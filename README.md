@@ -32,4 +32,4 @@ trademarks or logos is subject to and must follow
 Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
 Any use of third-party trademarks or logos are subject to those third-party's policies.
 
-<img src = “DASH Images/DASH image.jpg” width = 200>
+<img src = “DASH%20Images/DASH%20image.jpg” width = 200>
