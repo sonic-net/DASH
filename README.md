@@ -1,14 +1,14 @@
 # Project - Disaggregated API for SONiC Hosts (SONiC DASH)
 
-> One paragraph stating project intent.  This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+> SONiC DASH is a new open source project that "will deliver enterprise network performance to critical cloud applications.  The project extends functionality to stateful workloads.  
 
-As the maintainer of this project, please make a few updates:
+Comprised of a developing set of APIs and object models describing network services for the cloud, we will work with all cloud providers and enterprise hybrid clouds to develop further functionality. We believe the DASH program describes a comprehensive set of services that are required by the vast majority of clouds. The goal of DASH is to be specific enough for SMART Programmable Technologies to optimize network performance and leverage commodity hardware technology to achieve 10x or even 100x stateful connection performance.
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+The technology has multiple applications such as 1) NIC on a host, 2) a SmartToR, 3) Network Disaggregation, and 4) high performance Network Appliances. Many technology companies have committed to further developing this new open technology and its community. The best minds and practitioners are actively coming together to optimize performance of the cloud by extending SONiC to include stateful workloads. 
+ 
+Future innovations for in-service software upgrades and ultra-high availability for stateful connections will also be developed with the utmost importance. 
+ 
+We hope that DASH will have the same success as SONiC and become the world’s #1 NIC OS for stateful  Network Programmable Technologies to supercharge cloud applications. 
 
 ## Contributing
 
