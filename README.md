@@ -34,3 +34,6 @@ Any use of third-party trademarks or logos are subject to those third-party's po
 
 <img src="DASH%20Images/DASH%20image.jpg" width="250">
 
+## Where to Start?
+
+Please begin with the SDN Packet Transforms document, this enhances understanding of the program goal and the 7 networking scenarios that Azure has defined.  Next Service Tunneling and Private Link features, Fast Path (aka SLB - Load Balancer), High Availability and Scale, and Program Scale Testing Requirements.
