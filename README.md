@@ -8,11 +8,11 @@ The technology has multiple applications such as 1) NIC on a host, 2) a SmartToR
  
 Future innovations for in-service software upgrades and ultra-high availability for stateful connections will also be developed with the utmost importance. 
 
-We hope that DASH will have the same success as SONiC for switches and also be widely adopted as a major Open NOS for Programmable Technologies (including SmartNICs) to supercharge a variety of cloud and enterprise applicationsand become the world’s #1 NIC OS for stateful  Network Programmable Technologies to supercharge cloud applications. 
+We hope that DASH will have the same success as SONiC for switches and also be widely adopted as a major Open NOS for Programmable Technologies (including SmartNICs) to supercharge a variety of cloud and enterprise applications. 
 
 ## Where to Start?
 
-Please begin with 1) the SDN Packet Transforms document, this enhances understanding of the program goal and the 7 networking scenarios that Azure has defined.  Next 2) NSG v3, 3) Service Tunneling and Private Link features, 4) Fast Path (Load Balancer), 5) High Availability and Scale, and 6) Program Scale Testing Requirements.
+Please begin with 1) the SDN Packet Transforms document, this facilitates understanding of the program goal and the 7 networking scenarios that Azure has defined.  Next 2) Load Balancer_v3, 3) Service Tunneling and Private Link Features, 4) Load Balancer_v3, 5) Program Scale Testing Requirements - Draft, and 6) API.
 
 ## Contributing
 
