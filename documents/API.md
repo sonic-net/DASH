@@ -1,4 +1,4 @@
-# SiriusAPI
+# API
 
 ## 1. Overview
 
