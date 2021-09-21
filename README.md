@@ -7,8 +7,12 @@ Comprised of a developing set of APIs and object models describing network servi
 The technology has multiple applications such as 1) NIC on a host, 2) a SmartToR, 3) Network Disaggregation, and 4) high performance Network Appliances. Many technology companies have committed to further developing this new open technology and its community. The best minds and practitioners are actively coming together to optimize performance of the cloud by extending SONiC to include stateful workloads. 
  
 Future innovations for in-service software upgrades and ultra-high availability for stateful connections will also be developed with the utmost importance. 
- 
-We hope that DASH will have the same success as SONiC and become the world’s #1 NIC OS for stateful  Network Programmable Technologies to supercharge cloud applications. 
+
+We hope that DASH will have the same success as SONiC for switches and also be widely adopted as a major Open NOS for Programmable Technologies (including SmartNICs) to supercharge a variety of cloud and enterprise applicationsand become the world’s #1 NIC OS for stateful  Network Programmable Technologies to supercharge cloud applications. 
+
+## Where to Start?
+
+Please begin with 1) the SDN Packet Transforms document, this enhances understanding of the program goal and the 7 networking scenarios that Azure has defined.  Next 2) NSG v3, 3) Service Tunneling and Private Link features, 4) Fast Path (Load Balancer), 5) High Availability and Scale, and 6) Program Scale Testing Requirements.
 
 ## Contributing
 
@@ -33,7 +37,3 @@ Use of Microsoft trademarks or logos in modified versions of this project must n
 Any use of third-party trademarks or logos are subject to those third-party's policies.
 
 <img src="DASH%20Images/DASH%20image.jpg" width="250">
-
-## Where to Start?
-
-Please begin with 1) the SDN Packet Transforms document, this enhances understanding of the program goal and the 7 networking scenarios that Azure has defined.  Next 2) NSG v3, 3) Service Tunneling and Private Link features, 4) Fast Path (Load Balancer), 5) High Availability and Scale, and 6) Program Scale Testing Requirements.
