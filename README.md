@@ -36,4 +36,4 @@ Any use of third-party trademarks or logos are subject to those third-party's po
 
 ## Where to Start?
 
-Please begin with the SDN Packet Transforms document, this enhances understanding of the program goal and the 7 networking scenarios that Azure has defined.  Next Service Tunneling and Private Link features, Fast Path (aka SLB - Load Balancer), High Availability and Scale, and Program Scale Testing Requirements.
+Please begin with 1) the SDN Packet Transforms document, this enhances understanding of the program goal and the 7 networking scenarios that Azure has defined.  Next 2) NSG v3, 3) Service Tunneling and Private Link features, 4) Fast Path (Load Balancer), 5) High Availability and Scale, and 6) Program Scale Testing Requirements.
