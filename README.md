@@ -14,6 +14,8 @@ We hope that DASH will have the same success as SONiC for switches and also be w
 
 Please begin with 1) the SDN Packet Transforms document, this facilitates understanding of the program goal and the 7 networking scenarios that Azure has defined.  Next 2) Load Balancer_v3, 3) Service Tunneling and Private Link Features, 4) Program Scale Testing Requirements - Draft, and 6) API.
 
+The API and Object Model for VNET<->VNET is in draft; the remaining services will be posted over Oct/Nov time frame here.
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
