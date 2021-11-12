@@ -332,6 +332,9 @@ Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Ba
 ## Packet transforms
 
 ### VNET 
+### Scenario:  VM<->VM (in VNET) communication
+
+![some-title](dash_images/image001 High CPS Flow SKU for NVA.png.png)
 
 ### Internal Load balancer 
 
@@ -342,9 +345,6 @@ Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Ba
 ### Service Tunneling
 
 ### Inbound from LB
-
-> 
-
 
 ### Outbound NAT - L4 
 
