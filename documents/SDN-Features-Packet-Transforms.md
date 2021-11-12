@@ -5,7 +5,7 @@ Why do we need this scenario?  There is a huge cost associated with establishing
 
 - A high Connections per Second (CPS) / Flow SKU for Networked Virtual Appliances (NVA)
 
-- insert image here
+![some-title](dash_images/image001 High CPS Flow SKU for NVA.png.png)
 
 ## Scale per DPU (Card)
 **Note: Below are the expected numbers per Data Processing Unit (DPU); this applies to both IPV4 and IPV6 underlay and overlay*
@@ -333,8 +333,6 @@ Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Ba
 
 ### VNET 
 ### Scenario:  VM<->VM (in VNET) communication
-
-![some-title](dash_images/image001 High CPS Flow SKU for NVA.png.png)
 
 ### Internal Load balancer 
 
