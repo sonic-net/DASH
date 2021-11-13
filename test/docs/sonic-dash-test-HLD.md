@@ -1,6 +1,10 @@
 # High-Level Design Document for SONiC-DASH Testing
 This document provides the high-level design for the testing of devices which conform to the SONiC-DASH requirements.
 
+> **TODO** Consider [SONiC Management Testbed](https://github.com/Azure/sonic-mgmt/blob/master/docs/testbed/README.testbed.Overview.md) as the standardized test environment for consistency with standard SONiC testing. The reference architectures depiected below were crafted to expedite early dataplane testing in the simplest possible fashion.
+
+> **TODO** Articulate the testing of both dataplane and control plane features. The descriptions below focus on dataplane testing as the critical path towards DASH conformance and performance.
+
 # Reference Testbed Architecture - Single DUT
 
 **Figure 1. Testbed Reference Architecture**
