@@ -5,7 +5,7 @@ Why do we need this scenario?  There is a huge cost associated with establishing
 
 - A high Connections per Second (CPS) / Flow SKU for Networked Virtual Appliances (NVA)
 
-![some-title](dash_images/image001 High CPS Flow SKU for NVA.png.png)
+![NVA](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image001_high_cps_flow_sku_for_nva.png)
 
 ## Scale per DPU (Card)
 **Note: Below are the expected numbers per Data Processing Unit (DPU); this applies to both IPV4 and IPV6 underlay and overlay*
@@ -57,7 +57,7 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
 -       Virtual port is the container which holds all policies.
 
-- INSERT IMAGE HERE
+![VPORT](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image004_vport.png)
 
 - On receiving a packet from the wire, the SDN appliance will determine the matching ENI, Packet direction and packet processing strategy based on _Encap Transformation and Rules Evaluation_.
 
@@ -77,7 +77,7 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
             - **Example**: VM with IP 10.0.0.1 sends a packet to 8.8.8.8, VM Inbound ACL blocks all internet, VM outbound ACL allows 8.8.8.8 \- Response packet from 8.8.8.8 must be allowed without opening any inbound ACL due to the flow match.
             
-- INSERT IMAGE HERE
+![Appliance](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image006_sdn_appliance.png)
 
 ## Packet processing Pipeline (Sequential prefix match lookups)
 
@@ -237,17 +237,17 @@ _Why would we want to use these_?
 ### Inbound
 
  **Fast Path - Flow Match**
- 
+ ![Inb](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image007_inb_fast_path_flow_match.png)
 
  **Slow Path - No flow match**
- 
+ ![InbSP](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image009_in_slow_path_no_flow_match.png)
 
 ### Outbound
 
  **Fast path - flow match**
-
+![OutFP](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image011_out_fast_path_flow_match.png)
  **Slow Path (policy evaluation) - No flow match**
-
+![OutSP](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image013_out_slow_path_pol_eval_no_flow_match.png)
 
 ## Packet Transform Examples
 
@@ -333,18 +333,24 @@ Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Ba
 
 ### VNET 
 ### Scenario:  VM<->VM (in VNET) communication
+![VNETtoVNET](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image016_vm_to_vm.png)
 
 ### Internal Load balancer 
+![LB](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image018_vm_to_ilb.png)
 
 ### Private Link
+![PL](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image020_private_link.png)
 
 ### Private Link Service 
+![PLS](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image022_private_link_service.png)
 
 ### Service Tunneling
+![ST](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image024_service_tunneling.png)
 
 ### Inbound from LB
+![InbfromLB](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image026_inbound_frm_ilb.png)
 
 ### Outbound NAT - L4 
-
+![OutNATL4](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image028_outound_nat_l4.png)
 (L3 works in same way except port re\-write)
 
