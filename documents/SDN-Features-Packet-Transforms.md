@@ -352,5 +352,6 @@ Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Ba
 
 ### Outbound NAT - L4 
 ![OutNATL4](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image028_outound_nat_l4.png)
+
 (L3 works in same way except port re\-write)
 
