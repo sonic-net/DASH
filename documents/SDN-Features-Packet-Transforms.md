@@ -1,20 +1,36 @@
-# SDN Features, Packet Transforms and Scale
+---
+title: SDN Features Packet Transforms Scale
+description: Learn about highly optimized path, on dedicated appliance, with little processing or Encapsulation to SDN appliance and policies on an SDN appliance
+keywords: 
+author: tbd
+ms.author: tbd
+manager: tbd
+ms.topic: article
+ms.service: dash
+ms.date: 11/29/2021
+---
 
-## First Target Scenario:  Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance
-Why do we need this scenario?  There is a huge cost associated with establishing the first connection (and the CPS that can be established).
+# SDN Features Packet Transforms Scale
 
-- A high Connections per Second (CPS) / Flow SKU for Networked Virtual Appliances (NVA)
+## First Target Scenario
 
-![NVA](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image001_high_cps_flow_sku_for_nva.png)
+Software Defined Networking (SDN) has a huge cost associated with establishing the first connection and the Connections per Second (CPS) that can be created.
+
+This scenario addresses the issue by providing a **highly optimized path**, **dedicated appliance**, **little processing** or encapsulation to SDN appliance and policies on an SDN aspliance.
+
+The following figure shows a high CPS/Flow SKU for **Networked Virtual Appliances** (NVA)
+
+![NVA](../media/sdn/high-cps-flow-sku-for-nva.png)
 
 ## Scale per DPU (Card)
+
 **Note: Below are the expected numbers per Data Processing Unit (DPU); this applies to both IPV4 and IPV6 underlay and overlay*
 
 **IPV6 numbers will be lower*
 
 | Syntax | Description |
 | ----------- | ----------- |
-| Flow Scale | •	1+ million flows per v-port (aka ENI) |
+| Flow Scale | - 1+ million flows per v-port (aka ENI) - 50 million per DPU/Card|
 |  | •	50 million per DPU/Card |
 |  | o	single encap IPv4 overlay and IPV6 underlay |
 |  | o	single encap IPv6 overlay and IPV6 underlay. (This can be lower) |
