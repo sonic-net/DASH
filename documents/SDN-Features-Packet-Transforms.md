@@ -20,7 +20,7 @@ This scenario addresses the issue by providing a **highly optimized path**, **de
 
 The following figure shows a high CPS/Flow SKU for **Networked Virtual Appliances** (NVA)
 
-![NVA](../media/sdn/high-cps-flow-sku-for-nva.png)
+![NVA](../media/sdn/high-cps-flow-sku-for-nva.svg)
 
 ## Scale per DPU (Card)
 
