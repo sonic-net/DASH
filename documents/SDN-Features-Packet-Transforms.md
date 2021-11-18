@@ -24,19 +24,14 @@ The following figure shows a high CPS/Flow SKU for **Networked Virtual Appliance
 
 ## Scale per DPU (Card)
 
-**Note: Below are the expected numbers per Data Processing Unit (DPU); this applies to both IPV4 and IPV6 underlay and overlay*
-
-**IPV6 numbers will be lower*
+Below are the expected numbers per Data Processing Unit (DPU); this applies to both IPV4 and IPV6 underlay and overlay. 
+> [!NOTE]
+> **IPV6 numbers will be lower.**
 
 | Syntax | Description |
-| ----------- | ----------- |
-| Flow Scale | - 1+ million flows per v-port (aka ENI) - 50 million per DPU/Card|
-|  | •	50 million per DPU/Card |
-|  | o	single encap IPv4 overlay and IPV6 underlay |
-|  | o	single encap IPv6 overlay and IPV6 underlay. (This can be lower) |
-|  | o	single encap IPV4 |
-|  | o	Encap IPv6 and IPV4 |
-|  | *These are complex flows, details are below*
+| ---------- | ----------- |
+| Flow Scale <img style="width:200px"/>| <ul><li>1+ million flows per v-port (aka ENI)</li> <li>50 million per DPU/Card</li> <li>single encap IPv4 overlay and IPV6 underlay</li> <li>single encap IPv6 overlay and IPV6 underlay. (This can be lower)</li> <li>single encap IPV4</li> <li>Encap IPv6 and IPV4</li></ul>|
+|  | *Complex flows details are listed below*
 | CPS | 4 million+ (max)  |
 | Routes | 100k per v-port (max)  |
 | ACLs | 100k IP-Prefixes, 10k Src/Dst ports per v-port (max)  |
