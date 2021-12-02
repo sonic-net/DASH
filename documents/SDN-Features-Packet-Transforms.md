@@ -88,7 +88,7 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
 	- Allow (non-terminate, proceed to next, continue to FW rules)  
 
-	- Default action = Deny
+	- Default action = Deny (This is the default value if no rules are matched; traffic should be dropped.  This is the default action of firewalls, however it is OK to be configurable.  If not, we want to default Deny/Drop if no rules are matched).
 
 - ACL Group:  evaluate rules based on Priority (within an ACL Group); Terminate vs non\-Terminate pertains to the Pipeline
 
