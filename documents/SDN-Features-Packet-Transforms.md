@@ -84,9 +84,9 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
 		- If ‘terminate’ is not used here, the last line is the most important in ACL Level1 
 
-	- Soft Block (general block, with specific permits, non\-terminating, proceed to next group) \- or think of this as a Block, and then a ‘no’ for ‘termination’
+	- Soft Block (general block, with specific permits, non-terminating, proceed to next group) or think of this as a Block, and then a ‘no’ for ‘termination’.
 
-	- Allow (non\-terminate, proceed to next, continue to FW rules)  
+	- Allow (non-terminate, proceed to next, continue to FW rules)  
 
 	- Default action = Deny
 
