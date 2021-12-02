@@ -14,13 +14,7 @@ Why do we need this scenario?  There is a huge cost associated with establishing
 
 | Syntax | Description |
 | ----------- | ----------- |
-| Flow Scale | •	1+ million flows per v-port (aka ENI) |
-|  | •	50 million per DPU/Card |
-|  | o	single encap IPv4 overlay and IPV6 underlay |
-|  | o	single encap IPv6 overlay and IPV6 underlay. (This can be lower) |
-|  | o	single encap IPV4 |
-|  | o	Encap IPv6 and IPV4 |
-|  | *These are complex flows, details are below*
+| Flow Scale <img style="width:400px"/>| <ul><li>1+ million flows per v-port (aka ENI)</li> <li>50 million per DPU/Card<ul><li>single encap IPv4 overlay and IPV6 underlay</li> <li>single encap IPv6 overlay and IPV6 underlay. (This can be lower)</li> <li>single encap IPV4</li> <li>Encap IPv6 and IPV4</li></ul></ul> *These are complex flows, details are below.* | |  
 | CPS | 4 million+ (max)  |
 | Routes | 100k per v-port (max)  |
 | ACLs | 100k IP-Prefixes, 10k Src/Dst ports per v-port (max)  |
@@ -31,33 +25,26 @@ Why do we need this scenario?  There is a huge cost associated with establishing
 
 ## Scenario Milestone and Scoping
 
-
-| Scenario #        | Feature          | Perf |  
-| ------------- |-------------| -----|
-| 1      | VNET <-> VNET | • CPS
-|| Route Support | •Flow
-|| LPM Support | •PPS
-|| ACL Support | •Rule Scale
-| 2      | Load Balancer Inbound      |  |
-|| VIP Inbound
-| 3 | Private Link Outbound (transposition), encapsulate and change packet IPv4 to IPv6 (4 bits embedded)     |  |
-| 4 | L3 / L4 Source NAT (correlated w/#2) outbound perspective (Cx address) to Internet; changing Cx source IP to Public IP (1:1 mapping)     |  |
-| 5 | Private Link Service Link Service (dest side of Private Link) IPv6 to IPv4; DNAT’ing     |  |
-| 6 | Flow replication; supporting High Availability (HA); flow efficiently replicates to secondary card; Active/Passive (depending upon ENI policy) or can even have Active/Active; OR provision the same ENI over multiple devices w/o multiple SDN appliances – Primaries for a certain set of VMS can be on both     |  |
+| Scenario | Feature | Perf | Timeline | 
+|:---------|:---------|:-----|-----|
+| 1 | <ul> <li>VNET <-> VNET </li> <li>Route Support </li> <li>LPM Support </li> <li>ACL Support</li> </ul>|CPS<br/>Flow<br/>PPS</br>Rule Scale<img width=400/></br> |
+| 2  | <ul> <li>Load Balancer Inbound</li><li>VIP Inbound</li></ul>  |  | |
+| 3 | Private Link Outbound (transposition), encapsulate and change packet IPv4 to IPv6 (4 bits embedded)  |  | |
+| 4 | L3 / L4 Source NAT (correlated w/#2) outbound perspective (Cx address) to Internet; changing Cx source IP to Public IP (1:1 mapping)  |  | |
+| 5 | Private Link Service Link Service (dest side of Private Link) IPv6 to IPv4; DNAT’ing     |  | |
+| 6 | Flow replication; supporting High Availability (HA); flow efficiently replicates to secondary card; Active/Passive (depending upon ENI policy) or can even have Active/Active; OR provision the same ENI over multiple devices w/o multiple SDN appliances – Primaries for a certain set of VMS can be on both     |  | Not a must have for Private Preview <img width=400/>|
 
 ## Virtual Port and Packet Direction
 
 An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance will have multiple cards; 1 card will have multiple machines or bare-metal servers), which supports Virtual Ports.   These can map to policy buckets corresponding to customer workloads, example: Virtual Machines, Bare Metal servers.
 
 - The SDN controller will create these virtual ports on SDN appliance and associate corresponding SDN policies like – Route, ACL, NAT etc. to these virtual ports.  In other words, our software will communicate with the cards, hold card inventory and SDN placement, call API’s that are exposed through the card create policies, setup ENI, routes, ACLs, NAT, and different rules.
-
 - Each Virtual port will be created with an ENI identifier like – Mac address, VNI or more.
+	- Virtual port will also have attributes like – Flow time-out, QOS, port properties related to the port.
 
--       Virtual port will also have attributes like – Flow time-out, QOS, port properties related to the port.
+	- Virtual port is the container which holds all policies.
 
--       Virtual port is the container which holds all policies.
-
-![VPORT](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image004_vport.png)
+	![VPORT](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image004_vport.png)
 
 - On receiving a packet from the wire, the SDN appliance will determine the matching ENI, Packet direction and packet processing strategy based on _Encap Transformation and Rules Evaluation_.
 
@@ -77,11 +64,11 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
             - **Example**: VM with IP 10.0.0.1 sends a packet to 8.8.8.8, VM Inbound ACL blocks all internet, VM outbound ACL allows 8.8.8.8 \- Response packet from 8.8.8.8 must be allowed without opening any inbound ACL due to the flow match.
             
-![Appliance](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image006_sdn_appliance.png)
+	![Appliance](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image006_sdn_appliance.png)
 
 ## Packet processing Pipeline (Sequential prefix match lookups)
 
-## ACL
+### ACL
 
 - The ACL pipeline has 3 levels; an ACL decision is based on the most restrictive match across all 3 levels.  The 1st layer (contains default rules) is _controlled by Azure/MSFT_.  The 2nd and 3rd layers are _Customer controlled_.  
 
@@ -172,7 +159,7 @@ Etc…
 
 - Outer Encap IPv4 using permits routing between servers within a Region; across the Region we use IPv6
 
-_Why would we want to use these_?  
+*Why would we want to use these?* 
 
 - Example:  to block prefixes to internal DataCenter IP addresses, but Customer uses prefixes inside of their own VNET
 
@@ -205,30 +192,27 @@ _Why would we want to use these_?
 **Route Table for a v-port**
 
 - LPM decides which route is matched.
-
 - Once the route is matched, a corresponding action is executed.
 
 | Route| Action | Route Type| Route Id
 |:----------|:----------|:----------|:----------
-| 10.0.0.0/24, 20.0.0.0/24, 30.0.0.0/24 10.0.0.0/8, …… more prefixes (up-to 20k)| Encap Type: VXLAN Action - lookup mapping table for exact destination, VNI and D-Mac re-write info.| Encap_with_lookup_V4_underlay| 1
-| 10.0.0.100/32| Encap Type: VXLAN Action: Encap_with_Provided_dataEncap with source PA = 100.0.0.1Encap with destination PA = 23.0.0.1Re-write D-Mac to E4-A7-A0-99-0E-28Use VNI = 90000| Encap_with_Provided_data| 2
-| 10.0.0.101/32| Encap Type: VXLAN Action: Encap_with_Provided_dataEncap with source PA = 100.0.0.1Encap with destination PA = 23.0.0.10, 23.0.0.11, 23.0.0.13, 23.0.0.14 Re-write D-Mac to E4-A7-A0-99-0E-29Use VNI = 90000| Encap_with_Provided_data_ECMP| 3
-| 8.8.8.8/32 | L3 NAT Action:Transpose source IP to provided NAT IP, keep all ports same.NAT IP: 10.0.0.1 -> 15.0.0.1| Outbound NAT (SNAT)_L3| 4
-| 9.9.9.9.9/32| L4 NAT Action:Transpose source IP and source port re-write ports from configured port pool.| Outbound NAT (SNAT)_L4| 5
+| 10.0.0.0/24, <br/> 20.0.0.0/24, <br/> 30.0.0.0/24, <br/> 10.0.0.0/8, <br/>…… more prefixes (up-to 20k) <img width=500/>| Encap Type: VXLAN <br/> Action - lookup mapping table for exact destination, VNI and D-Mac re-write info.| Encap_with_lookup_V4_underlay| 1
+| 10.0.0.100/32| Encap Type: VXLAN <br/> Action: Encap_with_Provided_data <ul><li>Encap with source PA = 100.0.0.1</li><li>Encap with destination PA = 23.0.0.1</li><li>Re-write D-Mac to E4-A7-A0-99-0E-28</li><li>Use VNI = 90000</li></ul>| Encap_with_Provided_data| 2
+| 10.0.0.101/32| Encap Type: VXLAN <br/> Action: Encap_with_Provided_data <br/> <ul><li>Encap with source PA = 100.0.0.1</li> <li>Encap with destination PA = 23.0.0.10, 23.0.0.11, 23.0.0.13, 23.0.0.14</li> <li>Re-write D-Mac to E4-A7-A0-99-0E-29</li><li>Use VNI = 90000</li> </ul>| Encap_with_Provided_data_ECMP| 3
+| 8.8.8.8/32 | L3 NAT <br/> Action: Transpose source IP to provided NAT IP, keep all ports same.NAT IP: 10.0.0.1 -> 15.0.0.1| Outbound NAT (SNAT)_L3| 4
+| 9.9.9.9.9/32| L4 NAT <br/> Action: Transpose source IP and source port re-write ports from configured port pool.| Outbound NAT (SNAT)_L4| 5
 | 0.0.0.0/32| NULL| Null| 6
 | 23.0.0.1/32| Service endpoint| ST| 7
 | 23.0.0.2/32| Private Link - TBD| Private Link - TBD| 8
 
 **Route example- Outbound packets**
 
-| Original Packet| Matched route | Transform | Route Type
+| Original Packet| Matched route <img width=500/> | Transform <img width=1000/> | Route Type
 |:----------|:----------|:----------|:----------
-| 10.0.0.1 -> 10.0.0.2 SMAC1-> DMAC_FAKE Outer: SRC: [Physical IP of host] DST: [Physical IP of SDN Appliance] VXLAN VNI: custom Inner Mac:SRC - SMAC1 DST - DMAC_FAKE Inner IP: [10.0.0.1] -> [10.0.0.2]| Route Id = 1| Outer: SRC: [SDN Appliance IP] DST: [100.0.0.2] # Came from mapping table lookup VXLAN VNI: 10001 Inner Mac:SRC - SMAC1 DST - E4-A7-A0-99-0E-18 Inner IP: [10.0.0.1] -> [10.0.0.2]| Encap_with_lookup_V4_underlay
-| 10.0.0.1 -> 10.0.0.100 SMAC1-> DMAC_FAKE Outer: SRC: [Physical IP of host] DST: [Physical IP of SDN Appliance] VXLAN VNI: custom Inner Mac:SRC - SMAC1 DST - DMAC_FAKE Inner IP: [10.0.0.1] -> [10.0.0.2]| Route Id = 2| Outer: SRC: [SDN Appliance IP] DST: [23.0.0.1] # Came from mapping table lookup VXLAN VNI: 90000 Inner Mac:SRC - SMAC1 DST - E4-A7-A0-99-0E-28 Inner IP: [10.0.0.1] -> [10.0.0.100]| Encap_with_Provided_data
-| 10.0.0.1 -> 10.0.0.101 SMAC1-> DMAC_FAKE Outer:SRC: [Physical IP of host] DST: [Physical IP of SDN Appliance] VXLAN VNI: custom Inner Mac: SRC - SMAC1 DST - DMAC_FAKE Inner IP: [10.0.0.1] -> [10.0.0.2]| Route Id = 3| Outer: SRC: [SDN Appliance IP] DST: ECMP on [23.0.0.10, 23.0.0.11, 23.0.0.13, 23.0.0.14] # Came from mapping table lookup VXLAN VNI: 90000 Inner Mac:SRC - SMAC1 DST - E4-A7-A0-99-0E-29 Inner IP: [10.0.0.1] -> [10.0.0.100]| Encap_with_Provided_data_ECMP
-| 10.0.0.1 -> 8.8.8.8  SMAC1-> -DMAC_FAKE - Outer: SRC: [Physical IP of host] DST: [Physical IP of SDN Appliance] VXLAN VNI: custom Inner Mac: SRC - SMAC1 DST - DMAC_FAKE Inner IP: [10.0.0.1] -> [8.8.8.8]| Route Id = 4| | 
-| | | | 
-| | | | 
+| 10.0.0.1 -> 10.0.0.2 <br/> SMAC1-> DMAC_FAKE </br> Outer: <br/> SRC: [Physical IP of host] <br/> DST: [Physical IP of SDN Appliance] <br/> VXLAN <br/> &nbsp; &nbsp; &nbsp;VNI: custom <br/>Inner Mac: <br/> &nbsp; &nbsp; &nbsp; SRC - SMAC1 DST - DMAC_FAKE <br/>Inner IP:<br/>&nbsp; &nbsp; &nbsp;[10.0.0.1] -> [10.0.0.2]| Route Id = 1| Outer: <br/>SRC: [SDN Appliance IP] <br/>DST: [100.0.0.2] # Came from mapping table lookup <br/>VXLAN <br/> &nbsp; &nbsp; &nbsp;VNI: 10001 <br/>Inner Mac: <br/>&nbsp; &nbsp; &nbsp;SRC - SMAC1 DST - E4-A7-A0-99-0E-18 <br/>Inner IP: <br/>&nbsp; &nbsp; &nbsp;[10.0.0.1] -> [10.0.0.2]| Encap_with_lookup_V4_underlay
+| 10.0.0.1 -> 10.0.0.100 <br/> SMAC1-> DMAC_FAKE <br/> Outer: <br/> SRC: [Physical IP of host] <br/> DST: [Physical IP of SDN Appliance] <br/> VXLAN <br/>&nbsp; &nbsp; &nbsp;VNI: custom <br/> Inner Mac: <br/>&nbsp; &nbsp; &nbsp;SRC - SMAC1 DST - DMAC_FAKE <br/>Inner IP: <br/>&nbsp; &nbsp; &nbsp;[10.0.0.1] -> [10.0.0.2]| Route Id = 2| Outer: <br/>SRC: [SDN Appliance IP] DST: [23.0.0.1] # Came from mapping table lookup <br/>VXLAN VNI: 90000 <br/>Inner Mac:<br/>&nbsp; &nbsp; &nbsp;SRC - SMAC1 DST - E4-A7-A0-99-0E-28 <br/>Inner IP: <br/>&nbsp; &nbsp; &nbsp;[10.0.0.1] -> [10.0.0.100]| Encap_with_Provided_data
+| 10.0.0.1 -> 10.0.0.101 <br/>SMAC1-> DMAC_FAKE <br/>Outer: <br/>SRC: [Physical IP of host] <br/>DST: [Physical IP of SDN Appliance] <br/>VXLAN <br/>&nbsp; &nbsp; &nbsp;VNI: custom <br/>Inner Mac: <br/>&nbsp; &nbsp; &nbsp;SRC - SMAC1 DST - DMAC_FAKE <br/>Inner IP: <br/>&nbsp; &nbsp; &nbsp;[10.0.0.1] -> [10.0.0.2]| Route Id = 3| Outer: <br/>SRC: [SDN Appliance IP] <br/>DST: ECMP on <br/>[23.0.0.10, 23.0.0.11, 23.0.0.13, 23.0.0.14] <br/># Came from mapping table lookup <br/>VXLAN <br/>&nbsp; &nbsp; &nbsp;VNI: 90000 <br/>Inner Mac:<br/>&nbsp; &nbsp; &nbsp;SRC - SMAC1 DST - E4-A7-A0-99-0E-29 <br/>Inner IP: <br/>&nbsp; &nbsp; &nbsp; [10.0.0.1] -> [10.0.0.100]| Encap_with_Provided_data_ECMP
+| 10.0.0.1 -> 8.8.8.8  <br/>SMAC1-> DMAC_FAKE <br/>Outer: <br/>SRC: [Physical IP of host] <br/>DST: [Physical IP of SDN Appliance] VXLAN VNI: custom Inner Mac: SRC - SMAC1 DST - DMAC_FAKE Inner IP: [10.0.0.1] -> [8.8.8.8]| Route Id = 4| | 
 | | | | 
 
 
@@ -275,9 +259,7 @@ _Why would we want to use these_?
 | 10.0.0.3| 100.0.0.3| 3ffe :: 3| Mac3| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 300
 | | | | | | 
 | | | | | | 
-| | | | | | 
-| | | | | | 
-| | | | | | 
+ 
 
 
 
@@ -353,5 +335,5 @@ Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Ba
 ### Outbound NAT - L4 
 ![OutNATL4](https://raw.githubusercontent.com/Azure/DASH/main/dash_images/image028_outound_nat_l4.png)
 
-(L3 works in same way except port re\-write)
+(L3 works in same way except port re-write)
 
