@@ -250,7 +250,6 @@ Etc…
 	- 20.0.0.0/24
 
 
-
 **VNET Mapping Table**
 | | V4 underlay| V6 underlay| Mac-Address| Mapping Action | VNI
 |:----------|:----------|:----------|:----------|:----------|:----------
@@ -258,10 +257,7 @@ Etc…
 | 10.0.0.2| 100.0.0.2| 3ffe :: 2| Mac2| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 200
 | 10.0.0.3| 100.0.0.3| 3ffe :: 3| Mac3| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 300
 | | | | | | 
-| | | | | | 
  
-
-
 
 **Packet Transforms**
 
