@@ -240,7 +240,7 @@ integrators to track and test the designs in a common manner.
         within the 1 second interval. To check this, we need to see a
         high water counter for maximum connection table size.
 
-# Feature Requirements
+## Feature Requirements
 
 The following features are required to be enabled during scale testing:
 
@@ -285,7 +285,7 @@ The following features are required to be enabled during scale testing:
 
 -   VNET Peering
 
-# Policy and Route Requirements
+## Policy and Route Requirements
 
 The following scale of policies and routes are at minimum required to be
 configured during validation and test plan needs to be executed covering
@@ -293,128 +293,107 @@ both scenarios:
 
 1. &nbsp; 8 ENI Scenario
     - 8 ENI's/VPorts
-    -   200k \* 8 = 1.6M routes
-    -   8 \* 6 = 48 NSGs
-    -   48 \* 1000 rules = 48000 ACL rules
-    -   48 \* 200k prefixes per NSG = 9.6M Prefixes
-    -   2M Mapping Table
+    - 200k \* 8 = 1.6M routes
+    - 8 \* 6 = 48 NSGs
+    - 48 \* 1000 rules = 48000 ACL rules
+    - 48 \* 200k prefixes per NSG = 9.6M Prefixes
+    - 2M Mapping Table
 
-1.  1 ENI Scenario
+1. &nbsp; 1 ENI Scenario
+    - 1 ENI/VPort
+    - 1.6M routes
+    - 48 NSGs
+    - 48000 ACL rules
+    - 9.6M Prefixes
+    - 2M Mapping Table
 
--   1 ENI/VPort
+## MSFT LAB IXIA Configuration
 
--   1.6M routes
-
--   48 NSGs
-
--   48000 ACL rules
-
--   9.6M Prefixes
-
--   2M Mapping Table
-
-# MSFT LAB IXIA Configuration
-
-## Module Configuration
+### Module Configuration
 
 IXIA module: NOVUS100GE8Q28
 
-![Graphical user interface, text, application, email Description
-automatically generated](media/image1.png){width="6.5in"
+![Graphical user interface, text, application, email Description automatically generated](media/image1.png) {width="6.5in"
 height="1.9423611111111112in"}
 
-![Graphical user interface, text, application Description automatically
-generated](media/image2.png){width="6.5in" height="3.102777777777778in"}
+![Graphical user interface, text, application Description automatically generated](media/image2.png) {width="6.5in" height="3.102777777777778in"}
 
-## Streams
+### Streams
 
 TX: Local vnic to remote vnic
 
 RX: Remote vnic to local vnic
 
-### Learning Streams
+#### Learning Streams
 
 Learning Streams will be used to establish 2M CPS connections and 2M UDP
 background bi-directional flows prior to test execution. These 2M flows
 will be split across 8 vnics that are pre-configured.
 
-![Text Description automatically
-generated](media/image3.png){width="4.7194083552056in"
-height="1.7710804899387576in"}
+![Text Description automatically generated](media/image3.png){width="4.7194083552056in" height="1.7710804899387576in"}
 
--   MSFT-8V-1M-TX-PPS-Learning
+- MSFT-8V-1M-TX-PPS-Learning
 
-![Graphical user interface, application Description automatically
-generated](media/image4.png){width="4.697916666666667in"
+![Graphical user interface, application Description automatically generated](media/image4.png){width="4.697916666666667in"
 height="3.628838582677165in"}
 
-![Graphical user interface Description automatically
-generated](media/image5.png){width="4.685012029746281in"
+![Graphical user interface Description automatically generated](media/image5.png){width="4.685012029746281in"
 height="3.5833333333333335in"}
 
-![](media/image6.emf)
+![TBD](media/image6.emf)
 
--   MSFT-8V-1M-RX-PPS-Learning
+- MSFT-8V-1M-RX-PPS-Learning
 
-![Graphical user interface, application Description automatically
-generated](media/image7.png){width="4.770833333333333in"
+![Graphical user interface, application Description automatically generated](media/image7.png){width="4.770833333333333in"
 height="3.6275667104111986in"}
 
-![Graphical user interface Description automatically
-generated](media/image8.png){width="4.739583333333333in"
+![Graphical user interface Description automatically generated](media/image8.png){width="4.739583333333333in"
 height="3.6539359142607175in"}
 
-### Traffic Streams
+#### Traffic Streams
 
 Traffic streams will be used for running the learning flows with 64
 packets per flow. Traffic streams simulating 1/8/16 packets per flow
 need to be created individually.
 
--   MSFT-8V-1M-TX-PPS-64Pkt/Flow-100Sec
+- MSFT-8V-1M-TX-PPS-64Pkt/Flow-100Sec
 
-![Graphical user interface, application Description automatically
-generated](media/image9.png){width="4.56463145231846in"
+![Graphical user interface, application Description automatically generated](media/image9.png){width="4.56463145231846in"
 height="3.53125in"}
 
-![Graphical user interface, application Description automatically
-generated](media/image10.png){width="4.514899387576553in"
+![Graphical user interface, application Description automatically generated](media/image10.png){width="4.514899387576553in"
 height="3.4479166666666665in"}
 
--   MSFT-8V-1M-RX-PPS-64Pkt/Flow-100Sec
+- MSFT-8V-1M-RX-PPS-64Pkt/Flow-100Sec
 
 ![Graphical user interface, application Description automatically
 generated](media/image11.png){width="4.333333333333333in"
 height="3.3333333333333335in"}
 
-![Graphical user interface Description automatically
-generated](media/image12.png){width="4.3125in"
+![Graphical user interface Description automatically generated](media/image12.png){width="4.3125in"
 height="3.259255249343832in"}
 
-### Bandwidth Streams
+#### Bandwidth Streams
 
 Bandwidth streams runs with a higher packet size -- 1500 byte -- and
 will be used to verify the total 100Gbps bandwidth.
 
--   MSFT-8V-1M-TX-BW-Port1-100Sec
+- MSFT-8V-1M-TX-BW-Port1-100Sec
 
-![Graphical user interface, application Description automatically
-generated](media/image13.png){width="4.601770559930009in"
+![Graphical user interface, application Description automatically generated](media/image13.png){width="4.601770559930009in"
 height="3.5in"}
 
-![Graphical user interface Description automatically
-generated](media/image14.png){width="4.579363517060368in"
+![Graphical user interface Description automatically generated](media/image14.png){width="4.579363517060368in"
 height="3.5416666666666665in"}
 
-![](media/image15.emf)
+![TBD](media/image15.emf)
 
--   MSFT-8V-1M-RX-BW-Port1-100Sec
+- MSFT-8V-1M-RX-BW-Port1-100Sec
 
-![Graphical user interface Description automatically
-generated](media/image16.png){width="5.182404855643044in"
+![Graphical user interface Description automatically generated](media/image16.png){width="5.182404855643044in"
 height="3.96875in"}
 
-![Graphical user interface Description automatically
-generated](media/image17.png){width="5.1819444444444445in"
+![Graphical user interface Description automatically generated](media/image17.png){width="5.1819444444444445in"
 height="3.948464566929134in"}
 
 ### CPS Streams
@@ -422,73 +401,60 @@ height="3.948464566929134in"}
 CPS streams will be used to simulate TCP connection establishment and
 termination.
 
-![Text Description automatically
-generated](media/image18.png){width="4.146411854768154in"
+![Text Description automatically generated](media/image18.png){width="4.146411854768154in"
 height="1.4793733595800524in"}
 
 -   MSFT-8V-4M-Stream 1-Syn-TX-CPS-100Sec
 
-![Graphical user interface, application Description automatically
-generated](media/image19.png){width="4.9375in"
+![Graphical user interface, application Description automatically generated](media/image19.png){width="4.9375in"
 height="3.779086832895888in"}
 
-![Graphical user interface Description automatically
-generated](media/image20.png){width="4.916666666666667in"
+![Graphical user interface Description automatically generated](media/image20.png){width="4.916666666666667in"
 height="3.730573053368329in"}
 
 -   MSFT-8V-4M-Stream 2-Syn-Ack-RX-CPS-100Sec
 
-![Graphical user interface, application Description automatically
-generated](media/image21.png){width="5.170760061242345in"
+![Graphical user interface, application Description automatically generated](media/image21.png){width="5.170760061242345in"
 height="3.9791666666666665in"}
 
-![Graphical user interface Description automatically
-generated](media/image22.png){width="5.14583552055993in"
+![Graphical user interface Description automatically generated](media/image22.png){width="5.14583552055993in"
 height="3.930844269466317in"}
 
 -   MSFT-8V-4M-Stream 3-Ack-TX-CPS-100Sec
 
-![Graphical user interface, application Description automatically
-generated](media/image23.png){width="5.430209973753281in"
+![Graphical user interface, application Description automatically generated](media/image23.png){width="5.430209973753281in"
 height="4.177083333333333in"}
 
-![Graphical user interface Description automatically
-generated](media/image24.png){width="5.385415573053368in"
+![Graphical user interface Description automatically generated](media/image24.png){width="5.385415573053368in"
 height="4.1397517497812775in"}
 
 -   MSFT-8V-4M-Stream 4-Fin-Ack-RX-CPS-100Sec
 
-![Graphical user interface, application Description automatically
-generated](media/image25.png){width="5.284405074365704in"
+![Graphical user interface, application Description automatically generated](media/image25.png){width="5.284405074365704in"
 height="4.0in"}
 
-![Graphical user interface, application Description automatically
-generated](media/image26.png){width="5.297274715660542in"
+![Graphical user interface, application Description automatically generated](media/image26.png){width="5.297274715660542in"
 height="4.03125in"}
 
 -   MSFT-8V-4M-Stream 4-Fin-Ack-TX-CPS-100Sec
 
-![Graphical user interface Description automatically
-generated](media/image27.png){width="5.16666447944007in"
+![Graphical user interface Description automatically generated](media/image27.png){width="5.16666447944007in"
 height="3.951726815398075in"}
 
-![Graphical user interface Description automatically
-generated](media/image28.png){width="5.227589676290464in"
+![Graphical user interface Description automatically generated](media/image28.png){width="5.227589676290464in"
 height="4.0in"}
 
 -   MSFT-8V-4M-Stream 6-Ack-for-Fin-RX-CPS-100Sec
 
-![Graphical user interface, application Description automatically
-generated](media/image29.png){width="5.08333552055993in"
+![Graphical user interface, application Description automatically generated](media/image29.png){width="5.08333552055993in"
 height="3.8733267716535433in"}
 
-![Graphical user interface Description automatically
-generated](media/image30.png){width="5.125in"
+![Graphical user interface Description automatically generated](media/image30.png){width="5.125in"
 height="3.8930293088363954in"}
 
-## Sample Policy Configuration
+### Sample Policy Configuration
 
-### Device
+#### Device
 
 \"gw-ip-addr\": \"1.0.0.1\",
 
@@ -506,7 +472,7 @@ height="3.8930293088363954in"}
 
 \"oper-mode\": \"bitw-smart-switch\"
 
-### TEP
+#### TEP
 
 \"kind\" : \"tep\",
 
@@ -514,7 +480,7 @@ height="3.8930293088363954in"}
 
 \"prefix\": \"1.0.0.0/8\"
 
-### Route Table
+#### Route Table
 
 \"kind\" : \"route-table\",
 
@@ -524,21 +490,13 @@ height="3.8930293088363954in"}
 
 \"meter\" : \"true\"
 
-### 
-
-### Security Policy
+#### Security Policy
 
 \"kind\" : \"security-policy\",
 
 \"v4-count\" : \"1023\"
 
-### 
-
-### 
-
-### 
-
-### VPC
+#### VPC
 
 \"kind\" : \"vpc\",
 
@@ -550,9 +508,7 @@ height="3.8930293088363954in"}
 
 Note: All VPCs will be configured with the same prefix.
 
-### 
-
-### VNIC
+#### VNIC
 
 \"kind\" : \"vnic\",
 
@@ -562,9 +518,7 @@ Note: All VPCs will be configured with the same prefix.
 
 Note: VNIC configuration per vpc, subnet
 
-### 
-
-### Mappings
+#### Mappings
 
 \"kind\" : \"mappings\",
 
@@ -576,9 +530,8 @@ Note: VNIC configuration per vpc, subnet
 
 Note: Remotes are per subnet, tep.
 
-### 
 
-### Policer
+#### Policer
 
 \"kind\" : \"policer\",
 
@@ -588,7 +541,7 @@ Note: Remotes are per subnet, tep.
 
 \"rx_policer_en\" : \"true\"
 
-### UDR
+#### UDR
 
 \"kind\" : \"udr\",
 
@@ -600,11 +553,7 @@ Note: Remotes are per subnet, tep.
 
 \"tos\" : \"\"
 
-### 
-
-### 
-
-### Meter Policy
+#### Meter Policy
 
 \"kind\" : \"meter-policy\",
 
