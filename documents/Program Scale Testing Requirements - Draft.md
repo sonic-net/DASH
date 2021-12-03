@@ -312,10 +312,9 @@ both scenarios:
 
 IXIA module: NOVUS100GE8Q28
 
-![Graphical user interface, text, application, email Description automatically generated](media/image1.png) {width="6.5in"
-height="1.9423611111111112in"}
+![msft-lab-ixia-config-01](media/test/msft-lab-ixia-config-01.png) 
 
-![Graphical user interface, text, application Description automatically generated](media/image2.png) {width="6.5in" height="3.102777777777778in"}
+![msft-lab-ixia-config-02](media/test/msft-lab-ixia-config-02.png) 
 
 ### Streams
 
@@ -329,25 +328,63 @@ Learning Streams will be used to establish 2M CPS connections and 2M UDP
 background bi-directional flows prior to test execution. These 2M flows
 will be split across 8 vnics that are pre-configured.
 
-![Text Description automatically generated](media/image3.png){width="4.7194083552056in" height="1.7710804899387576in"}
+![learning-streams](media/test/learning-streams.png)
 
 - MSFT-8V-1M-TX-PPS-Learning
 
-![Graphical user interface, application Description automatically generated](media/image4.png){width="4.697916666666667in"
-height="3.628838582677165in"}
+![msft-8v-1m-tx-pps-learning-01](media/test/msft-8v-1m-tx-pps-learning-01.png)
 
-![Graphical user interface Description automatically generated](media/image5.png){width="4.685012029746281in"
-height="3.5833333333333335in"}
+![msft-8v-1m-tx-pps-learning-02](media/test/msft-8v-1m-tx-pps-learning-02.png)
 
-![TBD](media/image6.emf)
+**Packet view**
 
+``` cmd
+MAC: ------  MAC Header  ------
+MAC: 
+MAC: Destination Address : 00 AE CD 01 CD 26
+MAC: Source Address      : 00 AE CD 20 00 01
+MAC: Type                : 0x0800 (Ethernet II)
+MAC: 
+IP: ------  IP Header  -----------
+IP: 
+IP: Version                        = 04 (0x04)
+IP: Header Length                  = 20 (0x14)
+IP: Differentiated Services Field  = 0 (0x00)
+IP:                      000000..  = DSCP: Default(0x00)
+IP:                      ......0.  = ECN Capable Transport (ECT): 0
+IP:                      .......0  = ECN-CE: 0
+IP: Type of Service                = 00 (0x00)
+IP:                    000.....    = Routine
+IP:                    ...0....    = Normal Delay
+IP:                    ....0...    = Normal Throughput
+IP:                    .....0..    = Normal Reliability
+IP:                    ......0.    = Normal Cost
+IP:                    .......0    = Reserved
+IP: Total Length                   = 100 (0x0064)
+IP: Identification                 = 0 (0x0000)
+IP: Flags  Bit1  .0.  May  Fragment
+IP: Flags  Bit2  ..0  Last  Fragment
+IP: Fragment Offset                = 0
+IP: Time to Live                   = 64 (0x40)
+IP: Protocol                       = UDP
+IP: Checksum                       = 0x7885
+IP: Source Address                 = 1.0.0.3
+IP: Destination Address            = 1.0.0.2
+IP: 
+UDP: ------  UDP Header  -----------
+UDP: 
+UDP: Source Port         = 50686 (0xC5FE)
+UDP: Destination Port    = 4789 (0x12B5)
+UDP: Length              = 80 (0x0050)
+UDP: Checksum            = 1770 (0x06EA)
+UDP: 
+
+```
 - MSFT-8V-1M-RX-PPS-Learning
 
-![Graphical user interface, application Description automatically generated](media/image7.png){width="4.770833333333333in"
-height="3.6275667104111986in"}
+![msft-8v-1m-rx-pps-learning-01](media/test/msft-8v-1m-rx-pps-learning-01.png)
 
-![Graphical user interface Description automatically generated](media/image8.png){width="4.739583333333333in"
-height="3.6539359142607175in"}
+![msft-8v-1m-rx-pps-learning-02](media/test/msft-8v-1m-rx-pps-learning-02.png)
 
 #### Traffic Streams
 
@@ -357,20 +394,15 @@ need to be created individually.
 
 - MSFT-8V-1M-TX-PPS-64Pkt/Flow-100Sec
 
-![Graphical user interface, application Description automatically generated](media/image9.png){width="4.56463145231846in"
-height="3.53125in"}
+![msft-8v-1m-tx-pps-64pkt-flow-100sec-01](media/test/msft-8v-1m-tx-pps-64pkt-flow-100sec-01.png)
 
-![Graphical user interface, application Description automatically generated](media/image10.png){width="4.514899387576553in"
-height="3.4479166666666665in"}
+![msft-8v-1m-tx-pps-64pkt-flow-100sec-02](media/test/msft-8v-1m-tx-pps-64pkt-flow-100sec-02.png)
 
 - MSFT-8V-1M-RX-PPS-64Pkt/Flow-100Sec
 
-![Graphical user interface, application Description automatically
-generated](media/image11.png){width="4.333333333333333in"
-height="3.3333333333333335in"}
+![msft-8v-1m-rx-pps-64pkt-flow-100sec-01](media/test/msft-8v-1m-rx-pps-64pkt-flow-100sec-01.png)
 
-![Graphical user interface Description automatically generated](media/image12.png){width="4.3125in"
-height="3.259255249343832in"}
+![msft-8v-1m-rx-pps-64pkt-flow-100sec-02](media/test/msft-8v-1m-rx-pps-64pkt-flow-100sec-02.png)
 
 #### Bandwidth Streams
 
@@ -379,82 +411,108 @@ will be used to verify the total 100Gbps bandwidth.
 
 - MSFT-8V-1M-TX-BW-Port1-100Sec
 
-![Graphical user interface, application Description automatically generated](media/image13.png){width="4.601770559930009in"
-height="3.5in"}
+![msft-8v-1m-tx-bw-port1-100sec-01](media/test/msft-8v-1m-tx-bw-port1-100sec-01.png)
 
-![Graphical user interface Description automatically generated](media/image14.png){width="4.579363517060368in"
-height="3.5416666666666665in"}
+![msft-8v-1m-tx-bw-port1-100sec-02](media/test/msft-8v-1m-tx-bw-port1-100sec-02.png)
 
-![TBD](media/image15.emf)
+**Packet view**
+
+```cmd
+MAC: ------  MAC Header  ------
+MAC: 
+MAC: Destination Address : 00 AE CD 01 CD 26
+MAC: Source Address      : 00 AE CD 20 00 01
+MAC: Type                : 0x0800 (Ethernet II)
+MAC: 
+IP: ------  IP Header  -----------
+IP: 
+IP: Version                        = 04 (0x04)
+IP: Header Length                  = 20 (0x14)
+IP: Differentiated Services Field  = 0 (0x00)
+IP:                      000000..  = DSCP: Default(0x00)
+IP:                      ......0.  = ECN Capable Transport (ECT): 0
+IP:                      .......0  = ECN-CE: 0
+IP: Type of Service                = 00 (0x00)
+IP:                    000.....    = Routine
+IP:                    ...0....    = Normal Delay
+IP:                    ....0...    = Normal Throughput
+IP:                    .....0..    = Normal Reliability
+IP:                    ......0.    = Normal Cost
+IP:                    .......0    = Reserved
+IP: Total Length                   = 1482 (0x05CA)
+IP: Identification                 = 0 (0x0000)
+IP: Flags  Bit1  .0.  May  Fragment
+IP: Flags  Bit2  ..0  Last  Fragment
+IP: Fragment Offset                = 0
+IP: Time to Live                   = 64 (0x40)
+IP: Protocol                       = UDP
+IP: Checksum                       = 0x731F
+IP: Source Address                 = 1.0.0.3
+IP: Destination Address            = 1.0.0.2
+IP: 
+UDP: ------  UDP Header  -----------
+UDP: 
+UDP: Source Port         = 50686 (0xC5FE)
+UDP: Destination Port    = 4789 (0x12B5)
+UDP: Length              = 80 (0x0050)
+UDP: Checksum            = 1770 (0x06EA)
+UDP: 
+
+```
 
 - MSFT-8V-1M-RX-BW-Port1-100Sec
 
-![Graphical user interface Description automatically generated](media/image16.png){width="5.182404855643044in"
-height="3.96875in"}
+![msft-8v-1m-rx-bw-port1-100sec-01](media/test/msft-8v-1m-rx-bw-port1-100sec-01.png)
 
-![Graphical user interface Description automatically generated](media/image17.png){width="5.1819444444444445in"
-height="3.948464566929134in"}
+![msft-8v-1m-rx-bw-port1-100sec-02](media/test/msft-8v-1m-rx-bw-port1-100sec-02.png)
 
 ### CPS Streams
 
-CPS streams will be used to simulate TCP connection establishment and
-termination.
+CPS streams will be used to simulate TCP connection establishment and termination.
 
-![Text Description automatically generated](media/image18.png){width="4.146411854768154in"
-height="1.4793733595800524in"}
+![cps-streams](media/test/cps-streams.png)
 
 -   MSFT-8V-4M-Stream 1-Syn-TX-CPS-100Sec
 
-![Graphical user interface, application Description automatically generated](media/image19.png){width="4.9375in"
-height="3.779086832895888in"}
+![msft-8v-4m-stream-1-syn-tx-cps-100sec-01](media/test/msft-8v-4m-stream-1-syn-tx-cps-100sec-01.png)
 
-![Graphical user interface Description automatically generated](media/image20.png){width="4.916666666666667in"
-height="3.730573053368329in"}
+![msft-8v-4m-stream-1-syn-tx-cps-100sec-02](media/test/msft-8v-4m-stream-1-syn-tx-cps-100sec-02.png)
 
 -   MSFT-8V-4M-Stream 2-Syn-Ack-RX-CPS-100Sec
 
-![Graphical user interface, application Description automatically generated](media/image21.png){width="5.170760061242345in"
-height="3.9791666666666665in"}
+![msft-8v-4m-stream-2-syn-ack-rx-cps-100sec-01](media/test/msft-8v-4m-stream-2-syn-ack-rx-cps-100sec-01.png)
 
-![Graphical user interface Description automatically generated](media/image22.png){width="5.14583552055993in"
-height="3.930844269466317in"}
+![msft-8v-4m-stream-2-syn-ack-rx-cps-100sec-02](media/test/msft-8v-4m-stream-2-syn-ack-rx-cps-100sec-02.png)
 
 -   MSFT-8V-4M-Stream 3-Ack-TX-CPS-100Sec
 
-![Graphical user interface, application Description automatically generated](media/image23.png){width="5.430209973753281in"
-height="4.177083333333333in"}
+![msft-8v-4m-stream-3-ack-tx-cps-100sec-01](media/test/msft-8v-4m-stream-3-ack-tx-cps-100sec-01.png)
 
-![Graphical user interface Description automatically generated](media/image24.png){width="5.385415573053368in"
-height="4.1397517497812775in"}
+![msft-8v-4m-stream-3-ack-tx-cps-100sec-02](media/test/msft-8v-4m-stream-3-ack-tx-cps-100sec-02.png)
 
 -   MSFT-8V-4M-Stream 4-Fin-Ack-RX-CPS-100Sec
 
-![Graphical user interface, application Description automatically generated](media/image25.png){width="5.284405074365704in"
-height="4.0in"}
+![msft-8v-4m-stream-4-fin-ack-rx-cps-100sec-01](media/test/msft-8v-4m-stream-4-fin-ack-rx-cps-100sec-01.png)
 
-![Graphical user interface, application Description automatically generated](media/image26.png){width="5.297274715660542in"
-height="4.03125in"}
+![msft-8v-4m-stream-4-fin-ack-rx-cps-100sec-02](media/test/msft-8v-4m-stream-4-fin-ack-rx-cps-100sec-02.png)
 
 -   MSFT-8V-4M-Stream 4-Fin-Ack-TX-CPS-100Sec
 
-![Graphical user interface Description automatically generated](media/image27.png){width="5.16666447944007in"
-height="3.951726815398075in"}
+![msft-8v-4m-stream-4-fin-ack-tx-cps-100sec-01](media/test/msft-8v-4m-stream-4-fin-ack-tx-cps-100sec-01.png)
 
-![Graphical user interface Description automatically generated](media/image28.png){width="5.227589676290464in"
-height="4.0in"}
+![msft-8v-4m-stream-4-fin-ack-tx-cps-100sec-02](media/test/msft-8v-4m-stream-4-fin-ack-tx-cps-100sec-02.png)
 
 -   MSFT-8V-4M-Stream 6-Ack-for-Fin-RX-CPS-100Sec
 
-![Graphical user interface, application Description automatically generated](media/image29.png){width="5.08333552055993in"
-height="3.8733267716535433in"}
+![msft-8v-4m-stream-6-ack-fin-rx-cps-100sec-01](media/test/[msft-8v-4m-stream-6-ack-fin-rx-cps-100sec-01.png)
 
-![Graphical user interface Description automatically generated](media/image30.png){width="5.125in"
-height="3.8930293088363954in"}
+![msft-8v-4m-stream-6-ack-fin-rx-cps-100sec-02](media/test/msft-8v-4m-stream-6-ack-fin-rx-cps-100sec-02.png)
 
 ### Sample Policy Configuration
 
 #### Device
 
+```cmd
 \"gw-ip-addr\": \"1.0.0.1\",
 
 \"kind\" : \"device\",
@@ -470,17 +528,22 @@ height="3.8930293088363954in"}
 \"encap\": \"vxlan\",
 
 \"oper-mode\": \"bitw-smart-switch\"
+```
 
 #### TEP
 
+```cmd
 \"kind\" : \"tep\",
 
 \"count\" : \"2046\",
 
 \"prefix\": \"1.0.0.0/8\"
 
+```
+
 #### Route Table
 
+```cmd
 \"kind\" : \"route-table\",
 
 \"count\" : \"204800\",
@@ -494,9 +557,11 @@ height="3.8930293088363954in"}
 \"kind\" : \"security-policy\",
 
 \"v4-count\" : \"1023\"
+```
 
 #### VPC
 
+```cmd
 \"kind\" : \"vpc\",
 
 \"count\" : \"16\",
@@ -504,11 +569,13 @@ height="3.8930293088363954in"}
 \"prefix\" : \"192.0.0.0/8\",
 
 \"subnets\" : \"1\"
-
-Note: All VPCs will be configured with the same prefix.
+```
+> [!NOTE]
+> All VPCs will be configured with the same prefix.
 
 #### VNIC
 
+```cmd
 \"kind\" : \"vnic\",
 
 \"count\" : \"1\",
@@ -517,8 +584,11 @@ Note: All VPCs will be configured with the same prefix.
 
 Note: VNIC configuration per vpc, subnet
 
+```
+
 #### Mappings
 
+```cmd
 \"kind\" : \"mappings\",
 
 \"remotes\" : \"64\",
@@ -527,11 +597,13 @@ Note: VNIC configuration per vpc, subnet
 
 \"nat-prefix\" : \"3.0.0.0/8\"
 
-Note: Remotes are per subnet, tep.
-
+```
+> [!NOTE]
+> Remotes are per subnet, tep.
 
 #### Policer
 
+```cmd
 \"kind\" : \"policer\",
 
 \"count\" : \"16\",
@@ -552,8 +624,11 @@ Note: Remotes are per subnet, tep.
 
 \"tos\" : \"\"
 
+```
+
 #### Meter Policy
 
+```cmd
 \"kind\" : \"meter-policy\",
 
 \"count-xl\" : \"16383\",
@@ -561,3 +636,5 @@ Note: Remotes are per subnet, tep.
 \"count-m\" : \"1023\",
 
 \"prefix\" : \"4.0.0.0/8\"
+
+```
