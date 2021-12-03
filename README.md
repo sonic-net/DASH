@@ -38,4 +38,7 @@ trademarks or logos is subject to and must follow
 Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
 Any use of third-party trademarks or logos are subject to those third-party's policies.
 
-<img src="DASH%20Images/DASH%20image.jpg" width="250">
+<!-- Old icon: <img src="DASH%20Images/DASH%20image.jpg" width="250"> -->
+<div align="center">
+<img src="documents/media/DASH_Icon_02922-255px.png" style="align:center; width: 300px"/>
+<div/> 
