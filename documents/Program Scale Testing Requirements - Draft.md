@@ -49,8 +49,7 @@
 
 ## Introduction
 
-This document summarizes scale testing requirements for validating
-Microsoft program deliverables.
+This document summarizes scale testing requirements for validating program deliverables.
 
 This document will refer to Connection Per Second (CPS) capability as 5M
 which correlates to 10M flow operations. This capability is a
