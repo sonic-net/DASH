@@ -40,5 +40,5 @@ Any use of third-party trademarks or logos are subject to those third-party's po
 
 <!-- Old icon: <img src="DASH%20Images/DASH%20image.jpg" width="250"> -->
 <div align="center">
-<img src="documents/media/DASH_Icon_02922-255px.png" style="align:center; width: 300px"/>
+<img src="documents/media/images/icons/dash-icon-xlarge.png" style="align:center;"/>
 <div/> 
