@@ -13,39 +13,41 @@
 
 [MSFT LAB IXIA Configuration](#msft-lab-ixia-configuration)
 
-[Module Configuration](#module-configuration)
+- [Module Configuration](#module-configuration)
 
-[Streams](#streams)
+- [Streams](#streams)
 
-[Learning Streams](#learning-streams)
+    - [Learning Streams](#learning-streams)
 
-[Traffic Streams](#traffic-streams)
+    - [Traffic Streams](#traffic-streams)
 
-[Bandwidth Streams](#bandwidth-streams)
+    - [Bandwidth Streams](#bandwidth-streams)
 
-[CPS Streams](#cps-streams)
+    - [CPS Streams](#cps-streams)
 
 [Sample Policy Configuration](#sample-policy-configuration)
 
-[Device](#device)
+- [Device](#device)
 
-[TEP](#tep)
+- [TEP](#tep)
 
-[Route Table](#route-table)
+- [Route Table](#route-table)
 
-[Security Policy](#security-policy)
+- [Security Policy](#security-policy)
 
-[VPC](#vpc)
+- [VPC](#vpc)
 
-[VNIC](#vnic)
+- [VNIC](#vnic)
 
-[Mappings](#mappings)
+- [Mappings](#mappings)
 
-[Policer](#policer)
+- [Policer](#policer)
 
-[UDR](#udr)
+- [UDR](#udr)
 
-[Meter Policy](#meter-policy)
+- [Meter Policy](#meter-policy)
+
+<hr/>
 
 ## Introduction
 
