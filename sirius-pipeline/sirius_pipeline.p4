@@ -54,7 +54,7 @@ control sirius_ingress(inout headers_t hdr,
         key = {
             meta.appliance_id : ternary @name("meta.appliance_id:appliance_id");
         }
-    
+
         actions = {
             set_appliance;
         }
