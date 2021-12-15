@@ -74,7 +74,7 @@ control inbound(inout headers_t hdr,
 #endif // PNA_CONNTRACK
 
         /* ACL */
-        if (meta.conntrack_data.allow_in) {
+        if (!meta.conntrack_data.allow_in) {
             acl.apply(hdr, meta, standard_metadata);
         }
 

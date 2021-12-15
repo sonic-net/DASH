@@ -100,7 +100,7 @@ control outbound(inout headers_t hdr,
 #endif // PNA_CONNTRACK
 
         /* ACL */
-        if (meta.conntrack_data.allow_out) {
+        if (!meta.conntrack_data.allow_out) {
             acl.apply(hdr, meta, standard_metadata);
         }
 
