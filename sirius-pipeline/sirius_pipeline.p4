@@ -8,6 +8,35 @@
 #include "sirius_inbound.p4"
 #include "sirius_conntrack.p4"
 
+#ifdef PNA_CONNTRACK
+
+IPv4Address directionNeutralAddr (
+    in direction_t direction,
+    in IPv4Address outbound_address,
+    in IPv4Address inbound_address)
+{
+    if (direction == OUTBOUND) {
+        return outbound_address;
+    } else {
+        return inbound_address;
+    }
+}
+
+bit<16> directionNeutralPort (
+    in direction_t direction,
+    in bit<16> outbound_port,
+    in bit<16> inbound_port)
+{
+    if (direction == OUTBOUND) {
+        return outbound_port;
+    } else {
+        return inbound_port;
+    }
+}
+
+#endif /* PNA_CONNTRACK */
+
+
 control sirius_verify_checksum(inout headers_t hdr,
                          inout metadata_t meta)
 {
@@ -54,7 +83,7 @@ control sirius_ingress(inout headers_t hdr,
         key = {
             meta.appliance_id : ternary @name("meta.appliance_id:appliance_id");
         }
-    
+
         actions = {
             set_appliance;
         }

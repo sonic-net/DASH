@@ -68,6 +68,9 @@ control inbound(inout headers_t hdr,
 #ifdef STATEFUL_P4
             ConntrackIn.apply(0);
 #endif /* STATEFUL_P4 */
+#ifdef PNA_CONNTRACK
+        conntrackIn.apply();
+#endif // PNA_CONNTRACK
 
         /* ACL */
         if (meta.conntrack_data.allow_in) {
@@ -77,6 +80,9 @@ control inbound(inout headers_t hdr,
 #ifdef STATEFUL_P4
             ConntrackOut.apply(1);
 #endif /* STATEFUL_P4 */
+#ifdef PNA_CONNTRACK
+        conntrackOut.apply();
+#endif //PNA_CONNTRACK
 
         vxlan_encap(hdr,
                     meta.encap_data.underlay_dmac,
