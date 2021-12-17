@@ -21,7 +21,7 @@ A P4 program, [sirius_pipeline.p4](../sirius_pipeline.p4), describes the behavio
 
 Besides describing the dataplane behavior, the P4 source code can be parsed by the community [p4c](https://github.com/p4lang/p4c) compiler and, via a suitable backend (**TODO** - provide link when it becomes part of this repo) it emits [SAI](https://www.opencompute.org/projects/sai) header files describing the abstract dataplane API to the [underlay](../SAI/underlay) portion of the dataplane. The [overlay](../SAI/overlay) portion of the DASH dataplane is a subset of the standard SAI header files, e.g. as typically used by [SONiC](https://azure.github.io/SONiC/).
 
-Treating the P4 progam as the starting point ensures an unambiguous contract for dataplane behavior. By generating SAI header files directly from the P4 code, we can be assured the programming interface is tightly bound, and agrees to, the behavioral model.
+Treating the P4 program as the starting point ensures an unambiguous contract for dataplane behavior. By generating SAI header files directly from the P4 code, we can be assured the programming interface is tightly bound, and agrees to the behavioral model.
 
 ### DASH SAI API
 The combination of the underlay and the overlay SAI header files comprise the canonical "DASH API": an abstract dataplane API which exposes [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations upon canonical tables, which represent the configuration (and in some cases, the state) of the dataplane.
