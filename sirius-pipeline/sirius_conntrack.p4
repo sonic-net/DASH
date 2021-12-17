@@ -69,6 +69,7 @@ control ConntrackIn(inout headers_t hdr,
               exact;
           directionNeutralPort(meta.direction, hdr.tcp.dstPort, hdr.tcp.srcPort):
               exact;
+          meta.eni : exact;
       }
       actions = {
           conntrackIn_allow;
