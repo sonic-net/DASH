@@ -29,7 +29,7 @@ The combination of the underlay and the overlay SAI header files comprise the ca
 DASH tests use this API to configure and/or read the state of the DUT; therefore, test cases and test scripts will utilize this API.
 
 ### SAI Thrift RPC Interface
- Since SAI is defined as a c-language binding (`.h` header files), it's just a "contract;" it is not directly accessible by a test script running in its own process. A remote procedure call interface is required to allow a test program (e.g. a [PyTest](https://docs.pytest.org/en/6.2.x/) script) to "talk" to the DUT. The DUT must expose a server endpoint which can be accessed by the test program over a socket i.e. via an IP `address:port` pair.
+SAI is defined as a c-language binding (`.h` header files), it's just a "contract"; hence it is not directly accessible by a test script running in its own process. A remote procedure call interface is required to allow a test program (e.g., a [PyTest](https://docs.pytest.org/en/6.2.x/) script) to "talk" to the DUT. The DUT must expose a server endpoint which can be accessed by the test program over a socket i.e., via an IP `address:port` pair.
 
  The DASH project specifies the [saithrift](https://github.com/opencomputeproject/SAI/tree/master/test/saithrift) RPC approach, already used in SONiC testing. The Figure above illustrates the flow:
  * SAI header files are fed into a saithrift generator toolchain. This is a collection of Perl scripts which generates both client and server [Thrift](https://thrift.apache.org/) code. Thrift is a Remote Procedure Call (RPC) framework which uses an Interface Description language (IDL) schema to specify a client-server communications mechanism.
