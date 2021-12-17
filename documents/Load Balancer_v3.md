@@ -16,7 +16,7 @@ path between VMs (direct PA to PA path).
 
 ## Architecture
 
-![load-balancer-architecture](media/images/loadbalancer/load-balancer-architecture.png)
+![load-balancer-architecture](images/loadbalancer/load-balancer-architecture.png)
 
 ## How it works?
 
@@ -75,16 +75,16 @@ traffic is direct between VMs and does not transit the SLB MUXes.
 
 - TCP handshake uses VIP (52.184.168.32)
 
-    ![TCP-handshake](media/images/loadbalancer/TCP-handshake.png)
+    ![TCP-handshake](images/loadbalancer/TCP-handshake.png)
 
 - ICMP Redirect packet
 
-    ![ICMP-redirect.png](media/images/loadbalancer/ICMP-redirect.png)
+    ![ICMP-redirect.png](images/loadbalancer/ICMP-redirect.png)
 
 - After the ICMP redirect, the packets start using DIP/PA (100.110.225.76)
 
-    ![after-ICMP-redirect](media/images/loadbalancer/after-ICMP-redirect.png)
+    ![after-ICMP-redirect](images/loadbalancer/after-ICMP-redirect.png)
 
 ## Packet transformation
 
-![packet-transform](media/images/loadbalancer/packet-transform.png)
+![packet-transform](images/loadbalancer/packet-transform.png)
