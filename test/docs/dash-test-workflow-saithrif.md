@@ -1,18 +1,20 @@
 # DASH Test Workflow with saithrift
 
-This document describes the DASH test workflow with SAI thrift. 
+This document describes the DASH test workflow with SAI-thrift. 
 
 ## Workflow overview 
 
 ![dash-test-wflow-saithrift](../images/dash-test-wflow-saithrift.svg)
 
-The figure above captures some important concepts:
+The previous figure highlights the following important test work-flow concepts:
+
 * How test cases are represented and executed
 * How the abstract SAI interface to the Device Under Test (DUT) is derived
 * How the SAI-thrift interface is generated and utilized for testing
 * How a traffic generator (and receiver) is used to test the DUT
 
 The descriptions below are listed in rough order of dependency, culminating in the test script itself.
+
 ## P4 to SAI Interface Transformation
 
 > **TODO** This could be covered under the [../sirius_pipeline](../sirius_pipeline) directory README.
@@ -66,4 +68,13 @@ A test script consumes the test data, configures both the DUT and the traffic ge
 * Test scripts read the results from theTgen (and possibly DUT state queries), analyze against expected results and report test outcomes.
 
 ## References
-**TODO** - summarise useful links cited above
+- [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) 
+- [PyTest](https://docs.pytest.org/en/6.2.x/) 
+- [saithrift](https://github.com/opencomputeproject/SAI/tree/master/test/saithrift)
+- [Thrift](https://thrift.apache.org/)
+- [P4-DPDK](https://github.com/p4lang/p4-dpdk-target) 
+- [bmv2](https://github.com/p4lang/behavioral-model)
+- [Open Traffic Generator (OTG)](https://github.com/open-traffic-generator/models) 
+- [snappi](https://github.com/open-traffic-generator/snappi)
+- [Abstract test cases](./sonic-dash-test-HLD.md#data-driven-test-cases)
+- [DASH Test High-Level Description](./sonic-dash-test-HLD.md#data-driven-test-cases)
