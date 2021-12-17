@@ -26,7 +26,7 @@ Treating the P4 program as the starting point ensures an unambiguous contract fo
 ### DASH SAI API
 The combination of the underlay and the overlay SAI header files comprise the canonical "DASH API": an abstract dataplane API which exposes [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations upon canonical tables, which represent the configuration (and in some cases, the state) of the dataplane.
 
-DASH tests use this API to configure and/or read the state of, the DUT. Therefore, test cases and test scripts will utilize this API.
+DASH tests use this API to configure and/or read the state of the DUT; therefore, test cases and test scripts will utilize this API.
 
 ### SAI Thrift RPC Interface
  Since SAI is defined as a c-language binding (`.h` header files), it's just a "contract;" it is not directly accessible by a test script running in its own process. A remote procedure call interface is required to allow a test program (e.g. a [PyTest](https://docs.pytest.org/en/6.2.x/) script) to "talk" to the DUT. The DUT must expose a server endpoint which can be accessed by the test program over a socket i.e. via an IP `address:port` pair.
