@@ -52,7 +52,7 @@ There are many software and hardware-based traffic generator/analyzers (nickname
 
 The test cases are stored in the GitHub repository and comprise standard DASH test suites. A set of Pytest Test scripts use the test-case data to define a test. As an example, the test data may describe a set of ACL rules to configure the device, in an abstract form (e.g. a JSON file). The ACL rules may specify accept/deny behavior, which the test script can verify.
 
-### Finally - Running the test!
+### Running the test!
 A test script consumes the test data, configures both the DUT and the traffic generator, and measures the results. The DUT is configured, via saithrift protocol, over a socket to its endpoint; and the Tgen is configured, via OTG/snappi protocol, over a socket to its endpoint. Packets are sent from the Tgen to the DUT, received by the Tgen, and analyzed by the test script.
 ## Summarizing It All
 * DASH dataplane behavior is specified by a "Sirius" P4 behavior model
