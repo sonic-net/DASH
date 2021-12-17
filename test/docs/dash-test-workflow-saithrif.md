@@ -54,7 +54,7 @@ The test cases are stored in the GitHub repository and comprise standard DASH te
 
 ### Finally - Running the test!
 A test script consumes the test data, configures both the DUT and the traffic generator, and measures the results. The DUT is configured, via saithrift protocol, over a socket to its endpoint; and the Tgen is configured, via OTG/snappi protocol, over a socket to its endpoint. Packets are sent from the Tgen to the DUT, received by the Tgen, and analyzed by the test script.
-### Recap - Summarizing It All
+## Summarizing It All
 * DASH dataplane behavior is specified by a "Sirius" P4 behavior model
 * The P4 program can generate SAI overlay headers. Combined with a subset of standard SAI underlay headers, we have a complete "DASH API."
 * Vendors implement a `libsai` for their device
