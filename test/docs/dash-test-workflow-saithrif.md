@@ -13,7 +13,7 @@ The figure above captures some important concepts:
 * How a traffic generator (and receiver) is used to test the DUT
 
 The descriptions below are listed in rough order of dependency, culminating in the test script itself.
-### P4 to SAI Interface Transformation
+## P4 to SAI Interface Transformation
 
 > **TODO** This could be covered under the [../sirius_pipeline](../sirius_pipeline) directory README.
 
