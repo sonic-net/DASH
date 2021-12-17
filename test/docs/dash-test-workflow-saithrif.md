@@ -64,3 +64,6 @@ A test script consumes the test data, configures both the DUT and the traffic ge
 * Tets cases stored in an abstract format are stored in a catalog of test suites, and read by the test script runner.
 * Test scripts consume the test case data and execute code to program the DUT and configure the Traffic Generator to send and receive traffic.
 * Test scripts read the results from theTgen (and possibly DUT state queries), analyze against expected results and report test outcomes.
+
+# References
+**TODO** - summarise useful links cited above
