@@ -314,9 +314,9 @@ both scenarios:
 
 IXIA module: NOVUS100GE8Q28
 
-![msft-lab-ixia-config-01](media/images/test/msft-lab-ixia-config-01.png) 
+![msft-lab-ixia-config-01](images/test/msft-lab-ixia-config-01.png) 
 
-![msft-lab-ixia-config-02](media/images/test/msft-lab-ixia-config-02.png) 
+![msft-lab-ixia-config-02](images/test/msft-lab-ixia-config-02.png) 
 
 ### Streams
 
@@ -330,13 +330,13 @@ Learning Streams will be used to establish 2M CPS connections and 2M UDP
 background bi-directional flows prior to test execution. These 2M flows
 will be split across 8 vnics that are pre-configured.
 
-![learning-streams](media/images/test/learning-streams.png)
+![learning-streams](images/test/learning-streams.png)
 
 - MSFT-8V-1M-TX-PPS-Learning
 
-![msft-8v-1m-tx-pps-learning-01](media/images/test/msft-8v-1m-tx-pps-learning-01.png)
+![msft-8v-1m-tx-pps-learning-01](images/test/msft-8v-1m-tx-pps-learning-01.png)
 
-![msft-8v-1m-tx-pps-learning-02](media/images/test/msft-8v-1m-tx-pps-learning-02.png)
+![msft-8v-1m-tx-pps-learning-02](images/test/msft-8v-1m-tx-pps-learning-02.png)
 
 **Packet view**
 
@@ -384,9 +384,9 @@ UDP:
 ```
 - MSFT-8V-1M-RX-PPS-Learning
 
-![msft-8v-1m-rx-pps-learning-01](media/images/test/msft-8v-1m-rx-pps-learning-01.png)
+![msft-8v-1m-rx-pps-learning-01](images/test/msft-8v-1m-rx-pps-learning-01.png)
 
-![msft-8v-1m-rx-pps-learning-02](media/images/test/msft-8v-1m-rx-pps-learning-02.png)
+![msft-8v-1m-rx-pps-learning-02](images/test/msft-8v-1m-rx-pps-learning-02.png)
 
 #### Traffic Streams
 
@@ -396,15 +396,15 @@ need to be created individually.
 
 - MSFT-8V-1M-TX-PPS-64Pkt/Flow-100Sec
 
-![msft-8v-1m-tx-pps-64pkt-flow-100sec-01](media/images/test/msft-8v-1m-tx-pps-64pkt-flow-100sec-01.png)
+![msft-8v-1m-tx-pps-64pkt-flow-100sec-01](images/test/msft-8v-1m-tx-pps-64pkt-flow-100sec-01.png)
 
-![msft-8v-1m-tx-pps-64pkt-flow-100sec-02](media/images/test/msft-8v-1m-tx-pps-64pkt-flow-100sec-02.png)
+![msft-8v-1m-tx-pps-64pkt-flow-100sec-02](images/test/msft-8v-1m-tx-pps-64pkt-flow-100sec-02.png)
 
 - MSFT-8V-1M-RX-PPS-64Pkt/Flow-100Sec
 
-![msft-8v-1m-rx-pps-64pkt-flow-100sec-01](media/images/test/msft-8v-1m-rx-pps-64pkt-flow-100sec-01.png)
+![msft-8v-1m-rx-pps-64pkt-flow-100sec-01](images/test/msft-8v-1m-rx-pps-64pkt-flow-100sec-01.png)
 
-![msft-8v-1m-rx-pps-64pkt-flow-100sec-02](media/images/test/msft-8v-1m-rx-pps-64pkt-flow-100sec-02.png)
+![msft-8v-1m-rx-pps-64pkt-flow-100sec-02](images/test/msft-8v-1m-rx-pps-64pkt-flow-100sec-02.png)
 
 #### Bandwidth Streams
 
@@ -413,9 +413,9 @@ will be used to verify the total 100Gbps bandwidth.
 
 - MSFT-8V-1M-TX-BW-Port1-100Sec
 
-![msft-8v-1m-tx-bw-port1-100sec-01](media/images/test/msft-8v-1m-tx-bw-port1-100sec-01.png)
+![msft-8v-1m-tx-bw-port1-100sec-01](images/test/msft-8v-1m-tx-bw-port1-100sec-01.png)
 
-![msft-8v-1m-tx-bw-port1-100sec-02](media/images/test/msft-8v-1m-tx-bw-port1-100sec-02.png)
+![msft-8v-1m-tx-bw-port1-100sec-02](images/test/msft-8v-1m-tx-bw-port1-100sec-02.png)
 
 **Packet view**
 
@@ -464,51 +464,51 @@ UDP:
 
 - MSFT-8V-1M-RX-BW-Port1-100Sec
 
-![msft-8v-1m-rx-bw-port1-100sec-01](media/images/test/msft-8v-1m-rx-bw-port1-100sec-01.png)
+![msft-8v-1m-rx-bw-port1-100sec-01](images/test/msft-8v-1m-rx-bw-port1-100sec-01.png)
 
-![msft-8v-1m-rx-bw-port1-100sec-02](media/images/test/msft-8v-1m-rx-bw-port1-100sec-02.png)
+![msft-8v-1m-rx-bw-port1-100sec-02](images/test/msft-8v-1m-rx-bw-port1-100sec-02.png)
 
 ### CPS Streams
 
 CPS streams will be used to simulate TCP connection establishment and termination.
 
-![cps-streams](media/images/test/cps-streams.png)
+![cps-streams](images/test/cps-streams.png)
 
 -   MSFT-8V-4M-Stream 1-Syn-TX-CPS-100Sec
 
-![msft-8v-4m-stream-1-syn-tx-cps-100sec-01](media/images/test/msft-8v-4m-stream-1-syn-tx-cps-100sec-01.png)
+![msft-8v-4m-stream-1-syn-tx-cps-100sec-01](images/test/msft-8v-4m-stream-1-syn-tx-cps-100sec-01.png)
 
-![msft-8v-4m-stream-1-syn-tx-cps-100sec-02](media/images/test/msft-8v-4m-stream-1-syn-tx-cps-100sec-02.png)
+![msft-8v-4m-stream-1-syn-tx-cps-100sec-02](images/test/msft-8v-4m-stream-1-syn-tx-cps-100sec-02.png)
 
 -   MSFT-8V-4M-Stream 2-Syn-Ack-RX-CPS-100Sec
 
-![msft-8v-4m-stream-2-syn-ack-rx-cps-100sec-01](media/images/test/msft-8v-4m-stream-2-syn-ack-rx-cps-100sec-01.png)
+![msft-8v-4m-stream-2-syn-ack-rx-cps-100sec-01](images/test/msft-8v-4m-stream-2-syn-ack-rx-cps-100sec-01.png)
 
-![msft-8v-4m-stream-2-syn-ack-rx-cps-100sec-02](media/images/test/msft-8v-4m-stream-2-syn-ack-rx-cps-100sec-02.png)
+![msft-8v-4m-stream-2-syn-ack-rx-cps-100sec-02](images/test/msft-8v-4m-stream-2-syn-ack-rx-cps-100sec-02.png)
 
 -   MSFT-8V-4M-Stream 3-Ack-TX-CPS-100Sec
 
-![msft-8v-4m-stream-3-ack-tx-cps-100sec-01](media/images/test/msft-8v-4m-stream-3-ack-tx-cps-100sec-01.png)
+![msft-8v-4m-stream-3-ack-tx-cps-100sec-01](images/test/msft-8v-4m-stream-3-ack-tx-cps-100sec-01.png)
 
-![msft-8v-4m-stream-3-ack-tx-cps-100sec-02](media/images/test/msft-8v-4m-stream-3-ack-tx-cps-100sec-02.png)
+![msft-8v-4m-stream-3-ack-tx-cps-100sec-02](images/test/msft-8v-4m-stream-3-ack-tx-cps-100sec-02.png)
 
 -   MSFT-8V-4M-Stream 4-Fin-Ack-RX-CPS-100Sec
 
-![msft-8v-4m-stream-4-fin-ack-rx-cps-100sec-01](media/images/test/msft-8v-4m-stream-4-fin-ack-rx-cps-100sec-01.png)
+![msft-8v-4m-stream-4-fin-ack-rx-cps-100sec-01](images/test/msft-8v-4m-stream-4-fin-ack-rx-cps-100sec-01.png)
 
-![msft-8v-4m-stream-4-fin-ack-rx-cps-100sec-02](media/images/test/msft-8v-4m-stream-4-fin-ack-rx-cps-100sec-02.png)
+![msft-8v-4m-stream-4-fin-ack-rx-cps-100sec-02](images/test/msft-8v-4m-stream-4-fin-ack-rx-cps-100sec-02.png)
 
 -   MSFT-8V-4M-Stream 4-Fin-Ack-TX-CPS-100Sec
 
-![msft-8v-4m-stream-4-fin-ack-tx-cps-100sec-01](media/images/test/msft-8v-4m-stream-4-fin-ack-tx-cps-100sec-01.png)
+![msft-8v-4m-stream-4-fin-ack-tx-cps-100sec-01](images/test/msft-8v-4m-stream-4-fin-ack-tx-cps-100sec-01.png)
 
-![msft-8v-4m-stream-4-fin-ack-tx-cps-100sec-02](media/images/test/msft-8v-4m-stream-4-fin-ack-tx-cps-100sec-02.png)
+![msft-8v-4m-stream-4-fin-ack-tx-cps-100sec-02](images/test/msft-8v-4m-stream-4-fin-ack-tx-cps-100sec-02.png)
 
 -   MSFT-8V-4M-Stream 6-Ack-for-Fin-RX-CPS-100Sec
 
-![msft-8v-4m-stream-6-ack-fin-rx-cps-100sec-01](media/images/test/[msft-8v-4m-stream-6-ack-fin-rx-cps-100sec-01.png)
+![msft-8v-4m-stream-6-ack-fin-rx-cps-100sec-01](images/test/[msft-8v-4m-stream-6-ack-fin-rx-cps-100sec-01.png)
 
-![msft-8v-4m-stream-6-ack-fin-rx-cps-100sec-02](media/images/test/msft-8v-4m-stream-6-ack-fin-rx-cps-100sec-02.png)
+![msft-8v-4m-stream-6-ack-fin-rx-cps-100sec-02](images/test/msft-8v-4m-stream-6-ack-fin-rx-cps-100sec-02.png)
 
 ### Sample Policy Configuration
 
