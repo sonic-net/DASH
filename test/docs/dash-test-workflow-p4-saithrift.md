@@ -78,8 +78,6 @@ The P4-DPDK dataplane is bound to host veth ports at startup.  These are "wired"
 * Packets are sent into and out of veth interfaces of the simulator. These connect via Linux bridges or similar, to software-based packet generators. Complete dataplane tests can be performed soley in software, supporting development and CI/CD testing.
 
 
-dash-test-workflow-p4-saithrift
-
 ## References
 - [TBD](tbd) 
 - [TBD](tbd)
