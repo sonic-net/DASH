@@ -79,6 +79,11 @@ The P4-DPDK dataplane is bound to host veth ports at startup.  These are "wired"
 
 
 ## References
-- [TBD](tbd) 
-- [TBD](tbd)
-- 
+- [DASH Test Workflow with saithrift](dash-test-workflow-saithrift.md)
+- [CI/CD](https://en.wikipedia.org/wiki/CI/CD)
+- [SAI Challenger](https://plvision.eu/rd-lab/blog/opensource/sai-challenger-sonic-based-framework)
+- [Open Compute Project (OCP)](https://www.opencompute.org/)
+- [SONiC Architecture](https://github.com/Azure/SONiC/wiki/Architecture) 
+- [P4Runtime](https://github.com/p4lang/p4runtime)
+- [bmv2](https://github.com/p4lang/behavioral-model)
+- [P4-DPDK](https://github.com/p4lang/p4-dpdk-target)
