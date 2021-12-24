@@ -1,6 +1,6 @@
 # Project - Disaggregated API for SONiC Hosts (SONiC DASH) - version 0.1 DRAFT/Work in Progress
 
-> SONiC DASH is a new open source project that "will deliver enterprise network performance to critical cloud applications.  The project extends functionality to stateful workloads.  
+## SONiC DASH is a new open source project that "will deliver enterprise network performance to critical cloud applications.  The project extends functionality to stateful workloads.  
 
 Comprised of a developing set of APIs and object models describing network services for the cloud, we will work with all cloud providers and enterprise hybrid clouds to develop further functionality. We believe the DASH program describes a comprehensive set of services that are required by the vast majority of clouds. The goal of DASH is to be specific enough for SMART Programmable Technologies to optimize network performance and leverage commodity hardware technology to achieve 10x or even 100x stateful connection performance.
 
