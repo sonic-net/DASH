@@ -72,7 +72,7 @@ The P4-DPDK dataplane is bound to host veth ports at startup.  These are "wired"
 
 ## Summarizing it all
 * Standard DASH test cases and test runners apply conformance and performance tests against software-based DASH dataplane simulators.
-* Software dataplane have lower scale and performance capabilities compared to production hardware implementations. Therefore, test must be marked for suitability on each target to respect performance and scale limitations of each software implementation. The test runners will run only the appropriate subset for a given target.
+* Software dataplane have lower scale and performance capabilities compared to production hardware implementations. Therefore, tests must be marked for suitability on each target to respect performance and scale limitations of each software implementation. The test runners will run only the appropriate subset for a given target.
 * Two different software simulators are being developed independently (bmv2 and P4-DPDK), with various characteristics. They are works-in-progress and details may evolve quickly over time.
 * The simulators will have libsai libraries allowing compilation into a saithrift server. This server exposes a saithrift API endpoint used by the test scripts to configure and query the dataplane.
 * The native P4Runtime API endpoints are not used in standard DASH tests, but they may serve a purpose for developing the P4 model and simulations themselves.
