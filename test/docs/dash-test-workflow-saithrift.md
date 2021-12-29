@@ -1,8 +1,11 @@
 # DASH Test Workflow with saithrift
 
 This document describes the DASH test workflow with SAI-thrift. 
+> [!NOTE] We can exapnd this by adding some introductory test for example explaining the obiectives. 
 
 ## Workflow overview 
+
+> [!NOTE] We can exapnd this by adding some introductory test for example describing the flow inputs and outputs etc...
 
 ![dash-test-wflow-saithrift](../images/dash-test-wflow-saithrift.svg)
 
