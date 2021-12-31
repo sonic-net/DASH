@@ -1,3 +1,9 @@
+[[ < Test docs Table of Contents ]](./README.md)
+
+[[ << DASH/test main README ]](../README.md)
+
+[[ << DASH main README ]](../../README.md)
+
 # DASH Test Workflow with saithrift
 
 This document describes the DASH test workflow with SAI-thrift. We'll describe the inputs required to specify a test and how these are distributed across various repos; the transformation of these input source files into various test artifacts, and how these are utilized to create a client-server test framework which is utilized by test scripts to configure a DUT and test it with packet traffic.
@@ -6,7 +12,9 @@ This document describes the DASH test workflow with SAI-thrift. We'll describe t
 
 In the diagran below, fixed resources such as abstract test-cases, P4 code, SAI headers, etc. reside in GitHub repos as indicated. These artifacts are transformed roughly from left-to-right into into various artifacts required to run tests. This is a high-level conceptual diagram which omits many details, such as shell scripts, Makefiles, GitHub automation scripts, etc. In addition, some of the workflow steps take place in different environments or repos, at different points in time.
 
-Most importantly, the execution of test scripts inside the red circe represent the "Main event" and thus all the other steps are dependencies which must be satisfied, inlduing installation of software/firmware onto the Device Under Test (DUT).
+Most importantly, the execution of test scripts inside the red circe represent the "Main event" and thus all the other steps are dependencies which must be satisfied, including installation of software/firmware onto the Device Under Test (DUT).
+
+**Diagram - DASH saithrift Test Workflow**
 
 ![dash-test-wflow-saithrift](../images/dash-test-wflow-saithrift.svg)
 
