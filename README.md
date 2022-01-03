@@ -16,6 +16,8 @@ Please begin with 1) the SDN Packet Transforms document, this facilitates unders
 
 The API and Object Model for VNET<->VNET is in draft; the remaining services will be posted over Oct/Nov time frame here.
 
+DASH Testing is covered  under the [test/](test/README.md) directory and is a work in progress.
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a

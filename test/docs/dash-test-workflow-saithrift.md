@@ -1,11 +1,20 @@
+[[ < Test docs Table of Contents ]](./README.md)
+
+[[ << DASH/test main README ]](../README.md)
+
+[[ << DASH main README ]](../../README.md)
+
 # DASH Test Workflow with saithrift
 
-This document describes the DASH test workflow with SAI-thrift. 
-> [!NOTE] We can exapnd this by adding some introductory test for example explaining the obiectives. 
+This document describes the DASH test workflow with SAI-thrift. We'll describe the inputs required to specify a test and how these are distributed across various repos; the transformation of these input source files into various test artifacts, and how these are utilized to create a client-server test framework which is utilized by test scripts to configure a DUT and test it with packet traffic.
 
 ## Workflow overview 
 
-> [!NOTE] We can exapnd this by adding some introductory test for example describing the flow inputs and outputs etc...
+In the diagran below, fixed resources such as abstract test-cases, P4 code, SAI headers, etc. reside in GitHub repos as indicated. These artifacts are transformed roughly from left-to-right into into various artifacts required to run tests. This is a high-level conceptual diagram which omits many details, such as shell scripts, Makefiles, GitHub automation scripts, etc. In addition, some of the workflow steps take place in different environments or repos, at different points in time.
+
+Most importantly, the execution of test scripts inside the red circe represent the "Main event" and thus all the other steps are dependencies which must be satisfied, including installation of software/firmware onto the Device Under Test (DUT).
+
+**Diagram - DASH saithrift Test Workflow**
 
 ![dash-test-wflow-saithrift](../images/dash-test-wflow-saithrift.svg)
 
@@ -42,22 +51,28 @@ SAI is defined as a c-language binding (`.h` header files), it's just a "contrac
 * Each DASH device vendor must implement a `libsai` shared library, i.e., a compiled `.so` module which can be linked to the server skeleton to produce a running SAI server image. The library has function calls supporting CRUD operations upon each DASH SAI header definition and attribute. The vendor `libsai` function entrypoints translate the abstract SAI CRUD operations into the underlying platform operations, e.g., typically via the vendor's Software Development Kit (SDK) libraries or equivalent. 
 * The vendor-supplied `libsai` is compiled with the saithrift server skeleton to produce an executable binary file which is a server daemon. When run, this daemon exposes a socket-based API endpoint. This endpoint is the SAI-thrift API server.
 Test programs can perform SAI RPC calls agains the saithrift endpoint. In the previous figure, the PyTest test scripts make SAI calls to configure and query the DUT dataplane.
+
+> **TODO** Consider publishing versioned/tagged saithrift clients as [PyPi modules](https://pypi.org) and saithrift servers as Docker Images on [Dockerhub](https://hub.docker.com/) to eliminate the need for constant rebuilding. Once SAI header files have stablilized this should be feasible.
 ### Physical or Simulated DUT
 A DUT may be a real hardware device (SmartNIC/DPU/IPU), or a software "simulation", for example a [P4-DPDK](https://github.com/p4lang/p4-dpdk-target) soft switch, or a [bmv2](https://github.com/p4lang/behavioral-model) model. Simulations will be used as reference targets to cross-check conformance tests and verify DASH SAI APIs. Performance of software targets are not expected to meet DASH requirements, but nonetheless they serve as useful tools.
 ### OTG/snappi Traffic Generator
-The DUT is tested by configuring it as explained before. Then sending packets to it into a "front-panel" interface(s); then capturing and analyzing what the device sends back out the front panel interface(s). A Traffic Generator/Analyzer is used to emulate the behavior of many (even thousands) of hosts/servers in the normal datacenter environment. It can generate traffic streams simulating live traffic, capture what comes back, and analyze the results. **This is the main idea of DASH traffic tests**.
+The DUT is tested by configuring it as explained before; then sending packets to it into a "front-panel" interface(s); then capturing and analyzing what the device sends back out the front panel interface(s). A Traffic Generator/Analyzer is used to emulate the behavior of many (even thousands) of hosts/servers in the normal datacenter environment. It can generate traffic streams simulating live traffic, capture what comes back, and analyze the results. **This is the main idea of DASH traffic tests**.
 
 There are many software and hardware-based traffic generator/analyzers (nicknamed "Tgens") available in the market or in the open community, of varying capabilities. To provide a uniform, model-based programming interface and avoid vendor lock-in, DASH has adopted the [Open Traffic Generator (OTG)](https://github.com/open-traffic-generator/models) data model for Tgens, and the accompanying [snappi](https://github.com/open-traffic-generator/snappi) client SDKs to make test script development more consistent and convenient. This allows for both software and hardware based Tgens to be used with minimal script changes.
 
-> **NOTE**: some test cases may require dedicated, vendor-specific test scripts because these types of test are not supported in an OTG model. As an example, stateful connection performance testing may require specific gear.
+> **NOTE**: some test cases may require dedicated, vendor-specific traffic-generators controlled via proprietary APIs, because these types of test are not supported in an OTG model. As an example, stateful connection performance testing may require specific gear.
 
 
 ### Abstract Test Cases
-[Abstract test cases](./sonic-dash-test-HLD.md#data-driven-test-cases) comprise data and/or test script/programs which apply configuration to the DUT; configure a Traffic Generator to send packets to the DUT and capture packets back from the DUT; analyze the results; and compare expected versus actual to produce absolute pass/fail outcomes and/or perhaps performance figures against some standard. These test cases ideally are expressed independently of the precise programming interface of the DUT, and the programming interface of the Traffic Generator. This is discussed further in the [DASH Test High-Level Description](./sonic-dash-test-HLD.md#data-driven-test-cases) document.
+[Abstract test cases](./sonic-dash-test-HLD.md#data-driven-test-cases) comprise data and/or test script/programs which apply configuration to the DUT; configure a Traffic Generator to send packets to the DUT and capture packets back from the DUT; analyze the results; and compare expected versus actual to produce absolute pass/fail outcomes and/or perhaps performance figures against some standard. These test cases ideally are expressed independently of the precise programming interface of the DUT, and the programming interface of the Traffic Generator. For example, the same test case could in principle be used to program the DUT via the saithrift API (as is the central assumption of this workflow), or a northbound management interface such as the SONiC gNMI API. This is discussed further in the [DASH Test High-Level Description ](./sonic-dash-test-HLD.md#data-driven-test-cases) document.
 
 The test cases are stored in the GitHub repository and comprise standard DASH test suites. A set of Pytest Test scripts use the test-case data to define a test. As an example, the test data may describe a set of ACL rules to configure the device, in an abstract form (e.g. a JSON file). The ACL rules may specify accept/deny behavior, which the test script can verify.
 
-### Running the test!
+### Manual or Automatic Test Execution
+As the figure shows, test scripts are executable programs, e.g. Pytest suites. Execution may be triggered upon demand, by a SW developer or test engineer in their development environment; or via a [GitHub CI/CD "Action"](https://resources.github.com/devops/tools/automation/actions) such as a commit to a staging branch, or submission to a Pull Request. CI/CD tests are executed in a cloud-hosted server and are thus limited to purely SW-based tests, possibly including a P4-based simulation.
+
+Note, vendors may extend the community tests (locally, in their own environments) to add proprietary tests and  even include automatically-triggered (CI/CD), hardware-based tests. For example, automated test-cases could be added triggered upon local commits and execute against physical DUTs and traffic generators.
+
 A test script consumes the test data, configures both the DUT and the traffic generator, and measures the results. The DUT is configured, via saithrift protocol, over a socket to its endpoint; and the Tgen is configured, via OTG/snappi protocol, over a socket to its endpoint. Packets are sent from the Tgen to the DUT, received by the Tgen, and analyzed by the test script.
 ## Summarizing It All
 * DASH dataplane behavior is specified by a "Sirius" P4 behavior model
@@ -66,13 +81,16 @@ A test script consumes the test data, configures both the DUT and the traffic ge
 * The saithrift tool transforms the  SAI headers into a Thrift client library and a Thrift server skeleton.
   * The client [python] library is used by the test script to "talk" to the DUT to configure it.
   * The server skeleton must be linked to the vendor `libsai` to yield a complete server. When executed on the DUT, a client (the test script) can configure the DASH dataplane via SAI API calls transported over the Thrift API.
-* Tets cases stored in an abstract format are stored in a catalog of test suites, and read by the test script runner.
+* Test runs may be triggered manually, i.e. by a SW developer or test engineer; or triggered automatically by a GitHub Action (e.g. upon a Commit or Pull Request). Cloud-hosted community CI/CD tests are limited to pure software tests.
+* Data-driven test cases stored in an abstract format are stored in a catalog of test suites, and read by the executable test scripts.
 * Test scripts consume the test case data and execute code to program the DUT and configure the Traffic Generator to send and receive traffic.
 * Test scripts read the results from theTgen (and possibly DUT state queries), analyze against expected results and report test outcomes.
 
 ## References
 - [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) 
-- [PyTest](https://docs.pytest.org/en/6.2.x/) 
+- [PyTest](https://docs.pytest.org/en/6.2.x/)
+- [PyPi](https://pypi.org)
+- [GitHub CI/CD "Action"](https://resources.github.com/devops/tools/automation/actions)
 - [saithrift](https://github.com/opencomputeproject/SAI/tree/master/test/saithrift)
 - [Thrift](https://thrift.apache.org/)
 - [P4-DPDK](https://github.com/p4lang/p4-dpdk-target) 
