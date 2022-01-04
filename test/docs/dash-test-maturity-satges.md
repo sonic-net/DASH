@@ -28,13 +28,19 @@ TBD
 
 ## DUT configuration via SAI
 
+![dash-test-maturity-stages-dut-config-sai](../images/dash-test-maturity-stages-dut-config-sai.png) 
+
 TBD
 
 ## DUT configuration via Redis
 
+![dash-test-maturity-stages-dut-config-radis](../images/dash-test-maturity-stages-dut-config-radis.png) 
+
 TBD
 
 ## DUT configuration gNMI
+
+![dash-test-maturity-stages-dut-config-gnmi](../images/dash-test-maturity-stages-dut-config-gnmi.png) 
 
 TBD
 
