@@ -1,6 +1,30 @@
+
+[[ << Test docs Table of Contents ]](./README.md)
+
+[[ << DASH/test main README ]](../README.md)
+
+[[ << DASH main README ]](../../README.md)
+
 # DASH Test Workflow with saithrift
 
-This document describes the DASH test workflow with SAI-thrift. In particular, it describes 1) the inputs required to create a test and 2) how these are distributed across various repos, 3) the transformation of these input source files into various test artifacts, and 4) how these artifacts are utilized to create a client-server test framework to be used by test scripts to configure a DUT and test it with packet traffic.
+This document describes the DASH test workflow with SAI-thrift. In particular, it describes: 
+- The inputs required to create a test  
+- How these are distributed across various repos
+- The transformation of these input source files into various test artifacts
+- How these artifacts are utilized to create a client-server test framework to be used by test scripts to configure a DUT and test it with packet traffic.
+
+### Summary
+
+- DASH dataplane behavior is specified by a "Sirius" P4 behavior model.
+- The P4 program can generate SAI overlay headers. Combined with a subset of standard SAI underlay headers, we have a complete "DASH API".
+- Vendors implement a `libsai` for their device.
+- The **saithrift** tool transforms the  SAI headers into a **Thrift client** library and a **Thrift server** skeleton.
+  - The client `python` library is used by the test script to "talk" to the DUT to configure it.
+  - The server skeleton must be linked to the vendor `libsai` to yield a complete server. When executed on the DUT, a client (the test script) can configure the DASH dataplane via SAI API calls transported over the **Thrift API**.
+- Test runs may be triggered manually, i.e. by a SW developer or test engineer; or triggered automatically by a GitHub Action (e.g. upon a Commit or Pull Request). Cloud-hosted community CI/CD tests are limited to pure software tests.
+- Data-driven test cases stored in an abstract format are stored in a catalog of test suites, and read by the executable test scripts.
+- Test scripts consume the test case data and execute code to program the DUT and configure the Traffic Generator to send and receive traffic.
+- Test scripts read the results from theTgen (and possibly DUT state queries), analyze against expected results and report test outcomes.
 
 ## Workflow overview 
 
@@ -14,10 +38,15 @@ Most importantly, the execution of test scripts inside the red circle represent 
 
 The previous figure highlights the following important test work-flow concepts:
 
-* How test cases are represented and executed
-* How the abstract SAI interface to the Device Under Test (DUT) is derived
-* How the SAI-thrift interface is generated and utilized for testing
-* How a traffic generator (and receiver) is used to test the DUT
+- How test cases are represented and executed
+- How the abstract SAI interface to the Device Under Test (DUT) is derived
+- How the SAI-thrift interface is generated and utilized for testing
+- How a traffic generator (and receiver) is used to test the DUT
+
+The GitHub repositories can be found at these locations:
+
+- [dash/test](https://github.com/Azure/DASH/tree/main/test)
+- [opencompute/SAI](https://github.com/opencomputeproject/SAI)
 
 The descriptions below are listed in rough order of dependency, culminating in the test script itself.
 
@@ -76,28 +105,6 @@ As the figure shows, test scripts are executable programs, e.g. Pytest suites. E
 Note, vendors may extend the community tests (locally, in their own environments) to add proprietary tests and  even include automatically-triggered (CI/CD), hardware-based tests. For example, automated test-cases could be added triggered upon local commits and execute against physical DUTs and traffic generators.
 
 A test script consumes the test data, configures both the DUT and the traffic generator, and measures the results. The DUT is configured, via saithrift protocol, over a socket to its endpoint; and the Tgen is configured, via OTG/snappi protocol, over a socket to its endpoint. Packets are sent from the Tgen to the DUT, received by the Tgen, and analyzed by the test script.
-
-## Summarizing It All
-
-* DASH dataplane behavior is specified by a "Sirius" P4 behavior model
-* The P4 program can generate SAI overlay headers. Combined with a subset of standard SAI underlay headers, we have a complete "DASH API."
-* Vendors implement a `libsai` for their device
-* The saithrift tool transforms the  SAI headers into a Thrift client library and a Thrift server skeleton.
-  * The client [python] library is used by the test script to "talk" to the DUT to configure it.
-  * The server skeleton must be linked to the vendor `libsai` to yield a complete server. When executed on the DUT, a client (the test script) can configure the DASH dataplane via SAI API calls transported over the Thrift API.
-* Test runs may be triggered manually, i.e. by a SW developer or test engineer; or triggered automatically by a GitHub Action (e.g. upon a Commit or Pull Request). Cloud-hosted community CI/CD tests are limited to pure software tests.
-* Data-driven test cases stored in an abstract format are stored in a catalog of test suites, and read by the executable test scripts.
-* Test scripts consume the test case data and execute code to program the DUT and configure the Traffic Generator to send and receive traffic.
-* Test scripts read the results from theTgen (and possibly DUT state queries), analyze against expected results and report test outcomes.
-
-## See Also
-
-[Test docs Table of Contents](./README.md)
-
-[DASH/test main README](../README.md)
-
-[DASH main README](../../README.md)
-
 
 ## References
 
