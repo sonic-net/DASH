@@ -43,6 +43,11 @@ The previous figure highlights the following important test work-flow concepts:
 - How the SAI-thrift interface is generated and utilized for testing
 - How a traffic generator (and receiver) is used to test the DUT
 
+The GitHub repositories can be found at these locations:
+
+- [dash/test](https://github.com/Azure/DASH/tree/main/test)
+- [opencompute/SAI](https://github.com/opencomputeproject/SAI)
+
 The descriptions below are listed in rough order of dependency, culminating in the test script itself.
 
 ## P4 to SAI Interface Transformation
