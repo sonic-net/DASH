@@ -46,4 +46,6 @@ TBD
 
 ## Options 
 
+![dash-test-maturity-stages-options](../images/dash-test-maturity-stages-options.png) 
+
 TBD
