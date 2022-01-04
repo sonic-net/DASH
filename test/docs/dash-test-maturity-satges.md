@@ -14,7 +14,7 @@ last update: 01/04/2022
 
 This document describes the DASH maturity stages. 
 
-## Prof of Concept (OC)
+## Proof of Concept (OC)
 
 TBD
 
