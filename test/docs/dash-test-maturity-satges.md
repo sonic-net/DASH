@@ -12,7 +12,7 @@ last update: 01/04/2022
 
 # DASH test maturity stages
 
-This document describes the DASH maturity stages. 
+This document describes the DASH test maturity stages. 
 
 ## Proof of Concept (OC)
 
@@ -21,6 +21,8 @@ This document describes the DASH maturity stages.
 TBD
 
 ## Standard test cases
+
+![dash-test-maturity-stages-std-test-cases](../images/dash-test-maturity-stages-std-test-cases.png) 
 
 TBD
 
