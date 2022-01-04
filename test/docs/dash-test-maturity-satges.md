@@ -16,6 +16,8 @@ This document describes the DASH maturity stages.
 
 ## Proof of Concept (OC)
 
+![dash-test-maturity-stages-poc](../images/dash-test-maturity-stages-poc.png) 
+
 TBD
 
 ## Standard test cases
