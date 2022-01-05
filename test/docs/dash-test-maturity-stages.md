@@ -14,7 +14,7 @@ last update: 01/04/2022
 
 This document describes the DASH test maturity stages. We show both a bottoms-up dataplane testing progression and a top-down full SONiC-stack testing progression. The intent is to articulate the various scenarios and show a set of reference diagrams in order to establish a common vocabulary and workflows.
 
-The respective bottoms-up and top-down approaches allow respective development teams to proceed apace and converge towards eventual full-system integration.
+The bottoms-up and top-down approaches allow respective development teams to proceed apace and converge towards eventual full-system integration.
 
 ## Legend
 In the diagrams below, the dashed "callout" notes indicate the prerequisites/dependencies needed to achieve this stage of testing, for example:
@@ -24,7 +24,7 @@ In the diagrams below, the dashed "callout" notes indicate the prerequisites/dep
 ## Bottoms-Up, Dataplane Testing stages
 The dataplane can be progressively tested by configuring the DUT through successive "API" layers, starting with the DASH-SAI API, which does not require use of the SONiC stack; then adding more and more SONiC layers; culminating with the use of an application-oriented northbound management API such as gNMI or other interface.
 
-> **NOTE: Stage 3 - DUT Configuration via SAI-Thrift is deemed the minimum "gate" for DASH performance and conformance testing of a DUT's dataplane.** Community dataplane tests will focus on this stage.
+> **NOTE: Stage 3 - DUT Configuration via SAI-Thrift is deemed the minimum "gate" for DASH performance and conformance testing of a DUT's dataplane. Community dataplane tests will focus on this stage.**
 
 
 
@@ -32,9 +32,9 @@ The dataplane can be progressively tested by configuring the DUT through success
 
 ![dash-test-maturity-stages-manual](../images/dash-test-maturity-stages-manual.png) 
 
-This testing stage represents internal, vendor-specific testing approaches and probably precedes the use of any DASH community-specified tests. This stage is distinguished by:
+This testing stage represents internal, vendor-specific testing approaches and as a practrical matter, probably precedes the use of any DASH community-specified tests. This stage is distinguished by:
 
-* Proprietary DUT configuration mechanisms: e.g. gRPC/REST APIs, config files, utility programs etc. which are not slated for DASH produciton use
+* Proprietary DUT configuration mechanisms: e.g. gRPC/REST APIs, config files, utility programs etc. which are not slated for DASH production use.
 * Limited, manually-controlled, test traffic generation and analysis, using arbitrary, vendor-specific  traffic generation equipment, for example IXIA IxExplorer.
 
 ### Dataplane Testing Stage 2: Standardized, Automated Test Cases
@@ -113,11 +113,11 @@ This stage verifies that the SONiC-DASH northbound API can correctly populate an
 
 This stage verifies that the SONiC-DASH northbound API can correctly access a Fake SAI layer starting at the northbound SONiC API. This stage is distinguished by:
 
-* Functional ASIC sync daemon or `syncd` which translates ASIC-DB (conceptional SAI objects) into SAI library calls
+* Functional ASIC sync daemon or `syncd` which translates ASIC_DB (conceptional SAI objects) into SAI library calls
 * Fake `libsai` library linked at runtime to the `syncd` daemon.
 
 ### SONiC-DASH Stack Testing Stage 5 - Northbound through syncd to Fake SAI
-This is identical to [Dataplane Testing Stage 5: DUT configuration via SONiC Northbound API](#dataplane-testing-stage-5-dut-configuration-via-sonic-northbound-api) and represents the convergence of the dataplane and northbound API/SONiC stack. The diagram below is repeated from above.
+This is identical to [Dataplane Testing Stage 5: DUT configuration via SONiC Northbound API](#dataplane-testing-stage-5-dut-configuration-via-sonic-northbound-api) and represents the convergence of the dataplane and northbound API/SONiC stack. The content below is repeated from above.
 
 ![dash-test-maturity-stages-dut-config-north](../images/dash-test-maturity-stages-dut-config-north.png) 
 
