@@ -1,0 +1,8 @@
+FROM bmv2-base
+
+COPY behavioral-model /bm-src
+
+RUN cd bm-src \
+         && make install && \
+         cd .. \
+         rm -rf /bm-src
