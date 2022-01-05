@@ -40,3 +40,4 @@ table_add appliance set_appliance 0&&&0 => 77:77:77:77:77:77 66:66:66:66:66:66 0
 * Connection tracking - not supported by BMv2 at the moment
 * List match types - should be added to the target architecture
 * ACL stages - depend on items above
+* SAI API implementation for BMv2
