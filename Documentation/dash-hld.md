@@ -42,7 +42,7 @@ SONiC is structured into various containers that communicate through multiple lo
 
 <br/>**The figure below is a draft (work in progress)**<br/>
 
-**DASH architecture**
+**SONiC-DASH NOS architecture on NIC**
 
 ![dash-architecthure](images/hld/architecture.svg)
 
