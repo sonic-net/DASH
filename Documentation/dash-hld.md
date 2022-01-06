@@ -13,10 +13,8 @@ last update: 01/05/2022
 - [Architecture](#architecture)
 - [High-Level Design](#high-level-design)
 - [Repositories](#repositories)
-- [SAI](../SAI)
 - [Configuration and management](#configuration-and-management)
 - [Restrictions / Limitations](#restrictions--limitations)
-- [Test](../test)
 - [Glossary](https://github.com/Azure/DASH/wiki/Glossary)
 - [References](#supplementary-documents)
 
@@ -40,9 +38,9 @@ The ovreall requirement is to optimize network SMART Programmable Technologies p
 
 SONiC is structured into various containers that communicate through multiple logical databases via a shared Redis instance. DASH will make use of the SONiC infrastructure as shiwn in the figure below.
 
-<br/><br/>**The figure below is a place holder image**<br/><br/>
+<br/>**The figure below is a draft architecture image and work in progress**<br/>
 
-![dash-architecthure](../test/images/dash-gnmi-api.svg)
+![dash-architecthure](images/hld/architecture.svg)
 
 The following diagram 
 
@@ -57,3 +55,6 @@ TBD
 
 ## References
 
+- [Glossary](https://github.com/Azure/DASH/wiki/Glossary)
+- [SAI](../SAI)
+- [Test](../test)
