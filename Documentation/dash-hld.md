@@ -40,7 +40,8 @@ The ovreall requirement is to optimize network SMART Programmable Technologies p
 
 SONiC is structured into various containers that communicate through multiple logical databases via a shared Redis instance. DASH will make use of the SONiC infrastructure as shiwn in the figure below.
 
-<span style="background-color:yellow; color:red; font-weight:bold">The figure below is a place holder image</image>
+<br/><br/>**The figure below is a place holder image**<br/><br/>
+
 ![dash-architecthure](../test/images/dash-gnmi-api.svg)
 
 The following diagram 
