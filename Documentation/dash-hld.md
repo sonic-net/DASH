@@ -13,10 +13,10 @@ last update: 01/05/2022
 - [Architecture](#architecture)
 - [High-Level Design](#high-level-design)
 - [Repositories](#repositories)
-- [SAI API](#sai-api)
+- [SAI](../SAI)
 - [Configuration and management](#configuration-and-management)
 - [Restrictions / Limitations](#restrictions--limitations)
-- [Testing](../test)
+- [Test](../test)
 - [Glossary](https://github.com/Azure/DASH/wiki/Glossary)
 - [References](#supplementary-documents)
 
@@ -47,13 +47,6 @@ TBD
 
 TBD
 
-## SAI API
-
-<sapn style="font-clor:red">Is this section correct? Do we need it??</span>
-
-DASH uses existing SAI features without any changes, included fixed functions such as routing and configurable ones such as ACLs.
-
-For programmable hardware targets, DASH introduces an additional SAI header, `saip4ext.h`, to map user-defined private P4 extensions to vendor SAI implementations. More details on `saip4ext.h` can be found in the supporting document: [P4 Extensions for SAI][TBD].
 
 ## References
 
