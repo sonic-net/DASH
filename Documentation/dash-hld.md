@@ -25,8 +25,9 @@ last update: 01/05/2022
 
 This document describes the **SONiC Disaggregated API for SONiC Hosts** (SONiC-DASH) high level design and architecture. SONiC-DASH (DASH for short) is an open source project that will deliver enterprise network performance to critical cloud applications. The ultimate goal is that DASH will have the same success as SONiC for switches and also be widely adopted as a major **Open NOS for Programmable Hardware Technologies**, including [SmartNICs](https://blogs.nvidia.com/blog/2021/10/29/what-is-a-smartnic/), to supercharge a variety of cloud and enterprise applications.
   
-DASH extends SONiC APIs and a comprehensive set of object models that initially describe Microsoft Azure’s networking services for the cloud. The 7 initial services (in draft) located in the GitHub repo https://github.com/Azure/DASH describe this in more detail. The project enlists cloud and enterprise providers to further extend DASH to meet their specific needs.
+DASH extends SONiC APIs and a comprehensive set of object models that initially describe Microsoft Azure’s networking services for the cloud.The project enlists cloud and enterprise providers to further extend DASH to meet their specific needs.
 
+See the project [Scenario Milestone and Scoping](SDN-Features-Packet-Transforms.md#scenario-milestone-and-scoping). 
 
 ## Requirements
 
@@ -63,3 +64,6 @@ TBD
 - [Glossary](https://github.com/Azure/DASH/wiki/Glossary)
 - [SAI](../SAI)
 - [Test](../test)
+- [SDN Features Packet Transforms](SDN-Features-Packet-Transforms.md)
+- [Load Balancer](Load%20Balancer_v3.md)
+- [Program Scale Testing Requirements - Draft](Program%20Scale%20Testing%20Requirements%20-%20Draft.md)
