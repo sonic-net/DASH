@@ -1,3 +1,3 @@
 # Images
 Media folder that contains images. 
-The 'test' folder contains the images embedded ino the Sirius Program Draft Test document
+The 'test' folder contains the images embedded in the 'Program Scale Testing Requirements - Draft'
