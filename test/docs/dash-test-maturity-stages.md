@@ -116,7 +116,7 @@ This stage verifies that the SONiC-DASH northbound API can correctly access a Fa
 * Functional ASIC sync daemon or `syncd` which translates ASIC_DB (conceptional SAI objects) into SAI library calls
 * Fake `libsai` library linked at runtime to the `syncd` daemon.
 
-### SONiC-DASH Stack Testing Stage 5 - Northbound through syncd to Fake SAI
+### SONiC-DASH Stack Testing Stage 5 - Full stack northbound through to DUT
 This is identical to [Dataplane Testing Stage 5: DUT configuration via SONiC Northbound API](#dataplane-testing-stage-5-dut-configuration-via-sonic-northbound-api) and represents the convergence of the dataplane and northbound API/SONiC stack. The content below is repeated from above.
 
 ![dash-test-maturity-stages-dut-config-north](../images/dash-test-maturity-stages-dut-config-north.png) 
