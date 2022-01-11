@@ -1,5 +1,5 @@
 # Images
-Media folder that contains the following sub-folders: 
+Image sub-folders. 
 
 - [icons](icons). It contains DASH and SONiC icons.
 - [loadbalancer](loadbalancer). It contains images used in the [Load Balancer_v3.md](../Load%20Balancer_v3.md) article.
