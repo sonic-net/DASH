@@ -19,9 +19,9 @@ last update: 01/10/2022
 
 ## DASH smart ToR architecture
 
-![dash-smart-tor-architecture](images/architecture/dash-smart-tor-architecture.svg)
+![dash-smart-tor-architecture](images/architecture/mm-dash-high-level-smart-tor.svg)
 
 
 ## DASH appliance architecture
 
-![dash-appliance-architecture](images/architecture/dash-appliance-architecture.svg)
+![dash-appliance-architecture](images/architecture/mm-dash-high-level-appliance.svg)
