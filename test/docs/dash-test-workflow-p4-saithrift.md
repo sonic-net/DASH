@@ -1,3 +1,9 @@
+
+[[ << Test docs Table of Contents ]](./README.md)
+
+[[ << DASH/test main README ]](../README.md)
+
+[[ << DASH main README ]](../../README.md)
 # DASH Testing Using P4 Simulators and SAI Thrift
 
 This section documents the use of P4-based simulators or SW dataplanes to verify DASH behavior, using saithrift API. Refer to the following figure. Also, refer to [DASH Test Workflow with saithrift](dash-test-workflow-saithrift.md) as it contains some context and common elements which are not repeated here. The discussion below will assume a working knowledge of the saithrift workflow.
@@ -53,9 +59,7 @@ The diagram show a few details about the design of the [bmv2](https://github.com
 
 A saithrift server skeleton is linked to a libsai library to yield a saithrift API endoint, used by the test runner.
 
-The bmv2 simulator has a built-in P4Runtime server. A SAI-to-P4Runtime adaptor maps SAI API calls made to the libsai API, into P4Runtime API gRPC calls over a socket to the bmv2 endpoint. SAI object operations are thus converted into P4 entity operations.
-
-> **TODO** Verify that a gRPC interface is used, vs. an internal compiled interface.
+The bmv2 simulator has a built-in P4Runtime server. A SAI-to-P4Runtime adaptor maps SAI API calls made to the libsai API, into P4Runtime API gRPC calls over a socket to the bmv2 endpoint. SAI object operations are thus converted into P4 entity operations. Note that dataplane configuration thus requires two socket-based RPC hops, because saithrift messages are translated into equivalent P4RT gRPC messages.
 
 The bmv2 simulator is bound to host veth ports at startup.  These are "wired" to the software traffic generator using Linux bridging or similar.
 
@@ -66,7 +70,7 @@ The P4-DPDK dataplane has an internal, compiled [Table-Driven Interface (TDI)](h
 
 A libsai library will be developed which maps SAI conceptual APIs into the [sirius_pipeline.p4](../sirius_pipeline.p4) TDI implementation, all done in-process. This is very efficient because it avoids serialization over P4Runtime.
 
-The P4-DPDK dataplane also has a built-in P4Runtime server which can be used develop and test the P4 Model. This is not part of the official DASH test workflow.
+The P4-DPDK dataplane also has a built-in P4Runtime server which can be used develop and test the P4 Model. This is not part of the official DASH test workflow. Note that P4RT and saithrift servers are available simultaneously and operate "in parallel," sharing the native TDI layer.
 
 The P4-DPDK dataplane is bound to host veth ports at startup.  These are "wired" to the software traffic generator using Linux bridging or similar.
 
