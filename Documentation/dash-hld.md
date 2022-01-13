@@ -6,7 +6,8 @@ last update: 01/05/2022
 
 # SONiC-DASH High Level Design (WIP)
 
-<!-- reopened PR -->
+> [!WARNING] 
+> **This document is work in progress**
 
 ## Table of Contents
 
