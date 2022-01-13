@@ -4,7 +4,7 @@ description: Describe SONiC-DASH High Level Design
 last update: 01/05/2022
 ---
 
-# SONiC-DASH High Level Design
+# SONiC-DASH High Level Design (WIP)
 
 <!-- reopened PR -->
 
@@ -41,14 +41,38 @@ The overall requirement is to **optimize network SMART Programmable Technologies
 
 SONiC is structured into various containers that communicate through multiple logical databases via a shared Redis instance. DASH will make use of the SONiC infrastructure as shown in the figure below.
 
-
-
-**DASH NOS single DPU architecture on NIC**
-
 > [!NOTE] 
-> **The figure below is a draft (work in progress)**
+> **The figures shonw a work in progress**
+
+### DASH NOS single DPU on NIC
 
 ![dash-single-dpu-architecture](images/hld/dash-single-dpu-architecture.svg)
+
+
+### DASH smart switch architecture
+
+
+#### High level architecture
+
+![dash-high-level-smart-switch](images/hld/dash-high-level-smart-switch.svg)
+
+
+#### Low level architecture
+
+![dash-smart-switch-architecture](images/hld/dash-smart-switch-architecture.svg)
+
+
+
+### DASH appliance architecture
+
+
+![dash-high-level-appliance](images/hld/dash-high-level-appliance_v2.svg)
+
+
+#### Low level architecture
+
+![dash-appliance-architecture](images/hld/dash-appliance-architecture.svg)
+
 
 ## High-Level Design
 
