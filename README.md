@@ -1,6 +1,6 @@
-# Project - Disaggregated API for SONiC Hosts (SONiC DASH)
+# Project - Disaggregated API for SONiC Hosts (SONiC DASH) - version 0.1 DRAFT/Work in Progress
 
-> SONiC DASH is a new open source project that "will deliver enterprise network performance to critical cloud applications.  The project extends functionality to stateful workloads.  
+## SONiC DASH is a new open source project that "will deliver enterprise network performance to critical cloud applications.  The project extends functionality to stateful workloads.  
 
 Comprised of a developing set of APIs and object models describing network services for the cloud, we will work with all cloud providers and enterprise hybrid clouds to develop further functionality. We believe the DASH program describes a comprehensive set of services that are required by the vast majority of clouds. The goal of DASH is to be specific enough for SMART Programmable Technologies to optimize network performance and leverage commodity hardware technology to achieve 10x or even 100x stateful connection performance.
 
@@ -15,6 +15,8 @@ We hope that DASH will have the same success as SONiC for switches and also be w
 Please begin with 1) the SDN Packet Transforms document, this facilitates understanding of the program goal and the 7 networking scenarios that Azure has defined.  Next 2) Load Balancer_v3, 3) Program Scale Testing Requirements - Draft, and 6) SAI APIs and DASH APIs Rough Draft.
 
 The API and Object Model for VNET<->VNET is in draft; the remaining services will be posted over Oct/Nov time frame here.
+
+DASH Testing is covered  under the [test/](test/README.md) directory and is a work in progress.
 
 ## Contributing
 
@@ -38,7 +40,7 @@ trademarks or logos is subject to and must follow
 Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
 Any use of third-party trademarks or logos are subject to those third-party's policies.
 
-<!-- Old icon: <img src="DASH%20Images/DASH%20image.jpg" width="250"> -->
+<!-- dash icon -->
 <div align="center">
-<img src="documents/media/images/icons/dash-icon-xlarge.png" style="align:center;"/>
+<img src="Documentation/images/icons/dash-icon-xlarge.png" style="align:center;"/>
 <div/> 
