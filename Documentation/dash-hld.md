@@ -50,29 +50,26 @@ SONiC is structured into various containers that communicate through multiple lo
 ![dash-single-dpu-architecture](images/hld/dash-single-dpu-architecture.svg)
 
 
-### DASH smart switch architecture
+### DASH appliance architecture
 
+#### High level architecture
+
+![dash-high-level-appliance](images/hld/dash-high-level-appliance_v2.svg)
+
+#### Low level architecture
+
+![dash-appliance-architecture](images/hld/dash-appliance-architecture.svg)
+
+
+### DASH smart switch architecture
 
 #### High level architecture
 
 ![dash-high-level-smart-switch](images/hld/dash-high-level-smart-switch.svg)
 
-
 #### Low level architecture
 
 ![dash-smart-switch-architecture](images/hld/dash-smart-switch-architecture.svg)
-
-
-
-### DASH appliance architecture
-
-
-![dash-high-level-appliance](images/hld/dash-high-level-appliance_v2.svg)
-
-
-#### Low level architecture
-
-![dash-appliance-architecture](images/hld/dash-appliance-architecture.svg)
 
 
 ## High-Level Design
