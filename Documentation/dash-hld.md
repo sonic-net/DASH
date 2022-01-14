@@ -43,7 +43,7 @@ The overall requirement is to **optimize network SMART Programmable Technologies
 SONiC is structured into various containers that communicate through multiple logical databases via a shared Redis instance. DASH will make use of the SONiC infrastructure as shown in the figure below.
 
 > [!NOTE] 
-> **The figures shonw a work in progress**
+> **The figures shown are a work in progress**
 
 ### DASH NOS single DPU on NIC
 
