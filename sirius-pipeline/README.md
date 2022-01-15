@@ -2,8 +2,6 @@
 
 ## Build the environment
 ```
-make docker base
-make bm
 make docker
 ```
 
@@ -15,7 +13,7 @@ bmv2/sirius_pipeline.bmv2/sirius_pipeline.json
 
 ## Run software switch
 ```
-make run
+make run_switch
 ```
 
 ## Control plane

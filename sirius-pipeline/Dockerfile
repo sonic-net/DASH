@@ -37,12 +37,32 @@ RUN pip3 install six
 
 RUN apt-get update && apt-get install -y lsb-release
 
+RUN pip3 install ipaddr
+
 RUN git clone https://github.com/marian-pritsak/behavioral-model && \
         cd behavioral-model && \
 	bash install_deps.sh && \
+        ./autogen.sh && \
+        ./configure && \
+        make && \
+        make install && \
         cd .. && \
         rm -rf behavioral-model
 
-RUN pip3 install ipaddr
-
 ENV LD_LIBRARY_PATH /usr/local/lib/
+
+ARG user
+ARG uid
+ARG guid
+ARG hostname
+
+ENV BUILD_HOSTNAME $hostname
+ENV USER $user
+
+RUN groupadd -f -r -g $guid g$user
+
+RUN useradd $user -l -u $uid -g $guid -d /var/$user -m -s /bin/bash
+
+RUN echo "$user ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers
+
+USER $user

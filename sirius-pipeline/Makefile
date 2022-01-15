@@ -9,16 +9,7 @@ DOCKER_RUN := docker run \
 	-v $(PWD)/behavioral-model:/bm-src \
 	--network=host \
 	--rm \
-	bmv2
-
-DOCKER_RUN_BASE := docker run \
-	-it \
-	--name simple_switch \
-	-v $(PWD)/bmv2:/bmv2 \
-	-v $(PWD)/behavioral-model:/bm-src \
-	--network=host \
-	--rm \
-	bmv2-base
+	bmv2-$(USER)
 
 bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:
 	$(DOCKER_RUN) p4c -b bmv2 bmv2/sirius_pipeline.p4 -o bmv2/sirius_pipeline.bmv2
@@ -26,17 +17,18 @@ bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:
 clean:
 	rm -rf bmv2/sirius_pipeline.bmv2
 
-run_switch:
+run-switch:
 	$(DOCKER_RUN) simple_switch --log-console --interface 0@veth0 --interface 1@veth2 /bmv2/sirius_pipeline.bmv2/sirius_pipeline.json
 
-docker-base:
-	docker build -t bmv2-base -f Dockerfile.base bmv2/
-
-bm:
-	$(DOCKER_RUN_BASE) bash -c 'cd /bm-src && ./autogen.sh && ./configure && make'
-
 docker:
-	docker build -t bmv2 -f Dockerfile.run .
+	docker build \
+	    --no-cache \
+	    -t bmv2-$(USER) \
+	    --build-arg user=$(USER) \
+	    --build-arg uid=$(shell id -u) \
+	    --build-arg guid=$(shell id -g) \
+	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+	    .
 
 network:
 	ip link add name veth0 type veth peer name veth1
