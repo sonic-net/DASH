@@ -75,21 +75,21 @@ SONiC is structured into various containers that communicate through multiple lo
 ## High-Level Design
 
 **DASH high level design**
-The system architecture for SONiC-DASH relies upon the SONiC system architecture (link = https://github.com/Azure/SONiC/wiki/Architecture) and adds a _new docker container_ in the user space we are naming 'dash container' to create the functional component for DASH.  
 
-In the sync-d container we will add 'sai api DASH' (as opposed to simply 'sai api' in the original SONiC architecture.  
+The system architecture for SONiC-DASH relies upon the [SONiC system architecture](https://github.com/Azure/SONiC/wiki/Architecture) and adds a *new docker container* in the user space named **dash container** to create the functional component for DASH.  
 
-The DPU/IPU/SmartNic hardware will run a separate instance of 'SONiC-DASH' on the hardware.  
+In the **sync-d container** we will add **sai api DASH** (as opposed to *sai api* in the original SONiC architecture).  
+
+The *DPU/IPU/SmartNic* hardware will run a separate instance of SONiC-DASH on the hardware.  
 
 The component interactions will be executed as a new user space container implementation; relying on the existing SONiC infrastructure and components to interact as they normally would.  
 
-The functionality of the new dash container in the user space is to receive content from the Software Defined Networking (SDN) controller to control setup for the overlay configurations.  DASH receives the objects, translates them with a gNMI agent, provides them to the SONiC OrchAgent for further translation onto the dataplane via the SAI db. 
+The functionality of the new *dash container* in the user space is to receive content from the Software Defined Networking (SDN) controller to control setup for the overlay configurations. DASH receives the objects, translates them with a **gNMI agent**, provides them to the *SONiC OrchAgent* for further translation onto the dataplane via the **SAI database**. 
 
-Need a drawing and descriptions of the DASH user space **state interactions** (example such as LLDP-state interactions figure in https://github.com/Azure/SONiC/wiki/Architecture).  
+> [!NOTE]
+> Need a drawing and descriptions of the DASH user space **state interactions** (example such as shown in the figure [LLDP-state interactions](https://github.com/Azure/SONiC/wiki/Architecture).  
 
 @lihuay @lguohan @prsunny - would you review and/or improve this write-up?
-
-TBD
 
 ## Repositories
 
