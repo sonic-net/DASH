@@ -54,7 +54,7 @@ SONiC is structured into various containers that communicate through multiple lo
 
 #### High level architecture
 
-![dash-high-level-appliance](images/hld/dash-high-level-appliance_v2.svg)
+![dash-high-level-appliance](images/hld/interim-dash-high-level-appliance.svg)
 
 #### Low level architecture
 
