@@ -38,7 +38,6 @@ Scaling is achieved via the following concepts:
 
 ### High-level architecture of Rack Design for High Availability and Scale
 
-
 ![hl-arch-rack-design-ha](images/has/hl-arch-rack-design-ha.png)
 
 **Considerations**
@@ -67,38 +66,20 @@ Scaling is achieved via the following concepts:
 
 ![traffic-flow-has-scale-appliance](images/has/traffic-flow-has-scale-appliance.png)
 
-Documentation\images\has\traffic-flow-has-scale-appliance.png
+**Considerations**
 
-Considerations:
-
-1)  ENIs from single VM provisioned on multiple cards on same SDN
-    Appliance
-
-2)  Card from SDN Appliance 1 is "paired" with card from SDN Appliance 2
-    (each card participates only in single pairing relationship)
-
-3)  Pairwise flow replication
-
-4)  Single card handles multiple ENIs
-
-5)  Some ENIs on same card are in "Active" mode, some other ENIs on same
-    card are in "Passive" mode
-
-6)  Each card has two VIPs: one VIP announced with short path thru BGP
-    (used by ENIs in "Active" mode), second VIP announced with longer
-    path thru BGP (used by ENIs in "Passive" mode)
-
-7)  Paired cards announce same set of VIPs
-
-8)  ENI-based (not card based) flow replication (direction of flow
-    replication: "Active ENI" -\> "Passive ENI")
-
-9)  Single ENI is programmed on multiple cards (each card with different
-    VIP)
-
-10) TOR (or source node where VM is located) performs traffic load
-    balancing/splitting/sharding for selected ENI across VIPs of the
-    cards on which this ENI is provisioned
+1. ENIs from single VM provisioned on multiple cards on same SDN Appliance
+1. Card from SDN Appliance 1 is "paired" with card from SDN Appliance 2 (each card participates only in single pairing relationship)
+1. Pairwise flow replication
+1. Single card handles multiple ENIs
+1. Some ENIs on same card are in "Active" mode, some other ENIs on same card are in "Passive" mode
+1. Each card has two VIPs: one VIP announced with short path thru BGP (used by ENIs in "Active" mode), 
+second VIP announced with longer path thru BGP (used by ENIs in "Passive" mode)
+1. Paired cards announce same set of VIPs
+1. ENI-based (not card based) flow replication (direction of flow replication: "Active ENI" -\> "Passive ENI")
+1. Single ENI is programmed on multiple cards (each card with different VIP)
+1. TOR (or source node where VM is located) performs traffic load balancing/splitting/sharding for 
+selected ENI across VIPs of the cards on which this ENI is provisioned
 
 ## High Availability Architecture
 
@@ -109,81 +90,57 @@ one of the TOR/SDN Appliance dies, or (2) single card dies.
 
 **Setup details**
 
-1)  Each card from "SDN Appliance 1" will have "paired" card from "SDN
-    Appliance 2"
-
-2)  "Paired" cards will be serving same ENI with exact same policies
-    setup on each
-
-3)  "Paired" cards will be continuously replicating active flows from
-    Active card to Passive card
-
-4)  Both cards will be announcing same VIP via BGP
-
-5)  "SDN Appliance 1" will be in Active mode (announcing preferred,
-    shorter path to itself thru BGP)
-
-6)  "SDN Appliance 2" will be in Passive mode (announcing less
-    preferred, longer path to itself thru BGP)
+1. Each card from "SDN Appliance 1" will have "paired" card from "SDN Appliance 2"
+1. "Paired" cards will be serving same ENI with exact same policies setup on each
+1. "Paired" cards will be continuously replicating active flows from Active card to Passive card
+1.  Both cards will be announcing same VIP via BGP
+1. "SDN Appliance 1" will be in Active mode (announcing preferred, shorter path to itself thru BGP)
+1. "SDN Appliance 2" will be in Passive mode (announcing less preferred, longer path to itself thru BGP)
 
 **Normal traffic pattern**
 
-Normal traffic pattern for ENIs handled by cards will be going always
-thru "SDN Appliance 1" (Active one).
+Normal traffic pattern for ENIs handled by cards will be going always thru "SDN Appliance 1" (Active one).
 
 **Failure mode**
 
-In case of failure the BGP routes from "SDN Appliance 1" (previously
-active) will be withdrawn and TOR will prefer "SDN Appliance 2" and
-redirect traffic there, ensuring continuous traffic and uninterrupted
-customer experience.
+In case of failure the BGP routes from "SDN Appliance 1" (previously active) will be withdrawn and TOR will prefer 
+"SDN Appliance 2" and redirect traffic there, ensuring continuous traffic and uninterrupted customer experience.
 
 ### Pairing
 
-Cards between "SDN Appliance 1" and "SDN Appliance 2" will be paired
-with each other to created described "Active-Passive" model.
+Cards between "SDN Appliance 1" and "SDN Appliance 2" will be paired with each other to created described "Active-Passive" model.
 
-Control plane will be responsible for creating "pairing" relationship
-between cards -- select which cards create a pair.
+Control plane will be responsible for creating "pairing" relationship between cards -- select which cards create a pair.
 
 ### ENI Policy configuration
 
-"Paired" cards will be configured (by control plane) with same ENI and
-same policy.
+"Paired" cards will be configured (by control plane) with same ENI and same policy.
 
-Control plane will be responsible for configuring same ENI and same
-policy across both paired cards. To clarify - no replication of ENI
-policy is required by card -- control plane will do this.
+Control plane will be responsible for configuring same ENI and same policy across both paired cards. 
+To clarify - no replication of ENI policy is required by card -- control plane will do this.
 
 ### Flow replication
 
-Once "pairing" relationship is established, flows will need to start
-being replicated and synced.
+Once "pairing" relationship is established, flows will need to start being replicated and synced.
 
-Cards are responsible for replicating and syncing flows across cards in
-"paired" relationship.
+Cards are responsible for replicating and syncing flows across cards in "paired" relationship.
 
 **Important consideration**
 
-In case of outage (ex. entire SDN Appliance not available for longer
-period of time), the "Pairing" relationship might be changed by control
-plane.
+In case of outage (ex. entire SDN Appliance not available for longer period of time), the "Pairing" 
+relationship might be changed by control plane.
 
 In this case control plane will:
 
-1)  Withdraw "pairing" relationship from card (unpair the card)
+1. Withdraw "pairing" relationship from card (unpair the card)
 
-2)  Establish new "pairing" relationship to another card (pair different
-    card)
+1. Establish new "pairing" relationship to another card (pair different card)
 
-The original card (which is currently in active state) might and most
-likely will still continue to receive traffic when the pairing
-relationship will change.
+The original card (which is currently in active state) might and most likely will still continue to receive 
+traffic when the pairing relationship will change.
 
-Once new pairing is established, the flow transfer/sync should start.
-New card will become "passive" from the point of view of traffic and to
-ensure no outage happens - **must not become "active" until all flows
-are fully synced with original card**.
+Once new pairing is established, the flow transfer/sync should start. New card will become "passive" from the point of view of 
+traffic and to ensure no outage happens - **must not become "active" until all flows are fully synced with original card**.
 
 ### Overprovisioning
 
@@ -191,48 +148,37 @@ Same ENI will be handled by multiple cards
 
 ## Scalability
 
-Overprovisioning and flow splitting will provide capability of possibly
-"infinite" CPS as well as "infinite" bandwidth for customers, as all the
-connections will be distributed across multiple cards.
+Overprovisioning and flow splitting will provide capability of possibly "infinite" CPS as well as "infinite" 
+bandwidth for customers, as all the connections will be distributed across multiple cards.
 
-Control plan will be able to provision different number of cards
-depending on customer needs for scale.
+Control plan will be able to provision different number of cards depending on customer needs for scale.
 
 ### Overprovisioning
 
-Single ENI will be provisioned on multiple cards in a single SDN
-Appliance. Same policy (with exemption of card VIP which will different)
-will be setup on each card.
+Single ENI will be provisioned on multiple cards in a single SDN Appliance. Same policy (with exemption of card 
+VIP which will different) will be setup on each card.
 
 Each card will be announcing different VIP.
 
-TOR (or source side) will be responsible for splitting (spreading)
-traffic going thru SDN Appliances across multiple VIPs to ensure traffic
-is equally distributed across all the overprovisioned cards.
+TOR (or source side) will be responsible for splitting (spreading) traffic going thru SDN Appliances across multiple 
+VIPs to ensure traffic is equally distributed across all the overprovisioned cards.
 
-In addition, for the purpose of High Availability (as described in
-previous section), same ENI will be also setup on "paired" cards on
-secondary SDN Appliance.
+In addition, for the purpose of High Availability (as described in previous section), same ENI will be 
+also setup on "paired" cards on secondary SDN Appliance.
 
 ### Flow splitting
 
-The goal is to ensure that ECMP or any other mechanism will ensure that
-any set of flows that were active and synced actually end up on the
-passive node. We do not want a ECMP or other mechanism to land a
-different set of flows that are already synced.
+The goal is to ensure that ECMP or any other mechanism will ensure that any set of flows that were active and synced actually 
+end up on the passive node. We do not want a ECMP or other mechanism to land a different set of flows that are already synced.
 
-Flow splitting will therefore be done either by "intelligent" TOR or
-directly on a source based on stable hashing, or directly on the source
-node (where VM is).
+Flow splitting will therefore be done either by "intelligent" TOR or directly on a source based on stable hashing, or directly on the source node (where VM is).
 
-As single ENI will be handled by multiple VIPs (overprovisioned) -- ex.
-23.0.0.1, 23.0.0.2, 23.0.0.3, the TOR will equally rewrite destination
-address to ensure similar outcome as "ECMP" protocol (with additional
-explicit destination address rewrite).
+As single ENI will be handled by multiple VIPs (overprovisioned) -- example 23.0.0.1, 23.0.0.2, 23.0.0.3, the TOR will 
+equally rewrite destination address to ensure similar outcome as "ECMP" protocol (with additionalexplicit destination address rewrite).
 
-# Scenarios
+## Scenarios
 
-## Single TOR Failure
+### Single TOR Failure
 
 What happens
 
@@ -242,10 +188,8 @@ How traffic pattern changes
 
 -   SDN Applinace behind this TOR is still accessible thru second TOR
 
--   Loss of 50% bandwidth, no loss of CPS - second TOR must now handle
-    double the bandwidth and double the CPS. Assuming card is actually
-    the bottleneck for CPS (not TOR), there is no CPS loss, the only
-    impact is on bandwidth
+-   Loss of 50% bandwidth, no loss of CPS - second TOR must now handle double the bandwidth and double the CPS. 
+Assuming card is actually the bottleneck for CPS (not TOR), there is no CPS loss, the only impact is on bandwidth
 
 -   TOR becomes bottleneck for bandwidth and CPS
 
@@ -254,7 +198,7 @@ How traffic pattern changes
 By splitting the load across multiple cards we only lose 50% of the
 connections from the card that failed ... not the entire load of the VM.
 
-## Single link failure
+### Single link failure
 
 What happens
 
@@ -269,12 +213,10 @@ How traffic pattern changes
 
 -   No impact on CPS
 
-## 
-
 By splitting the load across multiple cards we only lose 50% of the
 connections from the card that failed ... not the entire load of the VM.
 
-## Single card failure
+### Single card failure
 
 What happens
 
@@ -291,19 +233,16 @@ How traffic pattern changes
 
 -   Longer route for same VIP is used by TORs
 
--   "Paired" card becomes "active" for all ENIs (it was already "active"
-    for some ENIs, and "passive" for other ENIs, now the "passive" ENIs
-    are becoming "active")
+-   "Paired" card becomes "active" for all ENIs (it was already "active" for some ENIs, and "passive" 
+for other ENIs, now the "passive" ENIs are becoming "active")
 
--   ENIs served by this card reduces utilization from 80% each -\> 50%
-    each (loss of 3/8^th^ 37.5% capacity per card). This assumes
-    original card was allocated up to only 80% (to allow for failover).
-    This number can be adjusted.
+-   ENIs served by this card reduces utilization from 80% each -\> 50% each (loss of 3/8^th^ 37.5% capacity per card). 
+This assumes original card was allocated up to only 80% (to allow for failover). 
 
--   Considering single ENI is load balanced across multiple cards, other
-    cards are not affected and the actual capacity reduction
-    (bandwidth + CPS) is much lower then the 30%. Assuming 5 cards
-    allocated per ENI, loss of single card reduces capacity by 7.5%
+This number can be adjusted.
+
+-   Considering single ENI is load balanced across multiple cards, other cards are not affected and the actual capacity reduction 
+(bandwidth + CPS) is much lower then the 30%. Assuming 5 cards allocated per ENI, loss of single card reduces capacity by 7.5%
 
     -   Previously: 100%, 100%, 100%, 100%, 100% = 100% capacity
 
@@ -328,7 +267,7 @@ What happens next
 
 -   Capacity is fully restored
 
-## Single SDN Appliance failure (all cards on that appliance)
+### Single SDN Appliance failure (all cards on that appliance)
 
 What happens
 
@@ -348,7 +287,7 @@ What happens next
     relationship, allocates new SDN Appliance and creates pairing
     relationship with that new SDN Appliance
 
-## Flow Replication using Perfect Sync 
+### Flow Replication using Perfect Sync 
 
 Consistent sync of flows between paired cards as those cards are active
 and receive new connections is important.
@@ -357,55 +296,48 @@ and receive new connections is important.
 replication between pair of the cards during sync process after pairing
 relationship is established, re-established or recovered.
 
-### Prerequisites
+#### Prerequisites
 
 1.  We have at least 2 colors (suggested: 8 colors represented by 3
     bits)
 
-2.  All connections/entries in the flow table are colored
+1.  All connections/entries in the flow table are colored
 
-3.  Pairing relationship is established between two cards (primary card
+1.  Pairing relationship is established between two cards (primary card
     and secondary card)
 
-4.  There exists a way to replicate connection (entry in a flow table)
+1.  There exists a way to replicate connection (entry in a flow table)
     to paired device.
 
-### "Perfect Sync" algorithm steps
+#### "Perfect Sync" algorithm steps
 
 1.  **When card comes online, it chooses color** ("Color A")
 
-2.  As card starts receiving traffic it creates new flows (entries in
-    flow table)
+1.  As card starts receiving traffic it creates new flows (entries in flow table)
 
-3.  New flows are added to the flow table with chosen color ("Color A")
-    and immediately replicated to paired device (colors do not get
-    replicated)
+1.  New flows are added to the flow table with chosen color ("Color A") and immediately 
+replicated to paired device (colors do not get replicated)
 
-4.  **All connections/flows** **use the same color until the pairing
-    fails**, and continues using the color if there is no pairing active
+1.  **All connections/flows** **use the same color until the pairing fails**, and continues 
+using the color if there is no pairing active
 
-5.  **When pairing is re-established, the device "changes" color to new
-    color ("Color B")**
+1.  **When pairing is re-established, the device "changes" color to new color ("Color B")**
 
-6.  New flows are added to the flow table using new color ("Color B")
-    and immediately replicated to paired device (colors do not get
-    replicated).
+1.  New flows are added to the flow table using new color ("Color B") and immediately 
+replicated to paired device (colors do not get replicated).
 
-7.  **Device starts replicating (sync) existing connections** (new
-    device to which either new pairing was created or existing device to
-    which pairing was re-established)
+1.  **Device starts replicating (sync) existing connections** (new device to which either 
+new pairing was created or existing device to which pairing was re-established)
 
-8.  **Sync** method replicates **only** connections (entries in flow
-    table) which have color **different then actively used color**
-    (different then "Color B")
+1.  **Sync** method replicates **only** connections (entries in flow table) which have 
+color **different then actively used color** (different then "Color B")
 
-9.  Entries with currently active color ("Color B") are not replicated
-    via sync algorithm, as they are replicated in real-time (immediately
-    as they are created).
+1.  Entries with currently active color ("Color B") are not replicated via sync algorithm, as they are 
+replicated in real-time (immediately as they are created).
 
-10. Algorithm finishes. Flow replication has been completed.
+1. Algorithm finishes. Flow replication has been completed.
 
-### Notes
+#### Notes
 
 -   The above algorithm ensures two sync are happening in parallel:
 
@@ -414,22 +346,19 @@ relationship is established, re-established or recovered.
 
     -   Sync of existing connections (happening during "Perfect Sync")
 
--   As the sync is happening, new connections as well as changes in
-    state of existing connections (irrespectively of color) is being
-    replicated immediately in real-time (outside of the sync algorithm).
+-   As the sync is happening, new connections as well as changes in state of existing connections 
+(irrespectively of color) is being replicated immediately in real-time (outside of the sync algorithm).
 
--   It is possible a connection will end (FIN) and will result in the
-    primary card removing flow and immediately sending the new
-    connection state change to close the connection to paired device
-    (before the existing connection was even journaled/synced to the
-    paired device). To deal with this possibility on the paired device
-    side, if the connection does not already exist in its table then
-    this update message should be ignored.
+-   It is possible a connection will end (FIN) and will result in the primary card removing flow and immediately 
+sending the new connection state change to close the connection to paired devices 
+(before the existing connection was even journaled/synced to the paired device). 
+To deal with this possibility on the paired device side, if the connection does not already 
+exist in its table then this update message should be ignored.
 
--   When pairing is re-established, it is recommended that the secondary
-    card for simplicity to empty entire state of the flow table. This
-    will allow it to receive clean state.
+-   When pairing is re-established, it is recommended that the secondary card for simplicity to empty entire state of 
+the flow table. This will allow it to receive clean state.
 
+<!-- 
 # References
 
 -   Visio Diagram -
@@ -437,3 +366,4 @@ relationship is established, re-established or recovered.
 
 -   Reduced Tuple support -
     <https://microsoft.sharepoint.com/teams/Aznet/Engineering%20Q%20%20Z/VNET/Sirius/ReducedTupleSupportInVFP.docx?web=1>
+-->
