@@ -4,9 +4,9 @@
 ## Overview
 
 This document covers the aspect of High Availability and Scalability of
-the Project Sirius and SDN Appliance.
+the project in the SDN Appliance implementation.
 
-The High Availability is achieved via the following concepts:
+High Availability is achieved via the following concepts:
 
 -   Active-Passive architecture with Two (2) SDN Appliances
 -   Overprovisioning -- same ENI handled by multiple appliance cards
@@ -26,11 +26,11 @@ Scaling is achieved via the following concepts:
 1. <2 sec downtime unplanned failover
 1. Ability to resume connections in event of both unplanned and planned
     failover
-1. Do not have complicated hashing logic in switches to ensure packets
+1. No complicated hashing logic in switches to ensure packets
     land on right appliance
 1. If appliance receives a valid packet, it must not drop it due to
     flow replication delays
-1. Ensure both inbound and outbound packets take same appliance for a
+1. Ensure both inbound and outbound packets transit the same appliance for a
     given flow
 
 
@@ -46,7 +46,7 @@ Scaling is achieved via the following concepts:
 1. Active/Passive ENI design (software)
 1. Two TORs, Cross Wire design
 1. Each card connected to both TORs for availability and scale
-1. Both SDN Appliances are still available in case of single TOR
+1. Both SDN Appliances remain available in case of single TOR
     failure
 1. Some ENIs are "Active" on SDN Appliance 1, and "Passive" on SDN
     Appliance 2. Other ENIs are "Active" on SDN Appliance 2 and
@@ -99,7 +99,7 @@ one of the TOR/SDN Appliance dies, or (2) single card dies.
 
 **Normal traffic pattern**
 
-Normal traffic pattern for ENIs handled by cards will be going always thru "SDN Appliance 1" (Active one).
+Normal traffic pattern for ENIs handled by cards will always transit through "SDN Appliance 1" (Active one).
 
 **Failure mode**
 
@@ -151,7 +151,7 @@ Same ENI will be handled by multiple cards
 Overprovisioning and flow splitting will provide capability of possibly "infinite" CPS as well as "infinite" 
 bandwidth for customers, as all the connections will be distributed across multiple cards.
 
-Control plan will be able to provision different number of cards depending on customer needs for scale.
+Control plane will be able to provision different number of cards depending on customer needs for scale.
 
 ### Overprovisioning
 
@@ -174,7 +174,7 @@ end up on the passive node. We do not want a ECMP or other mechanism to land a d
 Flow splitting will therefore be done either by "intelligent" TOR or directly on a source based on stable hashing, or directly on the source node (where VM is).
 
 As single ENI will be handled by multiple VIPs (overprovisioned) -- example 23.0.0.1, 23.0.0.2, 23.0.0.3, the TOR will 
-equally rewrite destination address to ensure similar outcome as "ECMP" protocol (with additionalexplicit destination address rewrite).
+equally rewrite destination address to ensure similar outcome as "ECMP" protocol (with additional explicit destination address rewrite).
 
 ## Scenarios
 
