@@ -357,13 +357,3 @@ exist in its table then this update message should be ignored.
 
 -   When pairing is re-established, it is recommended that the secondary card for simplicity to empty entire state of 
 the flow table. This will allow it to receive clean state.
-
-<!-- 
-# References
-
--   Visio Diagram -
-    <https://microsoft.sharepoint-df.com/teams/ProjectSirius/Shared%20Documents/General/Documentation/Design/MSFT%20Topology/AzureDedicated_Sirius_Diagrams.vsdx?web=1>
-
--   Reduced Tuple support -
-    <https://microsoft.sharepoint.com/teams/Aznet/Engineering%20Q%20%20Z/VNET/Sirius/ReducedTupleSupportInVFP.docx?web=1>
--->
