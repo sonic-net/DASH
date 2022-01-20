@@ -38,28 +38,21 @@ Scaling is achieved via the following concepts:
 
 ### High-level architecture of Rack Design for High Availability and Scale
 
-<!-- Image here -->
-<!-- ![](media/image1.emf) -->
 
-Considerations:
+![hl-arch-rack-design-ha](images/has/hl-arch-rack-design-ha.png)
+
+**Considerations**
 
 1. Active/Active hardware design
-
 1. Active/Passive ENI design (software)
-
 1. Two TORs, Cross Wire design
-
 1. Each card connected to both TORs for availability and scale
-
 1. Both SDN Appliances are still available in case of single TOR
     failure
-
 1. Some ENIs are "Active" on SDN Appliance 1, and "Passive" on SDN
     Appliance 2. Other ENIs are "Active" on SDN Appliance 2 and
     "Passive" on SDN Appliance 1
-
 1. Both SDN Appliances are in use for traffic
-
 1. Each SDN Appliance is provisioned only up to a set threshold of
     capacity (to allow for failovers)
 
@@ -67,15 +60,14 @@ Considerations:
         subsequent sections
     - If interested in full throughput redundancy -- a party may
         choose to run at 50%
-
 1. Single TOR failure does not impact CPS
-
 1. Single TOR failure reduces available bandwidth
 
 ### Traffic flow in Highly Available and Scalable Sirius Appliance Set
 
-<!-- Image here -->
-<!-- ![](media/image2.emf) -->
+![traffic-flow-has-scale-appliance](images/has/traffic-flow-has-scale-appliance.png)
+
+Documentation\images\has\traffic-flow-has-scale-appliance.png
 
 Considerations:
 
