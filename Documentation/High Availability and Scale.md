@@ -186,7 +186,7 @@ What happens
 
 How traffic pattern changes
 
--   SDN Applinace behind this TOR is still accessible thru second TOR
+-   SDN Appliance behind this TOR is still accessible thru second TOR
 
 -   Loss of 50% bandwidth, no loss of CPS - second TOR must now handle double the bandwidth and double the CPS. 
 Assuming card is actually the bottleneck for CPS (not TOR), there is no CPS loss, the only impact is on bandwidth
