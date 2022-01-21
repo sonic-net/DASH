@@ -70,7 +70,7 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
 ### ACL
 
-- The ACL pipeline has 3 levels; an ACL decision is based on the most restrictive match across all 3 levels.  The 1st layer (contains default rules) is _controlled by Azure/MSFT_.  The 2nd and 3rd layers are _Customer controlled_.  
+- The ACL pipeline has 3-5 levels; an ACL decision is based on the most restrictive match across all 3 levels.  The 1st layer (contains default rules) is _controlled by Azure/MSFT_.  The 2nd and 3rd layers are _Customer controlled_. The 4th and 5th layers might be for example, *VM/Subnet/Subscription* layers. These layers might be security rules or a top level entity controlled by an Administrator or an IT Department. 
 
 - If an ACL rule with bit exit ACL pipeline on hit is matched, the ACL pipeline is abandoned.
 
