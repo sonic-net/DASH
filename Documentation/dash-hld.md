@@ -24,7 +24,7 @@ last update: 01/21/2022
 
 # SONiC-DASH High Level Design
 
-This document describes the **SONiC Disaggregated API for SONiC Hosts** (SONiC-DASH) high level design and architecture. SONiC-DASH (DASH for short) is an open source project that will deliver enterprise network performance to critical cloud applications. The ultimate goal is that DASH will have the same success as SONiC for switches and also be widely adopted as a major **Open NOS for Programmable Hardware Technologies**, including [SmartNICs](https://blogs.nvidia.com/blog/2021/10/29/what-is-a-smartnic/), to supercharge a variety of cloud and enterprise applications.
+This document describes the **SONiC Disaggregated API for SONiC Hosts** (SONiC-DASH) high level design and architecture. SONiC-DASH (DASH for short) is an open source project that will deliver enterprise network performance to critical cloud applications. The ultimate goal is that DASH will have the same success as [SONiC](https://github.com/Azure/SONiC) for switches and also be widely adopted as a major **Open NOS for Programmable Hardware Technologies**, including [SmartNICs](https://blogs.nvidia.com/blog/2021/10/29/what-is-a-smartnic/), to supercharge a variety of cloud and enterprise applications.
 
 ## Overview 
 
@@ -59,12 +59,12 @@ The SDN controller controls the overlay built on top of the physical layer of th
 
 #### SDN and DPU High-Availability (HA)
 
-For **High Availability** (HA), the SDN controller selects the pair of cards and configures them identically.  The only requirement on the card from the HA perspective is for the cards to setup a channel between themselves for flow synchronization.  The synchronization mechanism is left for vendors to define and implement. For more information, see [High Availability]() document.   
+For **High Availability** (HA), the SDN controller selects the pair of cards and configures them identically.  The only requirement on the card from the HA perspective is for the cards to setup a channel between themselves for flow synchronization.  The synchronization mechanism is left for vendors to define and implement. For more information, see [High Availability and Scale]() document.   
 
 
 ### DASH container
  
-The SDN controller communicates with a DASH device through a **[gNMI]() endpoint** served by a new DASH SDN agent **running inside a new SONiC DASH container**.  
+The SDN controller communicates with a DASH device through a **[gNMI](https://github.com/Azure/DASH/wiki/Glossary#gnmi) endpoint** served by a new DASH SDN agent **running inside a new SONiC DASH container**.  
 
 In particular 
 - The **SONiC orchagent** will be enhanced to translate these objects into **SAI_DB objects**, including the new **DASH-specific SAI objects**. 
@@ -163,3 +163,4 @@ TBD
 - [SDN Features Packet Transforms](SDN-Features-Packet-Transforms.md)
 - [Load Balancer](Load%20Balancer_v3.md)
 - [Program Scale Testing Requirements - Draft](Program%20Scale%20Testing%20Requirements%20-%20Draft.md)
+- [SONiC](https://github.com/Azure/SONiC)
