@@ -92,7 +92,7 @@ In the case of a multiple DPUs device the following applies:
 
 ### Switch Abstraction Interface (SAI) DASH
 
-An **enhanced syncd** configures the dataplane using the vendor-specific SAI library.
+ The Switch Abstraction Interface (SAI) is a common API that is supported by many switch ASIC vendors. SONiC uses SAI to program the ASIC. This enabled SONiC to work across multiple ASIC platforms naturally. DASH uses an **enhanced syncd** to configure the dataplane using the vendor-specific SAI library.
 
 
 ### ASIC Drivers
