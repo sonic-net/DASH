@@ -91,7 +91,7 @@ In the case of a multiple DPUs device the following applies:
 
 ### Switch State Service (SWSS)
 The SWSS container comprises many daemons which operate on conceptual SONIC config objects across several databases. DASH affects the following daemons, as follows:
-* `orchagent`, which translates `APPL_DB` objects into `ASIC_DB` objects, must be enhanced to manage new DASH overlay objects, such as ACL1,2,3 rules, ENI mappings, etc. The `orchagent` has to manage both representations of SONiC objects (APPL_DB and ASIC_DB) and translates between them bidirectionally as required.
+* `orchagent`, which translates `DB` objects into `ASIC_DB` objects, must be enhanced to manage new DASH overlay objects, such as ACL1,2,3 rules, ENI mappings, etc. The `orchagent` has to manage both representations of SONiC objects (APPL_DB and ASIC_DB) and translates between them bidirectionally as required.
 * `syncd`, which translates `ASCI_DB` conceptual objects into vendor SAI library API calls, must likewise be enhanced to handle new DASH SAI objects.
 
 ### Switch Abstraction Interface (SAI) DASH
@@ -158,7 +158,8 @@ The functionality of the new *dash container* in the user space is to receive co
 > [!NOTE]
 > Need a drawing and descriptions of the DASH user space **state interactions** (similar to the one shown in the figure at this location [LLDP-state interactions](https://github.com/Azure/SONiC/wiki/Architecture#lldp-state-interactions).  
 
-@lihuay @lguohan @prsunny - would you review and/or improve this write-up?
+> [!NOTE] 
+> @lihuay @lguohan @prsunny - would you review and/or improve this write-up?
 
 ## DASH deployment 
 
