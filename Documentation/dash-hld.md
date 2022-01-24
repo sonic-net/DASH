@@ -44,8 +44,7 @@ The overall requirement is to **optimize network SMART Programmable Technologies
 
 ## Architecture
 
-SONiC is structured into various containers that communicate through multiple logical databases via a shared Redis instance. DASH will make use of the SONiC infrastructure as shown in the figure below. The following is a high level view of DASH architecture. 
-
+SONiC is structured into various containers that communicate through multiple logical databases via a shared Redis instance. DASH will make use of the SONiC infrastructure as shown in the figure below. The following is a high level view of DASH architecture. DASH builds upon the traditional SONiC Architecture, which is documented [here](https://github.com/Azure/SONiC/wiki/Architecture). The following descriptions assume familiarity with the SONiC architecture and will describe DASH as incremental changes relative to traditional SONiC.
 
 **DASH architecture**
 
@@ -66,8 +65,9 @@ For **High Availability** (HA), the SDN controller selects the pair of cards and
  
 The SDN controller communicates with a DASH device through a **[gNMI](https://github.com/Azure/DASH/wiki/Glossary#gnmi) endpoint** served by a new DASH SDN agent **running inside a new SONiC DASH container**.  
 
-In particular 
-- The **SONiC orchagent** will be enhanced to translate these objects into **SAI_DB objects**, including the new **DASH-specific SAI objects**. 
+In summary:
+- The DASH container translates SDN configuration modeled in gNMI into **SONiC APPL_DB** config objects.
+- The **SONiC orchagent** inside the Switch State Service (SWSS) Container will be enhanced to translate these objects into **SAI_DB objects**, including the new **DASH-specific SAI objects**. 
 - An **enhanced syncd** will then configure the dataplane using the **vendor-specific SAI library**.
 
 A **gNMI schema** will manage the following DASH services: 
@@ -76,6 +76,8 @@ A **gNMI schema** will manage the following DASH services:
 - Routing and mappings
 - Encapsulations 
 - Other  
+
+See [TODO] for DASH gNMI schema.
 
 #### Multiple DPUs device
 
@@ -88,18 +90,27 @@ In the case of a multiple DPUs device the following applies:
 
 
 ### Switch State Service (SWSS)
-
+The SWSS container comprises many daemons which operate on conceptual SONIC config objects across several databases. DASH affects the following daemons, as follows:
+* `orchagent`, which translates `APPL_DB` objects into `ASIC_DB` objects, must be enhanced to manage new DASH overlay objects, such as ACL1,2,3 rules, ENI mappings, etc. The `orchagent` has to manage both representations of SONiC objects (APPL_DB and ASIC_DB) and translates between them bidirectionally as required.
+* `syncd`, which translates `ASCI_DB` conceptual objects into vendor SAI library API calls, must likewise be enhanced to handle new DASH SAI objects.
 
 ### Switch Abstraction Interface (SAI) DASH
 
- The Switch Abstraction Interface (SAI) is a common API that is supported by many switch ASIC vendors. SONiC uses SAI to program the ASIC. This enabled SONiC to work across multiple ASIC platforms naturally. DASH uses an **enhanced syncd** to configure the dataplane using the vendor-specific SAI library.
+The Switch Abstraction Interface (SAI) is a common API that is supported by many switch ASIC vendors. SONiC uses SAI to program the ASIC. This enables SONiC to work across multiple ASIC platforms naturally. DASH uses a combination of traditional SAI headers and new DASH pipeline-specific headers. Vendors must implement this interface for their DASH devices. This is the primary integration point of DASH devices and the SONiC stack. It will be rigorously tested for performance and conformance. See [DASH Testing documentation](https://github.com/Azure/DASH/tree/main/test).
 
+SAI "schema" are represented as fixed c-language header files and derived metadata header files. The underlay and overlay schema have different origins:
+* Traditional SAI headers are defined in the [OCP SAI project repo](https://github.com/opencomputeproject/SAI/tree/master/inc).These are hand-generated and maintained. DASH uses a subset of these to manage underlay functions, e.g. device management, Layer 3 routing and so forth.
+* DASH SAI "underlay" objects are derived from a [P4 Behavioral Model](https://github.com/Azure/DASH/tree/main/sirius-pipeline). A script reads the P4 model and generates SAI header files.
+
+DASH uses an **enhanced syncd** to configure the dataplane using the vendor-specific SAI library.
 
 ### ASIC Drivers
+The term "ASIC Drivers" is borrowed from traditional SONiC and SAI, where a datacenter switch was implemented almost entirely inside an ASIC (or multiple ASICs). These devices are programmed using a vendor Software Development Kit (SDK) which includes device drivers, kernel modules, etc.
 
+A contemporary DASH "SmartNIC" may consist of many complex hardware components including multi-core System On A Chip (SoC) ASICs, and the associated software. For simplicity, the software for such systems which interfaces to the SAI layer is collectively called the "ASIC driver." More importantly, the vendor SAI library will hide all details and present a uniform interface.
 
 ### DASH capable ASICs
-
+These comprise the main dataplane engines and are the core of what are variously called SmartNICs, DPUs, IPUs, NPUS, etc. The actual cores may be ASICs, SoCs, FPGAs, or some other high-density, performant hardware.
 
 ## Detailed architectures
 
