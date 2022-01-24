@@ -49,7 +49,7 @@ SONiC is structured into various containers that communicate through multiple lo
 
 **DASH architecture**
 
-![draft-simple-layered-architecture](images/hld/dash-layered-architecture.svg)
+![dash-layered-architecture](images/hld/dash-layered-architecture.svg)
 
 ### SDN controller
 
@@ -96,7 +96,6 @@ In the case of a multiple DPUs device the following applies:
 
 
 ### ASIC Drivers
-
 
 
 ### DASH capable ASICs
