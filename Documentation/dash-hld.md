@@ -164,7 +164,7 @@ The functionality of the new *dash container* in the user space is to receive co
 
 The following figure is a simplified representation of DASH deployment in a datacenter. 
 
-![dash-simplified-physical-deployment-example](images\hld\dash-simplified-physical-deployment-example-v2.svg) 
+![dash-simplified-physical-deployment-example](images/hld/dash-simplified-physical-deployment-example-v2.svg) 
 
 ## Repositories
 
