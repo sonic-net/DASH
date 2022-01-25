@@ -52,7 +52,7 @@ SONiC is structured into various containers that communicate through multiple lo
 
 ### SDN controller
 
-The SDN controller is **primarily responsible for controlling the DASH overlay services**, while the traditional SONiC stack is used to manage the underlay (L3 routing) and hardware platform. 
+The SDN controller is **primarily responsible for controlling the DASH overlay services**, while the traditional SONiC app containers is used to manage the underlay (L3 routing) and hardware platform. Both the DASH container and the traditional SONiC application containers sit atop the Switch State services (SWSS) layer, and manipulate the Redis application-layer DBs; these in turn are translated into SAI dataplane obects via the normal SONiC orchestration daemons inside SWSS.
 
 The SDN controller controls the overlay built on top of the physical layer of the infrastructure.  From the point of view of the SDN control plane, when a customer creates an operation, for example a VNET creation, from the cloud portal, the controller allocates the resources, placement management, capacity, etc. via the  **NorthBound interface APIs**.
 
@@ -77,7 +77,7 @@ A **gNMI schema** will manage the following DASH services:
 - Encapsulations 
 - Other  
 
-See [TODO] for DASH gNMI schema.
+See [**TODO**] for DASH gNMI schema.
 
 #### Multiple DPUs device
 
@@ -91,8 +91,8 @@ In the case of a multiple DPUs device the following applies:
 
 ### Switch State Service (SWSS)
 The SWSS container comprises many daemons which operate on conceptual SONIC config objects across several databases. DASH affects the following daemons, as follows:
-* `orchagent`, which translates `DB` objects into `ASIC_DB` objects, must be enhanced to manage new DASH overlay objects, such as ACL1,2,3 rules, ENI mappings, etc. The `orchagent` has to manage both representations of SONiC objects (APPL_DB and ASIC_DB) and translates between them bidirectionally as required.
-* `syncd`, which translates `ASCI_DB` conceptual objects into vendor SAI library API calls, must likewise be enhanced to handle new DASH SAI objects.
+* `orchagent`, which translates `XX_DB` objects (application and state DBs - **TODO** - identify) into `ASIC_DB` objects, must be enhanced to manage new DASH overlay objects, such as ACL1,2,3 rules, ENI mappings, etc. The `orchagent` has to manage both representations of SONiC objects (`XX_DB` and `ASIC_DB`) and translates between them bidirectionally as required.
+* `syncd`, which translates `ASIC_DB` conceptual objects into vendor SAI library API calls, must likewise be enhanced to handle new DASH SAI objects.
 
 ### Switch Abstraction Interface (SAI) DASH
 
