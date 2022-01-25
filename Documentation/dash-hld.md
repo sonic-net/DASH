@@ -161,7 +161,7 @@ The functionality of the new *dash container* in the user space is to receive co
 > [!NOTE] 
 > @lihuay @lguohan @prsunny - would you review and/or improve this write-up?
 
-## DASH deployment 
+## DASH deployment options
 
 The following figure is a simplified representation of DASH deployment in a datacenter. 
 
