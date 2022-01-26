@@ -44,12 +44,14 @@ The overall requirement is to **optimize network SMART Programmable Technologies
 
 ## Architecture
 
-SONiC is structured into various containers that communicate through multiple logical databases via a shared Redis instance. DASH will make use of the SONiC infrastructure as shown in the figure below. The following is a high level view of DASH architecture. DASH builds upon the traditional SONiC Architecture, which is documented [here](https://github.com/Azure/SONiC/wiki/Architecture). The following descriptions assume familiarity with the SONiC architecture and will describe DASH as incremental changes relative to traditional SONiC.
+SONiC is structured into various containers that communicate through multiple logical databases via a shared Redis instance. DASH will make use of the SONiC infrastructure as shown in the figure below. The following is a high level view of DASH architecture. DASH builds upon the traditional SONiC Architecture, which is documented in the SONiC Wiki under [Sonic System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture). The following descriptions assume familiarity with the SONiC architecture and will describe DASH as incremental changes relative to traditional SONiC.
 
 **DASH architecture**
 
 ![dash-layered-architecture](images/hld/dash-layered-architecture.svg)
 
+**TODO**
+* Describe inband vs. out-of-band management traffic; dedicated management (Ethernet) Interfacesl PCIe network devices;etc.
 ### SDN controller
 
 The SDN controller is **primarily responsible for controlling the DASH overlay services**, while the traditional SONiC app containers is used to manage the underlay (L3 routing) and hardware platform. Both the DASH container and the traditional SONiC application containers sit atop the Switch State services (SWSS) layer, and manipulate the Redis application-layer DBs; these in turn are translated into SAI dataplane obects via the normal SONiC orchestration daemons inside SWSS.
@@ -60,8 +62,10 @@ The SDN controller controls the overlay built on top of the physical layer of th
 
 For **High Availability** (HA), the SDN controller selects the pair of cards and configures them identically.  The only requirement on the card from the HA perspective is for the cards to setup a channel between themselves for flow synchronization.  The synchronization mechanism is left for vendors to define and implement. For more information, see [High Availability and Scale]() document.   
 
+### Traditional SONiC Application Containers
 
-### DASH container
+ In the figure above, the "Traditional SONiC App Containers" box comprises the normal collection of optional/customizable application daemons and northbound interfaces, which provide BGP, LLDP, SNMP, etc, etc. These are described thoroughly in the [Sonic System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture) wiki and reproduced in diagram form under the [Detailed Architectures](#detailed-architectures) section of this document.
+ ### DASH container
  
 The SDN controller communicates with a DASH device through a **[gNMI](https://github.com/Azure/DASH/wiki/Glossary#gnmi) endpoint** served by a new DASH SDN agent **running inside a new SONiC DASH container**.  
 
@@ -113,22 +117,22 @@ A contemporary DASH "SmartNIC" may consist of many complex hardware components i
 These comprise the main dataplane engines and are the core of what are variously called SmartNICs, DPUs, IPUs, NPUS, etc. The actual cores may be ASICs, SoCs, FPGAs, or some other high-density, performant hardware.
 
 ## Detailed architectures
-
+>**Comments [cs] I don't hink it's useful to have repated busy diagrams over and over. I'd rather just  show the per-DPU stack Once and refer to it in the subsequent high-level diagrams. It's too much redundant info, hard to digest and creates a maintenance chore if one little detail changes. I'd only show low-level again if something is fundamentally different.
 ### DASH NOS single DPU on NIC
 
 ![dash-single-dpu-architecture](images/hld/dash-single-dpu-architecture.svg)
 
+The figure above highlights the primary SONiC and DASH software stack components and relationships, and will appear as variations within the various DASH conigurations described below.
 
 ### DASH appliance architecture
 
 #### High level architecture
 
 ![dash-high-level-appliance](images/hld/dash-high-level-appliance.svg)
+A DASH "appliance" contains multiple (e.g. six) DASH NIC devices installed as PCIe adaptors in a chassis. This chassis nominally only provides power and cooling and service (datacenter) traffic does not traverse the PCIe bus. The PCIe bus can be used to botstrap/upgrade cards and perform some platform management functions but is not a participant in steady-state datacenter traffic. Each DPU provides its own gNMI endpoint for SDN control.
 
 #### Low level architecture
-
 ![dash-appliance-architecture](images/hld/dash-appliance-architecture.svg)
-
 
 ### DASH smart switch architecture
 
@@ -139,7 +143,6 @@ These comprise the main dataplane engines and are the core of what are variously
 #### Low level architecture
 
 ![dash-smart-switch-architecture](images/hld/dash-smart-switch-architecture.svg)
-
 
 ## High-Level Design
 
