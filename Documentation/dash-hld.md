@@ -91,7 +91,7 @@ In the case of a multiple DPUs device the following applies:
 
 ### Switch State Service (SWSS)
 The SWSS container comprises many daemons which operate on conceptual SONIC config objects across several databases. DASH affects the following daemons, as follows:
-* `orchagent`, which translates `DB` objects into `ASIC_DB` objects, must be enhanced to manage new DASH overlay objects, such as ACL1,2,3 rules, ENI mappings, etc. The `orchagent` has to manage both representations of SONiC objects (APPL_DB and ASIC_DB) and translates between them bidirectionally as required.
+* `orchagent`, which translates `xx_DB` objects into `ASIC_DB` objects, must be enhanced to manage new DASH overlay objects, such as ACL1,2,3 rules, ENI mappings, etc. The `orchagent` has to manage both representations of SONiC objects (xx_DB and ASIC_DB) and translates between them bidirectionally as required.
 * `syncd`, which translates `ASCI_DB` conceptual objects into vendor SAI library API calls, must likewise be enhanced to handle new DASH SAI objects.
 
 ### Switch Abstraction Interface (SAI) DASH
