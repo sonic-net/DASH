@@ -51,7 +51,7 @@ SONiC is structured into various containers that communicate through multiple lo
 ![dash-layered-architecture](images/hld/dash-layered-architecture.svg)
 ### SDN controller
 
-The SDN controller is **primarily responsible for controlling the DASH overlay services**, while the traditional SONiC app containers is used to manage the underlay (L3 routing) and hardware platform. Both the DASH container and the traditional SONiC application containers sit atop the Switch State services (SWSS) layer, and manipulate the Redis application-layer DBs; these in turn are translated into SAI dataplane obects via the normal SONiC orchestration daemons inside SWSS.
+The SDN controller is **primarily responsible for controlling the DASH overlay services**, while the traditional SONiC application containers are used to manage the underlay (L3 routing) and hardware platform. Both the DASH container and the traditional SONiC application containers sit atop the Switch State services (SWSS) layer, and manipulate the Redis application-layer DBs; these in turn are translated into SAI dataplane obects via the normal SONiC orchestration daemons inside SWSS.
 
 The SDN controller controls the overlay built on top of the physical layer of the infrastructure.  From the point of view of the SDN control plane, when a customer creates an operation, for example a VNET creation, from the cloud portal, the controller allocates the resources, placement management, capacity, etc. via the  **NorthBound interface APIs**.
 
@@ -61,7 +61,7 @@ For **High Availability** (HA), the SDN controller selects the pair of cards and
 
 ### Traditional SONiC Application Containers
 
- In the figure above, the "Traditional SONiC App Containers" box comprises the normal collection of optional/customizable application daemons and northbound interfaces, which provide BGP, LLDP, SNMP, etc, etc. These are described thoroughly in the [Sonic System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture) wiki and reproduced in diagram form under the [Detailed Architectures](#detailed-architectures) section of this document.
+ In the figure above, the "Traditional SONiC Application Containers" box comprises the normal collection of optional/customizable application daemons and northbound interfaces, which provide BGP, LLDP, SNMP, etc, etc. These are described thoroughly in the [Sonic System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture) wiki and reproduced in diagram form under the [Detailed Architectures](#detailed-architectures) section of this document.
  ### DASH container
  
 The SDN controller communicates with a DASH device through a **[gNMI](https://github.com/Azure/DASH/wiki/Glossary#gnmi) endpoint** served by a new DASH SDN agent **running inside a new SONiC DASH container**.  
@@ -118,10 +118,10 @@ These comprise the main dataplane engines and are the core of what are variously
 
 ![dash-single-dpu-architecture](images/hld/dash-single-dpu-architecture.svg)
 
-The figure above highlights the primary SONiC and DASH software stack components and relationships, and will appear as variations within the various DASH conigurations described below.
+The figure above highlights the primary SONiC and DASH software stack components and relationships, and will appear as variations within the DASH configurations described below.
 
 ### DASH appliance architecture
-A DASH "appliance" contains multiple (e.g. six) DASH NIC devices installed as PCIe adaptors in a chassis. This chassis nominally only provides power and cooling and network traffic (both customer and infrastructure control) does not traverse the PCIe bus. The PCIe bus can be used to bootstrap/upgrade cards and perform some platform management functions but is not a participant in steady-state datacenter traffic. Each DPU provides its own gNMI endpoint for SDN control. This endpoint is reachable inband through the "front-panel" DPU traffic ports via L3 routing. In other words, the SDN controller can reach the DPU management endpoints over the ToR-to-DPU fabric links.
+A DASH "appliance" contains multiple (e.g. six) DASH NIC devices installed as PCIe adaptors in a chassis. This chassis nominally only provides power and cooling and network traffic (both customer and infrastructure control) does not traverse the PCIe bus. The PCIe bus *can* be used to bootstrap/upgrade cards and perform some platform management functions but is not a participant in steady-state datacenter traffic. Each DPU provides its own gNMI endpoint for SDN control. This endpoint is reachable inband through the "front-panel" DPU traffic ports via L3 routing. In other words, the SDN controller can reach the DPU management endpoints over the ToR-to-DPU fabric links. In some cases, DPUs might provide separate management Ethernet ports, or PCIe netdevs which can be used for control purposes, in accordance to deployment and security needs.
 
 #### High level architecture
 
