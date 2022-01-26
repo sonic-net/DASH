@@ -1,5 +1,5 @@
 # SDN Features, Packet Transforms and Scale
-<!-- Fix conflict -->
+
 ## First Target Scenario:  Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance
 Why do we need this scenario?  There is a huge cost associated with establishing the first connection (and the CPS that can be established).
 
