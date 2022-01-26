@@ -143,9 +143,7 @@ These comprise the main dataplane engines and are the core of what are variously
 
 ## High-Level Design
 
-**DASH high level design**
-
-![dash-high-level-design](images/hld/dash-high-level-design.svg)
+![dash-high-level-design](./images/hld/dash-high-level-design.svg)
 
 The system architecture for SONiC-DASH relies upon the [SONiC system architecture](https://github.com/Azure/SONiC/wiki/Architecture) and adds a *new docker container* in the user space named **dash container** to create the functional component for DASH.  
 
