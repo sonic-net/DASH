@@ -67,8 +67,8 @@ For **High Availability** (HA), the SDN controller selects the pair of cards and
 The SDN controller communicates with a DASH device through a **[gNMI](https://github.com/Azure/DASH/wiki/Glossary#gnmi) endpoint** served by a new DASH SDN agent **running inside a new SONiC DASH container**.  
 
 In summary:
-- The DASH container translates SDN configuration modeled in gNMI into **SONiC DB** objects.
-- The **SONiC orchagent** inside the Switch State Service (SWSS) Container will be enhanced to translate these objects into **SAI_DB objects**, including the new **DASH-specific SAI objects**. 
+- The DASH container translates SDN configuration modeled in gNMI into **SONiC DB** objects. The gNMI schema is closely related to the DASH DB schema so in effect, the gNMI server is a a thin RPC shim layer to the DB.
+- The **SONiC orchagent** inside the Switch State Service (SWSS) Container will be enhanced to transform and translate these objects into **SAI_DB objects**, including the new **DASH-specific SAI objects**.  
 - An **enhanced syncd** will then configure the dataplane using the **vendor-specific SAI library**.
 
 A **gNMI schema** will manage the following DASH services: 
