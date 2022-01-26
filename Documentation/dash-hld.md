@@ -155,9 +155,6 @@ The component interactions will be executed as a new user space container implem
 
 The functionality of the new *dash container* in the user space is to receive content from the Software Defined Networking (SDN) controller to control setup for the overlay configurations. DASH receives the objects, translates them with a **gNMI agent**, provides them to the *SONiC OrchAgent* for further translation onto the dataplane via the **SAI database**. 
 
-> [!NOTE]
-> Need a drawing and descriptions of the DASH user space **state interactions** (similar to the one shown in the figure at this location [LLDP-state interactions](https://github.com/Azure/SONiC/wiki/Architecture#lldp-state-interactions).  
-
 > [!NOTE] 
 > @lihuay @lguohan @prsunny - would you review and/or improve this write-up?
 
