@@ -4,7 +4,7 @@ description: Describes DASH Documentation folder content
 last update: 01/26/2022
 ---
 
-# README 
+## README 
 
 Documentation covers project wide concerns such as high level design, SDN, high availability, load balancing, testing. See also related DASH [FAQ](https://github.com/Azure/DASH/wiki/FAQ) and [Glossary](https://github.com/Azure/DASH/wiki/Glossary). 
 
