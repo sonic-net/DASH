@@ -121,7 +121,7 @@ These comprise the main dataplane engines and are the core of what are variously
 
 ### DASH appliance architecture
 
-#### High level architecture
+#### DASH container state interactions representation
 
 ![dash-high-level-appliance](images/hld/dash-high-level-appliance.svg)
 
