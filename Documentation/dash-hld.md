@@ -165,7 +165,14 @@ The following figure is a simplified representation of DASH deployment in a data
 
 ## Repositories
 
-TBD
+- [SONiC](https://github.com/Azure/SONiC)
+- [SAI Thrift PR](https://github.com/opencomputeproject/SAI/pull/1325)
+- [P4](https://opennetworking.org/p4) and [P4 working group](https://p4.org/working-groups)
+- [PINS](opennetworking.org/pins)
+- [PNA Consortium Spec](https://p4.org/p4-spec/docs/PNA-v0.5.0.html)
+- [IPDK](https://ipdk.io/) and [IPDK GitHub](https://github.com/ipdk-io/ipdk-io.github.io)
+- [bmv2 - behavioral model v2](https://github.com/p4lang/behavioral-model)
+- [DPDK](https://www.dpdk.org)
 
 
 ## References
@@ -176,11 +183,3 @@ TBD
 - [SDN Features Packet Transforms](SDN-Features-Packet-Transforms.md)
 - [Load Balancer](Load%20Balancer_v3.md)
 - [Program Scale Testing Requirements - Draft](Program%20Scale%20Testing%20Requirements%20-%20Draft.md)
-- [SONiC](https://github.com/Azure/SONiC)
-- [SAI Thrift PR](https://github.com/opencomputeproject/SAI/pull/1325)
-- [P4](https://opennetworking.org/p4) and [P4 working group](https://p4.org/working-groups)
-- [PINS](opennetworking.org/pins)
-- [PNA Consortium Spec](https://p4.org/p4-spec/docs/PNA-v0.5.0.html)
-- [IPDK](https://ipdk.io/) and [IPDK GitHub](https://github.com/ipdk-io/ipdk-io.github.io)
-- [bmv2 - behavioral model v2](https://github.com/p4lang/behavioral-model)
-- [DPDK](https://www.dpdk.org)
