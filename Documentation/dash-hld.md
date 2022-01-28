@@ -123,7 +123,7 @@ The figure above highlights the primary SONiC and DASH software stack components
 ### DASH appliance architecture
 A DASH "appliance" contains multiple (e.g. six) DASH NIC devices installed as PCIe adaptors in a chassis. This chassis nominally only provides power and cooling and network traffic (both customer and infrastructure control) does not traverse the PCIe bus. The PCIe bus *can* be used to bootstrap/upgrade cards and perform some platform management functions but is not a participant in steady-state datacenter traffic. Each DPU provides its own gNMI endpoint for SDN control. This endpoint is reachable inband through the "front-panel" DPU traffic ports via L3 routing. In other words, the SDN controller can reach the DPU management endpoints over the ToR-to-DPU fabric links. In some cases, DPUs might provide separate management Ethernet ports, or PCIe netdevs which can be used for control purposes, in accordance to deployment and security needs.
 
-#### DASH container state interactions representation
+#### High Level Architecture
 
 ![dash-high-level-appliance](images/hld/dash-high-level-appliance.svg)
 
@@ -140,7 +140,7 @@ A DASH "Smart Switch" is a merging of a datacenter switch and one or more DPUs i
 
 ![dash-smart-switch-architecture](images/hld/dash-smart-switch-architecture.svg)
 
-## High-Level Design
+## DASH container state interactions representation
 
 ![dash-high-level-design](./images/hld/dash-high-level-design.svg)
 
