@@ -11,6 +11,7 @@ Documentation covers project wide concerns such as high level design, SDN, high 
 
 | Document | Description |
 |----------|-------------|
+| [Compliance Requirements](dash-compliance-requirements.md) | Specifies requirements for a device to be considered DASH-Compliant" |
 | [High Availability and Scale](high-availability-and-scale.md) | Describes the aspect of High Availability and Scalability of the project in the SDN Appliance implementation. |
 | [Load Balancer](load-balancer-v3.md) | Describes how to switch traffic from using VIP-to-VIP connectivity to using a direct path between VMs. |
 | [Program Scale Testing Requirements](program-scale-testing-requirements-draft.md) | Provides a summary of the scale testing requirements for validating program deliverables. |
