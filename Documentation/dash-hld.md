@@ -44,15 +44,14 @@ The overall requirement is to **optimize network SMART Programmable Technologies
 
 ## Architecture
 
-SONiC is structured into various containers that communicate through multiple logical databases via a shared Redis instance. DASH will make use of the SONiC infrastructure as shown in the figure below. The following is a high level view of DASH architecture. DASH builds upon the traditional SONiC Architecture, which is documented [here](https://github.com/Azure/SONiC/wiki/Architecture). The following descriptions assume familiarity with the SONiC architecture and will describe DASH as incremental changes relative to traditional SONiC.
+SONiC is structured into various containers that communicate through multiple logical databases via a shared Redis instance. DASH will make use of the SONiC infrastructure as shown in the figure below. The following is a high level view of DASH architecture. DASH builds upon the traditional SONiC Architecture, which is documented in the SONiC Wiki under [Sonic System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture). The following descriptions assume familiarity with the SONiC architecture and will describe DASH as incremental changes relative to traditional SONiC.
 
 **DASH architecture**
 
 ![dash-layered-architecture](images/hld/dash-layered-architecture.svg)
-
 ### SDN controller
 
-The SDN controller is **primarily responsible for controlling the DASH overlay services**, while the traditional SONiC stack is used to manage the underlay (L3 routing) and hardware platform. 
+The SDN controller is **primarily responsible for controlling the DASH overlay services**, while the traditional SONiC application containers are used to manage the underlay (L3 routing) and hardware platform. Both the DASH container and the traditional SONiC application containers sit atop the Switch State services (SWSS) layer, and manipulate the Redis application-layer DBs; these in turn are translated into SAI dataplane obects via the normal SONiC orchestration daemons inside SWSS.
 
 The SDN controller controls the overlay built on top of the physical layer of the infrastructure.  From the point of view of the SDN control plane, when a customer creates an operation, for example a VNET creation, from the cloud portal, the controller allocates the resources, placement management, capacity, etc. via the  **NorthBound interface APIs**.
 
@@ -60,14 +59,16 @@ The SDN controller controls the overlay built on top of the physical layer of th
 
 For **High Availability** (HA), the SDN controller selects the pair of cards and configures them identically.  The only requirement on the card from the HA perspective is for the cards to setup a channel between themselves for flow synchronization.  The synchronization mechanism is left for vendors to define and implement. For more information, see [High Availability and Scale]() document.   
 
+### Traditional SONiC Application Containers
 
-### DASH container
+ In the figure above, the "Traditional SONiC Application Containers" box comprises the normal collection of optional/customizable application daemons and northbound interfaces, which provide BGP, LLDP, SNMP, etc, etc. These are described thoroughly in the [Sonic System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture) wiki and reproduced in diagram form under the [Detailed Architectures](#detailed-architectures) section of this document.
+ ### DASH container
  
 The SDN controller communicates with a DASH device through a **[gNMI](https://github.com/Azure/DASH/wiki/Glossary#gnmi) endpoint** served by a new DASH SDN agent **running inside a new SONiC DASH container**.  
 
 In summary:
-- The DASH container translates SDN configuration modeled in gNMI into **SONiC DB** objects.
-- The **SONiC orchagent** inside the Switch State Service (SWSS) Container will be enhanced to translate these objects into **SAI_DB objects**, including the new **DASH-specific SAI objects**. 
+- The DASH container translates SDN configuration modeled in gNMI into **SONiC DB** objects. The gNMI schema is closely related to the DASH DB schema so in effect, the gNMI server is a a thin RPC shim layer to the DB.
+- The **SONiC orchagent** inside the Switch State Service (SWSS) Container will be enhanced to transform and translate these objects into **SAI_DB objects**, including the new **DASH-specific SAI objects**.  
 - An **enhanced syncd** will then configure the dataplane using the **vendor-specific SAI library**.
 
 A **gNMI schema** will manage the following DASH services: 
@@ -77,7 +78,7 @@ A **gNMI schema** will manage the following DASH services:
 - Encapsulations 
 - Other  
 
-See [TODO] for DASH gNMI schema.
+See [**TODO**] for DASH gNMI schema.
 
 #### Multiple DPUs device
 
@@ -91,7 +92,7 @@ In the case of a multiple DPUs device the following applies:
 
 ### Switch State Service (SWSS)
 The SWSS container comprises many daemons which operate on conceptual SONIC config objects across several databases. DASH affects the following daemons, as follows:
-* `orchagent`, which translates `xx_DB` objects into `ASIC_DB` objects, must be enhanced to manage new DASH overlay objects, such as ACL1,2,3 rules, ENI mappings, etc. The `orchagent` has to manage both representations of SONiC objects (xx_DB and ASIC_DB) and translates between them bidirectionally as required.
+* `orchagent`, which translates `XX_DB` objects (application and state DBs - **TODO** - identify) into `ASIC_DB` objects, must be enhanced to manage new DASH overlay objects, such as ACL1,2,3 rules, ENI mappings, etc. The `orchagent` has to manage both representations of SONiC objects (`XX_DB` and `ASIC_DB`) and translates between them bidirectionally as required.
 * `syncd`, which translates `ASIC_DB` conceptual objects into vendor SAI library API calls, must likewise be enhanced to handle new DASH SAI objects.
 
 ### Switch Abstraction Interface (SAI) DASH
@@ -113,25 +114,24 @@ A contemporary DASH "SmartNIC" may consist of many complex hardware components i
 These comprise the main dataplane engines and are the core of what are variously called SmartNICs, DPUs, IPUs, NPUS, etc. The actual cores may be ASICs, SoCs, FPGAs, or some other high-density, performant hardware.
 
 ## Detailed architectures
-
 ### DASH NOS single DPU on NIC
 
 ![dash-single-dpu-architecture](images/hld/dash-single-dpu-architecture.svg)
 
+The figure above highlights the primary SONiC and DASH software stack components and relationships, and will appear as variations within the DASH configurations described below.
 
 ### DASH appliance architecture
+A DASH "appliance" contains multiple (e.g. six) DASH NIC devices installed as PCIe adaptors in a chassis. This chassis nominally only provides power and cooling and network traffic (both customer and infrastructure control) does not traverse the PCIe bus. The PCIe bus *can* be used to bootstrap/upgrade cards and perform some platform management functions but is not a participant in steady-state datacenter traffic. Each DPU provides its own gNMI endpoint for SDN control. This endpoint is reachable inband through the "front-panel" DPU traffic ports via L3 routing. In other words, the SDN controller can reach the DPU management endpoints over the ToR-to-DPU fabric links. In some cases, DPUs might provide separate management Ethernet ports, or PCIe netdevs which can be used for control purposes, in accordance to deployment and security needs.
 
 #### DASH container state interactions representation
 
 ![dash-high-level-appliance](images/hld/dash-high-level-appliance.svg)
 
 #### Low level architecture
-
 ![dash-appliance-architecture](images/hld/dash-appliance-architecture.svg)
 
-
 ### DASH smart switch architecture
-
+A DASH "Smart Switch" is a merging of a datacenter switch and one or more DPUs into an integrated device. The "front-panel" network interfaces of the DPU(s) are wired directly into the switching fabric instead of being presented externally, saving cabling, electronics, space and power. There can also be some consolidation of software stacks, for example see [SONiC Multi-ASIC](https://github.com/Azure/SONiC/blob/master/doc/multi_asic/SONiC_multi_asic_hld.md) for how this is accomplished in standard SONiC multi-ASIC devices.
 #### High level architecture
 
 ![dash-high-level-smart-switch](images/hld/dash-high-level-smart-switch.svg)
@@ -139,7 +139,6 @@ These comprise the main dataplane engines and are the core of what are variously
 #### Low level architecture
 
 ![dash-smart-switch-architecture](images/hld/dash-smart-switch-architecture.svg)
-
 
 ## High-Level Design
 
