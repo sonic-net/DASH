@@ -154,6 +154,14 @@ The component interactions will be executed as a new user space container implem
 
 The functionality of the new *dash container* in the user space is to receive content from the Software Defined Networking (SDN) controller to control setup for the overlay configurations. DASH receives the objects, translates them with a **gNMI agent**, provides them to the *SONiC OrchAgent* for further translation onto the dataplane via the **SAI database**. 
 
+
+Note the following:
+
+- **DASH API** shall be exposed as gNMI interface as part of the SONiC gNMI container. 
+- **DASH clients** shall configure SONiC via gRPC get/set calls. 
+- **gNMI container** has the config backend to translate/write  DASH objects to CONFDB and/or APPDB.
+- **DASH orchestration agent** (_dashorch_) in the SWSS container subscribes to the DB objects programmed by the DASH agent. These objects are not expected to be programmed to kernel, so orchestration agent writes to ASICDB for the DASH technology provider SAI implementation to finally program the DPU. The DASH orchestration agent shall write the state of each tables to STATEDB used by the applications to fetch the programmed status of DASH configured objects. 
+
 > [!NOTE] 
 > @lihuay @lguohan @prsunny - would you review and/or improve this write-up?
 
