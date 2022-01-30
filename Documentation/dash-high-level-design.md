@@ -154,7 +154,6 @@ The component interactions will be executed as a new user space container implem
 
 The functionality of the new *dash container* in the user space is to receive content from the Software Defined Networking (SDN) controller to control setup for the overlay configurations. DASH receives the objects, translates them with a **gNMI agent**, provides them to the *SONiC OrchAgent* for further translation onto the dataplane via the **SAI database**. 
 
-
 Note the following:
 
 - **DASH API** shall be exposed as gNMI interface as part of the SONiC gNMI container. 
