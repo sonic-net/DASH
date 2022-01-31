@@ -32,9 +32,9 @@ DASH extends SONiC APIs and a comprehensive set of object models that initially 
 
 See the project [Scenario Milestone and Scoping](SDN-Features-Packet-Transforms.md#scenario-milestone-and-scoping). 
 
-### Requirements
+### Objectives
 
-The overall requirement is to **optimize network SMART Programmable Technologies performance**, and **leverage commodity hardware technology** to achieve **10x or even 100x stateful connection performance**.
+The overall objective is to **optimize network SMART Programmable Technologies performance**, and **leverage commodity hardware technology** to achieve **10x or even 100x stateful connection performance**.
 - With the help of network hardware technology suppliers, create an open forum that capitalizes on the use of **programmable networking hardware** including SmartNICs, SmartToRs, SmartAppliances. 
 - Optimize **stateful L4** performance and connection scale by 10x or even 100x when compared to implementations that make extensive use of a generic software stack approach that compromises performance for flexibility.  This flexibility was needed early on, whereas the cloud is maturing and is ready for a further optimized approach.  As host networking in the cloud is performed at L4, the resulting performance improvements should be truly significant.
 - Microsoft Azure will integrate and deploy DASH solutions to ensure that scale, monitoring, reliability, availability and constant innovation are proven and hardened. Other enterprise and cloud providers may deploy DASH as well, and we hope to hear similar feedback and contributions as we move forward.  It should be noted that innovations for **in-service software upgrades** (ISSU) and **high availability** (HA) are key tenets of the DASH charter.   
