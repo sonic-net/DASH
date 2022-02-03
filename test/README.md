@@ -1,7 +1,7 @@
 # SONiC-DASH Testing
 This directory contains documentation, test scripts, test configurations and other artifacts required to test a SONiC-DASH device or devices.
 
-You can start with the [High-Level Description (HLD) Test Specification](docs/sonic-dash-test-HLD.md). 
+You can start with the [High-Level Description (HLD) Test Specification](docs/sonic-dash-test-HLD.md) or go to the [Test Docs Table of Contents](docs/README.md).
 
 ## Organization
 Please see the structure below:
