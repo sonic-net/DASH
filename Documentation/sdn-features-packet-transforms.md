@@ -141,12 +141,12 @@ Etc…
 | Source IP| Destination IP| Decision of ACL_LEVEL1| Decision of ACL_LEVEL2| Outcome
 |:----------|:----------|:----------|:----------|:----------
 | 10.0.0.100| 10.0.0.200| Allow (Terminating = false)| Allow (Terminating = false)| Allow
-| 100.0.0.100| 100.0.0.201| Block (Terminating = True)| Not evaluated or Ignored| Block
-| 100.0.0.100| 100.0.0.202| Allow (Terminating = True)| Not evaluated or Ignored| Allow
-| 100.0.0.100| 100.0.0.203| Allow (Terminating = false)| Block (Terminating = True)| Block
-| 100.0.0.100| 8.8.8.8| Block (Terminating = True)| Not evaluated or Ignored| Block
-| 100.0.0.100| 1.1.1.1| Block (Terminating = false)| Block (Terminating = false)| Block
-| 100.0.0.100| 1.1.1.2| Block (Terminating = false)| Allow (Terminating = false)| Allow
+| 10.0.0.100| 10.0.0.201| Block (Terminating = True)| Not evaluated or Ignored| Block
+| 10.0.0.100| 10.0.0.202| Allow (Terminating = True)| Not evaluated or Ignored| Allow
+| 10.0.0.100| 10.0.0.203| Allow (Terminating = false)| Block (Terminating = True)| Block
+| 10.0.0.100| 8.8.8.8| Block (Terminating = True)| Not evaluated or Ignored| Block
+| 10.0.0.100| 1.1.1.1| Block (Terminating = false)| Block (Terminating = false)| Block
+| 10.0.0.100| 1.1.1.2| Block (Terminating = false)| Allow (Terminating = false)| Allow
 
 
 ## Routes and Route-Action
@@ -200,7 +200,7 @@ Etc…
 | 10.0.0.100/32| Encap Type: VXLAN <br/> Action: Encap_with_Provided_data <ul><li>Encap with source PA = 100.0.0.1</li><li>Encap with destination PA = 23.0.0.1</li><li>Re-write D-Mac to E4-A7-A0-99-0E-28</li><li>Use VNI = 90000</li></ul>| Encap_with_Provided_data| 2
 | 10.0.0.101/32| Encap Type: VXLAN <br/> Action: Encap_with_Provided_data <br/> <ul><li>Encap with source PA = 100.0.0.1</li> <li>Encap with destination PA = 23.0.0.10, 23.0.0.11, 23.0.0.13, 23.0.0.14</li> <li>Re-write D-Mac to E4-A7-A0-99-0E-29</li><li>Use VNI = 90000</li> </ul>| Encap_with_Provided_data_ECMP| 3
 | 8.8.8.8/32 | L3 NAT <br/> Action: Transpose source IP to provided NAT IP, keep all ports same.NAT IP: 10.0.0.1 -> 15.0.0.1| Outbound NAT (SNAT)_L3| 4
-| 9.9.9.9.9/32| L4 NAT <br/> Action: Transpose source IP and source port re-write ports from configured port pool.| Outbound NAT (SNAT)_L4| 5
+| 9.9.9.9/32| L4 NAT <br/> Action: Transpose source IP and source port re-write ports from configured port pool.| Outbound NAT (SNAT)_L4| 5
 | 0.0.0.0/32| NULL| Null| 6
 | 23.0.0.1/32| Service endpoint| ST| 7
 | 23.0.0.2/32| Private Link - TBD| Private Link - TBD| 8
