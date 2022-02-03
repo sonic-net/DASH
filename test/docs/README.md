@@ -1,6 +1,10 @@
 # Table of Contents - DASH Test Documentation
-[DASH Test High Level Description (HLD)](sonic-dash-test-HLD.md)
 
-[DASH SAI-Thrift Test Workflow](dash-test-workflow-saithrift.md)
+| Document | Description |
+|----------|-------------|
+| [High-Level Description (HLD) Test Specification](sonic-dash-test-HLD.md) | High-level design for the testing of devices which conform to the SONiC-DASH requirements.|  
+| [DASH SAI-Thrift Test Workflow](dash-test-workflow-saithrift.md) | DASH test workflow with SAI-thrift. |
+| [DASH P4 SAI-Thrift Test Workflow](dash-test-workflow-p4-saithrift.md) | Use of P4-based simulators or SW dataplanes to verify DASH behavior, using saithrift API. |
 
-[DASH P4 SAI-Thrift Test Workflow](dash-test-workflow-p4-saithrift.md)
+
+You can start with the [High-Level Description (HLD) Test Specification](sonic-dash-test-HLD.md). 
