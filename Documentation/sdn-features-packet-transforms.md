@@ -1,5 +1,5 @@
 # SDN Features, Packet Transforms and Scale
-<!-- Fix conflict -->
+
 ## First Target Scenario:  Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance
 Why do we need this scenario?  There is a huge cost associated with establishing the first connection (and the CPS that can be established).
 
@@ -17,7 +17,7 @@ Why do we need this scenario?  There is a huge cost associated with establishing
 | Flow Scale <img style="width:400px"/>| <ul><li>1+ million flows per v-port (aka ENI)</li> <li>50 million per DPU/Card<ul><li>single encap IPv4 overlay and IPV6 underlay</li> <li>single encap IPv6 overlay and IPV6 underlay. (This can be lower)</li> <li>single encap IPV4</li> <li>Encap IPv6 and IPV4</li></ul></ul> *These are complex flows, details are below.* | |  
 | CPS | 4 million+ (max)  |
 | Routes | 100k per v-port (max)  |
-| ACLs | 100k IP-Prefixes, 10k Src/Dst ports per v-port (max)  |
+| ACLs | 100k IP-Prefixes, 10k Src/Dst ports per v-port (aka ENI) (max)  |
 | NAT | tbd  |
 | V-Port (aka ENI or Source VM) | 10k (max)  |
 | Mappings (VMS deployed) | 10 million total mapping per DPU; mappings are the objects that help us bridge the customer's virtual space (private ip address assigned to each VM) with Azure's physical space (physical/routable addresses where the VMs are hosted)  |
@@ -70,7 +70,7 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
 ### ACL
 
-- The ACL pipeline has 3 levels; an ACL decision is based on the most restrictive match across all 3 levels.  The 1st layer (contains default rules) is _controlled by Azure/MSFT_.  The 2nd and 3rd layers are _Customer controlled_.  
+- The ACL pipeline has 3-5 levels; an ACL decision is based on the most restrictive match across all 3 levels.  The 1st layer (contains default rules) is _controlled by Azure/MSFT_.  The 2nd and 3rd layers are _Customer controlled_. The 4th and 5th layers might be for example, *VM/Subnet/Subscription* layers. These layers might be security rules or a top level entity controlled by an Administrator or an IT Department. 
 
 - If an ACL rule with bit exit ACL pipeline on hit is matched, the ACL pipeline is abandoned.
 
