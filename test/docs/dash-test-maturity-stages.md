@@ -12,21 +12,21 @@ last update: 01/04/2022
 
 # DASH test maturity stages
 
-This document describes the DASH test maturity stages. We show both a bottoms-up dataplane testing progression and a top-down full SONiC-stack testing progression. The intent is to articulate the various scenarios and show a set of reference diagrams in order to establish a common vocabulary and workflows.
-
-The bottoms-up and top-down approaches allow respective development teams to proceed apace and converge towards eventual full-system integration.
+This document describes the DASH test maturity stages. The intent is to articulate the various scenarios and show a set of reference diagrams in order to establish a common vocabulary and workflows.
 
 ## Legend
 In the diagrams below, the dashed "callout" notes indicate the prerequisites/dependencies needed to achieve this stage of testing, for example:
 
 ![dash-test-maturity-stages-prereq](../images/dash-test-maturity-stages-prereq.png) 
 
+# Single Device Testing
+This section describes incremental approaches to test a single DASH device, including bottoms-up (dataplane first) and top-down (SDN northbound first) approaches.
+The bottoms-up and top-down approaches allow respective development teams to proceed apace and converge towards eventual full-system integration.
+
 ## Bottoms-Up, Dataplane Testing stages
 The dataplane can be progressively tested by configuring the DUT through successive "API" layers, starting with the DASH-SAI API, which does not require use of the SONiC stack; then adding more and more SONiC layers; culminating with the use of an application-oriented northbound management API such as gNMI or other interface.
 
 > **NOTE: Stage 3 - DUT Configuration via SAI-Thrift is deemed the minimum "gate" for DASH performance and conformance testing of a DUT's dataplane. Community dataplane tests will focus on this stage.**
-
-
 
 ### Dataplane Testing Stage 1: Manual/Ad-hoc Testing
 
@@ -116,7 +116,7 @@ This stage verifies that the SONiC-DASH northbound API can correctly access a Fa
 * Functional ASIC sync daemon or `syncd` which translates ASIC_DB (conceptional SAI objects) into SAI library calls
 * Fake `libsai` library linked at runtime to the `syncd` daemon.
 
-### SONiC-DASH Stack Testing Stage 5 - Northbound through syncd to Fake SAI
+### SONiC-DASH Stack Testing Stage 5 - Full stack northbound through to DUT
 This is identical to [Dataplane Testing Stage 5: DUT configuration via SONiC Northbound API](#dataplane-testing-stage-5-dut-configuration-via-sonic-northbound-api) and represents the convergence of the dataplane and northbound API/SONiC stack. The content below is repeated from above.
 
 ![dash-test-maturity-stages-dut-config-north](../images/dash-test-maturity-stages-dut-config-north.png) 
