@@ -1,20 +1,20 @@
 # DASH Documentation 
 
-Documentation comprises system descritions, High-level design (HLD) documetns and detgailed compliance reqauirements.
+Documentation comprises system descritions, High-level design (HLD) documents and detailed compliance requirements.
 
 See also DASH [FAQ](https://github.com/Azure/DASH/wiki/FAQ) and [Glossary](https://github.com/Azure/DASH/wiki/Glossary). 
 
 
 ## Organization of Documents
-Documentation consists of separate, but realted *System Descriptions* (HLDs, architecture, theory of operations, etc.) and *Compliance Requirements* (hard specifications, typically numerical  but also behavioral). These two types of documents are deliberately kept separated, see [Relationships and Flow of Documents](#relationships-and-flow-of-documents).
+Documentation consists of separate, but related *System Descriptions* (HLDs, architecture, theory of operations, etc.) and *Compliance Requirements* (hard specifications, typically numerical  but also behavioral). These two types of documents are deliberately kept separated, see [Relationships and Flow of Documents](#relationships-and-flow-of-documents).
 
-Documentation is organiaed into folders as follows:
+Documentation is organized into folders as follows:
 
 >**Chris' Commentary about current organization**:
-Currently, we have everything lumped into one folder and the high-level design and performance requirements are somewhat intermingled. There is no roadmap to future growth, no common format and no clear way how to create traceable, rigorous test cases from these documents in a maintainable fashion. Hence my proposals below.
+Currently, we have everything lumped into one folder and the high-level design and performance requirements are somewhat intermingled. There is no roadmap to future growth, no common format and no clear way how to create traceable, rigorous test cases from these documents in a maintainable fashion. Hence my proposals below. I recommend we take existing docs and split them into HLD & Compliance portions as time allows.
 
 ### Chris' Proposal 1 - Group HLDs & compliance requirements by category/feature/service (my first choice)
-In this format, each feature or aspect has all the high-level specs  and the compliance requirements in the same folder, making it easier to access related information about one topic. As the complexity grows, this helps keep things organised according to "functional topic."
+In this format, each feature or aspect has all the high-level specs  and the compliance requirements in the same folder, making it easier to access related information about one topic. As the complexity grows, this helps keep things organized according to "functional topic." Also, as additional documents about a specific topic are added, it'll be easier to find realted material.
 ```
 General
     General High-level Descriptions
@@ -39,7 +39,7 @@ Service XYZ
 ...
 ```
 ### Chris' Proposal 2 - Group all HLDs in one folder, all compliance requirements in another
-In this format, all the HLDs are in one folder and compliance requirements in another folder, makint it easier to find all the documents at the same "level" of detail. As the complexity grows, this helps keep things organised according to "technical area of interest/expertise" (architesure/features vs. detailed requirements).
+In this format, all the HLDs are in one folder and compliance requirements in another folder, making it easier to find all the documents at the same "level" of detail. As the complexity grows, this helps keep things organized according to "technical area of interest/expertise" (architesure/features vs. detailed requirements). The downside is you have to look in two different places to maintain/review the high-related desciptions and requirements.
 ```
 System Descriptions/HLDs
     General High-level Descriptions
@@ -59,7 +59,28 @@ Detailed Compliance Requirements
 ```
 
 ## ToC
-Needs to be reorganized per the choices made above.
+Needs to be reorganized per the choices made above. For example, following the proposal#1 above, it'd look more like this (hyperlinks omitted for now). Table formatting needs to be improved, e.g. use list items for right column to keep items in the same table cell.
+
+| Subject | Documents|
+| ------- | ---------|
+| General Architecture and Requirements| DASH HLD |
+|                                      | General Performance and scale compliance requirements       |
+| High-Availability (HA)               | High-Availability and Scale HLD                             |
+| Dataplane                            | Dataplane HLD                                               |
+|                                      | Dataplane Compliance Requirements                           |
+|                                      | HA and Scale Compliance Requirements                        |
+| VNET Service                         | VNET Service HLD                                            |
+|                                      | VNET Service Packet Transforms                              |
+|                                      | VNET Service Compliance Requirements                        |
+| Load Balancer Service                | Load Balancer Service HLD                                   |
+|                                      | Load Balancer Service Compliance Requirements               |
+| SAI Southbound API                   | SAI HLD                                                     |
+|                                      | SAI Compliance Requirements                                 |
+| gNMI Northbound API                  | gNMI HLD                                                    |
+|                                      | gNMI schema (unless described under SONiC repo)             |
+|                                      | gNMI Compliance Requirements                                |
+
+Original ToC Structure - not scalable:
 
 | Document | Description |
 |----------|-------------|
