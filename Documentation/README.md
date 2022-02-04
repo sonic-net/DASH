@@ -1,6 +1,6 @@
 # DASH Documentation 
 
-Documentation comprises system descritions, High-level design (HLD) documents and detailed compliance requirements.
+Documentation comprises system descriptions, High-level design (HLD) documents and detailed compliance requirements.
 
 See also DASH [FAQ](https://github.com/Azure/DASH/wiki/FAQ) and [Glossary](https://github.com/Azure/DASH/wiki/Glossary). 
 
@@ -14,7 +14,7 @@ Documentation is organized into folders as follows:
 Currently, we have everything lumped into one folder and the high-level design and performance requirements are somewhat intermingled. There is no roadmap to future growth, no common format and no clear way how to create traceable, rigorous test cases from these documents in a maintainable fashion. Hence my proposals below. I recommend we take existing docs and split them into HLD & Compliance portions as time allows.
 
 ### Chris' Proposal 1 - Group HLDs & compliance requirements by category/feature/service (my first choice)
-In this format, each feature or aspect has all the high-level specs  and the compliance requirements in the same folder, making it easier to access related information about one topic. As the complexity grows, this helps keep things organized according to "functional topic." Also, as additional documents about a specific topic are added, it'll be easier to find realted material.
+In this format, each feature or aspect has all the high-level specs  and the compliance requirements in the same folder, making it easier to access related information about one topic. As the complexity grows, this helps keep things organized according to "functional topic." Also, as additional documents about a specific topic are added, it'll be easier to find related material.
 ```
 General
     General High-level Descriptions
@@ -39,7 +39,7 @@ Service XYZ
 ...
 ```
 ### Chris' Proposal 2 - Group all HLDs in one folder, all compliance requirements in another
-In this format, all the HLDs are in one folder and compliance requirements in another folder, making it easier to find all the documents at the same "level" of detail. As the complexity grows, this helps keep things organized according to "technical area of interest/expertise" (architesure/features vs. detailed requirements). The downside is you have to look in two different places to maintain/review the high-related desciptions and requirements.
+In this format, all the HLDs are in one folder and compliance requirements in another folder, making it easier to find all the documents at the same "level" of detail. As the complexity grows, this helps keep things organized according to "technical area of interest/expertise" (architecture/features vs. detailed requirements). The downside is you have to look in two different places to maintain/review the highly-related descriptions and requirements.
 ```
 System Descriptions/HLDs
     General High-level Descriptions
