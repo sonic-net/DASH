@@ -55,6 +55,13 @@ typedef enum _sai_{{ table.name }}_action_t
  */
 typedef struct _sai_{{ table.name }}_t
 {
+    /**
+     * @brief Switch ID
+     *
+     * @objects SAI_OBJECT_TYPE_SWITCH
+     */
+    sai_object_id_t switch_id;
+
 {% for key in table['keys'] %}
     /**
      * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.sai_key_name }}
@@ -83,15 +90,18 @@ typedef enum _sai_{{ table.name }}_attr_t
      */
     SAI_{{ table.name | upper }}_ATTR_START,
 
+{% set ns = namespace(firstattr=false) %}
 {% if table.actions | length > 1 %}
     /**
      * @brief Action
      *
      * @type sai_{{ table.name }}_action_t
-     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
+     * @flags CREATE_AND_SET
+     * @default SAI_{{ table.name | upper }}_ACTION_{{ table.actions[0].name | upper }}
      */
     SAI_{{ table.name | upper }}_ATTR_ACTION = SAI_{{ table.name | upper }}_ATTR_START,
 
+{% set ns.firstattr = true %}
 {% endif %}
 {% if table.is_object == 'true' %}
 {% for key in table['keys'] %}
@@ -108,8 +118,16 @@ typedef enum _sai_{{ table.name }}_attr_t
      * @type {{ key.sai_key_type }}
 {% endif %}
      * @flags MANDATORY_ON_CREATE | CREATE_ONLY
+{% if key.sai_key_type == 'sai_uint16_t' %}
+     * @isvlan false
+{% endif %}
      */
+{% if not ns.firstattr %}
+    SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }} = SAI_{{ table.name | upper }}_ATTR_START,
+{% set ns.firstattr = true %}
+{% else %}
     SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }},
+{% endif %}
 
 {% endfor %}
 {% endif %}
@@ -119,12 +137,29 @@ typedef enum _sai_{{ table.name }}_attr_t
      * @brief Action {{ action.name }} parameter {{ param.name | upper }}
      *
      * @type {{ param.type }}
-     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
+     * @flags CREATE_AND_SET
+{% if param.type == 'sai_uint16_t' %}
+     * @isvlan false
+{% endif %}
 {% if table.actions | length > 1 %}
      * @condition SAI_{{ table.name | upper }}_ATTR_ACTION == SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}
 {% endif %}
+{% if param.type == 'sai_ip_address_t' %}
+     * @default 0.0.0.0
+{% elif param.type == 'sai_mac_t' %}
+     * @default 0:0:0:0:0:0
+{% elif param.type == 'bool' %}
+     * @default false
+{% else %}
+     * @default 0
+{% endif %}
      */
+{% if not ns.firstattr %}
+    SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }} = SAI_{{ table.name | upper }}_ATTR_START,
+{% set ns.firstattr = true %}
+{% else %}
     SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }},
+{% endif %}
 
 {% endfor %}
 {% endfor %}
@@ -148,10 +183,10 @@ typedef enum _sai_{{ table.name }}_attr_t
  *
 {% if table.is_object == 'true' %}
  * @param[out] {{ table.name }}_id Entry id
+ * @param[in] switch_id Switch id
 {% else %}
  * @param[in] {{ table.name }} Entry
 {% endif %}
- * @param[in] switch_id Switch id
  * @param[in] attr_count Number of attributes
  * @param[in] attr_list Array of attributes
  *
@@ -160,10 +195,10 @@ typedef enum _sai_{{ table.name }}_attr_t
 typedef sai_status_t (*sai_create_{{ table.name }}_fn)(
 {% if table.is_object == 'true' %}
         _Out_ sai_object_id_t *{{ table.name }}_id,
+        _In_ sai_object_id_t switch_id,
 {% else %}
         _In_ const sai_{{ table.name }}_t *{{ table.name }},
 {% endif %}
-        _In_ sai_object_id_t switch_id,
         _In_ uint32_t attr_count,
         _In_ const sai_attribute_t *attr_list);
 

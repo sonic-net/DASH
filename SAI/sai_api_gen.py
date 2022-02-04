@@ -57,7 +57,7 @@ def get_sai_list_type(key_size, key_header, key_field):
     elif key_size <= 16:
         return 'sai_u16_list_t'
     elif key_size == 32 and ('addr' in key_field or 'ip' in key_header):
-        return 'sai_ipaddr_list_t'
+        return 'sai_ip_address_list_t'
     elif key_size <= 32:
         return 'sai_u32_list_t'
     elif key_size <= 64:
@@ -186,6 +186,10 @@ def write_sai_files(sai_api):
     for line in lines:
         if 'Add new experimental APIs above this line' in line:
             new_lines.append('    SAI_API_' + sai_api['app_name'].upper() + ',\n\n')
+        if 'new experimental object type includes' in line:
+            new_lines.append(line)
+            new_lines.append('#include "saiexperimental' + sai_api['app_name'] + '.h"\n')
+            continue
 
         new_lines.append(line)
 
@@ -206,6 +210,28 @@ def write_sai_files(sai_api):
 
     with open('./SAI/experimental/saitypesextensions.h', 'w') as f:
         f.write(''.join(new_lines))
+
+    # The SAI object struct for entries
+    with open('./SAI/inc/saiobject.h', 'r') as f:
+        lines = f.readlines()
+
+    new_lines = []
+    for line in lines:
+        if 'Add new experimental entries above this line' in line:
+            for table in sai_api['tables']:
+                if table['is_object'] == 'false':
+                    new_lines.append('    /** @validonly object_type == SAI_OBJECT_TYPE_' + table['name'].upper() + ' */\n')
+                    new_lines.append('    sai_' + table['name'] + '_t ' + table['name'] + ';\n\n')
+        if 'new experimental object type includes' in line:
+            new_lines.append(line)
+            new_lines.append('#include "../experimental/saiexperimental' + sai_api['app_name'] + '.h"\n')
+            continue
+
+        new_lines.append(line)
+
+    with open('./SAI/inc/saiobject.h', 'w') as f:
+        f.write(''.join(new_lines))
+
 
 
 # CLI
