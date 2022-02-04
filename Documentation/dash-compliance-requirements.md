@@ -2,6 +2,7 @@
 
 [[ << DASH main README ]](../README.md)
 
+>**NOTE** This may be superceded by the rethought main [README](README.md) structure. This might still have use in case we need to document profiles of related requirements, which could benefit from a top-level compliance doc.
 # DASH Compliance Requirements
 This document describes the criteria for a device to be considered "DASH Compliant." Individual detailed specifications for each category are divided into separate documents. For actual testing methodology, configuration artifacts and scripts, etc. see [test/docs/README.md](../test/docs/README.md) and follow the links to respective areas. 
 
