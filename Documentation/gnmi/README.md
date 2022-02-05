@@ -1,6 +1,9 @@
-[ << [Back to DASH top-level Documents](../README.md) ]
+[ << [Back to DASH top-level Documents](../README.md#contents) ]
+
+# DASH gNMI Documents
 
 This folder contains DASH gNMI Interface design and requirements documents.
+
 
 # Contents
 
