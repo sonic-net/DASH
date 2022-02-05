@@ -1,4 +1,4 @@
-[ << [Back to DASH top-level Documents](../README.md#contents) ]
+[ [ << Back to DASH top-level Documents](../README.md#contents) ]
 
 # DASH VNET-to-VNET Service Documents
 

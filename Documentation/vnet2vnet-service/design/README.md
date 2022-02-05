@@ -1,6 +1,6 @@
-[ << [Back to parent directory](../README.md) ]
+[ [ << Back to parent directory](../README.md) ]
 
-[ << [Back to DASH top-level Documents](../../README.md#contents) ]
+[ [ << Back to DASH top-level Documents](../../README.md#contents) ]
 
 # DASH VNET-to-VNET Service Design Documents
 

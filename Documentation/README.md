@@ -33,7 +33,7 @@ etc
 | General Architecture and Requirements| [Parent Folder](general/README.md) \| [ Design](general/design/README.md) \| [Compliance Requirements](general/requirements/README.md)|
 | High-Availability (HA)                                                    | [Parent Folder](high-avail/README.md) \| [ Design](high-avail/design/README.md) \| [Compliance Requirements](high-avail/requirements/README.md)|
 | Load Balancer Service                | [Parent Folder](load-bal-service/README.md) \| [ Design](load-bal-service/design/README.md) \| [Compliance Requirements](load-bal-service/requirements/README.md)|
-| VNET Service                         | [Parent Folder](vnet2vnet-service/README.md) \| [ Design](vnet2vnet-service/design/README.md) \| [Compliance Requirements](vnet2vnet-service/requirements/README.md)|
+| VNET-to-VNET Service                         | [Parent Folder](vnet2vnet-service/README.md) \| [ Design](vnet2vnet-service/design/README.md) \| [Compliance Requirements](vnet2vnet-service/requirements/README.md)|
 | SAI Southbound API                   | [Parent Folder](sai/README.md) \| [ Design](sai/design/README.md) \| [Compliance Requirements](sai/requirements/README.md)|
 | gNMI Northbound API                  | [Parent Folder](gnmi/README.md) \| [ Design](gnmi/design/README.md) \| [Compliance Requirements](gnmi/requirements/README.md)|
 
