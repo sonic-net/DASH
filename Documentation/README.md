@@ -27,38 +27,20 @@ etc
 ```
 ## Contents
 
-
 | Topic   | Links to Folders |
 | ------- | ---------|
-| General Architecture and Requirements| [ Design](general/design/README.md) \| [Compliance Requirements](general/requirements/README.md)|
-|                                      | General Performance and scale compliance requirements       |
-| High-Availability (HA)               | High-Availability and Scale HLD                             |
-| Dataplane                            | Dataplane HLD                                               |
-|                                      | Dataplane Compliance Requirements                           |
-|                                      | HA and Scale Compliance Requirements                        |
-| VNET Service                         | VNET Service HLD                                            |
-|                                      | VNET Service Packet Transforms                              |
-|                                      | VNET Service Compliance Requirements                        |
-| Load Balancer Service                | Load Balancer Service HLD                                   |
-|                                      | Load Balancer Service Compliance Requirements               |
-| SAI Southbound API                   | SAI HLD                                                     |
-|                                      | SAI Compliance Requirements                                 |
-| gNMI Northbound API                  | gNMI HLD                                                    |
-|                                      | gNMI schema (unless described under SONiC repo)             |
-|                                      | gNMI Compliance Requirements                                |
+| Dataplane                            | [Parent Folder](dataplane/README.md) \| [ Design](dataplane/design/README.md) \| [Compliance Requirements](dataplane/requirements/README.md)|
+| General Architecture and Requirements| [Parent Folder](general/README.md) \| [ Design](general/design/README.md) \| [Compliance Requirements](general/requirements/README.md)|
+| High-Availability (HA)                                                    | [Parent Folder](high-avail/README.md) \| [ Design](high-avail/design/README.md) \| [Compliance Requirements](high-avail/requirements/README.md)|
+| Load Balancer Service                | [Parent Folder](load-bal-service/README.md) \| [ Design](load-bal-service/design/README.md) \| [Compliance Requirements](load-bal-service/requirements/README.md)|
+| VNET Service                         | [Parent Folder](vnet2vnet-service/README.md) \| [ Design](vnet2vnet-service/design/README.md) \| [Compliance Requirements](vnet2vnet-service/requirements/README.md)|
+| SAI Southbound API                   | [Parent Folder](sai/README.md) \| [ Design](sai/design/README.md) \| [Compliance Requirements](sai/requirements/README.md)|
+| gNMI Northbound API                  | [Parent Folder](gnmi/README.md) \| [ Design](gnmi/design/README.md) \| [Compliance Requirements](gnmi/requirements/README.md)|
 
-Original ToC Structure - not scalable:
-
-| Document | Description |
-|----------|-------------|
-| [Compliance Requirements](dash-compliance-requirements.md) | Specifies requirements for a device to be considered DASH-Compliant" |
-| [High Availability and Scale](high-availability-and-scale.md) | Describes the aspect of High Availability and Scalability of the project in the SDN Appliance implementation. |
-| [Load Balancer](load-balancer-v3.md) | Describes how to switch traffic from using VIP-to-VIP connectivity to using a direct path between VMs. |
-| [Program Scale Testing Requirements](program-scale-testing-requirements-draft.md) | Provides a summary of the scale testing requirements for validating program deliverables. |
-| [SDN-Features-Packet-Transforms](sdn-features-packet-transforms.md) | Scenarios and background. Service descriptions. Packet encapsulation formats and transformations. Scaling and performance requirements |
 
 ## Relationships and Flow of Documents
 The diagram below shows how High-Level Descriptions beget Compliance requirements, compliance requirements beget test cases, and test cases are executed by test scripts to produce Test Results.
+
 ![dash-specs-flow](images/general/dash-specs-flow.svg).
 
 Some of the guiding principles for this aproach are:
