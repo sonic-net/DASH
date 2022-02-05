@@ -3,7 +3,8 @@ This directory contains documentation, test scripts, test configurations and oth
 
 For hard requirements, see [Compliance Requirements](../Documentation/dash-compliance-requirements.md)
 
-You can start with the [High-Level Description (HLD) Test Specification](docs/sonic-dash-test-HLD.md) or go to the [Test Docs Table of Contents](docs/README.md)
+You can start with the [High-Level Description (HLD) Test Specification](docs/sonic-dash-test-HLD.md) or go to the [Test Docs Table of Contents](docs/README.md).
+
 ## Organization
 Please see the structure below:
 * [docs/](docs/README.md) - Test documentation
