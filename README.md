@@ -11,10 +11,11 @@ Future innovations for in-service software upgrades and ultra-high availability 
 We hope that DASH will have the same success as SONiC for switches and also be widely adopted as a major Open NOS for Programmable Technologies (including SmartNICs) to supercharge a variety of cloud and enterprise applications. 
 
 ## Where to Start?
+Go to the [Documentation table of contents](Documentation/README.md)
 
-Please begin with 1) the SDN Packet Transforms document, this facilitates understanding of the program goal and the 7 networking scenarios that Azure has defined.  Next 2) Load Balancer_v3, 3) Program Scale Testing Requirements - Draft, and 6) SAI APIs and DASH APIs Rough Draft.
+Please begin with 1) the [SDN Packet Transforms document](Documentation/vnet2vnet-service/design/sdn-features-packet-transforms.md), this facilitates understanding of the program goal and the 7 networking scenarios that Azure has defined.  Next 2) [Load Balancer_v3](DASH/Documentation/load-bal-service/design/load-balancer-v3.md), 3) [Program Scale Testing Requirements - Draft](DASH/Documentation/vnet2vnet-service/requirements/program-scale-testing-requirements-draft.md), and 6) [SAI APIs and DASH APIs Rough Draft](DASH/Documentation/sai/design/DASH-apis-rough-draft.xlsx).
 
-The API and Object Model for VNET<->VNET is in draft; the remaining services will be posted over Oct/Nov time frame here.
+The API and Object Model for VNET<->VNET is in draft; the remaining services are a work in progress.
 
 DASH Testing is covered  under the [test/](test/README.md) directory and is a work in progress.
 

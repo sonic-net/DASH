@@ -5,7 +5,7 @@ Why do we need this scenario?  There is a huge cost associated with establishing
 
 - A high Connections per Second (CPS) / Flow SKU for Networked Virtual Appliances (NVA)
 
-	![NVA](images/sdn/high_cps_flow_sku_for_nva.png)
+	![NVA](images/high_cps_flow_sku_for_nva.png)
 
 ## Scale per DPU (Card)
 **Note: Below are the expected numbers per Data Processing Unit (DPU); this applies to both IPV4 and IPV6 underlay and overlay*
@@ -44,7 +44,7 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
 	- Virtual port is the container which holds all policies.
 
-	![tt](images/sdn/vport.png)
+	![tt](images/vport.png)
 
 - On receiving a packet from the wire, the SDN appliance will determine the matching ENI, Packet direction and packet processing strategy based on _Encap Transformation and Rules Evaluation_.
 
@@ -64,7 +64,7 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
             - **Example**: VM with IP 10.0.0.1 sends a packet to 8.8.8.8, VM Inbound ACL blocks all internet, VM outbound ACL allows 8.8.8.8 \- Response packet from 8.8.8.8 must be allowed without opening any inbound ACL due to the flow match.
             
-	![Appliance](images/sdn/sdn_appliance.png)
+	![Appliance](images/sdn_appliance.png)
 
 ## Packet processing Pipeline (Sequential prefix match lookups)
 
@@ -221,18 +221,18 @@ Etc…
 ### Inbound
 
  **Fast Path - Flow Match**
- ![Inb](images/sdn/inb_fast_path_flow_match.png)
+ ![Inb](images/inb_fast_path_flow_match.png)
 
  **Slow Path - No flow match**
- ![InbSP](images/sdn/in_slow_path_no_flow_match.png)
+ ![InbSP](images/in_slow_path_no_flow_match.png)
 
 ### Outbound
 
  **Fast path - flow match**
-![OutFP](edia/images/sdn/out_fast_path_flow_match.png)
+![OutFP](edia/images/out_fast_path_flow_match.png)
 
  **Slow Path (policy evaluation) - No flow match**
-![OutSP](images/sdn/out_slow_path_pol_eval_no_flow_match.png)
+![OutSP](images/out_slow_path_pol_eval_no_flow_match.png)
 
 ## Packet Transform Examples
 
@@ -312,25 +312,25 @@ Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Ba
 
 ### VNET 
 ### Scenario:  VM<->VM (in VNET) communication
-![VNETtoVNET](images/sdn/vm_to_vm.png)
+![VNETtoVNET](images/vm_to_vm.png)
 
 ### Internal Load balancer 
-![LB](images/sdn/vm_to_ilb.png)
+![LB](images/vm_to_ilb.png)
 
 ### Private Link
-![PL](images/sdn/private_link.png)
+![PL](images/private_link.png)
 
 ### Private Link Service 
-![PLS](images/sdn/private_link_service.png)
+![PLS](images/private_link_service.png)
 
 ### Service Tunneling
-![ST](images/sdn/service_tunneling.png)
+![ST](images/service_tunneling.png)
 
 ### Inbound from LB
-![InbfromLB](images/sdn/inbound_frm_ilb.png)
+![InbfromLB](images/inbound_frm_ilb.png)
 
 ### Outbound NAT - L4 
-![OutNATL4](images/sdn/outbound_nat_l4.png)
+![OutNATL4](images/outbound_nat_l4.png)
 
 (L3 works in same way except port re-write)
 

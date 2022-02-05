@@ -39,7 +39,7 @@ Scaling is achieved via the following concepts:
 
 ### High-level architecture of Rack Design for High Availability and Scale
 
-![hl-arch-rack-design-ha](images/has/hl-arch-rack-design-ha.png)
+![hl-arch-rack-design-ha](images/hl-arch-rack-design-ha.png)
 
 **Considerations**
 
@@ -65,7 +65,7 @@ Scaling is achieved via the following concepts:
 
 ### Traffic flow in Highly Available and Scalable Sirius Appliance Set
 
-![traffic-flow-has-scale-appliance](images/has/traffic-flow-has-scale-appliance.png)
+![traffic-flow-has-scale-appliance](images/traffic-flow-has-scale-appliance.png)
 
 **Considerations**
 
