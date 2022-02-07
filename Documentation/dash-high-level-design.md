@@ -44,7 +44,7 @@ The overall objective is to **optimize network SMART Programmable Technologies p
 
 ## Architecture
 
-SONiC is structured into various containers that communicate through multiple logical databases via a shared Redis instance. DASH will make use of the SONiC infrastructure as shown in the figure below. The following is a high level view of DASH architecture. DASH builds upon the traditional SONiC Architecture, which is documented in the SONiC Wiki under [Sonic System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture). The following descriptions assume familiarity with the SONiC architecture and will describe DASH as incremental changes relative to traditional SONiC.
+SONiC is structured into various containers that communicate through multiple logical databases via a shared Redis instance. DASH will make use of the SONiC infrastructure as shown in the figure below. The following is a high level view of DASH architecture. DASH builds upon the traditional SONiC Architecture, which is documented in the SONiC Wiki under [Sonic System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture). The following descriptions assume familiarity with the SONiC architecture and will describe DASH as incremental changes relative to traditional SONiC. Notice that DASH adds a new SDN control plane via **gNMI** wuith the **DASH container**. 
 
 **DASH software stack**
 
