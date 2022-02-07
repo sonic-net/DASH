@@ -217,6 +217,8 @@ Etc…
 
 
  ## Packet Flow
+For the first packet of a TCP flow, we take the Slow Path, running the transposition engine and matching at each layer.  For subsequent packets, we take the Fast Path, 
+matching a unified flow via UFID and applying a transposition directly against rules.
 
 ### Inbound
 
