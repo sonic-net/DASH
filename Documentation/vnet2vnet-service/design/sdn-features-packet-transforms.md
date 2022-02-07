@@ -229,7 +229,7 @@ Etc…
 ### Outbound
 
  **Fast path - flow match**
-![OutFP](edia/images/out_fast_path_flow_match.png)
+![OutFP](images/out_fast_path_flow_match.png)
 
  **Slow Path (policy evaluation) - No flow match**
 ![OutSP](images/out_slow_path_pol_eval_no_flow_match.png)
