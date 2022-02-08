@@ -36,7 +36,10 @@ etc
 | VNET-to-VNET Service                         | [Parent Folder](vnet2vnet-service/README.md) \| [ Design](vnet2vnet-service/design/README.md) \| [Compliance Requirements](vnet2vnet-service/requirements/README.md)|
 | SAI Southbound API                   | [Parent Folder](sai/README.md) \| [ Design](sai/design/README.md) \| [Compliance Requirements](sai/requirements/README.md)|
 | gNMI Northbound API                  | [Parent Folder](gnmi/README.md) \| [ Design](gnmi/design/README.md) \| [Compliance Requirements](gnmi/requirements/README.md)|
-
+| Service Tunnel & Private Link
+| VNET Peering
+| Encryption Gateway
+| ER Gateway
 
 ## Relationships and Flow of Documents
 The diagram below shows how High-Level Descriptions beget Compliance requirements, compliance requirements beget test cases, and test cases are executed by test scripts to produce Test Results.
