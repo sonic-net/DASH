@@ -75,7 +75,7 @@ For **High Availability** (HA), the SDN controller selects the pair of cards and
 
 ### Traditional SONiC Application Containers
 
- In the figure above, the "Traditional SONiC Application Containers" box comprises the normal collection of optional/customizable application daemons and northbound interfaces, which provide BGP, LLDP, SNMP, etc, etc. These are described thoroughly in the [Sonic System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture) wiki and reproduced in diagram form under the [Detailed Architectures](#detailed-architectures) section of this document.
+ In the figure above, the "SONiC Containers" box comprises the normal collection of optional/customizable application daemons and northbound interfaces, which provide BGP, LLDP, SNMP, etc, etc. These are described thoroughly in the [Sonic System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture) wiki and reproduced in diagram form under the [Detailed Architectures](#detailed-architectures) section of this document.
  ### DASH container
  
 The SDN controller communicates with a DASH device through a **[gNMI](https://github.com/Azure/DASH/wiki/Glossary#gnmi) endpoint** served by a new DASH SDN agent **running inside a new SONiC DASH container**.  
