@@ -288,6 +288,25 @@ matching a unified flow via UFID and applying a transposition directly against r
 
 ## Telemetry
 
+## Counters
+
+Counters are objects on which data is being counted; we will be creating them per ENI. 
+Note - a counter is associated with only one ENI, it is not shared among different ENIs. You can define a counter as a global object but will not be referencing the same counter different ENIs.
+As long as the ENI exists, the counters exist. 
+We use API calls to handle these counters and we can add them globally. 
+When later we are creating a route table, we should be able to reference the counter.  
+Counters will live long after the flow ceased.
+The control plane is the consumer of counters that are defined in the data plane.  Counters can be assigned on the route rule, or assigned onto a mapping.  If mapping does not exist, we revert to the route rule counter. The control plane queries every 10 seconds. The counters persist after the flow is is complete. A complete definition will follow when we have more information other than software defined devices.  
+
+In the flow table we list the packet counter called a metering packet; once we have the final implementation that does the packet processing, we can do metering. Essentially, whenever a route table is accessed and we identify the right VNET target (based on the mapping from the underlay IP), will have an ID of the metering packet preprogrammed earlier.  We will reference this counter in the mappings. When the flow is created it will list this counter ID.  When the packet transits inbound or outbound through the specific flow, this counter becomes incremented and tracked separately for the inbound and outbound.
+
+We need more information around Counters, Statistics, and we need to start thinking about how to add Metering- and reconcile this in the P4 model.  
+Questions:  
+How often will we read?  
+What type of API to use?  
+Will we push or pull from the Controller?
+
+
 ## BGP
 
 ## Watchdogs
