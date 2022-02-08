@@ -44,7 +44,7 @@ The overall objective is to **optimize network SMART Programmable Technologies p
 
 ## Architecture
 
-SONiC is structured into various containers that communicate through multiple logical databases via a shared Redis instance. DASH will make use of the SONiC infrastructure as shown in the figure below. The following is a high level view of DASH architecture. DASH builds upon the traditional SONiC Architecture, which is documented in the SONiC Wiki under [Sonic System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture). The following descriptions assume familiarity with the SONiC architecture and will describe DASH as incremental changes relative to traditional SONiC. Notice that DASH adds a new SDN control plane via **gNMI** wuith the **DASH container**. 
+SONiC is structured into various containers that communicate through multiple logical databases via a shared Redis instance. DASH will make use of the SONiC infrastructure as shown in the figure below. The following is a high level view of DASH architecture. DASH builds upon the traditional SONiC Architecture, which is documented in the SONiC Wiki under [Sonic System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture). The following descriptions assume familiarity with the SONiC architecture and will describe DASH as incremental changes relative to traditional SONiC. Notice that DASH adds a new SDN control plane via **gNMI** with the **DASH container**. 
 
 **DASH software stack**
 
@@ -142,11 +142,15 @@ A DASH "Smart Switch" is a merging of a datacenter switch and one or more DPUs i
 
 ## DASH container state interactions representation
 
+The system architecture for SONiC-DASH relies upon the [SONiC system architecture](https://github.com/Azure/SONiC/wiki/Architecture), as shown in the following figure.
+
 ![dash-high-level-design](./images/hld/dash-high-level-design.svg)
+ 
+This architecture introduces the following DASH modifications:
 
-The system architecture for SONiC-DASH relies upon the [SONiC system architecture](https://github.com/Azure/SONiC/wiki/Architecture) and adds a *new docker container* in the user space named **dash container** to create the functional component for DASH.  
+1. A *new docker container* in the user space named **dash container** to create the functional component for DASH.
 
-In the **sync-d container** we will add **sai api DASH** (as opposed to *sai api* in the original SONiC architecture).  
+1. In the **sync-d container**, the **sai api DASH** (as opposed to *sai api* in the original SONiC architecture).  
 
 The *DPU/IPU/SmartNic* hardware will run a separate instance of SONiC-DASH on the hardware.  
 
@@ -159,7 +163,8 @@ Note the following:
 - **DASH API** shall be exposed as gNMI interface as part of the SONiC gNMI container. 
 - **DASH clients** shall configure SONiC via gRPC get/set calls. 
 - **gNMI container** has the config backend to translate/write  DASH objects to CONFDB and/or APPDB.
-- **DASH orchestration agent** (_dashorch_) in the SWSS container subscribes to the DB objects programmed by the DASH agent. These objects are not expected to be programmed to kernel, so orchestration agent writes to ASICDB for the DASH technology provider SAI implementation to finally program the DPU. The DASH orchestration agent shall write the state of each tables to STATEDB used by the applications to fetch the programmed status of DASH configured objects. 
+- **SWSS** (Underlay) for DASH shall have a small initialization and shall support a defined set of SAI APIs.
+- **DashOrch** (DASH orchestration agent) (Overlay) in the SWSS container subscribes to the DB objects programmed by the DASH agent. These objects are not expected to be programmed to kernel, so orchestration agent writes to ASICDB for the DASH technology provider SAI implementation to finally program the DPU. The DASH orchestration agent shall write the state of each tables to STATEDB used by the applications to fetch the programmed status of DASH configured objects. 
 
 > [!NOTE] 
 > @lihuay @lguohan @prsunny - would you review and/or improve this write-up?
