@@ -1,28 +1,42 @@
 ---
 title: SONiC-DASH High Level Design
 description: Describe SONiC-DASH High Level Design
-last update: 01/28/2022
+last update: 02/08/2022
 ---
+
+**Table of Contents**
+
+- [SONiC-DASH High Level Design (WIP)](#sonic-dash-high-level-design-wip)
+  - [Overview](#overview)
+    - [Objectives](#objectives)
+  - [Architecture](#architecture)
+    - [SDN controller](#sdn-controller)
+      - [SDN and DPU High-Availability (HA)](#sdn-and-dpu-high-availability-ha)
+    - [Traditional SONiC Application Containers](#traditional-sonic-application-containers)
+    - [DASH container](#dash-container)
+      - [Multiple DPUs device](#multiple-dpus-device)
+    - [Switch State Service (SWSS)](#switch-state-service-swss)
+    - [Switch Abstraction Interface (SAI) DASH](#switch-abstraction-interface-sai-dash)
+    - [ASIC Drivers](#asic-drivers)
+    - [DASH capable ASICs](#dash-capable-asics)
+  - [Detailed architectures](#detailed-architectures)
+    - [DASH NOS single DPU on NIC](#dash-nos-single-dpu-on-nic)
+    - [DASH appliance architecture](#dash-appliance-architecture)
+      - [High Level Architecture](#high-level-architecture)
+      - [Low level architecture](#low-level-architecture)
+    - [DASH smart switch architecture](#dash-smart-switch-architecture)
+      - [High level architecture](#high-level-architecture-1)
+      - [Low level architecture](#low-level-architecture-1)
+  - [DASH container state interactions representation](#dash-container-state-interactions-representation)
+  - [DASH deployment options](#dash-deployment-options)
+  - [Repositories](#repositories)
+  - [References](#references)
+
 
 # SONiC-DASH High Level Design (WIP)
 
 > [!WARNING] 
 > **This document is work in progress**
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Requirements](#requirements)
-- [Architecture](#architecture)
-- [High-Level Design](#high-level-design)
-- [Repositories](#repositories)
-- [Configuration and management](#configuration-and-management)
-- [Restrictions / Limitations](#restrictions--limitations)
-- [Glossary](https://github.com/Azure/DASH/wiki/Glossary)
-- [References](#supplementary-documents)
-
-
-# SONiC-DASH High Level Design
 
 This document describes the **SONiC Disaggregated API for SONiC Hosts** (SONiC-DASH) high level design and architecture. SONiC-DASH (DASH for short) is an open source project that will deliver enterprise network performance to critical cloud applications. The ultimate goal is that DASH will have the same success as [SONiC](https://github.com/Azure/SONiC) for switches and also be widely adopted as a major **Open NOS for Programmable Hardware Technologies**, including [SmartNICs](https://blogs.nvidia.com/blog/2021/10/29/what-is-a-smartnic/), to supercharge a variety of cloud and enterprise applications.
 
