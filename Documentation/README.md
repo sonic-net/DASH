@@ -12,7 +12,7 @@ Documentation is organized into folders as follows. Each feature or topic has al
 ```
 topic1
     design
-        Topic1 High-level Descriptions and architecture
+        topic1 High-level Descriptions and architecture
     requirements
         Topic1 compliance Requirements
 
