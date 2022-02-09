@@ -270,7 +270,7 @@ matching a unified flow via UFID and applying a transposition directly against r
 ### Outbound
 
  **Fast path - flow match**
-![OutFP](edia/images/sdn/out_fast_path_flow_match.png)
+![OutFP](images/sdn/out_fast_path_flow_match.png)
 
  **Slow Path (policy evaluation) - No flow match**
 ![OutSP](images/sdn/out_slow_path_pol_eval_no_flow_match.png)
