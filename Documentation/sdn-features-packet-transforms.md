@@ -1,3 +1,4 @@
+
 **Table of contents**
 
 - [SDN Features, Packet Transforms and Scale](#sdn-features-packet-transforms-and-scale)
@@ -256,8 +257,10 @@ Etc…
 
 
  ## Packet Flow
+ 
 For the first packet of a TCP flow, we take the Slow Path, running the transposition engine and matching at each layer.  For subsequent packets, we take the Fast Path, 
 matching a unified flow via UFID and applying a transposition directly against rules.
+
 
 ### Inbound
 
@@ -270,7 +273,9 @@ matching a unified flow via UFID and applying a transposition directly against r
 ### Outbound
 
  **Fast path - flow match**
+
 ![OutFP](images/sdn/out_fast_path_flow_match.png)
+
 
  **Slow Path (policy evaluation) - No flow match**
 ![OutSP](images/sdn/out_slow_path_pol_eval_no_flow_match.png)
@@ -327,6 +332,7 @@ matching a unified flow via UFID and applying a transposition directly against r
 
 ## Telemetry
 
+
 ## Counters
 
 Counters are objects for counteing data per ENI. The following are their main characteristics:
@@ -353,6 +359,7 @@ We need more information around Counters, Statistics, and we need to start think
 - How often will we read?  
 - What type of API to use?  
 - Will we push or pull from the Controller?
+
 
 
 ## BGP

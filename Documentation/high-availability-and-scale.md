@@ -32,7 +32,8 @@ Scaling is achieved via the following concepts:
     flow replication delays
 1. Ensure both inbound and outbound packets transit the same appliance for a
     given flow
-1. Interoperabililty
+1. Interoperabililty (in both failover and live migration?)
+
 
 
 ## Architecture
