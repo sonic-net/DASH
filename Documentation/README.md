@@ -44,6 +44,7 @@ They shall conform to each service's design specificaitons and compliance requir
 | ------- | ---------|
 | Load Balancer Service                | [Parent Folder](load-bal-service/README.md) \| [ Design](load-bal-service/design/README.md) \| [Compliance Requirements](load-bal-service/requirements/README.md)|
 | VNET-to-VNET Service                         | [Parent Folder](vnet2vnet-service/README.md) \| [ Design](vnet2vnet-service/design/README.md) \| [Compliance Requirements](vnet2vnet-service/requirements/README.md)|
+| Service Tunnel & Private Link Service                          | [Parent Folder](stpl-service/README.md) \| [ Design](stpl-service/design/README.md) \| [Compliance Requirements](stpl-service/requirements/README.md)|
 | VNET Peering Service                          | [Parent Folder](vnet-peering-service/README.md) \| [ Design](vnet-peering-service/design/README.md) \| [Compliance Requirements](vnet-peering-service/requirements/README.md)|
 | Express Route (ER) Service                    |  [Parent Folder](express-route-service/README.md) \| [ Design](express-route-service/design/README.md) \| [Compliance Requirements](express-route-service/requirements/README.md)|
 | Encryption Gateway Service                    |  [Parent Folder](encrypt-gw-service/README.md) \| [ Design](encrypt-gw-service/design/README.md) \| [Compliance Requirements](encrypt-gw-service/requirements/README.md)|
