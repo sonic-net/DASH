@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 
-import os
-import json
-import argparse
-from git import Repo
-from jinja2 import Template, Environment, FileSystemLoader
+try:
+    import os
+    import json
+    import argparse
+    from git import Repo
+    from jinja2 import Template, Environment, FileSystemLoader
+except ImportError as ie:
+    print("Import failed for " + ie.name)
+    exit(1)
 
 PIPELINES_TAG = 'pipelines'
 NAME_TAG = 'name'
@@ -246,6 +250,11 @@ args = parser.parse_args()
 
 if not os.path.isfile(args.filepath):
     print('File ' + args.filepath + ' does not exist')
+    exit(1)
+
+
+if os.path.exists('./SAI'):
+    print('Directory ./SAI already exists. Please remove in order to proceed')
     exit(1)
 
 # Get SAI dictionary from P4 dictionary
