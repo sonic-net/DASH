@@ -1,3 +1,43 @@
+
+**Table of contents**
+
+- [SDN Features, Packet Transforms and Scale](#sdn-features-packet-transforms-and-scale)
+	- [First Target Scenario:  Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance](#first-target-scenario--highly-optimized-path-dedicated-appliance-little-processing-or-encap-to-sdn-appliance-and-policies-on-an-sdn-appliance)
+	- [Scale per DPU (Card)](#scale-per-dpu-card)
+	- [Scenario Milestone and Scoping](#scenario-milestone-and-scoping)
+	- [Virtual Port and Packet Direction](#virtual-port-and-packet-direction)
+	- [Packet processing Pipeline (Sequential prefix match lookups)](#packet-processing-pipeline-sequential-prefix-match-lookups)
+		- [ACL](#acl)
+	- [Routes and Route-Action](#routes-and-route-action)
+	- [Packet Flow](#packet-flow)
+		- [Inbound](#inbound)
+		- [Outbound](#outbound)
+	- [Packet Transform Examples](#packet-transform-examples)
+		- [VNET to VNET Traffic](#vnet-to-vnet-traffic)
+		- [VNET to Internet - TBD](#vnet-to-internet---tbd)
+		- [VNET to Service Endpoints - TBD](#vnet-to-service-endpoints---tbd)
+		- [VNET to Private Link  - TBD.](#vnet-to-private-link----tbd)
+	- [Metering](#metering)
+	- [VNET Encryption](#vnet-encryption)
+	- [Telemetry](#telemetry)
+	- [Counters](#counters)
+	- [BGP](#bgp)
+	- [Watchdogs](#watchdogs)
+	- [Servicing](#servicing)
+	- [Debugging](#debugging)
+	- [Flow Replication](#flow-replication)
+	- [Unit Testing and development](#unit-testing-and-development)
+	- [Internal Partner dependencies](#internal-partner-dependencies)
+	- [Packet transforms](#packet-transforms)
+		- [VNET](#vnet)
+		- [Scenario:  VM<->VM (in VNET) communication](#scenario--vm-vm-in-vnet-communication)
+		- [Internal Load balancer](#internal-load-balancer)
+		- [Private Link](#private-link)
+		- [Private Link Service](#private-link-service)
+		- [Service Tunneling](#service-tunneling)
+		- [Inbound from LB](#inbound-from-lb)
+		- [Outbound NAT - L4](#outbound-nat---l4)
+
 # SDN Features, Packet Transforms and Scale
 
 ## First Target Scenario:  Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance
@@ -17,7 +57,7 @@ Why do we need this scenario?  There is a huge cost associated with establishing
 | Flow Scale <img style="width:400px"/>| <ul><li>1+ million flows per v-port (aka ENI)</li> <li>50 million per DPU/Card<ul><li>single encap IPv4 overlay and IPV6 underlay</li> <li>single encap IPv6 overlay and IPV6 underlay. (This can be lower)</li> <li>single encap IPV4</li> <li>Encap IPv6 and IPV4</li></ul></ul> *These are complex flows, details are below.* | |  
 | CPS | 4 million+ (max)  |
 | Routes | 100k per v-port (max)  |
-| ACLs | 100k IP-Prefixes, 10k Src/Dst ports per v-port (aka ENI) (max)  |
+| ACLs | 100k IP-Prefixes, 10k Src/Dst ports per v-port (max)  |
 | NAT | tbd  |
 | V-Port (aka ENI or Source VM) | 10k (max)  |
 | Mappings (VMS deployed) | 10 million total mapping per DPU; mappings are the objects that help us bridge the customer's virtual space (private ip address assigned to each VM) with Azure's physical space (physical/routable addresses where the VMs are hosted)  |
@@ -217,6 +257,10 @@ Etc…
 
 
  ## Packet Flow
+ 
+For the first packet of a TCP flow, we take the Slow Path, running the transposition engine and matching at each layer.  For subsequent packets, we take the Fast Path, 
+matching a unified flow via UFID and applying a transposition directly against rules.
+
 
 ### Inbound
 
@@ -229,7 +273,9 @@ Etc…
 ### Outbound
 
  **Fast path - flow match**
-![OutFP](edia/images/sdn/out_fast_path_flow_match.png)
+
+![OutFP](images/sdn/out_fast_path_flow_match.png)
+
 
  **Slow Path (policy evaluation) - No flow match**
 ![OutSP](images/sdn/out_slow_path_pol_eval_no_flow_match.png)
@@ -285,6 +331,36 @@ Etc…
 ## VNET Encryption
 
 ## Telemetry
+
+
+## Counters
+
+Counters are objects for counteing data per ENI. The following are their main characteristics:
+
+- A counter is associated with only one ENI that is, it is not shared among different ENIs. 
+- If you define a counter as a global object, it cannot reference different ENIs. 
+- The counters live as long as the related ENI exists.  
+- The counters persist after the flow is completed. 
+- You use API calls to handle these counters. 
+- When creating a route table, you will be able to reference the counters.
+
+
+The control plane is the consumer of counters that are defined in the data plane. The control plane queries every 10 seconds. 
+
+Counters can be assigned on the route rule, or assigned onto a mapping. If mapping does not exist, you revert to the route rule counter. A complete definition will follow when we have more information other than software defined devices.  
+
+In the flow table we list the packet counter called a metering packet; once we have the final implementation that does the packet processing, we can do metering. 
+
+Essentially, whenever a route table is accessed and we identify the right VNET target (based on the mapping from the underlay IP), will have an ID of the metering packet preprogrammed earlier.  We will reference this counter in the mappings. When the flow is created it will list this counter ID.  When the packet transits inbound or outbound through the specific flow, this counter is incremented and tracked separately for the inbound and outbound.
+
+We need more information around Counters, Statistics, and we need to start thinking about how to add Metering- and reconcile this in the P4 model.  
+
+**Questions**  
+- How often will we read?  
+- What type of API to use?  
+- Will we push or pull from the Controller?
+
+
 
 ## BGP
 

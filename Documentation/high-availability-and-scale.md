@@ -35,6 +35,7 @@ Scaling is achieved via the following concepts:
 1. Interoperabililty (in both failover and live migration?)
 
 
+
 ## Architecture
 
 ### High-level architecture of Rack Design for High Availability and Scale
