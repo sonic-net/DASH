@@ -8,7 +8,7 @@ make docker
 ## Build pipeline
 ```
 make clean
-bmv2/sirius_pipeline.bmv2/sirius_pipeline.json
+make bmv2/sirius_pipeline.bmv2/sirius_pipeline.json
 ```
 
 ## Run software switch
