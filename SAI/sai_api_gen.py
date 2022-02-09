@@ -240,7 +240,7 @@ parser.add_argument('filepath', type=str, help='Path to P4 program BMV2 JSON fil
 parser.add_argument('apiname', type=str, help='Name of the new SAI API')
 parser.add_argument('--print-sai-lib', type=bool)
 parser.add_argument('--sai-git-url', type=str, default='https://github.com/Opencomputeproject/SAI')
-parser.add_argument('--ignore-tables', type=str, default='', help='Coma separated list of tables to ignore')
+parser.add_argument('--ignore-tables', type=str, default='', help='Comma separated list of tables to ignore')
 parser.add_argument('--sai-git-branch', type=str, default='master')
 args = parser.parse_args()
 
