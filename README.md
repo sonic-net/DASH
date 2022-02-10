@@ -1,4 +1,4 @@
-# Project - Disaggregated API for SONiC Hosts (SONiC DASH) - version 0.1 DRAFT/Work in Progress
+# Project - Disaggregated API for SONiC Hosts (SONiC-DASH) - version 0.1 DRAFT/Work in Progress
 
 ## SONiC DASH is a new open source project that will "deliver enterprise network performance to critical cloud applications".  The project extends functionality to stateful workloads.  
 
