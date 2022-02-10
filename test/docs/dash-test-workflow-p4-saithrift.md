@@ -6,7 +6,7 @@
 [[ << DASH main README ]](../../README.md)
 # DASH Testing Using P4 Simulators and SAI Thrift
 
-This section documents the use of P4-based simulators or SW dataplanes to verify DASH behavior, using saithrift API. Refer to the following figure. Also, refer to [DASH Test Workflow with saithrift](dash-test-workflow-saithrift.md) as it contains some context and common elements which are not repeated here. The discussion below will assume a working knowledge of the saithrift workflow.
+This article documents the use of P4-based simulators or SW dataplanes to verify DASH behavior, using saithrift API. Refer to the following figure. Also, refer to [DASH Test Workflow with saithrift](dash-test-workflow-saithrift.md) as it contains some context and common elements which are not repeated here. The discussion below will assume a working knowledge of the saithrift workflow.
 
 Other documents on this site have explained the rationale of a P4 Behavioral model, with uses including:
 * Modeling and verifying the DASH dataplane intent
