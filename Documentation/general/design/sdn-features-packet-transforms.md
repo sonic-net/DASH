@@ -2,6 +2,7 @@
 
 [ [ << Back to DASH top-level Documents](../../README.md#contents) ]
 
+>**NOTE**: This document is destined to be restructured into general- and per-service specifications.
 
 **Table of contents**
 

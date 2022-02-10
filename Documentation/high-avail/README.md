@@ -8,5 +8,5 @@ This folder contains DASH High Availability design and requirements documents.
 
 | Folder                                                 | Description                                  |
 | ------------------------------------------------------ | -------------------------------------------- |
-| [design](design/README.md)                             | DASH HA design & architecture documents |
-| [requirements](requirements/README.md)                 | DASH HA requirements documents         |
+| [design](design/README.md)                             | DASH High Availability design & architecture documents |
+| [requirements](requirements/README.md)                 | DASH High Availability requirements documents         |
