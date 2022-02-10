@@ -1,5 +1,4 @@
 # Images
-
 The following is the Image folder break-down in sub-folders. 
 
 - [icons](icons). It contains DASH and SONiC icons.

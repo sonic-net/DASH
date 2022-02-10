@@ -10,4 +10,5 @@ This folder contains DASH "general" design and architecture documents.
 
 | Document                                               | Description                                |
 | ------------------------------------------------------ | ------------------------------------------ |
-| [dash-high-level-design.md](dash-high-level-design.md) | DASH High-Level Architecture and Design (doc awaiting [PR33](https://github.com/Azure/DASH/pull/33))    |]
+| [dash-high-level-design.md](dash-high-level-design.md) | DASH High-Level Architecture and Design |
+| [sdn-features-packet-transforms.md](sdn-features-packet-transforms.md) | DASH VNET-to-VNET HLD and Packet Transforms   |
