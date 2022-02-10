@@ -1,4 +1,4 @@
-# Project - Disaggregated API for SONiC Hosts (SONiC-DASH) - version 0.1 DRAFT/Work in Progress
+# SONiC-DASH - Disaggregated API for SONiC Hosts - version 0.1 DRAFT/Work in Progress
 
 ## SONiC-DASH is a new open source project that will "deliver enterprise network performance to critical cloud applications".  The project extends functionality to stateful workloads.  
 
@@ -12,7 +12,10 @@ We hope that DASH will have the same success as SONiC for switches and also be w
 
 ## Where to Start?
 
-Please begin with 1) the SDN Packet Transforms document, this facilitates understanding of the program goal and the 7 networking scenarios that Azure has defined.  Next 2) peruse the dash-high-level-design for an overview of the architecture, and 3) Program Scale Testing Requirements - Draft for an example of a test to stress DPU/NIC hardware.
+Please begin with 
+1. The [SDN Packet Transforms](Documentation/sdn-features-packet-transforms.md) document, this facilitates understanding of the program goal and the 7 networking scenarios that Azure has defined.  Next...
+2. Peruse the [dash-high-level-design](Documentation/dash-high-level-design.md) for an overview of the architecture, and 
+3. [Program Scale Testing Requirements - Draft](Documentation/program-scale-testing-requirements-draft.md) for an example of a test to stress DPU/NIC hardware.
 
 The API and Object Model for VNET<->VNET is in draft; the remaining services will be posted over as we move forward.
 
