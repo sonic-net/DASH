@@ -1,12 +1,14 @@
 [[ << Back to DASH top-level README ](../README.md)]
 # DASH Documentation 
 
-Documentation comprises system descriptions, High-level design (HLD) documents and detailed compliance requirements.
+Documentation comprises system descriptions, High-level design (HLD) documents and detailed compliance requirements. These are contained in the [DASH/documentation](./) directory and subdirectories.
+
+The testing framework, methodology, documentation and testing artifacts are stored in the [DASH/test](../test) directory
 
 See also DASH [FAQ](https://github.com/Azure/DASH/wiki/FAQ) and [Glossary](https://github.com/Azure/DASH/wiki/Glossary). 
 
 
-# Organization of Documents
+# Organization of Design & Requirements Documents
 Documentation consists of separate, but related *System Descriptions* (HLDs, architecture, theory of operations, etc.) and *Compliance Requirements* (hard specifications, typically numerical  but also behavioral). These two types of documents are deliberately kept separated, see [Relationships and Flow of Documents](#relationships-and-flow-of-documents).
 
 Documentation is organized into folders as follows. Each feature or topic has all the high-level specs  and the compliance requirements in the same parent folder, e.g. General, High-Availability, etc., making it easier to access related information about one topic. As the complexity grows, this helps keep things organized according to "functional topic." 
