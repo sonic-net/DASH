@@ -120,7 +120,7 @@ The Switch Abstraction Interface (SAI) is a common API that is supported by many
 
 SAI "schema" are represented as fixed c-language header files and derived metadata header files. The underlay and overlay schema have different origins:
 * Traditional SAI headers are defined in the [OCP SAI project repo](https://github.com/opencomputeproject/SAI/tree/master/inc).These are hand-generated and maintained. DASH uses a subset of these to manage underlay functions, e.g. device management, Layer 3 routing and so forth.
-* DASH SAI "underlay" objects are derived from a [P4 Behavioral Model](https://github.com/Azure/DASH/tree/main/sirius-pipeline). A script reads the P4 model and generates SAI header files.
+* DASH SAI "overlay" objects are derived from a [P4 Behavioral Model](https://github.com/Azure/DASH/tree/main/sirius-pipeline). A script reads the P4 model and generates SAI header files.
 
 DASH uses an **enhanced syncd** to configure the dataplane using the technology supplier-specific SAI library.
 
