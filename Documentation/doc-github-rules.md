@@ -17,7 +17,7 @@ This document describes a short process to effectively use GitHub to achieve the
 
 1. Proposing a change. 
 2. Reporting a bug. 
-3. Making impovement suggestions.   
+3. Making improvement suggestions.   
 
 > [!NOTE]
 > The intent of this document is not to teach the use of GitHub. The document just gathers some basic rules for a quick reference. 
