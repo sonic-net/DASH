@@ -9,8 +9,8 @@ last update: 02/11/2022
 **Table of contents**
 - [Create issues](#create-issues)
 - [Create a fork](#create-a-fork)
-  - [Create a pull request (PR) in the original repository from a fork](#create-a-pull-request-pr-in-the-original-repository-from-a-fork)
-- [Create pull request (PR) in the original repository](#create-pull-request-pr-in-the-original-repository)
+  - [Create a Pull Request in the original repository from a fork](#create-a-pull-request-in-the-original-repository-from-a-fork)
+- [Create a Pull Request from a branch in the original repository](#create-a-pull-request-from-a-branch-in-the-original-repository)
 - [Tools](#tools)
 
 This document describes a short process to effectively use GitHub to achieve the following main goals:
@@ -55,7 +55,7 @@ This approach is useful if you want to
 In this case, it's good practice to regularly sync your fork with the original repository. 
 For more information, see [Syncing a fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork).
 
-### Create a pull request (PR) in the original repository from a fork
+### Create a Pull Request in the original repository from a fork
 
 You can make any changes to a fork, including making branches and opening pull requests. 
 If you want to contribute to the original repository, you can send a request to the original author to pull your fork into their repository by submitting a pull request.
@@ -66,7 +66,7 @@ If you use the Github desktop app, see [Creating an issue or pull request](https
 
 As the author, you submit the PR to a review phase. The PR can be approved or rejected. If approved, the proposed changes are merged into the original repository by the people that have the ability to do so.
 
-## Create pull request (PR) in the original repository 
+## Create a Pull Request from a branch in the original repository
 
 You use a pull request (PR) to propose changes to a repository. A correct practice is to create a branch off the original repository and then create a PR based on this branch. You must have write access to the original repository. So this approach is for internal contributors. 
 
