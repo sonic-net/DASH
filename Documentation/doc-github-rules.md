@@ -20,6 +20,10 @@ This document describes a short process to effectively use GitHub to achieve the
 2. Reporting a bug. 
 3. Making impovement suggestions.   
 
+> [!NOTE]
+> The intent of this document is not to teach the use of GitHub. It just gathers in one place some of tne basic rules to quickly refer to. 
+
+
 ## Create issues
 
 You use the **Issues** mechanism to report problems, bugs and suggest general improvements. This is for both internal and external contributors. 
@@ -38,7 +42,7 @@ For more information, see [Creating an issue](https://docs.GitHub.com/en/issues/
 ## Create a fork
 
 You fork a repository to propose changes to the original repository.
-This is for external contributors that do not have the ability to create PRs directly against the original repository. It can also be used by internal contributors for tasks that cannot be addressed by issuing PRs against the original repository. 
+This is for external contributors that do not have the ability to create PRs directly against the original repository. It can also be used by internal contributors for longer tasks that cannot be addressed by issuing a single PR against the original repository. 
 For more information, see [Fork a repo](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
 
 This approach is useful if you want to 
@@ -57,27 +61,31 @@ If you want to contribute to the original repository, you can send a request to 
 
 For more information, see [Creating a pull request from a fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork).
 
-If you use the Github desktop app, you can perform these steps:
+If you use the Github desktop app, you can perform simple steps. Click the "details" arrow to see the steps. 
+<details>
+<ol>
+  <li>In the Github app, select **Branch** in the top menu bar.</li> 
+  <li>In the drop-down menu, select **Compare on GitHub**. This displays the **Comparing changes** page. </li>
+  <li>Select the original repository and then the **Create pull request** button. You can also select a branch in the main repository to host the PR if one is made available. </li>
+</ol>
+</details>
 
-1. In the Github app, select **Branch** in the top menu bar. 
-1. In the drop-down menu, select **Compare on GitHub**. 
-
-      ![create-pr-from-fork](images/docs/compare-on-gjthub.png)
-
-1. This displays the **Comparing changes** page. There select the original repository and then the **Create pull request** button.
-
-    ![create-pr-from-fork](images/docs/create-pr-from-fork.png)
-
-    You can also select a branch in the main repository to host the PR if one is made available. 
+As the author, you submit the PR to a review phase. The PR can be approved or rejected. If approved, the proposed changes are merged into the original repository by the people that have the ability to do so.
 
 ## Create pull request (PR) in the original repository 
 
-You use a pull request (PR) to propose changes to a repository. The changes can be accepted or rejected by the repository's contributors. This is for internal contributors. For more information, see [Creating a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request). 
+You use a pull request (PR) to propose changes to a repository. A correct practice is to create a branch off the original repository and then create a PR based on this branch. You must have write access to the original repository. So this approach is for internal contributors. 
+
+As the author, you submit the PR to a review phase. The PR can be approved or rejected. If approved, the proposed changes are merged into the original repository by the people that have the ability to do so.
+
+For more information, see [Creating a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request). 
 
 
 ## Tools
 
 - [GitHub desktop](https://desktop.github.com/)
 - [Visual studio code](https://code.visualstudio.com/)
-- [Drawing tool: draw.io](https://www.microsoft.com/en-us/p/drawio-diagrams/9mvvszk43qqw?activetab=pivot:overviewtab)
+  - [Gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens)
+- [Drawing tool: diagrams.net](https://www.diagrams.net/)
+
   
