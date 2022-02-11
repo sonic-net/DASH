@@ -21,8 +21,7 @@ This document describes a short process to effectively use GitHub to achieve the
 3. Making impovement suggestions.   
 
 > [!NOTE]
-> The intent of this document is not to teach the use of GitHub. It just gathers in one place some of tne basic rules to quickly refer to. 
-
+> The intent of this document is not to teach the use of GitHub. It just gathers in one place some of tne basic rules to quickly reference. 
 
 ## Create issues
 
@@ -75,6 +74,8 @@ You use a pull request (PR) to propose changes to a repository. A correct practi
 As the author, you submit the PR to a review phase. The PR can be approved or rejected. If approved, the proposed changes are merged into the original repository by the people that have the ability to do so.
 
 For more information, see [Creating a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request). 
+
+If you use the Github desktop app, see [Creating an issue or pull request](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/working-with-your-remote-repository-on-github-or-github-enterprise/creating-an-issue-or-pull-request). 
 
 
 ## Tools
