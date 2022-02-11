@@ -278,13 +278,7 @@ matching a unified flow via UFID and applying a transposition directly against r
 ### Outbound
 
  **Fast path - flow match**
-<<<<<<< HEAD:Documentation/vnet2vnet-service/design/sdn-features-packet-transforms.md
 ![OutFP](images/out_fast_path_flow_match.png)
-=======
-
-![OutFP](images/sdn/out_fast_path_flow_match.png)
-
->>>>>>> main:Documentation/sdn-features-packet-transforms.md
 
  **Slow Path (policy evaluation) - No flow match**
 ![OutSP](images/out_slow_path_pol_eval_no_flow_match.png)

@@ -11,12 +11,12 @@ Future innovations for in-service software upgrades and ultra-high availability 
 We hope that DASH will have the same success as SONiC for switches and also be widely adopted as a major Open NOS for Programmable Technologies (including SmartNICs) to supercharge a variety of cloud and enterprise applications. 
 
 ## Where to Start?
-Go to the [Documentation table of contents](Documentation/README.md) for access to all design and requirements documents.
+Go to the [Documentation table of contents](documentation/README.md) for access to all design and requirements documents.
 
 For a quick technical deep-dive, please begin with:
-1. The [SDN Packet Transforms](Documentation/general/design/sdn-features-packet-transforms.md) document, this facilitates understanding of the program goal and the 7 networking scenarios that Azure has defined.  Next...
-2. Peruse the [dash-high-level-design](Documentation/general/design/dash-high-level-design.md) for an overview of the architecture, and 
-3. [Program Scale Testing Requirements - Draft](Documentation/general/requirements/program-scale-testing-requirements-draft.md) for an example of a test to stress DPU/NIC hardware.
+1. The [SDN Packet Transforms](documentation/general/design/sdn-features-packet-transforms.md) document, this facilitates understanding of the program goal and the 7 networking scenarios that Azure has defined.  Next...
+2. Peruse the [dash-high-level-design](documentation/general/design/dash-high-level-design.md) for an overview of the architecture, and 
+3. [Program Scale Testing Requirements - Draft](documentation/general/requirements/program-scale-testing-requirements-draft.md) for an example of a test to stress DPU/NIC hardware.
 
 The API and Object Model for VNET<->VNET is in draft; the remaining services will be posted over as we move forward.
 
@@ -55,5 +55,5 @@ Any use of third-party trademarks or logos are subject to those third-party's po
 
 <!-- dash icon -->
 <div align="center">
-<img src="Documentation/images/icons/dash-icon-xlarge.png" style="align:center;"/>
+<img src="documentation/images/icons/dash-icon-xlarge.png" style="align:center;"/>
 <div/> 
