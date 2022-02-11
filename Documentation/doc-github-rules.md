@@ -1,8 +1,7 @@
 ---
 title: Github basic process
 description: Describe basic GitHub rules 
-author: michael
-last update: 02/10/2022
+last update: 02/11/2022
 ---
 
 # GitHub basic process
