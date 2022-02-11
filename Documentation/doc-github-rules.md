@@ -88,7 +88,8 @@ If you use the Github desktop app, see [Creating an issue or pull request](https
 
 - [GitHub desktop](https://desktop.github.com/)
 - [Visual studio code](https://code.visualstudio.com/)
-  - [Gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens)
+  - [Gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens). Supercharge the Git capabilities. 
+  - [Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one). Create the ToC for an article.
 - [Drawing tool: diagrams.net](https://www.diagrams.net/)
 
   
