@@ -8,12 +8,11 @@ last update: 02/10/2022
 # Github basic process
 
 **Table of contents**
- - [Github basic process](#github-basic-process)
-  - [Create issues](#create-issues)
-  - [Create a fork](#create-a-fork)
-    - [Create a pull request (PR) in the main repository](#create-a-pull-request-pr-in-the-main-repository)
-  - [Create pull request (PR) in the main repository](#create-pull-request-pr-in-the-main-repository)
-  - [Tools](#tools)
+- [Create issues](#create-issues)
+- [Create a fork](#create-a-fork)
+  - [Create a pull request (PR) in a forked repository](#create-a-pull-request-pr-in-a-forked-repository)
+- [Create pull request (PR) in the original repository](#create-pull-request-pr-in-the-original-repository)
+- [Tools](#tools)
 
 This document describes a short process to effectively use Github to achieve the following main goals:
 
@@ -21,6 +20,7 @@ This document describes a short process to effectively use Github to achieve the
 2. Reporting a bug. 
 3. Making impovement suggestions.   
 
+test
 
 ## Create issues
 
@@ -39,8 +39,8 @@ For more information, see [Creating an issue](https://docs.github.com/en/issues/
 
 ## Create a fork
 
-You fork a repository to propose changes to the main repository.
-This is for external contributors that do not have the ability to create PRs directly against the main repository. It can also be used by internal contributors for tasks that cannot be addressed by issuing PRs against the main repository.
+You fork a repository to propose changes to the original repository.
+This is for external contributors that do not have the ability to create PRs directly against the original repository. It can also be used by internal contributors for tasks that cannot be addressed by issuing PRs against the original repository.
 
 This approach is useful if you want to 
 
@@ -52,7 +52,10 @@ In this case, it's good practice to regularly sync your fork with the original r
 
 ### Create a pull request (PR) in a forked repository
 
+You can make any changes to a fork, including making branches and opening pull requests. 
+If you want to contribute to the original repository, you can send a request to the original author to pull your fork into their repository by submitting a pull request.
 
+For more information, see [Creating a pull request from a fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork).
 
 
 For more information, see 
@@ -61,9 +64,9 @@ For more information, see
 - [Syncing a fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork)
 
 
-## Create pull request (PR) in the main repository 
+## Create pull request (PR) in the original repository 
 
-You use a pull request (PR) to propose changes to a repository. The changes can be accepted or rejected by the repository's contributors. This is for internal contributors. For more information, see [Creating a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)
+You use a pull request (PR) to propose changes to a repository. The changes can be accepted or rejected by the repository's contributors. This is for internal contributors. For more information, see [Creating a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request). 
 
 
 
