@@ -20,7 +20,7 @@ This document describes a short process to effectively use GitHub to achieve the
 3. Making impovement suggestions.   
 
 > [!NOTE]
-> The intent of this document is not to teach the use of GitHub. It just gathers in one place some of tne basic rules to quickly reference. 
+> The intent of this document is not to teach the use of GitHub. The document just gathers some of basic rules for a quick reference. 
 
 ## Create issues
 
