@@ -57,6 +57,9 @@ For more information, see [Syncing a fork](https://docs.github.com/en/pull-reque
 
 ### Create a Pull Request in the original repository from a fork
 
+> [!NOTE] 
+> This approach is for external contributors and internal contributors that do not have write access to the original repository. This is the best practice to follow. 
+
 You can make any changes to a fork, including making branches and opening pull requests. 
 If you want to contribute to the original repository, you can send a request to the original author to pull your fork into their repository by submitting a pull request.
 
@@ -68,7 +71,11 @@ As the author, you submit the PR to a review phase. The PR can be approved or re
 
 ## Create a Pull Request from a branch in the original repository
 
-You use a pull request (PR) to propose changes to a repository. A correct practice is to create a branch off the original repository and then create a PR based on this branch. You must have write access to the original repository. So this approach is for internal contributors. 
+> [!WARNING] 
+> This approach is for internal contributors that have write access to the original repository. 
+
+You use a pull request (PR) to propose changes to a repository. 
+You create a branch off the original repository and then create a PR based on this branch. 
 
 As the author, you submit the PR to a review phase. The PR can be approved or rejected. If approved, the proposed changes are merged into the original repository by the people that have the ability to do so.
 
