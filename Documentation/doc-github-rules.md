@@ -43,7 +43,10 @@ For more information, see [Creating an issue](https://docs.GitHub.com/en/issues/
 
 You fork a repository to propose changes to the original repository.
 This is for external contributors that do not have the ability to create PRs directly against the original repository. It can also be used by internal contributors for longer tasks that cannot be addressed by issuing a single PR against the original repository. 
+
 For more information, see [Fork a repo](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
+
+If you use the Github desktop app, see [Cloning and forking repositories from GitHub Desktop](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/adding-and-cloning-repositories/cloning-and-forking-repositories-from-github-desktop). 
 
 This approach is useful if you want to 
 
@@ -61,14 +64,7 @@ If you want to contribute to the original repository, you can send a request to 
 
 For more information, see [Creating a pull request from a fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork).
 
-If you use the Github desktop app, you can perform simple steps. Click the "details" arrow to see the steps. 
-<details>
-<ol>
-  <li>In the Github app, select **Branch** in the top menu bar.</li> 
-  <li>In the drop-down menu, select **Compare on GitHub**. This displays the **Comparing changes** page. </li>
-  <li>Select the original repository and then the **Create pull request** button. You can also select a branch in the main repository to host the PR if one is made available. </li>
-</ol>
-</details>
+If you use the Github desktop app, see [Creating an issue or pull request](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/working-with-your-remote-repository-on-github-or-github-enterprise/creating-an-issue-or-pull-request). 
 
 As the author, you submit the PR to a review phase. The PR can be approved or rejected. If approved, the proposed changes are merged into the original repository by the people that have the ability to do so.
 
