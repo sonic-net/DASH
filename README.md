@@ -26,13 +26,7 @@ DASH Testing is covered  under the [test/](test/README.md) directory and is a wo
 
 This project welcomes contributions and suggestions.  We are happy to have the Community involved via submission of **Issues and Pull Requests** (with substantive content or even just fixes). We are hoping for the documents, test framework, etc. to become a community process with active engagement.  PRs can be reviewed by by any number of people, and a maintainer may accept.
 
-### Create an Issue
-See general GitHub instructions: [Creating an Issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/creating-an-issue).
-### Submit a Pull Request.
-The following are gereral instructions. GitHub workflows for Community projects are well-understood.
-* [Fork this project to your own repo](https://docs.github.com/en/get-started/quickstart/contributing-to-projects#forking-a-repository)
-* [ Create branches in your fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-and-deleting-branches-within-your-repository)
-* [Submit pull requests](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork).
+See [GitHub Basic Process](doc-github-rules.md).
 
 Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
 the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
