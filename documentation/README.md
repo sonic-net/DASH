@@ -7,27 +7,6 @@ The testing framework, methodology, documentation and testing artifacts are stor
 
 See also DASH [FAQ](https://github.com/Azure/DASH/wiki/FAQ) and [Glossary](https://github.com/Azure/DASH/wiki/Glossary). 
 
-
-# Organization of Design & Requirements Documents
-Documentation consists of separate, but related *System Descriptions* (HLDs, architecture, theory of operations, etc.) and *Compliance Requirements* (hard specifications, typically numerical  but also behavioral). These two types of documents are deliberately kept separated, see [Relationships and Flow of Documents](#relationships-and-flow-of-documents).
-
-Documentation is organized into folders as follows. Each feature or topic has all the high-level specs  and the compliance requirements in the same parent folder, e.g. General, High-Availability, etc., making it easier to access related information about one topic. As the complexity grows, this helps keep things organized according to "functional topic." 
-```
-topic1
-    design
-        topic1 High-level Descriptions and architecture
-    requirements
-        topic1 compliance Requirements
-
-topic2
-    design
-        topic2 High-level Descriptions
-    requirements
-        topic2 compliance Requirements
-
-etc
-...
-```
 # Contents
 ## Baseline Specifications and Requirements
 All DASH devices shall conform to the following design specifications and compliance requirements:
@@ -51,6 +30,28 @@ They shall conform to each service's design specificaitons and compliance requir
 | VNET Peering Service                          | [Parent Folder](vnet-peering-service/README.md) \| [ Design](vnet-peering-service/design/README.md) \| [Compliance Requirements](vnet-peering-service/requirements/README.md)|
 | Express Route (ER) Service                    |  [Parent Folder](express-route-service/README.md) \| [ Design](express-route-service/design/README.md) \| [Compliance Requirements](express-route-service/requirements/README.md)|
 | Encryption Gateway Service                    |  [Parent Folder](encrypt-gw-service/README.md) \| [ Design](encrypt-gw-service/design/README.md) \| [Compliance Requirements](encrypt-gw-service/requirements/README.md)|
+
+
+# Organization of Design & Requirements Documents
+Documentation consists of separate, but related *System Descriptions* (HLDs, architecture, theory of operations, etc.) and *Compliance Requirements* (hard specifications, typically numerical  but also behavioral). These two types of documents are deliberately kept separated, see [Relationships and Flow of Documents](#relationships-and-flow-of-documents).
+
+Documentation is organized into folders as follows. Each feature or topic has all the high-level specs  and the compliance requirements in the same parent folder, e.g. General, High-Availability, etc., making it easier to access related information about one topic. As the complexity grows, this helps keep things organized according to "functional topic." 
+```
+topic1
+    design
+        topic1 High-level Descriptions and architecture
+    requirements
+        topic1 compliance Requirements
+
+topic2
+    design
+        topic2 High-level Descriptions
+    requirements
+        topic2 compliance Requirements
+
+etc
+...
+```
 
 # Relationships and Flow of Documents
 The diagram below shows how High-Level Descriptions beget Compliance requirements, compliance requirements beget test cases, and test cases are executed by test scripts to produce Test Results.
