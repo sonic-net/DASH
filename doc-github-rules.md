@@ -89,6 +89,10 @@ Persons with write access permission or higher can directly edit documents and p
 
 When working on a complex issue or PR, it is often preferable to use a checklist within one issue or PR. This avoids the use of multiple issues or PRs that could be difficult to track.  
 
+Especially with an issue related to a feature, all of the pull requests used to implement the feature can refer to the same issue. The progress made can be easily understood by looking at which boxes are checked and which are not. The status is found in one place.
+
+Github even uses this checklist system to print out a small progress summary when looking at the lists of open issues.
+
 You enter the checklist in the comment when you create the issue or the PR. To create a checklist, you use a markdown format similar to the one shown in the example below.
 
 ```md
@@ -99,6 +103,7 @@ You enter the checklist in the comment when you create the issue or the PR. To c
 ## Tools
 
 - [GitHub desktop](https://desktop.github.com/)
+- [How to Use the Github Workflow](https://www.youtube.com/watch?v=8UguQzmswC4)
 - [Visual studio code](https://code.visualstudio.com/)
   - [Gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens). Supercharge the Git capabilities. 
   - [Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one). Create the ToC for an article.
