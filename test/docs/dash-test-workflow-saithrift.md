@@ -94,7 +94,7 @@ There are many software and hardware-based traffic generator/analyzers (nickname
 
 ### Abstract Test Cases
 
-[Abstract test cases](./sonic-dash-test-HLD.md#data-driven-test-cases) comprise data and/or test script/programs which apply configuration to the DUT; configure a Traffic Generator to send packets to the DUT and capture packets back from the DUT; analyze the results; and compare expected versus actual to produce absolute pass/fail outcomes and/or perhaps performance figures against some standard. These test cases ideally are expressed independently of the precise programming interface of the DUT, and the programming interface of the Traffic Generator. For example, the same test case could in principle be used to program the DUT via the saithrift API (as is the central assumption of this workflow), or a northbound management interface such as the SONiC gNMI API. This is discussed further in the [DASH Test High-Level Description ](./sonic-dash-test-HLD.md#data-driven-test-cases) document.
+[Abstract test cases](./dash-test-HLD.md#data-driven-test-cases) comprise data and/or test script/programs which apply configuration to the DUT; configure a Traffic Generator to send packets to the DUT and capture packets back from the DUT; analyze the results; and compare expected versus actual to produce absolute pass/fail outcomes and/or perhaps performance figures against some standard. These test cases ideally are expressed independently of the precise programming interface of the DUT, and the programming interface of the Traffic Generator. For example, the same test case could in principle be used to program the DUT via the saithrift API (as is the central assumption of this workflow), or a northbound management interface such as the SONiC gNMI API. This is discussed further in the [DASH Test High-Level Description ](./dash-test-HLD.md#data-driven-test-cases) document.
 
 The test cases are stored in the GitHub repository and comprise standard DASH test suites. A set of Pytest Test scripts use the test-case data to define a test. As an example, the test data may describe a set of ACL rules to configure the device, in an abstract form (e.g. a JSON file). The ACL rules may specify accept/deny behavior, which the test script can verify.
 
@@ -118,5 +118,5 @@ A test script consumes the test data, configures both the DUT and the traffic ge
 - [bmv2](https://github.com/p4lang/behavioral-model)
 - [Open Traffic Generator (OTG)](https://github.com/open-traffic-generator/models) 
 - [snappi](https://github.com/open-traffic-generator/snappi)
-- [Abstract test cases](./sonic-dash-test-HLD.md#data-driven-test-cases)
-- [DASH Test High-Level Description](./sonic-dash-test-HLD.md#data-driven-test-cases)
+- [Abstract test cases](./dash-test-HLD.md#data-driven-test-cases)
+- [DASH Test High-Level Description](./dash-test-HLD.md#data-driven-test-cases)
