@@ -1,9 +1,3 @@
----
-title: Github basic process
-description: Describes basic GitHub rules 
-last update: 02/14/2022
----
-
 # GitHub basic process
 
 **Table of contents**
@@ -99,6 +93,8 @@ A contributor would enter the checklist in the comment when creating the Issue o
 - [x] Fix TOC
 - [x] Add checklist section
 ```
+> [1NOTE]
+> Any work item is check-marked  with `x` when the related tasks are completed. 
 
 ## Tools
 
