@@ -79,21 +79,21 @@ Pull requests generally are open to community review and get accepted as-is or w
 Once a PR has received sufficient review and concerns are satisfied, a designated person with sufficient [permissions](https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-roles-for-an-organization#permissions-for-each-role) can accept the Pull Request. 
 
 ## Directly Editing Artifacts
-Persons with write access permission or higher can directly edit documents and push changes. This practice should be used very sparingly, and only in the draft stages of documents or to make trivial changes in documents already in use.
+Contributors with write access permission or higher have rights to directly edit documents and push changes. This practice should be used very sparingly, and only in the draft stages of documents, or to make trivial changes in documents already in use.
 
 > [!WARNING]
-> Making direct edits to "released" documents which could impact downstream consumers, without proper review phases, short-circuits the normal community process and can result in breaking changes and significant disruption.
+> Direct edits (without proper review phases) to "released" documents short-circuits the normal community process and can result in breaking changes and significant disruption, resulting in potential impact to downstream consumers.
 
 
 ## Use checklists for large issues or PRs
 
-When working on a complex issue or PR, it is often preferable to use a checklist within one issue or PR. This avoids the use of multiple issues or PRs that could be difficult to track.  
+When working on a complex Issue or PR, it is often preferable to use a checklist within one Issue or PR. This avoids the use of multiple Issues or PRs that could be difficult to track.  
 
 Especially with an issue related to a feature, all of the pull requests used to implement the feature can refer to the same issue. The progress made can be easily understood by looking at which boxes are checked and which are not. The status is found in one place.
 
-Github even uses this checklist system to print out a small progress summary when looking at the lists of open issues.
+The checklist system is also useful to track work, such as a progress summary, when reviewing lists of open Issues.
 
-You enter the checklist in the comment when you create the issue or the PR. To create a checklist, you use a markdown format similar to the one shown in the example below.
+A contributor would enter the checklist in the comment when creating the Issue or PR. To create a checklist, please use a markdown format similar to the one shown in the example below.
 
 ```md
 - [x] Fix TOC
