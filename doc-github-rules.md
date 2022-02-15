@@ -93,7 +93,7 @@ A contributor would enter the checklist in the comment when creating the Issue o
 - [x] Fix TOC
 - [x] Add checklist section
 ```
-> [1NOTE]
+> [!NOTE]
 > Any work item is check-marked  with `x` when the related tasks are completed. 
 
 ## Tools
