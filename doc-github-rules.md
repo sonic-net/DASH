@@ -82,7 +82,7 @@ Once a PR has received sufficient review and concerns are satisfied, a designate
 Persons with write access permission or higher can directly edit documents and push changes. This practice should be used very sparingly, and only in the draft stages of documents or to make trivial changes in documents already in use.
 
 > [!WARNING]
-><span style="font-color:red; font-weigth:bold"> **Making direct edits to "released" documents which could impact downstream consumers, without proper review phases, short-circuits the normal community process and can result in breaking changes and significant disruption.**</span>
+><span style="color:red; font-weigth:bold"> **Making direct edits to "released" documents which could impact downstream consumers, without proper review phases, short-circuits the normal community process and can result in breaking changes and significant disruption.**</span>
 
 
 ## Use checklists for large issues
