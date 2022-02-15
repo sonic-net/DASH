@@ -14,7 +14,7 @@ last update: 02/14/2022
 - [PR Review Phase](#pr-review-phase)
 - [PR Accept Phase](#pr-accept-phase)
 - [Directly Editing Artifacts](#directly-editing-artifacts)
-- [Use checklists for large issues](#use-checklists-for-large-issues)
+- [Use checklists for large issues or PRs](#use-checklists-for-large-issues-or-prs)
 - [Tools](#tools)
 
 This document describes a short process to effectively use GitHub to achieve the following main goals:
@@ -82,15 +82,20 @@ Once a PR has received sufficient review and concerns are satisfied, a designate
 Persons with write access permission or higher can directly edit documents and push changes. This practice should be used very sparingly, and only in the draft stages of documents or to make trivial changes in documents already in use.
 
 > [!WARNING]
-><span style="color:red; font-weight: bold"> Making direct edits to "released" documents which could impact downstream consumers, without proper review phases, short-circuits the normal community process and can result in breaking changes and significant disruption.</span>
+> Making direct edits to "released" documents which could impact downstream consumers, without proper review phases, short-circuits the normal community process and can result in breaking changes and significant disruption.
 
-<span style="color:red; font-weight: bold"> Making direct edits to "released" documents which could impact downstream consumers, without proper review phases, short-circuits the normal community process and can result in breaking changes and significant disruption.</span>
 
-## Use checklists for large issues
+## Use checklists for large issues or PRs
 
 When working a complex issue or PR, it is often preferable to use a checklist within one issue or PR. 
 This avoids the use of multiple isssues or PRs that could be difficult to track.  
 
+You enter the checklist in the first comment when you create the issue or the PR. To cerate a checklist, you use the markdown shown in the the example below.
+
+```md
+- [x] Fix TOC
+- [x] Add checklist section
+```
 
 ## Tools
 
