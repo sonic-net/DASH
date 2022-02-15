@@ -66,3 +66,26 @@ Some of the guiding principles for this aproach are:
 * Many projects exist where only a programmer can locate and ferret out actual test criteria, often expressed as hard-coded constants buried within thousands of lines of test automation code. For quality control, these criteria must be easily accessible, reviewable and maintainable, to anyone familiar with the project.
 * We advocate complete auditability and traceability of tests cases, test results, associated specs and DUT/SUT configuration. This means a test run will record versions of every item including GitHub Repo commit SHA ids, branches, tags, SW versions, API versions, etc.
 * Clear, concise and to the point human-readable reports, plus machine-readable results allowing dashboards, rolling-up of results, etc.
+
+## Repositories
+
+- [SONiC](https://github.com/Azure/SONiC)
+- [SAI](https://github.com/opencomputeproject/SAI)
+- [P4](https://opennetworking.org/p4) and [P4 working group](https://p4.org/working-groups)
+- [PINS](opennetworking.org/pins)
+- [PNA Consortium Spec](https://p4.org/p4-spec/docs/PNA-v0.5.0.html)
+- [IPDK](https://ipdk.io/) and [IPDK GitHub](https://github.com/ipdk-io/ipdk-io.github.io)
+- [bmv2 - behavioral model v2](https://github.com/p4lang/behavioral-model)
+- [DPDK](https://www.dpdk.org)
+
+
+## References
+
+- [Glossary](https://github.com/Azure/DASH/wiki/Glossary)
+- [FAQ](https://github.com/Azure/DASH/wiki/FAQ)
+- [SAI](./sai/README.md)
+- [Test](./../test/docs/README.md)
+- [SDN Features Packet Transforms](SDN-Features-Packet-Transforms.md)
+- [Load Balancer](Load%20Balancer_v3.md)
+- [Program Scale Testing Requirements - Draft](Program%20Scale%20Testing%20Requirements%20-%20Draft.md)
+
