@@ -84,8 +84,4 @@ Some of the guiding principles for this aproach are:
 - [Glossary](https://github.com/Azure/DASH/wiki/Glossary)
 - [FAQ](https://github.com/Azure/DASH/wiki/FAQ)
 - [SAI](./sai/README.md)
-- [Test](./../test/docs/README.md)
-- [SDN Features Packet Transforms](SDN-Features-Packet-Transforms.md)
-- [Load Balancer](Load%20Balancer_v3.md)
-- [Program Scale Testing Requirements - Draft](Program%20Scale%20Testing%20Requirements%20-%20Draft.md)
 
