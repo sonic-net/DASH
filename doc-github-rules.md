@@ -87,10 +87,9 @@ Persons with write access permission or higher can directly edit documents and p
 
 ## Use checklists for large issues or PRs
 
-When working a complex issue or PR, it is often preferable to use a checklist within one issue or PR. 
-This avoids the use of multiple isssues or PRs that could be difficult to track.  
+When working on a complex issue or PR, it is often preferable to use a checklist within one issue or PR. This avoids the use of multiple issues or PRs that could be difficult to track.  
 
-You enter the checklist in the first comment when you create the issue or the PR. To cerate a checklist, you use the markdown shown in the the example below.
+You enter the checklist in the comment when you create the issue or the PR. To create a checklist, you use a markdown format similar to the one shown in the example below.
 
 ```md
 - [x] Fix TOC
