@@ -1,7 +1,7 @@
 ---
 title: Github basic process
-description: Describe basic GitHub rules 
-last update: 02/11/2022
+description: Describes basic GitHub rules 
+last update: 02/14/2022
 ---
 
 # GitHub basic process
@@ -14,7 +14,7 @@ last update: 02/11/2022
 - [PR Review Phase](#pr-review-phase)
 - [PR Accept Phase](#pr-accept-phase)
 - [Directly Editing Artifacts](#directly-editing-artifacts)
-- [Use checklists for aarge issues](#use-checklists-for-aarge-issues)
+- [Use checklists for large issues](#use-checklists-for-large-issues)
 - [Tools](#tools)
 
 This document describes a short process to effectively use GitHub to achieve the following main goals:
@@ -81,14 +81,14 @@ Once a PR has received sufficient review and concerns are satisfied, a designate
 ## Directly Editing Artifacts
 Persons with write access permission or higher can directly edit documents and push changes. This practice should be used very sparingly, and only in the draft stages of documents or to make trivial changes in documents already in use.
 
->**Making direct edits to "released" documents which could impact downstream consumers, without proper review phases, short-circuits the normal community process and can result in breaking changes and significant disruption.**
+> [!WARNING]
+><span style="font-color:red; font-weigth:bold"> **Making direct edits to "released" documents which could impact downstream consumers, without proper review phases, short-circuits the normal community process and can result in breaking changes and significant disruption.**</span>
 
 
-## Use checklists for aarge issues
+## Use checklists for large issues
 
 When working a complex issue or PR, it is often preferable to use a checklist within one issue or PR. 
 This avoids the use of multiple isssues or PRs that could be difficult to track.  
-
 
 
 ## Tools
