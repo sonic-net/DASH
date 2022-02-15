@@ -103,10 +103,10 @@ You enter the checklist in the comment when you create the issue or the PR. To c
 ## Tools
 
 - [GitHub desktop](https://desktop.github.com/ "Cntrl+Left Click to open in a new tab")
-- [How to Use the Github Workflow](https://www.youtube.com/watch?v=8UguQzmswC4)
-- [Visual studio code](https://code.visualstudio.com/)
-  - [Gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens). Supercharge the Git capabilities. 
-  - [Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one). Create the ToC for an article.
-- [Drawing tool: diagrams.net](https://www.diagrams.net/)
+- [How to Use the Github Workflow ](https://www.youtube.com/watch?v=8UguQzmswC4 "Cntrl+Left Click to open in a new tab")
+- [Visual studio code](https://code.visualstudio.com/ "Cntrl+Left Click to open in a new tab")
+  - [Gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens "Cntrl+Left Click to open in a new tab"). Supercharge the Git capabilities. 
+  - [Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one "Cntrl+Left Click to open in a new tab"). Create the ToC for an article.
+- [Drawing tool: diagrams.net](https://www.diagrams.net/ "Cntrl+Left Click to open in a new tab")
 
   
