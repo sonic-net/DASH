@@ -9,8 +9,12 @@ last update: 02/11/2022
 **Table of contents**
 - [Create issues](#create-issues)
 - [Create a fork](#create-a-fork)
-  - [Create a Pull Request in the original repository from a fork](#create-a-pull-request-in-the-original-repository-from-a-fork)
+  - [Create a Pull Request](#create-a-pull-request)
 - [Create a Pull Request from a branch in the original repository](#create-a-pull-request-from-a-branch-in-the-original-repository)
+- [PR Review Phase](#pr-review-phase)
+- [PR Accept Phase](#pr-accept-phase)
+- [Directly Editing Artifacts](#directly-editing-artifacts)
+- [Use checklists for aarge issues](#use-checklists-for-aarge-issues)
 - [Tools](#tools)
 
 This document describes a short process to effectively use GitHub to achieve the following main goals:
@@ -78,7 +82,15 @@ Once a PR has received sufficient review and concerns are satisfied, a designate
 Persons with write access permission or higher can directly edit documents and push changes. This practice should be used very sparingly, and only in the draft stages of documents or to make trivial changes in documents already in use.
 
 >**Making direct edits to "released" documents which could impact downstream consumers, without proper review phases, short-circuits the normal community process and can result in breaking changes and significant disruption.**
-> 
+
+
+## Use checklists for aarge issues
+
+When working a complex issue or PR, it is often preferable to use a checklist within one issue or PR. 
+This avoids the use of multiple isssues or PRs that could be difficult to track.  
+
+
+
 ## Tools
 
 - [GitHub desktop](https://desktop.github.com/)
