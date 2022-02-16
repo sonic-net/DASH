@@ -1,16 +1,14 @@
----
-title: Github basic process
-description: Describe basic GitHub rules 
-last update: 02/11/2022
----
-
 # GitHub basic process
 
 **Table of contents**
 - [Create issues](#create-issues)
 - [Create a fork](#create-a-fork)
-  - [Create a Pull Request in the original repository from a fork](#create-a-pull-request-in-the-original-repository-from-a-fork)
+  - [Create a Pull Request](#create-a-pull-request)
 - [Create a Pull Request from a branch in the original repository](#create-a-pull-request-from-a-branch-in-the-original-repository)
+- [PR Review Phase](#pr-review-phase)
+- [PR Accept Phase](#pr-accept-phase)
+- [Directly Editing Artifacts](#directly-editing-artifacts)
+- [Use checklists for large issues or PRs](#use-checklists-for-large-issues-or-prs)
 - [Tools](#tools)
 
 This document describes a short process to effectively use GitHub to achieve the following main goals:
@@ -75,16 +73,36 @@ Pull requests generally are open to community review and get accepted as-is or w
 Once a PR has received sufficient review and concerns are satisfied, a designated person with sufficient [permissions](https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-roles-for-an-organization#permissions-for-each-role) can accept the Pull Request. 
 
 ## Directly Editing Artifacts
-Persons with write access permission or higher can directly edit documents and push changes. This practice should be used very sparingly, and only in the draft stages of documents or to make trivial changes in documents already in use.
+Contributors with write access permission or higher have rights to directly edit documents and push changes. This practice should be used very sparingly, and only in the draft stages of documents, or to make trivial changes in documents already in use.
 
->**Making direct edits to "released" documents which could impact downstream consumers, without proper review phases, short-circuits the normal community process and can result in breaking changes and significant disruption.**
-> 
+> [!WARNING]
+> Direct edits (without proper review phases) to "released" documents short-circuits the normal community process and can result in breaking changes and significant disruption, resulting in potential impact to downstream consumers.
+
+
+## Use checklists for large issues or PRs
+
+When working on a complex Issue or PR, it is often preferable to use a checklist within one Issue or PR. This avoids the use of multiple Issues or PRs that could be difficult to track.  
+
+Especially with an issue related to a feature, all of the pull requests used to implement the feature can refer to the same issue. The progress made can be easily understood by looking at which boxes are checked and which are not. The status is found in one place.
+
+The checklist system is also useful to track work, such as a progress summary, when reviewing lists of open Issues.
+
+A contributor would enter the checklist in the comment when creating the Issue or PR. To create a checklist, please use a markdown format similar to the one shown in the example below.
+
+```md
+- [x] Fix TOC
+- [x] Add checklist section
+```
+> [!NOTE]
+> Any work item is check-marked  with `x` when the related tasks are completed. 
+
 ## Tools
 
-- [GitHub desktop](https://desktop.github.com/)
-- [Visual studio code](https://code.visualstudio.com/)
-  - [Gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens). Supercharge the Git capabilities. 
-  - [Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one). Create the ToC for an article.
-- [Drawing tool: diagrams.net](https://www.diagrams.net/)
+- [GitHub desktop](https://desktop.github.com/ "Cntrl+Left Click to open in a new tab")
+- [How to Use the Github Workflow ](https://www.youtube.com/watch?v=8UguQzmswC4 "Cntrl+Left Click to open in a new tab")
+- [Visual studio code](https://code.visualstudio.com/ "Cntrl+Left Click to open in a new tab")
+  - [Gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens "Cntrl+Left Click to open in a new tab"). Supercharge the Git capabilities. 
+  - [Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one "Cntrl+Left Click to open in a new tab"). Create the ToC for an article.
+- [Drawing tool: diagrams.net](https://www.diagrams.net/ "Cntrl+Left Click to open in a new tab")
 
   
