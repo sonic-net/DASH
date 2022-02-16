@@ -83,5 +83,5 @@ Some of the guiding principles for this aproach are:
 
 - [Glossary](https://github.com/Azure/DASH/wiki/Glossary)
 - [FAQ](https://github.com/Azure/DASH/wiki/FAQ)
-- [SAI](./sai/README.md)
+
 
