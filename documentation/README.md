@@ -67,7 +67,7 @@ Some of the guiding principles for this aproach are:
 * We advocate complete auditability and traceability of tests cases, test results, associated specs and DUT/SUT configuration. This means a test run will record versions of every item including GitHub Repo commit SHA ids, branches, tags, SW versions, API versions, etc.
 * Clear, concise and to the point human-readable reports, plus machine-readable results allowing dashboards, rolling-up of results, etc.
 
-## Repositories
+## Related Repositories
 
 - [SONiC](https://github.com/Azure/SONiC)
 - [SAI](https://github.com/opencomputeproject/SAI)
