@@ -262,6 +262,53 @@ typedef sai_status_t (*sai_get_{{ table.name }}_attribute_fn)(
         _In_ uint32_t attr_count,
         _Inout_ sai_attribute_t *attr_list);
 
+{% if table.is_object == 'false' %}
+/**
+ * @brief Bulk create {{ table.name }}
+ *
+ * @param[in] object_count Number of objects to create
+ * @param[in] {{ table.name }} List of object to create
+ * @param[in] attr_count List of attr_count. Caller passes the number
+ *    of attribute for each object to create.
+ * @param[in] attr_list List of attributes for every object.
+ * @param[in] mode Bulk operation error handling mode.
+ * @param[out] object_statuses List of status for every object. Caller needs to
+ * allocate the buffer
+ *
+ * @return #SAI_STATUS_SUCCESS on success when all objects are created or
+ * #SAI_STATUS_FAILURE when any of the objects fails to create. When there is
+ * failure, Caller is expected to go through the list of returned statuses to
+ * find out which fails and which succeeds.
+ */
+typedef sai_status_t (*sai_bulk_create_{{ table.name }}_fn)(
+        _In_ uint32_t object_count,
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+        _In_ const uint32_t *attr_count,
+        _In_ const sai_attribute_t **attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses);
+
+/**
+ * @brief Bulk remove {{ table.name }}
+ *
+ * @param[in] object_count Number of objects to remove
+ * @param[in] {{ table.name }} List of objects to remove
+ * @param[in] mode Bulk operation error handling mode.
+ * @param[out] object_statuses List of status for every object. Caller needs to
+ * allocate the buffer
+ *
+ * @return #SAI_STATUS_SUCCESS on success when all objects are removed or
+ * #SAI_STATUS_FAILURE when any of the objects fails to remove. When there is
+ * failure, Caller is expected to go through the list of returned statuses to
+ * find out which fails and which succeeds.
+ */
+typedef sai_status_t (*sai_bulk_remove_{{ table.name }}_fn)(
+        _In_ uint32_t object_count,
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses);
+
+{% endif %}
 {% endfor %}
 typedef struct _sai_{{ sai_api.app_name }}_api_t
 {
@@ -272,6 +319,13 @@ typedef struct _sai_{{ sai_api.app_name }}_api_t
     sai_remove_{{ table.name }}_fn           {{ " " * space_offset }}remove_{{ table.name }};
     sai_set_{{ table.name }}_attribute_fn    {{ " " * space_offset }}set_{{ table.name }}_attribute;
     sai_get_{{ table.name }}_attribute_fn    {{ " " * space_offset }}get_{{ table.name }}_attribute;
+{% if table.is_object == 'true' %}
+    sai_bulk_object_create_fn{{ " " * table_name_max }}create_{{ table.name }}s;
+    sai_bulk_object_remove_fn{{ " " * table_name_max }}remove_{{ table.name }}s;
+{% else %}
+    sai_bulk_create_{{ table.name }}_fn      {{ " " * space_offset }}create_{{ table.name | replace("entry", "entries") }};
+    sai_bulk_remove_{{ table.name }}_fn      {{ " " * space_offset }}remove_{{ table.name | replace("entry", "entries") }};
+{% endif %}
 {% endfor %}
 } sai_{{ sai_api.app_name }}_api_t;
 
