@@ -147,6 +147,7 @@ Each DPU provides its own **gNMI endpoint** for SDN control. This endpoint is re
 
 In some cases, DPUs might provide separate management Ethernet ports, or PCIe *netdevs* which can be used for control purposes, in accordance to deployment and security needs.
 
+
 #### High Level Architecture
 
 ![dash-high-level-appliance](images/dash-high-level-appliance.svg)
