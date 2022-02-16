@@ -11,31 +11,29 @@ last update: 02/08/2022
 
 **Table of Contents**
 
-- [SONiC-DASH High Level Design (WIP)](#sonic-dash-high-level-design-wip)
-  - [Overview](#overview)
-    - [Objectives](#objectives)
-  - [Architecture](#architecture)
-    - [SDN controller](#sdn-controller)
-      - [SDN and DPU High-Availability (HA)](#sdn-and-dpu-high-availability-ha)
-    - [Traditional SONiC Application Containers](#traditional-sonic-application-containers)
-    - [DASH container](#dash-container)
-      - [Multiple DPUs device](#multiple-dpus-device)
-    - [Switch State Service (SWSS)](#switch-state-service-swss)
-    - [Switch Abstraction Interface (SAI) DASH](#switch-abstraction-interface-sai-dash)
-    - [ASIC Drivers](#asic-drivers)
-    - [DASH capable ASICs](#dash-capable-asics)
-  - [Detailed architectures](#detailed-architectures)
-    - [DASH NOS single DPU on NIC](#dash-nos-single-dpu-on-nic)
-    - [DASH appliance architecture](#dash-appliance-architecture)
-      - [High Level Architecture](#high-level-architecture)
-      - [Low level architecture](#low-level-architecture)
-    - [DASH smart switch architecture](#dash-smart-switch-architecture)
-      - [High level architecture](#high-level-architecture-1)
-      - [Low level architecture](#low-level-architecture-1)
-  - [DASH container state interactions representation](#dash-container-state-interactions-representation)
-  - [DASH deployment options](#dash-deployment-options)
-  - [Repositories](#repositories)
-  - [References](#references)
+- [Overview](#overview)
+  - [Objectives](#objectives)
+- [Architecture](#architecture)
+  - [SDN controller](#sdn-controller)
+    - [SDN and DPU High-Availability (HA)](#sdn-and-dpu-high-availability-ha)
+  - [Traditional SONiC Application Containers](#traditional-sonic-application-containers)
+  - [DASH container](#dash-container)
+    - [Multiple DPUs device](#multiple-dpus-device)
+  - [Switch State Service (SWSS)](#switch-state-service-swss)
+  - [Switch Abstraction Interface (SAI) DASH](#switch-abstraction-interface-sai-dash)
+  - [ASIC Drivers](#asic-drivers)
+  - [DASH capable ASICs](#dash-capable-asics)
+- [Detailed architectures](#detailed-architectures)
+  - [DASH NOS single DPU on NIC](#dash-nos-single-dpu-on-nic)
+  - [DASH appliance architecture](#dash-appliance-architecture)
+    - [High Level Architecture](#high-level-architecture)
+    - [Low level architecture](#low-level-architecture)
+  - [DASH smart switch architecture](#dash-smart-switch-architecture)
+    - [High level architecture](#high-level-architecture-1)
+    - [Low level architecture](#low-level-architecture-1)
+- [DASH container state interactions representation](#dash-container-state-interactions-representation)
+- [DASH deployment options](#dash-deployment-options)
+- [References](#references)
 
 
 # SONiC-DASH High Level Design (WIP)
@@ -140,11 +138,15 @@ These comprise the main dataplane engines and are the core of what are variously
 The figure above highlights the primary SONiC and DASH software stack components and relationships, and will appear as variations within the DASH configurations described below.
 
 ### DASH appliance architecture
-A DASH "appliance" contains multiple (e.g., six) DASH NIC/DPU/Other devices installed as PCIe adaptors in a chassis. This chassis provides power and cooling with options for manageability/servicing/supportability (as needed), and other capability through PCIe bus, but no large-scale data path traversal of PCIe is needed. 
-Each NIC/DPU runs its own SONiC instance in such a way that it could also potentially operate as a standalone component once programed through the control plane given the chassis power / cooling / management.  
-The PCIe bus *can* be used to bootstrap/upgrade cards and perform some platform management functions but is not a participant in steady-state datacenter traffic. 
-Each DASH NIC/DPU Will run a version of SONiC that runs its own gNMI endpoint for SDN Control.  This endpoint is reachable in band through the "front-panel" DPU traffic ports via L3 routing. In other words, the SDN controller can reach the DPU management endpoints over the ToR-to-DPU fabric links. 
-In some cases, DPUs might provide separate management Ethernet ports, or PCIe netdevs which can be used for control purposes, in accordance with deployment and security needs.
+
+A DASH "appliance" contains multiple (e.g. six) DASH NIC devices installed as PCIe adaptors in a chassis. This chassis nominally only provides power and cooling and network traffic (both customer and infrastructure control); it does not traverse the PCIe bus. 
+
+The PCIe bus *can* be used to bootstrap/upgrade cards and perform some platform management functions but it is not a participant in steady-state datacenter traffic. 
+
+Each DPU provides its own **gNMI endpoint** for SDN control. This endpoint is reachable inband through the *front-panel* DPU traffic ports via L3 routing. In other words, the SDN controller can reach the DPU management endpoints over the **ToR-to-DPU** fabric links. 
+
+In some cases, DPUs might provide separate management Ethernet ports, or PCIe *netdevs* which can be used for control purposes, in accordance to deployment and security needs.
+
 
 #### High Level Architecture
 
@@ -198,23 +200,7 @@ The following figure is a simplified representation of DASH deployment in a data
 
 ![dash-simplified-physical-deployment-example](images/dash-simplified-physical-deployment-example.svg) 
 
-## Repositories
-
-- [SONiC](https://github.com/Azure/SONiC)
-- [SAI Thrift PR](https://github.com/opencomputeproject/SAI/pull/1325)
-- [P4](https://opennetworking.org/p4) and [P4 working group](https://p4.org/working-groups)
-- [PINS](opennetworking.org/pins)
-- [PNA Consortium Spec](https://p4.org/p4-spec/docs/PNA-v0.5.0.html)
-- [IPDK](https://ipdk.io/) and [IPDK GitHub](https://github.com/ipdk-io/ipdk-io.github.io)
-- [bmv2 - behavioral model v2](https://github.com/p4lang/behavioral-model)
-- [DPDK](https://www.dpdk.org)
-
-
 ## References
 
 - [Glossary](https://github.com/Azure/DASH/wiki/Glossary)
-- [SAI](../SAI)
-- [Test](../test)
-- [SDN Features Packet Transforms](SDN-Features-Packet-Transforms.md)
-- [Load Balancer](Load%20Balancer_v3.md)
-- [Program Scale Testing Requirements - Draft](Program%20Scale%20Testing%20Requirements%20-%20Draft.md)
+- [FAQ](https://github.com/Azure/DASH/wiki/FAQ)
