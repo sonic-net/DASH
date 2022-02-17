@@ -19,6 +19,8 @@ All DASH devices shall conform to the following design specifications and compli
 | gNMI Northbound API                  | [Parent Folder](gnmi/README.md) \| [ Design](gnmi/design/README.md) \| [Compliance Requirements](gnmi/requirements/README.md)|
 | SAI Southbound API                   | [Parent Folder](sai/README.md) \| [ Design](sai/design/README.md) \| [Compliance Requirements](sai/requirements/README.md)|
 
+| General Architecture and Requirements | [Link to ReadMe w/Design & Compliance folders](general/README.md)
+
 ## Service Specifications and Requirements
 DASH devices may implement one or more of the following services.
 They shall conform to each service's design specificaitons and compliance requirements.
