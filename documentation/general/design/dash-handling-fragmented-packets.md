@@ -1,7 +1,6 @@
 ---
 title: Handling of Fragments
-description: Handling of Fragments draft
-author: michael
+description: Draft
 last update: 02/18/2022
 ---
 
