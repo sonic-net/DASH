@@ -1,6 +1,5 @@
 ---
 title: Handling of Fragments
-description: Draft
 last update: 02/22/2022
 ---
 
