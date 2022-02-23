@@ -139,14 +139,11 @@ The figure above highlights the primary SONiC and DASH software stack components
 
 ### DASH appliance architecture
 
-A DASH "appliance" contains multiple (e.g. six) DASH NIC devices installed as PCIe adaptors in a chassis. This chassis nominally only provides power and cooling and network traffic (both customer and infrastructure control); it does not traverse the PCIe bus. 
-
-The PCIe bus *can* be used to bootstrap/upgrade cards and perform some platform management functions but it is not a participant in steady-state datacenter traffic. 
-
-Each DPU provides its own **gNMI endpoint** for SDN control. This endpoint is reachable inband through the *front-panel* DPU traffic ports via L3 routing. In other words, the SDN controller can reach the DPU management endpoints over the **ToR-to-DPU** fabric links. 
-
-In some cases, DPUs might provide separate management Ethernet ports, or PCIe *netdevs* which can be used for control purposes, in accordance to deployment and security needs.
-
+A DASH "appliance" contains multiple (e.g., six) DASH NIC/DPU/Other devices installed as PCIe adaptors in a chassis. This chassis provides power and cooling with options for manageability/servicing/supportability (as needed), and other capability through PCIe bus, but no large-scale data path traversal of PCIe is needed. 
+Each NIC/DPU runs its own SONiC instance in such a way that it could also potentially operate as a standalone component once programmed through the control plane given the chassis power / cooling / management.  
+The PCIe bus *can* be used to bootstrap/upgrade cards and perform some platform management functions but is not a participant in steady-state datacenter traffic. 
+Each DASH NIC/DPU Will run a version of SONiC that exposes its own gNMI endpoint for SDN Control.  This endpoint is reachable in band through the "front-panel" DPU traffic ports via L3 routing. In other words, the SDN controller can reach the DPU management endpoints over the ToR-to-DPU fabric links. 
+In some cases, DPUs might provide separate management Ethernet ports, or PCIe netdevs which can be used for control purposes, in accordance with deployment and security needs.
 
 #### High Level Architecture
 
