@@ -125,7 +125,7 @@ processing** for the duration of the connection.
 
 1. If a subsequent packet arrives that is the start of a fragmented packet, the
 **Frag ID** must be used to create a **new temporal flow** that can be
-**uniquely identified** by the (**Frag ID**, **DST**, **SRC**) tuple.
+**uniquely identified** by the (**Protocol**, **Frag ID**, **DST**, **SRC**) tuple.
 
 1. The temporal flow should be **maintained until the last fragment arrives** or
 the flow is **aged**.
