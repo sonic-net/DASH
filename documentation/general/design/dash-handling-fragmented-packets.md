@@ -126,9 +126,14 @@ processing** for the duration of the connection.
 1. If a subsequent packet arrives that is the first fragment of a fragmented packet (i.e. the Fragment Offset field is 0), the
 **Frag ID** must be used to create a **new temporal flow** that can be
 **uniquely identified** by the (**Frag ID**, **DST**, **SRC**) tuple.
+This **temporal flow** must record the relevant layer 4 header fields
+from the packet that are needed for classification, e.g. source &
+destination port, for retrieval by later arriving non-first IP
+fragments that match this **temporal flow**.
 
 1. If a packet arrives that is a non-first fragment (i.e. the Fragment Offset field is not 0), and there is not already a **temporal flow** that matches
-this packet, the packet must be dropped.
+this packet, the packet must be dropped, and no **temporal flow** will be
+created.
 
 1. The temporal flow should be **maintained until the last fragment arrives** or
 the flow is **aged**.
