@@ -148,6 +148,24 @@ time-out.
 1. If the connection is closed with the arrival of the **FIN packet** then all
 **temporal flows must be closed** as well.
 
+## Stats/Counters
+The temporal flow should also support packet and byte counters.  This data should
+be rolled/added back into the original/parent flow once the temporal flow is removed.
+
+## Other considerastions
+
+1.  When a first fragment (with L4 header) arrives, a new temporal flow should be created.
+This temporal flow should be associated (need to mainatin some state) with the
+**original/parent** flow against which the first fragement was matched.  This
+**association/relationship** will be used in an event when the parent flow is removed
+(age-out, closed, etc.) before the temporal flow is deleted.
+
+1.  If the second fragment (first packet without L4 header and non-zero fragement offset)
+arrives before the first fragment, there will be no temporal flow entry and we will have a
+**flow-mis**.  This may take the **packet processing** to the slow-path.  The slow-path
+should drop this packet.  Since there is no 5-tuple information available, against which
+**bucket** will we count these drop packets in the slow path?
+
 ## Issues and Nuances
 
 1. A connection that is reset should also result in the related
