@@ -43,7 +43,7 @@
 		- [Inbound from LB](#inbound-from-lb)
 		- [Outbound NAT - L4](#outbound-nat---l4)
 
-# SDN Features, Packet Transforms and Scale
+# SDN Features, Packet Transforms and Scale - try to split the document
 
 ## First Target Scenario:  Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance
 Why do we need this scenario?  There is a huge cost associated with establishing the first connection (and the CPS that can be established).
