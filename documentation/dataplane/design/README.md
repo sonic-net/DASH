@@ -10,4 +10,4 @@ This folder contains DASH dataplane design and architecture documents.
 
 | Document                                               | Description                                 |
 | ------------------------------------------------------ | ------------------------------------------- |
-|[dash-routing-guidelines.md](dash-routing-guidelines.md)|Dataplane (pipeline, protocol handling, etc.)|
+|[dash-routing-guidelines.md](dash-routing-guidelines.md)|Routing guidelines and examples.             |
