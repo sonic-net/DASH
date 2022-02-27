@@ -8,13 +8,13 @@ last update: 02/28/2022
 This article explains the basic steps to build a **routing table** and how to
 use **mappings** during the process.  
 It is important to notice from the get go, **routing** and **mapping** are two
-different but complemtary concepts, specifically:
+different but complementary concepts, specifically:
 
 1. **Routing**. It is used by the customer to configure the way the traffic must
 be routed. It must be clear that routing table has the last say in the way the
 traffic is routed. For example, by defaut usually this entry applies:
 
-    `- 0/0 -> Internet (Default)`
+    `0/0 -> Internet (Default)`
 
     But the customer can override the entry and route the traffic as follows:
 
@@ -29,4 +29,4 @@ traffic is routed. For example, by defaut usually this entry applies:
 1. On the other hand, we want to be able to plumb (insert) in the routing table
    for an entry a specific mapping, for example:  
 
-    `- 10.3.0.0/16 -> VNET C (Peered) (use mapping)`
+    `10.3.0.0/16 -> VNET C (Peered) (use mapping)`
