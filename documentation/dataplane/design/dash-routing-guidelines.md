@@ -102,6 +102,8 @@ Notice a routing table is attached to a specific VM in the VNET, not to VNET its
 
 ![dash-dataplane-routing-table-vm](./images/dash-dataplane-routing-table-vm.svg)
 
+<figcaption><i>Figure 1. Routing table per VM</i></figcaption><br/>
+
 ### Adding firewall hop to the routing table
 
 In the example shown below shows how to add a hop to a firewall in a routing table entry using mapping.  
