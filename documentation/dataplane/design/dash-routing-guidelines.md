@@ -26,7 +26,22 @@ traffic is routed. For example, by defaut usually this entry applies:
    network physical space that is transparent to the customer . In other words,
    mapping allows to know what is the **physical address** (PA) for a specific
    **customer address** (CA) and if it requires different encap, etc.
-1. On the other hand, we want to be able to plumb (insert) in the routing table
-   for an entry a specific mapping, for example:  
+1. On the other hand, we want to be able to insert in the routing table
+   any entry with a specific mapping, for example:  
 
     `10.3.0.0/16 -> VNET C (Peered) (use mapping)`
+
+Notice that a routing table has a size limit of about 100 K while mapping has a
+limit of 1 M. Using mapping allows you to extendd the amount of data that can be
+contained in a routing table.
+
+One of the main objectives of a routing table, more specifically **LPM
+routing table**, is to allow the customers to enter static or mapped
+entries the way they see fit. The LPM routing rules determine the order. 
+The rules can be either static or can refer to mapping. But mappings does not 
+control routing which is done via the LPM table.  
+
+- **Static** means that when you create an entry into the table, you know exactly the physical address (PA). 
+  Here there is no mapping (lookup).
+- **Mapping** means that for that particular entry, you want to intercept the traffic and exempt it from the standard routing. 
+Instead, you want to apply different actions than the ones associated with the rest of the traffic. 
