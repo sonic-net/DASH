@@ -98,9 +98,13 @@ RouteTable (LPM)  attached to VM 10.1.1.1
 
 ```
 
+Notice a routing table is attached to a specific VM in the VNET, not to VNET itself. In VNET the VM functions like a router, to which a routing table is attached.
+
+![dash-dataplane-routing-table-vm](./images/dash-dataplane-routing-table-vm.svg)
+
 ### Adding firewall hop to the routing table
 
-In the example shown below we have the following.
+In the example shown below shows how to add a hop to a firewall in a routing table entry using mapping.  
 
 #### Mapping
 
@@ -125,6 +129,18 @@ A hop to the firewall (10.1.2.11) is added at address 10.1.3.0/24
 - 10.3.0.0/16 -> VNET C (Peered) (use mappings)
 - 0/0 -> Default (Internet)
 ```
+
+The following settings should also be allowed:
+
+```
+- 10.1.0.0/16 -> VNET
+- 10.1.3.0/24 -> Hop: 10.1.2.11 Customer Address (CA) -> Private Address (PA) (Firewall in current VNET)
+- 10.1.3.0/26 -> Hop: 10.1.2.88 Customer Address (CA) -> Private Address (PA) (Firewall in peered VNET)
+- 10.2.0.0/16 -> VNET B (Peered) (use mappings)
+- 10.3.0.0/16 -> VNET C (Peered) (use mappings)
+- 0/0 -> Default (Internet)
+```
+
 
 
 ## Terminlogy
