@@ -6,9 +6,12 @@ last update: 02/28/2022
 # Routing guidelines
 - [Overview](#overview)
 - [Routing examples](#routing-examples)
-  - [Adding firewall hop to the routing table](#adding-firewall-hop-to-the-routing-table)
+  - [Add firewall hop to the routes](#add-firewall-hop-to-the-routes)
     - [Mapping](#mapping)
     - [RouteTable (LPM)](#routetable-lpm)
+  - [Set default route](#set-default-route)
+    - [Mapping](#mapping-1)
+    - [RouteTable (LPM)](#routetable-lpm-1)
 - [Terminlogy](#terminlogy)
 
 ## Overview
@@ -104,9 +107,9 @@ Notice a routing table is attached to a specific VM in the VNET, not to VNET its
 
 <figcaption><i>Figure 1. Routing table per VM</i></figcaption><br/>
 
-### Adding firewall hop to the routing table
+### Add firewall hop to the routes
 
-In the example shown below shows how to add a hop to a firewall in a routing table entry using mapping.  
+The example below shows how to add a hop to a firewall in a routing table entry using mapping.  
 
 #### Mapping
 
@@ -114,7 +117,6 @@ The `VNET: 10.1.0.0/16` has 3 subnets. A VM/NVA (VM or Virtual Appliance) firewa
 
 ```
 VNET: 10.1.0.0/16
-
 - Subnet 1: 10.1.1.0/24
 - Subnet 2: 10.1.2.0/24 (VM/NVA: 10.1.2.11 - Firewall)
 - Subnet 3: 10.1.3.0/24
@@ -122,7 +124,7 @@ VNET: 10.1.0.0/16
 
 #### RouteTable (LPM) 
 
-A hop to the firewall (10.1.2.11) is added at address 10.1.3.0/24 
+A hop to the firewall `10.1.2.11` is added at address `10.1.3.0/24`. 
 
 ```
 - 10.1.0.0/16 -> VNET
@@ -142,6 +144,28 @@ The following settings should also be allowed:
 - 10.3.0.0/16 -> VNET C (Peered) (use mappings)
 - 0/0 -> Default (Internet)
 ```
+
+### Set default route
+
+The example shows how to set the default route to hop to a firewall instead of routing the traffic to the Internet.   
+
+#### Mapping
+
+A VM/NVA (VM or Virtual Appliance) firewall is added to Subnet 2 with address `10.1.2.11`.
+
+```
+VNET: 10.1.0.0/16
+- Subnet 2: 10.1.2.0/24 (VM/NVA: 10.1.2.11 - Firewall)
+```
+
+#### RouteTable (LPM) 
+
+A hop to the firewall `10.1.2.11` is added at address `0/0`.
+
+```
+- 0/0 -> Default Hop: 10.1.2.11 (Firewall in current VNET)
+```
+
 
 
 
