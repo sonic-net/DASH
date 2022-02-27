@@ -12,6 +12,9 @@ last update: 02/28/2022
   - [Set default route](#set-default-route)
     - [Mapping](#mapping-1)
     - [RouteTable (LPM)](#routetable-lpm-1)
+  - [Set a specific Internet route](#set-a-specific-internet-route)
+    - [Mapping](#mapping-2)
+    - [RouteTable (LPM)](#routetable-lpm-2)
 - [Terminlogy](#terminlogy)
 
 ## Overview
@@ -166,7 +169,29 @@ A hop to the firewall `10.1.2.11` is added at address `0/0`.
 - 0/0 -> Default Hop: 10.1.2.11 (Firewall in current VNET)
 ```
 
+### Set a specific Internet route 
 
+The example shows how to set a specific Internet route.   
+
+
+#### Mapping
+
+
+A VM/NVA (VM or Virtual Appliance) firewall is added to Subnet 2 with address `10.1.2.11`.
+
+```
+VNET: 10.1.0.0/16
+- Subnet 2: 10.1.2.0/24 (VM/NVA: 10.1.2.11 - Firewall)
+```
+
+#### RouteTable (LPM) 
+
+All the default traffic goes to through the fire-wall before going to the Internet; but the traffic going to the Internet trusted IPs do not have to go through the firewall and can go directly to the Internet.  
+
+```
+8.8.0.0/16 -> Internet – SNAT (Source Network Address Translation) to VIP (Virtual IP Address). 
+- 0/0 -> Default Hop: 10.1.2.11 (Firewall in current VNET)
+```
 
 
 ## Terminlogy
@@ -179,3 +204,8 @@ It is called this because it is also the entry where the largest number of leadi
   - Destination network and subnet mask.
   - Next hop to get to the destination network.
   - Routing metrics.
+
+- **SNAT**. The Source Network Address Translation (SNAT) is typically used when an internal/private host needs to initiate a connection to an external/public host. The device performing NAT changes the private IP address of the source host to public IP address. It may also change the source port in the TCP/UDP headers.
+  
+- **VIP**. The Virtual IP Address (VIP) is a public IP address that may be shared by multiple devices connected to the Internet. 
+
