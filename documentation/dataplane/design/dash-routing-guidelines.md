@@ -5,7 +5,10 @@ last update: 02/28/2022
 
 # Routing guidelines
 
-This article explains the basic steps to build a **routing table** and how to
+
+## Overview
+
+This article explains the basic steps to build a **routing table** (also knonw as *forwarding* table) and how to
 use **mappings** during the process.  
 It is important to notice from the get go, **routing** and **mapping** are two
 different but complementary concepts, specifically:
@@ -45,3 +48,20 @@ control routing which is done via the LPM table.
   Here there is no mapping (lookup).
 - **Mapping** means that for that particular entry, you want to intercept the traffic and exempt it from the standard routing. 
 Instead, you want to apply different actions than the ones associated with the rest of the traffic. 
+
+## Routing examples
+
+This section provides guidelines, along with some examples, on how to build routing tables statically and/or by using mapping. 
+
+
+
+## Terminlogy
+
+- **LPM**. LPM or longest prefix match refers to an algorithm used by routers in Internet Protocol (IP) networking to select an entry from a routing table.
+Because each entry in a forwarding table may specify a sub-network, one destination address may match more than one forwarding table entry. 
+The most specific of the matching table entries — the one with the longest subnet mask — is called the longest prefix match. 
+It is called this because it is also the entry where the largest number of leading address bits of the destination address match those in the table entry. 
+- **Routing**. Routing is the process of sending a packet of information from one network to another network. Routers build **routing tables** that contain the following information:
+  - Destination network and subnet mask.
+  - Next hop to get to the destination network.
+  - Routing metrics.
