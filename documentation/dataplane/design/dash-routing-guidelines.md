@@ -98,7 +98,7 @@ contain. We'll describe the various entries as we progess with the explanation.
 
 
 
-This might be for Private Link...check back on this
+**Private Link, Express Route, Internet Examples**
 VNET: 10.1.0.0/16
 - Subnet 1: 10.1.1.0/24
 - Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall)
@@ -149,8 +149,16 @@ This makes a difference when plumbing metering.
 
 ### Peered VNET use Mappings
 
+RouteTable (LPM) - attached to VM 10.1.1.2 :
+- 10.1.0.0/16 -> VNET A (use mappings)
+
 ### VNET_A w/Subnets
 #### Direct communication between subnets w/mapping
+
+RouteTable (LPM) - attached to VM 10.2.0.1 (VM in Peered VNET B) :
+(ENIC_x - separate counter)
+- 10.1.0.0/16 -> VNET A (Peered) (use mappings)
+- 10.2.0.0/16 -> VNET B (local) (use mappings)
 
 ### Add firewall hop to the routes (Communication between subnets w/firewall (NVA) w/firewall next hop route entry)
 
