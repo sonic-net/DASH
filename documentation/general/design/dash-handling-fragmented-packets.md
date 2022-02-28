@@ -167,11 +167,11 @@ time-out.
      
 
 1. Also, if the first packet comes in out of order then the fragments belonging
-   to the same packet would be dropped as they **do not contain Layer-4
+   to the same packet would be **dropped** as they **do not contain Layer-4
    information** and it **would not have an entry in the temporal flow table**.
 
     - Fortunately, as everything coming/going between VMs is **encapsulated
-      within VXLAN** or methods, **out of order packets are unlikely** as
+      within VXLAN** or methods, **out of order packets are unlikely (and again, would be dropped)** as
       switches/routers do not mis-order frames of a single L4 flow.
     - The encapsulated packet will look like a **single L4 flow** to a
       router/switch. 
