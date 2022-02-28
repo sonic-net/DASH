@@ -20,17 +20,10 @@ last update: 02/28/2022
     - [RouteTable (LPM)](#routetable-lpm-3)
   - [Set an on premises route to an express route (ER) with two private addresses](#set-an-on-premises-route-to-an-express-route-er-with-two-private-addresses)
     - [RouteTable (LPM)](#routetable-lpm-4)
-- [Add private links routes](#add-private-links-routes)
+  - [Set private links routes](#set-private-links-routes)
 - [Counters](#counters)
 - [Terminlogy](#terminlogy)
-    (ER)](#set-an-on-premises-route-to-an-express-route-er)
-    - [RouteTable (LPM)](#routetable-lpm-3)
-  - [Set an on premises route to an express route (ER) with two private
-    addresses](#set-an-on-premises-route-to-an-express-route-er-with-two-private-addresses)
-    - [RouteTable (LPM)](#routetable-lpm-4)
-- [Private end points](#private-end-points)
-- [Counters](#counters)
-- [Terminlogy](#terminlogy)
+
 ## Overview
 
 This article explains the basic steps to build a **routing table** (also knonw
@@ -246,7 +239,7 @@ key.
 - 50.1.0.0/16 -> Internet - This is also supported
 ```
 
-## Add private links routes 
+### Set private links routes 
 
 The following example shows how the traffic to private links and VMs can be
 direted to a firewall.  
