@@ -20,7 +20,15 @@ last update: 02/28/2022
     - [RouteTable (LPM)](#routetable-lpm-3)
   - [Set an on premises route to an express route (ER) with two private addresses](#set-an-on-premises-route-to-an-express-route-er-with-two-private-addresses)
     - [RouteTable (LPM)](#routetable-lpm-4)
-- [Private end points (?)](#private-end-points-)
+- [Add private links routes](#add-private-links-routes)
+- [Counters](#counters)
+- [Terminlogy](#terminlogy)
+    (ER)](#set-an-on-premises-route-to-an-express-route-er)
+    - [RouteTable (LPM)](#routetable-lpm-3)
+  - [Set an on premises route to an express route (ER) with two private
+    addresses](#set-an-on-premises-route-to-an-express-route-er-with-two-private-addresses)
+    - [RouteTable (LPM)](#routetable-lpm-4)
+- [Private end points](#private-end-points)
 - [Counters](#counters)
 - [Terminlogy](#terminlogy)
 ## Overview
@@ -238,9 +246,54 @@ key.
 - 50.1.0.0/16 -> Internet - This is also supported
 ```
 
-## Private end points (?)
+## Add private links routes 
 
-TBD
+The following example shows how the traffic to private links and VMs can be
+direted to a firewall.  
+
+Let’s say we have the following mapping:
+
+```
+VNET: 10.1.0.0/16
+- Subnet 1: 10.1.1.0/24
+- Subnet 2: 10.1.2.0/24 (VM/NVA: 10.1.2.11 - Firewall)
+- Subnet 3: 10.1.3.0/24
+
+- Mappings: 
+    . VM 1: 10.1.1.1
+    . VM 2: 10.1.3.2
+    . Private Link 1: 10.1.3.3
+    . Private Link 2: 10.1.3.4
+    . VM 3: 10.1.3.5`
+```
+
+VM 2, VM 3 and the private links belongs to the Subnet 3: `10.1.3.0/24`. 
+
+The traffic to private links and VMs can be direted to a firewall by adding the
+entry shown below to the routing table. 
+
+```
+
+- 10.1.3.0/26 -> Hop: 10.1.2.88 Customer Address (CA) -> Private Address (PA) (Firewall in peered VNET)
+
+```
+
+We should also be able to add a private link route to the routing table as shown
+below. In this case the routing happens because of the entry in the table not
+because of the mapping. 
+
+```
+
+- 10.1.3.3/32 -> Private Link Route (Private Link 1) 
+
+```
+
+> [!NOTE] In the past Microsoft only allowed private links to be added to the
+> routing table. But this was not scalable because of the amount of the private
+> links. So the ability was given to use mappings for the routing of the private
+> links.  
+
+
 
 ## Counters
 
