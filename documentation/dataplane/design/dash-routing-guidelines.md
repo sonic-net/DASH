@@ -5,6 +5,7 @@ last update: 02/28/2022
 
 # Routing guidelines
 
+  - [Overview](#overview)
 - [Overview](#overview)
 - [Routing examples](#routing-examples)
   - [Add firewall hop to the routes](#add-firewall-hop-to-the-routes)
@@ -19,14 +20,6 @@ last update: 02/28/2022
   - [Set an on premises route to an express route (ER)](#set-an-on-premises-route-to-an-express-route-er)
     - [RouteTable (LPM)](#routetable-lpm-3)
   - [Set an on premises route to an express route (ER) with two private addresses](#set-an-on-premises-route-to-an-express-route-er-with-two-private-addresses)
-    - [RouteTable (LPM)](#routetable-lpm-4)
-  - [Set private links routes](#set-private-links-routes)
-- [Counters](#counters)
-- [Terminlogy](#terminlogy)
-    (ER)](#set-an-on-premises-route-to-an-express-route-er)
-    - [RouteTable (LPM)](#routetable-lpm-3)
-  - [Set an on premises route to an express route (ER) with two private
-    addresses](#set-an-on-premises-route-to-an-express-route-er-with-two-private-addresses)
     - [RouteTable (LPM)](#routetable-lpm-4)
   - [Set private links routes](#set-private-links-routes)
 - [Counters](#counters)
