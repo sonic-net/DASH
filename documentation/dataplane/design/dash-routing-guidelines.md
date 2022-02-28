@@ -5,23 +5,27 @@ last update: 02/28/2022
 
 # Routing guidelines and scenarios
 
-  - [Overview](#overview)
 - [Overview](#overview)
 - [Routing examples](#routing-examples)
-  - [Add firewall hop to the routes](#add-firewall-hop-to-the-routes)
+  - [Explicit LPM](#explicit-lpm)
+  - [Peered VNET use Mappings](#peered-vnet-use-mappings)
+  - [VNET_A w/Subnets](#vnet_a-wsubnets)
+    - [Direct communication between subnets w/mapping](#direct-communication-between-subnets-wmapping)
+  - [Add firewall hop to the routes (Communication between subnets w/firewall (NVA) w/firewall next hop route entry)](#add-firewall-hop-to-the-routes-communication-between-subnets-wfirewall-nva-wfirewall-next-hop-route-entry)
     - [Mapping](#mapping)
     - [RouteTable (LPM)](#routetable-lpm)
   - [Set default route](#set-default-route)
     - [Mapping](#mapping-1)
     - [RouteTable (LPM)](#routetable-lpm-1)
-  - [Set a specific Internet route](#set-a-specific-internet-route)
+  - [Next hop in peered VNET w/mapping via firewall (NVA)](#next-hop-in-peered-vnet-wmapping-via-firewall-nva)
+  - [Set a specific Internet route w/firewall](#set-a-specific-internet-route-wfirewall)
     - [Mapping](#mapping-2)
     - [RouteTable (LPM)](#routetable-lpm-2)
-  - [Set an on premises route to an express route (ER)](#set-an-on-premises-route-to-an-express-route-er)
+  - [Set an on premises route to a express route (ExR) PA](#set-an-on-premises-route-to-a-express-route-exr-pa)
     - [RouteTable (LPM)](#routetable-lpm-3)
-  - [Set an on premises route to an express route (ER) with two private addresses](#set-an-on-premises-route-to-an-express-route-er-with-two-private-addresses)
+  - [Set an on premises route to a next hop express route (ExR) PA with two private addresses (usually paired 2 endpoints) w/different GRE key](#set-an-on-premises-route-to-a-next-hop-express-route-exr-pa-with-two-private-addresses-usually-paired-2-endpoints-wdifferent-gre-key)
     - [RouteTable (LPM)](#routetable-lpm-4)
-  - [Set private links routes](#set-private-links-routes)
+  - [Set private links routes using mapping, routes, or peered VNETs](#set-private-links-routes-using-mapping-routes-or-peered-vnets)
 - [Counters](#counters)
 - [Terminlogy](#terminlogy)
 
@@ -29,15 +33,18 @@ last update: 02/28/2022
 
 This article explains the basic steps to build a **routing table** (also known
 as a *forwarding* table) and how to use **mappings**.  
-The route is a concept of ENI/VNIC, not a VNET (i.e. the route table is attached to ENI/VNIC)
-It is important to notice from the get go, **routing** and **mapping** are two
-different but complementary concepts, specifically:
+The route is a concept of ENI/VNIC, not a VNET (i.e. the route table is attached
+to ENI/VNIC) It is important to notice from the get go, **routing** and
+**mapping** are two different but complementary concepts, specifically:
 
-1. **Routing**. The route table is configured by the customer, depending upon how they want to route traffic.  Or intercept via a firewall, or redirect.  
-It must be clear that the routing table has the final say in the way the traffic is routed (Longest Prefix Match = wins). Routes can intercept **part** of the traffic and forward to next hop for the purpose of filtering
+1. **Routing**. The route table is configured by the customer, depending upon
+   how they want to route traffic.  Or intercept via a firewall, or redirect.  
+It must be clear that the routing table has the final say in the way the traffic
+is routed (Longest Prefix Match = wins). Routes can intercept **part** of the
+traffic and forward to next hop for the purpose of filtering
 
-For example, by default usually this entry applies:
-
+For example, by default usually this entry applies:- [Overview](#overview)
+  
     `0/0 -> Internet (Default)`
 
     But the customer can override the entry and route the traffic as follows:
@@ -46,20 +53,23 @@ For example, by default usually this entry applies:
 
     `0/0 -> Default Hop: 10.1.2.11 (Firewall in current VNET)`
 
-2. **Mapping**. Mapping lookups determine the network physical address (PA) spaces to redirect traffic.  
-A mapping is a lookup table PA to CA (Customer Address), and whether it requires a different Encap (for example).
+1. **Mapping**. Mapping lookups determine the network physical address (PA)
+   spaces to redirect traffic.  
+A mapping is a lookup table PA to CA (Customer Address), and whether it requires
+a different Encap (for example).
 
     `10.3.0.0/16 -> VNET C (Peered) (use mapping)`
 
-The order is:  LPM->Route->Mapping.  We ONLY look mappings, AFTER LPM decides that this route wins.
+The order is:  LPM->Route->Mapping.  We ONLY look mappings, AFTER LPM decides
+that this route wins.
 
-Notice that a routing table has a size limit of about 100K while mapping table has a
-limit of 1M. Using mapping facilitates extension of the amount of data that can be
-contained in the routing table.
+Notice that a routing table has a size limit of about 100K while mapping table
+has a limit of 1M. Using mapping facilitates extension of the amount of data
+that can be contained in the routing table.
 
 One of the main objectives of a routing table, more specifically **LPM routing
-table**, is to allow the customers to enter static or mapped entries per their requirements. 
-The LPM routing rules determine the order. The rules can be either
+table**, is to allow the customers to enter static or mapped entries per their
+requirements. The LPM routing rules determine the order. The rules can be either
 static or can refer to a mapping. But mappings do not control routing, which is
 decided via the LPM table.  
 
@@ -78,44 +88,41 @@ The following is an example of the kind of entries an LPM routing table may
 contain. We'll describe the various entries as we progess with the explanation.
 
 **Example route table (basic customer setup), always LPM**
+
 ```
--     10.1/16 -> VNET A (via mapping lookup)
--     10.1.0/24 -> UDR to transit next hop 10.2.0.5 (ex. intercept this subnet through firewall VM in peered vnet)
--     10.1.0.7/32 -> VNET A (exempt this IP from being intercepted by UDR above and use normal VNET route, as LPM on /32 wins)
--     10.1.0.10/32 -> UDR to transit next hop 10.2.0.5 (ex. customer wants to intercept traffic to this destination and filter it via firewall)
--     10.1.0.11/32 -> This is a Private Endpoint plumbed as /32 route
--     10.1.0.12/32 -> This is another Private Endpoint plumbed as /32 route
--     10.2/16 -> Peered VNET B (via mapping lookup)
--     10.2.0.8/32 -> This is another Private Endpoint in peered vnet plumbed as /32 route
--     50/8 -> Internet (allow this 50/8 traffic to be exempt from transiting the firewall, and allow it to go directly to internet)
--     20.1/16 -> Static Route to on-prem (encap with some GRE key and send to CISCO Express Route device, that later redirects to onprem)
--     20.2/16 -> Static Route to on-prem (encap with some GRE key and send to CISCO Express Route device, that later redirects to onprem)
--     0/0 -> UDR to transit next hop 10.1.0.7 (ex. firewall all traffic going originally through internet via firewall which is in the same vnet)
 
+- 10.1/16 -> VNET A (via mapping lookup)
+- 10.1.0/24 -> UDR to transit next hop 10.2.0.5 (ex. intercept this subnet through firewall VM in peered vnet)
+- 10.1.0.7/32 -> VNET A (exempt this IP from being intercepted by UDR above and use normal VNET route, as LPM on /32 wins)
+- 10.1.0.10/32 -> UDR to transit next hop 10.2.0.5 (ex. customer wants to intercept traffic to this destination and filter it via firewall)
+- 10.1.0.11/32 -> This is a Private Endpoint plumbed as /32 route
+- 10.1.0.12/32 -> This is another Private Endpoint plumbed as /32 route
+- 10.2/16 -> Peered VNET B (via mapping lookup)
+- 10.2.0.8/32 -> This is another Private Endpoint in peered vnet plumbed as /32 route
+- 50/8 -> Internet (allow this 50/8 traffic to be exempt from transiting the firewall, and allow it to go directly to internet)
+- 20.1/16 -> Static Route to on-prem (encap with some GRE key and send to CISCO Express Route device, that later redirects to onprem)
+- 20.2/16 -> Static Route to on-prem (encap with some GRE key and send to CISCO Express Route device, that later redirects to onprem)
+- 0/0 -> UDR to transit next hop 10.1.0.7 (ex. firewall all traffic going originally through internet via firewall which is in the same vnet)
 
-
-
-
-
+```
 
 **Private Link, Express Route, Internet Examples**
+
+```
 VNET: 10.1.0.0/16
 - Subnet 1: 10.1.1.0/24
 - Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall)
 - Subnet 3: 10.1.3.0/24
-- Mappings: 
- . VM 1: 10.1.1.1 (y)
- . VM 2: 10.1.3.2
- . Private Link 1: 10.1.3.3
- . Private Link 2: 10.1.3.4
- . VM 3: 10.1.3.5
+- Mappings: . VM 1: 10.1.1.1 (y) . VM 2: 10.1.3.2 . Private Link 1: 10.1.3.3 .
+ Private Link 2: 10.1.3.4 . VM 3: 10.1.3.5
  
-ENIA_x - separate counter)
-RouteTable (LPM)  attached to VM 10.1.1.1
+ENIA_x - separate counter) RouteTable (LPM)  attached to VM 10.1.1.1
 - 10.1.0.0/16 -> VNET (use mappings)
  * route meter class: y
-- 10.1.3.0/24 -> Hop: 10.1.2.11 Customer Address (CA) -> Private Address (PA) (Firewall in current VNET)
-- 10.1.3.0/26 -> Hop: 10.1.2.88 Customer Address (CA) -> Private Address (PA)(Firewall in peered VNET)
+- 10.1.3.0/24 -> Hop: 10.1.2.11 Customer Address (CA) -> Private Address (PA)
+  (Firewall in current VNET)
+- 10.1.3.0/26 -> Hop: 10.1.2.88 Customer Address (CA) -> Private Address
+  (PA)(Firewall in peered VNET)
  * route meter class: y
  * use mapping meter class (if exists): true
 - 10.1.3.5/27 -> VNET A (mapping)
@@ -193,8 +200,10 @@ The following settings should also be allowed:
 
 ```
 - 10.1.0.0/16 -> VNET
-- 10.1.3.0/24 -> Hop: 10.1.2.11 Customer Address (CA) -> Private Address (PA) (Firewall in current VNET)
-- 10.1.3.0/26 -> Hop: 10.1.2.88 Customer Address (CA) -> Private Address (PA) (Firewall in peered VNET)
+- 10.1.3.0/24 -> Hop: 10.1.2.11 Customer Address (CA) -> Private Address (PA)
+  (Firewall in current VNET)
+- 10.1.3.0/26 -> Hop: 10.1.2.88 Customer Address (CA) -> Private Address (PA)
+  (Firewall in peered VNET)
 - 10.2.0.0/16 -> VNET B (Peered) (use mappings)
 - 10.3.0.0/16 -> VNET C (Peered) (use mappings)
 - 0/0 -> Default (Internet)
@@ -246,7 +255,8 @@ Internet; but the traffic going to the Internet trusted IPs do not have to go
 through the firewall and can go directly to the Internet.  
 
 ```
-8.8.0.0/16 -> Internet – SNAT (Source Network Address Translation) to VIP (Virtual IP Address). 
+8.8.0.0/16 -> Internet – SNAT (Source Network Address Translation) to VIP
+(Virtual IP Address). 
 - 0/0 -> Default Hop: 10.1.2.11 (Firewall in current VNET)
 ```
 
@@ -293,12 +303,8 @@ VNET: 10.1.0.0/16
 - Subnet 2: 10.1.2.0/24 (VM/NVA: 10.1.2.11 - Firewall)
 - Subnet 3: 10.1.3.0/24
 
-- Mappings: 
-    . VM 1: 10.1.1.1
-    . VM 2: 10.1.3.2
-    . Private Link 1: 10.1.3.3
-    . Private Link 2: 10.1.3.4
-    . VM 3: 10.1.3.5`
+- Mappings: . VM 1: 10.1.1.1 . VM 2: 10.1.3.2 . Private Link 1: 10.1.3.3 .
+    Private Link 2: 10.1.3.4 . VM 3: 10.1.3.5`
 ```
 
 VM 2, VM 3 and the private links belongs to the Subnet 3: `10.1.3.0/24`. 
@@ -308,7 +314,8 @@ entry shown below to the routing table.
 
 ```
 
-- 10.1.3.0/26 -> Hop: 10.1.2.88 Customer Address (CA) -> Private Address (PA) (Firewall in peered VNET)
+- 10.1.3.0/26 -> Hop: 10.1.2.88 Customer Address (CA) -> Private Address (PA)
+  (Firewall in peered VNET)
 
 ```
 
@@ -354,7 +361,11 @@ The answer is because VNET is global (there is no VNET for each ENI), those
 counters will be global. Otherwise, we have to copy the entire VNET object for
 each ENI that would be impossible. But you can get the counters meaning from the
 VNET context.  
-Different ENI in peered VNET; need to have context on the ENI Counter for every other NIC, Mapping, and Peered VNET – and statically isolate each value (right now we rely on the fact that the mappings are not hit by different ENIs).  At time of programming of ENI, we now we have to know..?
+
+Different ENI in peered VNET need to have context on the ENI counter for every other NIC. 
+Mapping and Peered VNET and statically isolate each value (right now we rely on the fact that the 
+mappings are not hit by different ENIs).  
+At time of programming of ENI, we now we have to know..?
 
 
 ## Terminlogy
