@@ -1,9 +1,9 @@
 ---
-title: Routing guidelines
+title: Routing guidelines and scenarios
 last update: 02/28/2022
 ---
 
-# Routing guidelines
+# Routing guidelines and scenarios
 
   - [Overview](#overview)
 - [Overview](#overview)
@@ -27,14 +27,15 @@ last update: 02/28/2022
 
 ## Overview
 
-This article explains the basic steps to build a **routing table** (also knonw
-as *forwarding* table) and how to use **mappings** during the process.  
+This article explains the basic steps to build a **routing table** (also known
+as a *forwarding* table) and how to use **mappings**.  
 It is important to notice from the get go, **routing** and **mapping** are two
 different but complementary concepts, specifically:
 
-1. **Routing**. It is used by the customer to configure the way the traffic must
-be routed. It must be clear that routing table has the last say in the way the
-traffic is routed. For example, by defaut usually this entry applies:
+1. **Routing**. The route table is configured by the customer, depending upon how they want to route traffic.  Or intercept via a firewall, or redirect.  
+It must be clear that the routing table has the final say in the way the traffic is routed (Longest Prefix Match = wins). Routes can intercept **part** of the traffic and forward to next hop for the purpose of filtering
+
+For example, by default usually this entry applies:
 
     `0/0 -> Internet (Default)`
 
@@ -44,24 +45,22 @@ traffic is routed. For example, by defaut usually this entry applies:
 
     `0/0 -> Default Hop: 10.1.2.11 (Firewall in current VNET)`
 
-1. **Mapping**. It allows to relate the customer’s defined routing to the
-   network physical space that is transparent to the customer . In other words,
-   mapping allows to know what is the **physical address** (PA) for a specific
-   **customer address** (CA) and if it requires different encap, etc.
-1. On the other hand, we want to be able to insert in the routing table any
-   entry with a specific mapping, for example:  
+2. **Mapping**. Mapping lookups determine the network physical address (PA) spaces to redirect traffic.  
+A mapping is a lookup table PA to CA (Customer Address), and whether it requires a different Encap (for example).
 
     `10.3.0.0/16 -> VNET C (Peered) (use mapping)`
 
-Notice that a routing table has a size limit of about 100 K while mapping has a
-limit of 1 M. Using mapping allows you to extendd the amount of data that can be
-contained in a routing table.
+The order is:  LPM->Route->Mapping.  We ONLY look mappings, AFTER LPM decides that this route wins.
+
+Notice that a routing table has a size limit of about 100K while mapping table has a
+limit of 1M. Using mapping facilitates extension of the amount of data that can be
+contained in the routing table.
 
 One of the main objectives of a routing table, more specifically **LPM routing
-table**, is to allow the customers to enter static or mapped entries the way
-they see fit. The LPM routing rules determine the order. The rules can be either
-static or can refer to mapping. But mappings does not control routing which is
-done via the LPM table.  
+table**, is to allow the customers to enter static or mapped entries per their requirements. 
+The LPM routing rules determine the order. The rules can be either
+static or can refer to a mapping. But mappings do not control routing, which is
+decided via the LPM table.  
 
 - **Static** means that when you create an entry into the table, you know
   exactly the physical address (PA). Here there is no mapping (lookup).
@@ -75,9 +74,30 @@ This section provides guidelines, along with some examples, on how to build
 routing tables statically and/or by using mapping.
 
 The following is an example of the kind of entries an LPM routing table may
-contain. We'll describe the various entries as we progess with the explantion.
+contain. We'll describe the various entries as we progess with the explanation.
 
+**Example route table (basic customer setup), always LPM**
 ```
+-     10.1/16 -> VNET A (via mapping lookup)
+-     10.1.0/24 -> UDR to transit next hop 10.2.0.5 (ex. intercept this subnet through firewall VM in peered vnet)
+-     10.1.0.7/32 -> VNET A (exempt this IP from being intercepted by UDR above and use normal VNET route, as LPM on /32 wins)
+-     10.1.0.10/32 -> UDR to transit next hop 10.2.0.5 (ex. customer wants to intercept traffic to this destination and filter it via firewall)
+-     10.1.0.11/32 -> This is a Private Endpoint plumbed as /32 route
+-     10.1.0.12/32 -> This is another Private Endpoint plumbed as /32 route
+-     10.2/16 -> Peered VNET B (via mapping lookup)
+-     10.2.0.8/32 -> This is another Private Endpoint in peered vnet plumbed as /32 route
+-     50/8 -> Internet (allow this 50/8 traffic to be exempt from transiting the firewall, and allow it to go directly to internet)
+-     20.1/16 -> Static Route to on-prem (encap with some GRE key and send to CISCO Express Route device, that later redirects to onprem)
+-     20.2/16 -> Static Route to on-prem (encap with some GRE key and send to CISCO Express Route device, that later redirects to onprem)
+-     0/0 -> UDR to transit next hop 10.1.0.7 (ex. firewall all traffic going originally through internet via firewall which is in the same vnet)
+
+
+
+
+
+
+
+This might be for Private Link...check back on this
 VNET: 10.1.0.0/16
 - Subnet 1: 10.1.1.0/24
 - Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall)
@@ -123,10 +143,17 @@ attached.
 
 <figcaption><i>Figure 1. Routing table per VM</i></figcaption><br/>
 
-### Add firewall hop to the routes
+### Explicit LPM 
+
+### Peered VNET use Mappings
+
+### VNET_A w/Subnets
+#### Direct communication between subnets w/mapping
+
+### Add firewall hop to the routes (Communication between subnets w/firewall (NVA) w/firewall next hop route entry)
 
 The example below shows how to add a hop to a firewall in a routing table entry
-using mapping.  
+using a mapping.  
 
 #### Mapping
 
@@ -186,7 +213,9 @@ A hop to the firewall `10.1.2.11` is added at address `0/0`.
 - 0/0 -> Default Hop: 10.1.2.11 (Firewall in current VNET)
 ```
 
-### Set a specific Internet route
+### Next hop in peered VNET w/mapping via firewall (NVA)
+
+### Set a specific Internet route w/firewall
 
 The example shows how to set a specific Internet route.
 
@@ -211,7 +240,7 @@ through the firewall and can go directly to the Internet.
 - 0/0 -> Default Hop: 10.1.2.11 (Firewall in current VNET)
 ```
 
-### Set an on premises route to an express route (ER)
+### Set an on premises route to a express route (ExR) PA 
 
 The example shows how to set an on premises route to an express route (ER) for a
 specific private address (PA).
@@ -227,7 +256,7 @@ In the example below the RouteTable (LPM) is attached to VM `10.1.1.1`.
 
 Where the on premises route: `50.0.0.0/0` is the customer on premises space.
 
-### Set an on premises route to an express route (ER) with two private addresses
+### Set an on premises route to a next hop express route (ExR) PA with two private addresses (usually paired 2 endpoints) w/different GRE key
 
 The example shows how to set an on premises route to an express route (ER) with
 two private addresses (end points) and **Generic Routing Encapsulation** (GRE)
@@ -240,10 +269,11 @@ key.
 - 50.1.0.0/16 -> Internet - This is also supported
 ```
 
-### Set private links routes 
+### Set private links routes using mapping, routes, or peered VNETs
+PEs (Private Endpoints) can be /32 routes or mappings
 
 The following example shows how the traffic to private links and VMs can be
-direted to a firewall.  
+directed to a firewall.  
 
 Let’s say we have the following mapping:
 
@@ -263,7 +293,7 @@ VNET: 10.1.0.0/16
 
 VM 2, VM 3 and the private links belongs to the Subnet 3: `10.1.3.0/24`. 
 
-The traffic to private links and VMs can be direted to a firewall by adding the
+The traffic to private links and VMs can be directed to a firewall by adding the
 entry shown below to the routing table. 
 
 ```
