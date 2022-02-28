@@ -4,6 +4,7 @@ last update: 02/28/2022
 ---
 
 # Routing guidelines
+
 - [Overview](#overview)
 - [Routing examples](#routing-examples)
   - [Add firewall hop to the routes](#add-firewall-hop-to-the-routes)
@@ -15,6 +16,11 @@ last update: 02/28/2022
   - [Set a specific Internet route](#set-a-specific-internet-route)
     - [Mapping](#mapping-2)
     - [RouteTable (LPM)](#routetable-lpm-2)
+  - [Set an on premises route to an express route (ER)](#set-an-on-premises-route-to-an-express-route-er)
+    - [RouteTable (LPM)](#routetable-lpm-3)
+  - [Set an on premises route to an express route (ER) with two private addresses](#set-an-on-premises-route-to-an-express-route-er-with-two-private-addresses)
+    - [RouteTable (LPM)](#routetable-lpm-4)
+- [Private end points (?)](#private-end-points-)
 - [Terminlogy](#terminlogy)
 
 ## Overview
@@ -125,9 +131,9 @@ VNET: 10.1.0.0/16
 - Subnet 3: 10.1.3.0/24
 ```
 
-#### RouteTable (LPM) 
+#### RouteTable (LPM)
 
-A hop to the firewall `10.1.2.11` is added at address `10.1.3.0/24`. 
+A hop to the firewall `10.1.2.11` is added at address `10.1.3.0/24`.
 
 ```
 - 10.1.0.0/16 -> VNET
@@ -150,7 +156,7 @@ The following settings should also be allowed:
 
 ### Set default route
 
-The example shows how to set the default route to hop to a firewall instead of routing the traffic to the Internet.   
+The example shows how to set the default route to hop to a firewall instead of routing the traffic to the Internet.
 
 #### Mapping
 
@@ -161,7 +167,7 @@ VNET: 10.1.0.0/16
 - Subnet 2: 10.1.2.0/24 (VM/NVA: 10.1.2.11 - Firewall)
 ```
 
-#### RouteTable (LPM) 
+#### RouteTable (LPM)
 
 A hop to the firewall `10.1.2.11` is added at address `0/0`.
 
@@ -169,13 +175,11 @@ A hop to the firewall `10.1.2.11` is added at address `0/0`.
 - 0/0 -> Default Hop: 10.1.2.11 (Firewall in current VNET)
 ```
 
-### Set a specific Internet route 
+### Set a specific Internet route
 
-The example shows how to set a specific Internet route.   
-
+The example shows how to set a specific Internet route.
 
 #### Mapping
-
 
 A VM/NVA (VM or Virtual Appliance) firewall is added to Subnet 2 with address `10.1.2.11`.
 
@@ -184,7 +188,7 @@ VNET: 10.1.0.0/16
 - Subnet 2: 10.1.2.0/24 (VM/NVA: 10.1.2.11 - Firewall)
 ```
 
-#### RouteTable (LPM) 
+#### RouteTable (LPM)
 
 All the default traffic goes to through the fire-wall before going to the Internet; but the traffic going to the Internet trusted IPs do not have to go through the firewall and can go directly to the Internet.  
 
@@ -193,6 +197,37 @@ All the default traffic goes to through the fire-wall before going to the Intern
 - 0/0 -> Default Hop: 10.1.2.11 (Firewall in current VNET)
 ```
 
+### Set an on premises route to an express route (ER)
+
+The example shows how to set an on premises route to an express route (ER)
+for a specific private address (PA).
+
+#### RouteTable (LPM)
+
+In the example below the RouteTable (LPM) is attached to VM `10.1.1.1`.
+
+```
+- 10.1.0.0/16 -> VNET
+- 50.0.0.0/8 -> Hop CISCO Express Route (ER) device PA (100.1.2.3)
+```
+
+Where the on premises route: `50.0.0.0/0` is the customer on premises space.
+
+### Set an on premises route to an express route (ER) with two private addresses
+
+The example shows how to set an on premises route to an express route (ER) with two
+private addresses (end points) and **Generic Routing Encapsulation** (GRE) key.
+
+#### RouteTable (LPM)
+
+```
+- 50.0.0.0/8 -> Hop CISCO Express Route (ER) device PA (100.1.2.3, 100.1.2.4)
+- 50.1.0.0/16 -> Internet - This is also supported
+```
+
+## Private end points (?)
+
+TBD
 
 ## Terminlogy
 
@@ -207,5 +242,4 @@ It is called this because it is also the entry where the largest number of leadi
 
 - **SNAT**. The Source Network Address Translation (SNAT) is typically used when an internal/private host needs to initiate a connection to an external/public host. The device performing NAT changes the private IP address of the source host to public IP address. It may also change the source port in the TCP/UDP headers.
   
-- **VIP**. The Virtual IP Address (VIP) is a public IP address that may be shared by multiple devices connected to the Internet. 
-
+- **VIP**. The Virtual IP Address (VIP) is a public IP address that may be shared by multiple devices connected to the Internet.
