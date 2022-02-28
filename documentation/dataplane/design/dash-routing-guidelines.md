@@ -282,8 +282,8 @@ because of the mapping.
 ```
 
 > [!NOTE] In the past Microsoft only allowed private links to be added to the
-> routing table. But this was not scalable because of the amount of the private
-> links. So the ability was given to use mappings for the routing of the private
+> routing table. But this was not scalable because of the big amount of private
+> links. So, the ability was added to use mappings for the routing of the private
 > links.  
 
 
