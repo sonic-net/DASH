@@ -21,6 +21,7 @@ last update: 02/28/2022
   - [Set an on premises route to an express route (ER) with two private addresses](#set-an-on-premises-route-to-an-express-route-er-with-two-private-addresses)
     - [RouteTable (LPM)](#routetable-lpm-4)
 - [Private end points (?)](#private-end-points-)
+- [Counters](#counters)
 - [Terminlogy](#terminlogy)
 ## Overview
 
@@ -241,6 +242,9 @@ key.
 
 TBD
 
+## Counters
+
+TBD
 
 ## Terminlogy
 
