@@ -22,14 +22,6 @@ last update: 02/28/2022
     - [RouteTable (LPM)](#routetable-lpm-4)
 - [Private end points (?)](#private-end-points-)
 - [Terminlogy](#terminlogy)
-    (ER)](#set-an-on-premises-route-to-an-express-route-er)
-    - [RouteTable (LPM)](#routetable-lpm-3)
-  - [Set an on premises route to an express route (ER) with two private
-    addresses](#set-an-on-premises-route-to-an-express-route-er-with-two-private-addresses)
-    - [RouteTable (LPM)](#routetable-lpm-4)
-- [Private end points (?)](#private-end-points-)
-- [Terminlogy](#terminlogy)
-
 ## Overview
 
 This article explains the basic steps to build a **routing table** (also knonw
@@ -248,6 +240,7 @@ key.
 ## Private end points (?)
 
 TBD
+
 
 ## Terminlogy
 
