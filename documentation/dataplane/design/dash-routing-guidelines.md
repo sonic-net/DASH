@@ -29,6 +29,7 @@ last update: 02/28/2022
 
 This article explains the basic steps to build a **routing table** (also known
 as a *forwarding* table) and how to use **mappings**.  
+The route is a concept of ENI/VNIC, not a VNET (i.e. the route table is attached to ENI/VNIC)
 It is important to notice from the get go, **routing** and **mapping** are two
 different but complementary concepts, specifically:
 
@@ -136,8 +137,9 @@ RouteTable (LPM)  attached to VM 10.1.1.1
 ```
 
 Notice a routing table is attached to a specific VM in the VNET, not to VNET
-itself. In VNET the VM functions like a router, to which a routing table is
-attached.
+itself. The route is a concept of ENI/VNIC, not VNET (i.e. route table is attached to ENI/VNIC).  
+In VNET the VM functions like a router, to which a routing table is attached.
+This makes a difference when plumbing metering.
 
 ![dash-dataplane-routing-table-vm](./images/dash-dataplane-routing-table-vm.svg)
 
@@ -327,6 +329,7 @@ will be found in a document dedicated to this topic.
 
 The following applies:
 
+- We need a Counter on both the Route and the Mapping.
 - The idea is to treat private endpoints as customer addresses (CA). 
 - We are only evaluating private links mappings not using explicit routes. 
 - Private endpoints mappings take precedence over everything. 
@@ -343,6 +346,7 @@ The answer is because VNET is global (there is no VNET for each ENI), those
 counters will be global. Otherwise, we have to copy the entire VNET object for
 each ENI that would be impossible. But you can get the counters meaning from the
 VNET context.  
+Different ENI in peered VNET; need to have context on the ENI Counter for every other NIC, Mapping, and Peered VNET – and statically isolate each value (right now we rely on the fact that the mappings are not hit by different ENIs).  At time of programming of ENI, we now we have to know..?
 
 
 ## Terminlogy
