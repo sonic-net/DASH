@@ -23,6 +23,14 @@ last update: 02/28/2022
   - [Set private links routes](#set-private-links-routes)
 - [Counters](#counters)
 - [Terminlogy](#terminlogy)
+    (ER)](#set-an-on-premises-route-to-an-express-route-er)
+    - [RouteTable (LPM)](#routetable-lpm-3)
+  - [Set an on premises route to an express route (ER) with two private
+    addresses](#set-an-on-premises-route-to-an-express-route-er-with-two-private-addresses)
+    - [RouteTable (LPM)](#routetable-lpm-4)
+  - [Set private links routes](#set-private-links-routes)
+- [Counters](#counters)
+- [Terminlogy](#terminlogy)
 
 ## Overview
 
@@ -283,14 +291,36 @@ because of the mapping.
 
 > [!NOTE] In the past Microsoft only allowed private links to be added to the
 > routing table. But this was not scalable because of the big amount of private
-> links. So, the ability was added to use mappings for the routing of the private
-> links.  
-
-
+> links. So, the ability was added to use mappings for the routing of the
+> private links.  
 
 ## Counters
 
-TBD
+This section briefly introduces the **counters**. A more in depth description
+will be found in a document dedicated to this topic.
+
+> [!NOTE] When and how metering depends on the way routing is done that is
+> statically or via mapping, 
+
+The following applies:
+
+- The idea is to treat private endpoints as customer addresses (CA). 
+- We are only evaluating private links mappings not using explicit routes. 
+- Private endpoints mappings take precedence over everything. 
+- If the VMs in a peer VNET have meters, they are going to be used because they
+  are attached to the ultimate destination. 
+- Because the mapping of the (metering) object is at VNET level, not at VNIC
+  level, the metering object means different things depending where the source
+  came from.
+
+
+The question is do you need to specify for each ENI every possible destination
+for correct application of the metering (counters)?  
+The answer is because VNET is global (there is no VNET for each ENI), those
+counters will be global. Otherwise, we have to copy the entire VNET object for
+each ENI that would be impossible. But you can get the counters meaning from the
+VNET context.  
+
 
 ## Terminlogy
 
