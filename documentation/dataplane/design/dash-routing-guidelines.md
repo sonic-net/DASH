@@ -292,7 +292,7 @@ because of the mapping.
 This section briefly introduces the **counters**. A more in depth description
 will be found in a document dedicated to this topic.
 
-> [!NOTE] When and how metering depends on the way routing is done that is
+> [!NOTE] When and how metering is done depends on the way routing is done that is
 > statically or via mapping, 
 
 The following applies:
@@ -321,7 +321,7 @@ VNET context.
 protocol. It is a simple IP packet encapsulation protocol used when IP packets
 need to be transported from one network to another network, without being
 notified as IP packets by any intermediate routers.
-- 
+  
 - **LPM**. LPM or longest prefix match refers to an algorithm used by routers in
 Internet Protocol (IP) networking to select an entry from a routing table.
 Because each entry in a forwarding table may specify a sub-network, one
