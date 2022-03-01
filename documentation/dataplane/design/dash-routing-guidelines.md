@@ -238,66 +238,107 @@ Route Table attached to VM x.x.x.x
 - 10.1.3.0/26 -> Next Hop: 10.2.0.88 **(CA -> PA) - firewall in peered VNET** :heavy_check_mark:
 - 10.2.0.o/16 -> VNET B (use mappings)
 - 10.3.0.o/16 -> VNET C (use mappings)
-- 50.1.0.0/16 -> Internet **Used for intercept** :heavy_check_mark:
+- 50.1.0.0/16 -> Internet **Used for intercept of other traffic** :heavy_check_mark:
 - 50.0.0.0/8 -> Next Hop: **ER device PA (100.1.2.3, 100.1.2.4) 2 endpoints, GRE Key: X** :heavy_check_mark:
 - 8.8.0.0/16 -> Internet (for Trusted traffic) - (can be SNAT to VIP)
 - 0/0 -> Next Hop: 10.1.2.11 for Untrusted traffic
 
-**Route Table**
-
-In the example below the RouteTable (LPM) is attached to VM `10.1.1.1`.
-
-- 10.1.0.0/16 -> VNET
-- 50.0.0.0/8 -> Hop CISCO Express Route (ER) device PA (100.1.2.3)
-
-Where the on premises route: `50.0.0.0/0` is the customer on premises space.
-
-### Set an on premises route to a next hop express route (ExR) PA
-
-The example shows how to set an on premises route to an express route (ER) with
-two private addresses (end points) and **Generic Routing Encapsulation** (GRE)
-key.
-
-RouteTable (LPM)
-
-- 50.0.0.0/8 -> Hop CISCO - **Express route (ER) device PA (100.1.2.3, 100.1.2.4)** :heavy_check_mark:
-- 50.1.0.0/16 -> Internet - This is also supported
-
-### Set private links routes using mapping, routes, or peered VNETs
-
-The following example shows how the traffic to private links and VMs can be
-directed to a firewall. PEs (Private Endpoints) can be /32 routes or mappings.
+### Scenario: Private Endpoints
 
 VNET: 10.1.0.0/16
 
 - Subnet 1: 10.1.1.0/24
-- Subnet 2: 10.1.2.0/24 (VM/NVA: 10.1.2.11 - Firewall)
+- Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) Customer places FW here :heavy_check_mark:
 - Subnet 3: 10.1.3.0/24
+- Mappings:     **Customer adds some VMs below, Private Links, etc...in the VNET** :heavy_check_mark:
+-    VM 1: 10.1.1.1     **In subnet 1** ✔️
+-    VM 2: 10.1.3.2     **In subnet 3** ✔️
+-    Private Link 1: 10.1.3.3     **In subnet 3** ✔️
+-    Private Link 2: 10.1.3.4     **Private Links are Mappings, but we also support Customers plumbing them as a Route** :heavy_check_mark:
+-    VM 3: 10.1.3.5     **In subnet 3** ✔️
 
-Mappings:
+On-Prem: 50.0.0.0/8 - Customer On Prem space
 
-- VM 1: 10.1.1.1
-- VM 2: 10.1.3.2 .
-- Private Link 1: 10.1.3.3
-- Private Link 2: 10.1.3.4 . VM 3: 10.1.3.5`
+Route Table attached to VM x.x.x.x
 
-VM 2, VM 3 and the private links belongs to the Subnet 3: `10.1.3.0/24`.
+- 10.1.0.0/16 -> VNET A (use mappings)
+- 10.1.3.0/24 -> Next Hop: 10.1.2.11 (CA -> PA) - next hop here from previous example
+- 10.1.3.0/26 -> Next Hop: 10.2.0.88 (CA -> PA) - firewall in peered VNET **From LPM perspective, this route is taken** :heavy_check_mark:
+- 10.2.0.0/16 -> VNET B (use mappings)
+- 10.3.0.0/16 -> VNET C (use mappings)
+- 50.1.0.0/16 -> Internet Used for intercept of other traffic
+- 50.0.0.0/8 -> Next Hop: ER device PA (100.1.2.3, 100.1.2.4) 2 endpoints, GRE Key: X
+- 8.8.0.0/16 -> Internet (for Trusted traffic) - (can be SNAT to VIP)
+- 0/0 -> Next Hop: 10.1.2.11 for Untrusted traffic
 
-The traffic to private links and VMs can be directed to a firewall by adding the
-entry, shown below, to the routing table.
 
-10.1.3.0/26 -> Hop: 10.1.2.88 **Customer Address (CA) -> Private Address (PA) Firewall in peered VNET** :heavy_check_mark:
+### Scenario: Private Endpoints plumbed as Route
+Customer can also send Private Link directly as a route
 
-We should also be able to add a private link route to the routing table as shown
-below. In this case the routing happens because of the entry in the table not
-because of the mapping.
+VNET: 10.1.0.0/16
 
- `10.1.3.3/32 -> Private Link Route (Private Link 1)`
+- Subnet 1: 10.1.1.0/24
+- Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) Customer places FW here :heavy_check_mark:
+- Subnet 3: 10.1.3.0/24
+- Mappings:     **Customer adds some VMs below, Private Links, etc...in the VNET** :heavy_check_mark:
+-    VM 1: 10.1.1.1     In subnet 1
+-    VM 2: 10.1.3.2     In subnet 3
+-    Private Link 1: 10.1.3.3     **From Route Table below, specific /32 route** ✔️
+-    Private Link 2: 10.1.3.4     Private Links are Mappings, but we also support Customers plumbing them as a Route
+-    VM 3: 10.1.3.5     In subnet 3
 
-> [!NOTE] In the past Microsoft only allowed private links to be added to the
-> routing table. But this was not scalable because of the big amount of private
-> links. So, the ability was added to use mappings for the routing of the
-> private links.  
+On-Prem: 50.0.0.0/8 - Customer On Prem space
+
+Route Table attached to VM x.x.x.x
+
+- 10.1.0.0/16 -> VNET A (use mappings)
+- 10.1.3.0/24 -> Next Hop: 10.1.2.11 (CA -> PA) - next hop here from previous example
+- 10.1.3.0/26 -> Next Hop: 10.2.0.88 (CA -> PA) - firewall in peered VNET
+- 10.1.3.3/32 -> **Private Link Route (should 'win' b/c it is part of a route, not part of a mapping** ✔️
+- 10.2.0.0/16 -> VNET B (use mappings)
+- 10.3.0.0/16 -> VNET C (use mappings)
+- 50.1.0.0/16 -> Internet Used for intercept of other traffic
+- 50.0.0.0/8 -> Next Hop: ER device PA (100.1.2.3, 100.1.2.4) 2 endpoints, GRE Key: X
+- 8.8.0.0/16 -> Internet (for Trusted traffic) - (can be SNAT to VIP)
+- 0/0 -> Next Hop: 10.1.2.11 for Untrusted traffic
+
+### Scenario: Intercept Specific Traffic / Exempt a Specific IP/VM
+Customer wants to exempt 1 IP or perhaps a VNET (need explanation of why)
+
+VNET: 10.1.0.0/16
+
+- Subnet 1: 10.1.1.0/24
+- Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) Customer places FW here :heavy_check_mark:
+- Subnet 3: 10.1.3.0/24
+- Mappings:     **Customer adds some VMs below, Private Links, etc...in the VNET**
+-    VM 1: 10.1.1.1     In subnet 1
+-    VM 2: 10.1.3.2     In subnet 3
+-    Private Link 1: 10.1.3.3     
+-    Private Link 2: 10.1.3.4     
+-    VM 3: 10.1.3.5     In subnet 3 **This is still here as a Mapping as part of the VNET** ✔️
+
+On-Prem: 50.0.0.0/8 - Customer On Prem space
+
+Route Table attached to VM x.x.x.x
+
+- 10.1.0.0/16 -> VNET A (use mappings) **Default catch-all for prefix**
+- 10.1.3.0/24 -> Next Hop: 10.1.2.11 (CA -> PA) - next hop here from previous example
+- 10.1.3.0/26 -> Next Hop: 10.2.0.88 (CA -> PA) - firewall in peered VNET
+- 10.1.3.5/32 -> **VNET A (mapping) customer wants to exempt this IP to 'go direct'** ✔️
+- 10.1.3.3/32 -> Private Link Route
+- 10.2.0.0/16 -> VNET B (use mappings)
+- 10.3.0.0/16 -> VNET C (use mappings)
+- 50.1.0.0/16 -> Internet Used for intercept of other traffic
+- 50.0.0.0/8 -> Next Hop: ER device PA (100.1.2.3, 100.1.2.4) 2 endpoints, GRE Key: X
+- 8.8.0.0/16 -> Internet (for Trusted traffic) - (can be SNAT to VIP)
+- 0/0 -> Next Hop: 10.1.2.11 for Untrusted traffic
+
+Route Table attached to VM **y.y.y.y** **Different ENI using same route table above; the VNET object is shared**
+
+Customer wants to be able to communicate with 10.1.3.5 (via the route table), but **does not** want to intercept any traffic ✔️
+
+- 10.1.0.0/16 -> VNET A (use mappings)
+
 
 ## Counters
 
