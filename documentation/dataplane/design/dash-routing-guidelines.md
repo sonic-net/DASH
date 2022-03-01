@@ -40,15 +40,24 @@ It must be clear that the routing table has the final say in the way the traffic
 traffic and forward to a next hop for the purpose of filtering.  The order is:  LPM->Route->Mapping.  We ONLY look at mappings, AFTER LPM decides
 that a route wins.
 
-For example, a default route appears as below:
+For example, a default route looks like this:
   
-  `0/0 -> Internet (Default)`
+0/0 -> Internet (Default)
 
-The entry following shows how a customer can override the entry and route the traffic differently:
+The following example shows how a customer can override the default entry and route the traffic differently:
 
-  `8.8.0.0/16 -> Internet (SNAT to VIP)`
+- 8.8.0.0/16 -> Internet (SNAT to VIP)
+- 0/0 -> Default Hop: 10.1.2.11 (direct to a Firewall in current VNET)
 
-  `0/0 -> Default Hop: 10.1.2.11 (direct to a Firewall in current VNET)`
+
+Please note, a routing table is attached to a specific VM DASH DPU in the VNET, not to the VNET itself. 
+The route is an ENI/VNIC concept, not a VNET one (i.e., a route table is *attached* to ENI/VNIC).  
+In a VNET a VM DASH DPU functions like a router, to which a routing table is attached. 
+This must be taken into consideration in metering.
+
+![dash-dataplane-routing-table-vm](./images/dash-dataplane-routing-table-vm.svg)
+
+<figcaption><i>Figure 1. Routing tables per VM</i></figcaption><br/>
 
 ### Mapping
 
@@ -126,13 +135,6 @@ RouteTable attached to VM 10.1.1.1
 - 0/0 -> Default Hop: 10.1.2.11 (Firewall in current VNET)
 
 ```
-
-Please note, a routing table is attached to a specific a VM DASH DPU in the VNET, not to VNET itself. The route is a concept of ENI/VNIC, not a VNET (i.e. route table is attached to ENI/VNIC).  
-In a VNET a VM DASH DPU functions like a router, to which a routing table is attached. This makes a difference when plumbing metering.
-
-![dash-dataplane-routing-table-vm](./images/dash-dataplane-routing-table-vm.svg)
-
-<figcaption><i>Figure 1. Routing table per VM</i></figcaption><br/>
 
 ## SCENARIOS (these build upon each other)
 
@@ -257,10 +259,8 @@ Route Table attached to VM x.x.x.x
 
 In the example below the RouteTable (LPM) is attached to VM `10.1.1.1`.
 
-```
 - 10.1.0.0/16 -> VNET
 - 50.0.0.0/8 -> Hop CISCO Express Route (ER) device PA (100.1.2.3)
-```
 
 Where the on premises route: `50.0.0.0/0` is the customer on premises space.
 
@@ -286,7 +286,7 @@ VNET: 10.1.0.0/16
 - Subnet 2: 10.1.2.0/24 (VM/NVA: 10.1.2.11 - Firewall)
 - Subnet 3: 10.1.3.0/24
 
-- Mappings: 
+Mappings: 
 
 - VM 1: 10.1.1.1 
 - VM 2: 10.1.3.2 . 
@@ -304,12 +304,8 @@ entry, shown below, to the routing table.
 We should also be able to add a private link route to the routing table as shown
 below. In this case the routing happens because of the entry in the table not
 because of the mapping. 
-
-```
-
-- 10.1.3.3/32 -> Private Link Route (Private Link 1) 
-
-```
+ 
+ `10.1.3.3/32 -> Private Link Route (Private Link 1)` 
 
 > [!NOTE] In the past Microsoft only allowed private links to be added to the
 > routing table. But this was not scalable because of the big amount of private
