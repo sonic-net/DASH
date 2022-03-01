@@ -17,7 +17,6 @@ last update: 02/28/2022
   - [Scenario: Filter default route](#scenario-filter-default-route)
   - [Scenario: Trusted versus untrusted Internet-bound traffic](#scenario-trusted-versus-untrusted-internet-bound-traffic)
   - [Scenario: Set an on premises route to a express route (ExR) PA](#scenario-set-an-on-premises-route-to-a-express-route-exr-pa)
-    - [Route Table](#route-table)
   - [Set an on premises route to a next hop express route (ExR) PA](#set-an-on-premises-route-to-a-next-hop-express-route-exr-pa)
   - [Set private links routes using mapping, routes, or peered VNETs](#set-private-links-routes-using-mapping-routes-or-peered-vnets)
 - [Counters](#counters)
@@ -247,7 +246,7 @@ Route Table attached to VM x.x.x.x
 - 8.8.0.0/16 -> Internet (for Trusted traffic) - (can be SNAT to VIP)
 - 0/0 -> Next Hop: 10.1.2.11 for Untrusted traffic
 
-#### Route Table
+**Route Table**
 
 In the example below the RouteTable (LPM) is attached to VM `10.1.1.1`.
 
