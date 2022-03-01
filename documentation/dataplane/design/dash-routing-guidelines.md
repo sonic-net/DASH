@@ -33,7 +33,7 @@ The route is a concept of ENI/VNIC, not a VNET (i.e. the route table is attached
 to ENI/VNIC) It is important to notice from the get go, **routing** and
 **mapping** are two different but complementary concepts, specifically:
 
-### Routing 
+### Routing
 
 The route table is configured by the customer to provide the desired traffic routing behavior; traffic can also be intercepted or redirected.  
 It must be clear that the routing table has the final say in the way the traffic is routed (Longest Prefix Match = wins). Routes can intercept **part** of the
@@ -49,10 +49,9 @@ The following example shows how a customer can override the default entry and ro
 - 8.8.0.0/16 -> Internet (SNAT to VIP)
 - 0/0 -> Default Hop: 10.1.2.11 (direct to a Firewall in current VNET)
 
-
-Please note, a routing table is attached to a specific VM DASH DPU in the VNET, not to the VNET itself. 
+Please note, a routing table is attached to a specific VM DASH DPU in the VNET, not to the VNET itself.
 The route is an ENI/VNIC concept, not a VNET one (i.e., a route table is *attached* to ENI/VNIC).  
-In a VNET a VM DASH DPU functions like a router, to which a routing table is attached. 
+In a VNET a VM DASH DPU functions like a router, to which a routing table is attached.
 This must be taken into consideration in metering.
 
 ![dash-dataplane-routing-table-vm](./images/dash-dataplane-routing-table-vm.svg)
@@ -138,35 +137,30 @@ RouteTable attached to VM 10.1.1.1
 
 ## SCENARIOS (these build upon each other)
 
-### Scenario: Explicit LPM 
+### Scenario: Explicit LPM
 
-<!-- #### This example is a single VNET with direct traffic between VMs using mappings -->
-
-This example shows a single VNET with direct traffic between VMs 
-using mappings.
+This example shows a single VNET with direct traffic between VMs using mappings.
 
 **Customer provides entries which are handled by default**
 
-```
 Route Table - attached to VM x.x.x.x
+
 - 10.1.0.0/16 -> VNET (use mappings)
 - 0/0 -> Default (Internet)
-```
 
 **Peered VNET using mappings**
 
 Route Table - attached to VM x.x.x.x
 
-- 10.1.0.0/16 -> VNET A (use mappings) 
+- 10.1.0.0/16 -> VNET A (use mappings)
 - 10.2.0.0/16 -> VNET B (use mappings)
 - 10.3.0.0/16 -> VNET C (use mappings)
 - 0/0 -> Default (Internet)
 
-
-### Scenario: Direct communication between subnets 
+### Scenario: Direct communication between subnets
 
 <!-- #### Example: Customer wants to filter traffic from subnet 1 to subnet 3 through a FW on subnet 2 -->
-The scenario shows communication between subnets with mapping and addition of next hop (such as a firewall)
+This scenario shows communication between subnets with mapping and addition of next hop (such as a firewall)
 
 In the following example the customer filter traffic from subnet 1 to subnet 3 through a firewall on subnet 2.
 
@@ -176,9 +170,9 @@ VNET: 10.1.0.0/16
 - Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) **Customer places firewall here** :heavy_check_mark:
 - Subnet 3: 10.1.3.0/24
 
-#### Add firewall hop to the routes 
+#### Add firewall hop to the routes
 
-The scenario shows communication between subnets with firewall (NVA) next hop route entry. 
+The scenario shows communication between subnets with firewall (NVA) next hop route entry.
 
 Route Table attached to VM x.x.x.x
 
@@ -199,9 +193,9 @@ VNET: 10.1.0.0/16
 - Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) **Customer places FW here** :heavy_check_mark:
 - Subnet 3: 10.1.3.0/24
 
-#### Add firewall hop to the routes 
+#### Add firewall hop to the routes
 
-The scenario shows communication between subnets with firewall (NVA) next hop route entry.
+This scenario shows communication between subnets with firewall (NVA) next hop route entry.
 
 RouteTable attached to VM 10.1.1.1
 
@@ -230,8 +224,7 @@ Route Table attached to VM x.x.x.x
 - 8.8.0.0/16 -> Internet **(for Trusted traffic) - (can be SNAT to VIP)** :heavy_check_mark:
 - 0/0 -> Next Hop: 10.1.2.11 **for Untrusted traffic** :heavy_check_mark:
 
-
-### Scenario: Set an on premises route to a express route (ExR) PA 
+### Scenario: Set an on premises route to a express route (ExR) PA
 
 The example shows how to set an on premises route to an express route (ER) for a
 specific private address (PA).
@@ -245,6 +238,7 @@ VNET: 10.1.0.0/16
 **On-Prem: 50.0.0.0/8 - Customer On Prem space**
 
 Route Table attached to VM x.x.x.x
+
 - 10.1.0.0/16 -> VNET A (use mappings)
 - 10.1.3.0/24 -> Next Hop: 10.1.2.11 **(CA -> PA) - next hop here from previous example** :heavy_check_mark:
 - 10.1.3.0/26 -> Next Hop: 10.2.0.88 **(CA -> PA) (firewall in peered VNET)** :heavy_check_mark:
@@ -264,7 +258,7 @@ In the example below the RouteTable (LPM) is attached to VM `10.1.1.1`.
 
 Where the on premises route: `50.0.0.0/0` is the customer on premises space.
 
-### Set an on premises route to a next hop express route (ExR) PA 
+### Set an on premises route to a next hop express route (ExR) PA
 
 The example shows how to set an on premises route to an express route (ER) with
 two private addresses (end points) and **Generic Routing Encapsulation** (GRE)
@@ -278,7 +272,7 @@ RouteTable (LPM)
 ### Set private links routes using mapping, routes, or peered VNETs
 
 The following example shows how the traffic to private links and VMs can be
-directed to a firewall. PEs (Private Endpoints) can be /32 routes or mappings. 
+directed to a firewall. PEs (Private Endpoints) can be /32 routes or mappings.
 
 VNET: 10.1.0.0/16
 
@@ -286,26 +280,25 @@ VNET: 10.1.0.0/16
 - Subnet 2: 10.1.2.0/24 (VM/NVA: 10.1.2.11 - Firewall)
 - Subnet 3: 10.1.3.0/24
 
-Mappings: 
+Mappings:
 
-- VM 1: 10.1.1.1 
-- VM 2: 10.1.3.2 . 
-- Private Link 1: 10.1.3.3 
+- VM 1: 10.1.1.1
+- VM 2: 10.1.3.2 .
+- Private Link 1: 10.1.3.3
 - Private Link 2: 10.1.3.4 . VM 3: 10.1.3.5`
 
-VM 2, VM 3 and the private links belongs to the Subnet 3: `10.1.3.0/24`. 
+VM 2, VM 3 and the private links belongs to the Subnet 3: `10.1.3.0/24`.
 
 The traffic to private links and VMs can be directed to a firewall by adding the
-entry, shown below, to the routing table. 
+entry, shown below, to the routing table.
 
 10.1.3.0/26 -> Hop: 10.1.2.88 **Customer Address (CA) -> Private Address (PA) Firewall in peered VNET** :heavy_check_mark:
 
-
 We should also be able to add a private link route to the routing table as shown
 below. In this case the routing happens because of the entry in the table not
-because of the mapping. 
- 
- `10.1.3.3/32 -> Private Link Route (Private Link 1)` 
+because of the mapping.
+
+ `10.1.3.3/32 -> Private Link Route (Private Link 1)`
 
 > [!NOTE] In the past Microsoft only allowed private links to be added to the
 > routing table. But this was not scalable because of the big amount of private
@@ -318,20 +311,19 @@ This section briefly introduces the **counters**. A more in depth description
 will be found in a document dedicated to this topic.
 
 > [!NOTE] When and how metering is done depends on the way routing is done that is
-> statically or via mapping, 
+> statically or via mapping,
 
 The following applies:
 
 - We need a Counter on both the Route and the Mapping.
-- The idea is to treat private endpoints as customer addresses (CA). 
-- We are only evaluating private links mappings not using explicit routes. 
-- Private endpoints mappings take precedence over everything. 
+- The idea is to treat private endpoints as customer addresses (CA).
+- We are only evaluating private links mappings not using explicit routes.
+- Private endpoints mappings take precedence over everything.
 - If the VMs in a peer VNET have meters, they are going to be used because they
-  are attached to the ultimate destination. 
+  are attached to the ultimate destination.
 - Because the mapping of the (metering) object is at VNET level, not at VNIC
   level, the metering object means different things depending where the source
   came from.
-
 
 The question is do you need to specify for each ENI every possible destination
 for correct application of the metering (counters)?  
@@ -340,11 +332,10 @@ counters will be global. Otherwise, we have to copy the entire VNET object for
 each ENI that would be impossible. But you can get the counters meaning from the
 VNET context.  
 
-Different ENI in peered VNET need to have context on the ENI counter for every other NIC. 
-Mapping and Peered VNET and statically isolate each value (right now we rely on the fact that the 
+Different ENI in peered VNET need to have context on the ENI counter for every other NIC.
+Mapping and Peered VNET and statically isolate each value (right now we rely on the fact that the
 mappings are not hit by different ENIs).  
 At time of programming of ENI, we now we have to know..?
-
 
 ## Terminlogy
 
