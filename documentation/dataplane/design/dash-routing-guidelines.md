@@ -10,12 +10,12 @@ last update: 02/28/2022
   - [Mapping](#mapping)
 - [Routing examples](#routing-examples)
   - [Example route table (basic customer setup)](#example-route-table-basic-customer-setup)
-  - [NET, Mappings, Private Link, Express Route, Internet Examples](#net-mappings-private-link-express-route-internet-examples)
+  - [VNET, Mappings, Private Link, Express Route, Internet Examples](#vnet-mappings-private-link-express-route-internet-examples)
 - [SCENARIOS (these build upon each other)](#scenarios-these-build-upon-each-other)
   - [Scenario: Explicit LPM](#scenario-explicit-lpm)
   - [Scenario: Direct communication between subnets](#scenario-direct-communication-between-subnets)
   - [Scenario: Filter default route](#scenario-filter-default-route)
-  - [Scenario: Trusted versus untrusted Internet-bound traffic](#scenario-trusted-versus-untrusted-internet-bound-traffic)
+  - [Scenario: Trusted versus Untrusted Internet-bound traffic](#scenario-trusted-versus-untrusted-internet-bound-traffic)
   - [Scenario: Set an on premises route to a express route (ExR) PA](#scenario-set-an-on-premises-route-to-a-express-route-exr-pa)
   - [Set an on premises route to a next hop express route (ExR) PA](#set-an-on-premises-route-to-a-next-hop-express-route-exr-pa)
   - [Set private links routes using mapping, routes, or peered VNETs](#set-private-links-routes-using-mapping-routes-or-peered-vnets)
@@ -46,9 +46,9 @@ The following example shows how a customer can override the default entry and ro
 - 8.8.0.0/16 -> Internet (SNAT to VIP)
 - 0/0 -> Default Hop: 10.1.2.11 (direct to a Firewall in current VNET)
 
-Please note, a routing table is attached to a specific VM DASH DPU in the VNET, not to the VNET itself.
+Please notice. A routing table is *attached* to a specific VM DASH DPU in the VNET, not to the VNET itself.
 The route is an ENI/VNIC concept, not a VNET one (i.e., a route table is *attached* to ENI/VNIC).  
-In a VNET a VM DASH DPU functions like a router, to which a routing table is attached.
+In a VNET a VM DASH DPU functions like a router, to which a routing table is *attached*.
 This must be taken into consideration in metering.
 
 ![dash-dataplane-routing-table-vm](./images/dash-dataplane-routing-table-vm.svg)
@@ -102,7 +102,7 @@ contain. We'll describe the various entries as we progess with the explanation.
 
 ```
 
-### NET, Mappings, Private Link, Express Route, Internet Examples
+### VNET, Mappings, Private Link, Express Route, Internet Examples
 
 ```
 VNET: 10.1.0.0/16
@@ -156,7 +156,6 @@ Route Table - attached to VM x.x.x.x
 
 ### Scenario: Direct communication between subnets
 
-<!-- #### Example: Customer wants to filter traffic from subnet 1 to subnet 3 through a FW on subnet 2 -->
 This scenario shows communication between subnets with mapping and addition of next hop (such as a firewall)
 
 In the following example the customer filter traffic from subnet 1 to subnet 3 through a firewall on subnet 2.
@@ -168,8 +167,6 @@ VNET: 10.1.0.0/16
 - Subnet 3: 10.1.3.0/24
 
 **Add firewall hop to the routes**
-
-The scenario shows communication between subnets with firewall (NVA) next hop route entry.
 
 Route Table attached to VM x.x.x.x
 
@@ -202,7 +199,7 @@ RouteTable attached to VM 10.1.1.1
 - 10.3.0.0/16 -> VNET C (use mappings)
 - 0/0 -> Next Hop: 10.1.2.11 **Customer overrides default route with a next hop of 10.1.2.11 (firewall in VNET)** :heavy_check_mark:
 
-### Scenario: Trusted versus untrusted Internet-bound traffic
+### Scenario: Trusted versus Untrusted Internet-bound traffic
 
 This scenario shows how to route directly **trusted** Internet-bound traffic while routing **untrusted** trafffic to a firewall
 
@@ -219,7 +216,7 @@ Route Table attached to VM x.x.x.x
 - 10.2.0.0/16 -> VNET B (use mappings)
 - 10.3.0.0/16 -> VNET C (use mappings)
 - 8.8.0.0/16 -> Internet **For trusted traffic can be SNAT to VIP** :heavy_check_mark:
-- 0/0 -> Next Hop: 10.1.2.11 **For Untrusted traffic** :heavy_check_mark:
+- 0/0 -> Next Hop: 10.1.2.11 **For untrusted traffic** :heavy_check_mark:
 
 ### Scenario: Set an on premises route to a express route (ExR) PA
 
