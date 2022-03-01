@@ -13,12 +13,8 @@ last update: 02/28/2022
   - [NET, Mappings, Private Link, Express Route, Internet Examples](#net-mappings-private-link-express-route-internet-examples)
 - [SCENARIOS (these build upon each other)](#scenarios-these-build-upon-each-other)
   - [Scenario: Explicit LPM](#scenario-explicit-lpm)
-    - [This example is a single VNET with direct traffic between VMs using mappings](#this-example-is-a-single-vnet-with-direct-traffic-between-vms-using-mappings)
-    - [Customer provides entries, we handle by default](#customer-provides-entries-we-handle-by-default)
   - [Scenario: Peered VNET using Mappings](#scenario-peered-vnet-using-mappings)
   - [Scenario: Direct communication between subnets w/mapping and addition of next hop (such as a Firewall)](#scenario-direct-communication-between-subnets-wmapping-and-addition-of-next-hop-such-as-a-firewall)
-    - [Example: Customer wants to filter traffic from subnet 1 to subnet 3 through a FW on subnet 2](#example-customer-wants-to-filter-traffic-from-subnet-1-to-subnet-3-through-a-fw-on-subnet-2)
-    - [VNET w/Subnets](#vnet-wsubnets)
     - [Add firewall hop to the routes (Communication between subnets w/firewall (NVA) next hop route entry)](#add-firewall-hop-to-the-routes-communication-between-subnets-wfirewall-nva-next-hop-route-entry)
   - [Scenario: Customer wants to filter default route (ex: route all Internet destined traffic through a firewall).](#scenario-customer-wants-to-filter-default-route-ex-route-all-internet-destined-traffic-through-a-firewall)
     - [Add firewall hop to the routes (Communication between subnets w/firewall (NVA) next hop route entry)](#add-firewall-hop-to-the-routes-communication-between-subnets-wfirewall-nva-next-hop-route-entry-1)
@@ -139,20 +135,25 @@ In a VNET a VM DASH DPU functions like a router, to which a routing table is att
 ## SCENARIOS (these build upon each other)
 
 ### Scenario: Explicit LPM 
-#### This example is a single VNET with direct traffic between VMs using mappings
 
-#### Customer provides entries, we handle by default
+<!-- #### This example is a single VNET with direct traffic between VMs using mappings -->
+
+This example shows a single VNET with direct traffic between VMs 
+using mappings.
+
+**Customer provides entries which are handled by default**
 
 ```
 Route Table - attached to VM x.x.x.x
 - 10.1.0.0/16 -> VNET (use mappings)
 - 0/0 -> Default (Internet)
 ```
+
 ### Scenario: Peered VNET using Mappings
 
 ```
 Route Table - attached to VM x.x.x.x
-- 10.1.0.0/16 -> VNET A (use mappings)
+- 10.1.0.0/16 -> VNET A (use mappings) :heavy_check_mark:
 - 10.2.0.0/16 -> VNET B (use mappings)
 - 10.3.0.0/16 -> VNET C (use mappings)
 - 0/0 -> Default (Internet)
@@ -160,11 +161,14 @@ Route Table - attached to VM x.x.x.x
 
 ### Scenario: Direct communication between subnets w/mapping and addition of next hop (such as a Firewall)
 
-#### Example: Customer wants to filter traffic from subnet 1 to subnet 3 through a FW on subnet 2
-#### VNET w/Subnets
+<!-- #### Example: Customer wants to filter traffic from subnet 1 to subnet 3 through a FW on subnet 2 -->
+
+In the following example the customer filter traffic from subnet 1 to subnet 3 through a firewall on subnet 2.
+
 VNET: 10.1.0.0/16
+
 - Subnet 1: 10.1.1.0/24
-- Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) **Customer places FW here**
+- Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) **Customer places firewall here** :heavy_check_mark:
 - Subnet 3: 10.1.3.0/24
 
 #### Add firewall hop to the routes (Communication between subnets w/firewall (NVA) next hop route entry)
