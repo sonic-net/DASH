@@ -152,19 +152,18 @@ time-out.
 The temporal flow should also support packet and byte counters.  This data should
 be rolled/added back into the original/parent flow once the temporal flow is removed.
 
-## Other considerastions
+## Other considerations
 
 1.  When a first fragment (with L4 header) arrives, a new temporal flow should be created.
-This temporal flow should be associated (need to mainatin some state) with the
-**original/parent** flow against which the first fragement was matched.  This
-**association/relationship** will be used in an event when the parent flow is removed
-(age-out, closed, etc.) before the temporal flow is deleted.
+This temporal flow should be associated (need to maintain some state) with the
+**original/parent** flow against which the first fragment was matched.  
+If the connection is terminated, all temporal flows should be terminated as well.  
 
-1.  If the second fragment (first packet without L4 header and non-zero fragement offset)
-arrives before the first fragment, there will be no temporal flow entry and we will have a
-**flow-mis**.  This may take the **packet processing** to the slow-path.  The slow-path
-should drop this packet.  Since there is no 5-tuple information available, against which
-**bucket** will we count these drop packets in the slow path?
+1.  If the second fragment (first packet without L4 header and non-zero fragment offset)
+arrives before the first fragment, the packet will be dropped and no temporal flow will be created.  
+
+**Q**:  Since there is no 5-tuple information available, against which
+**bucket** will we count these drop packets in the slow path or count out of order packets?
 
 ## Issues and Nuances
 
@@ -189,7 +188,7 @@ should drop this packet.  Since there is no 5-tuple information available, again
    information** and it **would not have an entry in the temporal flow table**.
 
     - Fortunately, as everything coming/going between VMs is **encapsulated
-      within VXLAN** or methods, **out of order packets are unlikely (and again, would be dropped)** as
+      within VXLAN** or methods, **out of order packets are unlikely (and again, they need to be dropped)** as
       switches/routers do not mis-order frames of a single L4 flow.
     - The encapsulated packet will look like a **single L4 flow** to a
       router/switch. 
@@ -237,6 +236,10 @@ should drop this packet.  Since there is no 5-tuple information available, again
 1. Because the appliances are not reassembling frames nor terminating user
    frames there is no need to provide any action whether the **PUSH flag** is
    set or not.
+   
+ ## URGENT Flag
+ 
+ 1. As Appliances are wire-rate, this flag can be ignored unless destined for the Operating System which is out of scope for this document.
 
 ## Do Not Fragment Flag
 
