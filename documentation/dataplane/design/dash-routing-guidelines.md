@@ -13,13 +13,15 @@ last update: 02/28/2022
   - [NET, Mappings, Private Link, Express Route, Internet Examples](#net-mappings-private-link-express-route-internet-examples)
 - [SCENARIOS (these build upon each other)](#scenarios-these-build-upon-each-other)
   - [Scenario: Explicit LPM](#scenario-explicit-lpm)
-  - [Scenario: Peered VNET using Mappings](#scenario-peered-vnet-using-mappings)
-  - [Scenario: Direct communication between subnets w/mapping and addition of next hop (such as a Firewall)](#scenario-direct-communication-between-subnets-wmapping-and-addition-of-next-hop-such-as-a-firewall)
-    - [Add firewall hop to the routes (Communication between subnets w/firewall (NVA) next hop route entry)](#add-firewall-hop-to-the-routes-communication-between-subnets-wfirewall-nva-next-hop-route-entry)
-  - [Scenario: Customer wants to filter default route (ex: route all Internet destined traffic through a firewall).](#scenario-customer-wants-to-filter-default-route-ex-route-all-internet-destined-traffic-through-a-firewall)
-    - [Add firewall hop to the routes (Communication between subnets w/firewall (NVA) next hop route entry)](#add-firewall-hop-to-the-routes-communication-between-subnets-wfirewall-nva-next-hop-route-entry-1)
-  - [Scenario: Trusted Internet-bound traffic is direct, Untrusted transits firewall](#scenario-trusted-internet-bound-traffic-is-direct-untrusted-transits-firewall)
-    - [Add firewall hop to the routes (Communication between subnets w/firewall (NVA) next hop route entry)](#add-firewall-hop-to-the-routes-communication-between-subnets-wfirewall-nva-next-hop-route-entry-2)
+  - [Scenario: Direct communication between subnets](#scenario-direct-communication-between-subnets)
+    - [Add firewall hop to the routes](#add-firewall-hop-to-the-routes)
+  - [Scenario: Filter default route](#scenario-filter-default-route)
+    - [Add firewall hop to the routes](#add-firewall-hop-to-the-routes-1)
+  - [Scenario: Trusted versus untrusted Internet-bound traffic](#scenario-trusted-versus-untrusted-internet-bound-traffic)
+  - [Scenario: Set an on premises route to a express route (ExR) PA](#scenario-set-an-on-premises-route-to-a-express-route-exr-pa)
+    - [Route Table](#route-table)
+  - [Set an on premises route to a next hop express route (ExR) PA](#set-an-on-premises-route-to-a-next-hop-express-route-exr-pa)
+  - [Set private links routes using mapping, routes, or peered VNETs](#set-private-links-routes-using-mapping-routes-or-peered-vnets)
 - [Counters](#counters)
 - [Terminlogy](#terminlogy)
 
@@ -149,19 +151,20 @@ Route Table - attached to VM x.x.x.x
 - 0/0 -> Default (Internet)
 ```
 
-### Scenario: Peered VNET using Mappings
+**Peered VNET using mappings**
 
-```
 Route Table - attached to VM x.x.x.x
-- 10.1.0.0/16 -> VNET A (use mappings) :heavy_check_mark:
+
+- 10.1.0.0/16 -> VNET A (use mappings) 
 - 10.2.0.0/16 -> VNET B (use mappings)
 - 10.3.0.0/16 -> VNET C (use mappings)
 - 0/0 -> Default (Internet)
-```
 
-### Scenario: Direct communication between subnets w/mapping and addition of next hop (such as a Firewall)
+
+### Scenario: Direct communication between subnets 
 
 <!-- #### Example: Customer wants to filter traffic from subnet 1 to subnet 3 through a FW on subnet 2 -->
+The scenario shows communication between subnets with mapping and addition of next hop (such as a firewall)
 
 In the following example the customer filter traffic from subnet 1 to subnet 3 through a firewall on subnet 2.
 
@@ -171,59 +174,60 @@ VNET: 10.1.0.0/16
 - Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) **Customer places firewall here** :heavy_check_mark:
 - Subnet 3: 10.1.3.0/24
 
-#### Add firewall hop to the routes (Communication between subnets w/firewall (NVA) next hop route entry)
+#### Add firewall hop to the routes 
+
+The scenario shows communication between subnets with firewall (NVA) next hop route entry. 
 
 Route Table attached to VM x.x.x.x
+
 - 10.1.0.0/16 -> VNET A (use mappings)
-
-**- 10.1.3.0/24 -> Next Hop: (10.1.2.11) - Customer adds Subnet 3 Next Hop through Firewall in Current VNET here**
-
-**- 10.1.3.0/26 -> Next Hop: (10.2.0.88) - Another example, Firewall Next Hop in a Peered VNET**
-
+- 10.1.3.0/24 -> Next Hop: (10.1.2.11) - **Customer adds Subnet 3 Next Hop through Firewall in Current VNET here** :heavy_check_mark:
+- 10.1.3.0/26 -> Next Hop: (10.2.0.88) - **Another example, Firewall Next Hop in a Peered VNET** :heavy_check_mark:
 - 10.2.0.0/16 -> VNET B (use mappings)
 - 10.3.0.0/16 -> VNET C (use mappings)
 - 0/0 -> Default (Internet)
 
-### Scenario: Customer wants to filter default route (ex: route all Internet destined traffic through a firewall).
+### Scenario: Filter default route
 
-The example shows how redirect default route (Internet) traffic to through a firewall.
+The example shows how to route all Internet destined traffic through a firewall
 
 VNET: 10.1.0.0/16
+
 - Subnet 1: 10.1.1.0/24
-- Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) **Customer places FW here**
+- Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) **Customer places FW here** :heavy_check_mark:
 - Subnet 3: 10.1.3.0/24
 
-#### Add firewall hop to the routes (Communication between subnets w/firewall (NVA) next hop route entry)
+#### Add firewall hop to the routes 
+
+The scenario shows communication between subnets with firewall (NVA) next hop route entry.
 
 RouteTable attached to VM 10.1.1.1
-- 10.1.0.0/16 -> VNET A (use mappings)
-  
-**- 10.1.3.0/26 -> Next Hop: (10.1.2.11) - next hop here from previous example**
 
+- 10.1.0.0/16 -> VNET A (use mappings)
+- 10.1.3.0/26 -> Next Hop: (10.1.2.11) - **Next hop here from previous example** :heavy_check_mark:
 - 10.2.0.0/16 -> VNET B (use mappings)
 - 10.3.0.0/16 -> VNET C (use mappings)
-- 0/0 -> Next Hop: 10.1.2.11 **Customer overrides Default Route with a Next Hop of 10.1.2.11 (firewall in VNET)**
+- 0/0 -> Next Hop: 10.1.2.11 **Customer overrides default route with a next Hop of 10.1.2.11 (firewall in VNET)** :heavy_check_mark:
 
+### Scenario: Trusted versus untrusted Internet-bound traffic
 
-### Scenario: Trusted Internet-bound traffic is direct, Untrusted transits firewall
-
-The example shows how to set a permit specific Internet destined traffic to transit directly, while the rest transits a firewall.
+This scenario shows how to route directly **trusted** Internet-bound traffic while routing **untrusted** trafffic to a firewall
 
 VNET: 10.1.0.0/16
+
 - Subnet 1: 10.1.1.0/24
-- Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) **Customer places FW here**
+- Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) **Customer places FW here** :heavy_check_mark:
 - Subnet 3: 10.1.3.0/24
 
-#### Add firewall hop to the routes (Communication between subnets w/firewall (NVA) next hop route entry)
 Route Table attached to VM x.x.x.x
+
 - 10.1.0.0/16 -> VNET A (use mappings)
-**- 10.1.3.0/26 -> Next Hop: (10.1.2.11) - next hop here from previous example**
+- 10.1.3.0/26 -> Next Hop: (10.1.2.11) - **Next hop here from previous example** :heavy_check_mark:
 - 10.2.0.0/16 -> VNET B (use mappings)
 - 10.3.0.0/16 -> VNET C (use mappings)
-- 8.8.0.0/16 -> Internet **(for Trusted traffic) - (can be SNAT to VIP)** 
-- 0/0 -> Next Hop: 10.1.2.11 **for Untrusted traffic**
+- 8.8.0.0/16 -> Internet **(for Trusted traffic) - (can be SNAT to VIP)** :heavy_check_mark:
+- 0/0 -> Next Hop: 10.1.2.11 **for Untrusted traffic** :heavy_check_mark:
 
-```
 
 ### Scenario: Set an on premises route to a express route (ExR) PA 
 
@@ -231,20 +235,21 @@ The example shows how to set an on premises route to an express route (ER) for a
 specific private address (PA).
 
 VNET: 10.1.0.0/16
+
 - Subnet 1: 10.1.1.0/24
-- Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) **Customer places FW here**
+- Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) **Customer places FW here** :heavy_check_mark:
 - Subnet 3: 10.1.3.0/24
 
 **On-Prem: 50.0.0.0/8 - Customer On Prem space**
 
 Route Table attached to VM x.x.x.x
 - 10.1.0.0/16 -> VNET A (use mappings)
-- 10.1.3.0/24 -> Next Hop: 10.1.2.11 **(CA -> PA)** - next hop here from previous example**
-- 10.1.3.0/26 -> Next Hop: 10.2.0.88 **(CA -> PA)** (firewall in peered VNET)**
+- 10.1.3.0/24 -> Next Hop: 10.1.2.11 **(CA -> PA) - next hop here from previous example** :heavy_check_mark:
+- 10.1.3.0/26 -> Next Hop: 10.2.0.88 **(CA -> PA) (firewall in peered VNET)** :heavy_check_mark:
 - 10.2.0.o/16 -> VNET B (use mappings)
 - 10.3.0.o/16 -> VNET C (use mappings)
-- 50.1.0.0/16 -> Internet **Used for Intercept**
-- 50.0.0.0/8 -> Next Hop: **ER Device PA (100.1.2.3, 100.1.2.4) 2 Endpoints, GRE Key: X**
+- 50.1.0.0/16 -> Internet **Used for Intercept** :heavy_check_mark:
+- 50.0.0.0/8 -> Next Hop: **ER Device PA (100.1.2.3, 100.1.2.4) 2 Endpoints, GRE Key: X** :heavy_check_mark:
 - 8.8.0.0/16 -> Internet (for Trusted traffic) - (can be SNAT to VIP)
 - 0/0 -> Next Hop: 10.1.2.11 for Untrusted traffic
 
@@ -259,48 +264,42 @@ In the example below the RouteTable (LPM) is attached to VM `10.1.1.1`.
 
 Where the on premises route: `50.0.0.0/0` is the customer on premises space.
 
-### Set an on premises route to a next hop express route (ExR) PA with two private addresses (usually paired 2 endpoints) w/different GRE key
+### Set an on premises route to a next hop express route (ExR) PA 
 
 The example shows how to set an on premises route to an express route (ER) with
 two private addresses (end points) and **Generic Routing Encapsulation** (GRE)
 key.
 
-#### RouteTable (LPM)
+RouteTable (LPM)
 
-```
-- 50.0.0.0/8 -> Hop CISCO Express Route (ER) device PA (100.1.2.3, 100.1.2.4)
+- 50.0.0.0/8 -> Hop CISCO - **Express Route (ER) device PA (100.1.2.3, 100.1.2.4)** :heavy_check_mark:
 - 50.1.0.0/16 -> Internet - This is also supported
-```
 
 ### Set private links routes using mapping, routes, or peered VNETs
-PEs (Private Endpoints) can be /32 routes or mappings
 
 The following example shows how the traffic to private links and VMs can be
-directed to a firewall.  
+directed to a firewall. PEs (Private Endpoints) can be /32 routes or mappings. 
 
-Let’s say we have the following mapping:
-
-```
 VNET: 10.1.0.0/16
+
 - Subnet 1: 10.1.1.0/24
 - Subnet 2: 10.1.2.0/24 (VM/NVA: 10.1.2.11 - Firewall)
 - Subnet 3: 10.1.3.0/24
 
-- Mappings: . VM 1: 10.1.1.1 . VM 2: 10.1.3.2 . Private Link 1: 10.1.3.3 .
-    Private Link 2: 10.1.3.4 . VM 3: 10.1.3.5`
-```
+- Mappings: 
+
+- VM 1: 10.1.1.1 
+- VM 2: 10.1.3.2 . 
+- Private Link 1: 10.1.3.3 
+- Private Link 2: 10.1.3.4 . VM 3: 10.1.3.5`
 
 VM 2, VM 3 and the private links belongs to the Subnet 3: `10.1.3.0/24`. 
 
 The traffic to private links and VMs can be directed to a firewall by adding the
-entry shown below to the routing table. 
+entry, shown below, to the routing table. 
 
-```
+10.1.3.0/26 -> Hop: 10.1.2.88 **Customer Address (CA) -> Private Address (PA) Firewall in peered VNET** :heavy_check_mark:
 
-- 10.1.3.0/26 -> Hop: 10.1.2.88 Customer Address (CA) -> Private Address (PA)
-  (Firewall in peered VNET)
-
-```
 
 We should also be able to add a private link route to the routing table as shown
 below. In this case the routing happens because of the entry in the table not
