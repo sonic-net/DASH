@@ -6,28 +6,26 @@ last update: 02/28/2022
 # Routing guidelines and scenarios
 
 - [Overview](#overview)
+  - [Routing](#routing)
+  - [Mapping](#mapping)
 - [Routing examples](#routing-examples)
-  - [Explicit LPM](#explicit-lpm)
-  - [Peered VNET use Mappings](#peered-vnet-use-mappings)
-  - [VNET_A w/Subnets](#vnet_a-wsubnets)
-    - [Direct communication between subnets w/mapping](#direct-communication-between-subnets-wmapping)
-  - [Add firewall hop to the routes (Communication between subnets w/firewall (NVA) w/firewall next hop route entry)](#add-firewall-hop-to-the-routes-communication-between-subnets-wfirewall-nva-wfirewall-next-hop-route-entry)
-    - [Mapping](#mapping)
-    - [RouteTable (LPM)](#routetable-lpm)
-  - [Set default route](#set-default-route)
-    - [Mapping](#mapping-1)
-    - [RouteTable (LPM)](#routetable-lpm-1)
-  - [Next hop in peered VNET w/mapping via firewall (NVA)](#next-hop-in-peered-vnet-wmapping-via-firewall-nva)
-  - [Set a specific Internet route w/firewall](#set-a-specific-internet-route-wfirewall)
-    - [Mapping](#mapping-2)
-    - [RouteTable (LPM)](#routetable-lpm-2)
-  - [Set an on premises route to a express route (ExR) PA](#set-an-on-premises-route-to-a-express-route-exr-pa)
-    - [RouteTable (LPM)](#routetable-lpm-3)
-  - [Set an on premises route to a next hop express route (ExR) PA with two private addresses (usually paired 2 endpoints) w/different GRE key](#set-an-on-premises-route-to-a-next-hop-express-route-exr-pa-with-two-private-addresses-usually-paired-2-endpoints-wdifferent-gre-key)
-    - [RouteTable (LPM)](#routetable-lpm-4)
-  - [Set private links routes using mapping, routes, or peered VNETs](#set-private-links-routes-using-mapping-routes-or-peered-vnets)
+  - [Example route table (basic customer setup)](#example-route-table-basic-customer-setup)
+  - [NET, Mappings, Private Link, Express Route, Internet Examples](#net-mappings-private-link-express-route-internet-examples)
+- [SCENARIOS (these build upon each other)](#scenarios-these-build-upon-each-other)
+  - [Scenario: Explicit LPM](#scenario-explicit-lpm)
+    - [This example is a single VNET with direct traffic between VMs using mappings](#this-example-is-a-single-vnet-with-direct-traffic-between-vms-using-mappings)
+    - [Customer provides entries, we handle by default](#customer-provides-entries-we-handle-by-default)
+  - [Scenario: Peered VNET using Mappings](#scenario-peered-vnet-using-mappings)
+  - [Scenario: Direct communication between subnets w/mapping and addition of next hop (such as a Firewall)](#scenario-direct-communication-between-subnets-wmapping-and-addition-of-next-hop-such-as-a-firewall)
+    - [Example: Customer wants to filter traffic from subnet 1 to subnet 3 through a FW on subnet 2](#example-customer-wants-to-filter-traffic-from-subnet-1-to-subnet-3-through-a-fw-on-subnet-2)
+    - [VNET w/Subnets](#vnet-wsubnets)
+    - [Add firewall hop to the routes (Communication between subnets w/firewall (NVA) next hop route entry)](#add-firewall-hop-to-the-routes-communication-between-subnets-wfirewall-nva-next-hop-route-entry)
+  - [Scenario: Customer wants to filter default route (ex: route all Internet destined traffic through a firewall).](#scenario-customer-wants-to-filter-default-route-ex-route-all-internet-destined-traffic-through-a-firewall)
+    - [Add firewall hop to the routes (Communication between subnets w/firewall (NVA) next hop route entry)](#add-firewall-hop-to-the-routes-communication-between-subnets-wfirewall-nva-next-hop-route-entry-1)
+  - [Scenario: Trusted Internet-bound traffic is direct, Untrusted transits firewall](#scenario-trusted-internet-bound-traffic-is-direct-untrusted-transits-firewall)
+    - [Add firewall hop to the routes (Communication between subnets w/firewall (NVA) next hop route entry)](#add-firewall-hop-to-the-routes-communication-between-subnets-wfirewall-nva-next-hop-route-entry-2)
 - [Counters](#counters)
-- [Terminology](#terminology)
+- [Terminlogy](#terminlogy)
 
 ## Overview
 
@@ -37,7 +35,7 @@ The route is a concept of ENI/VNIC, not a VNET (i.e. the route table is attached
 to ENI/VNIC) It is important to notice from the get go, **routing** and
 **mapping** are two different but complementary concepts, specifically:
 
-**Routing** 
+### Routing 
 
 The route table is configured by the customer to provide the desired traffic routing behavior; traffic can also be intercepted or redirected.  
 It must be clear that the routing table has the final say in the way the traffic is routed (Longest Prefix Match = wins). Routes can intercept **part** of the
@@ -45,22 +43,21 @@ traffic and forward to a next hop for the purpose of filtering.  The order is:  
 that a route wins.
 
 For example, a default route appears as below:
-- [Overview](#overview)
   
-    `0/0 -> Internet (Default)`
+  `0/0 -> Internet (Default)`
 
-    The entry following shows how a customer can override the entry and route the traffic differently:
+The entry following shows how a customer can override the entry and route the traffic differently:
 
-    `8.8.0.0/16 -> Internet (SNAT to VIP)`
+  `8.8.0.0/16 -> Internet (SNAT to VIP)`
 
-    `0/0 -> Default Hop: 10.1.2.11 (direct to a Firewall in current VNET)`
+  `0/0 -> Default Hop: 10.1.2.11 (direct to a Firewall in current VNET)`
 
-**Mapping**
+### Mapping
 
 Mapping lookups determine the network physical address (PA) spaces to redirect traffic.  
 A mapping is a PA to CA (Physical Address to Customer Address) lookup table, and Encap determination (for example).
 
-    `10.3.0.0/16 -> VNET C (Peered) (use mapping)`
+  `10.3.0.0/16 -> VNET C (Peered) (use mapping)`
 
 Notice that a routing table has a size limit of about 100K while mapping table
 has a limit of 1M. Using mappings extends the amount of data
@@ -83,7 +80,7 @@ This section provides guidelines, along with some examples, for how to build
 routing tables statically and/or by using mapping.  It includes the types of entries an LPM routing table may
 contain. We'll describe the various entries as we progess with the explanation.
 
-**Example route table (basic customer setup)**
+### Example route table (basic customer setup)
 
 ```
 
@@ -102,7 +99,7 @@ contain. We'll describe the various entries as we progess with the explanation.
 
 ```
 
-**VNET, Mappings, Private Link, Express Route, Internet Examples**
+### NET, Mappings, Private Link, Express Route, Internet Examples
 
 ```
 VNET: 10.1.0.0/16
@@ -132,10 +129,8 @@ RouteTable attached to VM 10.1.1.1
 
 ```
 
-Please note, a routing table is attached to a specific VM in the VNET, not to VNET
-itself. The route is a concept of ENI/VNIC, not a VNET (i.e. route table is attached to ENI/VNIC).  
-In a VNET the VM functions like a router, to which a routing table is attached.
-This makes a difference when plumbing metering.
+Please note, a routing table is attached to a specific a VM DASH DPU in the VNET, not to VNET itself. The route is a concept of ENI/VNIC, not a VNET (i.e. route table is attached to ENI/VNIC).  
+In a VNET a VM DASH DPU functions like a router, to which a routing table is attached. This makes a difference when plumbing metering.
 
 ![dash-dataplane-routing-table-vm](./images/dash-dataplane-routing-table-vm.svg)
 
@@ -145,21 +140,26 @@ This makes a difference when plumbing metering.
 
 ### Scenario: Explicit LPM 
 #### This example is a single VNET with direct traffic between VMs using mappings
+
 #### Customer provides entries, we handle by default
 
+```
 Route Table - attached to VM x.x.x.x
 - 10.1.0.0/16 -> VNET (use mappings)
 - 0/0 -> Default (Internet)
-
+```
 ### Scenario: Peered VNET using Mappings
 
+```
 Route Table - attached to VM x.x.x.x
 - 10.1.0.0/16 -> VNET A (use mappings)
 - 10.2.0.0/16 -> VNET B (use mappings)
 - 10.3.0.0/16 -> VNET C (use mappings)
 - 0/0 -> Default (Internet)
+```
 
 ### Scenario: Direct communication between subnets w/mapping and addition of next hop (such as a Firewall)
+
 #### Example: Customer wants to filter traffic from subnet 1 to subnet 3 through a FW on subnet 2
 #### VNET w/Subnets
 VNET: 10.1.0.0/16
@@ -168,12 +168,14 @@ VNET: 10.1.0.0/16
 - Subnet 3: 10.1.3.0/24
 
 #### Add firewall hop to the routes (Communication between subnets w/firewall (NVA) next hop route entry)
+
 Route Table attached to VM x.x.x.x
 - 10.1.0.0/16 -> VNET A (use mappings)
 
 **- 10.1.3.0/24 -> Next Hop: (10.1.2.11) - Customer adds Subnet 3 Next Hop through Firewall in Current VNET here**
 
 **- 10.1.3.0/26 -> Next Hop: (10.2.0.88) - Another example, Firewall Next Hop in a Peered VNET**
+
 - 10.2.0.0/16 -> VNET B (use mappings)
 - 10.3.0.0/16 -> VNET C (use mappings)
 - 0/0 -> Default (Internet)
@@ -188,15 +190,17 @@ VNET: 10.1.0.0/16
 - Subnet 3: 10.1.3.0/24
 
 #### Add firewall hop to the routes (Communication between subnets w/firewall (NVA) next hop route entry)
+
 RouteTable attached to VM 10.1.1.1
 - 10.1.0.0/16 -> VNET A (use mappings)
+  
 **- 10.1.3.0/26 -> Next Hop: (10.1.2.11) - next hop here from previous example**
+
 - 10.2.0.0/16 -> VNET B (use mappings)
 - 10.3.0.0/16 -> VNET C (use mappings)
 - 0/0 -> Next Hop: 10.1.2.11 **Customer overrides Default Route with a Next Hop of 10.1.2.11 (firewall in VNET)**
 
-```
-```
+
 ### Scenario: Trusted Internet-bound traffic is direct, Untrusted transits firewall
 
 The example shows how to set a permit specific Internet destined traffic to transit directly, while the rest transits a firewall.
