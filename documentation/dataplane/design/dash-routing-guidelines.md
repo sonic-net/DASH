@@ -65,7 +65,7 @@ that this route wins.
 
 Notice that a routing table has a size limit of about 100K while mapping table
 has a limit of 1M. Using mapping facilitates extension of the amount of data
-that can be contained in the routing table.
+that can be contained in the routing table.  It is important that the intent of this document is correctly modelled in the [P4 pipeline](https://github.com/Azure/DASH/tree/main/sirius-pipeline).
 
 One of the main objectives of a routing table, more specifically **LPM routing
 table**, is to allow the customers to enter static or mapped entries per their
