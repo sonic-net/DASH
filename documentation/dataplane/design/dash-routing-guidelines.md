@@ -17,8 +17,9 @@ last update: 02/28/2022
   - [Scenario: Filter default route](#scenario-filter-default-route)
   - [Scenario: Trusted versus Untrusted Internet-bound traffic](#scenario-trusted-versus-untrusted-internet-bound-traffic)
   - [Scenario: Set an on premises route to a express route (ExR) PA](#scenario-set-an-on-premises-route-to-a-express-route-exr-pa)
-  - [Set an on premises route to a next hop express route (ExR) PA](#set-an-on-premises-route-to-a-next-hop-express-route-exr-pa)
-  - [Set private links routes using mapping, routes, or peered VNETs](#set-private-links-routes-using-mapping-routes-or-peered-vnets)
+  - [Scenario: Private Endpoints](#scenario-private-endpoints)
+  - [Scenario: Private Endpoints plumbed as Route](#scenario-private-endpoints-plumbed-as-route)
+  - [Scenario: Intercept Specific Traffic / Exempt a Specific IP/VM](#scenario-intercept-specific-traffic--exempt-a-specific-ipvm)
 - [Counters](#counters)
 - [Terminlogy](#terminlogy)
 
@@ -251,11 +252,11 @@ VNET: 10.1.0.0/16
 - Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) Customer places FW here :heavy_check_mark:
 - Subnet 3: 10.1.3.0/24
 - Mappings:     **Customer adds some VMs below, Private Links, etc...in the VNET** :heavy_check_mark:
--    VM 1: 10.1.1.1     **In subnet 1** ✔️
--    VM 2: 10.1.3.2     **In subnet 3** ✔️
--    Private Link 1: 10.1.3.3     **In subnet 3** ✔️
--    Private Link 2: 10.1.3.4     **Private Links are Mappings, but we also support Customers plumbing them as a Route** :heavy_check_mark:
--    VM 3: 10.1.3.5     **In subnet 3** ✔️
+- VM 1: 10.1.1.1     **In subnet 1** ✔️
+- VM 2: 10.1.3.2     **In subnet 3** ✔️
+- Private Link 1: 10.1.3.3     **In subnet 3** ✔️
+- Private Link 2: 10.1.3.4     **Private Links are Mappings, but we also support Customers plumbing them as a Route** :heavy_check_mark:
+- VM 3: 10.1.3.5     **In subnet 3** ✔️
 
 On-Prem: 50.0.0.0/8 - Customer On Prem space
 
@@ -271,8 +272,8 @@ Route Table attached to VM x.x.x.x
 - 8.8.0.0/16 -> Internet (for Trusted traffic) - (can be SNAT to VIP)
 - 0/0 -> Next Hop: 10.1.2.11 for Untrusted traffic
 
-
 ### Scenario: Private Endpoints plumbed as Route
+
 Customer can also send Private Link directly as a route
 
 VNET: 10.1.0.0/16
@@ -281,11 +282,11 @@ VNET: 10.1.0.0/16
 - Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) Customer places FW here :heavy_check_mark:
 - Subnet 3: 10.1.3.0/24
 - Mappings:     **Customer adds some VMs below, Private Links, etc...in the VNET** :heavy_check_mark:
--    VM 1: 10.1.1.1     In subnet 1
--    VM 2: 10.1.3.2     In subnet 3
--    Private Link 1: 10.1.3.3     **From Route Table below, specific /32 route** ✔️
--    Private Link 2: 10.1.3.4     Private Links are Mappings, but we also support Customers plumbing them as a Route
--    VM 3: 10.1.3.5     In subnet 3
+- VM 1: 10.1.1.1     In subnet 1
+- VM 2: 10.1.3.2     In subnet 3
+- Private Link 1: 10.1.3.3     **From Route Table below, specific /32 route** ✔️
+- Private Link 2: 10.1.3.4     Private Links are Mappings, but we also support Customers plumbing them as a Route
+- VM 3: 10.1.3.5     In subnet 3
 
 On-Prem: 50.0.0.0/8 - Customer On Prem space
 
@@ -303,6 +304,7 @@ Route Table attached to VM x.x.x.x
 - 0/0 -> Next Hop: 10.1.2.11 for Untrusted traffic
 
 ### Scenario: Intercept Specific Traffic / Exempt a Specific IP/VM
+
 Customer wants to exempt 1 IP or perhaps a VNET (need explanation of why)
 
 VNET: 10.1.0.0/16
@@ -311,11 +313,11 @@ VNET: 10.1.0.0/16
 - Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) Customer places FW here :heavy_check_mark:
 - Subnet 3: 10.1.3.0/24
 - Mappings:     **Customer adds some VMs below, Private Links, etc...in the VNET**
--    VM 1: 10.1.1.1     In subnet 1
--    VM 2: 10.1.3.2     In subnet 3
--    Private Link 1: 10.1.3.3     
--    Private Link 2: 10.1.3.4     
--    VM 3: 10.1.3.5     In subnet 3 **This is still here as a Mapping as part of the VNET** ✔️
+- VM 1: 10.1.1.1     In subnet 1
+- VM 2: 10.1.3.2     In subnet 3
+- Private Link 1: 10.1.3.3
+- Private Link 2: 10.1.3.4
+- VM 3: 10.1.3.5     In subnet 3 **This is still here as a Mapping as part of the VNET** ✔️
 
 On-Prem: 50.0.0.0/8 - Customer On Prem space
 
@@ -338,7 +340,6 @@ Route Table attached to VM **y.y.y.y** **Different ENI using same route table ab
 Customer wants to be able to communicate with 10.1.3.5 (via the route table), but **does not** want to intercept any traffic ✔️
 
 - 10.1.0.0/16 -> VNET A (use mappings)
-
 
 ## Counters
 
