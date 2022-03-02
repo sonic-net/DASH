@@ -25,11 +25,11 @@ last update: 02/28/2022
 
 ## Overview
 
-This article explains the basic steps to build a **routing table** (also known
+This article is an effort to explain common customer scenarios and configurations, showing the basic steps how to build a **routing table** (also known
 as a *forwarding* table) and how to use **mappings**.  
-The route is a concept of ENI/VNIC, not a VNET (i.e. the route table is attached
-to ENI/VNIC) It is important to notice from the get go, **routing** and
-**mapping** are two different but complementary concepts, specifically:
+
+It is important to keep in mind that a route is a concept of the ENI/VNIC, not a VNET (i.e. the route table is attached
+to ENI/VNIC).  **Routing** and **Mapping** are two different but complementary concepts, specifically:
 
 ### Routing
 
@@ -47,10 +47,7 @@ The following example shows how a customer can override the default entry and ro
 - 8.8.0.0/16 -> Internet (SNAT to VIP)
 - 0/0 -> Default Hop: 10.1.2.11 (direct to a Firewall in current VNET)
 
-Please notice. A routing table is *attached* to a specific VM DASH DPU in the VNET, not to the VNET itself.
-The route is an ENI/VNIC concept, not a VNET one (i.e., a route table is *attached* to ENI/VNIC).  
-In a VNET a VM DASH DPU functions like a router, to which a routing table is *attached*.
-This must be taken into consideration in metering.
+Please notice, a routing table is *attached* to a specific VM DASH DPU in the VNET, not to the VNET itself.  The route is an ENI/VNIC concept, not a VNET one (i.e., a route table is *attached* to ENI/VNIC).  In a VNET a VM DASH DPU functions like a router, to which a routing table is *attached*.  This must be taken into consideration in metering.
 
 ![dash-dataplane-routing-table-vm](./images/dash-dataplane-routing-table-vm.svg)
 
