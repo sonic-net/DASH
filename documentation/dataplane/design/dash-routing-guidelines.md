@@ -56,12 +56,12 @@ Please notice, a routing table is *attached* to a specific VM DASH DPU in the VN
 ### Mapping
 
 Mapping lookups determine the network physical address (PA) spaces to redirect traffic.  
-A mapping is a PA to CA (Physical Address to Customer Address) lookup table, and Encap determination (for example).
+A mapping is a CA to PA (Customer Address to Physical Address) lookup table, and Encap determination (for example).
 
   `10.3.0.0/16 -> VNET C (Peered) (use mapping)`
 
 Notice that a routing table has a size limit of about 100K while mapping table
-has a limit of 1M. Using mappings extends the amount of data
+has a limit of 2M. Using mappings extends the amount of data
 that can be contained in the routing table.  
 
 One of the main objectives of a routing table, more specifically **LPM routing
@@ -71,15 +71,14 @@ static or can refer to a mapping. But mappings do not control routing, which is
 decided via the LPM table.  
 
 - **Static** :  when an entry is created in the table, the exact physical address (PA) is known; there is no mapping (lookup).
-- **Mapping** : for a particular entry, the desired behavior is to intercept the
-traffic and exempt it from the standard routing, in order to apply
+- **Mapping** : for a particular entry, the desired behavior is to route to dynamic destination based on mapping, in order to apply
 different actions than the ones associated with the rest of the traffic.
 
 ## Routing examples
 
 This section provides guidelines, along with some examples, for how to build
 routing tables statically and/or by using mapping.  It includes the types of entries an LPM routing table may
-contain. We'll describe the various entries as we progess with the explanation.
+contain. We'll describe the various entries as we progress with the explanation.
 
 ### Example route table (basic customer setup)
 
@@ -138,14 +137,28 @@ This example shows a single VNET with direct traffic between VMs using mappings.
 
 **Customer provides entries which are handled by default**
 
+
+Mappings
+
+VNET: 10.1.0.0/16
+
+- Subnet 1: 10.1.1.0/24
+- Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) **Customer places firewall** :heavy_check_mark:
+- Subnet 3: 10.1.3.0/24
+
 Route Table - attached to VM x.x.x.x
 
 - 10.1.0.0/16 -> VNET (use mappings)
+- 10.1.0.5/32 -> (use mappings "CA to PA x.x.x")
 - 0/0 -> Default (Internet)
+
+<!-- Example needed -->
 
 **Peered VNET using mappings**
 
-Route Table - attached to VM x.x.x.x
+<!-- Will be good to maybe have visual diagram of 1 vnet peered to B and C and specify that VNET A is local vnet, and B and C are peered. -->
+
+Route Table - attached to VM x.x.x.x 
 
 - 10.1.0.0/16 -> VNET A (use mappings)
 - 10.2.0.0/16 -> VNET B (use mappings)
@@ -157,6 +170,14 @@ Route Table - attached to VM x.x.x.x
 This scenario shows communication between subnets with mapping and addition of next hop (such as a firewall)
 
 In the following example the customer filter traffic from subnet 1 to subnet 3 through a firewall on subnet 2.
+
+> [!NOTE]
+> The bold and checkmark indicate the changes from the example above. 
+
+
+<!-- Needs diagram -->
+
+Mappings
 
 VNET: 10.1.0.0/16
 
@@ -175,9 +196,13 @@ Route Table attached to VM x.x.x.x
 - 10.3.0.0/16 -> VNET C (use mappings)
 - 0/0 -> Default (Internet)
 
+Ex. traffic going to 10.1.3.5, or any other address in 10.1.3.0/24.. Is intercepted and encapped and goes thru 10.1.2.11, and this 10.1.2.11 is from VNET A
+
 ### Scenario: Filter default route
 
 The example shows how to route all Internet destined traffic through a firewall
+
+Mappings
 
 VNET: 10.1.0.0/16
 
@@ -201,6 +226,8 @@ RouteTable attached to VM 10.1.1.1
 
 This scenario shows how to route directly **trusted** Internet-bound traffic while routing **untrusted** trafffic to a firewall
 
+Mappings
+
 VNET: 10.1.0.0/16
 
 - Subnet 1: 10.1.1.0/24
@@ -220,6 +247,8 @@ Route Table attached to VM x.x.x.x
 
 The example shows how to set an on premises route to an express route (ER) for a
 specific private address (PA).
+
+Mappings
 
 VNET: 10.1.0.0/16
 
@@ -242,6 +271,8 @@ Route Table attached to VM x.x.x.x
 - 0/0 -> Next Hop: 10.1.2.11 for Untrusted traffic
 
 ### Scenario: Private Endpoints
+
+Mappings
 
 VNET: 10.1.0.0/16
 
@@ -273,6 +304,8 @@ Route Table attached to VM x.x.x.x
 
 Customer can also send Private Link directly as a route
 
+Mappings
+
 VNET: 10.1.0.0/16
 
 - Subnet 1: 10.1.1.0/24
@@ -303,6 +336,8 @@ Route Table attached to VM x.x.x.x
 ### Scenario: Intercept Specific Traffic / Exempt a Specific IP/VM
 
 Customer wants to exempt 1 IP or perhaps a VNET (need explanation of why)
+
+Mappings
 
 VNET: 10.1.0.0/16
 
