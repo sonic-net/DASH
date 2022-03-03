@@ -21,7 +21,7 @@ last update: 02/28/2022
   - [Scenario: Private Endpoints plumbed as Route](#scenario-private-endpoints-plumbed-as-route)
   - [Scenario: Intercept Specific Traffic / Exempt a Specific IP/VM](#scenario-intercept-specific-traffic--exempt-a-specific-ipvm)
 - [Counters](#counters)
-- [Terminlogy](#terminlogy)
+- [References](#references)
 
 ## Overview
 
@@ -172,18 +172,17 @@ This scenario shows communication between subnets with mapping and addition of n
 In the following example the customer filter traffic from subnet 1 to subnet 3 through a firewall on subnet 2.
 
 > [!NOTE]
-> The bold and checkmark indicate the changes from the example above. 
+> Bold and the checkmark indicate changes from the example above.
 
-
-<!-- Needs diagram -->
-
-Mappings
+**Mappings**
 
 VNET: 10.1.0.0/16
 
 - Subnet 1: 10.1.1.0/24
 - Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) **Customer places firewall** :heavy_check_mark:
 - Subnet 3: 10.1.3.0/24
+  
+<!-- Needs diagram -->
 
 **Add firewall hop to the routes**
 
@@ -202,7 +201,7 @@ Ex. traffic going to 10.1.3.5, or any other address in 10.1.3.0/24.. Is intercep
 
 The example shows how to route all Internet destined traffic through a firewall
 
-Mappings
+**Mappings**
 
 VNET: 10.1.0.0/16
 
@@ -226,7 +225,7 @@ RouteTable attached to VM 10.1.1.1
 
 This scenario shows how to route directly **trusted** Internet-bound traffic while routing **untrusted** trafffic to a firewall
 
-Mappings
+**Mappings**
 
 VNET: 10.1.0.0/16
 
@@ -248,7 +247,7 @@ Route Table attached to VM x.x.x.x
 The example shows how to set an on premises route to an express route (ER) for a
 specific private address (PA).
 
-Mappings
+**Mappings**
 
 VNET: 10.1.0.0/16
 
@@ -272,7 +271,7 @@ Route Table attached to VM x.x.x.x
 
 ### Scenario: Private Endpoints
 
-Mappings
+**Mappings**
 
 VNET: 10.1.0.0/16
 
@@ -304,7 +303,7 @@ Route Table attached to VM x.x.x.x
 
 Customer can also send Private Link directly as a route
 
-Mappings
+**Mappings**
 
 VNET: 10.1.0.0/16
 
@@ -337,7 +336,7 @@ Route Table attached to VM x.x.x.x
 
 Customer wants to exempt 1 IP or perhaps a VNET (need explanation of why)
 
-Mappings
+**Mappings**
 
 VNET: 10.1.0.0/16
 
@@ -405,33 +404,10 @@ Mapping and Peered VNET and statically isolate each value (right now we rely on 
 mappings are not hit by different ENIs).  
 At time of programming of ENI, we now we have to know..?
 
-## Terminlogy
+## References
 
-- **GRE**. Generic Routing Encapsulation is a Cisco developed tunneling
-protocol. It is a simple IP packet encapsulation protocol used when IP packets
-need to be transported from one network to another network, without being
-notified as IP packets by any intermediate routers.
-  
-- **LPM**. LPM or longest prefix match refers to an algorithm used by routers in
-Internet Protocol (IP) networking to select an entry from a routing table.
-Because each entry in a forwarding table may specify a sub-network, one
-destination address may match more than one forwarding table entry. The most
-specific of the matching table entries — the one with the longest subnet mask —
-is called the longest prefix match. It is called this because it is also the
-entry where the largest number of leading address bits of the destination
-address match those in the table entry.
-- **Routing**. Routing is the process of sending a packet of information from
-  one network to another network. Routers build **routing tables** that contain
-  the following information:
-  - Destination network and subnet mask.
-  - Next hop to get to the destination network.
-  - Routing metrics.
+- [What is Azure Virtual Network?](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview)
+- [Virtual network traffic routing](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview)
+- [ExpressRoute routing requirements](https://docs.microsoft.com/en-us/azure/expressroute/expressroute-routing?toc=/azure/virtual-network/toc.json)
 
-- **SNAT**. The Source Network Address Translation (SNAT) is typically used when
-  an internal/private host needs to initiate a connection to an external/public
-  host. The device performing NAT changes the private IP address of the source
-  host to public IP address. It may also change the source port in the TCP/UDP
-  headers.
-  
-- **VIP**. The Virtual IP Address (VIP) is a public IP address that may be
-  shared by multiple devices connected to the Internet.
+
