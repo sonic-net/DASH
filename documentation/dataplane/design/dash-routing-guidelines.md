@@ -1,6 +1,6 @@
 ---
 title: Routing guidelines and scenarios
-last update: 02/28/2022
+last update: 03/03/2022
 ---
 
 # Routing guidelines and scenarios
@@ -33,9 +33,9 @@ to ENI/VNIC).  **Routing** and **Mapping** are two different but complementary c
 
 ### Routing
 
-The route table is configured by the customer to provide the desired traffic routing behavior; traffic can also be intercepted or redirected.  
-It must be clear that the routing table has the final say in the way the traffic is routed (Longest Prefix Match = wins). Routes can intercept **part** of the
-traffic and forward to a next hop for the purpose of filtering.  The order is:  LPM->Route->Mapping.  We ONLY look at mappings, AFTER LPM decides
+The route table is configured by the customer to provide the desired traffic [routing](https://github.com/Azure/DASH/wiki/Glossary#routing) behavior; traffic can also be intercepted or redirected.  
+It must be clear that the [routing](https://github.com/Azure/DASH/wiki/Glossary#routing) table has the final say in the way the traffic is routed (Longest Prefix Match = wins). Routes can intercept **part** of the
+traffic and forward to a next hop for the purpose of filtering.  The order is:  LPM->Route->Mapping.  We ONLY look at mappings, AFTER [LPM](https://github.com/Azure/DASH/wiki/Glossary#lpm) decides
 that a route wins.
 
 For example, a default route looks like this:
@@ -44,7 +44,7 @@ For example, a default route looks like this:
 
 The following example shows how a customer can override the default entry and route the traffic differently:
 
-- 8.8.0.0/16 -> Internet (SNAT to VIP)
+- 8.8.0.0/16 -> Internet ([SNAT](https://github.com/Azure/DASH/wiki/Glossary#snat) to VIP)
 - 0/0 -> Default Hop: 10.1.2.11 (direct to a Firewall in current VNET)
 
 Please notice, a routing table is *attached* to a specific VM DASH DPU in the VNET, not to the VNET itself.  The route is an ENI/VNIC concept, not a VNET one (i.e., a route table is *attached* to ENI/VNIC).  In a VNET a VM DASH DPU functions like a router, to which a routing table is *attached*.  This must be taken into consideration in metering.
@@ -66,9 +66,9 @@ that can be contained in the routing table.
 
 One of the main objectives of a routing table, more specifically **LPM routing
 table**, is to allow the customers to enter static or mapped entries per their
-requirements. The LPM routing rules determine the order. The rules can be either
+requirements. The [LPM](https://github.com/Azure/DASH/wiki/Glossary#lpm) routing rules determine the order. The rules can be either
 static or can refer to a mapping. But mappings do not control routing, which is
-decided via the LPM table.  
+decided via the [LPM](https://github.com/Azure/DASH/wiki/Glossary#lpm) table.  
 
 - **Static** :  when an entry is created in the table, the exact physical address (PA) is known; there is no mapping (lookup).
 - **Mapping** : for a particular entry, the desired behavior is to route to dynamic destination based on mapping, in order to apply
@@ -77,7 +77,7 @@ different actions than the ones associated with the rest of the traffic.
 ## Routing examples
 
 This section provides guidelines, along with some examples, for how to build
-routing tables statically and/or by using mapping.  It includes the types of entries an LPM routing table may
+routing tables statically and/or by using mapping.  It includes the types of entries an [LPM](https://github.com/Azure/DASH/wiki/Glossary#lpm) routing table may
 contain. We'll describe the various entries as we progress with the explanation.
 
 ### Example route table (basic customer setup)
@@ -93,8 +93,8 @@ contain. We'll describe the various entries as we progress with the explanation.
 - 10.2/16 -> Peered VNET B (via mapping lookup)
 - 10.2.0.8/32 -> This is another Private Endpoint in peered vnet plumbed as /32 route
 - 50/8 -> Internet (allow this 50/8 traffic to be exempt from transiting the firewall, and allow it to go directly to internet)
-- 20.1/16 -> Static Route to on-prem (encap with some GRE key and send to CISCO Express Route device, that later redirects to onprem)
-- 20.2/16 -> Static Route to on-prem (encap with some GRE key and send to CISCO Express Route device, that later redirects to onprem)
+- 20.1/16 -> Static Route to on-prem (encap with some [GRE](https://github.com/Azure/DASH/wiki/Glossary#nvgregre) key and send to CISCO Express Route device, that later redirects to onprem)
+- 20.2/16 -> Static Route to on-prem (encap with some [GRE](https://github.com/Azure/DASH/wiki/Glossary#nvgregre) key and send to CISCO Express Route device, that later redirects to onprem)
 - 0/0 -> UDR to transit next hop 10.1.0.7 (ex. firewall all traffic going originally through internet via firewall which is in the same vnet)
 
 ```
@@ -123,8 +123,8 @@ RouteTable attached to VM 10.1.1.1
 - 10.3.0.0/16 -> VNET C (Peered)  (use mappings)
 - 50.3.5.2/32 -> Private Link Route (Private Link 7)
 - 50.1.0.0/16 -> Internet
-- 50.0.0.0/8 -> Hop: CISCO ER device PA (100.1.2.3, 10.1.2.4), GRE Key: X
-- 8.8.0.0/16 -> Internet (SNAT to VIP)
+- 50.0.0.0/8 -> Hop: CISCO ER device PA (100.1.2.3, 10.1.2.4), [GRE](https://github.com/Azure/DASH/wiki/Glossary#nvgregre) Key: X
+- 8.8.0.0/16 -> Internet ([SNAT](https://github.com/Azure/DASH/wiki/Glossary#snat) to VIP)
 - 0/0 -> Default Hop: 10.1.2.11 (Firewall in current VNET)
 
 ```
@@ -138,7 +138,7 @@ This example shows a single VNET with direct traffic between VMs using mappings.
 **Customer provides entries which are handled by default**
 
 
-Mappings
+**Mappings**
 
 VNET: 10.1.0.0/16
 
@@ -172,7 +172,7 @@ This scenario shows communication between subnets with mapping and addition of n
 In the following example the customer filter traffic from subnet 1 to subnet 3 through a firewall on subnet 2.
 
 > [!NOTE]
-> Bold and the checkmark indicate changes from the example above.
+> Bold and checkmark indicate changes from the previous example above.
 
 **Mappings**
 
@@ -239,7 +239,7 @@ Route Table attached to VM x.x.x.x
 - 10.1.3.0/26 -> Next Hop: (10.1.2.11) - **Next hop here from previous example** :heavy_check_mark:
 - 10.2.0.0/16 -> VNET B (use mappings)
 - 10.3.0.0/16 -> VNET C (use mappings)
-- 8.8.0.0/16 -> Internet **For trusted traffic can be SNAT to VIP** :heavy_check_mark:
+- 8.8.0.0/16 -> Internet **For trusted traffic can be [SNAT](https://github.com/Azure/DASH/wiki/Glossary#snat) to VIP** :heavy_check_mark:
 - 0/0 -> Next Hop: 10.1.2.11 **For untrusted traffic** :heavy_check_mark:
 
 ### Scenario: Set an on premises route to a express route (ExR) PA
@@ -265,8 +265,8 @@ Route Table attached to VM x.x.x.x
 - 10.2.0.o/16 -> VNET B (use mappings)
 - 10.3.0.o/16 -> VNET C (use mappings)
 - 50.1.0.0/16 -> Internet **Used for intercept of other traffic** :heavy_check_mark:
-- 50.0.0.0/8 -> Next Hop: **ER device PA (100.1.2.3, 100.1.2.4) 2 endpoints, GRE Key: X** :heavy_check_mark:
-- 8.8.0.0/16 -> Internet (for Trusted traffic) - (can be SNAT to VIP)
+- 50.0.0.0/8 -> Next Hop: **ER device PA (100.1.2.3, 100.1.2.4) 2 endpoints, [GRE](https://github.com/Azure/DASH/wiki/Glossary#nvgregre) Key: X** :heavy_check_mark:
+- 8.8.0.0/16 -> Internet (for Trusted traffic) - (can be [SNAT](https://github.com/Azure/DASH/wiki/Glossary#snat) to VIP)
 - 0/0 -> Next Hop: 10.1.2.11 for Untrusted traffic
 
 ### Scenario: Private Endpoints
@@ -291,12 +291,12 @@ Route Table attached to VM x.x.x.x
 
 - 10.1.0.0/16 -> VNET A (use mappings)
 - 10.1.3.0/24 -> Next Hop: 10.1.2.11 (CA -> PA) - next hop here from previous example
-- 10.1.3.0/26 -> Next Hop: 10.2.0.88 (CA -> PA) - firewall in peered VNET **From LPM perspective, this route is taken** :heavy_check_mark:
+- 10.1.3.0/26 -> Next Hop: 10.2.0.88 (CA -> PA) - firewall in peered VNET **From [LPM](https://github.com/Azure/DASH/wiki/Glossary#lpm) perspective, this route is taken** :heavy_check_mark:
 - 10.2.0.0/16 -> VNET B (use mappings)
 - 10.3.0.0/16 -> VNET C (use mappings)
 - 50.1.0.0/16 -> Internet Used for intercept of other traffic
-- 50.0.0.0/8 -> Next Hop: ER device PA (100.1.2.3, 100.1.2.4) 2 endpoints, GRE Key: X
-- 8.8.0.0/16 -> Internet (for Trusted traffic) - (can be SNAT to VIP)
+- 50.0.0.0/8 -> Next Hop: ER device PA (100.1.2.3, 100.1.2.4) 2 endpoints, [GRE](https://github.com/Azure/DASH/wiki/Glossary#nvgregre) Key: X
+- 8.8.0.0/16 -> Internet (for Trusted traffic) - (can be [SNAT](https://github.com/Azure/DASH/wiki/Glossary#snat) to VIP)
 - 0/0 -> Next Hop: 10.1.2.11 for Untrusted traffic
 
 ### Scenario: Private Endpoints plumbed as Route
@@ -328,7 +328,7 @@ Route Table attached to VM x.x.x.x
 - 10.2.0.0/16 -> VNET B (use mappings)
 - 10.3.0.0/16 -> VNET C (use mappings)
 - 50.1.0.0/16 -> Internet Used for intercept of other traffic
-- 50.0.0.0/8 -> Next Hop: ER device PA (100.1.2.3, 100.1.2.4) 2 endpoints, GRE Key: X
+- 50.0.0.0/8 -> Next Hop: ER device PA (100.1.2.3, 100.1.2.4) 2 endpoints, [GRE](https://github.com/Azure/DASH/wiki/Glossary#nvgregre) Key: X
 - 8.8.0.0/16 -> Internet (for Trusted traffic) - (can be SNAT to VIP)
 - 0/0 -> Next Hop: 10.1.2.11 for Untrusted traffic
 
@@ -362,8 +362,8 @@ Route Table attached to VM x.x.x.x
 - 10.2.0.0/16 -> VNET B (use mappings)
 - 10.3.0.0/16 -> VNET C (use mappings)
 - 50.1.0.0/16 -> Internet Used for intercept of other traffic
-- 50.0.0.0/8 -> Next Hop: ER device PA (100.1.2.3, 100.1.2.4) 2 endpoints, GRE Key: X
-- 8.8.0.0/16 -> Internet (for Trusted traffic) - (can be SNAT to VIP)
+- 50.0.0.0/8 -> Next Hop: ER device PA (100.1.2.3, 100.1.2.4) 2 endpoints, [GRE](https://github.com/Azure/DASH/wiki/Glossary#nvgregre) Key: X
+- 8.8.0.0/16 -> Internet (for Trusted traffic) - (can be [SNAT](https://github.com/Azure/DASH/wiki/Glossary#snat) to VIP)
 - 0/0 -> Next Hop: 10.1.2.11 for Untrusted traffic
 
 Route Table attached to VM **y.y.y.y** **Different ENI using same route table above; the VNET object is shared**
