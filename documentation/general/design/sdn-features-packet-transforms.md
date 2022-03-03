@@ -6,42 +6,41 @@
 
 **Table of contents**
 
-- [SDN Features, Packet Transforms and Scale](#sdn-features-packet-transforms-and-scale)
-	- [First Target Scenario:  Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance](#first-target-scenario--highly-optimized-path-dedicated-appliance-little-processing-or-encap-to-sdn-appliance-and-policies-on-an-sdn-appliance)
-	- [Scale per DPU (Card)](#scale-per-dpu-card)
-	- [Scenario Milestone and Scoping](#scenario-milestone-and-scoping)
-	- [Virtual Port and Packet Direction](#virtual-port-and-packet-direction)
-	- [Packet processing Pipeline (Sequential prefix match lookups)](#packet-processing-pipeline-sequential-prefix-match-lookups)
-		- [ACL](#acl)
-	- [Routes and Route-Action](#routes-and-route-action)
-	- [Packet Flow](#packet-flow)
-		- [Inbound](#inbound)
-		- [Outbound](#outbound)
-	- [Packet Transform Examples](#packet-transform-examples)
-		- [VNET to VNET Traffic](#vnet-to-vnet-traffic)
-		- [VNET to Internet - TBD](#vnet-to-internet---tbd)
-		- [VNET to Service Endpoints - TBD](#vnet-to-service-endpoints---tbd)
-		- [VNET to Private Link  - TBD.](#vnet-to-private-link----tbd)
-	- [Metering](#metering)
-	- [VNET Encryption](#vnet-encryption)
-	- [Telemetry](#telemetry)
-	- [Counters](#counters)
-	- [BGP](#bgp)
-	- [Watchdogs](#watchdogs)
-	- [Servicing](#servicing)
-	- [Debugging](#debugging)
-	- [Flow Replication](#flow-replication)
-	- [Unit Testing and development](#unit-testing-and-development)
-	- [Internal Partner dependencies](#internal-partner-dependencies)
-	- [Packet transforms](#packet-transforms)
-		- [VNET](#vnet)
-		- [Scenario:  VM<->VM (in VNET) communication](#scenario--vm-vm-in-vnet-communication)
-		- [Internal Load balancer](#internal-load-balancer)
-		- [Private Link](#private-link)
-		- [Private Link Service](#private-link-service)
-		- [Service Tunneling](#service-tunneling)
-		- [Inbound from LB](#inbound-from-lb)
-		- [Outbound NAT - L4](#outbound-nat---l4)
+- [First Target Scenario:  Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance](#first-target-scenario--highly-optimized-path-dedicated-appliance-little-processing-or-encap-to-sdn-appliance-and-policies-on-an-sdn-appliance)
+- [Scale per DPU (Card)](#scale-per-dpu-card)
+- [Scenario Milestone and Scoping](#scenario-milestone-and-scoping)
+- [Virtual Port and Packet Direction](#virtual-port-and-packet-direction)
+- [Packet processing Pipeline (Sequential prefix match lookups)](#packet-processing-pipeline-sequential-prefix-match-lookups)
+	- [ACL](#acl)
+- [Routes and Route-Action](#routes-and-route-action)
+- [Packet Flow](#packet-flow)
+	- [Inbound](#inbound)
+	- [Outbound](#outbound)
+- [Packet Transform Examples](#packet-transform-examples)
+	- [VNET to VNET Traffic](#vnet-to-vnet-traffic)
+	- [VNET to Internet - TBD](#vnet-to-internet---tbd)
+	- [VNET to Service Endpoints - TBD](#vnet-to-service-endpoints---tbd)
+	- [VNET to Private Link  - TBD.](#vnet-to-private-link----tbd)
+- [Metering](#metering)
+- [VNET Encryption](#vnet-encryption)
+- [Telemetry](#telemetry)
+- [Counters](#counters)
+- [BGP](#bgp)
+- [Watchdogs](#watchdogs)
+- [Servicing](#servicing)
+- [Debugging](#debugging)
+- [Flow Replication](#flow-replication)
+- [Unit Testing and development](#unit-testing-and-development)
+- [Internal Partner dependencies](#internal-partner-dependencies)
+- [Packet transforms](#packet-transforms)
+	- [VNET](#vnet)
+	- [Scenario:  VM<->VM (in VNET) communication](#scenario--vm-vm-in-vnet-communication)
+	- [Internal Load balancer](#internal-load-balancer)
+	- [Private Link](#private-link)
+	- [Private Link Service](#private-link-service)
+	- [Service Tunneling](#service-tunneling)
+	- [Inbound from LB](#inbound-from-lb)
+	- [Outbound NAT - L4](#outbound-nat---l4)
 
 # SDN Features, Packet Transforms and Scale
 
@@ -50,7 +49,7 @@ Why do we need this scenario?  There is a huge cost associated with establishing
 
 - A high Connections per Second (CPS) / Flow SKU for Networked Virtual Appliances (NVA)
 
-	![NVA](images/high_cps_flow_sku_for_nva.png)
+	![NVA](images/high_cps_flow_sku_for_nva.svg)
 
 ## Scale per DPU (Card)
 **Note: Below are the expected numbers per Data Processing Unit (DPU); this applies to both IPV4 and IPV6 underlay and overlay*
@@ -109,7 +108,8 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
             - **Example**: VM with IP 10.0.0.1 sends a packet to 8.8.8.8, VM Inbound ACL blocks all internet, VM outbound ACL allows 8.8.8.8 \- Response packet from 8.8.8.8 must be allowed without opening any inbound ACL due to the flow match.
             
-	![Appliance](images/sdn_appliance.png)
+	![Appliance](images/sdn-appliance.svg)
+
 - The VNI is static on the 'left-side' of the diagram
 - The VNI will be different depending upon the Inbound circumstance (Internet, ER Gateway for example)
 - SDN Eng to populate this further
