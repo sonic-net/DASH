@@ -119,20 +119,28 @@ The figure below shows the TCP header format. For more information, see [RFC 793
 
 ### Fragmentation contextual information
 
-1. After a connection has been identified and processed by normal means it will
+1. After a connection has been identified and processed it should
 result in an **entry** into the **flow table** to **enable fast path
 processing** for the duration of the connection.
 
-1. If a subsequent packet arrives that is the start of a fragmented packet, the
-**Frag ID** must be used to create a **new temporal flow** that can be
+1. If a subsequent packet arrives that is the start of a fragmented packet
+a **new temporal flow** should be created that can be
 **uniquely identified** by the (**Frag ID**, **DST**, **SRC**, **Protocol ID**) tuple.
 
-1. The temporal flow should be **maintained until the last fragment arrives** or
-the flow is **aged** or the connection is **closed**.
+1. The fragment temporal flow should be **maintained until the last fragment arrives** OR
+the flow is **aged** OR the connection is **closed**.
 
-1. The aging of a temporal flow **could be different than the connection**
- itself as the packets are closed together and generated over a small period of
- time.
+1. Fragment temporal flows should be removed after receiving the last packet of the 
+fragmented frame. This is the most efficient way to keep temporal flows from consuming
+flow table resources which are finite and in practice consume a large amount of memory. 
+
+1. The aging of a stale temporal flow **should be different than the aging of TCP connections or 
+UDP flows** as the packets are generated over a small period of time and should
+arrive fairly close together. Stale temporal flows should be removed quickly as the
+flow table is a finite resource that can be depleted. This 
+is especialy true when connections or UDP flows are arriving in the range of millions/sec. A
+background or garbage collection task could be used for this purpose coupled with other
+table management functions. The stale time-out period should be programmable per ENI.
 
 1. It is also possible to have **several frames in flight** and hence there may
 be **several temporal flows**, however they can be **uniquely identified** by
@@ -140,10 +148,6 @@ the (Frag ID, DST, SRC, Protocol ID) tuple as each frame will have a different F
 
 1. Although this will result in more flow entries **these flows will likely live
 for `usecs/msec`** and can be aged much quicker than a connection.
-
-1. As these flows last for such a short period of time, **any implementation may
-want to consider using aging timer** that is much shorter than a connection
-time-out.
 
 1. If the connection is closed with the arrival of the **FIN packet** then all
 **temporal flows must be closed** as well.
