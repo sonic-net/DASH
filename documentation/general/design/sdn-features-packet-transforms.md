@@ -90,7 +90,7 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
   - Virtual port is the container which holds all policies.
 
- 	![sdn-virtual-port](images/sdn-virtual-port.svg)
+	![sdn-virtual-port](images/sdn-virtual-port.svg)
 
 - On receiving a packet from the wire, the SDN appliance will determine the matching ENI, Packet direction and packet processing strategy based on *Encap Transformation and Rules Evaluation*.
 
