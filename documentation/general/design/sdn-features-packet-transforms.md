@@ -297,9 +297,9 @@ matching a unified flow via UFID and applying a transposition directly against r
 
  **VNET Definition:**
 
- - 10.0.0.0/24 
+- 10.0.0.0/24
 
- - 20.0.0.0/24
+- 20.0.0.0/24
 
 **VNET Mapping Table**
 | | V4 underlay| V6 underlay| Mac-Address| Mapping Action | VNI
