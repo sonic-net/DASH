@@ -141,7 +141,25 @@ def generate_sai_api(program, ignore_tables):
         sai_table_data = dict()
         sai_table_data['keys'] = []
         sai_table_data['actions'] = []
+        sai_table_data['stages'] = []
         table_control, table_name = table[NAME_TAG].split('.', 1)
+
+        # chechk if table belongs to a group
+        is_new_group = True
+        if ':' in table_name:
+            stage, group_name = table_name.split(':')
+            table_name = group_name
+            stage = stage.replace('.' , '_')
+            for sai_table in sai_tables:
+                if sai_table['name'] == table_name:
+                    sai_table['stages'].append(stage)
+                    is_new_group = False
+                    break
+            if is_new_group:
+                sai_table_data['stages'].append(stage)
+            else:
+                continue
+
         sai_table_data['name'] = table_name.replace('.' , '_')
 
         if sai_table_data['name'] in ignore_tables:

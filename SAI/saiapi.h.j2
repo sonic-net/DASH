@@ -47,6 +47,19 @@ typedef enum _sai_{{ table.name }}_action_t
 } sai_{{ table.name }}_action_t;
 
 {% endif %}
+{% if table.stages | length > 0 %}
+/**
+ * @brief Attribute data for #SAI_{{ table.name | upper }}_ATTR_STAGE
+ */
+typedef enum _sai_{{ table.name }}_stage_t
+{
+{% for stage in table.stages %}
+    SAI_{{ table.name | upper }}_STAGE_{{ stage | upper }},
+
+{% endfor %}
+} sai_{{ table.name }}_stage_t;
+
+{% endif %}
 {% endfor %}
 {% for table in sai_api.tables %}
 {% if table.is_object == 'false' %}
@@ -163,6 +176,17 @@ typedef enum _sai_{{ table.name }}_attr_t
 
 {% endfor %}
 {% endfor %}
+{% if table.stages | length > 0 %}
+    /**
+     * @brief Stage
+     *
+     * @type sai_{{ table.name }}_stage_t
+     * @flags CREATE_AND_SET
+     * @default SAI_{{ table.name | upper }}_STAGE_{{ table.stages[0] | upper }}
+     */
+    SAI_{{ table.name | upper }}_ATTR_STAGE,
+
+{% endif %}
     /**
      * @brief End of attributes
      */
