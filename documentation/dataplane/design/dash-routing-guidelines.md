@@ -54,8 +54,9 @@ Please notice, a routing table is *attached* to a specific VM DASH DPU in the VN
 
 ### Mapping
 
-Mapping lookups determine the network physical address (PA) spaces to redirect traffic.  
-A mapping is a CA to PA (Customer Address to Physical Address) lookup table, and Encap determination (for example).
+Mappings for a local VM reside on a VM's host.  
+Mapping lookups determine the network provider address (PA) spaces to redirect traffic.  
+A mapping is a CA to PA (Customer Address to Provider Address) lookup table, and Encap determination (for example).
 
   `10.3.0.0/16 -> VNET C (Peered) (use mapping)`
 
@@ -110,9 +111,9 @@ VNET: 10.1.0.0/16
  
 RouteTable attached to VM 10.1.1.1
 - 10.1.0.0/16 -> VNET (use mappings)
-- 10.1.3.0/24 -> Hop: 10.1.2.11 Customer Address (CA) -> Private Address (PA)
+- 10.1.3.0/24 -> Hop: 10.1.2.11 Customer Address (CA) -> Provider Address (PA)
   (Firewall in current VNET)
-- 10.1.3.0/26 -> Hop: 10.1.2.88 Customer Address (CA) -> Private Address
+- 10.1.3.0/26 -> Hop: 10.1.2.88 Customer Address (CA) -> Provider Address
   (PA)(Firewall in peered VNET)
 - 10.1.3.5/27 -> VNET A (mapping)
 - 10.1.3.3/32 -> Private Link Route (Private Link 1)
@@ -132,7 +133,7 @@ RouteTable attached to VM 10.1.1.1
 
 ### Scenario: Explicit LPM - Basic VNET
 
-Customers configure their routing tables.  This example shows a single VNET with **direct traffic** between VMs using mappings.  For example a specific IP address transits a VNET based upon LPM, hits a lookup in the mapping table, which holds an entry mapping to 10.1.3.5 to a specific PA and proceeds with encap.  
+Customers configure routing tables based upon their requirements.  This example shows a single VNET with **direct traffic** between VMs using mappings.  For example a specific IP address transits a VNET based upon LPM, matches a lookup in the mapping table, which holds an entry mapping to 10.1.3.5 to a specific PA and proceeds with encap.  
 
 Customer VNET A: 10.1.0.0/16
 
@@ -150,7 +151,7 @@ Customer VNET A: 10.1.0.0/16
 Route Table - attached to VM 10.1.1.1
 
 - 10.1.0.0/16 -> define VNET space as a prefix (direct traffic between VMs using mappings)
-- 10.1.3.5/32 -> VNET A (mapping) **(CA -> PA) then encap** ✔️
+- 10.1.3.5/32 -> VNET A (mapping) **(CA -> PA) then apply action to encap (ex: NVGRE) to destination VM** ✔️
 - 0/0 -> Default (to Internet for example, or Customer-owned VIPs, no action, no encap)
 
 <!-- more examples needed -->
@@ -248,7 +249,7 @@ Route Table attached to VM x.x.x.x
 <!-- Needs diagram from MSDN, use address below as On-Prem address in visual -->
 
 The example shows how to set an on premises route to an express route (ER) for a
-specific private address (PA).
+specific provider address (PA).
 
 **Mappings**
 
