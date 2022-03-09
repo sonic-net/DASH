@@ -132,7 +132,7 @@ RouteTable attached to VM 10.1.1.1
 
 ### Scenario: Explicit LPM - Basic VNET
 
-This example shows a single VNET with direct traffic between VMs using mappings.  For example a specific IP address transits a VNET based upon LPM, hits a lookup in the mapping table, which holds an entry mapping to 10.1.0.5 to a specific PA and proceeds with encap.
+This example shows a single VNET with **direct traffic** between VMs using mappings.  For example a specific IP address transits a VNET based upon LPM, hits a lookup in the mapping table, which holds an entry mapping to 10.1.3.5 to a specific PA and proceeds with encap.
 
 **Customer provides entries which are handled by default**
 
@@ -141,20 +141,19 @@ Customer VNET A: 10.1.0.0/16
 **Mappings**
 
 - Subnet 1: 10.1.1.0/24
-- Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) **Customer places VM functioning as firewall** :heavy_check_mark:
+- Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall)
 - Subnet 3: 10.1.3.0/24
 - Mappings (Support up to 1M): 
 - *VM 1: 10.1.1.1
 - *VM 2: 10.1.3.2
 - *Private Link 1: 10.1.3.3
 - *Private Link 2: 10.1.3.4
-- *VM 3: 10.1.3.5
+- *VM 3: 10.1.3.5 ✔️
 
 Route Table - attached to VM 10.1.1.1
 
 - 10.1.0.0/16 -> define VNET space as a prefix (direct traffic between VMs using mappings)
-- 10.1.0.5/32 -> (CA -> PA) (destination direct VM) ✔️
-- 10.1.3.5/32 -> VNET A (mapping)
+- 10.1.3.5/32 -> VNET A (mapping) **(CA -> PA) then encap** ✔️
 - 0/0 -> Default (to Internet for example, or Customer-owned VIPs, no action, no encap)
 
 <!-- more examples needed -->
