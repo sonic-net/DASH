@@ -138,12 +138,10 @@ This example shows a single VNET with **direct traffic** between VMs using mappi
 
 Customer VNET A: 10.1.0.0/16
 
-**Mappings**
-
 - Subnet 1: 10.1.1.0/24
 - Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall)
 - Subnet 3: 10.1.3.0/24
-- Mappings (Support up to 1M): 
+**Mappings**: 
 - *VM 1: 10.1.1.1
 - *VM 2: 10.1.3.2
 - *Private Link 1: 10.1.3.3
