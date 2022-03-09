@@ -136,22 +136,26 @@ This example shows a single VNET with direct traffic between VMs using mappings.
 
 **Customer provides entries which are handled by default**
 
+Customer VNET A: 10.1.0.0/16
 
 **Mappings**
 
-VNET A: 10.1.0.0/16
-
 - Subnet 1: 10.1.1.0/24
-- Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) **Customer places firewall** :heavy_check_mark:
+- Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) **Customer places VM functioning as firewall** :heavy_check_mark:
 - Subnet 3: 10.1.3.0/24
-- Mappings: 
-- *VM 1: 10.1.0.5 ✔️
+- Mappings (Support up to 1M): 
+- *VM 1: 10.1.1.1
+- *VM 2: 10.1.3.2
+- *Private Link 1: 10.1.3.3
+- *Private Link 2: 10.1.3.4
+- *VM 3: 10.1.3.5
 
-Route Table - attached to VM x.x.x.x
+Route Table - attached to VM 10.1.1.1
 
-- 10.1.0.0/16 -> VNET (use mappings)
+- 10.1.0.0/16 -> define VNET space as a prefix (direct traffic between VMs using mappings)
 - 10.1.0.5/32 -> (CA -> PA) (destination direct VM) ✔️
-- 0/0 -> Default (Internet)
+- 10.1.3.5/32 -> VNET A (mapping)
+- 0/0 -> Default (to Internet for example, or Customer-owned VIPs, no action, no encap)
 
 <!-- more examples needed -->
 
@@ -268,7 +272,7 @@ Route Table attached to VM x.x.x.x
 - 10.2.0.0/16 -> VNET B (use mappings)
 - 10.3.0.0/16 -> VNET C (use mappings)
 - 50.1.0.0/16 -> Internet **Used for intercept of other traffic** :heavy_check_mark:
-- 50.0.0.0/8 -> Next Hop: **ER device PA (100.1.2.3, 100.1.2.4) 2 endpoints, GRE Key: X** :heavy_check_mark:
+- 50.0.0.0/8 -> Next Hop: **ER device pair PAs (100.1.2.3, 100.1.2.4) 2 endpoints, GRE Key: X** :heavy_check_mark:
 - 8.8.0.0/16 -> Internet (for Trusted traffic) - (can be SNAT to VIP)
 - 0/0 -> Next Hop: 10.1.2.11 for Untrusted traffic
 
@@ -371,8 +375,7 @@ Route Table attached to VM x.x.x.x
 - 8.8.0.0/16 -> Internet (for Trusted traffic) - (can be SNAT to VIP)
 - 0/0 -> Next Hop: 10.1.2.11 for Untrusted traffic
 
-Route Table attached to VM **y.y.y.y** **Different ENI using same route table above; the VNET object is shared**
-
+Route Table attached to VM **10.1.1.2** **Different ENI using same route table above; the VNET object is shared**
 Customer wants to be able to communicate with 10.1.3.5 (via the route table), but **does not** want to intercept any traffic ✔️
 
 - 10.1.0.0/16 -> VNET A (use mappings)
