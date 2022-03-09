@@ -92,9 +92,10 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
 	![sdn-virtual-port](images/sdn-virtual-port.svg)
 
-- On receiving a packet from the wire, the SDN appliance will determine the matching ENI, Packet direction and packet processing strategy based on *Encap Transformation and Rules Evaluation*.
+- On receiving a packet from the wire, the SDN appliance will determine the matching ENI, Packet direction and packet processing strategy based on *Encap Transformation and Rules Evaluation*.  Upon receiving a packet, the SDN appliance will determine:
 
-  - On receiving a packet, the SDN appliance will perform a lookup based upon the inner source mac (VXLAN encap packet), if a matching ENI is found, and corresponding rule / flow processing will start.
+- Packet Direction is evaluated based off of the most-outer VNI lookup (implementation dependent) from the left-side (DASH optimized VM sending outbound packets) behind the Appliance, otherwise (if no match) the direction is Inbound).
+- ENI Selection - Outbound uses source-MAC, Inbound uses destination-MAC
 
   - Once the ENI is matched, the packet is first matched with flow table to see if an existing flow already matches this.  If a flow match is found, a corresponding match action is executed without going into rule processing. Flow match direction is identified based on source and destination mac.
 
