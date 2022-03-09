@@ -112,7 +112,7 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
  ![sdn-appliance](images/sdn-appliance.svg)
 
-- The VNI is static on the 'left-side' of the diagram
+- The VNI is static on the 'left-side' (most-outer) of the diagram (there is only 1 encap) from the reserved VNI range
 - The VNI will be different depending upon the Inbound circumstance (Internet, ER Gateway for example)
 - SDN Eng to populate this further
 
