@@ -12,7 +12,8 @@ last update: 02/28/2022
   - [Example route table (basic customer setup)](#example-route-table-basic-customer-setup)
   - [VNET, Mappings, Private Link, Express Route, Internet Examples](#vnet-mappings-private-link-express-route-internet-examples)
 - [SCENARIOS (these build upon each other)](#scenarios-these-build-upon-each-other)
-  - [Scenario: Explicit LPM](#scenario-explicit-lpm)
+  - [Scenario: Explicit LPM - Basic VNET](#scenario-explicit-lpm---basic-vnet)
+  - [Scenario:  Peered VNET using mappings](#scenario--peered-vnet-using-mappings)
   - [Scenario: Direct communication between subnets](#scenario-direct-communication-between-subnets)
   - [Scenario: Filter default route](#scenario-filter-default-route)
   - [Scenario: Trusted versus Untrusted Internet-bound traffic](#scenario-trusted-versus-untrusted-internet-bound-traffic)
@@ -20,7 +21,6 @@ last update: 02/28/2022
   - [Scenario: Private Endpoints](#scenario-private-endpoints)
   - [Scenario: Private Endpoints plumbed as Route](#scenario-private-endpoints-plumbed-as-route)
   - [Scenario: Intercept Specific Traffic / Exempt a Specific IP/VM](#scenario-intercept-specific-traffic--exempt-a-specific-ipvm)
-- [Counters](#counters)
 - [References](#references)
 
 ## Overview
@@ -381,5 +381,3 @@ Customer wants to be able to communicate with 10.1.3.5 (via the route table), bu
 - [What is Azure Virtual Network?](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview)
 - [Virtual network traffic routing](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview)
 - [ExpressRoute routing requirements](https://docs.microsoft.com/en-us/azure/expressroute/expressroute-routing?toc=/azure/virtual-network/toc.json)
-
-
