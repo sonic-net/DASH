@@ -1,6 +1,5 @@
 # hardware setup
-https://github.com/Azure/DASH/blob/master/docs/testbed/README.testbed.software.md
-  - do the steps in "Prepare Testbed Server" section
+do the steps in [Prepare Testbed Server](../docs/testbed/README.testbed.software.md) section
 
 # build container
 ```
