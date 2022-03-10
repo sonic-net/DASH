@@ -92,30 +92,32 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
 	![sdn-virtual-port](images/sdn-virtual-port.svg)
 
-- On receiving a packet from the wire, the SDN appliance will determine the matching ENI, Packet direction and packet processing strategy based on *Encap Transformation and Rules Evaluation*.  Upon receiving a packet, the SDN appliance will determine:
+- On receiving a packet from the wire, the SDN appliance will determine the Packet direction, matching ENI, and packet processing strategy based on *Encap Transformation and Rules Evaluation*.  Upon receiving a packet, the SDN appliance will determine:
 
-- Packet Direction is evaluated based off of the most-outer VNI lookup (implementation dependent) from the left-side (DASH optimized VM sending outbound packets) behind the Appliance, otherwise (if no match) the direction is Inbound).
+- Packet Direction - which is evaluated based off of the most-outer **VNI** lookup (implementation dependent) from the left-side (see figure below, a DASH optimized VM sending Outbound packets) behind the Appliance.  If there is no match, the direction is Inbound).
+
 - ENI Selection - Outbound uses source-MAC, Inbound uses destination-MAC
+- SLB decap (if packet was encapped by SLB)
+- Decap VNET GRE key
 
-  - Once the ENI is matched, the packet is first matched with flow table to see if an existing flow already matches this.  If a flow match is found, a corresponding match action is executed without going into rule processing. Flow match direction is identified based on source and destination mac.
+  - Once the ENI is matched, the packet is first matched with flow table to check whether an existing flow already matches.  If a flow match is found, a corresponding match action is executed without entering into rule processing. Flow match direction is identified based on source and destination MAC.
 
   - If no flow match is found, the ENI rule processing pipeline will execute.
 
-    - **Inbound rule** processing pipeline is executed if destination mac in the packet matches the ENI mac. Once rule pipeline is executed corresponding flows are created.
+    - **Inbound rule** processing pipeline is executed if destination MAC in the packet matches the ENI MAC. Once rule pipeline is executed corresponding flows are created.
 
-    - **Outbound rule** processing pipeline is executed if source mac in the packet matches the ENI mac.
+    - **Outbound rule** processing pipeline is executed if source MAC in the packet matches the ENI MAC.
 
       - Once outbound rule processing is complete and final transforms are identified, the corresponding flow is created in the flow table.
 
-      - Depending on implementation of flow table, a corresponding inbound flow may also be inserted to enable response packets to match the flow and bypass the rule processing pipeline.
+      - Depending upon the implementation of the flow table, a corresponding inbound flow may also be inserted to enable response packets to match the flow and bypass the rule processing pipeline.
 
       - **Example**: VM with IP 10.0.0.1 sends a packet to 8.8.8.8, VM Inbound ACL blocks all internet, VM outbound ACL allows 8.8.8.8 \- Response packet from 8.8.8.8 must be allowed without opening any inbound ACL due to the flow match.
 
  	![sdn-appliance](images/sdn-appliance.svg)
 
-- The VNI is static on the 'left-side' (most-outer) of the diagram (there is only 1 encap) from the reserved VNI range
-- The VNI will be different depending upon the Inbound circumstance (Internet, ER Gateway for example)
-- SDN Eng to populate this further
+- Note: the VNI is **static** on the 'left-side' (most-outer) of the diagram (there is only 1 encap) from the reserved VNI range
+- The VNI will be **different** depending upon the Inbound 'right-side' circumstance (Internet, ER Gateway for example)
 
 ## Packet processing Pipeline (Sequential prefix match lookups)
 
