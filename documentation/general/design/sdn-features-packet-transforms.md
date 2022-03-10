@@ -114,7 +114,7 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
       - **Example**: VM with IP 10.0.0.1 sends a packet to 8.8.8.8, VM Inbound ACL blocks all internet, VM outbound ACL allows 8.8.8.8 \- Response packet from 8.8.8.8 must be allowed without opening any inbound ACL due to the flow match.
 
- 	![sdn-appliance](images/sdn-appliance.svg)
+	![sdn-appliance](images/sdn-appliance.svg)
 
 - Note: the VNI is **static** on the 'left-side' (most-outer) of the diagram (there is only 1 encap) from the reserved VNI range
 - The VNI will be **different** depending upon the Inbound 'right-side' circumstance (Internet, ER Gateway for example)
