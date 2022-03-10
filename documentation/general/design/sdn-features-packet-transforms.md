@@ -1,65 +1,66 @@
-[ [ << Back to parent directory](../README.md) ]
+[<< Back to parent directory](../README.md) ]
 
-[ [ << Back to DASH top-level Documents](../../README.md#contents) ]
+[<< Back to DASH top-level Documents](../../README.md#contents) ]
 
 >**NOTE**: This document is destined to be restructured into general- and per-service specifications.
 
 **Table of contents**
 
-- [SDN Features, Packet Transforms and Scale](#sdn-features-packet-transforms-and-scale)
-	- [First Target Scenario:  Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance](#first-target-scenario--highly-optimized-path-dedicated-appliance-little-processing-or-encap-to-sdn-appliance-and-policies-on-an-sdn-appliance)
-	- [Scale per DPU (Card)](#scale-per-dpu-card)
-	- [Scenario Milestone and Scoping](#scenario-milestone-and-scoping)
-	- [Virtual Port and Packet Direction](#virtual-port-and-packet-direction)
-	- [Packet processing Pipeline (Sequential prefix match lookups)](#packet-processing-pipeline-sequential-prefix-match-lookups)
-		- [ACL](#acl)
-	- [Routes and Route-Action](#routes-and-route-action)
-	- [Packet Flow](#packet-flow)
-		- [Inbound](#inbound)
-		- [Outbound](#outbound)
-	- [Packet Transform Examples](#packet-transform-examples)
-		- [VNET to VNET Traffic](#vnet-to-vnet-traffic)
-		- [VNET to Internet - TBD](#vnet-to-internet---tbd)
-		- [VNET to Service Endpoints - TBD](#vnet-to-service-endpoints---tbd)
-		- [VNET to Private Link  - TBD.](#vnet-to-private-link----tbd)
-	- [Metering](#metering)
-	- [VNET Encryption](#vnet-encryption)
-	- [Telemetry](#telemetry)
-	- [Counters](#counters)
-	- [BGP](#bgp)
-	- [Watchdogs](#watchdogs)
-	- [Servicing](#servicing)
-	- [Debugging](#debugging)
-	- [Flow Replication](#flow-replication)
-	- [Unit Testing and development](#unit-testing-and-development)
-	- [Internal Partner dependencies](#internal-partner-dependencies)
-	- [Packet transforms](#packet-transforms)
-		- [VNET](#vnet)
-		- [Scenario:  VM<->VM (in VNET) communication](#scenario--vm-vm-in-vnet-communication)
-		- [Internal Load balancer](#internal-load-balancer)
-		- [Private Link](#private-link)
-		- [Private Link Service](#private-link-service)
-		- [Service Tunneling](#service-tunneling)
-		- [Inbound from LB](#inbound-from-lb)
-		- [Outbound NAT - L4](#outbound-nat---l4)
+- [First Target Scenario:  Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance](#first-target-scenario--highly-optimized-path-dedicated-appliance-little-processing-or-encap-to-sdn-appliance-and-policies-on-an-sdn-appliance)
+- [Scale per DPU (Card)](#scale-per-dpu-card)
+- [Scenario Milestone and Scoping](#scenario-milestone-and-scoping)
+- [Virtual Port and Packet Direction](#virtual-port-and-packet-direction)
+- [Packet processing Pipeline (Sequential prefix match lookups)](#packet-processing-pipeline-sequential-prefix-match-lookups)
+	- [ACL](#acl)
+- [Routes and Route-Action](#routes-and-route-action)
+- [Packet Flow](#packet-flow)
+	- [Inbound](#inbound)
+	- [Outbound](#outbound)
+- [Packet Transform Examples](#packet-transform-examples)
+	- [VNET to VNET Traffic](#vnet-to-vnet-traffic)
+	- [VNET to Internet - TBD](#vnet-to-internet---tbd)
+	- [VNET to Service Endpoints - TBD](#vnet-to-service-endpoints---tbd)
+	- [VNET to Private Link  - TBD](#vnet-to-private-link----tbd)
+- [Metering](#metering)
+- [VNET Encryption](#vnet-encryption)
+- [Telemetry](#telemetry)
+- [Counters](#counters)
+- [BGP](#bgp)
+- [Watchdogs](#watchdogs)
+- [Servicing](#servicing)
+- [Debugging](#debugging)
+- [Flow Replication](#flow-replication)
+- [Unit Testing and development](#unit-testing-and-development)
+- [Internal Partner dependencies](#internal-partner-dependencies)
+- [Packet transforms](#packet-transforms)
+	- [VNET](#vnet)
+	- [Scenario:  VM<->VM (in VNET) communication](#scenario--vm-vm-in-vnet-communication)
+	- [Internal Load balancer](#internal-load-balancer)
+	- [Private Link](#private-link)
+	- [Private Link Service](#private-link-service)
+	- [Service Tunneling](#service-tunneling)
+	- [Inbound from LB](#inbound-from-lb)
+	- [Outbound NAT - L4](#outbound-nat---l4)
 
 # SDN Features, Packet Transforms and Scale
 
 ## First Target Scenario:  Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance
+
 Why do we need this scenario?  There is a huge cost associated with establishing the first connection (and the CPS that can be established).
 
 - A high Connections per Second (CPS) / Flow SKU for Networked Virtual Appliances (NVA)
 
-	![NVA](images/high_cps_flow_sku_for_nva.png)
+ ![sdn-high-cps](images/sdn-high-cps.svg)
 
 ## Scale per DPU (Card)
+
 **Note: Below are the expected numbers per Data Processing Unit (DPU); this applies to both IPV4 and IPV6 underlay and overlay*
 
 **IPV6 numbers will be lower*
 
 | Syntax | Description |
 | ----------- | ----------- |
-| Flow Scale <img style="width:400px"/>| <ul><li>1+ million flows per v-port (aka ENI)</li> <li>50 million per DPU/Card<ul><li>single encap IPv4 overlay and IPV6 underlay</li> <li>single encap IPv6 overlay and IPV6 underlay. (This can be lower)</li> <li>single encap IPV4</li> <li>Encap IPv6 and IPV4</li></ul></ul> *These are complex flows, details are below.* | |  
+| Flow Scale <img style="width:400px"/>| <ul><li>1+ million flows per v-port (aka ENI)</li> <li>16 million per DPU/Card per 200G<ul><li>single encap IPv4 overlay and IPV6 underlay</li> <li>single encap IPv6 overlay and IPV6 underlay. (This can be lower)</li> <li>single encap IPV4</li> <li>Encap IPv6 and IPV4</li></ul></ul> *These are complex flows, details are below.* | |  
 | CPS | 4 million+ (max)  |
 | Routes | 100k per v-port (max)  |
 | ACLs | 100k IP-Prefixes, 10k Src/Dst ports per v-port (max)  |
@@ -70,7 +71,7 @@ Why do we need this scenario?  There is a huge cost associated with establishing
 
 ## Scenario Milestone and Scoping
 
-| Scenario | Feature | Perf | Timeline | 
+| Scenario | Feature | Perf | Timeline |
 |:---------|:---------|:-----|-----|
 | 1 | <ul> <li>VNET <-> VNET </li> <li>Route Support </li> <li>LPM Support </li> <li>ACL Support</li> </ul>|CPS<br/>Flow<br/>PPS</br>Rule Scale<img width=400/></br> |
 | 2  | <ul> <li>Load Balancer Inbound</li><li>VIP Inbound</li></ul>  |  | |
@@ -85,32 +86,34 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
 - The SDN controller will create these virtual ports on SDN appliance and associate corresponding SDN policies like – Route, ACL, NAT etc. to these virtual ports.  In other words, our software will communicate with the cards, hold card inventory and SDN placement, call API’s that are exposed through the card create policies, setup ENI, routes, ACLs, NAT, and different rules.
 - Each Virtual port will be created with an ENI identifier like – Mac address, VNI or more.
-	- Virtual port will also have attributes like – Flow time-out, QOS, port properties related to the port.
+  - Virtual port will also have attributes like – Flow time-out, QOS, port properties related to the port.
 
-	- Virtual port is the container which holds all policies.
+  - Virtual port is the container which holds all policies.
 
-	![tt](images/vport.png)
+	![sdn-virtual-port](images/sdn-virtual-port.svg)
 
-- On receiving a packet from the wire, the SDN appliance will determine the matching ENI, Packet direction and packet processing strategy based on _Encap Transformation and Rules Evaluation_.
+- On receiving a packet from the wire, the SDN appliance will determine the matching ENI, Packet direction and packet processing strategy based on *Encap Transformation and Rules Evaluation*.  Upon receiving a packet, the SDN appliance will determine:
 
-	- On receiving a packet, the SDN appliance will perform a lookup based upon the inner source mac (VXLAN encap packet), if a matching ENI is found, and corresponding rule / flow processing will start.
+- Packet Direction is evaluated based off of the most-outer VNI lookup (implementation dependent) from the left-side (DASH optimized VM sending outbound packets) behind the Appliance, otherwise (if no match) the direction is Inbound).
+- ENI Selection - Outbound uses source-MAC, Inbound uses destination-MAC
 
-	- Once the ENI is matched, the packet is first matched with flow table to see if an existing flow already matches this.  If a flow match is found, a corresponding match action is executed without going into rule processing. Flow match direction is identified based on source and destination mac.
+  - Once the ENI is matched, the packet is first matched with flow table to see if an existing flow already matches this.  If a flow match is found, a corresponding match action is executed without going into rule processing. Flow match direction is identified based on source and destination mac.
 
-	- If no flow match is found, the ENI rule processing pipeline will execute.
+  - If no flow match is found, the ENI rule processing pipeline will execute.
 
-		- **Inbound rule** processing pipeline is executed if destination mac in the packet matches the ENI mac. Once rule pipeline is executed corresponding flows are created.
+    - **Inbound rule** processing pipeline is executed if destination mac in the packet matches the ENI mac. Once rule pipeline is executed corresponding flows are created.
 
-		- **Outbound rule** processing pipeline is executed if source mac in the packet matches the ENI mac. 
+    - **Outbound rule** processing pipeline is executed if source mac in the packet matches the ENI mac.
 
-			- Once outbound rule processing is complete and final transforms are identified, the corresponding flow is created in the flow table.
+      - Once outbound rule processing is complete and final transforms are identified, the corresponding flow is created in the flow table.
 
-			- Depending on implementation of flow table, a corresponding inbound flow may also be inserted to enable response packets to match the flow and bypass the rule processing pipeline.
+      - Depending on implementation of flow table, a corresponding inbound flow may also be inserted to enable response packets to match the flow and bypass the rule processing pipeline.
 
-            - **Example**: VM with IP 10.0.0.1 sends a packet to 8.8.8.8, VM Inbound ACL blocks all internet, VM outbound ACL allows 8.8.8.8 \- Response packet from 8.8.8.8 must be allowed without opening any inbound ACL due to the flow match.
-            
-	![Appliance](images/sdn_appliance.png)
-- The VNI is static on the 'left-side' of the diagram
+      - **Example**: VM with IP 10.0.0.1 sends a packet to 8.8.8.8, VM Inbound ACL blocks all internet, VM outbound ACL allows 8.8.8.8 \- Response packet from 8.8.8.8 must be allowed without opening any inbound ACL due to the flow match.
+
+ 	![sdn-appliance](images/sdn-appliance.svg)
+
+- The VNI is static on the 'left-side' (most-outer) of the diagram (there is only 1 encap) from the reserved VNI range
 - The VNI will be different depending upon the Inbound circumstance (Internet, ER Gateway for example)
 - SDN Eng to populate this further
 
@@ -118,7 +121,7 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
 ### ACL
 
-- The ACL pipeline has 3-5 levels; an ACL decision is based on the most restrictive match across all 3 levels.  The 1st layer (contains default rules) is _controlled by Azure/MSFT_.  The 2nd and 3rd layers are _Customer controlled_. The 4th and 5th layers might be for example, *VM/Subnet/Subscription* layers. These layers might be security rules or a top level entity controlled by an Administrator or an IT Department. 
+- The ACL pipeline has 3-5 levels; an ACL decision is based on the most restrictive match across all 3 levels.  The 1st layer (contains default rules) is *controlled by Azure/MSFT*.  The 2nd and 3rd layers are *Customer controlled*. The 4th and 5th layers might be for example, *VM/Subnet/Subscription* layers. These layers might be security rules or a top level entity controlled by an Administrator or an IT Department.
 
 - If an ACL rule with bit exit ACL pipeline on hit is matched, the ACL pipeline is abandoned.
 
@@ -128,15 +131,15 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
 - Action Definitions:  
 
-	- Block (terminate)
+  - Block (terminate)
 
-		- If ‘terminate’ is not used here, the last line is the most important in ACL Level1 
+    - If ‘terminate’ is not used here, the last line is the most important in ACL Level1
 
-	- Soft Block (general block, with specific permits, non-terminating, proceed to next group) or think of this as a Block, and then a ‘no’ for ‘termination’.
+  - Soft Block (general block, with specific permits, non-terminating, proceed to next group) or think of this as a Block, and then a ‘no’ for ‘termination’.
 
-	- Allow (non-terminate, proceed to next, continue to FW rules)  
+  - Allow (non-terminate, proceed to next, continue to FW rules)  
 
-	- Default action = Deny (This is the default value if no rules are matched; traffic should be dropped.  This is the default action of firewalls, however it is OK to be configurable.  If not, we want to default Deny/Drop if no rules are matched).
+  - Default action = Deny (This is the default value if no rules are matched; traffic should be dropped.  This is the default action of firewalls, however it is OK to be configurable.  If not, we want to default Deny/Drop if no rules are matched).
 
 - ACL Group:  evaluate rules based on Priority (within an ACL Group); Terminate vs non\-Terminate pertains to the Pipeline
 
@@ -152,9 +155,9 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 | *| 8.8.8.8/32| *| *| *| Block| 5| Yes
 | *| 8.8.8.8/32| *| *| *| Allow| 6| Yes
 | *| 9.9.9.9/32| *| *| *| Allow| 7| Yes
-| *| *| *| *| *| Block| 8| No 
-| | | | | | | | 
-| | | | | | | | 
+| *| *| *| *| *| Block| 8| No
+| | | | | | | |
+| | | | | | | |
 
 **ACL_LEVEL2 (Customer/User FW rules - portal.azure.com)**
 
@@ -166,9 +169,9 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 | *| 8.8.8.8/32| *| *| *| Allow| 2| No
 | *| 9.9.9.9/32| *| *| *| Block| 2| Yes
 | *| 1.1.1.2/32| *| *| *| Allow| 30| No
-| *| *| *| *| *| Block| 3| No 
-| | | | | | | | 
-| | | | | | | | 
+| *| *| *| *| *| Block| 3| No
+| | | | | | | |
+| | | | | | | |
 
 **ACL_LEVEL3**
 
@@ -178,7 +181,7 @@ Etc…
 
 - ACL_LEVEL1 \-> ACL_LEVEL2
 
-**Test Scenarios and expected results** 
+**Test Scenarios and expected results**
 
 - For simplicity below table only has IP conditions, but the same combinations exist for ports also.
 
@@ -196,7 +199,6 @@ Etc…
 | 100.0.0.100| 1.1.1.1| Block (Terminating = false)| Block (Terminating = false)| Block
 | 100.0.0.100| 1.1.1.2| Block (Terminating = false)| Allow (Terminating = false)| Allow
 
-
 ## Routes and Route-Action
 
 - Routes are usually LPM based Outbound
@@ -207,7 +209,7 @@ Etc…
 
 - Outer Encap IPv4 using permits routing between servers within a Region; across the Region we use IPv6
 
-*Why would we want to use these?* 
+*Why would we want to use these?*
 
 - Example:  to block prefixes to internal DataCenter IP addresses, but Customer uses prefixes inside of their own VNET
 
@@ -217,16 +219,16 @@ Etc…
 
 - Example:  ExpressRoute with 2 different PAs specified (load balancing across multiple PAs) using 5 tuples of packet to choose 1st PA or 2nd PA
 
-| Route Type| Example 
+| Route Type| Example
 |:----------|:----------
 | Encap_with_lookup_V4_underlay| Encap action is executed based on lookup into the mapping table.V4 underlay is used
 | Encap_with_lookup_V6_underlay| Encap action is executed based on lookup into the mapping table.V6 underlay is used
 | Encap_with_Provided_data (PA)| Encap action is executed based on provided data.Multiple PA can be provided.
 | Outbound NAT (SNAT)_L3| L3 NAT action is executed on source IP, based on provided data.
 | Outbound NAT (SNAT)_L4| L4 NAT action is executed on source IP, source port based on provided data.
-| Null | Blocks the traffic 
+| Null | Blocks the traffic
 | Private Link | -
-| | 
+| |
 
 **Mapping Table for a v-port**
 
@@ -260,15 +262,13 @@ Etc…
 | 10.0.0.1 -> 10.0.0.2 <br/> SMAC1-> DMAC_FAKE </br> Outer: <br/> SRC: [Physical IP of host] <br/> DST: [Physical IP of SDN Appliance] <br/> VXLAN <br/> &nbsp; &nbsp; &nbsp;VNI: custom <br/>Inner Mac: <br/> &nbsp; &nbsp; &nbsp; SRC - SMAC1 DST - DMAC_FAKE <br/>Inner IP:<br/>&nbsp; &nbsp; &nbsp;[10.0.0.1] -> [10.0.0.2]| Route Id = 1| Outer: <br/>SRC: [SDN Appliance IP] <br/>DST: [100.0.0.2] # Came from mapping table lookup <br/>VXLAN <br/> &nbsp; &nbsp; &nbsp;VNI: 10001 <br/>Inner Mac: <br/>&nbsp; &nbsp; &nbsp;SRC - SMAC1 DST - E4-A7-A0-99-0E-18 <br/>Inner IP: <br/>&nbsp; &nbsp; &nbsp;[10.0.0.1] -> [10.0.0.2]| Encap_with_lookup_V4_underlay
 | 10.0.0.1 -> 10.0.0.100 <br/> SMAC1-> DMAC_FAKE <br/> Outer: <br/> SRC: [Physical IP of host] <br/> DST: [Physical IP of SDN Appliance] <br/> VXLAN <br/>&nbsp; &nbsp; &nbsp;VNI: custom <br/> Inner Mac: <br/>&nbsp; &nbsp; &nbsp;SRC - SMAC1 DST - DMAC_FAKE <br/>Inner IP: <br/>&nbsp; &nbsp; &nbsp;[10.0.0.1] -> [10.0.0.2]| Route Id = 2| Outer: <br/>SRC: [SDN Appliance IP] DST: [23.0.0.1] # Came from mapping table lookup <br/>VXLAN VNI: 90000 <br/>Inner Mac:<br/>&nbsp; &nbsp; &nbsp;SRC - SMAC1 DST - E4-A7-A0-99-0E-28 <br/>Inner IP: <br/>&nbsp; &nbsp; &nbsp;[10.0.0.1] -> [10.0.0.100]| Encap_with_Provided_data
 | 10.0.0.1 -> 10.0.0.101 <br/>SMAC1-> DMAC_FAKE <br/>Outer: <br/>SRC: [Physical IP of host] <br/>DST: [Physical IP of SDN Appliance] <br/>VXLAN <br/>&nbsp; &nbsp; &nbsp;VNI: custom <br/>Inner Mac: <br/>&nbsp; &nbsp; &nbsp;SRC - SMAC1 DST - DMAC_FAKE <br/>Inner IP: <br/>&nbsp; &nbsp; &nbsp;[10.0.0.1] -> [10.0.0.2]| Route Id = 3| Outer: <br/>SRC: [SDN Appliance IP] <br/>DST: ECMP on <br/>[23.0.0.10, 23.0.0.11, 23.0.0.13, 23.0.0.14] <br/># Came from mapping table lookup <br/>VXLAN <br/>&nbsp; &nbsp; &nbsp;VNI: 90000 <br/>Inner Mac:<br/>&nbsp; &nbsp; &nbsp;SRC - SMAC1 DST - E4-A7-A0-99-0E-29 <br/>Inner IP: <br/>&nbsp; &nbsp; &nbsp; [10.0.0.1] -> [10.0.0.100]| Encap_with_Provided_data_ECMP
-| 10.0.0.1 -> 8.8.8.8 <br/>SMAC1-> DMAC_FAKE <br/>Outer: <br/>SRC: [Physical IP of host] <br/>DST: [Physical IP of SDN Appliance] <br/> VXLAN <br/>&nbsp; &nbsp; &nbsp;VNI: custom <br/> Inner Mac: <br/>&nbsp; &nbsp; &nbsp; SRC - SMAC1 DST - DMAC_FAKE <br/>Inner IP: <br/>&nbsp; &nbsp; &nbsp;[10.0.0.1] -> [8.8.8.8]| Route Id = 4| | 
-| | | | 
+| 10.0.0.1 -> 8.8.8.8 <br/>SMAC1-> DMAC_FAKE <br/>Outer: <br/>SRC: [Physical IP of host] <br/>DST: [Physical IP of SDN Appliance] <br/> VXLAN <br/>&nbsp; &nbsp; &nbsp;VNI: custom <br/> Inner Mac: <br/>&nbsp; &nbsp; &nbsp; SRC - SMAC1 DST - DMAC_FAKE <br/>Inner IP: <br/>&nbsp; &nbsp; &nbsp;[10.0.0.1] -> [8.8.8.8]| Route Id = 4| |
+| | | |
 
+## Packet Flow
 
- ## Packet Flow
- 
-For the first packet of a TCP flow, we take the Slow Path, running the transposition engine and matching at each layer.  For subsequent packets, we take the Fast Path, 
+For the first packet of a TCP flow, we take the Slow Path, running the transposition engine and matching at each layer.  For subsequent packets, we take the Fast Path,
 matching a unified flow via UFID and applying a transposition directly against rules.
-
 
 ### Inbound
 
@@ -298,10 +298,9 @@ matching a unified flow via UFID and applying a transposition directly against r
 
  **VNET Definition:**
 
-	- 10.0.0.0/24 
+- 10.0.0.0/24
 
-	- 20.0.0.0/24
-
+- 20.0.0.0/24
 
 **VNET Mapping Table**
 | | V4 underlay| V6 underlay| Mac-Address| Mapping Action | VNI
@@ -309,26 +308,24 @@ matching a unified flow via UFID and applying a transposition directly against r
 | 10.0.0.1| 100.0.0.1| 3ffe :: 1| Mac1| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 100
 | 10.0.0.2| 100.0.0.2| 3ffe :: 2| Mac2| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 200
 | 10.0.0.3| 100.0.0.3| 3ffe :: 3| Mac3| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 300
-| | | | | | 
- 
+| | | | | |
+
 **Packet Transforms**
 
 | SRC -> DST <img width=1000/>| Out-ACL1| Out-ACL2| Out-ACL3| Routing <img width=1000/>| Final <img width=1000/>|
 |:----------|:----------|:----------|:----------|:----------|:----------
-| | Block 10.0.0.10 Allow *| Block 10.0.0.11 Allow * | Allow*| 10.0.0.0/24 - Route Action = VNET 20.0.0.0/24 - Route Action = VNET| 
+| | Block 10.0.0.10 Allow *| Block 10.0.0.11 Allow * | Allow*| 10.0.0.0/24 - Route Action = VNET 20.0.0.0/24 - Route Action = VNET|
 | 10.0.0.1 -> 10.0.0.10 <br/>SMAC1-> DMAC_FAKE| Block| | | | Blocked
 | 10.0.0.1 -> 10.0.0.11 <br/>SMAC1-> DMAC_FAKE| Allow| Block| | | Blocked
 | 10.0.0.1 -> 10.0.0.2 <br/>SMAC1-> DMAC_FAKE <br/>Outer:<br/>SRC: [Physical IP of host] <br/>DST: [Physical IP of SDN Appliance] <br/>VXLAN <br/>&nbsp;&nbsp;&nbsp;&nbsp;VNI: custom <br/>Inner Mac: <br/>&nbsp;&nbsp;&nbsp;&nbsp;SRC - SMAC1 DST - DMAC_FAKE <br/>Inner IP: <br/>&nbsp;&nbsp;&nbsp;&nbsp;[10.0.0.1] -> [10.0.0.2]| Allow| Allow| Allow| Matched LPM route 10.0.0.0/24 Execute action VNET - which will lookup in mapping table and take mapping action.| Highlighted the changes in packet <br/>Outer:<br/>SRC: [100.0.0.2] <br/>DST: [100.0.0.1] <br/>VXLAN <br/>&nbsp;&nbsp;&nbsp;&nbsp;VNI: 200 <br/>Inner Mac: <br/>&nbsp;&nbsp;&nbsp;&nbsp;SRC - SMAC1 DST - Mac1 <br/>Inner IP: <br/>&nbsp;&nbsp;&nbsp;&nbsp;[10.0.0.1] -> [10.0.0.2]
-| 10.0.0.1 -> 10.0.0.3 SMAC1-> DMAC_FAKE| | | | | 
-| | | | | | 
-
-
+| 10.0.0.1 -> 10.0.0.3 SMAC1-> DMAC_FAKE| | | | |
+| | | | | |
 
 ### VNET to Internet - TBD
 
 ### VNET to Service Endpoints - TBD
 
-### VNET to Private Link  - TBD.
+### VNET to Private Link  - TBD
 
 ## Metering
 
@@ -338,35 +335,32 @@ matching a unified flow via UFID and applying a transposition directly against r
 
 ## Telemetry
 
-
 ## Counters
 
 Counters are objects for counteing data per ENI. The following are their main characteristics:
 
-- A counter is associated with only one ENI that is, it is not shared among different ENIs. 
-- If you define a counter as a global object, it cannot reference different ENIs. 
+- A counter is associated with only one ENI that is, it is not shared among different ENIs.
+- If you define a counter as a global object, it cannot reference different ENIs.
 - The counters live as long as the related ENI exists.  
-- The counters persist after the flow is completed. 
-- You use API calls to handle these counters. 
+- The counters persist after the flow is completed.
+- You use API calls to handle these counters.
 - When creating a route table, you will be able to reference the counters.
 
-
-The control plane is the consumer of counters that are defined in the data plane. The control plane queries every 10 seconds. 
+The control plane is the consumer of counters that are defined in the data plane. The control plane queries every 10 seconds.
 
 Counters can be assigned on the route rule, or assigned onto a mapping. If mapping does not exist, you revert to the route rule counter. A complete definition will follow when we have more information other than software defined devices.  
 
-In the flow table we list the packet counter called a metering packet; once we have the final implementation that does the packet processing, we can do metering. 
+In the flow table we list the packet counter called a metering packet; once we have the final implementation that does the packet processing, we can do metering.
 
 Essentially, whenever a route table is accessed and we identify the right VNET target (based on the mapping from the underlay IP), will have an ID of the metering packet preprogrammed earlier.  We will reference this counter in the mappings. When the flow is created it will list this counter ID.  When the packet transits inbound or outbound through the specific flow, this counter is incremented and tracked separately for the inbound and outbound.
 
 We need more information around Counters, Statistics, and we need to start thinking about how to add Metering- and reconcile this in the P4 model.  
 
 **Questions**  
+
 - How often will we read?  
 - What type of API to use?  
 - Will we push or pull from the Controller?
-
-
 
 ## BGP
 
@@ -376,7 +370,7 @@ We need more information around Counters, Statistics, and we need to start think
 
 ## Debugging
 
-Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Bandwidth Metering for Routing Rules to count bytes (each flow associated with a bandwidth counter when an LPM is hit \- many flows _may_ share the same counters).   
+Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Bandwidth Metering for Routing Rules to count bytes (each flow associated with a bandwidth counter when an LPM is hit \- many flows *may* share the same counters).
 
 ## Flow Replication
 
@@ -392,27 +386,34 @@ Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Ba
 
 ## Packet transforms
 
-### VNET 
+### VNET
+
 ### Scenario:  VM<->VM (in VNET) communication
+
 ![VNETtoVNET](images/vm_to_vm.png)
 
-### Internal Load balancer 
+### Internal Load balancer
+
 ![LB](images/vm_to_ilb.png)
 
 ### Private Link
+
 ![PL](images/private_link.png)
 
-### Private Link Service 
+### Private Link Service
+
 ![PLS](images/private_link_service.png)
 
 ### Service Tunneling
+
 ![ST](images/service_tunneling.png)
 
 ### Inbound from LB
+
 ![InbfromLB](images/inbound_frm_ilb.png)
 
-### Outbound NAT - L4 
+### Outbound NAT - L4
+
 ![OutNATL4](images/outbound_nat_l4.png)
 
 (L3 works in same way except port re-write)
-
