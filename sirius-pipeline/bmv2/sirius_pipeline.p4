@@ -82,27 +82,12 @@ control sirius_ingress(inout headers_t hdr,
         meta.dropped = true;
     }
 
-    table pa_validation {
-        key = {
-            hdr.ipv4.src_addr : exact @name("hdr.ipv4.src_addr:sip");
-            hdr.vxlan.vni : exact @name("hdr.vxlan.vni:vni");
-        }
-
-        actions = {
-            permit;
-            @defaultonly deny;
-        }
-
-        const default_action = deny;
-    }
-
     table inbound_routing {
         key = {
             hdr.vxlan.vni : exact @name("hdr.vxlan.vni:vni");
         }
         actions = {
-            vxlan_decap;
-            vxlan_decap_pa_validate;
+            vxlan_decap(hdr);
             @defaultonly deny;
         }
 
@@ -119,14 +104,7 @@ control sirius_ingress(inout headers_t hdr,
         if (meta.direction == direction_t.OUTBOUND) {
             vxlan_decap(hdr);
         } else if (meta.direction == direction_t.INBOUND) {
-            slb_decap.apply(); /* TODO: define this encapsulation */
-
-            switch (inbound_routing.apply().action_run) {
-                vxlan_decap_pa_validate: {
-                    pa_validation.apply();
-                    vxlan_decap();
-                }
-            }
+            inbound_routing.apply();
         }
 
         /* At this point the processing is done on customer headers */
