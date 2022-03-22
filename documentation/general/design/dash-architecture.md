@@ -370,7 +370,7 @@ The following figure is a partial mockup of the final product.
 
 ![dash-high-level-design](./images/dash-hld-mockup.svg)
 
-<figcaption><i>Figure 3 - DASH final product partial mockup</i></figcaption><br/><br/>
+<figcaption><i>Figure 3 - Partial mockup of final product </i></figcaption><br/><br/>
 
 ### Deployment
 
