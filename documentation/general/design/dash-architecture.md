@@ -370,13 +370,14 @@ The following figure is a partial mockup of the final product.
 
 ![dash-high-level-design](./images/dash-hld-mockup.svg)
 
-<figcaption><i>Figure 3 - DASH final product mockup</i></figcaption><br/><br/>
+<figcaption><i>Figure 3 - DASH final product partial mockup</i></figcaption><br/><br/>
 
 ### Deployment
 
 ## API
 
-TBD - We describe in general terms the intent and where it *fits* in the *big
+> [!NOTE]
+> TBD - We describe in general terms the intent and where it *fits* in the *big
 picture*. We need engineering help. James, Michael and others.
 
 ### Switch Abstraction Interface (SAI) API
