@@ -37,7 +37,7 @@ last update: 03/22/2022
   - [A day in the life of a DASH SDN controller](#a-day-in-the-life-of-a-dash-sdn-controller)
   - [A day in the life of a DASH container](#a-day-in-the-life-of-a-dash-container)
 - [References](#references)
--
+
 
 ## Introduction
 
@@ -46,7 +46,7 @@ This document describes the **SONiC Disaggregated API for SONiC Hosts**
 is an open source project that will deliver enterprise network performance to
 critical cloud applications.
 
-![dash-words-cloud](../images/general/dash-words-cloud.png)
+![dash-words-cloud](./images/dash-words-cloud.png)
 
 DASH extends SONiC APIs and a comprehensive set of object models that initially
 describe Microsoft Azure’s networking services for the cloud. The project
@@ -165,7 +165,7 @@ Explain how we use each of these devices.
  that DASH adds a new **SDN control plane** via **gNMI** in the **DASH
  container**. The following figure depicts DASH software stack.
 
-![dash-software-stack](../images/architecture/dash-software-stack.svg)
+![dash-software-stack](./images/dash-software-stack.svg)
 
 <figcaption><i>Figure 1 - DASH software stack</i></figcaption><br/>
 
