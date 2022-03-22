@@ -323,7 +323,7 @@ following figure.
 
 This architecture introduces the following DASH modifications:
 
-1. A *new docker container* in the user space named **dash container** to create
+1. A *new docker container* in the user space named **dash container** (aka SDN container) to create
    the functional component for DASH.
 
 1. In the **sync-d container**, the **sai api DASH** (as opposed to *sai api* in
@@ -344,8 +344,8 @@ onto the dataplane via the **SAI database**.
 
 Notice the following:
 
-- **DASH API** shall be exposed as gNMI interface as part of the SONiC gNMI
-  container.
+- **DASH API** shall be exposed as gNMI interface as part of the SONiC DASH
+  container (aka as SDN container).
 - **DASH clients** shall configure SONiC via gRPC get/set calls.
 - **gNMI container** has the config backend to translate/write  DASH objects to
   CONFDB and/or APPDB.
