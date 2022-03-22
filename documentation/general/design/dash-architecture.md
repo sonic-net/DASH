@@ -317,7 +317,7 @@ The system architecture for SONiC-DASH relies upon the [SONiC system
 architecture](https://github.com/Azure/SONiC/wiki/Architecture), as shown in the
 following figure.
 
-![dash-high-level-design](../images/architecture/dash-high-level-design.svg)
+![dash-high-level-design](./images/dash-high-level-design.svg)
 
 <figcaption><i>Figure 2 - SONiC integration</i></figcaption><br/><br/>
 
@@ -363,7 +363,14 @@ Notice the following:
 > For more information and details, see [SONiC-DASH HLD](https://github.com/prsunny/DASH/blob/main/Documentation/dash-sonic-hld.md). This is a private link at this time. 
 ## Physical architecture  
 
-TBD - Kristina you have info here.
+> [!NOTE]
+> TBD - Kristina you have info here.
+
+The following figure is a partial mockup of the final product.
+
+![dash-high-level-design](./images/dash-hld-mockup.svg)
+
+<figcaption><i>Figure 3 - DASH final product mockup</i></figcaption><br/><br/>
 
 ### Deployment
 
