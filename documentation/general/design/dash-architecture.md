@@ -77,7 +77,8 @@ or even 100x stateful connection performance**.
   
 ## Compliance and requirements
 
-TBD - Some intro here from SDN packets transform document.
+> [!NOTE]
+> TBD - Some intro here from SDN packets transform document.
 
 The following are the compliance and requirements details applicable to the
 supported scenario:
@@ -219,7 +220,8 @@ A **gNMI schema** will manage the following DASH services:
 - Encapsulations
 - Other  
 
-TBD - See also [TBD gnmi schema]().
+> [!NOTE]
+> TBD - See also [TBD gnmi schema]().
 
 #### Multiple DPUs device
 
@@ -410,8 +412,9 @@ pipeline](https://github.com/Azure/DASH/tree/main/sirius-pipeline).
 
 ### Test
 
-TBD - We just capture the gist of it and then we link to the related test area.
-Chris can take care of this.
+> [!NOTE]
+> TBD - We just capture the gist of it and then we link to the related test area.
+> Chris can take care of this.
 
 - [High-Level Description (HLD) Test
   Specification](https://github.com/Azure/DASH/blob/main/test/docs/dash-test-HLD.md).
@@ -432,7 +435,8 @@ Chris can take care of this.
 
 ### DASH single DPU on NIC
 
-TBD - We need Prince's help.
+> [!NOTE]
+> TBD - We need Prince's help.
 
 ### DASH appliance
 
@@ -470,20 +474,23 @@ is accomplished in standard SONiC multi-ASIC devices.
 
 ### A day in the life of a DASH packet
 
-TBD - We need engineering and Gerald's  help.
+> [!NOTE]
+> TBD - We need engineering and Gerald's  help.
 
 Some of the info from the doc you *sanitized*.
 Different for ecosystem. 
 
 ### A day in the life of a DASH SDN controller
 
-TBD - We need engineering and Gerald's  help.
+> [!NOTE]
+> TBD - We need engineering and Gerald's  help.
 
 Different for ecosystem?
 
 ### A day in the life of a DASH container
 
-TBD - We need engineering and Gerald's  help.
+> [!NOTE]
+> TBD - We need engineering and Gerald's  help.
 
 Different for ecosystem?
 
