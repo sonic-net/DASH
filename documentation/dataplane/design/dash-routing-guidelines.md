@@ -138,7 +138,7 @@ Customers configure routing tables based upon their requirements.  This example 
 Customer VNET A: 10.1.0.0/16
 
 - Subnet 1: 10.1.1.0/24
-- Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall)
+- Subnet 2: 10.1.2.0/24  (Subnet contains a customer placed VM/NVA: 10.1.2.11) ✔️
 - Subnet 3: 10.1.3.0/24
 
 **Mappings**: 
@@ -178,7 +178,7 @@ In the following example the customer filter traffic from subnet 1 to subnet 3 t
 
 **Mappings**
 
-VNET: 10.1.0.0/16
+VNET A: 10.1.0.0/16
 
 - Subnet 1: 10.1.1.0/24
 - Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) **Customer places firewall** :heavy_check_mark:
@@ -205,10 +205,10 @@ The example shows how to route all Internet destined traffic through a firewall
 
 **Mappings**
 
-VNET: 10.1.0.0/16
+VNET A: 10.1.0.0/16
 
 - Subnet 1: 10.1.1.0/24
-- Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) 
+- Subnet 2: 10.1.2.0/24  (Subnet contains a customer placed VM/NVA: 10.1.2.11) ✔️) 
 - Subnet 3: 10.1.3.0/24
 
 **Add firewall hop to the routes**
@@ -229,7 +229,7 @@ This scenario shows how to route directly **trusted** Internet-bound traffic whi
 
 **Mappings**
 
-VNET: 10.1.0.0/16
+VNET A: 10.1.0.0/16
 
 - Subnet 1: 10.1.1.0/24
 - Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) ✔️
@@ -253,7 +253,7 @@ specific provider address (PA).
 
 **Mappings**
 
-VNET: 10.1.0.0/16
+VNET A: 10.1.0.0/16
 
 - Subnet 1: 10.1.1.0/24
 - Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) 
@@ -279,7 +279,7 @@ Route Table attached to VM x.x.x.x
 
 **Mappings**
 
-VNET: 10.1.0.0/16
+VNET A: 10.1.0.0/16
 
 - Subnet 1: 10.1.1.0/24
 - Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) Customer places FW here :heavy_check_mark:
@@ -311,7 +311,7 @@ Customer can also send Private Link directly as a route
 
 **Mappings**
 
-VNET: 10.1.0.0/16
+VNET A: 10.1.0.0/16
 
 - Subnet 1: 10.1.1.0/24
 - Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) Customer places FW here :heavy_check_mark:
@@ -344,7 +344,7 @@ Customer wants to exempt 1 IP or perhaps a VNET.  Example:  A customer routing t
 
 **Mappings**
 
-VNET: 10.1.0.0/16
+VNET A: 10.1.0.0/16
 
 - Subnet 1: 10.1.1.0/24
 - Subnet 2: 10.1.2.0/24  (VM/NVA: 10.1.2.11 - Firewall) Customer places FW here :heavy_check_mark:
