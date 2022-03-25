@@ -153,8 +153,11 @@ folder](https://github.com/Azure/DASH/tree/main/documentation):
 With the help of network hardware technology suppliers, create an open forum
 that capitalizes on the use of **programmable networking hardware** including
 SmartNICs, SmartToRs, SmartAppliances.
-Explain how we use each of these devices.
+The following figure shows the DASH ecosystem.
 
+![dash-software-stack](./images/hld/dash-hld-ecosystem.svg)
+
+<figcaption><i>Figure 1 - DASH ecosystem</i></figcaption><br/>
 
 ## Logical architecture (software stack) 
 
@@ -166,9 +169,9 @@ Explain how we use each of these devices.
  that DASH adds a new **SDN control plane** via **gNMI** in the **DASH
  container**. The following figure depicts DASH software stack.
 
-![dash-software-stack](./images/dash-software-stack.svg)
+![dash-software-stack](./images/hld/dash-hld-software-stack.svg)
 
-<figcaption><i>Figure 1 - DASH software stack</i></figcaption><br/>
+<figcaption><i>Figure 2 - DASH software stack</i></figcaption><br/>
 
 #### SDN controller
 
@@ -319,9 +322,9 @@ The system architecture for SONiC-DASH relies upon the [SONiC system
 architecture](https://github.com/Azure/SONiC/wiki/Architecture), as shown in the
 following figure.
 
-![dash-high-level-design](./images/dash-high-level-design.svg)
+![dash-high-level-design](./images/hld/dash-high-level-design.svg)
 
-<figcaption><i>Figure 2 - SONiC integration</i></figcaption><br/><br/>
+<figcaption><i>Figure 3 - SONiC integration</i></figcaption><br/><br/>
 
 This architecture introduces the following DASH modifications:
 
@@ -370,9 +373,9 @@ Notice the following:
 
 The following figure is a partial mockup of the final product.
 
-![dash-high-level-design](./images/dash-hld-mockup.svg)
+![dash-high-level-design](./images/hld/dash-hld-mockup.svg)
 
-<figcaption><i>Figure 3 - Partial mockup of final product </i></figcaption><br/><br/>
+<figcaption><i>Figure 4 - Partial mockup of final product </i></figcaption><br/><br/>
 
 ### Deployment
 
