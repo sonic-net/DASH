@@ -32,7 +32,11 @@ last update: 03/22/2022
 - [Appendix](#appendix)
   - [DASH single DPU on NIC](#dash-single-dpu-on-nic)
   - [DASH appliance](#dash-appliance)
+    - [High Level Architecture](#high-level-architecture)
+    - [Low level architecture](#low-level-architecture)
   - [DASH smart switch](#dash-smart-switch)
+    - [High level architecture](#high-level-architecture-1)
+    - [Low level architecture](#low-level-architecture-1)
   - [A day in the life of a DASH packet](#a-day-in-the-life-of-a-dash-packet)
   - [A day in the life of a DASH SDN controller](#a-day-in-the-life-of-a-dash-sdn-controller)
   - [A day in the life of a DASH container](#a-day-in-the-life-of-a-dash-container)
@@ -150,15 +154,18 @@ folder](https://github.com/Azure/DASH/tree/main/documentation):
 
 ## Ecosystem
 
-With the help of network hardware technology suppliers, create an open forum
-that capitalizes on the use of **programmable networking hardware** including
-SmartNICs, SmartToRs, SmartAppliances.
+
 The following figure shows the DASH ecosystem.
 
 ![dash-software-stack](./images/hld/dash-hld-ecosystem.svg)
 
 <figcaption><i>Figure 1 - DASH ecosystem</i></figcaption><br/>
 
+- **Cloud**. This includes the infrastructure and the end user UI to provision **programmable networking devices** that support DASH. 
+- **Community**. 
+- **Platform**. 
+- **Technology providers**. With the help of network hardware technology providers, create an open forum hat capitalizes on the use of **programmable networking hardware** including **SmartNICs**, **SmartToRs**, **SmartAppliances**.
+  
 ## Logical architecture (software stack) 
 
  DASH builds upon the traditional SONiC architecture, which is documented in the
@@ -167,7 +174,7 @@ The following figure shows the DASH ecosystem.
  The following descriptions assume familiarity with the SONiC architecture and
  will describe DASH as incremental changes relative to traditional SONiC. Notice
  that DASH adds a new **SDN control plane** via **gNMI** in the **DASH
- container**. The following figure depicts DASH software stack.
+ container**. The following figure depicts the DASH software stack.
 
 ![dash-software-stack](./images/hld/dash-hld-software-stack.svg)
 
@@ -438,6 +445,10 @@ pipeline](https://github.com/Azure/DASH/tree/main/sirius-pipeline).
 
 ### DASH single DPU on NIC
 
+![dash-single-dpu-architecture](images/dash-single-dpu-architecture.svg)
+
+The figure above highlights the primary SONiC and DASH software stack components and relationships, and will appear as variations within the DASH configurations described below.
+
 > [!NOTE]
 > TBD - We need Prince's help.
 
@@ -466,14 +477,31 @@ In some cases, DPUs might provide separate management Ethernet ports, or PCIe
 netdevs which can be used for control purposes, in accordance with deployment
 and security needs.
 
+#### High Level Architecture
+
+![dash-high-level-appliance](images/dash-high-level-appliance.svg)
+
+#### Low level architecture
+
+![dash-appliance-architecture](images/dash-appliance-architecture.svg)
+
 ### DASH smart switch
 
-A DASH "Smart Switch" is a merging of a datacenter switch and one or more DPUs
+A DASH **smart switch** is a merging of a datacenter switch and one or more DPUs
 into an integrated device. The "front-panel" network interfaces of the DPU(s)
 are wired directly into the switching fabric instead of being presented
 externally, saving cabling, electronics, space and power. There can also be some
 consolidation of software stacks, for example see SONiC Multi-ASIC for how this
 is accomplished in standard SONiC multi-ASIC devices.
+
+#### High level architecture
+
+![dash-high-level-smart-switch](images/dash-high-level-smart-switch.svg)
+
+#### Low level architecture
+
+![dash-smart-switch-architecture](images/dash-smart-switch-architecture.svg)
+
 
 ### A day in the life of a DASH packet
 
