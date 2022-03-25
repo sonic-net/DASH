@@ -56,7 +56,7 @@ Please notice, a routing table is *attached* to a specific VM DASH DPU in the VN
 
 Mappings for a local VM reside on a VM's host.  
 Mapping lookups determine the network provider address (PA) spaces to redirect traffic.  
-A mapping is a CA to PA (Customer Address to Provider Address) lookup table, and Encap determination (for example).
+A mapping is a CA to PA (Customer Address to Provider Address) lookup table, and the parameters that would be required to transform the packet before forwarding to the right interface (for example: Encap determination).   
 
   `10.3.0.0/16 -> VNET C (Peered) (use mapping)`
 
