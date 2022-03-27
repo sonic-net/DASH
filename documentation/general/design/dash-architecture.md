@@ -1,16 +1,15 @@
 ---
-description: DASH architecture draft
-last update: 03/22/2022
+last update: 03/27/2022
 ---
 
-# DASH architecture (draft)
+# SONiC-ASH an architectural view (draft)
 
 - [Introduction](#introduction)
   - [Objectives](#objectives)
 - [Compliance and requirements](#compliance-and-requirements)
 - [Scenarios](#scenarios)
 - [Provisioning example](#provisioning-example)
-- [Ecosystem](#ecosystem)
+- [DASH project cosystem](#dash-project-cosystem)
 - [Logical architecture (software stack)](#logical-architecture-software-stack)
     - [SDN controller](#sdn-controller)
       - [SDN and DPU High-Availability (HA)](#sdn-and-dpu-high-availability-ha)
@@ -45,25 +44,25 @@ last update: 03/22/2022
 
 ## Introduction
 
-This document describes the **SONiC Disaggregated API for SONiC Hosts**
-(SONiC-DASH) high level design and architecture. SONiC-DASH (**DASH** for short)
-is an open source project that will deliver enterprise network performance to
-critical cloud applications.
+This document introudeces the **SONiC Disaggregated API for SONiC Hosts**
+(SONiC-DASH) from an architectural point of view. SONiC-DASH (**DASH** for short)
+is an open source project whose goal is to deliver high-speed network performance to
+critical cloud enterprise applications.
 
 ![dash-words-cloud](./images/dash-words-cloud.png)
 
-DASH extends SONiC APIs and a comprehensive set of object models that initially
+DASH extends SONiC APIs and related comprehensive set of object models that initially
 describe Microsoft Azure’s networking services for the cloud. The project
-enlists cloud and enterprise providers to further extend DASH to meet their
+enlists cloud and enterprise technology providers to further extend DASH to meet their
 specific needs.
 
 ### Objectives
 
-The overall objective is to **optimize network SMART Programmable Technologies
+DASH overall objective is to **optimize network SMART Programmable Technologies
 performance**, and **leverage commodity hardware technology** to achieve **10x
-or even 100x stateful connection performance**.
+or even 100x stateful connection performance**. In particular
 
-- With the help of network hardware technology suppliers, create an open forum
+- With the help of network hardware technology providers, create an open forum
   that capitalizes on the use of **programmable networking hardware** including
   SmartNICs, SmartToRs, SmartAppliances.
 - Optimize **stateful L4** performance and connection scale by 10x or even 100x
@@ -74,8 +73,7 @@ or even 100x stateful connection performance**.
   resulting performance improvements should be truly significant.
 - Microsoft Azure will integrate and deploy DASH solutions to ensure that scale,
   monitoring, reliability, availability and constant innovation are proven and
-  hardened. Other enterprise and cloud providers may deploy DASH as well, and we
-  hope to hear similar feedback and contributions as we move forward.  It should
+  hardened. Other enterprise and cloud providers may deploy DASH as well.  It should
   be noted that innovations for **in-service software upgrades** (ISSU) and
   **high availability** (HA) are key tenets of the DASH charter.
   
@@ -102,7 +100,7 @@ supported scenario:
 
 ## Scenarios
 
-SONiC DASH extends SONiC APIs and a comprehensive set of object models desribed
+SONiC DASH extends SONiC APIs and a related comprehensive set of object models desribed
 in both *documentation* and a *behavioral model* to initially describe Microsoft
 Azure’s networking services for the cloud. The 7 initial services (in draft)
 describe this in more detail. We will also work with cloud and enterprise
@@ -152,19 +150,15 @@ folder](https://github.com/Azure/DASH/tree/main/documentation):
 > [!NOTES] We just capture the gist of these scenarios and then we link to the
 > related documentation.
 
-## Ecosystem
+## DASH project cosystem
 
 
-The following figure shows the DASH ecosystem.
+The following figure shows the DASH project ecosystem.
 
 ![dash-software-stack](./images/hld/dash-hld-ecosystem.svg)
 
 <figcaption><i>Figure 1 - DASH ecosystem</i></figcaption><br/>
 
-- **Cloud**. This includes the infrastructure and the end user UI to provision **programmable networking devices** that support DASH. 
-- **Community**. 
-- **Platform**. 
-- **Technology providers**. With the help of network hardware technology providers, create an open forum hat capitalizes on the use of **programmable networking hardware** including **SmartNICs**, **SmartToRs**, **SmartAppliances**.
   
 ## Logical architecture (software stack) 
 
