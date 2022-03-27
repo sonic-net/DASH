@@ -372,11 +372,17 @@ Notice the following:
 > [!NOTE]
 > TBD - Kristina you have info here.
 
-The following figure is a partial mockup of the final product.
+
+<details>  
+
+<summary>Click the arrow on the left to display the partial mockup of the final product</summary>  
+The following figure is the partial mockup of the final product.
 
 ![dash-high-level-design](./images/hld/dash-hld-mockup.svg)
 
-<figcaption><i>Figure 4 - Partial mockup of final product </i></figcaption><br/><br/>
+<figcaption><i>Figure 4 - Partial mockup of final product </i></figcaption><br/>
+
+</details>  <br/>
 
 ### Deployment
 
