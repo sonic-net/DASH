@@ -46,7 +46,7 @@ last update: 03/27/2022
 
 This document introudeces the **SONiC Disaggregated API for SONiC Hosts**
 (SONiC-DASH) from an architectural point of view. SONiC-DASH (**DASH** for short)
-is an open source project whose goal is to deliver high-speed network performance to
+is an open source project whose goal is to deliver high-speed network connectivity to
 critical cloud enterprise applications.
 
 ![dash-words-cloud](./images/dash-words-cloud.png)
@@ -375,12 +375,12 @@ Notice the following:
 
 <details>  
 
-<summary>Click the arrow on the left to display the partial mockup of the final product</summary>  
-The following figure is the partial mockup of the final product.
+<summary>Click the arrow on the left to display the partial mockup of the final product.</summary>  
+<p>The following figure is the partial mockup of the final product.</p>
 
 ![dash-high-level-design](./images/hld/dash-hld-mockup.svg)
 
-<figcaption><i>Figure 4 - Partial mockup of final product </i></figcaption><br/>
+<figcaption><i>Figure 4 - Partial mockup of the final product </i></figcaption><br/>
 
 </details>  <br/>
 
