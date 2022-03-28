@@ -152,13 +152,21 @@ folder](https://github.com/Azure/DASH/tree/main/documentation):
 
 ## DASH project 
 
-The following figure shows the main elemtns of the DASH project.
+The following figure shows the main components of the DASH project.
 
 ![dash-software-stack](./images/hld/dash-hld-ecosystem.svg)
 
 <figcaption><i>Figure 1 - DASH project</i></figcaption><br/>
 
-  
+- **Functional test suite**.
+- **SDN**.
+- **Network SONiC OS**.
+- **Cloud deployment**.
+- **P4 behavioral model**.
+- **DASH network cards**.
+- **Scenarios**.
+- **Performance test suite**.
+
 ## Logical architecture (software stack) 
 
  DASH builds upon the traditional SONiC architecture, which is documented in the
