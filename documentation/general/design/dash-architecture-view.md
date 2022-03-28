@@ -22,6 +22,13 @@ last update: 03/28/2022
   - [ASIC Drivers](#asic-drivers)
   - [DASH capable ASICs](#dash-capable-asics)
 - [SONiC integration](#sonic-integration)
+  - [DASH single DPU on NIC](#dash-single-dpu-on-nic)
+  - [DASH appliance](#dash-appliance)
+    - [High Level Architecture](#high-level-architecture)
+    - [Low level architecture](#low-level-architecture)
+  - [DASH smart switch](#dash-smart-switch)
+    - [High level architecture](#high-level-architecture-1)
+    - [Low level architecture](#low-level-architecture-1)
 - [Physical architecture](#physical-architecture)
   - [Deployment](#deployment)
 - [API](#api)
@@ -30,13 +37,6 @@ last update: 03/28/2022
     - [Behavioral model](#behavioral-model)
   - [Test](#test)
 - [Appendix](#appendix)
-  - [DASH single DPU on NIC](#dash-single-dpu-on-nic)
-  - [DASH appliance](#dash-appliance)
-    - [High Level Architecture](#high-level-architecture)
-    - [Low level architecture](#low-level-architecture)
-  - [DASH smart switch](#dash-smart-switch)
-    - [High level architecture](#high-level-architecture-1)
-    - [Low level architecture](#low-level-architecture-1)
   - [A day in the life of a DASH packet](#a-day-in-the-life-of-a-dash-packet)
   - [A day in the life of a DASH SDN controller](#a-day-in-the-life-of-a-dash-sdn-controller)
   - [A day in the life of a DASH container](#a-day-in-the-life-of-a-dash-container)
@@ -375,6 +375,67 @@ Notice the following:
 
 > [!NOTE]
 > For more information and details, see [SONiC-DASH HLD](https://github.com/prsunny/DASH/blob/main/Documentation/dash-sonic-hld.md). This is a private link at this time. 
+
+### DASH single DPU on NIC
+
+![dash-single-dpu-architecture](images/dash-single-dpu-architecture.svg)
+
+The figure above highlights the primary SONiC and DASH software stack components and relationships, and will appear as variations within the DASH configurations described below.
+
+> [!NOTE]
+> TBD - We need Prince's help.
+
+
+### DASH appliance
+
+A DASH "appliance" contains multiple (e.g., six) DASH NIC/DPU/Other devices
+installed as PCIe adaptors in a chassis. This chassis provides power and cooling
+with options for manageability/servicing/supportability (as needed), and other
+capability through PCIe bus, but no large-scale data path traversal of PCIe is
+needed.
+
+Each NIC/DPU runs its own SONiC instance in such a way that it could also
+potentially operate as a standalone component once programmed through the
+control plane given the chassis power / cooling / management.
+
+The PCIe bus can be used to bootstrap/upgrade cards and perform some platform
+management functions but is not a participant in steady-state datacenter
+traffic.
+
+Each DASH NIC/DPU Will run a version of SONiC that exposes its own gNMI endpoint
+for SDN Control. This endpoint is reachable in band through the "front-panel"
+DPU traffic ports via L3 routing. In other words, the SDN controller can reach
+the DPU management endpoints over the ToR-to-DPU fabric links.
+
+In some cases, DPUs might provide separate management Ethernet ports, or PCIe
+netdevs which can be used for control purposes, in accordance with deployment
+and security needs.
+
+#### High Level Architecture
+
+![dash-high-level-appliance](images/dash-high-level-appliance.svg)
+
+#### Low level architecture
+
+![dash-appliance-architecture](images/dash-appliance-architecture.svg)
+
+### DASH smart switch
+
+A DASH **smart switch** is a merging of a datacenter switch and one or more DPUs
+into an integrated device. The "front-panel" network interfaces of the DPU(s)
+are wired directly into the switching fabric instead of being presented
+externally, saving cabling, electronics, space and power. There can also be some
+consolidation of software stacks, for example see SONiC Multi-ASIC for how this
+is accomplished in standard SONiC multi-ASIC devices.
+
+#### High level architecture
+
+![dash-high-level-smart-switch](images/dash-high-level-smart-switch.svg)
+
+#### Low level architecture
+
+![dash-smart-switch-architecture](images/dash-smart-switch-architecture.svg)
+
 ## Physical architecture  
 
 > [!NOTE]
@@ -450,66 +511,6 @@ pipeline](https://github.com/Azure/DASH/tree/main/sirius-pipeline).
   saithrift API.
 
 ## Appendix
-
-### DASH single DPU on NIC
-
-![dash-single-dpu-architecture](images/dash-single-dpu-architecture.svg)
-
-The figure above highlights the primary SONiC and DASH software stack components and relationships, and will appear as variations within the DASH configurations described below.
-
-> [!NOTE]
-> TBD - We need Prince's help.
-
-### DASH appliance
-
-A DASH "appliance" contains multiple (e.g., six) DASH NIC/DPU/Other devices
-installed as PCIe adaptors in a chassis. This chassis provides power and cooling
-with options for manageability/servicing/supportability (as needed), and other
-capability through PCIe bus, but no large-scale data path traversal of PCIe is
-needed.
-
-Each NIC/DPU runs its own SONiC instance in such a way that it could also
-potentially operate as a standalone component once programmed through the
-control plane given the chassis power / cooling / management.
-
-The PCIe bus can be used to bootstrap/upgrade cards and perform some platform
-management functions but is not a participant in steady-state datacenter
-traffic.
-
-Each DASH NIC/DPU Will run a version of SONiC that exposes its own gNMI endpoint
-for SDN Control. This endpoint is reachable in band through the "front-panel"
-DPU traffic ports via L3 routing. In other words, the SDN controller can reach
-the DPU management endpoints over the ToR-to-DPU fabric links.
-
-In some cases, DPUs might provide separate management Ethernet ports, or PCIe
-netdevs which can be used for control purposes, in accordance with deployment
-and security needs.
-
-#### High Level Architecture
-
-![dash-high-level-appliance](images/dash-high-level-appliance.svg)
-
-#### Low level architecture
-
-![dash-appliance-architecture](images/dash-appliance-architecture.svg)
-
-### DASH smart switch
-
-A DASH **smart switch** is a merging of a datacenter switch and one or more DPUs
-into an integrated device. The "front-panel" network interfaces of the DPU(s)
-are wired directly into the switching fabric instead of being presented
-externally, saving cabling, electronics, space and power. There can also be some
-consolidation of software stacks, for example see SONiC Multi-ASIC for how this
-is accomplished in standard SONiC multi-ASIC devices.
-
-#### High level architecture
-
-![dash-high-level-smart-switch](images/dash-high-level-smart-switch.svg)
-
-#### Low level architecture
-
-![dash-smart-switch-architecture](images/dash-smart-switch-architecture.svg)
-
 
 ### A day in the life of a DASH packet
 
