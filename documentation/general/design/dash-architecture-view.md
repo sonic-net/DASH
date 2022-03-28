@@ -3,7 +3,7 @@ Version: draft
 last update: 03/28/2022
 ---
 
-# SONiC-ASH an architectural view (draft)
+# SONiC-DASH an architectural view (draft)
 
 - [Introduction](#introduction)
   - [Objectives](#objectives)
@@ -29,14 +29,13 @@ last update: 03/28/2022
   - [DASH smart switch](#dash-smart-switch)
     - [High level architecture](#high-level-architecture-1)
     - [Low level architecture](#low-level-architecture-1)
-- [Physical architecture](#physical-architecture)
-  - [Final product partial mockup](#final-product-partial-mockup)
+- [Example of network representation](#example-of-network-representation)
   - [Deployment](#deployment)
 - [API](#api)
   - [Switch Abstraction Interface (SAI) API](#switch-abstraction-interface-sai-api)
   - [DASH pipeline API](#dash-pipeline-api)
     - [Behavioral model](#behavioral-model)
-  - [Test](#test)
+  - [Performance testing](#performance-testing)
 - [Appendix](#appendix)
   - [A day in the life of a DASH packet](#a-day-in-the-life-of-a-dash-packet)
   - [A day in the life of a DASH SDN controller](#a-day-in-the-life-of-a-dash-sdn-controller)
@@ -156,7 +155,7 @@ folder](https://github.com/Azure/DASH/tree/main/documentation):
 
 The following figure shows the main components of the DASH project.
 
-![dash-software-stack](./images/hld/dash-hld-ecosystem.svg)
+![dash-hld-project-ecosystem](./images/hld/dash-hld-project-ecosystem.svg)
 
 <figcaption><i>Figure 1 - DASH project</i></figcaption><br/><br/>
 
@@ -437,26 +436,14 @@ is accomplished in standard SONiC multi-ASIC devices.
 
 ![dash-smart-switch-architecture](images/dash-smart-switch-architecture.svg)
 
-## Physical architecture  
+## Example of network representation 
 
-> [!NOTE]
-> TBD - Kristina you have info here.
-
-### Final product partial mockup 
-
-<details>  
-
-<summary>Click the arrow on the left, to show or hide the partial mockup of the final product.</summary>  
-
-<p>The following figure is the partial mockup of the final product.</p>
-
-![dash-high-level-design](./images/hld/dash-hld-mockup.svg)
-
-<figcaption><i>Figure 4 - Partial mockup of the final product </i></figcaption><br/>
-
-</details>  <br/>
 
 ### Deployment
+
+The following figure is a simplified representation of DASH deployment in a datacenter.
+
+![dash-simplified-physical-deployment-example](images/dash-simplified-physical-deployment-example.svg)
 
 ## API
 
@@ -492,7 +479,12 @@ pipeline](https://github.com/Azure/DASH/tree/main/sirius-pipeline).
 
 #### Behavioral model
 
-### Test
+We are developing a **P4 defined behavioral model** to describe
+the behaviors per scenario and document them in a repeatable format. From there
+we will be able to auto-generate the APIs. The *implementation* itself does not
+have to be P4.
+
+### Performance testing
 
 > [!NOTE]
 > TBD - We just capture the gist of it and then we link to the related test area.
