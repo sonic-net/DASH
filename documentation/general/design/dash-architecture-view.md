@@ -1,5 +1,5 @@
 ---
-last update: 03/27/2022
+last update: 03/28/2022
 ---
 
 # SONiC-ASH an architectural view (draft)
@@ -513,7 +513,7 @@ is accomplished in standard SONiC multi-ASIC devices.
 ### A day in the life of a DASH packet
 
 > [!NOTE]
-> TBD - We need engineering and Gerald's  help.
+> TBD - We need engineering help.
 
 Some of the info from the doc you *sanitized*.
 Different for ecosystem. 
@@ -521,14 +521,14 @@ Different for ecosystem.
 ### A day in the life of a DASH SDN controller
 
 > [!NOTE]
-> TBD - We need engineering and Gerald's  help.
+> TBD - We need engineering help.
 
 Different for ecosystem?
 
 ### A day in the life of a DASH container
 
 > [!NOTE]
-> TBD - We need engineering and Gerald's  help.
+> TBD - We need engineering help.
 
 Different for ecosystem?
 
