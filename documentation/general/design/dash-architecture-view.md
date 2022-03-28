@@ -378,13 +378,14 @@ Notice the following:
 
 ### DASH single DPU on NIC
 
-![dash-single-dpu-architecture](images/dash-single-dpu-architecture.svg)
+![dash-single-dpu-architecture](images/hld/dash-single-dpu-architecture.svg)
+
+<figcaption><i>Figure 4 - Single DPU</i></figcaption><br/><br/>
 
 The figure above highlights the primary SONiC and DASH software stack components and relationships, and will appear as variations within the DASH configurations described below.
 
 > [!NOTE]
 > TBD - We need Prince's help.
-
 
 ### DASH appliance
 
@@ -413,11 +414,15 @@ and security needs.
 
 #### High Level Architecture
 
-![dash-high-level-appliance](images/dash-high-level-appliance.svg)
+![dash-high-level-appliance](images/hld/dash-high-level-appliance.svg)
+
+<figcaption><i>Figure 5.1 - Appliance high level</i></figcaption><br/><br/>
 
 #### Low level architecture
 
-![dash-appliance-architecture](images/dash-appliance-architecture.svg)
+![dash-appliance-architecture](images/hld/dash-appliance-architecture.svg)
+
+<figcaption><i>Figure 5.2 - Appliance low level</i></figcaption><br/><br/>
 
 ### DASH smart switch
 
@@ -430,15 +435,19 @@ is accomplished in standard SONiC multi-ASIC devices.
 
 #### High level architecture
 
-![dash-high-level-smart-switch](images/dash-high-level-smart-switch.svg)
+![dash-high-level-smart-switch](images/hld/dash-high-level-smart-switch.svg)
+
+<figcaption><i>Figure 6.1 - Smart switch high level</i></figcaption><br/><br/>
 
 #### Low level architecture
 
-![dash-smart-switch-architecture](images/dash-smart-switch-architecture.svg)
+![dash-smart-switch-architecture](images/hld/dash-smart-switch-architecture.svg)
+
+<figcaption><i>Figure 6.2 - Smart switch low level</i></figcaption><br/><br/>
 
 ## Example of network representation 
 
-
+> [!NOTE] TBD. Introduction needed.
 ### Deployment
 
 The following figure is a simplified representation of DASH deployment in a datacenter.
