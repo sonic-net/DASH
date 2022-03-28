@@ -9,7 +9,7 @@ last update: 03/27/2022
 - [Compliance and requirements](#compliance-and-requirements)
 - [Scenarios](#scenarios)
 - [Provisioning example](#provisioning-example)
-- [DASH project cosystem](#dash-project-cosystem)
+- [DASH project](#dash-project)
 - [Logical architecture (software stack)](#logical-architecture-software-stack)
     - [SDN controller](#sdn-controller)
       - [SDN and DPU High-Availability (HA)](#sdn-and-dpu-high-availability-ha)
@@ -150,14 +150,13 @@ folder](https://github.com/Azure/DASH/tree/main/documentation):
 > [!NOTES] We just capture the gist of these scenarios and then we link to the
 > related documentation.
 
-## DASH project cosystem
+## DASH project 
 
-
-The following figure shows the DASH project ecosystem.
+The following figure shows the main elemtns of the DASH project.
 
 ![dash-software-stack](./images/hld/dash-hld-ecosystem.svg)
 
-<figcaption><i>Figure 1 - DASH ecosystem</i></figcaption><br/>
+<figcaption><i>Figure 1 - DASH project</i></figcaption><br/>
 
   
 ## Logical architecture (software stack) 
