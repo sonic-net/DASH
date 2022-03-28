@@ -30,6 +30,7 @@ last update: 03/28/2022
     - [High level architecture](#high-level-architecture-1)
     - [Low level architecture](#low-level-architecture-1)
 - [Physical architecture](#physical-architecture)
+  - [Final product partial mockup](#final-product-partial-mockup)
   - [Deployment](#deployment)
 - [API](#api)
   - [Switch Abstraction Interface (SAI) API](#switch-abstraction-interface-sai-api)
@@ -441,6 +442,7 @@ is accomplished in standard SONiC multi-ASIC devices.
 > [!NOTE]
 > TBD - Kristina you have info here.
 
+### Final product partial mockup 
 
 <details>  
 
