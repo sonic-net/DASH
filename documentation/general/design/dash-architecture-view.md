@@ -157,7 +157,7 @@ The following figure shows the main components of the DASH project.
 
 ![dash-software-stack](./images/hld/dash-hld-ecosystem.svg)
 
-<figcaption><i>Figure 1 - DASH project</i></figcaption><br/>
+<figcaption><i>Figure 1 - DASH project</i></figcaption><br/><br/>
 
 - **Functional test suite**.
 - **SDN**.
@@ -516,22 +516,17 @@ is accomplished in standard SONiC multi-ASIC devices.
 > [!NOTE]
 > TBD - We need engineering help.
 
-Some of the info from the doc you *sanitized*.
-Different for ecosystem. 
+Some of the info from Kristina's *sanitized* doc.
 
 ### A day in the life of a DASH SDN controller
 
 > [!NOTE]
 > TBD - We need engineering help.
 
-Different for ecosystem?
-
 ### A day in the life of a DASH container
 
 > [!NOTE]
 > TBD - We need engineering help.
-
-Different for ecosystem?
 
 ## References
 
