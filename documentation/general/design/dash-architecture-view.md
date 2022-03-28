@@ -444,7 +444,8 @@ is accomplished in standard SONiC multi-ASIC devices.
 
 <details>  
 
-<summary>Click the arrow on the left to display the partial mockup of the final product.</summary>  
+<summary>Click the arrow on the left, to show or hide the partial mockup of the final product.</summary>  
+
 <p>The following figure is the partial mockup of the final product.</p>
 
 ![dash-high-level-design](./images/hld/dash-hld-mockup.svg)
