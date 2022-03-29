@@ -35,7 +35,7 @@ to ENI/VNIC).  **Routing** and **Mapping** are two different but complementary c
 The route table is configured by the customer to provide the desired traffic routing behavior; traffic can also be intercepted or redirected.  
 It must be clear that the routing table has the final say in the way the traffic is routed (Longest Prefix Match = wins). Routes can intercept **part** of the
 traffic and forward to a next hop for the purpose of filtering.  The order is:  LPM->Route->Mapping.  We ONLY look at mappings, AFTER LPM decides
-that a route wins.
+that a route wins.  The 'routing-type') determines the 'routing action' such as 'direct' or 'appliance' or 'drop' (examples).  Next matches a lookup in the mapping table, which holds an entry CA to PA mapping and proceeds with packet transformation (actions such as encap, or other).
 
 For example, a default route looks like this:
   
@@ -72,7 +72,7 @@ decided via the LPM table.
 
 - **Static** :  when an entry is created in the table, the exact physical address (PA) is known; there is no mapping (lookup).
 - **Mapping** : for a particular entry, the desired behavior is to route to dynamic destination based on mapping, in order to apply
-different actions than the ones associated with the rest of the traffic.
+packet transformatoin actions apart from the ones associated with the rest of the traffic.
 
 ## Routing examples
 
@@ -131,30 +131,36 @@ RouteTable attached to VM 10.1.1.1
 
 ## SCENARIOS (these build upon each other)
 
-### Scenario: Explicit LPM - Basic VNET
+### Scenario: VM to VM in the same VNET
 
-Customers configure routing tables based upon their requirements.  This example shows a single VNET with **direct traffic** between VMs using mappings.  For example a specific IP address transits a VNET based upon LPM, matches a lookup in the mapping table, which holds an entry mapping to 10.1.3.5 to a specific PA and proceeds with encap.  
+Customers configure routing tables based upon their requirements.  This example shows a single VNET with **direct traffic** between different subnets in the same VNET.  
 
-Customer VNET A: 10.1.0.0/16
+In this example, if Subnet 1 wants to communicate with Subnet 2, **the direct path would be taken** ✔️  
+
+If VM 1 10.1.1.1 wanted to communicate with VM 2 10.1.3.2 it would use a mapping in the mapping table to translate the CA to PA, and apply further packet transformation 🟢
+
+Customer VNET A: 10.1.0.0/16 divided into subnets (below)
 
 - Subnet 1: 10.1.1.0/24
-- Subnet 2: 10.1.2.0/24  (Subnet contains a customer placed VM/NVA: 10.1.2.11) ✔️
+- Subnet 2: 10.1.2.0/24
 - Subnet 3: 10.1.3.0/24
 
 **Mappings**: 
-- *VM 1: 10.1.1.1
+- *VM 1: 10.1.1.1 - 🟢
 - *VM 2: 10.1.3.2
 - *Private Link 1: 10.1.3.3
 - *Private Link 2: 10.1.3.4
-- *VM 3: 10.1.3.5 ✔️
+- *VM 3: 10.1.3.5
 
 Route Table - attached to VM 10.1.1.1
 
-- 10.1.0.0/16 -> define VNET space as a prefix (direct traffic between VMs using mappings)
-- 10.1.3.5/32 -> VNET A (mapping) **(CA -> PA) then apply action to encap (ex: NVGRE) to destination VM** ✔️
+- 10.1.0.0/16 -> define VNET space as a prefix  - take this path ✔️
+- 10.2.0.0/16 -> a peered VNET B
+- 10.3.0.0/16 -> a peered VNET C
+- 10.1.3.5/32 -> VNET A (mapping) **(CA -> PA) then apply action to encap (ex: NVGRE) to destination VM**
 - 0/0 -> Default (to Internet for example, or Customer-owned VIPs, no action, no encap)
 
-<!-- more examples needed -->
+
 
 ### Scenario:  Peered VNET using mappings
 
