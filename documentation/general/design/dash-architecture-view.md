@@ -321,26 +321,20 @@ FPGAs, or some other high-density, performant hardware.
 
 ## SONiC integration
 
-> [!NOTE]
-> TBD - This is what Prince is doing. For us it is important to capture how SONiC
-is modified to accomodate DASH. We'll to the related SONiC docs when needed. I
-put all the permutations in the appendix so we do not clutter the flow of
-essential info.
-
-The system architecture for SONiC-DASH relies upon the [SONiC system
+SONiC is modified to accomodate DASH. The system architecture for SONiC-DASH relies upon the [SONiC system
 architecture](https://github.com/Azure/SONiC/wiki/Architecture), as shown in the
 following figure.
 
 ![dash-high-level-design](./images/hld/dash-high-level-design.svg)
 
-<figcaption><i>Figure 3 - SONiC integration</i></figcaption><br/><br/>
+<figcaption><i>Figure 3 - SONiC integration</i></figcaption><br/>
 
 This architecture introduces the following DASH modifications:
 
 1. A *new docker container* in the user space named **dash container** (aka SDN container) to create
    the functional component for DASH.
 
-1. In the **sync-d container**, the **sai api DASH** (as opposed to *sai api* in
+2. In the **sync-d container**, the **sai api DASH** (as opposed to *sai api* in
    the original SONiC architecture).  
 
 The *DPU/IPU/SmartNic* hardware will run a separate instance of SONiC-DASH on
@@ -373,8 +367,7 @@ Notice the following:
   STATEDB used by the applications to fetch the programmed status of DASH
   configured objects.
 
-> [!NOTE]
-> For more information and details, see [SONiC-DASH HLD](https://github.com/prsunny/DASH/blob/main/Documentation/dash-sonic-hld.md). This is a private link at this time. 
+For more information and details, see [SONiC-DASH HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-sonic-hld.md). 
 
 ### DASH single DPU on NIC
 
