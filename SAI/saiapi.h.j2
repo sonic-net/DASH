@@ -1,0 +1,360 @@
+/**
+ * Copyright (c) 2014 Microsoft Open Technologies, Inc.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License"); you may
+ *    not use this file except in compliance with the License. You may obtain
+ *    a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR
+ *    CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
+ *    LIMITATION ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS
+ *    FOR A PARTICULAR PURPOSE, MERCHANTABILITY OR NON-INFRINGEMENT.
+ *
+ *    See the Apache Version 2.0 License for specific language governing
+ *    permissions and limitations under the License.
+ *
+ *    Microsoft would like to thank the following companies for their review and
+ *    assistance with these files: Intel Corporation, Mellanox Technologies Ltd,
+ *    Dell Products, L.P., Facebook, Inc., Marvell International Ltd.
+ *
+ * @file    saiexperimental{{ sai_api.app_name }}.h
+ *
+ * @brief   This module defines SAI P4 extension  interface
+ */
+
+#if !defined (__SAIEXPERIMENTAL{{ sai_api.app_name | upper }}_H_)
+#define __SAIEXPERIMENTAL{{ sai_api.app_name | upper}}_H_
+
+#include <saitypes.h>
+
+/**
+ * @defgroup SAIEXPERIMENTAL{{ sai_api.app_name | upper}} SAI - Extension specific API definitions
+ *
+ * @{
+ */
+
+{% for table in sai_api.tables %}
+{% if table.actions | length > 1 %}
+/**
+ * @brief Attribute data for #SAI_{{ table.name | upper }}_ATTR_ACTION
+ */
+typedef enum _sai_{{ table.name }}_action_t
+{
+{% for action in table.actions %}
+    SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }},
+
+{% endfor %}
+} sai_{{ table.name }}_action_t;
+
+{% endif %}
+{% if table.stages | length > 0 %}
+/**
+ * @brief Attribute data for #SAI_{{ table.name | upper }}_ATTR_STAGE
+ */
+typedef enum _sai_{{ table.name }}_stage_t
+{
+{% for stage in table.stages %}
+    SAI_{{ table.name | upper }}_STAGE_{{ stage | upper }},
+
+{% endfor %}
+} sai_{{ table.name }}_stage_t;
+
+{% endif %}
+{% endfor %}
+{% for table in sai_api.tables %}
+{% if table.is_object == 'false' %}
+/**
+ * @brief Entry for {{ table.name }}
+ */
+typedef struct _sai_{{ table.name }}_t
+{
+    /**
+     * @brief Switch ID
+     *
+     * @objects SAI_OBJECT_TYPE_SWITCH
+     */
+    sai_object_id_t switch_id;
+
+{% for key in table['keys'] %}
+    /**
+     * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.sai_key_name }}
+     */
+{% if key.match_type == 'lpm' %}
+    {{ key.sai_lpm_type }} {{ key.sai_key_name }};
+{% elif key.match_type == 'list' %}
+    {{ key.sai_list_type }} {{ key.sai_key_name }};
+{% elif key.match_type == 'range_list' %}
+    {{ key.sai_range_list_type }} {{ key.sai_key_name }};
+{% else %}
+    {{ key.sai_key_type }} {{ key.sai_key_name }};
+{% endif %}
+
+{% endfor %}
+} sai_{{ table.name }}_t;
+
+{% endif %}
+/**
+ * @brief Attribute ID for {{ table.name }}
+ */
+typedef enum _sai_{{ table.name }}_attr_t
+{
+    /**
+     * @brief Start of attributes
+     */
+    SAI_{{ table.name | upper }}_ATTR_START,
+
+{% set ns = namespace(firstattr=false) %}
+{% if table.actions | length > 1 %}
+    /**
+     * @brief Action
+     *
+     * @type sai_{{ table.name }}_action_t
+     * @flags CREATE_AND_SET
+     * @default SAI_{{ table.name | upper }}_ACTION_{{ table.actions[0].name | upper }}
+     */
+    SAI_{{ table.name | upper }}_ATTR_ACTION = SAI_{{ table.name | upper }}_ATTR_START,
+
+{% set ns.firstattr = true %}
+{% endif %}
+{% if table.is_object == 'true' %}
+{% for key in table['keys'] %}
+    /**
+     * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.sai_key_name }}
+     *
+{% if key.match_type == 'lpm' %}
+     * @type {{ key.sai_lpm_type }}
+{% elif key.match_type == 'list' %}
+     * @type {{ key.sai_list_type }}
+{% elif key.match_type == 'range_list' %}
+     * @type {{ key.sai_range_list_type }}
+{% else %}
+     * @type {{ key.sai_key_type }}
+{% endif %}
+     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
+{% if key.sai_key_type == 'sai_uint16_t' %}
+     * @isvlan false
+{% endif %}
+     */
+{% if not ns.firstattr %}
+    SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }} = SAI_{{ table.name | upper }}_ATTR_START,
+{% set ns.firstattr = true %}
+{% else %}
+    SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }},
+{% endif %}
+
+{% endfor %}
+{% endif %}
+{% for action in table.actions %}
+{% for param in action.params %}
+    /**
+     * @brief Action {{ action.name }} parameter {{ param.name | upper }}
+     *
+     * @type {{ param.type }}
+     * @flags CREATE_AND_SET
+{% if param.type == 'sai_uint16_t' %}
+     * @isvlan false
+{% endif %}
+{% if table.actions | length > 1 %}
+     * @condition SAI_{{ table.name | upper }}_ATTR_ACTION == SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}
+{% endif %}
+{% if param.type == 'sai_ip_address_t' %}
+     * @default 0.0.0.0
+{% elif param.type == 'sai_mac_t' %}
+     * @default 0:0:0:0:0:0
+{% elif param.type == 'bool' %}
+     * @default false
+{% else %}
+     * @default 0
+{% endif %}
+     */
+{% if not ns.firstattr %}
+    SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }} = SAI_{{ table.name | upper }}_ATTR_START,
+{% set ns.firstattr = true %}
+{% else %}
+    SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }},
+{% endif %}
+
+{% endfor %}
+{% endfor %}
+{% if table.stages | length > 0 %}
+    /**
+     * @brief Stage
+     *
+     * @type sai_{{ table.name }}_stage_t
+     * @flags CREATE_AND_SET
+     * @default SAI_{{ table.name | upper }}_STAGE_{{ table.stages[0] | upper }}
+     */
+    SAI_{{ table.name | upper }}_ATTR_STAGE,
+
+{% endif %}
+    /**
+     * @brief End of attributes
+     */
+    SAI_{{ table.name | upper }}_ATTR_END,
+
+    /** Custom range base value */
+    SAI_{{ table.name | upper }}_ATTR_CUSTOM_RANGE_START = 0x10000000,
+
+    /** End of custom range base */
+    SAI_{{ table.name | upper }}_ATTR_CUSTOM_RANGE_END,
+
+} sai_{{ table.name }}_attr_t;
+
+{% endfor %}
+{% for table in sai_api.tables %}
+/**
+ * @brief Create {{ table.name }}
+ *
+{% if table.is_object == 'true' %}
+ * @param[out] {{ table.name }}_id Entry id
+ * @param[in] switch_id Switch id
+{% else %}
+ * @param[in] {{ table.name }} Entry
+{% endif %}
+ * @param[in] attr_count Number of attributes
+ * @param[in] attr_list Array of attributes
+ *
+ * @return #SAI_STATUS_SUCCESS on success Failure status code on error
+ */
+typedef sai_status_t (*sai_create_{{ table.name }}_fn)(
+{% if table.is_object == 'true' %}
+        _Out_ sai_object_id_t *{{ table.name }}_id,
+        _In_ sai_object_id_t switch_id,
+{% else %}
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+{% endif %}
+        _In_ uint32_t attr_count,
+        _In_ const sai_attribute_t *attr_list);
+
+/**
+ * @brief Remove {{ table.name }}
+ *
+{% if table.is_object == 'true' %}
+ * @param[in] {{ table.name }}_id Entry id
+{% else %}
+ * @param[in] {{ table.name }} Entry
+{% endif %}
+ *
+ * @return #SAI_STATUS_SUCCESS on success Failure status code on error
+ */
+typedef sai_status_t (*sai_remove_{{ table.name }}_fn)(
+{% if table.is_object == 'true' %}
+        _In_ sai_object_id_t {{ table.name }}_id);
+{% else %}
+        _In_ const sai_{{ table.name }}_t *{{ table.name }});
+{% endif %}
+
+/**
+ * @brief Set attribute for {{ table.name }}
+ *
+{% if table.is_object == 'true' %}
+ * @param[in] {{ table.name }}_id Entry id
+{% else %}
+ * @param[in] {{ table.name }} Entry
+{% endif %}
+ * @param[in] attr Attribute
+ *
+ * @return #SAI_STATUS_SUCCESS on success Failure status code on error
+ */
+typedef sai_status_t (*sai_set_{{ table.name }}_attribute_fn)(
+{% if table.is_object == 'true' %}
+        _In_ sai_object_id_t {{ table.name }}_id,
+{% else %}
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+{% endif %}
+        _In_ const sai_attribute_t *attr);
+
+/**
+ * @brief Get attribute for {{ table.name }}
+ *
+{% if table.is_object == 'true' %}
+ * @param[in] {{ table.name }}_id Entry id
+{% else %}
+ * @param[in] {{ table.name }} Entry
+{% endif %}
+ * @param[in] attr_count Number of attributes
+ * @param[inout] attr_list Array of attributes
+ *
+ * @return #SAI_STATUS_SUCCESS on success Failure status code on error
+ */
+typedef sai_status_t (*sai_get_{{ table.name }}_attribute_fn)(
+{% if table.is_object == 'true' %}
+        _In_ sai_object_id_t {{ table.name }}_id,
+{% else %}
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+{% endif %}
+        _In_ uint32_t attr_count,
+        _Inout_ sai_attribute_t *attr_list);
+
+{% if table.is_object == 'false' %}
+/**
+ * @brief Bulk create {{ table.name }}
+ *
+ * @param[in] object_count Number of objects to create
+ * @param[in] {{ table.name }} List of object to create
+ * @param[in] attr_count List of attr_count. Caller passes the number
+ *    of attribute for each object to create.
+ * @param[in] attr_list List of attributes for every object.
+ * @param[in] mode Bulk operation error handling mode.
+ * @param[out] object_statuses List of status for every object. Caller needs to
+ * allocate the buffer
+ *
+ * @return #SAI_STATUS_SUCCESS on success when all objects are created or
+ * #SAI_STATUS_FAILURE when any of the objects fails to create. When there is
+ * failure, Caller is expected to go through the list of returned statuses to
+ * find out which fails and which succeeds.
+ */
+typedef sai_status_t (*sai_bulk_create_{{ table.name }}_fn)(
+        _In_ uint32_t object_count,
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+        _In_ const uint32_t *attr_count,
+        _In_ const sai_attribute_t **attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses);
+
+/**
+ * @brief Bulk remove {{ table.name }}
+ *
+ * @param[in] object_count Number of objects to remove
+ * @param[in] {{ table.name }} List of objects to remove
+ * @param[in] mode Bulk operation error handling mode.
+ * @param[out] object_statuses List of status for every object. Caller needs to
+ * allocate the buffer
+ *
+ * @return #SAI_STATUS_SUCCESS on success when all objects are removed or
+ * #SAI_STATUS_FAILURE when any of the objects fails to remove. When there is
+ * failure, Caller is expected to go through the list of returned statuses to
+ * find out which fails and which succeeds.
+ */
+typedef sai_status_t (*sai_bulk_remove_{{ table.name }}_fn)(
+        _In_ uint32_t object_count,
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses);
+
+{% endif %}
+{% endfor %}
+typedef struct _sai_{{ sai_api.app_name }}_api_t
+{
+{% set table_name_max = sai_api.tables|map(attribute="name")|map("length") | max %}
+{% for table in sai_api.tables %}
+{% set space_offset = table_name_max - table.name | length %}
+    sai_create_{{ table.name }}_fn           {{ " " * space_offset }}create_{{ table.name }};
+    sai_remove_{{ table.name }}_fn           {{ " " * space_offset }}remove_{{ table.name }};
+    sai_set_{{ table.name }}_attribute_fn    {{ " " * space_offset }}set_{{ table.name }}_attribute;
+    sai_get_{{ table.name }}_attribute_fn    {{ " " * space_offset }}get_{{ table.name }}_attribute;
+{% if table.is_object == 'true' %}
+    sai_bulk_object_create_fn{{ " " * table_name_max }}create_{{ table.name }}s;
+    sai_bulk_object_remove_fn{{ " " * table_name_max }}remove_{{ table.name }}s;
+{% else %}
+    sai_bulk_create_{{ table.name }}_fn      {{ " " * space_offset }}create_{{ table.name | replace("entry", "entries") }};
+    sai_bulk_remove_{{ table.name }}_fn      {{ " " * space_offset }}remove_{{ table.name | replace("entry", "entries") }};
+{% endif %}
+{% endfor %}
+} sai_{{ sai_api.app_name }}_api_t;
+
+/**
+ * @}
+ */
+#endif /** __SAIEXPERIMENTAL{{ sai_api.app_name | upper}}_H_ */
+
