@@ -107,7 +107,7 @@ After the ACL stage, it does LPM routing based on the inner dst-ip and applies t
 	
 ## 2.2 Inbound packet processing pipeline
 	
-   ![dash-inbound](./images/dah-hld-inbound-packet-processing-pipeline.svg)
+   ![dash-inbound](./images/dash-hld-inbound-packet-processing-pipeline.svg)
 
 Based on the incoming packet's VNI, if it does not match against any reserved VNI, the pipeline shall set the direction as RX(Inbound) and using the inner dst-mac, maps to the corresponding ENI. In the inbound flow, Routing (LPM) lookup happens first based on the inner dst-ip and does a CA-PA validation based on the mapping. After LPM is the three stage ACL, processed in order. ACLs can have multiple src/dst IP ranges or port ranges as match criteria.
 	
