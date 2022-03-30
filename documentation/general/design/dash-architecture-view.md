@@ -454,6 +454,7 @@ The following figure is a simplified representation of DASH deployment in a data
 
 ![dash-simplified-physical-deployment-example](images/dash-simplified-physical-deployment-example.svg)
 
+<figcaption><i>Figure 7 - DASH simplified deployment</i></figcaption><br/><br/>
 ## API
 
 > [!NOTE]
