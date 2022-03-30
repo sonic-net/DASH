@@ -32,7 +32,7 @@
 
 
 # About this Manual
-This document provides more detailed design of DASH APIs, DASH orchestration agent, Config and APP DB Schemas and other SONiC buildimage changes required to bring up SONiC image on an appliance card. General DASH HLD can be found at [dash_hld](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-high-level-design.md).
+This document provides more detailed design of DASH APIs, DASH orchestration agent, Config and APP DB Schemas and other SONiC buildimage changes required to bring up SONiC image on an appliance card. General DASH HLD can be found at [dash_hld](./dash-high-level-design.md).
 
 # Definitions/Abbreviation
 ###### Table 1: Abbreviations
@@ -97,7 +97,7 @@ The following section captures at a high-level on the VNET packet flow. Detailed
 
 ## 2.1 Outbound packet processing pipeline
 	
-  ![dash-outbound](https://github.com/Azure/DASH/blob/main/documentation/general/design/images/dash-hld-outbound-packet-processing-pipeline.svg)
+  ![dash-outbound](./images/dash-hld-outbound-packet-processing-pipeline.svg)
 	
 Based on the incoming packet's VNI matched against the reserved VNI assigned for VM->Appliance, the pipeline shall set the direction as TX(Outbound) and using the inner src-mac, maps to the corresponding ENI.The incoming packet will always be vxlan encapped and outer dst-ip is the appliance VIP. The pipeline shall parse the VNI, and for VM traffic, the VNI shall be a special reserved VNI. Everything else shall be treated as as network traffic(RX). Pipeline shall use VNI to differentiate the traffic to be VM (Inbound) or Network (Outbound).
 
@@ -107,7 +107,7 @@ After the ACL stage, it does LPM routing based on the inner dst-ip and applies t
 	
 ## 2.2 Inbound packet processing pipeline
 	
-   ![dash-intbound](https://github.com/Azure/DASH/blob/main/documentation/general/design/images/dah-hld-inbound-packet-processing-pipeline.svg)
+   ![dash-inbound](./images/dash-hld-inbound-packet-processing-pipeline.svg)
 
 Based on the incoming packet's VNI, if it does not match against any reserved VNI, the pipeline shall set the direction as RX(Inbound) and using the inner dst-mac, maps to the corresponding ENI. In the inbound flow, Routing (LPM) lookup happens first based on the inner dst-ip and does a CA-PA validation based on the mapping. After LPM is the three stage ACL, processed in order. ACLs can have multiple src/dst IP ranges or port ranges as match criteria.
 	
@@ -160,7 +160,7 @@ VXLAN_TUNNEL|{{tunnel_name}}
 
 Following diagram captures the object reference model.
 
-  ![dash-eni-obj-model](https://github.com/Azure/DASH/blob/main/documentation/general/design/images/dash-hld-eni-objects.svg)    ![dash-vnet-obj-model](https://github.com/Azure/DASH/blob/main/documentation/general/design/images/dash-hld-vnet-objects.svg) 
+  ![dash-eni-obj-model](./images/dash-hld-eni-objects.svg)   ![dash-vnet-obj-model](./images/dash-hld-vnet-objects.svg) 
 
 ### 3.2.1 VNET
   
@@ -338,7 +338,7 @@ metering_bucket          = bucket_id                 ; metering and counter
 
 A high-level module interaction is captured in the following diagram.
 
-  ![dash-high-level-diagram](https://github.com/Azure/DASH/blob/main/documentation/general/design/images/dash-high-level-design.svg)
+  ![dash-high-level-diagram](./images/dash-high-level-design.svg)
   
 ### 3.3.1 SONiC host containers
 
