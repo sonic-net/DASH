@@ -322,14 +322,16 @@ FPGAs, or some other high-density, performant hardware.
 ## SONiC integration
 
 SONiC is modified to accomodate DASH. The system architecture for SONiC-DASH relies upon the [SONiC system
-architecture](https://github.com/Azure/SONiC/wiki/Architecture), as shown in the
-following figure.
+architecture](https://github.com/Azure/SONiC/wiki/Architecture).
+For more information and details about the integration, see [SONiC-DASH HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-sonic-hld.md). 
 
+<!--
 ![dash-high-level-design](./images/hld/dash-high-level-design.svg)
 
-<figcaption><i>Figure 3 - SONiC integration</i></figcaption><br/>
+<figcaption><i>Figure 3 - SONiC integration</i></figcaption><br/> 
+-->
 
-This architecture introduces the following DASH modifications:
+This SONiC-DASH integration introduces the following DASH modifications:
 
 1. A *new docker container* in the user space named **dash container** (aka SDN container) to create
    the functional component for DASH.
@@ -350,7 +352,7 @@ for the overlay configurations. DASH receives the objects, translates them with
 a **gNMI agent**, provides them to the *SONiC OrchAgent* for further translation
 onto the dataplane via the **SAI database**.
 
-Notice the following:
+In particular, notice the following:
 
 - **DASH API** shall be exposed as gNMI interface as part of the SONiC DASH
   container (aka as SDN container).
@@ -366,8 +368,6 @@ Notice the following:
   the DPU. The DASH orchestration agent shall write the state of each tables to
   STATEDB used by the applications to fetch the programmed status of DASH
   configured objects.
-
-For more information and details, see [SONiC-DASH HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-sonic-hld.md). 
 
 ### DASH single DPU on NIC
 
