@@ -153,21 +153,23 @@ folder](https://github.com/Azure/DASH/tree/main/documentation):
 
 ## DASH project 
 
-The following figure shows the main components of the DASH project.
+The following figure shows the DASH project main components.
 
 ![dash-hld-project-ecosystem](./images/hld/dash-hld-project-ecosystem.svg)
 
 <figcaption><i>Figure 1 - DASH project</i></figcaption><br/><br/>
 
-- **Functional test suite**. Checks that the DASH capable hardware satisfies the standard SONiC functional requirements. 
-- **SDN**.
-- **Network SONiC OS**.
-- **Cloud deployment**.
-- **P4 behavioral model**.
-- **DASH network cards**.
+- **Functional test suite**. Checks that the DASH capable device satisfies the standard SONiC functional requirements. This is a **black-box testing**  concerned with validating if the device works as intended in SONiC. For more information, see [SONiC testbed deployment and setup, SONiC testing, test report processing](https://github.com/Azure/sonic-mgmt/tree/master/docs).  
+- **SDN**. The SDN with its controller is primarily responsible for controlling the DASH overlay services, while the traditional SONiC application containers are used to manage the underlay (L3 routing) and hardware platform. 
+The SDN controller controls the overlay built on top of the physical layer of the infrastructure. From the point of view of the SDN control plane, when a customer creates an operation, for example a VNET creation, from the cloud portal, the controller allocates the resources, placement management, capacity, etc. via the northbound interface APIs. For more information, see the [SDN controller](#sdn-controller) section.
+- **Network SONiC OS**. DASH builds upon the traditional SONiC architecture, which is documented in the SONiC Wiki under [Sonic System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture). For more information, see the [Logical architecture (software stack)](#logical-architecture-software-stack) section.
+- **Cloud deployment**. Microsoft Azure will integrate and deploy DASH solutions to ensure that scale, monitoring, reliability, availability and constant innovation are proven and hardened. Other enterprise and cloud providers may deploy DASH as well. It should be noted that innovations for **in-service software upgrades** (ISSU) and **high availability** (HA) are key tenets of the DASH charter. For more information, see the [Deployment](#deployment) section. 
+- **P4 behavioral model**. We are developing a P4 defined behavioral model to describe the behaviors per scenario and document them in a repeatable format. From there we will be able to auto-generate the APIs. The implementation itself does not have to be P4. for more information, see the [Behavioral model](#behavioral_model) section.
+- **DASH network devices**. With the help of network hardware technology providers, create an open forum that capitalizes on the use of programmable networking hardware including **SmartNICs**, **SmartToRs**, **SmartAppliances**.
+The documentation related to these devices will be made available by the providers themselves.  
 - **Scenarios**. Cover SONiC-DASH extending SONiC APIs and related comprehensive set of objects to initially describe Microsoft
-Azure’s networking services for the cloud.
-- **Performance test suite**. Checks that the DASH capable hardware satisfies the standard SONiC-DASH performance requirements. 
+Azure’s networking services for the cloud. The 7 initial services (in draft) describe this in more detail. We will also work with cloud and enterprise providers to further extend SONiC DASH to meet their specific needs. For more informnation,see the [Scenarios](#scenarios) section.
+- **Performance test suite**. Checks that the DASH capable device satisfies the standard SONiC-DASH performance requirements. For mor information about test documentation, test scripts, test configurations and other artifacts required to test a SONiC-DASH device or devices, see [SONiC-DASH Testing](https://github.com/Azure/DASH/tree/main/test). Notice that the focus is on executable test artifacts, not test requirements.
 
 ## Logical architecture (software stack) 
 
@@ -340,8 +342,8 @@ The SONiC-DASH integration introduces the following DASH modifications:
 2. In the **sync-d container**, the **sai api DASH** (as opposed to *sai api* in
    the original SONiC architecture).  
 
-The *DPU/IPU/SmartNic* hardware will run a separate instance of SONiC-DASH on
-the hardware.  
+The *DPU/IPU/SmartNic* device will run a separate instance of SONiC-DASH on
+the device.  
 
 The component interactions will be executed as a new user space container
 implementation; relying on the existing SONiC infrastructure and components to
