@@ -169,7 +169,7 @@ The SDN controller controls the overlay built on top of the physical layer of th
 The documentation related to these devices will be made available by the providers themselves.  
 - **Scenarios**. Cover SONiC-DASH extending SONiC APIs and related comprehensive set of objects to initially describe Microsoft
 Azure’s networking services for the cloud. The 7 initial services (in draft) describe this in more detail. We will also work with cloud and enterprise providers to further extend SONiC DASH to meet their specific needs. For more informnation,see the [Scenarios](#scenarios) section.
-- **Performance test suite**. Checks that the DASH capable device satisfies the standard SONiC-DASH performance requirements. For mor information about test documentation, test scripts, test configurations and other artifacts required to test a SONiC-DASH device or devices, see [SONiC-DASH Testing](https://github.com/Azure/DASH/tree/main/test). Notice that the focus is on executable test artifacts, not test requirements.
+- **Performance test suite**. Checks that the DASH capable device satisfies the standard SONiC-DASH performance requirements. For more information about test documentation, test scripts, test configurations and other artifacts required to test a SONiC-DASH device or devices, see [SONiC-DASH Testing](https://github.com/Azure/DASH/tree/main/test). Notice that the focus is on executable test artifacts, not test requirements.
 
 ## Logical architecture (software stack) 
 
