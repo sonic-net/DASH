@@ -27,7 +27,7 @@ def tbinfo(request):
 
 @pytest.fixture(name="smartnics", scope="session")
 def fixture_smartnics(tbinfo):
-    test_type = tbinfo['novus'][0]['dpu'][0]['type']
+    test_type = tbinfo['stateless'][0]['dpu'][0]['type']
     if test_type:
         modname = test_type.lower() + "." + test_type.lower()
     else:
@@ -48,18 +48,19 @@ def utils():
 @pytest.fixture
 def create_ixload_session_url(tbinfo):
     ixload_settings = {}
+    tb = tbinfo['stateful'][0]
     tg = {
-        'chassis_list': tbinfo['cloudstorm'][0]['server'],
-        'tgen': tbinfo['cloudstorm'][0]['tgen'],
-        'vxlan': tbinfo['cloudstorm'][0]['tgen'],
-        'dpu': tbinfo['cloudstorm'][0]
+        'chassis_list': tb['server'],
+        'tgen':  tb['tgen'],
+        'vxlan': tb['vxlan'],
+        'dpu': tb
     }
 
     # Helper Functions
     def create_test_settings():
         # TEST CONFIG
         test_settings = TestSettings.IxLoadTestSettings()
-        test_settings.gatewayServer = tbinfo['cloudstorm'][0]['server'][0]['addr']
+        test_settings.gatewayServer = tbinfo['stateful'][0]['server'][0]['addr']
         test_settings.apiVersion = "v0"
         test_settings.ixLoadVersion = "9.20.0.279"
 
