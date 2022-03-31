@@ -131,17 +131,18 @@ class Test_Dpu:
         val_map = testdata["val_map"]
 
         print('connect to a test tool platform')
+        tb=testbed['stateless'][0]
         session_assistant = SessionAssistant(
-            IpAddress=testbed['novus'][0]['server'][0]['addr'],
-            RestPort=testbed['novus'][0]['server'][0]['rest'],
-            UserName=testbed["CR"][testbed['novus'][0]['server'][0]['addr']]['user'],
-            Password=testbed["CR"][testbed['novus'][0]['server'][0]['addr']]['password'],
+            IpAddress=tb['server'][0]['addr'],
+            RestPort=tb['server'][0]['rest'],
+            UserName=testbed["CR"][tb['server'][0]['addr']]['user'],
+            Password=testbed["CR"][tb['server'][0]['addr']]['password'],
             SessionName="MIRTest",
             ClearConfig=True
         )
 
         ixnetwork = session_assistant.Ixnetwork
-        portList = [{'xpath': '/vport[%s]' % str(indx+1), 'name': 'VTEP_0%d' % (indx+1), 'location': '%s;%s;%s' % tuple(p)} for indx, p in enumerate(testbed['novus'][0]['tgen'][0]['interfaces'])]
+        portList = [{'xpath': '/vport[%s]' % str(indx+1), 'name': 'VTEP_0%d' % (indx+1), 'location': '%s;%s;%s' % tuple(p)} for indx, p in enumerate(tb['tgen'][0]['interfaces'])]
         ixnetwork.ResourceManager.ImportConfig(json.dumps(portList), False)
         vports = list(ixnetwork.Vport.find())
         tmp = [{'xpath': '/vport[%d]/l1Config/%s' % (vp.InternalId, vp.Type), "ieeeL1Defaults": False} for vp in vports]

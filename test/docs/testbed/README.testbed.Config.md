@@ -5,7 +5,7 @@
 `testbed.py`
 ```
 TESTBED = {
-    'novus': [
+    'stateless': [
         {
             'server': [
                 {'addr': '10.36.77.101', 'rest': 443}
@@ -22,7 +22,7 @@ TESTBED = {
             ],
         }
     ],
-    'cloudstorm': [
+    'stateful': [
         {
             'server': [{'addr': '10.36.77.107', 'rest': 10010}],
             'tgen':    [
