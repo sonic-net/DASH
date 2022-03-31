@@ -321,7 +321,7 @@ FPGAs, or some other high-density, performant hardware.
 
 ## SONiC integration
 
-SONiC is modified to accomodate DASH. The system architecture for SONiC-DASH relies upon the [SONiC system
+The system architecture for SONiC-DASH relies upon the [SONiC system
 architecture](https://github.com/Azure/SONiC/wiki/Architecture).
 For more information and details about the integration, see [SONiC-DASH HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-sonic-hld.md). 
 
@@ -331,7 +331,7 @@ For more information and details about the integration, see [SONiC-DASH HLD](htt
 <figcaption><i>Figure 3 - SONiC integration</i></figcaption><br/> 
 -->
 
-This SONiC-DASH integration introduces the following DASH modifications:
+The SONiC-DASH integration introduces the following DASH modifications:
 
 1. A *new docker container* in the user space named **dash container** (aka SDN container) to create
    the functional component for DASH.
