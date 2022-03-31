@@ -12,7 +12,7 @@ Key components in the physical connection:
     * Keysight XGS12-HSL Chassis
     * Keysight Novus 100G load module
     * Keysight CloudStorm load module (1x for up to 4.5M CPS or 2x for up to 9M CPS)
-    * 2x 100G fan out switch (vlan to vxlan). Example: Cisco Nexus 3232C
+* 2x 100G switches that can do vlan to vxlan translation. Example: Cisco Nexus 3232C, Accton7816_64X
 * Test Server to run the test case and host the test environment[^1]
 
 
