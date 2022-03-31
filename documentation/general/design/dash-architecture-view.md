@@ -159,14 +159,15 @@ The following figure shows the main components of the DASH project.
 
 <figcaption><i>Figure 1 - DASH project</i></figcaption><br/><br/>
 
-- **Functional test suite**.
+- **Functional test suite**. Checks that the DASH capable hardware satisfies the standard SONiC functional requirements. 
 - **SDN**.
 - **Network SONiC OS**.
 - **Cloud deployment**.
 - **P4 behavioral model**.
 - **DASH network cards**.
-- **Scenarios**.
-- **Performance test suite**.
+- **Scenarios**. Cover SONiC-DASH extending SONiC APIs and related comprehensive set of objects to initially describe Microsoft
+Azure’s networking services for the cloud.
+- **Performance test suite**. Checks that the DASH capable hardware satisfies the standard SONiC-DASH performance requirements. 
 
 ## Logical architecture (software stack) 
 
