@@ -64,7 +64,7 @@ performance**, and **leverage commodity hardware technology** to achieve **10x
 or even 100x stateful connection performance**. In particular
 
 - With the help of network hardware technology providers, create an open forum
-  that capitalizes on the use of **programmable networking hardware** including
+  that capitalizes on the use of **programmable networking devices** including
   SmartNICs, SmartToRs, SmartAppliances.
 - Optimize **stateful L4** performance and connection scale by 10x or even 100x
   when compared to implementations that make extensive use of a generic software
@@ -165,7 +165,7 @@ The SDN controller controls the overlay built on top of the physical layer of th
 - **Network SONiC OS**. DASH builds upon the traditional SONiC architecture, which is documented in the SONiC Wiki under [Sonic System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture). For more information, see the [Logical architecture (software stack)](#logical-architecture-software-stack) section.
 - **Cloud deployment**. Microsoft Azure will integrate and deploy DASH solutions to ensure that scale, monitoring, reliability, availability and constant innovation are proven and hardened. Other enterprise and cloud providers may deploy DASH as well. It should be noted that innovations for **in-service software upgrades** (ISSU) and **high availability** (HA) are key tenets of the DASH charter. For more information, see the [Deployment](#deployment) section. 
 - **P4 behavioral model**. We are developing a P4 defined behavioral model to describe the behaviors per scenario and document them in a repeatable format. From there we will be able to auto-generate the APIs. The implementation itself does not have to be P4. for more information, see the [Behavioral model](#behavioral_model) section.
-- **DASH network devices**. With the help of network hardware technology providers, create an open forum that capitalizes on the use of programmable networking hardware including **SmartNICs**, **SmartToRs**, **SmartAppliances**.
+- **DASH programmable devices**. With the help of network hardware technology providers, create an open forum that capitalizes on the use of programmable networking devices including **SmartNICs**, **SmartToRs**, **SmartAppliances**.
 The documentation related to these devices will be made available by the providers themselves.  
 - **Scenarios**. Cover SONiC-DASH extending SONiC APIs and related comprehensive set of objects to initially describe Microsoft
 Azure’s networking services for the cloud. The 7 initial services (in draft) describe this in more detail. We will also work with cloud and enterprise providers to further extend SONiC DASH to meet their specific needs. For more informnation,see the [Scenarios](#scenarios) section.
