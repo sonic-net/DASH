@@ -1,9 +1,9 @@
 ---
 Version: draft
-last update: 03/28/2022
+last update: 03/31/2022
 ---
 
-# SONiC-DASH an architectural view (draft)
+# SONiC-DASH an architectural view 
 
 - [Introduction](#introduction)
   - [Objectives](#objectives)
