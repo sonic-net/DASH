@@ -16,6 +16,20 @@ https://github.com/Azure/DASH/blob/main/documentation/high-avail/design/high-ava
 Our thoughts and proposals for the HA protocol follows below.
 
 
+## Channels
+
+We propose that the HA protocol defines a control channel and a data channel.  
+The control channel is used to exchange control messages after two cards are paired.  
+Control messages can include an exchange of capabilities, commands to start and stop active syncing, start and stop perfect syncing etc.  
+Control messages would determine which Mode and attributes are used for the data channel. The control channel uses TCP for transport.  
+The data channel is used to exchange the flow update messages.  
+
+
+The channels are shown in this functional model of the HA synchronization mechanisms:
+
+![ha-functional-dagram.svg](images/ha-functional-diag.svg)
+
+
 ## Modes
 
 Some examples of possible modes for syncing active flows are:
@@ -31,15 +45,6 @@ We propose that Batched mode is the base mode.
 Mirror mode can be considered to be just Batch mode with a maximum of one message per HA packet.  
 We assume that a card that can only mirror a packet is still flexible enough to massage the contents to look like a Batch packet.  
 Other modes (e.g. Compressed mode) are not defined at this time.
-
-
-## Channels
-
-We propose that the HA protocol defines a control channel and a data channel.  
-The control channel is used to exchange control messages after two cards are paired.  
-Control messages can include an exchange of capabilities, commands to start and stop active syncing, start and stop perfect syncing etc.  
-Control messages would determine which Mode and attributes are used for the data channel. The control channel uses TCP for transport.  
-The data channel is used to exchange the flow update messages.  
 
 
 ## Active Flow Sync Algorithm
