@@ -3,6 +3,7 @@
 
 #include "sirius_headers.p4"
 #include "sirius_acl.p4"
+#include "sirius_conntrack.p4"
 
 control outbound(inout headers_t hdr,
                  inout metadata_t meta,
@@ -25,12 +26,12 @@ control outbound(inout headers_t hdr,
     action set_vni(bit<24> vni) {
         meta.encap_data.vni = vni;
     }
-    
+
     table eni_to_vni {
         key = {
             meta.eni : exact @name("meta.eni:eni");
         }
-    
+
         actions = {
             set_vni;
         }
@@ -47,7 +48,7 @@ control outbound(inout headers_t hdr,
             meta.eni : exact @name("meta.eni:eni");
             hdr.ipv4.dst_addr : lpm @name("hdr.ipv4.dst_addr:destination");
         }
-    
+
         actions = {
             route_vnet; /* for expressroute - ecmp of overlay */
         }
@@ -68,7 +69,7 @@ control outbound(inout headers_t hdr,
         meta.encap_data.overlay_dmac = overlay_dmac;
         meta.encap_data.underlay_dip = underlay_dip;
     }
-    
+
     direct_counter(CounterType.packets_and_bytes) ca_to_pa_counter;
 
     table ca_to_pa {
@@ -77,7 +78,7 @@ control outbound(inout headers_t hdr,
             meta.encap_data.dest_vnet_vni : exact @name("meta.encap_data.dest_vnet_vni:dest_vni");
             hdr.ipv4.dst_addr : exact @name("hdr.ipv4.dst_addr:dip");
         }
-    
+
         actions = {
             set_tunnel_mapping;
         }
@@ -91,17 +92,25 @@ control outbound(inout headers_t hdr,
         eni_to_vni.apply();
 
 #ifdef STATEFUL_P4
-            ConntrackOut.apply(0);
+           ConntrackOut.apply(0);
 #endif /* STATEFUL_P4 */
 
+#ifdef PNA_CONNTRACK
+        ConntrackOut.apply(hdr, meta);
+#endif // PNA_CONNTRACK
+
         /* ACL */
-        if (meta.conntrack_data.allow_out) {
+        if (!meta.conntrack_data.allow_out) {
             acl.apply(hdr, meta, standard_metadata);
         }
 
 #ifdef STATEFUL_P4
             ConntrackIn.apply(1);
 #endif /* STATEFUL_P4 */
+
+#ifdef PNA_CONNTRACK
+        ConntrackIn.apply(hdr, meta);
+#endif // PNA_CONNTRACK
 
         switch (routing.apply().action_run) {
             route_vnet: {
