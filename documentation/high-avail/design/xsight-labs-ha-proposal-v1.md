@@ -7,22 +7,8 @@ The purpose is to generate discussion that will lead to an actual design doc.
 
 # HA Requirements
 
-The High Availability document lists most of the requirements:
+The High Availability document lists the requirements:
 https://github.com/Azure/DASH/blob/main/documentation/high-avail/design/high-availability-and-scale.md
-
-Microsoft has provided some additional requirements:
-
-1. HA Interoperability is required between vendors
-   - Pairing cards from different vendors is not the typical deployment, but must work
-2. The HA packet format and protocol must be public
-   - This allows sniffed/mirrored HA messages to be analyzed
-   - No vendor-private protocol is allowed
-3. The HA protocol for syncing active flows could have a base mode and optional modes 
-   - Additional modes could be defined, for example to the reduce PPS/bps needed for the active sync messages
-   - A vendor only needs to support the base mode
-   - Any optional modes must also be public
-4. The HA protocol does not need to reliably sync 100% of the flows between cards
-   - Ideally all flows are synced. But is ok if a small number of flows (hundreds out of 10s of millions) are missed.
 
 
 # Proposal
@@ -137,4 +123,18 @@ but we can tolerate thousands of zombie entries because the flow table capacity 
 
 We have thoughts on additional details (control messages, data message format, etc) but thought that we should get agreement on the basics first.
 
+
+# Additional Considerations
+
+Comments on the initial version of this document are captured below:
+
+1. gRPC could be used for the control channel. It's the favored messaging protocol these days and would make it easy to write production as well as test applications. It can actually be quite performant, especially if streaming connections are used.
+
+1. We need to think about a "management" interface to the HA subsystem, to configure operating parameters (e.g. timeouts), perform resets, query states and statistics, etc. This then begs the question, "will there be a SAI API to the HA controller?"
+
+1. Presumably a behavioral model could be built which allows the algorithm to be evaluated and simulated at scale, without requiring actual HW targets. (Extra credit: this could even be plugged into e.g. NS3 simulations).
+
+1. We need to think about test & performance criteria, even test techniques. If we pose some requirements, we need to ensure they're testable. This might require extra observability features (streaming internal state & stats updates, above and beyond the presumed management API).
+
+1. We need to think about continuous observability, including a high-fidelity mode (e.g. streaming high-speed updates of the internal states) to be able to judge performance of the HA system in a lab or even live environment.
 
