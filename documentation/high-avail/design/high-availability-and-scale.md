@@ -34,6 +34,20 @@ Scaling is achieved via the following concepts:
     given flow
 1. Interoperabililty (in both failover and live migration?)
 
+Protocol Requirements:
+
+1. HA Interoperability is required between vendors
+   - Pairing cards from different vendors is not the typical deployment, but must work
+1. The HA packet format and protocol must be public
+   - This allows sniffed/mirrored HA messages to be analyzed
+   - No vendor-private protocol is allowed
+1. The HA protocol for syncing active flows could have a base mode and optional modes 
+   - Additional modes could be defined, for example to the reduce PPS/bps needed for the active sync messages
+   - A vendor only needs to support the base mode
+   - Any optional modes must also be public
+1. The HA protocol does not need to reliably sync 100% of the flows between cards
+   - Ideally all flows are synced. But is ok if a small number of flows (hundreds out of 10s of millions) are missed.
+
 
 
 ## Architecture
