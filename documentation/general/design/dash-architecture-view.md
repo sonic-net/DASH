@@ -45,30 +45,30 @@ last update: 03/31/2022
 
 ## Introduction
 
-This document introudeces the **SONiC Disaggregated API for SONiC Hosts**
+This document introduces the **SONiC Disaggregated API for SONiC Hosts**
 (SONiC-DASH) from an architectural point of view. SONiC-DASH (**DASH** for short)
-is an open source project whose goal is to deliver high-speed network connectivity to
+is an open source project with the goal to deliver high-speed network connectivity to
 critical cloud enterprise applications.
 
 ![dash-words-cloud](./images/dash-words-cloud.png)
 
-DASH extends SONiC APIs and related comprehensive set of object models that initially
+DASH extends SONiC APIs and a related comprehensive set of object models that
 describe Microsoft Azure’s networking services for the cloud. The project
-enlists cloud and enterprise technology providers to further extend DASH to meet their
+enlists cloud and enterprise technology providers to collaborate and further extend DASH to meet their
 specific needs.
 
 ### Objectives
 
-DASH overall objective is to **optimize network SMART Programmable Technologies
+The DASH overall objective is to **optimize network SMART Programmable Technologies
 performance**, and **leverage commodity hardware technology** to achieve **10x
 or even 100x stateful connection performance**. In particular
 
 - With the help of network hardware technology providers, create an open forum
   that capitalizes on the use of **programmable networking devices** including
-  SmartNICs, SmartToRs, SmartAppliances.
-- Optimize **stateful L4** performance and connection scale by 10x or even 100x
+  SmartNICs, SmartSwitches, and SmartAppliances.
+- Optimize **stateful L4** performance and connection scale by 10x or even 100x, 
   when compared to implementations that make extensive use of a generic software
-  stack approach that compromises performance for flexibility.  This flexibility
+  stack approach (compromising performance for flexibility).  This flexibility
   was needed early on, whereas the cloud is maturing and is ready for a further
   optimized approach.  As host networking in the cloud is performed at L4, the
   resulting performance improvements should be truly significant.
@@ -101,8 +101,8 @@ supported scenario:
 
 ## Scenarios
 
-SONiC DASH extends SONiC APIs and a related comprehensive set of object models desribed
-in both *documentation* and a *behavioral model* to initially describe Microsoft
+SONiC DASH extends SONiC APIs and a related comprehensive set of object models described
+in both *documentation* and a *behavioral model* to describe Microsoft
 Azure’s networking services for the cloud. The 7 initial services (in draft)
 describe this in more detail. We will also work with cloud and enterprise
 providers to further extend SONiC DASH to meet their specific needs.
@@ -119,15 +119,15 @@ providers to further extend SONiC DASH to meet their specific needs.
    Useful for failure and failover events
 1. [Load
    Balancer](https://github.com/Azure/DASH/tree/main/documentation/load-bal-service).
-   the feature that switches traffic from using VIP-to-VIP connectivity (which
+   The feature that switches traffic from using VIP-to-VIP connectivity (which
    involves transiting SLB MUXes), into using a direct path between VMs (direct
    PA to PA path).
 1. [Service Tunnel & Private Link]().  Service Tunnel prevents Internet access
    to specific services.  Access is permitted only from a specific virtual
-   network (vnet). The Service Tunnel feature provides this capability by
+   network (VNET). The Service Tunnel feature provides this capability by
    encoding certain id's via packet transformation.  Private Link feature is an
-   extension to Service Tunnel feature and enables customers to access public
-   facing shared services via their private IP addresses within their vnet.
+   extension to the Service Tunnel feature and enables customers to access public
+   facing shared services via their private IP addresses within their VNET.
 1. [Encryption
    Gateway](https://github.com/Azure/DASH/tree/main/documentation/encrypt-gw-service).
 1. [Express Route
@@ -144,7 +144,7 @@ REST API calls for allocation and provisioning within the Azure infrastructure.
 In the initial Azure offering, traffic with the feature selected will be
 directed to our Appliance, which processes the first packet in hardware.
 
-From a DASH perspective we are developing a common programming interface to
+In parallel, from a DASH perspective we are developing a common programming interface to
 agnostically configure hardware for the scenarios outlined in the [Documentation
 folder](https://github.com/Azure/DASH/tree/main/documentation):
 
@@ -159,22 +159,22 @@ The following figure shows the DASH project main components.
 
 <figcaption><i>Figure 1 - DASH project</i></figcaption><br/><br/>
 
-- **Functional test suite**. Checks that the DASH capable device satisfies the standard SONiC functional requirements. This is a **black-box testing**  concerned with validating if the device works as intended in SONiC. For more information, see [SONiC testbed deployment and setup, SONiC testing, test report processing](https://github.com/Azure/sonic-mgmt/tree/master/docs).  
-- **SDN**. The SDN with its controller is primarily responsible for controlling the DASH overlay services, while the traditional SONiC application containers are used to manage the underlay (L3 routing) and hardware platform. 
-The SDN controller controls the overlay built on top of the physical layer of the infrastructure. From the point of view of the SDN control plane, when a customer creates an operation, for example a VNET creation, from the cloud portal, the controller allocates the resources, placement management, capacity, etc. via the northbound interface APIs. For more information, see the [SDN controller](#sdn-controller) section.
-- **Network SONiC OS**. DASH builds upon the traditional SONiC architecture, which is documented in the SONiC Wiki under [Sonic System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture). For more information, see the [Logical architecture (software stack)](#logical-architecture-software-stack) section.
-- **Cloud deployment**. Microsoft Azure will integrate and deploy DASH solutions to ensure that scale, monitoring, reliability, availability and constant innovation are proven and hardened. Other enterprise and cloud providers may deploy DASH as well. It should be noted that innovations for **in-service software upgrades** (ISSU) and **high availability** (HA) are key tenets of the DASH charter. For more information, see the [Deployment](#deployment) section. 
-- **P4 behavioral model**. We are developing a P4 defined behavioral model to describe the behaviors per scenario and document them in a repeatable format. From there we will be able to auto-generate the APIs. The implementation itself does not have to be P4. for more information, see the [Behavioral model](#behavioral_model) section.
-- **DASH programmable networking devices**. With the help of network hardware technology providers, create an open forum that capitalizes on the use of programmable networking devices including **SmartNICs**, **SmartToRs**, **SmartAppliances**.
+- **Functional test suite**. A suite of checks to validate the DASH capable device satisfies the standard SONiC functional requirements. This is a **black-box testing**  concerned with validating whether the device works as intended with SONiC. For more information, see [SONiC testbed deployment and setup, SONiC testing, test report processing](https://github.com/Azure/sonic-mgmt/tree/master/docs).  
+- **SDN**. The SDN with its controller is primarily responsible for controlling the DASH overlay services; the traditional SONiC application containers are used to manage the underlay (L3 routing) and hardware platform. 
+The SDN controller controls the overlay built on top of the physical layer of the infrastructure. From the point of view of the SDN control plane, when a customer creates an operation from the cloud portal (for example a VNET creation) the controller allocates the resources, placement management, capacity, etc. via the northbound interface APIs. For more information, see the [SDN controller](#sdn-controller) section.
+- **Network SONiC OS**. DASH builds upon the traditional SONiC architecture, which is documented in the SONiC Wiki under [SONiC System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture). For more information, see the [Logical architecture (software stack)](#logical-architecture-software-stack) section.
+- **Cloud deployment**. Microsoft Azure will integrate and deploy DASH solutions to ensure that scale, monitoring, reliability, availability and constant innovation are proven and hardened. Other enterprise and cloud providers may deploy DASH as well. For more information, see the [Deployment](#deployment) section. 
+- **P4 behavioral model**. We are developing a P4 defined behavioral model to describe the behaviors per scenario and document them in a repeatable format. From there we will be able to auto-generate the APIs. The implementation itself is not required to be P4. For more information, see the [Behavioral model](#behavioral_model) section.
+- **DASH programmable hardware**. With the help of network hardware technology providers, we are collaborating to create an open forum capitalizing on the use of programmable hardware including **SmartNICs**, **SmartSwitches**, and **SmartAppliances**.
 The documentation related to these devices will be made available by the providers themselves.  
-- **Scenarios**. Cover SONiC-DASH extending SONiC APIs and related comprehensive set of objects to initially describe Microsoft
-Azure’s networking services for the cloud. The 7 initial services (in draft) describe this in more detail. We will also work with cloud and enterprise providers to further extend SONiC DASH to meet their specific needs. For more informnation,see the [Scenarios](#scenarios) section.
-- **Performance test suite**. Checks that the DASH capable device satisfies the standard SONiC-DASH performance requirements. For more information about test documentation, test scripts, test configurations and other artifacts required to test a SONiC-DASH device or devices, see [SONiC-DASH Testing](https://github.com/Azure/DASH/tree/main/test). Notice that the focus is on executable test artifacts, not test requirements.
+- **Scenarios**. Cover SONiC-DASH extending SONiC APIs and related comprehensive set of objects to describe Microsoft
+Azure’s networking services for the cloud. The 7 initial services (in draft) describe this in more detail. We will also work with cloud and enterprise providers to further extend SONiC DASH to meet their specific needs. For more information,see the [Scenarios](#scenarios) section.
+- **Performance test suite**. Verification to ensure the DASH capable device satisfy the standard SONiC-DASH performance requirements. For more information about test documentation, test scripts, test configurations and other artifacts required to test a SONiC-DASH device or devices, see [SONiC-DASH Testing](https://github.com/Azure/DASH/tree/main/test). Notice that the focus is on executable test artifacts, not test requirements.
 
 ## Logical architecture (software stack) 
 
  DASH builds upon the traditional SONiC architecture, which is documented in the
- SONiC Wiki under [Sonic System
+ SONiC Wiki under [SONiC System
  Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture).
  The following descriptions assume familiarity with the SONiC architecture and
  will describe DASH as incremental changes relative to traditional SONiC. Notice
@@ -197,13 +197,12 @@ daemons inside SWSS.
 
 The SDN controller controls the overlay built on top of the physical layer of
 the infrastructure.  From the point of view of the SDN control plane, when a
-customer creates an operation, for example a VNET creation, from the cloud
-portal, the controller allocates the resources, placement management, capacity,
+customer creates an operation from the cloud portal (for example a VNET creation), the controller allocates the resources, placement management, capacity,
 etc. via the  **NorthBound interface APIs**.
 
 ##### SDN and DPU High-Availability (HA)
 
-For **High Availability** (HA), the SDN controller selects the pair of cards and
+For **High Availability** (HA), the SDN controller selects a pair of cards and
 configures them identically.  The only requirement on the card from the HA
 perspective is for the cards to setup a channel between themselves for flow
 synchronization.  The synchronization mechanism is left for technology suppliers
@@ -227,7 +226,7 @@ In summary:
 - An **enhanced syncd** will then configure the dataplane using the **technology
   supplier-specific SAI library**.
 
-A **gNMI schema** will manage the following DASH services:
+A **gNMI schema** will manage the following DASH components:
 
 - Elastic Network Interface (ENI)
 - Access Control Lists (ACLs)
@@ -244,7 +243,7 @@ In the case of a multiple DPUs device the following applies:
 
 - Each DPU provides a gNMI endpoint for SDN controller through a unique IP
   address.
-- An appliance or smart switch containing multiple DPUs therefore contains
+- An appliance or smart switch containing multiple DPUs will contain 
   multiple gNMI endpoints for SDN controller, and the controller treats each DPU
   as a separate entity.
 - To conserve IPv4 addresses, such an appliance or switch *might* contain a
@@ -257,7 +256,7 @@ In the case of a multiple DPUs device the following applies:
 
  In the figure above, the "SONiC Containers" box comprises the normal collection
  of optional/customizable application daemons and northbound interfaces, which
- provide BGP, LLDP, SNMP, etc, etc. These are described thoroughly in the [Sonic
+ provide BGP, LLDP, SNMP, etc, etc. These are described thoroughly in the [SONiC
  System
  Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture)
  wiki and reproduced in diagram form under the [Detailed
