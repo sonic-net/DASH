@@ -9,6 +9,13 @@
 - [PR Accept Phase](#pr-accept-phase)
 - [Directly Editing Artifacts](#directly-editing-artifacts)
 - [Use checklists for large issues or PRs](#use-checklists-for-large-issues-or-prs)
+  - [About task lists (check lists)](#about-task-lists-check-lists)
+    - [Tracking work on an issue](#tracking-work-on-an-issue)
+    - [Convert a task to an issue](#convert-a-task-to-an-issue)
+- [Create a project](#create-a-project)
+  - [Adding draft issues to your project](#adding-draft-issues-to-your-project)
+  - [Reorder rows](#reorder-rows)
+  - [Adding your project to a repository](#adding-your-project-to-a-repository)
 - [Tools](#tools)
 
 This document describes a short process to effectively use GitHub to achieve the following main goals:
@@ -96,13 +103,77 @@ A contributor would enter the checklist in the comment when creating the Issue o
 > [!NOTE]
 > Any work item is check-marked  with `x` when the related tasks are completed. 
 
+### About task lists (check lists)
+
+A task list (or check list) is a set of tasks where each task is displayed on a separate line with a clickable checkbox. Notice the following:
+
+- You can select or deselect the checkboxes to mark the tasks as complete or incomplete.
+- If you reference an issue, pull request, or discussion in a task list, the reference shows the title and the status.
+- If you add a task list to the body of an issue, the list has added functionality.
+
+#### Tracking work on an issue
+
+- The progress of an issue's task list appears in various places on GitHub, such as a repository's list of issues.
+- If a task references another issue and someone closes that issue, the task's checkbox will automatically be marked as completed.
+- If a task requires further tracking or discussion, you can **convert the task to an issue** by hovering over the task and clicking  in the upper-right corner of the task.
+- To add more details before creating the issue, you can use keyboard shortcuts to open the new issue form. For more information, see [Keyboard shortcuts](https://docs.github.com/en/get-started/using-github/keyboard-shortcuts#issues-and-pull-requests).
+- Any issues referenced in the task list will specify that they are tracked in the referencing issue.
+
+#### Convert a task to an issue
+
+When in the issue that contains tasks, perform these steps:
+
+1. Mouse over the task to convert to an issue.
+2. On the right side, select the arrow down icon.
+3. Select the link to the issue just created. This displays the related page. Enter a description, labels, assignees, etc..
+
+For more information, see [About task lists](https://docs.github.com/en/issues/tracking-your-work-with-issues/about-task-lists)
+
+## Create a project
+
+A project is a **customizable spreadsheet** that integrates with issues and pull requests. You can do the following:
+
+- Customize the layout by filtering, sorting, and grouping your issues and PRs.
+- Add custom fields to track metadata.
+
+For more information see [About projects (beta)](https://docs.github.com/en/issues/trying-out-the-new-projects-experience/about-projects).
+
+See also [Creating an organization project](https://docs.github.com/en/issues/trying-out-the-new-projects-experience/quickstart#creating-an-organization-project). 
+
+The following figure is a simple workflow representation.
+
+![github-project-workflow](./images/github-project-workflow.svg)
+
+### Adding draft issues to your project
+
+You can also add a draft issue to the project as a place holder for future work not yet defined. See [Adding draft issues to your project](https://docs.github.com/en/issues/trying-out-the-new-projects-experience/quickstart#adding-draft-issues-to-your-project). 
+
+For more information, see [Plan and track projects closer to your code #DemoDays](https://www.youtube.com/watch?v=SI1ra-XHWHM) (you may want to start at minute 23:00). 
+
+### Reorder rows
+
+In project table layout, you can change the order of rows.
+
+1. Select the **number** at the start of the row.
+1. While clicking, **drag the row** to the required location.
+
+> [!NOTE]
+> Make sure to clear automatic sorting.
+
+### Adding your project to a repository
+
+You can list relevant projects in a repository. You can only list projects that are owned by the same user or organization that owns the repository.
+
+In order for **repository members to see a project listed in a repository**, they **must have visibility** for the project. For more information, see [Managing the visibility of your projects (beta)](https://docs.github.com/en/issues/trying-out-the-new-projects-experience/managing-the-visibility-of-your-projects) and [Managing access to projects (beta)](https://docs.github.com/en/issues/trying-out-the-new-projects-experience/managing-access-to-projects).
+
 ## Tools
 
 - [GitHub desktop](https://desktop.github.com/ "Cntrl+Left Click to open in a new tab")
-- [How to Use the Github Workflow ](https://www.youtube.com/watch?v=8UguQzmswC4 "Cntrl+Left Click to open in a new tab")
-- [Visual studio code](https://code.visualstudio.com/ "Cntrl+Left Click to open in a new tab")
-  - [Gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens "Cntrl+Left Click to open in a new tab"). Supercharge the Git capabilities. 
-  - [Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one "Cntrl+Left Click to open in a new tab"). Create the ToC for an article.
-- [Drawing tool: diagrams.net](https://www.diagrams.net/ "Cntrl+Left Click to open in a new tab")
+- [How to Use the Github Workflow ](https://www.youtube.com/watch?v=8UguQzmswC4)
+-  [Plan and track projects closer to your code #DemoDays](https://www.youtube.com/watch?v=SI1ra-XHWHM) 
+- [Visual studio code](https://code.visualstudio.com/)
+  - [Gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens). Supercharge the Git capabilities. 
+  - [Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one). Create the ToC for an article.
+- [Drawing tool: diagrams.net](https://www.diagrams.net/)
 
   

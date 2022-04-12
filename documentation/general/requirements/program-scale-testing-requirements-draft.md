@@ -310,7 +310,7 @@ both scenarios:
     - 1.6M routes
     - 48 NSGs
     - 48000 ACL rules
-    - 9.6M Prefixes
+    - 9.6M Prefixes (upper limit per DPU - sum of the above)
     - 2M Mapping Table
 
 ## MSFT LAB IXIA Configuration
