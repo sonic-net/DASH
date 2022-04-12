@@ -140,11 +140,15 @@ For more information see [About projects (beta)](https://docs.github.com/en/issu
 
 See also [Creating an organization project](https://docs.github.com/en/issues/trying-out-the-new-projects-experience/quickstart#creating-an-organization-project). 
 
+The following figure is a simple workflow representation.
+
+![github-project-workflow](./images/github-project-workflow.svg)
+
 ### Adding draft issues to your project
 
 You can also add a draft issue to the project as a place holder for future work not yet defined. See [Adding draft issues to your project](https://docs.github.com/en/issues/trying-out-the-new-projects-experience/quickstart#adding-draft-issues-to-your-project). 
 
-For more informaiton, see [Plan and track projects closer to your code #DemoDays](https://www.youtube.com/watch?v=SI1ra-XHWHM) (you may want to start at minute 23:00). 
+For more information, see [Plan and track projects closer to your code #DemoDays](https://www.youtube.com/watch?v=SI1ra-XHWHM) (you may want to start at minute 23:00). 
 
 ### Reorder rows
 
