@@ -10,3 +10,4 @@ This folder contains DASH dataplane design and architecture documents.
 
 | Document                                               | Description                                |
 | ------------------------------------------------------ | ------------------------------------------ |
+| [Configuration schema example (JSON)](dash-config-schema-example.md) |Configuration schema example  |
