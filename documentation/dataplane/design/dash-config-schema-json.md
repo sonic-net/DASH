@@ -5,7 +5,7 @@ last update: 04/12/2022
 
 # Configuration schema example (JSON)
 
-**WARNING - This example is in JSON format and it is intended for educational purposes only. It is not intended for production use. The production schema must be in [YANG](https://www.fir3net.com/Networking/Protocols/an-introduction-to-netconf-yang.html) format**
+**WARNING - This example is in JSON format and it is intended for educational / collaboration purposes only. It is not intended for production use. The production schema must be in [YANG](https://www.fir3net.com/Networking/Protocols/an-introduction-to-netconf-yang.html) format**
 
 ```xml
 {
