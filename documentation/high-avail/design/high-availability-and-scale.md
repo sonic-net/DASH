@@ -53,8 +53,19 @@ Protocol Requirements:
 ## Architecture
 
 ### High-level architecture of Rack Design for High Availability and Scale
+Two architectures are presented.
+* The initial, near-term solution uses separate "T0" or "ToR" switches wired to "DASH APpliances" carrying six, 200GB DPUs.
+* The second, longer-term solution uses integrated Smart Switches containing captive DPUs wired to a main sw.
 
-![hl-arch-rack-design-ha](images/hl-arch-rack-design-ha.png)
+See the following diagrams.
+
+**ToRs + DASH Appliances - HA Cross-wired Configuration**
+
+![dash-ha-appliance](images/dash-ha-appliance.svg)
+
+**Smart ToRs - HA Cross-wired Configuration**
+
+![dash-ha-smart-switch](images/dash-ha-smart-switch.svg)
 
 **Considerations**
 
