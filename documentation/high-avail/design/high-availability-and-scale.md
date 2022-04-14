@@ -54,8 +54,8 @@ Protocol Requirements:
 
 ### High-level architecture of Rack Design for High Availability and Scale
 Two architectures are presented.
-* The initial, near-term solution uses separate "T0" or "ToR" switches wired to "DASH APpliances" carrying six, 200GB DPUs.
-* The second, longer-term solution uses integrated Smart Switches containing captive DPUs wired to a main sw.
+* The initial, near-term solution uses separate "T0" or "ToR" switches wired to "DASH Appliances" carrying six, 200GB (2x100GB ports each) DPUs. DPU redundancy requires each DPU to be wired to both switches (one 100GB link to each) as shown.
+* The second, longer-term solution uses integrated Smart Switches, containing captive DPUs wired to a main switching ASIC(s); DPU ports are not wired to front panels. This also means the DPU count and physical port configuration is not stipulated; only the aggregate throughput to the main switch ASIC is important. DPU redundancy requires dedicated inter-switch "cross-links."
 
 See the following diagrams.
 
