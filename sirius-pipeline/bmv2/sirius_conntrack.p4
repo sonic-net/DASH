@@ -38,6 +38,7 @@ bit<16> directionNeutralPort (
 control ConntrackIn(inout headers_t hdr,
                 inout metadata_t meta)
 {
+
   action conntrackIn_allow () {
   /* Invalidate entry based on TCP flags */
           if (hdr.tcp.flags & 0x101 /* FIN/RST */) {
@@ -65,9 +66,9 @@ control ConntrackIn(inout headers_t hdr,
           directionNeutralAddr(meta.direction, hdr.ipv4.dstAddr, hdr.ipv4.srcAddr):
               exact;
           hdr.ipv4.protocol : exact;
-          directionNeutralPort(meta.direction, hdr.tcp.srcPort, hdr.tcp.dstPort):
+          directionNeutralPort(meta.direction, meta.flow.src_port, meta.flow.dst_port):
               exact;
-          directionNeutralPort(meta.direction, hdr.tcp.dstPort, hdr.tcp.srcPort):
+          directionNeutralPort(meta.direction, meta.flow.dst_port, meta.flow.src_port):
               exact;
           meta.eni : exact;
       }
@@ -116,9 +117,9 @@ control ConntrackOut(inout headers_t hdr,
           directionNeutralAddr(meta.direction, hdr.ipv4.dstAddr, hdr.ipv4.srcAddr):
               exact;
           hdr.ipv4.protocol : exact;
-          directionNeutralPort(meta.direction, hdr.tcp.srcPort, hdr.tcp.dstPort):
+          directionNeutralPort(meta.direction, meta.flow.src_port, meta.flow.dst_port):
               exact;
-          directionNeutralPort(meta.direction, hdr.tcp.dstPort, hdr.tcp.srcPort):
+          directionNeutralPort(meta.direction, meta.flow.dst_port, meta.flow.src_port):
               exact;
           meta.eni : exact;
       }

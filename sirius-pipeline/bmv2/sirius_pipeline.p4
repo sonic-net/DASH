@@ -109,6 +109,15 @@ control sirius_ingress(inout headers_t hdr,
 
         /* At this point the processing is done on customer headers */
 
+        /* set common flow ports for TCP/UDP */
+        if(hdr.tcp.isValid()) {
+            meta.flow.src_port = hdr.tcp.src_port;
+            meta.flow.dst_port = hdr.tcp.dst_port;
+        } else if(hdr.udp.isValid()) {
+            meta.flow.src_port = hdr.udp.src_port;
+            meta.flow.dst_port = hdr.udp.dst_port;
+        }
+
         if (meta.direction == direction_t.OUTBOUND) {
             outbound.apply(hdr, meta, standard_metadata);
         } else if (meta.direction == direction_t.INBOUND) {

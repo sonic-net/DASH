@@ -24,6 +24,11 @@ struct conntrack_data_t {
     bool allow_out;
 }
 
+struct flow_data_t {
+    bit<16> src_port;
+    bit<16> dst_port;
+}
+
 struct metadata_t {
     bool dropped;
     direction_t direction;
@@ -31,6 +36,7 @@ struct metadata_t {
     bit<16> eni;
     bit<16> vm_id;
     bit<8> appliance_id;
+    flow_data_t flow;
     conntrack_data_t conntrack_data;
 }
 
