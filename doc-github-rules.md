@@ -83,8 +83,13 @@ Once a PR has received sufficient review and concerns are satisfied, a designate
 Contributors with write access permission or higher have rights to directly edit documents and push changes. This practice should be used very sparingly, and only in the draft stages of documents, or to make trivial changes in documents already in use.
 
 > [!WARNING]
-> Direct edits (without proper review phases) to "released" documents short-circuits the normal community process and can result in breaking changes and significant disruption, resulting in potential impact to downstream consumers.
+> Direct edits (without proper PR and review) to "released" artifacts short-circuits the normal community process and can result in breaking changes and significant disruption, resulting in potential impact to downstream consumers.
 
+## Avoid Directly Committing New Artifacts
+As a corrollary to the hazards of directly editing documents, contributors with write access permission or higher have rights to directly commit new documents. This should be avoided. Skipping the normal PR and review process prevents reviewers from making inline comments against "Files Changed" etc. Only summary comments of the commit itself are possible, which is less useful.
+
+> [!WARNING]
+> Direct commits (without proper PR and review) of new artifacts short-circuits the normal community process and should be avoided. 
 
 ## Use checklists for large issues or PRs
 
