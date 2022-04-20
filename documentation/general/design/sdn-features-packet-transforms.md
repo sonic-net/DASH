@@ -58,16 +58,16 @@ Why do we need this scenario?  There is a huge cost associated with establishing
 
 **IPV6 numbers will be lower*
 
-| Syntax | Description |
-| ----------- | ----------- |
-| Flow Scale <img style="width:400px"/>| <ul><li>1+ million flows per v-port (aka ENI)</li> <li>16 million per DPU/Card per 200G<ul><li>single encap IPv4 overlay and IPV6 underlay</li> <li>single encap IPv6 overlay and IPV6 underlay. (This can be lower)</li> <li>single encap IPV4</li> <li>Encap IPv6 and IPV4</li></ul></ul> *These are complex flows, details are below.* | |  
-| CPS | 4 million+ (max)  |
-| Routes | 100k per v-port (max)  |
-| ACLs | 100k IP-Prefixes, 10k Src/Dst ports per v-port (max)  |
-| NAT | tbd  |
-| V-Port (aka ENI or Source VM) | 32 Primary, 32 Secondary assuming 2x OverSub, 32GB RAM, No ISSU, 10k (theorhetical max)  |
-| Mappings (VMS deployed) | 10 million total mapping per DPU; mappings are the objects that help us bridge the customer's virtual space (private ip address assigned to each VM) with Azure's physical space (physical/routable addresses where the VMs are hosted)  |
-|  | For each VPC, we have a list of mappings of the form: PrivateAddress -> (Physical Address v4, Physical Address V6, Mac Address, etc...) | VPC can have up to 1M mappings
+| Syntax | Description | Notes |
+| ----------- | ----------- |-------|
+| Flow Scale <img style="width:200px"/>| <ul><li>1+ million flows per v-port (aka ENI)</li> <li>16 million per DPU/Card per 200G<ul><li>single encap IPv4 overlay and IPV6 underlay</li> <li>single encap IPv6 overlay and IPV6 underlay. (This can be lower)</li> <li>single encap IPV4</li> <li>Encap IPv6 and IPV4</li></ul></ul> *These are complex flows, details are below.* | |  
+| CPS | 4 million+ (max)  | |
+| Routes | 100k per v-port (max)  | |
+| ACLs | 100k IP-Prefixes, 10k Src/Dst ports per v-port (max)  | |
+| NAT | tbd  | |
+| V-Port (aka ENI or Source VM) | 32 Primary, 32 Secondary assuming 2x OverSub, 32GB RAM, No ISSU, 10k (theorhetical max)  | Each ENI 1M total active connections and 2M flows |
+| Mappings (VMS deployed) | 10 million total mapping per DPU; mappings are the objects that help us bridge the customer's virtual space (private ip address assigned to each VM) with Azure's physical space (physical/routable addresses where the VMs are hosted)  | |
+|  | For each VPC, we have a list of mappings of the form: PrivateAddress -> (Physical Address v4, Physical Address V6, Mac Address, etc...) | VPC can have up to 1M mappings |
 
 ## Scenario Milestone and Scoping
 
