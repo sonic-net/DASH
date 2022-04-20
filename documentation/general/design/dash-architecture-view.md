@@ -1,6 +1,6 @@
 ---
 Version: draft
-last update: 03/31/2022
+last update: 04/20/2022
 ---
 
 # DASH an architectural view 
@@ -65,7 +65,12 @@ or even 100x stateful connection performance**. In particular
 
 - With the help of network hardware technology providers, create an open forum
   that capitalizes on the use of **programmable networking devices** including
-  SmartNICs, SmartSwitches, and SmartAppliances.
+  - **SmartNICs**. A smart network interface card (SmartNIC), is a programmable 
+    accelerator that makes data center networking, security and storage efficient and flexible.
+    It offloads from server CPU a set of tasks such as how to process and route packets of data.
+  - **SmartSwitches**. A smart switch is a type of managed switch with only a select number of options 
+    for management. It may only provide functionality to configure a handful of settings.
+  - **SmartAppliances**.
 - Optimize **stateful L4** performance and connection scale by 10x or even 100x, 
   when compared to implementations that make extensive use of a generic software
   stack approach (compromising performance for flexibility).  This flexibility
