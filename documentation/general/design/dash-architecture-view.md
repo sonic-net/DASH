@@ -70,12 +70,13 @@ or even 100x stateful connection performance**. In particular
     It offloads from server CPU a set of tasks such as how to process and route packets of data.
   - **SmartSwitches**. A smart switch is a type of managed switch with only a select number of options 
     for management. It may only provide functionality to configure a handful of settings.
-  - **SmartAppliances**.
+  - **SmartAppliances**. An (SDN) appliance is a multi-tenant network appliance. It will have multiple cards; 
+    1 card will have multiple machines or bare-metal servers), which supports Virtual Ports. 
+    These can map to policy buckets corresponding to customer workloads, example: Virtual Machines, Bare Metal servers.
 - Optimize **stateful L4** performance and connection scale by 10x or even 100x, 
   when compared to implementations that make extensive use of a generic software
   stack approach (compromising performance for flexibility).  This flexibility
-  was needed early on, whereas the cloud is maturing and is ready for a further
-  optimized approach.  As host networking in the cloud is performed at L4, the
+  for a further optimized approach. As host networking in the cloud is performed at L4, the
   resulting performance improvements should be truly significant.
 - Microsoft Azure will integrate and deploy DASH solutions to ensure that scale,
   monitoring, reliability, availability and constant innovation are proven and
@@ -106,7 +107,7 @@ supported scenario:
 
 ## Scenarios
 
-SONiC DASH extends SONiC APIs and a related comprehensive set of object models described
+DASH extends SONiC APIs and a related comprehensive set of object models described
 in both *documentation* and a *behavioral model* to describe Microsoft
 Azure’s networking services for the cloud. The 7 initial services (in draft)
 describe this in more detail. We will also work with cloud and enterprise
@@ -200,10 +201,9 @@ services (SWSS) layer, and manipulate the Redis application-layer DBs; these in
 turn are translated into SAI dataplane obects via the normal SONiC orchestration
 daemons inside SWSS.
 
-The SDN controller controls the overlay built on top of the physical layer of
+The SDN controller controls the overlay built on top of the physical layer (underlay) of
 the infrastructure.  From the point of view of the SDN control plane, when a
-customer creates an operation from the cloud portal (for example a VNET creation), the controller allocates the resources, placement management, capacity,
-etc. via the  **NorthBound interface APIs**.
+customer creates an operation from the cloud portal (for example a VNET creation), the controller allocates the resources, placement management, capacity, etc. via the  **NorthBound interface APIs**.
 
 ##### SDN and DPU High-Availability (HA)
 
@@ -212,7 +212,7 @@ configures them identically.  The only requirement on the card from the HA
 perspective is for the cards to setup a channel between themselves for flow
 synchronization.  The synchronization mechanism is left for technology suppliers
 to define and implement. For more information, see [High Availability and
-Scale]() document.
+Scale](../../high-avail/design/high-availability-and-scale.md) document.
 
 ### DASH container
 
@@ -361,7 +361,7 @@ onto the dataplane via the **SAI database**.
 
 In particular, notice the following:
 
-- **DASH API** shall be exposed as gNMI interface as part of the SONiC DASH
+- **DASH API** shall be exposed as gNMI interface as part of the DASH
   container (aka as SDN container).
 - **DASH clients** shall configure SONiC via gRPC get/set calls.
 - **gNMI container** has the config backend to translate/write  DASH objects to
@@ -482,7 +482,8 @@ See related code at this location
 
 Previousley named *Sirius pipeline API*.
 
-We just capture the gist of it and then we link to the related Sirius pipeline
+> [!NOTE]
+> We just capture the gist of it and then we link to the related Sirius pipeline
 API.
 
 See related code at this location [sirius
