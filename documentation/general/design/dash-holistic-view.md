@@ -48,17 +48,16 @@ last update: 04/20/2022
 
 This document introduces the **Disaggregated API for SONiC Hosts** (**DASH** for
 short) and provides an overview of the project, the supporting elements and the and 
-DASH architecture.
-
-DASH is an open source project whose final goal is to deliver high-speed network 
-connectivity to critical cloud enterprise applications.
+its architecture.
 
 ![dash-words-cloud](./images/dash-words-cloud.png)
 
-DASH extends SONiC APIs and a related comprehensive set of object models that
-describe Microsoft Azure’s networking services for the cloud. The project
-enlists cloud and enterprise technology providers to collaborate and further
-extend DASH to meet their specific needs.
+DASH is an open source project whose final goal is to deliver high-speed network
+connectivity to critical cloud enterprise applications. It extends SONiC APIs
+and a related comprehensive set of object models that describe Microsoft Azure’s
+networking services for the cloud. The project enlists cloud and enterprise
+technology providers to collaborate and further extend DASH to meet their
+specific needs.
 
 ### Objectives
 
