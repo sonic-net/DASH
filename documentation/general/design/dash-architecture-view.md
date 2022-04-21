@@ -35,6 +35,7 @@ last update: 04/20/2022
   - [Switch Abstraction Interface (SAI) API](#switch-abstraction-interface-sai-api)
   - [DASH pipeline API](#dash-pipeline-api)
     - [Behavioral model](#behavioral-model)
+  - [Functional testing](#functional-testing)
   - [Performance testing](#performance-testing)
 - [Appendix](#appendix)
   - [A day in the life of a DASH packet](#a-day-in-the-life-of-a-dash-packet)
@@ -71,8 +72,7 @@ or even 100x stateful connection performance**. In particular
   - **SmartSwitches**. A smart switch is a type of managed switch with only a select number of options 
     for management. It may only provide functionality to configure a handful of settings.
   - **SmartAppliances**. An (SDN) appliance is a multi-tenant network appliance. It will have multiple cards; 
-    1 card will have multiple machines or bare-metal servers), which supports Virtual Ports. 
-    These can map to policy buckets corresponding to customer workloads, example: Virtual Machines, Bare Metal servers.
+    one card has multiple machines or bare-metal servers, which supports Virtual Ports.
 - Optimize **stateful L4** performance and connection scale by 10x or even 100x, 
   when compared to implementations that make extensive use of a generic software
   stack approach (compromising performance for flexibility).  This flexibility
@@ -111,7 +111,7 @@ DASH extends SONiC APIs and a related comprehensive set of object models describ
 in both *documentation* and a *behavioral model* to describe Microsoft
 Azure’s networking services for the cloud. The 7 initial services (in draft)
 describe this in more detail. We will also work with cloud and enterprise
-providers to further extend SONiC DASH to meet their specific needs.
+providers to further extend DASH to meet their specific needs.
 
 1. [VNET-to-VNET](https://github.com/Azure/DASH/tree/main/documentation/vnet2vnet-service).
 1. [VNET
@@ -173,9 +173,9 @@ The SDN controller controls the overlay built on top of the physical layer of th
 - **P4 behavioral model**. We are developing a P4 defined behavioral model to describe the behaviors per scenario and document them in a repeatable format. From there we will be able to auto-generate the APIs. The implementation itself is not required to be P4. For more information, see the [Behavioral model](#behavioral_model) section.
 - **DASH programmable hardware**. With the help of network hardware technology providers, we are collaborating to create an open forum capitalizing on the use of programmable hardware including **SmartNICs**, **SmartSwitches**, and **SmartAppliances**.
 The documentation related to these devices will be made available by the providers themselves.  
-- **Scenarios**. Cover SONiC-DASH extending SONiC APIs and related comprehensive set of objects to describe Microsoft
+- **Scenarios**. Cover DASH extending SONiC APIs and related comprehensive set of objects to describe Microsoft
 Azure’s networking services for the cloud. The 7 initial services (in draft) describe this in more detail. We will also work with cloud and enterprise providers to further extend SONiC DASH to meet their specific needs. For more information,see the [Scenarios](#scenarios) section.
-- **Performance test suite**. Verification to ensure the DASH capable device satisfy the standard SONiC-DASH performance requirements. For more information about test documentation, test scripts, test configurations and other artifacts required to test a SONiC-DASH device or devices, see [SONiC-DASH Testing](https://github.com/Azure/DASH/tree/main/test). Notice that the focus is on executable test artifacts, not test requirements.
+- **Performance test suite**. Verification to ensure the DASH capable device satisfy the standard DASH performance requirements. For more information about test documentation, test scripts, test configurations and other artifacts required to test a DASH device or devices, see [Testing](https://github.com/Azure/DASH/tree/main/test). 
 
 ## Logical architecture (software stack) 
 
@@ -328,9 +328,9 @@ FPGAs, or some other high-density, performant hardware.
 
 ## SONiC integration
 
-The system architecture for SONiC-DASH relies upon the [SONiC system
+The system architecture for SONiC DASH relies upon the [SONiC system
 architecture](https://github.com/Azure/SONiC/wiki/Architecture).
-For more information and details about the integration, see [SONiC-DASH HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-sonic-hld.md). 
+For more information and details about the integration, see [SONiC DASH HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-sonic-hld.md). 
 
 <!--
 ![dash-high-level-design](./images/hld/dash-high-level-design.svg)
@@ -338,7 +338,7 @@ For more information and details about the integration, see [SONiC-DASH HLD](htt
 <figcaption><i>Figure 3 - SONiC integration</i></figcaption><br/> 
 -->
 
-The SONiC-DASH integration introduces the following DASH modifications:
+The SONiC DASH integration introduces the following DASH modifications:
 
 1. A *new docker container* in the user space named **dash container** (aka SDN container) to create
    the functional component for DASH.
@@ -346,8 +346,7 @@ The SONiC-DASH integration introduces the following DASH modifications:
 2. In the **sync-d container**, the **sai api DASH** (as opposed to *sai api* in
    the original SONiC architecture).  
 
-The *DPU/IPU/SmartNic* device will run a separate instance of SONiC-DASH on
-the device.  
+The *DPU/IPU/SmartNic* device will run a separate instance of SONiC DASH on the device.  
 
 The component interactions will be executed as a new user space container
 implementation; relying on the existing SONiC infrastructure and components to
@@ -389,8 +388,8 @@ The figure above highlights the primary SONiC and DASH software stack components
 
 ### DASH appliance
 
-A DASH "appliance" contains multiple (e.g., six) DASH NIC/DPU/Other devices
-installed as PCIe adaptors in a chassis. This chassis provides power and cooling
+A DASH *appliance* contains multiple (e.g., six) DASH NIC/DPU/Other devices
+installed as PCI adaptors in a chassis. This chassis provides power and cooling
 with options for manageability/servicing/supportability (as needed), and other
 capability through PCIe bus, but no large-scale data path traversal of PCIe is
 needed.
@@ -496,7 +495,13 @@ the behaviors per scenario and document them in a repeatable format. From there
 we will be able to auto-generate the APIs. The *implementation* itself does not
 have to be P4.
 
+### Functional testing
+ 
+ Functional testing provides a suite of checks to validate that the DASH devices satisfy the standard **SONiC functional requirements**. This is a **black-box testing**  concerned with validating whether the device works as intended with SONiC. For more information, see [SONiC testbed deployment and setup, SONiC testing, test report processing](https://github.com/Azure/sonic-mgmt/tree/master/docs).  
+
 ### Performance testing
+
+Performance testing provides a suite of checks to verify that the DASH devices satisfy the standard **DASH performance requirements**. For more information about test documentation, test scripts, test configurations and other artifacts required to test a DASH device or devices, see [DASH Testing](https://github.com/Azure/DASH/tree/main/test). 
 
 > [!NOTE]
 > TBD - We just capture the gist of it and then we link to the related test area.
@@ -504,8 +509,7 @@ have to be P4.
 
 - [High-Level Description (HLD) Test
   Specification](https://github.com/Azure/DASH/blob/main/test/docs/dash-test-HLD.md).
-  High-level design for the testing of devices which conform to the SONiC-DASH
-  requirements.
+  High-level design for the testing of devices which conform to the DASH requirements.
 - [Dash Test Maturity
   Stages](https://github.com/Azure/DASH/blob/main/test/docs/dash-test-maturity-stages.md).
   Describes a progressive approach to DASH testing.
