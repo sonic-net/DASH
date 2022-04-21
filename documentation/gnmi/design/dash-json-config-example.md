@@ -10,4 +10,4 @@ last update: 04/21/2022
 Please, refer to the [DASH.json](DASH.json) example. 
 
 > [!NOTE] 
-> When reviewing, enter specific comments in the code itself. 
+> When reviewing the sample code, enter comments directly under the applicable line(s).
