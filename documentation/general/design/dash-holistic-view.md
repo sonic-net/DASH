@@ -47,8 +47,8 @@ last update: 04/20/2022
 ## Introduction
 
 This document introduces the **Disaggregated API for SONiC Hosts** (**DASH** for
-short) and provides an overview of the project, the supporting elements and the and 
-its architecture.
+short) and provides an overview of the project, the supporting elements and its 
+architecture.
 
 ![dash-words-cloud](./images/dash-words-cloud.png)
 
