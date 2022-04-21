@@ -67,23 +67,24 @@ or even 100x stateful connection performance**. In particular
 
 - With the help of network hardware technology providers, create an open forum
   that capitalizes on the use of **programmable networking devices** including
-  - **SmartNICs**. A smart network interface card (SmartNIC), is a programmable 
-    accelerator that makes data center networking, security and storage efficient and flexible.
-    It offloads from server CPU a set of tasks such as how to process and route packets of data.
-  - **SmartSwitches**. A smart switch is a type of managed switch with only a select number of options 
-    for management. It may only provide functionality to configure a handful of settings.
-  - **SmartAppliances**. An (SDN) appliance is a multi-tenant network appliance. It will have multiple cards; 
-    one card has multiple machines or bare-metal servers, which supports Virtual Ports.
-- Optimize **stateful L4** performance and connection scale by 10x or even 100x, 
+  - **SmartNICs**. A smart network interface card (SmartNIC), is a programmable
+    accelerator that makes data center networking, security and storage
+    efficient and flexible. It offloads from server CPU a set of tasks such as
+    how to process and route packets of data.
+  - **SmartSwitches**. A smart switch is a type of managed switch with a
+    selected number of options for management. 
+  - **SmartAppliances**. An appliance is a multi-tenant network appliance.
+    It has multiple data processing units (DPUs) supporting virtual ports.
+- Optimize **stateful L4** performance and connection scale by 10x or even 100x,
   when compared to implementations that make extensive use of a generic software
-  stack approach (compromising performance for flexibility).  This flexibility
-  for a further optimized approach. As host networking in the cloud is performed at L4, the
-  resulting performance improvements should be truly significant.
+  stack approach (compromising performance for flexibility). As host networking
+  in the cloud is performed at L4, the resulting performance improvements should
+  be truly significant.
 - Microsoft Azure will integrate and deploy DASH solutions to ensure that scale,
   monitoring, reliability, availability and constant innovation are proven and
-  hardened. Other enterprise and cloud providers may deploy DASH as well.  It should
-  be noted that innovations for **in-service software upgrades** (ISSU) and
-  **high availability** (HA) are key tenets of the DASH charter.
+  hardened. Other enterprise and cloud providers may deploy DASH as well.  It
+  should be noted that innovations for **in-service software upgrades** (ISSU)
+  and **high availability** (HA) are key tenets of the DASH charter.
   
 ## Compliance and requirements
 
