@@ -10,4 +10,4 @@ This folder contains DASH gNMI northbound API design and architecture documents.
 
 | Document                                               | Description                                |
 | ------------------------------------------------------ | ------------------------------------------ |
-| [Json configuration example](dash-json-config-example.md) |Configuration schema example  |
+| [JSON configuration example](dash-json-config-example.md) |Configuration schema example  |
