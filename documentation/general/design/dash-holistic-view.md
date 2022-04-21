@@ -35,7 +35,7 @@ last update: 04/20/2022
   - [Switch Abstraction Interface (SAI) API](#switch-abstraction-interface-sai-api)
   - [DASH pipeline API](#dash-pipeline-api)
     - [Behavioral model](#behavioral-model)
-  - [Functional testing](#functional-testing)
+  - [Functional and conformance testing](#functional-and-conformance-testing)
   - [Performance testing](#performance-testing)
 - [Appendix](#appendix)
   - [A day in the life of a DASH packet](#a-day-in-the-life-of-a-dash-packet)
@@ -167,7 +167,7 @@ The following figure shows the DASH project main components.
 
 <figcaption><i>Figure 1 - DASH project</i></figcaption><br/><br/>
 
-- **Functional test suite**. A suite of checks to validate the DASH capable device satisfies the standard SONiC functional requirements. This is a **black-box testing**  concerned with validating whether the device works as intended with SONiC. For more information, see [SONiC testbed deployment and setup, SONiC testing, test report processing](https://github.com/Azure/sonic-mgmt/tree/master/docs).  
+- **Functional and conformance test suite**. A suite of tests to validate that the DASH devices satisfy the standard SONiC functional requirements. This is a **black-box testing**  concerned with validating whether the device works as intended with SONiC. For more information, see [SONiC testbed deployment and setup, SONiC testing, test report processing](https://github.com/Azure/sonic-mgmt/tree/master/docs).  
 - **SDN**. The SDN with its controller is primarily responsible for controlling the DASH overlay services; the traditional SONiC application containers are used to manage the underlay (L3 routing) and hardware platform. 
 The SDN controller controls the overlay built on top of the physical layer of the infrastructure. From the point of view of the SDN control plane, when a customer creates an operation from the cloud portal (for example a VNET creation) the controller allocates the resources, placement management, capacity, etc. via the northbound interface APIs. For more information, see the [SDN controller](#sdn-controller) section.
 - **Network SONiC OS**. DASH builds upon the traditional SONiC architecture, which is documented in the SONiC Wiki under [SONiC System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture). For more information, see the [Logical architecture (software stack)](#logical-architecture-software-stack) section.
@@ -177,7 +177,7 @@ The SDN controller controls the overlay built on top of the physical layer of th
 The documentation related to these devices will be made available by the providers themselves.  
 - **Scenarios**. Cover DASH extending SONiC APIs and related comprehensive set of objects to describe Microsoft
 Azure’s networking services for the cloud. The 7 initial services (in draft) describe this in more detail. We will also work with cloud and enterprise providers to further extend SONiC DASH to meet their specific needs. For more information,see the [Scenarios](#scenarios) section.
-- **Performance test suite**. Verification to ensure the DASH capable device satisfy the standard DASH performance requirements. For more information about test documentation, test scripts, test configurations and other artifacts required to test a DASH device or devices, see [Testing](https://github.com/Azure/DASH/tree/main/test). 
+- **Performance test suite**. A suite of tests to validate that the DASH devices satisfy the standard DASH performance requirements. For more information about test documentation, test scripts, test configurations and other artifacts required to test a DASH device or devices, see [Testing](https://github.com/Azure/DASH/tree/main/test). 
 
 ## Logical architecture (software stack) 
 
@@ -242,7 +242,7 @@ A **gNMI schema** will manage the following DASH components:
 - Other  
 
 > [!NOTE]
-> TBD - See also [TBD gnmi schema]().
+> See also work in progress PR [doc-ref-config-example #93](https://github.com/Azure/DASH/pull/93).
 
 #### Multiple DPUs device
 
@@ -497,13 +497,13 @@ the behaviors per scenario and document them in a repeatable format. From there
 we will be able to auto-generate the APIs. The *implementation* itself does not
 have to be P4.
 
-### Functional testing
+### Functional and conformance testing
  
- Functional testing provides a suite of checks to validate that the DASH devices satisfy the standard **SONiC functional requirements**. This is a **black-box testing**  concerned with validating whether the device works as intended with SONiC. For more information, see [SONiC testbed deployment and setup, SONiC testing, test report processing](https://github.com/Azure/sonic-mgmt/tree/master/docs).  
+ Functional and conformance testing provides a suite of tests to validate that the DASH devices satisfy the standard **SONiC functional requirements**. This is a **black-box testing**  concerned with validating whether the device works as intended with SONiC. For more information, see [SONiC testbed deployment and setup, SONiC testing, test report processing](https://github.com/Azure/sonic-mgmt/tree/master/docs).  
 
 ### Performance testing
 
-Performance testing provides a suite of checks to verify that the DASH devices satisfy the standard **DASH performance requirements**. For more information about test documentation, test scripts, test configurations and other artifacts required to test a DASH device or devices, see [DASH Testing](https://github.com/Azure/DASH/tree/main/test). 
+Performance testing provides a suite of tests to verify that the DASH devices satisfy the standard **DASH performance requirements**. For more information about test documentation, test scripts, test configurations and other artifacts required to test a DASH devices, see [DASH Testing](https://github.com/Azure/DASH/tree/main/test). 
 
 > [!NOTE]
 > TBD - We just capture the gist of it and then we link to the related test area.
