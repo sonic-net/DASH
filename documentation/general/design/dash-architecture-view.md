@@ -3,7 +3,7 @@ Version: draft
 last update: 04/20/2022
 ---
 
-# DASH an architectural view 
+# Disaggregated API for SONiC Hosts (DASH) an holistic view 
 
 - [Introduction](#introduction)
   - [Objectives](#objectives)
@@ -47,7 +47,7 @@ last update: 04/20/2022
 ## Introduction
 
 This document introduces the **Disaggregated API for SONiC Hosts** (**DASH** for
-short) from an architectural point of view. DASH is an open source project with
+short) from an holistic point of view. DASH is an open source project with
 the goal to deliver high-speed network connectivity to critical cloud enterprise
 applications.
 
