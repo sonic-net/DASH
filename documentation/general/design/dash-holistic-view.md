@@ -95,15 +95,15 @@ their specific needs.
 
 The current technologies in the market by necessity provide general purpose APIs
 to perform general purpose actions (ACLs, forwarding tables, metering, etc.).
-The reason is that it is impossiible to target a general purpose API to each
-specific technology provider's implemantation. Obviusely, all this works against
-high performance connectivity. 
+The reason is that it is impossiible to target each specific technology
+provider's implemantation. Obviusely, a general purpose approach can just do so
+much and works against high performance connectivity. 
 
 DASH takes a different approach. It does not make any assumption or enforce any
 implementation details, such as programming language. It delegates to the
 technology providers such decisions so they can best employ their know-how and
 competitive edge to obtain the best possible results, as long as the agreed upon
-behaviroal model and the test cases are satisfied. 
+DASH behaviroal model and test cases are satisfied. 
 
 ### Objectives
 
@@ -126,11 +126,12 @@ achieve **10x or even 100x stateful connection performance**. In particular
   stack approach (compromising performance for flexibility). As host networking
   in the cloud is performed at L4, the resulting performance improvements should
   be truly significant.
-- Microsoft Azure will integrate and deploy DASH solutions to ensure that scale,
-  monitoring, reliability, availability and constant innovation are proven and
-  hardened. Other enterprise and cloud providers may deploy DASH as well.  It
-  should be noted that innovations for **in-service software upgrades** (ISSU)
-  and **high availability** (HA) are key tenets of the DASH charter.
+- As a starting point, Microsoft Azure will integrate and deploy DASH solutions to
+  ensure that scale, monitoring, reliability, availability and constant
+  innovation are proven and hardened. Other enterprise and cloud providers may
+  deploy DASH as well.  It should be noted that innovations for **in-service
+  software upgrades** (ISSU) and **high availability** (HA) are key tenets of
+  the DASH charter.
   
 ## Compliance and requirements
 
