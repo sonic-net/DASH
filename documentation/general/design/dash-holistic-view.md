@@ -43,34 +43,6 @@ last update: 04/20/2022
   - [A day in the life of a DASH SDN controller](#a-day-in-the-life-of-a-dash-sdn-controller)
   - [A day in the life of a DASH container](#a-day-in-the-life-of-a-dash-container)
 - [References](#references)
-    DASH](#switch-abstraction-interface-sai-dash)
-  - [ASIC Drivers](#asic-drivers)
-  - [DASH capable ASICs](#dash-capable-asics)
-- [SONiC integration](#sonic-integration)
-  - [DASH single DPU on NIC](#dash-single-dpu-on-nic)
-  - [DASH appliance](#dash-appliance)
-    - [High Level Architecture](#high-level-architecture)
-    - [Low level architecture](#low-level-architecture)
-  - [DASH smart switch](#dash-smart-switch)
-    - [High level architecture](#high-level-architecture-1)
-    - [Low level architecture](#low-level-architecture-1)
-- [Example of network representation](#example-of-network-representation)
-  - [Deployment](#deployment)
-- [API](#api)
-  - [Switch Abstraction Interface (SAI)
-    API](#switch-abstraction-interface-sai-api)
-  - [DASH pipeline API](#dash-pipeline-api)
-    - [Behavioral model](#behavioral-model)
-  - [Functional and conformance testing](#functional-and-conformance-testing)
-  - [Performance testing](#performance-testing)
-- [Appendix](#appendix)
-  - [A day in the life of a DASH packet](#a-day-in-the-life-of-a-dash-packet)
-  - [A day in the life of a DASH SDN
-    controller](#a-day-in-the-life-of-a-dash-sdn-controller)
-  - [A day in the life of a DASH
-    container](#a-day-in-the-life-of-a-dash-container)
-- [References](#references)
-
 
 ## Introduction
 
