@@ -10,7 +10,7 @@ last update: 04/20/2022
   - [Objectives](#objectives)
 - [Compliance and requirements](#compliance-and-requirements)
 - [Scenarios](#scenarios)
-- [Provisioning example](#provisioning-example)
+- [Azure provisioning example](#azure-provisioning-example)
 - [DASH project](#dash-project)
 - [Logical architecture (software stack)](#logical-architecture-software-stack)
     - [SDN controller](#sdn-controller)
@@ -87,9 +87,9 @@ to provide **high-speed network connectivity** to critical cloud enterprise
 applications. 
 
 DASH extends SONiC APIs and a related comprehensive set of object models that
-describe Microsoft Azure’s networking services for the cloud. The project
-enlists cloud and enterprise technology providers to collaborate and further
-extend DASH to meet their specific needs.
+describe networking services for the cloud. The project enlists cloud and
+enterprise technology providers to collaborate and further extend DASH to meet
+their specific needs.
 
 ### Why DASH? 
 
@@ -155,10 +155,10 @@ supported scenario:
 ## Scenarios
 
 DASH extends SONiC APIs and a related comprehensive set of object models
-described in both *documentation* and a *behavioral model* to describe Microsoft
-Azure’s networking services for the cloud. The 7 initial services (in draft)
-describe this in more detail. We will also work with cloud and enterprise
-providers to further extend DASH to meet their specific needs.
+described in both *documentation* and a *behavioral model* to describe
+networking services for the cloud. The 7 initial services (in draft) describe
+this in more detail. We will also work with cloud and enterprise providers to
+further extend DASH to meet their specific needs.
 
 1. [VNET-to-VNET](https://github.com/Azure/DASH/tree/main/documentation/vnet2vnet-service).
 1. [VNET
@@ -187,7 +187,7 @@ providers to further extend DASH to meet their specific needs.
 1. [Express Route
    Gateway](https://github.com/Azure/DASH/tree/main/documentation/express-route-service).
 
-## Provisioning example
+## Azure provisioning example
 
 This is an Azure example, other Cloud providers may host their implementation.  
 
@@ -213,11 +213,11 @@ The following figure shows the DASH project main components.
 
 <figcaption><i>Figure 1 - DASH project</i></figcaption><br/><br/>
 
-- **Functional and conformance test suite**. A suite of tests to validate that
-  the DASH devices satisfy the standard SONiC functional requirements. This is a
-  **black-box testing**  concerned with validating whether the device works as
-  intended with SONiC. For more information, see [SONiC testbed deployment and
-  setup, SONiC testing, test report
+- **Functional test suite**. A suite of tests to validate that the DASH devices
+  satisfy the standard SONiC functional requirements. This is a **black-box
+  testing**  concerned with validating whether the device works as intended with
+  SONiC. For more information, see [SONiC testbed deployment and setup, SONiC
+  testing, test report
   processing](https://github.com/Azure/sonic-mgmt/tree/master/docs).  
 - **SDN**. The SDN with its controller is primarily responsible for controlling
 the DASH overlay services; the traditional SONiC application containers are used
@@ -249,14 +249,15 @@ of programmable hardware including **SmartNICs**, **SmartSwitches**, and
 **SmartAppliances**. The documentation related to these devices will be made
 available by the providers themselves.  
 - **Scenarios**. Cover DASH extending SONiC APIs and related comprehensive set
-of objects to describe Microsoft Azure’s networking services for the cloud. The
-7 initial services (in draft) describe this in more detail. We will also work
-with cloud and enterprise providers to further extend SONiC DASH to meet their
-specific needs. For more information,see the [Scenarios](#scenarios) section.
-- **Performance test suite**. A suite of tests to validate that the DASH devices
-  satisfy the standard DASH performance requirements. For more information about
-  test documentation, test scripts, test configurations and other artifacts
-  required to test a DASH device or devices, see [Performance
+of objects to describe networking services for the cloud. The 7 initial services
+(in draft) describe this in more detail. We will also work with cloud and
+enterprise providers to further extend SONiC DASH to meet their specific needs.
+For more information,see the [Scenarios](#scenarios) section.
+- **Conformance and performance test suite**. A suite of tests to validate that
+  the DASH devices satisfy the standard DASH conformance and performance
+  requirements. For more information about test documentation, test scripts,
+  test configurations and other artifacts required to test a DASH device or
+  devices, see [Performance
   testing](https://github.com/Azure/DASH/tree/main/test). 
 
 ## Logical architecture (software stack) 
@@ -427,11 +428,6 @@ architecture](https://github.com/Azure/SONiC/wiki/Architecture). For more
 information and details about the integration, see [SONiC DASH
 HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-sonic-hld.md). 
 
-<!--
-![dash-high-level-design](./images/hld/dash-high-level-design.svg)
-
-<figcaption><i>Figure 3 - SONiC integration</i></figcaption><br/> 
--->
 
 The SONiC DASH integration introduces the following DASH modifications:
 
