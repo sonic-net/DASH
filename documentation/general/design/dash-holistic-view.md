@@ -6,6 +6,7 @@ last update: 04/20/2022
 # Disaggregated API for SONiC Hosts (DASH) holistic view 
 
 - [Introduction](#introduction)
+  - [Why DASH?](#why-dash)
   - [Objectives](#objectives)
 - [Compliance and requirements](#compliance-and-requirements)
 - [Scenarios](#scenarios)
@@ -18,7 +19,7 @@ last update: 04/20/2022
     - [Multiple DPUs device](#multiple-dpus-device)
   - [SONiC app containers](#sonic-app-containers)
   - [Switch State Service (SWSS)](#switch-state-service-swss)
-  - [Switch Abstraction Interface (SAI) DASH](#switch-abstraction-interface-sai-dash)
+  - [Switch Abstraction Interface (SAI) DASH extension](#switch-abstraction-interface-sai-dash-extension)
   - [ASIC Drivers](#asic-drivers)
   - [DASH capable ASICs](#dash-capable-asics)
 - [SONiC integration](#sonic-integration)
@@ -35,8 +36,8 @@ last update: 04/20/2022
   - [Switch Abstraction Interface (SAI) API](#switch-abstraction-interface-sai-api)
   - [DASH pipeline API](#dash-pipeline-api)
     - [Behavioral model](#behavioral-model)
-  - [Functional and conformance testing](#functional-and-conformance-testing)
-  - [Performance testing](#performance-testing)
+  - [Functional testing](#functional-testing)
+  - [Conformance and performance testing](#conformance-and-performance-testing)
 - [Appendix](#appendix)
   - [A day in the life of a DASH packet](#a-day-in-the-life-of-a-dash-packet)
   - [A day in the life of a DASH SDN controller](#a-day-in-the-life-of-a-dash-sdn-controller)
@@ -79,12 +80,30 @@ architecture.
 
 ![dash-words-cloud](./images/dash-words-cloud.png)
 
-DASH is an open source project whose final goal is to deliver high-speed network
-connectivity to critical cloud enterprise applications. It extends SONiC APIs
-and a related comprehensive set of object models that describe Microsoft Azure’s
-networking services for the cloud. The project enlists cloud and enterprise
-technology providers to collaborate and further extend DASH to meet their
-specific needs.
+DASH is an open source project whose goal is to deliver a **behavioral model**
+and related **test cases**. Technology providers must conform to the model and
+test cases when designing and building network devices. These devices are meant
+to provide **high-speed network connectivity** to critical cloud enterprise
+applications. 
+
+DASH extends SONiC APIs and a related comprehensive set of object models that
+describe Microsoft Azure’s networking services for the cloud. The project
+enlists cloud and enterprise technology providers to collaborate and further
+extend DASH to meet their specific needs.
+
+### Why DASH? 
+
+The current technologies in the market by necessity provide general purpose APIs
+to perform general purpose actions (ACLs, forwarding tables, metering, etc.).
+The reason is that it is impossiible to target a general purpose API to each
+specific technology provider's implemantation. Obviusely, all this works against
+high performance connectivity. 
+
+DASH takes a different approach. It does not make any assumption or enforce any
+implementation details, such as programming language. It delegates to the
+technology providers such decisions so they can best employ their know-how and
+competitive edge to obtain the best possible results, as long as the agreed upon
+behaviroal model and the test cases are satisfied. 
 
 ### Objectives
 
@@ -347,12 +366,12 @@ follows:
   supplier SAI library API calls, must likewise be enhanced to handle new DASH
   SAI objects.
 
-### Switch Abstraction Interface (SAI) DASH
+### Switch Abstraction Interface (SAI) DASH extension
 
 The Switch Abstraction Interface (SAI) is a common API that is supported by many
 switch ASIC technology suppliers. SONiC uses SAI to program the ASIC. This
 enables SONiC to work across multiple ASIC platforms naturally. DASH uses a
-combination of traditional SAI headers and new DASH pipeline-specific headers.
+combination of traditional SAI headers and new DASH pipeline-specific extension headers.
 Technology suppliers must implement this interface for their DASH devices. This
 is the primary integration point of DASH devices and the SONiC stack. It will be
 rigorously tested for performance and conformance. See [DASH Testing
@@ -384,6 +403,16 @@ including multi-core System On A Chip (SoC) ASICs, and the associated software.
 For simplicity, the software for such systems which interfaces to the SAI layer
 is collectively called the "ASIC driver." More importantly, the technology
 supplier SAI library will hide all details and present a uniform interface.
+
+
+Dedicated group was looking at PINS (which competes w/DASH). 
+
+Why DASH & Why Not PINS? Reason for DASH is that PINS is based upon a specific language (P4), 
+and DPUs on the market would need to build a cross compiler. 
+SAI is 1 layer above where you can have PINS, or Vendor APIs under the covers. 
+
+DASH is different b/c all other vendors are describing general purpose APIs to perform general purpose actions (ACL, Forwarding table, Meters). THIS IS THE PROBLEM - it's too generic. They do not know how the APIs will be used, and they don't have knowledge of what the cloud is actually 'doing'. DASH is publicizing Behavioral Models to optimize exactly what we are doing, to optimize against 'what' we do. This is the first time 'what we do' has ever been exposed.
+
 
 ### DASH capable ASICs
 
@@ -562,19 +591,19 @@ per scenario and document them in a repeatable format. From there we will be
 able to auto-generate the APIs. The *implementation* itself does not have to be
 P4.
 
-### Functional and conformance testing
- 
- Functional and conformance testing provides a suite of tests to validate that
+### Functional testing
+
+ Functional testing provides a suite of tests to validate that
  the DASH devices satisfy the standard **SONiC functional requirements**. This
  is a **black-box testing**  concerned with validating whether the device works
  as intended with SONiC. For more information, see [SONiC testbed deployment and
  setup, SONiC testing, test report
  processing](https://github.com/Azure/sonic-mgmt/tree/master/docs).  
 
-### Performance testing
+### Conformance and performance testing
 
-Performance testing provides a suite of tests to verify that the DASH devices
-satisfy the standard **DASH performance requirements**. For more information
+Conformance and performance testing provides a suite of tests to verify that the DASH devices
+satisfy the standard **DASH conformance and performance requirements**. For more information
 about test documentation, test scripts, test configurations and other artifacts
 required to test a DASH devices, see [DASH
 Testing](https://github.com/Azure/DASH/tree/main/test). 
