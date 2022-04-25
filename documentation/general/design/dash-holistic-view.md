@@ -52,11 +52,15 @@ architecture.
 
 ![dash-words-cloud](./images/dash-words-cloud.png)
 
-DASH is an open source project whose goal is to deliver a **behavioral model**
-and related **test cases**. Technology providers must conform to the model and
-test cases when designing and building network devices. These devices are meant
-to provide **high-speed network connectivity** to critical cloud enterprise
-applications. 
+DASH is an open source project with the goal of delivering a **behavioral model**
+and related **test cases** to confirm conformance and performance requirements. Technology providers will conform to the model and
+test cases when designing and building programmable hardware technology. These devices are meant
+to **deliver enterprise network performance to critical cloud applications**. 
+
+DASH extends SONiC APIs and a related comprehensive set of object models to
+describe networking services for the cloud. The project enlists cloud and
+enterprise technology providers to collaborate and further extend DASH to meet
+their specific needs.
 
 DASH extends SONiC APIs and a related comprehensive set of object models that
 describe networking services for the cloud. The project enlists cloud and
