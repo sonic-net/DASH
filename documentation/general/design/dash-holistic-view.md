@@ -375,13 +375,11 @@ is collectively called the "ASIC driver." More importantly, the technology
 supplier SAI library will hide all details and present a uniform interface.
 
 
-Dedicated group was looking at PINS (which competes w/DASH). 
+Note:  a dedicated group has been investigating the use of PINS.  
 
-Why DASH & Why Not PINS? Reason for DASH is that PINS is based upon a specific language (P4), 
-and DPUs on the market would need to build a cross compiler. 
-SAI is 1 layer above where you can have PINS, or Vendor APIs under the covers. 
+Why DASH and Why Not PINS?  PINS is based upon a specific language (P4), and DPUs on the market would need to build a cross compiler. PINS places the onus onto the Cloud Providers to code and string together the PINS API and their own implementation to create the actions they want to achieve; however it may not be optimal for performance reasons in our project.
 
-DASH is different b/c all other vendors are describing general purpose APIs to perform general purpose actions (ACL, Forwarding table, Meters). THIS IS THE PROBLEM - it's too generic. They do not know how the APIs will be used, and they don't have knowledge of what the cloud is actually 'doing'. DASH is publicizing Behavioral Models to optimize exactly what we are doing, to optimize against 'what' we do. This is the first time 'what we do' has ever been exposed.
+
 
 
 ### DASH capable ASICs
