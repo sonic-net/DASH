@@ -69,17 +69,10 @@ their specific needs.
 
 ### Why DASH? 
 
-The current technologies in the market by necessity provide general purpose APIs
-to perform general purpose actions (ACLs, forwarding tables, metering, etc.).
-The reason is that it is impossiible to target each specific technology
-provider's implemantation. Obviusely, a general purpose approach can just do so
-much and works against high performance connectivity. 
+Because it has been difficult/impossible to target each specific technology provider's implementation(s), the technologies in the market currently provide general purpose APIs to perform general purpose actions (such as ACLs, forwarding tables, metering, etc...).  Again, these are not targeted to specific cloud/enterprise usage.  Obviously, a general purpose approach delivers only so much, and may work against high performance connectivity. 
 
-DASH takes a different approach. It does not make any assumption or enforce any
-implementation details, such as programming language. It delegates to the
-technology providers such decisions so they can best employ their know-how and
-competitive edge to obtain the best possible results, as long as the agreed upon
-DASH behaviroal model and test cases are satisfied. 
+DASH takes a different approach. DASH is publicizing Behavioral Models to optimize exactly 'what' clouds/enterprises are doing, to optimize against their services. This is the first time 'what we do' has been exposed.  It does not make assumptions or enforce implementation details, such as a programming language. It delegates these decisions to technology providers in order to best employ their expertise and competitive edge to obtain the best possible results (*given that the agreed upon
+DASH behavioral model and test cases are satisfied*).
 
 ### Objectives
 
