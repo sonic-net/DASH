@@ -52,9 +52,10 @@ architecture.
 
 ![dash-words-cloud](./images/dash-words-cloud.png)
 
-DASH is an open source project with the goal of delivering a **behavioral model**
-and related **test cases** to confirm conformance and performance requirements. Technology providers will conform to the model and
-test cases when designing and building programmable hardware technology. These devices are meant
+DASH is an open source project with the goal of delivering a **behavioral
+model** and related **test cases** to confirm conformance and performance
+requirements. Technology providers will conform to the model and test cases when
+designing and building programmable hardware technology. These devices are meant
 to **deliver enterprise network performance to critical cloud applications**. 
 
 DASH extends SONiC APIs and a related comprehensive set of object models to
@@ -311,6 +312,9 @@ In the case of a multiple DPUs device the following applies:
 - No complex logic will run on the switches (switches do not have a top-level
   view of other/neighboring switches in the infrastructure).
 
+> [!NOTE] Check w/SDN and SONiC if the controller communicates with the DPU, 
+> or is it the SONiC switch NOS communicating with the DPU?
+
 ### SONiC app containers
 
  In the figure above, the "SONiC Containers" box comprises the normal collection
@@ -375,12 +379,14 @@ is collectively called the "ASIC driver." More importantly, the technology
 supplier SAI library will hide all details and present a uniform interface.
 
 
-Note:  a dedicated group has been investigating the use of PINS.  
+> [!NOTE]
+> A dedicated group has been investigating the use of PINS.  
 
-Why DASH and Why Not PINS?  PINS is based upon a specific language (P4), and DPUs on the market would need to build a cross compiler. PINS places the onus onto the Cloud Providers to code and string together the PINS API and their own implementation to create the actions they want to achieve; however it may not be optimal for performance reasons in our project.
-
-
-
+**Why DASH and Why Not PINS?**  PINS is based upon a specific language (P4), and
+DPUs on the market would need to build a cross compiler. PINS places the onus
+onto the Cloud Providers to code and string together the PINS API and their own
+implementation to create the actions they want to achieve; however it may not be
+optimal for performance reasons in our project.
 
 ### DASH capable ASICs
 
@@ -398,8 +404,12 @@ HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-s
 
 The SONiC DASH integration introduces the following DASH modifications:
 
-1. A *new docker container* in the user space named **dash container** (aka SDN
-   container) to create the functional component for DASH.
+1. A *new docker container* in the user space named **DASH container** (aka SDN
+   container) to create the functional component for DASH. Microsoft will
+   deliver the **DASH container** as code to SONiC to allow any SONiC switch to
+   talk with and integrate DPU technology. The *DASH container* software
+   integrates with the SONiC system containers seemlessly. Microsoft will ensure
+   a high quality integration with the switch. 
 
 2. In the **sync-d container**, the **sai api DASH** (as opposed to *sai api* in
    the original SONiC architecture).  
