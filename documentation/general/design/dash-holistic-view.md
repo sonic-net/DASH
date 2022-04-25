@@ -454,8 +454,6 @@ The figure above highlights the primary SONiC and DASH software stack components
 and relationships, and will appear as variations within the DASH configurations
 described below.
 
-> [!NOTE] TBD - We need Prince's help.
-
 ### DASH appliance
 
 A DASH *appliance* contains multiple (e.g., six) DASH NIC/DPU/Other devices
@@ -528,8 +526,8 @@ datacenter.
 
 ## API
 
-> [!NOTE] TBD - We describe in general terms the intent and where it *fits* in
-> the *big picture*. We need engineering help. James, Michael and others.
+> [!NOTE] TBD  - Describe in general terms the intent and where it *fits* in
+> the *big picture*. 
 
 ### Switch Abstraction Interface (SAI) API
 
@@ -581,8 +579,8 @@ about test documentation, test scripts, test configurations and other artifacts
 required to test a DASH devices, see [DASH
 Testing](https://github.com/Azure/DASH/tree/main/test). 
 
-> [!NOTE] TBD - We just capture the gist of it and then we link to the related
-> test area. Chris can take care of this.
+> [!NOTE] TBD - We just capture he basic info and then link to the related
+> test area. 
 
 - [High-Level Description (HLD) Test
   Specification](https://github.com/Azure/DASH/blob/main/test/docs/dash-test-HLD.md).
@@ -603,17 +601,17 @@ Testing](https://github.com/Azure/DASH/tree/main/test).
 
 ### A day in the life of a DASH packet
 
-> [!NOTE] TBD - We need engineering help.
+> [!NOTE] TBD - Engineering help needed. 
 
 Some of the info from Kristina's *sanitized* doc.
 
 ### A day in the life of a DASH SDN controller
 
-> [!NOTE] TBD - We need engineering help.
+> [!NOTE] TBD - Engineering help needed.
 
 ### A day in the life of a DASH container
 
-> [!NOTE] TBD - We need engineering help.
+> [!NOTE] TBD - Engineering help needed.
 
 ## References
 
