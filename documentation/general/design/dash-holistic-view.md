@@ -83,11 +83,10 @@ achieve **10x or even 100x stateful connection performance**. In particular
 - With the help of network hardware technology providers, create an open forum
   that capitalizes on the use of **programmable networking devices** including
   - **SmartNICs**. A smart network interface card (SmartNIC), is a programmable
-    accelerator that makes data center networking, security and storage
-    efficient and flexible. It offloads from server CPU a set of tasks such as
+    accelerator enabling flexible and efficient data center networking, security and storage
+    It offloads from server CPU a set of tasks such as
     how to process and route packets of data.
-  - **SmartSwitches**. A smart switch is a type of managed switch with a
-    selected number of options for management. 
+  - **SmartSwitches**. A smart switch is a network switch with programmable DPUs/IPUs/EPUs, etc...) SmartNIC hardware integrated into the switch design, with a selected number of options for management. 
   - **SmartAppliances**. An appliance is a multi-tenant network appliance. It
     has multiple data processing units (DPUs) supporting virtual ports.
 - Optimize **stateful L4** performance and connection scale by 10x or even 100x,
@@ -262,7 +261,7 @@ capacity, etc. via the  **NorthBound interface APIs**.
 
 ##### SDN and DPU High-Availability (HA)
 
-For **High Availability** (HA), the SDN controller selects a pair of cards and
+High Availability (HA) is important for hardware failover incidents. The SDN controller selects a pair of cards and
 configures them identically.  The only requirement on the card from the HA
 perspective is for the cards to setup a channel between themselves for flow
 synchronization.  The synchronization mechanism is left for technology suppliers
@@ -279,7 +278,7 @@ In summary:
 
 - The DASH container translates SDN configuration modeled in gNMI into **SONiC
   DB** objects. The gNMI schema is closely related to the DASH DB schema so in
-  effect, the gNMI server is a a thin RPC shim layer to the DB.
+  effect, the gNMI server is a thin RPC shim layer to the DB.
 - The **SONiC orchagent** inside the Switch State Service (SWSS) Container will
   be enhanced to transform and translate these objects into **SAI_DB objects**,
   including the new **DASH-specific SAI objects**.  
@@ -342,7 +341,7 @@ follows:
 The Switch Abstraction Interface (SAI) is a common API that is supported by many
 switch ASIC technology suppliers. SONiC uses SAI to program the ASIC. This
 enables SONiC to work across multiple ASIC platforms naturally. DASH uses a
-combination of traditional SAI headers and new DASH pipeline-specific extension headers.
+combination of traditional SAI headers and new DASH pipeline-specific *extension* headers.
 Technology suppliers must implement this interface for their DASH devices. This
 is the primary integration point of DASH devices and the SONiC stack. It will be
 rigorously tested for performance and conformance. See [DASH Testing
@@ -353,7 +352,7 @@ metadata header files. The underlay and overlay schema have different origins:
 
 - Traditional SAI headers are defined in the [OCP SAI project
   repo](https://github.com/opencomputeproject/SAI/tree/master/inc).These are
-  hand-generated and maintained. DASH uses a subset of these to manage underlay
+  hand-generated and maintained. DASH uses a subset of these to manage "underlay"
   functions, e.g. device management, Layer 3 routing and so forth.
 - DASH SAI "overlay" objects are derived from a [P4 Behavioral
   Model](https://github.com/Azure/DASH/tree/main/sirius-pipeline). A script
