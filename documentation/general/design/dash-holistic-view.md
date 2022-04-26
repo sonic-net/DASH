@@ -1,6 +1,5 @@
 ---
-Version: draft
-last update: 04/20/2022
+last update: 04/25/2022
 ---
 
 # Disaggregated API for SONiC Hosts (DASH) holistic view 
