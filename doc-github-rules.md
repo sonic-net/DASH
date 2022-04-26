@@ -3,7 +3,7 @@
 **Table of contents**
 - [Create issues](#create-issues)
 - [Create a fork](#create-a-fork)
-  - [Create a Pull Request](#create-a-pull-request)
+  - [Create a Pull Request (PR)](#create-a-pull-request-pr)
 - [Create a Pull Request from a branch in the original repository](#create-a-pull-request-from-a-branch-in-the-original-repository)
 - [PR Review Phase](#pr-review-phase)
 - [PR Accept Phase](#pr-accept-phase)
@@ -53,7 +53,7 @@ If you use the Github desktop app, see [Cloning and forking repositories from Gi
 It's good practice to regularly sync your fork with the original repository. 
 For more information, see [Syncing a fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork).
 
-### Create a Pull Request
+### Create a Pull Request (PR)
 
 You can make any changes to a fork, including making branches and opening pull requests. 
 If you want to contribute to the original repository, you can submit a pull request.
@@ -74,9 +74,23 @@ For more information, see [Creating a pull request](https://docs.github.com/en/p
 If you use the Github desktop app, see [Creating an issue or pull request](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/working-with-your-remote-repository-on-github-or-github-enterprise/creating-an-issue-or-pull-request). 
 
 ## PR Review Phase
+
 Pull requests generally are open to community review and get accepted as-is or with requested changes. The more impactful the changes, the more review activity is to be expected.
 
+The following are the main steps of the review process:
+
+- You can review changes in a pull request one file at a time. 
+- While reviewing the files in a pull request, you can leave individual comments on specific changes. 
+- After you finish reviewing each file, you can mark the file as viewed. This collapses the file, helping you identify the files you still need to review. 
+- A progress bar in the pull request header shows the number of files you've viewed. 
+- After reviewing as many files as you want, you can approve the pull request or request additional changes by submitting your review with a summary comment. 
+
+For more information, see [Reviewing proposed changes in a pull request](https://docs.github.com/en/enterprise-cloud@latest/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/reviewing-proposed-changes-in-a-pull-request).
+
+See also [Searching issues and pull requests](https://docs.github.com/en/enterprise-cloud@latest/search-github/searching-on-github/searching-issues-and-pull-requests). 
+
 ## PR Accept Phase
+
 Once a PR has received sufficient review and concerns are satisfied, a designated person with sufficient [permissions](https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-roles-for-an-organization#permissions-for-each-role) can accept the Pull Request. 
 
 ## Directly Editing Artifacts
