@@ -261,12 +261,21 @@ capacity, etc. via the  **NorthBound interface APIs**.
 
 ##### SDN and DPU High-Availability (HA)
 
-High Availability (HA) is important for hardware failover incidents. The SDN controller selects a pair of cards and
-configures them identically.  The only requirement on the card from the HA
-perspective is for the cards to setup a channel between themselves for flow
-synchronization.  The synchronization mechanism is left for technology suppliers
-to define and implement. For more information, see [High Availability and
+High Availability (HA) is important for hardware failover incidents. The SDN
+controller selects a pair of cards and configures them identically.  
+The SDN controller will set up the L3 routes through the ToR switch levels,
+possibly even T2 levels for a third backup appliance or smart ToR and configure
+the HA "Peers." 
+
+> [!NOTE] HA sync protocols are WIP and will be standardized and interoperable,
+> not vendor-specified.
+
+The only requirement on the card from the HA perspective is for the cards to
+setup a channel between themselves for flow synchronization.  The
+synchronization mechanism is left for technology suppliers to define and
+implement. For more information, see [High Availability and
 Scale](../../high-avail/design/high-availability-and-scale.md) document.
+
 
 ### DASH container
 
@@ -276,11 +285,11 @@ a new DASH SDN agent **running inside a new SONiC DASH container**.
 
 In summary:
 
-- The DASH container translates SDN configuration modeled in gNMI into **SONiC
-  DB** objects. The gNMI schema is closely related to the DASH DB schema so in
-  effect, the gNMI server is a thin RPC shim layer to the DB.
+- The DASH container translates SDN configuration modeled in gNMI into
+  **DASH_APP_DB** objects. The gNMI schema is closely related to the DASH DB
+  schema so in effect, the gNMI server is a thin RPC shim layer to the DB.
 - The **SONiC orchagent** inside the Switch State Service (SWSS) Container will
-  be enhanced to transform and translate these objects into **SAI_DB objects**,
+  be enhanced to transform and translate these objects into **ASIC_DB objects**,
   including the new **DASH-specific SAI objects**.  
 - An **enhanced syncd** will then configure the dataplane using the **technology
   supplier-specific SAI library**.
