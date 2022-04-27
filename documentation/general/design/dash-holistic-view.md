@@ -7,7 +7,7 @@ Last update: 04/26/2022
 
 [<< Back to DASH top-level Documents](../../README.md#contents) ]
 
-# Disaggregated API for SONiC Hosts (DASH) holistic view 
+# Disaggregated API for SONiC Hosts (DASH) high level design 
 
 - [Introduction](#introduction)
   - [Why DASH?](#why-dash)
@@ -55,7 +55,7 @@ Last update: 04/26/2022
 
 
 This document introduces the **Disaggregated API for SONiC Hosts** (**DASH** for
-short) and provides an overview of the project, the supporting elements and its
+short) and provides an holistic view or overview of the project, the supporting elements and its
 architecture.
 
 ![dash-words-cloud](./images/dash-words-cloud.png)
@@ -589,7 +589,7 @@ P4.
 Conformance and performance testing provides a suite of tests to verify that the DASH devices
 satisfy the standard **DASH conformance and performance requirements**. For more information
 about test documentation, test scripts, test configurations and other artifacts
-required to test a DASH devices, see [DASH
+required to test a DASH device, see [DASH
 Testing](https://github.com/Azure/DASH/tree/main/test). 
 
 > [!NOTE] TBD - We just capture he basic info and then link to the related
