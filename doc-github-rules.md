@@ -16,6 +16,7 @@
   - [Adding draft issues to your project](#adding-draft-issues-to-your-project)
   - [Reorder rows](#reorder-rows)
   - [Adding your project to a repository](#adding-your-project-to-a-repository)
+  - [Excluding files from being pushed to the remote repository](#excluding-files-from-being-pushed-to-the-remote-repository)
 - [Tools](#tools)
 
 This document describes a short process to effectively use GitHub to achieve the following main goals:
@@ -180,6 +181,16 @@ You can list relevant projects in a repository. You can only list projects that 
 
 In order for **repository members to see a project listed in a repository**, they **must have visibility** for the project. For more information, see [Managing the visibility of your projects (beta)](https://docs.github.com/en/issues/trying-out-the-new-projects-experience/managing-the-visibility-of-your-projects) and [Managing access to projects (beta)](https://docs.github.com/en/issues/trying-out-the-new-projects-experience/managing-access-to-projects).
 
+### Excluding files from being pushed to the remote repository 
+
+When working on a project, you’ll want to exclude specific files or directories
+from being pushed to the remote repository. This is where `.gitignore` file
+comes into the picture. This file specifies what untracked files Git must ignore
+so tey are not pushed to the remote repository.
+For more information, see [Ignoring Files and Directories in Git
+(.gitignore)](https://linuxize.com/post/gitignore-ignoring-files-in-git/). 
+See also [A collection of .gitignore templates](https://github.com/github/gitignore). 
+
 ## Tools
 
 - [GitHub desktop](https://desktop.github.com/ "Cntrl+Left Click to open in a new tab")
@@ -189,5 +200,3 @@ In order for **repository members to see a project listed in a repository**, the
   - [Gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens). Supercharge the Git capabilities. 
   - [Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one). Create the ToC for an article.
 - [Drawing tool: diagrams.net](https://www.diagrams.net/)
-
-  
