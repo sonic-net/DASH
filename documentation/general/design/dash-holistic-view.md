@@ -332,7 +332,7 @@ In the case of a multiple DPUs device the following applies:
   view of other/neighboring switches in the infrastructure).
 
 > [!NOTE] 
-> Each DPU shall have an instance of SONiC NOS that exposes the gNMI APIs to the SDN controller. 
+> Each DPU shall have an instance of SONiC DASH OS that exposes the gNMI APIs to the SDN controller. 
 
 ### SONiC app containers
 
