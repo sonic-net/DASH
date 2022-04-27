@@ -586,11 +586,12 @@ P4.
 
 ### Conformance and performance testing
 
-Conformance and performance testing provides a suite of tests to verify that the DASH devices
-satisfy the standard **DASH conformance and performance requirements**. For more information
-about test documentation, test scripts, test configurations and other artifacts
-required to test a DASH device, see [DASH
-Testing](https://github.com/Azure/DASH/tree/main/test). 
+Conformance and performance testing provides a suite of tests to verify that the
+DASH devices satisfy the standard **DASH conformance and performance
+requirements**. For more information about test documentation, test scripts,
+test configurations and other artifacts required to test a DASH device, see
+[DASH conformance and performance
+testing](https://github.com/Azure/DASH/tree/main/test). 
 
 > [!NOTE] TBD - We just capture he basic info and then link to the related
 > test area. 
@@ -629,8 +630,10 @@ Some of the info from Kristina's *sanitized* doc.
 ## References
 
 - [FAQ](https://github.com/Azure/DASH/wiki/FAQ)
-- [Gossary](https://github.com/Azure/DASH/wiki/Glossary)
-- [SAI](https://github.com/Azure/DASH/tree/main/SAI)
+- [Glossary](https://github.com/Azure/DASH/wiki/Glossary)
+- [SAI headers](https://github.com/Azure/DASH/tree/main/SAI)
+- [Sirius pipeline](https://github.com/Azure/DASH/tree/main/sirius-pipeline)
+- [DASH conformance and performance testing](https://github.com/Azure/DASH/tree/main/test)
 - [SONiC DASH HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-sonic-hld.md)
 - [SONiC System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture)
 
