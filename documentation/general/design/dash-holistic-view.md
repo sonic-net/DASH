@@ -571,7 +571,7 @@ pipeline](https://github.com/Azure/DASH/tree/main/sirius-pipeline).
 #### Behavioral model
 
 We are developing a **P4 defined behavioral model** to describe the behaviors
-per scenario and document them in a repeatable format. From there we will be
+per scenario and document them in a repeatable format. The behavioral model is compiled as software to behave exactly as hardware.  From there we will be
 able to auto-generate the APIs. The *implementation* itself does not have to be
 P4.
 
