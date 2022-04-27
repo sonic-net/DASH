@@ -1,6 +1,11 @@
 ---
-last update: 04/25/2022
+Note: Work in progress
+Last update: 04/26/2022
 ---
+
+[<< Back to parent directory](../README.md) ]
+
+[<< Back to DASH top-level Documents](../../README.md#contents) ]
 
 # Disaggregated API for SONiC Hosts (DASH) holistic view 
 
@@ -14,7 +19,7 @@ last update: 04/25/2022
 - [Logical architecture (software stack)](#logical-architecture-software-stack)
     - [SDN controller](#sdn-controller)
       - [SDN and DPU High-Availability (HA)](#sdn-and-dpu-high-availability-ha)
-  - [DASH container](#dash-container)
+  - [gNMI container](#gnmi-container)
     - [Multiple DPUs device](#multiple-dpus-device)
   - [SONiC app containers](#sonic-app-containers)
   - [Switch State Service (SWSS)](#switch-state-service-swss)
@@ -45,6 +50,10 @@ last update: 04/25/2022
 
 ## Introduction
 
+> [!NOTE]
+> This document is work in progress and will replace the current [SONiC-DASH High Level Design (WIP)](dash-high-level-design.md).
+
+
 This document introduces the **Disaggregated API for SONiC Hosts** (**DASH** for
 short) and provides an overview of the project, the supporting elements and its
 architecture.
@@ -62,10 +71,8 @@ describe networking services for the cloud. The project enlists cloud and
 enterprise technology providers to collaborate and further extend DASH to meet
 their specific needs.
 
-DASH extends SONiC APIs and a related comprehensive set of object models that
-describe networking services for the cloud. The project enlists cloud and
-enterprise technology providers to collaborate and further extend DASH to meet
-their specific needs.
+The project enlists cloud and enterprise technology providers to collaborate and
+further extend DASH to meet their specific needs.
 
 ### Why DASH? 
 
@@ -130,6 +137,10 @@ this in more detail. We will also work with cloud and enterprise providers to
 further extend DASH to meet their specific needs.
 
 1. [VNET-to-VNET](https://github.com/Azure/DASH/tree/main/documentation/vnet2vnet-service).
+This scenario is the starting point to design, implement and test the core DASH
+mechanisms. In particular it allows the following features: VM to VM
+communication in VNET, route support, LPM support, ACL support. This is to
+verify the following performance propereies: CPS, flow, PPS, and rule scale. 
 1. [VNET
    Peering](https://github.com/Azure/DASH/tree/main/documentation/vnet-peering-service).
    Virtual network peering permits configuration to connect two virtual networks
@@ -277,7 +288,7 @@ implement. For more information, see [High Availability and
 Scale](../../high-avail/design/high-availability-and-scale.md) document.
 
 
-### DASH container
+### gNMI container
 
 The SDN controller communicates with a DASH device through a
 **[gNMI](https://github.com/Azure/DASH/wiki/Glossary#gnmi) endpoint** served by
@@ -320,8 +331,8 @@ In the case of a multiple DPUs device the following applies:
 - No complex logic will run on the switches (switches do not have a top-level
   view of other/neighboring switches in the infrastructure).
 
-> [!NOTE] Check w/SDN and SONiC if the controller communicates with the DPU, 
-> or is it the SONiC switch NOS communicating with the DPU?
+> [!NOTE] 
+> Each DPU shall have an instance of SONiC NOS that exposes the gNMI APIs to the SDN controller. 
 
 ### SONiC app containers
 
@@ -336,17 +347,9 @@ In the case of a multiple DPUs device the following applies:
 ### Switch State Service (SWSS)
 
 The SWSS container comprises many daemons which operate on conceptual SONIC
-config objects across several databases. DASH affects the following daemons, as
-follows:
-
-- `orchagent`, which translates `XX_DB` objects (application and state DBs -
-  **TODO** - identify) into `ASIC_DB` objects, must be enhanced to manage new
-  DASH overlay objects, such as ACL1,2,3 rules, ENI mappings, etc. The
-  `orchagent` has to manage both representations of SONiC objects (`XX_DB` and
-  `ASIC_DB`) and translates between them bidirectionally as required.
-- `syncd`, which translates `ASIC_DB` conceptual objects into technology
-  supplier SAI library API calls, must likewise be enhanced to handle new DASH
-  SAI objects.
+config objects across several databases. For more information and details about
+the integration, see [SONiC DASH
+HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-sonic-hld.md). 
 
 ### Switch Abstraction Interface (SAI) DASH extension
 
@@ -409,12 +412,11 @@ architecture](https://github.com/Azure/SONiC/wiki/Architecture). For more
 information and details about the integration, see [SONiC DASH
 HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-sonic-hld.md). 
 
-
 The SONiC DASH integration introduces the following DASH modifications:
 
-1. A *new docker container* in the user space named **DASH container** (aka SDN
+1. A *new docker container* in the user space named **gNMI container** (aka SDN
    container) to create the functional component for DASH. Microsoft will
-   deliver the **DASH container** as code to SONiC to allow any SONiC switch to
+   deliver the **gNMI container** as code to SONiC to allow any SONiC switch to
    talk with and integrate DPU technology. The *DASH container* software
    integrates with the SONiC system containers seemlessly. Microsoft will ensure
    a high quality integration with the switch. 
@@ -547,11 +549,14 @@ interface for their DASH devices. This interface is the primary integration
 point of DASH devices and the SONiC stack. It will be rigorously tested for
 performance and conformance. See DASH Testing documentation.
 
-See related code at this location
-[SAI](https://github.com/Azure/DASH/tree/main/SAI). See also:
+- **Overlay headers**. The headers for overlay are generated from the P4 code. 
+- **Underlay headers**. The headers for underlay are a filtered subset derived from standard OCP SAI headers. 
 
-- [Overlay](https://github.com/Azure/DASH/tree/main/SAI/overlay)
-- [Underlay](https://github.com/Azure/DASH/tree/main/SAI/underlay)
+> [!NOTE] 
+> Check with SAI engeenering. 
+
+See related code at this location
+[SAI](https://github.com/Azure/DASH/tree/main/SAI). 
 
 ### DASH pipeline API
 
@@ -625,3 +630,7 @@ Some of the info from Kristina's *sanitized* doc.
 
 - [FAQ](https://github.com/Azure/DASH/wiki/FAQ)
 - [Gossary](https://github.com/Azure/DASH/wiki/Glossary)
+- [SAI](https://github.com/Azure/DASH/tree/main/SAI)
+- [SONiC DASH HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-sonic-hld.md)
+- [SONiC System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture)
+
