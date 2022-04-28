@@ -94,6 +94,20 @@ control sirius_ingress(inout headers_t hdr,
         const default_action = deny;
     }
 
+    action set_eni(bit<16> eni) {
+        meta.eni = eni;
+    }
+
+    table eni_ether_address_map {
+        key = {
+            meta.eni_addr : exact @name("meta.eni_addr:address");
+        }
+
+        actions = {
+            set_eni;
+        }
+    }
+
     apply {
         direction_lookup.apply();
 
@@ -108,6 +122,12 @@ control sirius_ingress(inout headers_t hdr,
         }
 
         /* At this point the processing is done on customer headers */
+
+        /* Put VM's MAC in the direction agnostic metadata field */
+        meta.eni_addr = meta.direction == direction_t.OUTBOUND  ?
+                                          hdr.ethernet.src_addr :
+                                          hdr.ethernet.dst_addr;
+        eni_ether_address_map.apply();
 
         if (meta.direction == direction_t.OUTBOUND) {
             outbound.apply(hdr, meta, standard_metadata);
