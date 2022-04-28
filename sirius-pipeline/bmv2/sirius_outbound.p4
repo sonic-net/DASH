@@ -9,20 +9,6 @@ control outbound(inout headers_t hdr,
                  inout metadata_t meta,
                  inout standard_metadata_t standard_metadata)
 {
-    action set_eni(bit<16> eni) {
-        meta.eni = eni;
-    }
-
-    table eni_lookup_from_vm {
-        key = {
-            hdr.ethernet.src_addr : exact @name("hdr.ethernet.src_addr:smac");
-        }
-
-        actions = {
-            set_eni;
-        }
-    }
-
     action set_vni(bit<24> vni) {
         meta.encap_data.vni = vni;
     }
@@ -87,8 +73,6 @@ control outbound(inout headers_t hdr,
     }
 
     apply {
-        eni_lookup_from_vm.apply();
-
         eni_to_vni.apply();
 
 #ifdef STATEFUL_P4
