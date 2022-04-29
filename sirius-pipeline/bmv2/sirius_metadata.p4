@@ -28,6 +28,7 @@ struct metadata_t {
     bool dropped;
     direction_t direction;
     encap_data_t encap_data;
+    EthernetAddress eni_addr;
     bit<16> eni;
     bit<16> vm_id;
     bit<8> appliance_id;
