@@ -1,0 +1,480 @@
+module sonic-dash {
+    namespace "http://github.com/Azure/sonic-dash";
+    prefix dash;
+    
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC DASH";
+
+    revision 2022-04-20 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-dash {
+        container DASH_VNET {
+            description "DASH VNET configuration, part of APP_DB";            
+
+            list DASH_VNET_LIST {
+                key "name";
+
+                leaf name {
+                    type string {
+                        pattern "Vnet[a-zA-Z0-9_-]+" {
+                            error-message "Invalid Vnet name";
+                            error-app-tag vnet-name-invalid;
+                        }
+                    }
+                }   
+
+                leaf vni {
+                    type  uint32 {
+                        range 0..16777215;
+                    }
+                }
+
+                leaf guid {
+                    type string {
+                        length 1..255;
+                    }
+                }
+
+                leaf vxlan_tunnel {
+                    description "Vxlan tunnel name"
+                    type string {
+                        length 1..255;
+                    }
+                }
+
+                leaf-list address_spaces {
+                     type union {
+                         type stypes:sonic-ip4-prefix;
+                         type stypes:sonic-ip6-prefix;
+                     }
+                }
+
+            } /* end of list DASH_VNET_LIST */
+        } /* end of container DASH_VNET */
+
+        container DASH_QOS {
+            description "DASH QOS configs to specify bandwidth, cps, part of APP_DB";            
+
+            list DASH_QOS_LIST {
+                key "name";
+
+                leaf name{
+                    type string {
+                        length 1..255;
+                    }
+                }
+
+                leaf bw {
+                    description "Bandwidth in kbps"
+                    type uint64 {
+                        range "0..100000000" {
+                            error-message "kbps value out of range";
+                        }
+                    }
+                }
+
+                leaf cps {
+                    description "Max number of connections per second"
+                    type uint64 {
+                        range "0..100000000" {
+                            error-message "cps value out of range";
+                        }
+                    }
+                }
+
+                leaf flows {
+                    description "Number of flows"
+                    type uint64 {
+                        range "0..100000000" {
+                            error-message "flows value out of range";
+                        }
+                    }
+                }
+
+            } /* end of list DASH_QOS_LIST */
+        } /* end of container DASH_QOS */
+        
+        container DASH_ENI {
+            description "DASH ENI object to specify eni params; part of APP_DB";            
+
+            list DASH_ENI_LIST {
+                key "name";
+
+                leaf name{
+                    type string {
+                        length 1..255;
+                    }
+                }
+
+                leaf eni_id{
+                    type string {
+                        length 1..255;
+                    }
+                }
+
+                leaf mac_address {
+                    type yang:mac-address;
+                }
+
+                leaf qos {
+                    type leafref {
+                        path /dash:sonic-dash/dash:DASH_QOS/dash:DASH_QOS_LIST/dash:name;
+                    }
+                }
+
+                leaf-list vnet {
+                    type leafref {
+                        path /dash:sonic-dash/dash:DASH_VNET/dash:DASH_VNET_LIST/dash:name;
+                    }
+                }
+
+            } /* end of list DASH_ENI_LIST */
+        } /* end of container DASH_ENI */
+     
+
+        container DASH_ACL_V4_IN {
+            description "DASH Ingress V4 ACL to specify stage and group; part of APP_DB";            
+
+            list DASH_ACL_V4_IN_LIST {
+                key "eni";
+
+                leaf eni {
+                    type leafref {
+                        path /dash:sonic-dash/dash:DASH_ENI/dash:DASH_ENI_LIST/dash:name;
+                    }
+                }
+
+                leaf stage {
+                    type  uint32 {
+                        range 1..5;
+                    }
+                }
+
+                leaf acl_group_id {
+                    type leafref {
+                        path /dash:sonic-dash/dash:DASH_ACL_GROUP/dash:DASH_ACL_GROUP_LIST/dash:name;
+                    }
+                }
+
+            } /* end of list DASH_ACL_V4_IN_LIST */
+        } /* end of container DASH_ACL_V4_IN */
+
+        container DASH_ACL_V4_OUT {
+            description "DASH Egress V4 ACL to specify stage and group; part of APP_DB";            
+
+            list DASH_ACL_V4_OUT_LIST {
+                key "eni";
+
+                leaf eni {
+                    type leafref {
+                        path /dash:sonic-dash/dash:DASH_ENI/dash:DASH_ENI_LIST/dash:name;
+                    }
+                }
+
+                leaf stage {
+                    type  uint32 {
+                        range 1..5;
+                    }
+                }
+
+                leaf acl_group_id {
+                    type leafref {
+                        path /dash:sonic-dash/dash:DASH_ACL_GROUP/dash:DASH_ACL_GROUP_LIST/dash:name;
+                    }
+                }
+
+            } /* end of list DASH_ACL_V4_OUT_LIST */
+        } /* end of container DASH_ACL_V4_OUT */
+
+        container DASH_ACL_GROUP {
+            description "DASH ACL group to specify IP version; part of APP_DB";            
+
+            list DASH_ACL_GROUP_LIST {
+                key "name";
+
+                leaf name {
+                    type string {
+                        length 1..255;
+                    }
+                }
+
+                leaf ip_version {
+                    type string {
+                        pattern "ipv4|ipv6";
+                    }
+                }
+
+            } /* end of list DASH_ACL_GROUP_LIST */
+        } /* end of container DASH_ACL_GROUP */
+
+        container DASH_ACL_RULE {
+            description "DASH ACL rule; part of APP_DB";            
+
+            list DASH_ACL_RULE_LIST {
+                key "acl_group_id name";
+
+                leaf acl_group_id {
+                    type leafref {
+                        path /dash:sonic-dash/dash:DASH_ACL_GROUP/dash:DASH_ACL_GROUP_LIST/dash:name;
+                    }
+                }
+
+                leaf name {
+                    type string {
+                        length 1..255;
+                    }
+                }
+
+                leaf priority {
+                    type  uint32 {
+                        range 0..16777215;
+                    }
+                }
+
+                leaf action {
+                    type string {
+                        pattern "allow|deny";
+                    }
+                }
+
+                leaf terminating {
+                    type boolean
+                    default false;
+                    description "If set to true, stop processing further rules";
+                }
+
+                leaf-list ip_protocol {
+                    description "IP Protocol (tcp or udp or icmp etc)";
+                    type stypes:ip-protocol-type;
+                }   
+
+                leaf-list src_addr {
+                     type union {
+                         type stypes:sonic-ip4-prefix;
+                         type stypes:sonic-ip6-prefix;
+                     }
+                }
+
+                leaf-list dst_addr {
+                     type union {
+                         type stypes:sonic-ip4-prefix;
+                         type stypes:sonic-ip6-prefix;
+                     }
+                }
+
+                leaf-list src_port {
+                     type string {
+                         pattern "TBD"
+                     }
+                }
+
+                leaf-list dst_port {
+                     type string {
+                         pattern "TBD"
+                     }
+                }
+
+            } /* end of list DASH_ACL_RULE_LIST */
+        } /* end of container DASH_ACL_RULE */
+
+        container DASH_APPLIANCE {
+            description "DASH general appliance configs; part of APP_DB";            
+
+            list DASH_APPLIANCE_LIST {
+                key "name";
+
+                leaf name {
+                    type string {
+                        length 1..255;
+                    }
+                }
+
+                leaf sip {
+                     type inet:ip-address;
+                }
+
+                leaf-list vni {
+                    type  uint32 {
+                        range 0..16777215;
+                    }
+                }
+
+            } /* end of list DASH_APPLIANCE_LIST */
+        } /* end of container DASH_APPLIANCE */
+
+        container DASH_ROUTING_TYPE {
+            description "DASH Routing types and actions; part of APP_DB";            
+
+            list DASH_ROUTING_TYPE_LIST {
+                key "name";
+
+                leaf name {
+                    type string {
+                        pattern "direct|vnet|vnet-direct|drop|appliance|privatelink|privatelinknsg|servicetunnel";
+                    }
+                }
+
+                list actions {
+                    key "name"
+ 
+                    leaf name {
+                        type string {
+                            length 1..255;
+                        }
+                    }
+
+                    leaf action_type {
+                        type string {
+                            pattern "none|maprouting|direct|staticencap|appliance|4to6|mapdecap|decap|drop"
+                        }
+                    }
+
+                    leaf encap_type {
+                        type string {
+                            pattern "vxlan|nvgre"
+                        }
+                    }
+
+                    leaf vni {
+                        type  uint32 {
+                            range 0..16777215;
+                        }
+                    }
+                }
+
+            } /* end of list DASH_ROUTING_TYPE_LIST */
+        } /* end of container DASH_ROUTING_TYPE */
+
+        container DASH_ROUTE_TABLE {
+            description "DASH Route table associated to an ENI; part of APP_DB";            
+
+            list DASH_ROUTE_TABLE_LIST {
+                key "eni prefix";
+
+                leaf eni {
+                    type leafref {
+                        path /dash:sonic-dash/dash:DASH_ENI/dash:DASH_ENI_LIST/dash:name;
+                    }
+                }
+
+                leaf prefix {
+                     type union {
+                         type stypes:sonic-ip4-prefix;
+                         type stypes:sonic-ip6-prefix;
+                     }
+                }
+ 
+                leaf ip_version {
+                    type string {
+                        pattern "IPv4|IPv6"
+                    }
+                }
+
+                leaf routing_type {
+                    type leafref {
+                        path /dash:sonic-dash/dash:DASH_ROUTING_TYPE/dash:DASH_ROUTING_TYPE_LIST/dash:name;
+                    }
+                }
+
+                leaf vnet {
+                    type leafref {
+                        path /dash:sonic-dash/dash:DASH_VNET/dash:DASH_VNET_LIST/dash:name;
+                    }
+                }
+
+                leaf customer_addr {
+                     description "if routing_type is vnet-direct"
+                     type inet:ip-address;
+                }
+
+                leaf appliance {
+                    type leafref {
+                        path /dash:sonic-dash/dash:DASH_APPLIANCE/dash:DASH_APPLIANCE_LIST/dash:name;
+                    }
+                }
+
+                leaf overlay_ip {
+                     description "if routing_type is service tunnel"
+                     type inet:ip-address;
+                }
+
+                leaf underlay_ip {
+                     description "if routing_type is service tunnel"
+                     type inet:ip-address;
+                }
+
+                leaf overlay_sip {
+                     description "if routing_type is service tunnel"
+                     type inet:ip-address;
+                }
+
+                leaf underlay_sip {
+                     description "if routing_type is service tunnel"
+                     type inet:ip-address;
+                }
+
+                leaf metering_bucket {
+                    type leafref {
+                        path TBD;
+                    }
+                }
+
+            } /* end of list DASH_ROUTE_TABLE_LIST */
+        } /* end of container DASH_ROUTE_TABLE */
+
+        container DASH_MAPPING_TABLE {
+            description "DASH Mapping table associated to a Vnet; part of APP_DB";            
+
+            list DASH_MAPPING_TABLE_LIST {
+                key "vnet ip_addr";
+
+                leaf vnet {
+                    type leafref {
+                        path /dash:sonic-dash/dash:DASH_VNET/dash:DASH_VNET_LIST/dash:name;
+                    }
+                }
+
+                leaf ip_addr {
+                     description "Overlay CA address"
+                     type inet:ip-address;
+                }
+
+                leaf routing_type {
+                    type leafref {
+                        path /dash:sonic-dash/dash:DASH_ROUTING_TYPE/dash:DASH_ROUTING_TYPE_LIST/dash:name;
+                    }
+                }
+
+                leaf underlay_ip {
+                     description "PA address"
+                     type inet:ip-address;
+                }
+
+                leaf mac_address {
+                    type yang:mac-address;
+                }
+
+                leaf metering_bucket {
+                    type leafref {
+                        path TBD;
+                    }
+                }
+
+            } /* end of list DASH_MAPPING_TABLE_LIST */
+        } /* end of container DASH_MAPPING_TABLE */
+
+    } /* end of container sonic-dash */
+} /* end of module sonic-dash */
