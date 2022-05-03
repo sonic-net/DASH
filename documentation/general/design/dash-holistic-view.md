@@ -143,7 +143,7 @@ communication in VNET, route support, LPM support, ACL support. This is to
 verify the following performance propereies: CPS, flow, PPS, and rule scale. 
 1. [VNET
    Peering](https://github.com/Azure/DASH/tree/main/documentation/vnet-peering-service).
-   Virtual network peering permits configuration to connect two virtual networks
+   Virtual network peering connects two virtual networks
    seamlessly. Once peered, for connectivity purposes, the virtual networks
    appear as one. For background information, see [Virtual network
    peering](https://docs.microsoft.com/en-us/windows-server/networking/sdn/vnet-peering/sdn-vnet-peering).
@@ -222,7 +222,7 @@ section.
   describe the behaviors per scenario and document them in a repeatable format.
   From there we will be able to auto-generate the APIs. The implementation
   itself is not required to be P4. For more information, see the [Behavioral
-  model](#behavioral_model) section.
+  model](https://github.com/Azure/DASH/tree/main/sirius-pipeline/bmv2) section.
 - **DASH programmable hardware**. With the help of network hardware technology
 providers, we are collaborating to create an open forum capitalizing on the use
 of programmable hardware including **SmartNICs**, **SmartSwitches**, and
@@ -558,16 +558,6 @@ performance and conformance. See DASH Testing documentation.
 See related code at this location
 [SAI](https://github.com/Azure/DASH/tree/main/SAI). 
 
-### DASH pipeline API
-
-Previousley named *Sirius pipeline API*.
-
-> [!NOTE] We just capture the gist of it and then we link to the related Sirius
-> pipeline API.
-
-See related code at this location [sirius
-pipeline](https://github.com/Azure/DASH/tree/main/sirius-pipeline).
-
 #### Behavioral model
 
 We are developing a **P4 defined behavioral model** to describe the behaviors
@@ -575,7 +565,7 @@ per scenario and document them in a repeatable format. The behavioral model is c
 able to auto-generate the APIs. The *implementation* itself does not have to be
 P4.
 
-### Functional testing
+### SONiC Integration testing
 
  Functional testing provides a suite of tests to validate that
  the DASH devices satisfy the standard **SONiC functional requirements**. This
@@ -584,7 +574,7 @@ P4.
  setup, SONiC testing, test report
  processing](https://github.com/Azure/sonic-mgmt/tree/master/docs).  
 
-### Conformance and performance testing
+### DASH services conformance and performance testing
 
 Conformance and performance testing provides a suite of tests to verify that the
 DASH devices satisfy the standard **DASH conformance and performance
