@@ -276,14 +276,16 @@ module sonic-dash {
                 }
 
                 leaf-list src_port {
+                     description "List of L4 source port range as pattern '0-65365'"
                      type string {
-                         pattern "TBD"
+                         pattern '([0-9]{1,4}|[0-5][0-9]{4}|[6][0-4][0-9]{3}|[6][5][0-2][0-9]{2}|[6][5][3][0-5]{2}|[6][5][3][6][0-5])-([0-9]{1,4}|[0-5][0-9]{4}|[6][0-4][0-9]{3}|[6][5][0-2][0-9]{2}|[6][5][3][0-5]{2}|[6][5][3][6][0-5])';
                      }
                 }
 
                 leaf-list dst_port {
+                     description "List of L4 dst port range as pattern '0-65365'"
                      type string {
-                         pattern "TBD"
+                         pattern '([0-9]{1,4}|[0-5][0-9]{4}|[6][0-4][0-9]{3}|[6][5][0-2][0-9]{2}|[6][5][3][0-5]{2}|[6][5][3][6][0-5])-([0-9]{1,4}|[0-5][0-9]{4}|[6][0-4][0-9]{3}|[6][5][0-2][0-9]{2}|[6][5][3][0-5]{2}|[6][5][3][6][0-5])';
                      }
                 }
 
@@ -390,40 +392,47 @@ module sonic-dash {
                 }
 
                 leaf vnet {
+                    when "((current()/../routing_type = 'vnet') or (current()/../routing_type = 'vnet-direct'))";
                     type leafref {
                         path /dash:sonic-dash/dash:DASH_VNET/dash:DASH_VNET_LIST/dash:name;
                     }
                 }
 
                 leaf customer_addr {
-                     description "if routing_type is vnet-direct"
-                     type inet:ip-address;
+                    when "((current()/../routing_type = 'vnet') or (current()/../routing_type = 'vnet-direct'))";
+                    description "if routing_type is vnet-direct"
+                    type inet:ip-address;
                 }
 
                 leaf appliance {
+                    when "(current()/../routing_type = 'appliance')";
                     type leafref {
                         path /dash:sonic-dash/dash:DASH_APPLIANCE/dash:DASH_APPLIANCE_LIST/dash:name;
                     }
                 }
 
                 leaf overlay_ip {
-                     description "if routing_type is service tunnel"
-                     type inet:ip-address;
+                    when "(current()/../routing_type = 'servicetunnel')";
+                    description "Overlay ip for service tunnel"
+                    type inet:ip-address;
                 }
 
                 leaf underlay_ip {
-                     description "if routing_type is service tunnel"
-                     type inet:ip-address;
+                    when "(current()/../routing_type = 'servicetunnel')";
+                    description "Underlay ip for service tunnel"
+                    type inet:ip-address;
                 }
 
                 leaf overlay_sip {
-                     description "if routing_type is service tunnel"
-                     type inet:ip-address;
+                    when "(current()/../routing_type = 'servicetunnel')";
+                    description "Overlay source ip for service tunnel"
+                    type inet:ip-address;
                 }
 
-                leaf underlay_sip {
-                     description "if routing_type is service tunnel"
-                     type inet:ip-address;
+                leaf overlay_dip {
+                    when "(current()/../routing_type = 'servicetunnel')";
+                    description "Overlay dst ip for service tunnel"
+                    type inet:ip-address;
                 }
 
                 leaf metering_bucket {
@@ -448,8 +457,8 @@ module sonic-dash {
                 }
 
                 leaf ip_addr {
-                     description "Overlay CA address"
-                     type inet:ip-address;
+                    description "Overlay CA address"
+                    type inet:ip-address;
                 }
 
                 leaf routing_type {
@@ -459,11 +468,12 @@ module sonic-dash {
                 }
 
                 leaf underlay_ip {
-                     description "PA address"
-                     type inet:ip-address;
+                    description "PA address"
+                    type inet:ip-address;
                 }
 
                 leaf mac_address {
+                    description "Overlay destination mac address"
                     type yang:mac-address;
                 }
 
