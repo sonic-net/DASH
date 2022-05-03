@@ -36,12 +36,11 @@ Last update: 04/26/2022
     - [Low level architecture](#low-level-architecture-1)
 - [Example of network representation](#example-of-network-representation)
   - [Deployment](#deployment)
-- [API](#api)
-  - [Switch Abstraction Interface (SAI) API](#switch-abstraction-interface-sai-api)
-  - [DASH pipeline API](#dash-pipeline-api)
-    - [Behavioral model](#behavioral-model)
-  - [Functional testing](#functional-testing)
-  - [Conformance and performance testing](#conformance-and-performance-testing)
+- [SAI headers and behavioral model](#sai-headers-and-behavioral-model)
+  - [Switch Abstraction Interface (SAI) headers](#switch-abstraction-interface-sai-headers)
+  - [Behavioral model](#behavioral-model)
+  - [SONiC Integration testing](#sonic-integration-testing)
+  - [DASH services conformance and performance testing](#dash-services-conformance-and-performance-testing)
 - [Appendix](#appendix)
   - [A day in the life of a DASH packet](#a-day-in-the-life-of-a-dash-packet)
   - [A day in the life of a DASH SDN controller](#a-day-in-the-life-of-a-dash-sdn-controller)
@@ -534,12 +533,12 @@ datacenter.
 
 <figcaption><i>Figure 7 - DASH simplified deployment</i></figcaption><br/>
 
-## API
+## SAI headers and behavioral model
 
 > [!NOTE] TBD  - Describe in general terms the intent and where it *fits* in
 > the *big picture*. 
 
-### Switch Abstraction Interface (SAI) API
+### Switch Abstraction Interface (SAI) headers
 
 The Switch Abstraction Interface (SAI) is a common API that is supported by many
 switch ASIC technology suppliers. SONiC uses the API to work across multiple
@@ -547,23 +546,22 @@ ASIC platforms naturally. DASH uses a combination of traditional SAI headers and
 new DASH pipeline-specific headers. Technology suppliers must implement this
 interface for their DASH devices. This interface is the primary integration
 point of DASH devices and the SONiC stack. It will be rigorously tested for
-performance and conformance. See DASH Testing documentation.
+performance and conformance. The SAI headers are the following:
 
 - **Overlay headers**. The headers for overlay are generated from the P4 code. 
-- **Underlay headers**. The headers for underlay are a filtered subset derived from standard OCP SAI headers. 
+- **Underlay headers**. The headers for underlay are a filtered subset derived
+  from standard OCP SAI headers. 
 
-> [!NOTE] 
-> Check with SAI engeenering. 
+For more information see the [SAI README](../SAI/README.md) file.
 
-See related code at this location
-[SAI](https://github.com/Azure/DASH/tree/main/SAI). 
-
-#### Behavioral model
+### Behavioral model
 
 We are developing a **P4 defined behavioral model** to describe the behaviors
-per scenario and document them in a repeatable format. The behavioral model is compiled as software to behave exactly as hardware.  From there we will be
-able to auto-generate the APIs. The *implementation* itself does not have to be
-P4.
+per scenario and document them in a repeatable format. The behavioral model is
+compiled as software to behave exactly as hardware.  From there we will be able
+to auto-generate the APIs. The *implementation* itself does not have to be P4.
+
+For more information see the [pipeline README](../sirius-pipeline/README.md) file.
 
 ### SONiC Integration testing
 
