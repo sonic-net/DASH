@@ -84,7 +84,7 @@ DASH behavioral model and test cases are satisfied*).
 
 The DASH overall objective is to **optimize network SMART Programmable
 Technologies performance**, and **leverage commodity hardware technology** to
-achieve **10x or even 100x stateful connection performance**. In particular
+achieve **10x or even 100x stateful connection performance** leveraging parallel processing for specific tasks. In particular
 
 - With the help of network hardware technology providers, create an open forum
   that capitalizes on the use of **programmable networking devices** including
