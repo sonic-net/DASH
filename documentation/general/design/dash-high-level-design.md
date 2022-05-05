@@ -70,9 +70,6 @@ describe networking services for the cloud. The project enlists cloud and
 enterprise technology providers to collaborate and further extend DASH to meet
 their specific needs.
 
-The project enlists cloud and enterprise technology providers to collaborate and
-further extend DASH to meet their specific needs.
-
 ### Why DASH? 
 
 Because it has been difficult/impossible to target each specific technology provider's implementation(s), the technologies in the market currently provide general purpose APIs to perform general purpose actions (such as ACLs, forwarding tables, metering, etc...).  Again, these are not targeted to specific cloud/enterprise usage.  Obviously, a general purpose approach delivers only so much, and may work against high performance connectivity. 
