@@ -1,4 +1,6 @@
-.bkp
-.git
-/* images 
-/* assets
+# Ignore backup files
+*.bkp
+
+# Ignore logs
+*.log
+
