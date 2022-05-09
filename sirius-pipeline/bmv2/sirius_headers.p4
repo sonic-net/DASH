@@ -4,6 +4,7 @@
 typedef bit<48>  EthernetAddress;
 typedef bit<32>  IPv4Address;
 typedef bit<128> IPv6Address;
+typedef bit<128> IPv4ORv6Address;
 
 header ethernet_t {
     EthernetAddress dst_addr;

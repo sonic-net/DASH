@@ -27,34 +27,19 @@ control outbound(inout headers_t hdr,
         meta.encap_data.dest_vnet_vni = dest_vnet_vni;
     }
 
-    direct_counter(CounterType.packets_and_bytes) routing_v4_counter;
+    direct_counter(CounterType.packets_and_bytes) routing_counter;
 
-    table routing_v4 {
+    table routing {
         key = {
             meta.eni : exact @name("meta.eni:eni");
-            hdr.ipv4.dst_addr : lpm @name("hdr.ipv4.dst_addr:destination");
+            meta.dst_ip_addr : lpm @name("meta.dst_ip_addr:destination");
         }
 
         actions = {
             route_vnet; /* for expressroute - ecmp of overlay */
         }
 
-        counters = routing_v4_counter;
-    }
-
-    direct_counter(CounterType.packets_and_bytes) routing_v6_counter;
-
-    table routing_v6 {
-        key = {
-            meta.eni : exact @name("meta.eni:eni");
-            hdr.ipv6.dst_addr : lpm @name("hdr.ipv6.dst_addr:destination");
-        }
-
-        actions = {
-            route_vnet; /* for expressroute - ecmp of overlay */
-        }
-
-        counters = routing_v6_counter;
+        counters = routing_counter;
     }
 
     action set_tunnel_mapping(IPv4Address underlay_dip,
@@ -71,36 +56,20 @@ control outbound(inout headers_t hdr,
         meta.encap_data.underlay_dip = underlay_dip;
     }
 
-    direct_counter(CounterType.packets_and_bytes) ca_v4_to_pa_counter;
+    direct_counter(CounterType.packets_and_bytes) ca_to_pa_counter;
 
-    table ca_v4_to_pa {
+    table ca_to_pa {
         key = {
             /* Flow for express route */
             meta.encap_data.dest_vnet_vni : exact @name("meta.encap_data.dest_vnet_vni:dest_vni");
-            hdr.ipv4.dst_addr : exact @name("hdr.ipv4.dst_addr:dip");
+            meta.dst_ip_addr : exact @name("meta.dst_ip_addr:dip");
         }
 
         actions = {
             set_tunnel_mapping;
         }
 
-        counters = ca_v4_to_pa_counter;
-    }
-
-    direct_counter(CounterType.packets_and_bytes) ca_v6_to_pa_counter;
-
-    table ca_v6_to_pa {
-        key = {
-            /* Flow for express route */
-            meta.encap_data.dest_vnet_vni : exact @name("meta.encap_data.dest_vnet_vni:dest_vni");
-            hdr.ipv6.dst_addr : exact @name("hdr.ipv6.dst_addr:dip");
-        }
-
-        actions = {
-            set_tunnel_mapping;
-        }
-
-        counters = ca_v6_to_pa_counter;
+        counters = ca_to_pa_counter;
     }
 
     apply {
@@ -127,35 +96,19 @@ control outbound(inout headers_t hdr,
         ConntrackIn.apply(hdr, meta);
 #endif // PNA_CONNTRACK
 
-        bool do_v6 = false;
-        bool do_action = false;
-        if (hdr.ipv6.isValid()) {
-            do_v6 = true;
-            switch (routing_v6.apply().action_run) {
-                route_vnet: {
-                    ca_v6_to_pa.apply();
-                    do_action = true;
-                }
-            }
-        } else {
-            switch (routing_v4.apply().action_run) {
-                route_vnet: {
-                    ca_v4_to_pa.apply();
-                    do_action = true;
-                }
-            }
-        }
+        switch (routing.apply().action_run) {
+            route_vnet: {
+                ca_to_pa.apply();
 
-        if (do_action) {
-            vxlan_encap(hdr,
-                        meta.encap_data.underlay_dmac,
-                        meta.encap_data.underlay_smac,
-                        meta.encap_data.underlay_dip,
-                        meta.encap_data.underlay_sip,
-                        meta.encap_data.overlay_dmac,
-                        meta.encap_data.vni);
-
-        }
+                vxlan_encap(hdr,
+                            meta.encap_data.underlay_dmac,
+                            meta.encap_data.underlay_smac,
+                            meta.encap_data.underlay_dip,
+                            meta.encap_data.underlay_sip,
+                            meta.encap_data.overlay_dmac,
+                            meta.encap_data.vni);
+             }
+         }
     }
 }
 
