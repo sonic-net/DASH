@@ -28,17 +28,40 @@ control sirius_ingress(inout headers_t hdr,
         mark_to_drop(standard_metadata);
     }
 
-    action set_direction(direction_t direction) {
-        meta.direction = direction;
+    action deny() {
+        meta.dropped = true;
     }
 
-    table direction_lookup {
+    action accept() {
+    }
+
+    @name("vip|dash")
+    table vip {
         key = {
-            hdr.vxlan.vni : exact @name("hdr.vxlan.vni:vni");
+            hdr.ipv4.dst_addr : exact @name("hdr.ipv4.dst_addr:VIP");
         }
 
         actions = {
-            set_direction;
+            accept;
+            deny;
+        }
+
+        const default_action = deny;
+    }
+
+    action set_outbound_direction() {
+        meta.direction = direction_t.OUTBOUND;
+    }
+
+    @name("direction_lookup|dash")
+    table direction_lookup {
+        key = {
+            hdr.vxlan.vni : exact @name("hdr.vxlan.vni:VNI");
+        }
+
+        actions = {
+            set_outbound_direction;
+            deny;
         }
     }
 
@@ -60,11 +83,30 @@ control sirius_ingress(inout headers_t hdr,
         }
     }
 
+    action set_eni_attrs(bit<32> cps,
+                         bit<32> pps,
+                         bit<32> flows) {
+        meta.eni_data.cps   = cps;
+        meta.eni_data.pps   = pps;
+        meta.eni_data.flows = flows;
+    }
+
+    @name("eni|dash")
+    table eni {
+        key = {
+            meta.eni_id : exact @name("meta.eni_id:eni_id");
+        }
+
+        actions = {
+            set_eni_attrs;
+        }
+    }
+
     direct_counter(CounterType.packets_and_bytes) eni_counter;
 
     table eni_meter {
         key = {
-            meta.eni : exact @name("meta.eni:eni");
+            meta.eni_id : exact @name("meta.eni_id:eni_id");
             meta.direction : exact @name("meta.direction:direction");
             meta.dropped : exact @name("meta.dropped:dropped");
         }
@@ -78,26 +120,43 @@ control sirius_ingress(inout headers_t hdr,
         meta.dropped = false;
     }
 
-    action deny() {
-        meta.dropped = true;
-    }
+    action vxlan_decap_pa_validate() {}
 
-    table inbound_routing {
+    @name("pa_validation|dash_vnet")
+    table pa_validation {
         key = {
-            hdr.vxlan.vni : exact @name("hdr.vxlan.vni:vni");
+            meta.eni_id: exact @name("meta.eni_id:eni_id");
+            hdr.ipv4.src_addr : exact @name("hdr.ipv4.src_addr:sip");
+            hdr.vxlan.vni : exact @name("hdr.vxlan.vni:VNI");
         }
+
         actions = {
-            vxlan_decap(hdr);
+            permit;
             @defaultonly deny;
         }
 
         const default_action = deny;
     }
 
-    action set_eni(bit<16> eni) {
-        meta.eni = eni;
+    @name("inbound_routing|dash_vnet")
+    table inbound_routing {
+        key = {
+            hdr.vxlan.vni : exact @name("hdr.vxlan.vni:VNI");
+        }
+        actions = {
+            vxlan_decap(hdr);
+            vxlan_decap_pa_validate;
+            @defaultonly deny;
+        }
+
+        const default_action = deny;
     }
 
+    action set_eni(bit<16> eni_id) {
+        meta.eni_id = eni_id;
+    }
+
+    @name("eni_ether_address_map|dash")
     table eni_ether_address_map {
         key = {
             meta.eni_addr : exact @name("meta.eni_addr:address");
@@ -109,6 +168,12 @@ control sirius_ingress(inout headers_t hdr,
     }
 
     apply {
+        vip.apply();
+        if (meta.dropped) {
+            return;
+        }
+
+        meta.direction = direction_t.INBOUND;
         direction_lookup.apply();
 
         appliance.apply();
@@ -118,7 +183,12 @@ control sirius_ingress(inout headers_t hdr,
         if (meta.direction == direction_t.OUTBOUND) {
             vxlan_decap(hdr);
         } else if (meta.direction == direction_t.INBOUND) {
-            inbound_routing.apply();
+            switch (inbound_routing.apply().action_run) {
+                vxlan_decap_pa_validate: {
+                    pa_validation.apply();
+                    vxlan_decap(hdr);
+                }
+            }
         }
 
         meta.dst_ip_addr = 0;
@@ -137,6 +207,7 @@ control sirius_ingress(inout headers_t hdr,
                                           hdr.ethernet.src_addr :
                                           hdr.ethernet.dst_addr;
         eni_ether_address_map.apply();
+        eni.apply();
 
         if (meta.direction == direction_t.OUTBOUND) {
             outbound.apply(hdr, meta, standard_metadata);
