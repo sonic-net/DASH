@@ -21,7 +21,7 @@ Last update: 05/09/2022
 This scenario is the starting point to design, implement and test the core DASH
 mechanisms. In particular it allows the following features: VM to VM
 communication in VNET, route support, LPM support, ACL support. This is to
-verify the following performance propereies: CPS, flow, PPS, and rule scale.
+verify the following performance properties: CPS, flow, PPS, and rule scale.
 
 ![vnet-to-vnet-one-dpu](./images/vnet-to-vnet-one-dpu.svg)
 
@@ -29,11 +29,11 @@ verify the following performance propereies: CPS, flow, PPS, and rule scale.
 
 ## Moving packets from source to destination VM
 
-To understand DASH *magic*, you must grasp how packets are transferred from source to destination, in this scenario from source VM to destination VM in a VNET environment.
+To understand DASH *magic*, it is important to understand the path where packets are transferred from source to destination; in this scenario - from source VM to destination VM in a VNET environment.
 
-To make an anology, it is like establshing a virtual connection, as it is done in a telephonic switch, between a caller and a receiver. The first time the connection (virtual circuit) is established it takes some time because extrasteps are required. We call this a **slow path**. After the connection is in place, the messages between caller and receiver can be exchanged whithout overhaed. We can call this **fast path**.
+To make an analogy, it is similar to establishing a dedicated circuit between Point A and Point B for the duration of a call in a telephonic switch, between a caller and a receiver. The first time the connection (circuit) is initiated and established, it takes more time due to the full setup for exchange that is required. We call this a **slow path**. After the connection is established, the messages between caller and receiver can be exchanged via the established path and flow (without overhead). We call this **fast path**.
 
-In the case of the packets between VMs in VNET, a tunnel, equivalent to the virtual circuit of a telephnonic switch, is established between the two VMs. This tunnel allows the packets to be redirected to a DPU, usually in an appliance. This is where the DASH magic (so called *bump in the wire*) happens.
+With respect to packets and flows between VMs in VNET, a tunnel (equivalent to the circuit of a telephnonic switch) is established between the two VMs. This tunnel (along with some SDN feature work) will redirect the packets to a DPU, for example - in an appliance. This is where the DASH magic (so called *bump in the wire*) happens.
 
 ## Packet handling detailed steps
 
@@ -43,7 +43,7 @@ Upon receiving a packet, the SDN appliance will determine:
 - **ENI selection**. Outbound uses source-MAC, Inbound uses destination-MAC.
 - **SLB decap**. If packet was encapped by SLB.
 - **Decap VNET**  GRE key.
-- **Packet match**. Once the ENI is matched, the packet is first matched with flow table to check whether an existing flow already matches.
+- **Packet match**. Once the ENI is matched, the packet is compared with flow table to determine whether there is an existing flow.
 
   - If a **flow match is found**, a corresponding **match action is executed without entering into rule processing**. Flow match direction is identified based on source and destination MAC.
   - If **no flow match is found**, the ENI **rule processing pipeline will execute**. See next steps.
