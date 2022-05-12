@@ -12,7 +12,7 @@ Last update: 05/12/2022
 - [Overview](#overview)
 - [Moving packets from source VM to destination VM](#moving-packets-from-source-vm-to-destination-vm)
 - [Packet transforms](#packet-transforms)
-- [Packet transform example](#packet-transform-example)
+- [Packet transforms example](#packet-transforms-example)
   - [V-Port definition](#v-port-definition)
   - [VNET definition](#vnet-definition)
   - [VNET mapping table](#vnet-mapping-table)
@@ -74,7 +74,7 @@ Packet transformation plays a crucial role when moving a packet from a source to
 
 - **Flow table**. A global table on a DPU that contains the transforms for all of the per-FNI flows that have been processed through the data path pipeline. 
 
-## Packet transform example 
+## Packet transforms example 
 
 The following is an example of packet transformation in VNET to VNET traffic.
 
