@@ -1,27 +1,20 @@
 ---
 Note: Work in progress
-Last update: 05/09/2022
+Last update: 05/12/2022
 ---
 
 [[<< Back to parent directory](../README.md)]
 
 [[<< Back to DASH top-level Documents](../../README.md#contents)]
 
-- [Overview](#overview)
-- [Moving packets from source to destination VM](#moving-packets-from-source-to-destination-vm)
-- [Packet handling detailed steps](#packet-handling-detailed-steps)
-  - [Rule processing pipeline](#rule-processing-pipeline)
-    - [Inbound rule](#inbound-rule)
-    - [Outbound rule](#outbound-rule)
-  VM](#moving-packets-from-source-to-destination-vm)
-- [Overview](#overview)
-- [Moving packets from source to destination VM](#moving-packets-from-source-to-destination-vm)
-- [Packet handling detailed steps](#packet-handling-detailed-steps)
-  - [Rule processing pipeline](#rule-processing-pipeline)
-    - [Inbound rule](#inbound-rule)
-    - [Outbound rule](#outbound-rule)
-
 # VNET to VNET scenario
+
+- [Overview](#overview)
+- [Moving packets from source to destination VM](#moving-packets-from-source-to-destination-vm)
+- [Packet handling detailed steps](#packet-handling-detailed-steps)
+  - [Rule processing pipeline](#rule-processing-pipeline)
+    - [Inbound rule](#inbound-rule)
+    - [Outbound rule](#outbound-rule)
 
 ## Overview
 
