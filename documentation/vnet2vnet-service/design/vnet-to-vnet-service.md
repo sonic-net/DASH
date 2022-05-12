@@ -26,9 +26,14 @@ Last update: 05/09/2022
 ## Overview
 
 This scenario is the starting point to design, implement and test the core DASH
-mechanisms. In particular it allows the following features: VM to VM
-communication in VNET, route support, LPM support, ACL support. This is to
-verify the following performance properties: CPS, flow, PPS, and rule scale.
+mechanisms. In particular it allows the following features: 
+
+- VM to VM communication in VNET
+- Route support
+- LPM support
+- ACL support 
+
+The intent is to verify the following performance properties: **CPS**, **flow**, **PPS**, and **rule scale**.
 
 ![vnet-to-vnet-one-dpu](./images/vnet-to-vnet-one-dpu.svg)
 
