@@ -10,8 +10,9 @@ Last update: 05/12/2022
 # VNET to VNET scenario
 
 - [Overview](#overview)
-- [Moving packets from source to destination VM](#moving-packets-from-source-to-destination-vm)
+- [Moving packets from source VM to destination VM](#moving-packets-from-source-vm-to-destination-vm)
 - [Packet transforms](#packet-transforms)
+- [Packet transform example](#packet-transform-example)
   - [V-Port definition](#v-port-definition)
   - [VNET definition](#vnet-definition)
   - [VNET mapping table](#vnet-mapping-table)
@@ -31,9 +32,9 @@ The intent is to verify the following performance properties: **CPS**, **flow**,
 
 ![vnet-to-vnet-one-dpu](./images/vnet-to-vnet-one-dpu.svg)
 
-<figcaption><i>Figure 1 - VNET to VNET with DPU</i></figcaption><br/>
+<figcaption><i>Figure 1 - VNET to VNET with appliance</i></figcaption><br/>
 
-## Moving packets from source to destination VM
+## Moving packets from source VM to destination VM
 
 To understand DASH *performance enhancements and programmability*, it is important to understand the path where packets
 are transferred from source to destination; in this scenario - from source VM to
@@ -55,7 +56,25 @@ the wire*) happens.
 
 ## Packet transforms
 
-Packet transformation is defined as .... and plays a crucial when moving a packet from a source to a destination.
+Packet transformation plays a crucial role when moving a packet from a source to a destination. Before we look at the example, let's define a few terms. 
+
+- **Flows**. It describes a specific “conversation” between two hosts (SRC/DST IP, SRC/DST Port). When flows are processed and policy is applied to them and then routed, the DPU records the outcomes of all those decisions in a **transform** and places them in the **flow table** which resides locally on the DPU itself.  
+
+  > [!NOTE]
+  > This is why sometimes the term *transform* and *flow* are used interchangeably.
+
+- **Transforms**. It is represented either by *iflow* (initiator) or *rflow* (responder) in the **flow table**. It contains everything the DPU needs to route a packet to its destination without first having to apply a policy.  Whenever the DPU receives a packet, it checks the local *flow table* to see if it’s already done the preparatory work has been done for this flow. The following can happen:
+
+  - When a *transform* or *flow* doesn’t exist in the *flow table*, a **slow path** is executed and policy applied.
+  - When a *transform* or *flow* does exist in the *flow table*, a **fast path** is executed and the values in the transform are used to forward the packet to its destination without having to apply a policy first. 
+
+- **Mapping table**. It is tied to the V-Port, and contains the CA:PA (IPv4, IPv6) mapping, along with the FNI value of the CA for Inner Destination MAC re-write and VNID to use for VXLAN encapsulation.
+ 
+- **Routing table**. A longest prefix match (LPM) table that once matched on destination specifies the action to perform VXLAN encapsulation based on variables already provided, VXLAN encap using a **mapping table** or *Overlay Tunnel* lookup for variables, or *L3/L4 NAT*. Routing tables are mapped to the V-Port. 
+
+- **Flow table**. A global table on a DPU that contains the transforms for all of the per-FNI flows that have been processed through the data path pipeline. 
+
+## Packet transform example 
 
 The following is an example of packet transformation in VNET to VNET traffic.
 
@@ -94,6 +113,7 @@ The following figure shows the transformation steps in a traditional VNET settin
 
 ![packet-transforms-vnet-to-vnet](./images/packet-transforms-vm-to-vm-vnet.svg)
 
+<figcaption><i>Figure 2 - VNET to VNET without appliance</i></figcaption><br/>
 
 <!--
 ![sdn-appliance](../../general/design/images/sdn-appliance.svg) 
