@@ -30,9 +30,9 @@ mechanisms. In particular it allows the following features:
 
 The intent is to verify the following performance properties: **CPS**, **flow**, **PPS**, and **rule scale**.
 
-![vnet-to-vnet-one-dpu](./images/vnet-to-vnet-one-dpu.svg)
+![vm-to-vm-communication-vnet](./images/vm-to-vm-communication-vnet.svg)
 
-<figcaption><i>Figure 1 - VNET to VNET with appliance</i></figcaption><br/>
+<figcaption><i>Figure 1 - VM to VM communiczation using appliance</i></figcaption><br/>
 
 ## Moving packets from source VM to destination VM
 
@@ -69,6 +69,9 @@ Packet transformation plays a crucial role when moving a packet from a source to
   - When a *transform* or *flow* does exist in the *flow table*, a **fast path** is executed and the values in the transform are used to forward the packet to its destination without having to apply a policy first. 
 
 - **Mapping table**. It is tied to the V-Port, and contains the CA:PA (IPv4, IPv6) mapping, along with the FNI value of the CA for Inner Destination MAC re-write and VNID to use for VXLAN encapsulation.
+
+  > [!NOTE]
+  > The Flexible Network Interface (FNI) is a 48-bit value which easily maps to MAC values. The MAC address of a VNIC (VM NIC or BareMetal NIC) is synonymous with FNI. It is one of the values used to identify a V-Port container ID.  
  
 - **Routing table**. A longest prefix match (LPM) table that once matched on destination specifies the action to perform VXLAN encapsulation based on variables already provided, VXLAN encap using a **mapping table** or *Overlay Tunnel* lookup for variables, or *L3/L4 NAT*. Routing tables are mapped to the V-Port. 
 
