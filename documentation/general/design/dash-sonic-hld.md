@@ -338,7 +338,7 @@ metering_bucket          = bucket_id                 ; metering and counter
 
 A high-level module interaction is captured in the following diagram.
 
-  ![dash-high-level-diagram](./images/dash-high-level-design.svg)
+  ![dash-high-level-diagram](./images/hld/dash-high-level-design.svg)
   
 ### 3.3.1 SONiC host containers
 
@@ -418,6 +418,7 @@ SONiC for DASH shall have a lite swss initialization without the heavy-lift of e
 |                          | SAI_PORT_ATTR_OPER_SPEED  |  
 |                          | SAI_PORT_ATTR_OPER_STATUS  |  
 |                          | SAI_PORT_ATTR_SPEED  |  
+|                          | SAI_PORT_ATTR_SUPPORTED_SPEED |
 | RIF                      | SAI_ROUTER_INTERFACE_ATTR_ADMIN_V4_STATE  |  
 |                          | SAI_ROUTER_INTERFACE_ATTR_ADMIN_V6_STATE  |  
 |                          | SAI_ROUTER_INTERFACE_ATTR_MTU  |
