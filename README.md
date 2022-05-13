@@ -1,22 +1,23 @@
-# SONiC-DASH - Disaggregated API for SONiC Hosts - version 0.1 DRAFT/Work in Progress
+# SONiC-DASH - Disaggregated API for SONiC Hosts - DRAFT/Work in Progress
 
 ## SONiC-DASH is a new open source project that will "deliver enterprise network performance to critical cloud applications".  The project extends functionality to stateful workloads.  
 
-We are developing set of APIs and object models describing network services for the cloud, and will work with all cloud providers and enterprise hybrid clouds to develop further functionality. We believe the DASH program describes a comprehensive set of services that are required by the vast majority of clouds. The goal of DASH is to be specific enough for SMART Programmable Technologies to optimize network performance and leverage commodity hardware technology to achieve 10x or even 100x stateful connection performance.
+We are developing set of APIs and object models describing network services for the cloud, and will work with all cloud providers and enterprise hybrid clouds to develop further functionality. We believe the DASH program describes a comprehensive set of services that are required by the vast majority of clouds. The goal of DASH is to be specific enough for SMART Programmable Technologies to optimize network performance and leverage commodity **hardware** technology to achieve 10x or even 100x stateful connection performance.
 
-The technology has multiple applications such as 1) NIC on a host, 2) a Smart Switch, 3) Network Disaggregation, and 4) high performance Network Appliances. Many technology companies have committed to further developing this new open technology and its community. The best minds and practitioners are actively coming together to optimize performance of the cloud by extending SONiC to include stateful workloads. 
+The technology has multiple applications such as 1) NIC on a host, 2) a Smart Switch, 3) Network Disaggregation, and 4) high performance Network Appliances. Many technology companies have committed to further developing this new open technology and its community. The best minds and practitioners are actively collaborating to optimize performance of the cloud by extending SONiC to include stateful workloads. 
  
 Future innovations for in-service software upgrades and ultra-high availability for stateful connections will also be developed with the utmost importance. 
 
-We hope that DASH will have the same success as SONiC for switches and also be widely adopted as a major Open NOS for Programmable Technologies (including SmartNICs) to supercharge a variety of cloud and enterprise applications. 
+We hope that DASH will have the same success as SONiC for switches and will experience wide adoption as a major Open NOS for Programmable Technologies (including SmartNICs) to supercharge a variety of cloud and enterprise applications. 
 
 ## Where to Start?
-Go to the [Documentation table of contents](documentation/README.md) for access to all design and requirements documents.
+Visit the [Documentation table of contents](documentation/README.md) for access to all design and requirements documents.
 
 For a quick technical deep-dive, please begin with:
-1. The [SDN Packet Transforms](documentation/general/design/sdn-features-packet-transforms.md) document, this facilitates understanding of the program goal and the 7 networking scenarios that Azure has defined.  Next...
-2. Peruse the [dash-high-level-design](documentation/general/design/dash-high-level-design.md) for an overview of the architecture, and 
-3. [Program Scale Testing Requirements - Draft](documentation/general/requirements/program-scale-testing-requirements-draft.md) for an example of a test to stress DPU/NIC hardware.
+
+1. Peruse the [DASH high level design](documentation/general/design/dash-high-level-design.md) for an overview of DASH architecture. 
+1. The [SDN Packet Transforms](documentation/general/design/sdn-features-packet-transforms.md) document, this facilitates understanding of the program goal and the 7 networking scenarios that Azure has defined.  
+1. [Program Scale Testing Requirements - Draft](documentation/general/requirements/program-scale-testing-requirements-draft.md) for an example of a test to stress DPU/NIC hardware.
 
 The API and Object Model for VNET<->VNET is in draft; the remaining services will be posted over as we move forward.
 
