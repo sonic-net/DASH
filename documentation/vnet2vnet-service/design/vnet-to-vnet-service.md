@@ -112,7 +112,7 @@ The following is an example of packet transformation in VNET to VNET traffic.
 | | | | | |
 
 
-The following figure shows the transformation steps in a traditional VNET setting i.e., without appliance in between.
+The following figure shows the transformation steps in a traditional VNET setting i.e., without appliance.
 
 ![packet-transforms-vnet-to-vnet](./images/packet-transforms-vm-to-vm-vnet.svg)
 
