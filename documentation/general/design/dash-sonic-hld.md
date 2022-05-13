@@ -338,7 +338,7 @@ metering_bucket          = bucket_id                 ; metering and counter
 
 A high-level module interaction is captured in the following diagram.
 
-  ![dash-high-level-diagram](./images/dash-high-level-design.svg)
+  ![dash-high-level-diagram](./images/hld/dash-high-level-design.svg)
   
 ### 3.3.1 SONiC host containers
 
