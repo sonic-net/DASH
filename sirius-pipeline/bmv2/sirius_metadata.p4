@@ -33,6 +33,7 @@ struct metadata_t {
     bit<16> vm_id;
     bit<8> appliance_id;
     conntrack_data_t conntrack_data;
+    bit<32> xn_meter_tag;
 }
 
 #endif /* _SIRIUS_METADATA_P4_ */
