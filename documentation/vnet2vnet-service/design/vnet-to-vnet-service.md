@@ -198,20 +198,27 @@ The last step is mapping that is shown in the following summary.
 
 #### Mapping
 
-|Source          |Destination     |Action                    |Routing/Mapping                    |
-|----------------|----------------|--------------------------|-----------------------------------|
-|`10.0.0.1`      |`10.0.0.10`     |Blocked (ACL1)            |Blocked                            |
-|`10.0.0.1`      |`10.0.0.11`     |Blocked (ACL1, ACL2)      |Blocked                            |
-|SMAC1           |DMAC_FAKE       |                          |                                   |
-|`10.0.0.1` (1)  |`10.0.0.2` (2)  |Allowed (ACL1, ACL2. ACL3)|Matched LPM route `10.0.0.0/24` (3)|
-|SMAC1           |DMAC_FAKE       |                          |                                   |
+|Source               |Destination                   |Action                    |Routing/Mapping                    |
+|---------------------|------------------------------|--------------------------|-----------------------------------|
+|`10.0.0.1`           |`10.0.0.10`                   |Blocked (ACL1)            |Blocked                            |
+|`10.0.0.1` SMAC1     |`10.0.0.11` DMAC_FAKE         |Blocked (ACL1, ACL2)      |Blocked                            |
+|`10.0.0.1` (1) SMAC1 |`10.0.0.2` (2) DMAC_FAKE      |Allowed (ACL1, ACL2. ACL3)|Matched LPM route `10.0.0.0/24` (3)|
 
+**Notes**
 
-- (1) Outer: Physical host IP VXLAN, VNI: custom, Inner Mac: SMAC1 
+- (1) Outer: Physical host IP, VXLAN VNI: custom, Inner Mac: SMAC1 
 - (2) Outer: Physical SDN Appliance IP, DMAC_FAKE
 - (3) Execute action VNET that will look up in the mapping table and take mapping action. 
-This mapping action is (from row 2 of the mapping table): Outer: SRC: `100.0.0.2` DST: `100.0.0.1` VXLAN VNI: 200 Inner Mac:
-SRC - SMAC1 DST - Mac Inner IP: `10.0.0.1` -> `10.0.0.2`.
+This mapping action is (from row 2 of the mapping table): 
+  - Outer: 
+    - SRC: `100.0.0.2` 
+    - DST: `100.0.0.1` 
+  - VXLAN 
+    - VNI: 200 
+  - Inner Mac: 
+    - SRC - SMAC1 DST 
+  - Mac1 
+    - Inner IP: `10.0.0.1` -> `10.0.0.2`.
 
 
 ## References
@@ -226,5 +233,4 @@ The following figure shows the transformation steps in a traditional VNET settin
 
 ![packet-transforms-vnet-to-vnet](./images/packet-transforms-vm-to-vm-vnet.svg)
 
-<figcaption><i>Figure 2 - VNET to VNET without appliance</i></figcaption><br/>
-
+<figcaption><i>Figure 2 - VNET to VNET without appliance</i></figcaption>
