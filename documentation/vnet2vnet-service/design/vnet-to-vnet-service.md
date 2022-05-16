@@ -16,7 +16,7 @@ Last update: 05/16/2022
   - [V-Port definition](#v-port-definition)
   - [VNET definition](#vnet-definition)
   - [VNET mapping table](#vnet-mapping-table)
-  - [Packet transforms](#packet-transforms-1)
+  - [Packet transform summary](#packet-transform-summary)
   - [Explaining packet transforms](#explaining-packet-transforms)
     - [Match action tables](#match-action-tables)
       - [Table ACL1](#table-acl1)
@@ -69,7 +69,7 @@ DASH performance enhancements (so called *bump in the wire*) happens.
 ## Packet transforms
 
 Packet transformation plays a crucial role when moving a packet from a source to
-a destination. Before we look at the example, let's define a few terms. 
+a destination. Before we look at the example, let's define a few terms.
 
 - **Flows**. It describes a specific *conversation* between two hosts (SRC/DST
   IP, SRC/DST Port). When flows are processed and policy is applied to them and
@@ -90,7 +90,7 @@ a destination. Before we look at the example, let's define a few terms.
     path** is executed and policy applied.
   - When a *transform* or *flow* does exist in the *flow table*, a **fast path**
     is executed and the values in the transform are used to forward the packet
-    to its destination without having to apply a policy first. 
+    to its destination without having to apply a policy first.
 
 - **Mapping table**. It is tied to the V-Port, and contains the CA:PA (IPv4,
   IPv6) mapping, along with the FNI value of the CA for Inner Destination MAC
@@ -100,17 +100,17 @@ a destination. Before we look at the example, let's define a few terms.
   > maps to MAC values. The MAC address of a VNIC (VM NIC or BareMetal NIC) is
   > synonymous with FNI. It is one of the values used to identify a V-Port
   > container ID.  
- 
+
 - **Routing table**. A longest prefix match (LPM) table that once matched on
   destination specifies the action to perform VXLAN encapsulation based on
   variables already provided, VXLAN encap using a **mapping table** or *Overlay
   Tunnel* lookup for variables, or *L3/L4 NAT*. Routing tables are mapped to the
-  V-Port. 
+  V-Port.
 
 - **Flow table**. A global table on a SmartNIC that contains the transforms for all
-  of the per-FNI flows that have been processed through the data path pipeline. 
+  of the per-FNI flows that have been processed through the data path pipeline.
 
-## Packet transforms example 
+## Packet transforms example
 
 The following is an example of packet transformation in VM to VM communication in VNET.
 
@@ -133,7 +133,7 @@ The following is an example of packet transformation in VM to VM communication i
 | 10.0.0.3| 100.0.0.3| 3ffe :: 3| Mac3| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 300
 | | | | | |
 
-### Packet transforms
+### Packet transform summary
 
 The following table summarizes the process of mapping, transforming, and routing.  
 
@@ -206,18 +206,18 @@ The last step is mapping that is shown in the following summary.
 
 **Notes**
 
-- (1) Outer: Physical host IP, VXLAN VNI: custom, Inner Mac: SMAC1 
+- (1) Outer: Physical host IP, VXLAN VNI: custom, Inner Mac: SMAC1
 - (2) Outer: Physical SDN Appliance IP, DMAC_FAKE
-- (3) Execute action VNET that will look up in the mapping table and take mapping action. 
-This mapping action is (from row 2 of the mapping table): 
-  - Outer: 
-    - SRC: `100.0.0.2` 
-    - DST: `100.0.0.1` 
-  - VXLAN 
-    - VNI: 200 
-  - Inner Mac: 
-    - SRC - SMAC1 DST 
-  - Mac1 
+- (3) Execute action VNET that will look up in the mapping table and take mapping action.
+This mapping action is (from row 2 of the mapping table):
+  - Outer:
+    - SRC: `100.0.0.2`
+    - DST: `100.0.0.1`
+  - VXLAN
+    - VNI: 200
+  - Inner Mac:
+    - SRC - SMAC1 DST
+  - Mac1
     - Inner IP: `10.0.0.1` -> `10.0.0.2`.
 
 - [DMAC_FAKE](https://github.com/Azure/DASH/wiki/Glossary#dmac_fake). A hardcoded MAC address (ex: 12:34:56:78:9a:bc). It is not a MAC of an actual VM, it is simply a MAC address to "satisfy" the TCP/IP stack of Windows/Linux.
