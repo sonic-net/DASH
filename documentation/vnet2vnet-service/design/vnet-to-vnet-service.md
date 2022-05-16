@@ -12,7 +12,7 @@ Last update: 05/16/2022
 - [Overview](#overview)
 - [Moving packets from source VM to destination VM](#moving-packets-from-source-vm-to-destination-vm)
 - [Packet transforms](#packet-transforms)
-- [Packet transforms example](#packet-transforms-example)
+- [Packet transform example](#packet-transform-example)
   - [V-Port definition](#v-port-definition)
   - [VNET definition](#vnet-definition)
   - [VNET mapping table](#vnet-mapping-table)
@@ -110,7 +110,7 @@ a destination. Before we look at the example, let's define a few terms.
 - **Flow table**. A global table on a SmartNIC that contains the transforms for all
   of the per-FNI flows that have been processed through the data path pipeline.
 
-## Packet transforms example
+## Packet transform example
 
 The following is an example of packet transformation in VM to VM communication in VNET.
 
