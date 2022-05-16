@@ -16,14 +16,14 @@ Last update: 05/16/2022
   - [V-Port definition](#v-port-definition)
   - [VNET definition](#vnet-definition)
   - [VNET mapping table](#vnet-mapping-table)
-  - [Packet transform summary](#packet-transform-summary)
-  - [Explaining packet transforms](#explaining-packet-transforms)
+  - [Understanding packet transform](#understanding-packet-transform)
     - [Match action tables](#match-action-tables)
       - [Table ACL1](#table-acl1)
       - [Table ACL2](#table-acl2)
       - [Table ACL3](#table-acl3)
     - [Routing table](#routing-table)
     - [Mapping](#mapping)
+  - [Packet transform summary](#packet-transform-summary)
 - [References](#references)
 - [Appendix](#appendix)
   - [VNET to VNET without appliance](#vnet-to-vnet-without-appliance)
@@ -133,20 +133,7 @@ The following is an example of packet transformation in VM to VM communication i
 | 10.0.0.3| 100.0.0.3| 3ffe :: 3| Mac3| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 300
 | | | | | |
 
-### Packet transform summary
-
-The following table summarizes the process of mapping, transforming, and routing.  
-
-| SRC -> DST <img width=1000/>| Out-ACL1| Out-ACL2| Out-ACL3| Routing <img width=1000/>| Final <img width=1000/>|
-|:----------|:----------|:----------|:----------|:----------|:----------
-| | Block 10.0.0.10 Allow *| Block 10.0.0.11 Allow * | Allow*| 10.0.0.0/24 - Route Action = VNET 20.0.0.0/24 - Route Action = VNET|
-| 10.0.0.1 -> 10.0.0.10 <br/>SMAC1-> DMAC_FAKE| Block| | | | Blocked
-| 10.0.0.1 -> 10.0.0.11 <br/>SMAC1-> DMAC_FAKE| Allow| Block| | | Blocked
-| 10.0.0.1 -> 10.0.0.2 <br/>SMAC1-> DMAC_FAKE <br/>Outer:<br/>SRC: [Physical IP of host] <br/>DST: [Physical IP of SDN Appliance] <br/>VXLAN <br/>&nbsp;&nbsp;&nbsp;&nbsp;VNI: custom <br/>Inner Mac: <br/>&nbsp;&nbsp;&nbsp;&nbsp;SRC - SMAC1 DST - DMAC_FAKE <br/>Inner IP: <br/>&nbsp;&nbsp;&nbsp;&nbsp;[10.0.0.1] -> [10.0.0.2]| Allow| Allow| Allow| Matched LPM route 10.0.0.0/24 Execute action VNET - which will lookup in mapping table and take mapping action.| Highlighted the changes in packet <br/>Outer:<br/>SRC: [100.0.0.2] <br/>DST: [100.0.0.1] <br/>VXLAN <br/>&nbsp;&nbsp;&nbsp;&nbsp;VNI: 200 <br/>Inner Mac: <br/>&nbsp;&nbsp;&nbsp;&nbsp;SRC - SMAC1 DST - Mac1 <br/>Inner IP: <br/>&nbsp;&nbsp;&nbsp;&nbsp;[10.0.0.1] -> [10.0.0.2]
-| 10.0.0.1 -> 10.0.0.3 SMAC1-> DMAC_FAKE| | | | |
-| | | | | |
-
-### Explaining packet transforms
+### Understanding packet transform
 
 When talking about packet transforms, we need to think about a process that
 involves three main steps: transforming, mapppng and routing. Let's walk
@@ -221,6 +208,19 @@ This mapping action is (from row 2 of the mapping table):
     - Inner IP: `10.0.0.1` -> `10.0.0.2`.
 
 - [DMAC_FAKE](https://github.com/Azure/DASH/wiki/Glossary#dmac_fake). A hardcoded MAC address (ex: 12:34:56:78:9a:bc). It is not a MAC of an actual VM, it is simply a MAC address to "satisfy" the TCP/IP stack of Windows/Linux.
+
+### Packet transform summary
+
+The following table summarizes the process of transforming, mapping and routing.  
+
+| SRC -> DST <img width=1000/>| Out-ACL1| Out-ACL2| Out-ACL3| Routing <img width=1000/>| Final <img width=1000/>|
+|:----------|:----------|:----------|:----------|:----------|:----------
+| | Block 10.0.0.10 Allow *| Block 10.0.0.11 Allow * | Allow*| 10.0.0.0/24 - Route Action = VNET 20.0.0.0/24 - Route Action = VNET|
+| 10.0.0.1 -> 10.0.0.10 <br/>SMAC1-> DMAC_FAKE| Block| | | | Blocked
+| 10.0.0.1 -> 10.0.0.11 <br/>SMAC1-> DMAC_FAKE| Allow| Block| | | Blocked
+| 10.0.0.1 -> 10.0.0.2 <br/>SMAC1-> DMAC_FAKE <br/>Outer:<br/>SRC: [Physical IP of host] <br/>DST: [Physical IP of SDN Appliance] <br/>VXLAN <br/>&nbsp;&nbsp;&nbsp;&nbsp;VNI: custom <br/>Inner Mac: <br/>&nbsp;&nbsp;&nbsp;&nbsp;SRC - SMAC1 DST - DMAC_FAKE <br/>Inner IP: <br/>&nbsp;&nbsp;&nbsp;&nbsp;[10.0.0.1] -> [10.0.0.2]| Allow| Allow| Allow| Matched LPM route 10.0.0.0/24 Execute action VNET - which will lookup in mapping table and take mapping action.| Highlighted the changes in packet <br/>Outer:<br/>SRC: [100.0.0.2] <br/>DST: [100.0.0.1] <br/>VXLAN <br/>&nbsp;&nbsp;&nbsp;&nbsp;VNI: 200 <br/>Inner Mac: <br/>&nbsp;&nbsp;&nbsp;&nbsp;SRC - SMAC1 DST - Mac1 <br/>Inner IP: <br/>&nbsp;&nbsp;&nbsp;&nbsp;[10.0.0.1] -> [10.0.0.2]
+| 10.0.0.1 -> 10.0.0.3 SMAC1-> DMAC_FAKE| | | | |
+| | | | | |
 
 ## References
 
