@@ -1,6 +1,6 @@
 ---
 Note: Work in progress
-Last update: 05/12/2022
+Last update: 05/16/2022
 ---
 
 [[<< Back to parent directory](../README.md)]
@@ -24,15 +24,16 @@ Last update: 05/12/2022
       - [Table ACL3](#table-acl3)
     - [Routing table](#routing-table)
     - [Mapping](#mapping)
+- [References](#references)
 - [Appendix](#appendix)
   - [VNET to VNET without appliance](#vnet-to-vnet-without-appliance)
 
 ## Overview
 
 This scenario is the starting point to design, implement and test the core DASH
-mechanisms. In particular it allows the following features:
+mechanisms. In particular it allows the following:
 
-- VM to VM communication in VNET using the Appliance for rules and routing offload.  The details for this scenario are located in the DASH HLD (link to section), the SDN Transforms document, (link to section) and the Routing Scenarios document (link to section).  
+- VM to VM communication in VNET, using an Appliance for rules and routing offload
 - Route support
 - LPM support
 - ACL support
@@ -45,9 +46,10 @@ The intent is to verify the following performance properties: **CPS**, **flow**,
 
 ## Moving packets from source VM to destination VM
 
-To understand DASH *performance enhancements and programmability*, it is important to understand the path where packets
-are transferred from source to destination; in this scenario - from source VM to
-destination VM in a VNET environment.
+To understand DASH *performance enhancements and programmability*, it is
+important to understand the path where packets are transferred from source to
+destination; in this scenario - from source VM to destination VM in a VNET
+environment.
 
 To make an analogy, it is similar to establishing a dedicated circuit between
 Point A and Point B for the duration of a call in a telephonic switch, between a
@@ -58,37 +60,59 @@ messages between caller and receiver can be exchanged via the established path
 and flow (without overhead). We call this **fast path**.
 
 With respect to packets and flows between VMs in VNET, a tunnel (equivalent to
-the circuit of a telephonic switch) is established between the source VM to the Appliance, and from the Appliance to the destination VM (after packet rules, routing, and transforms). This
-tunnel (along with some SDN feature work) will redirect the packets to a DPU,
-for example - in an appliance. This is where the DASH performance enhancements (so called *bump in
-the wire*) happens.
+the circuit of a telephonic switch) is established between the source VM to the
+Appliance, and from the Appliance to the destination VM (after packet rules,
+routing, and transforms). This tunnel (along with some SDN feature work) will
+redirect the packets to a DPU, for example - in an appliance. This is where the
+DASH performance enhancements (so called *bump in the wire*) happens.
 
 ## Packet transforms
 
-Packet transformation plays a crucial role when moving a packet from a source to a destination. Before we look at the example, let's define a few terms. 
+Packet transformation plays a crucial role when moving a packet from a source to
+a destination. Before we look at the example, let's define a few terms. 
 
-- **Flows**. It describes a specific “conversation” between two hosts (SRC/DST IP, SRC/DST Port). When flows are processed and policy is applied to them and then routed, the DPU records the outcomes of all those decisions in a **transform** and places them in the **flow table** which resides locally on the DPU itself.  
+- **Flows**. It describes a specific *conversation* between two hosts (SRC/DST
+  IP, SRC/DST Port). When flows are processed and policy is applied to them and
+  then routed, the SmartNIC (or DPU) records the outcomes of all those decisions in a
+  **transform** and places them in the **flow table** which resides locally on
+  the card itself.  
 
-  > [!NOTE]
-  > This is why sometimes the term *transform* and *flow* are used interchangeably.
+  > [!NOTE] This is why sometimes the term *transform* and *flow* are used
+  > interchangeably.
 
-- **Transforms**. It is represented either by *iflow* (initiator) or *rflow* (responder) in the **flow table**. It contains everything the DPU needs to route a packet to its destination without first having to apply a policy.  Whenever the DPU receives a packet, it checks the local *flow table* to see if it’s already done the preparatory work has been done for this flow. The following can happen:
+- **Transforms**. It is represented either by *iflow* (initiator) or *rflow*
+  (responder) in the **flow table**. It contains everything the SmartNIC needs to
+  route a packet to its destination without first having to apply a policy.
+  Whenever the SmartNIC receives a packet, it checks the local *flow table* to see if
+  the preparatory work has been done for this flow. The following can happen:
 
-  - When a *transform* or *flow* doesn’t exist in the *flow table*, a **slow path** is executed and policy applied.
-  - When a *transform* or *flow* does exist in the *flow table*, a **fast path** is executed and the values in the transform are used to forward the packet to its destination without having to apply a policy first. 
+  - When a *transform* or *flow* doesn’t exist in the *flow table*, a **slow
+    path** is executed and policy applied.
+  - When a *transform* or *flow* does exist in the *flow table*, a **fast path**
+    is executed and the values in the transform are used to forward the packet
+    to its destination without having to apply a policy first. 
 
-- **Mapping table**. It is tied to the V-Port, and contains the CA:PA (IPv4, IPv6) mapping, along with the FNI value of the CA for Inner Destination MAC re-write and VNID to use for VXLAN encapsulation.
+- **Mapping table**. It is tied to the V-Port, and contains the CA:PA (IPv4,
+  IPv6) mapping, along with the FNI value of the CA for Inner Destination MAC
+  re-write and VNID to use for VXLAN encapsulation.
 
-  > [!NOTE]
-  > The Flexible Network Interface (FNI) is a 48-bit value which easily maps to MAC values. The MAC address of a VNIC (VM NIC or BareMetal NIC) is synonymous with FNI. It is one of the values used to identify a V-Port container ID.  
+  > [!NOTE] The Flexible Network Interface (FNI) is a 48-bit value which easily
+  > maps to MAC values. The MAC address of a VNIC (VM NIC or BareMetal NIC) is
+  > synonymous with FNI. It is one of the values used to identify a V-Port
+  > container ID.  
  
-- **Routing table**. A longest prefix match (LPM) table that once matched on destination specifies the action to perform VXLAN encapsulation based on variables already provided, VXLAN encap using a **mapping table** or *Overlay Tunnel* lookup for variables, or *L3/L4 NAT*. Routing tables are mapped to the V-Port. 
+- **Routing table**. A longest prefix match (LPM) table that once matched on
+  destination specifies the action to perform VXLAN encapsulation based on
+  variables already provided, VXLAN encap using a **mapping table** or *Overlay
+  Tunnel* lookup for variables, or *L3/L4 NAT*. Routing tables are mapped to the
+  V-Port. 
 
-- **Flow table**. A global table on a DPU that contains the transforms for all of the per-FNI flows that have been processed through the data path pipeline. 
+- **Flow table**. A global table on a SmartNIC that contains the transforms for all
+  of the per-FNI flows that have been processed through the data path pipeline. 
 
 ## Packet transforms example 
 
-The following is an example of packet transformation in VNET to VNET traffic.
+The following is an example of packet transformation in VM to VM communication in VNET.
 
 ### V-Port definition
 
@@ -124,11 +148,17 @@ The following table summarizes the process of mapping, transforming, and routing
 
 ### Explaining packet transforms
 
-When talking about packet transforms, we need to think about a process that involves three mani steps: transforming, mapppng and routing. Let's reason through these steps using  the table shown above.
+When talking about packet transforms, we need to think about a process that
+involves three main steps: transforming, mapppng and routing. Let's walk
+through these steps using  the table shown above.
 
 #### Match action tables
 
-The transform step, as per the P4 model, is executed based on a set of **match/action** tables which are traversed sequencly by the P4 parser. The following are the example applicable tables.   
+The transform step, as per the P4 model, see [P416 Language
+Specification](https://p4.org/p4-spec/docs/P4-16-v1.2.2.html), is executed based
+on a set of **match/action** tables which are traversed sequencly by the P4
+parser. The following are the example applicable tables.
+
 ##### Table ACL1
 
 |Match/Action|Value              |
@@ -156,7 +186,7 @@ The transform step, as per the P4 model, is executed based on a set of **match/a
 
 #### Routing table
 
-The routing step is shown in the following routing table whne defines when a packet is routed from the source to the destination.
+The routing step shown in the following routing table defines when a packet is routed from the source to the destination.
 
 |Match/action|Value                 |
 |------------|----------------------|
@@ -164,7 +194,7 @@ The routing step is shown in the following routing table whne defines when a pac
 |            |src add=`10.0.0.0/24` |
 |action      |allow                 |
 
-The last step to perfom is mapping that is shown in the following summary.
+The last step is mapping that is shown in the following summary.
 
 #### Mapping
 
@@ -184,6 +214,10 @@ This mapping action is (from row 2 of the mapping table): Outer: SRC: `100.0.0.2
 SRC - SMAC1 DST - Mac Inner IP: `10.0.0.1` -> `10.0.0.2`.
 
 
+## References
+
+- [P416 Language Specification](https://p4.org/p4-spec/docs/P4-16-v1.2.2.html)
+
 ## Appendix
 
 ### VNET to VNET without appliance
@@ -194,6 +228,3 @@ The following figure shows the transformation steps in a traditional VNET settin
 
 <figcaption><i>Figure 2 - VNET to VNET without appliance</i></figcaption><br/>
 
-<!--
-![sdn-appliance](../../general/design/images/sdn-appliance.svg) 
--->
