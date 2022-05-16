@@ -17,6 +17,15 @@ Last update: 05/12/2022
   - [VNET definition](#vnet-definition)
   - [VNET mapping table](#vnet-mapping-table)
   - [Packet transforms](#packet-transforms-1)
+  - [Explaining packet transforms](#explaining-packet-transforms)
+    - [Match action tables](#match-action-tables)
+      - [Table ACL1](#table-acl1)
+      - [Table ACL2](#table-acl2)
+      - [Table ACL3](#table-acl3)
+    - [Routing table](#routing-table)
+    - [Mapping](#mapping)
+- [Appendix](#appendix)
+  - [VNET to VNET without appliance](#vnet-to-vnet-without-appliance)
 
 ## Overview
 
@@ -102,6 +111,8 @@ The following is an example of packet transformation in VNET to VNET traffic.
 
 ### Packet transforms
 
+The following table summarizes the process of mapping, transforming, and routing.  
+
 | SRC -> DST <img width=1000/>| Out-ACL1| Out-ACL2| Out-ACL3| Routing <img width=1000/>| Final <img width=1000/>|
 |:----------|:----------|:----------|:----------|:----------|:----------
 | | Block 10.0.0.10 Allow *| Block 10.0.0.11 Allow * | Allow*| 10.0.0.0/24 - Route Action = VNET 20.0.0.0/24 - Route Action = VNET|
@@ -111,6 +122,71 @@ The following is an example of packet transformation in VNET to VNET traffic.
 | 10.0.0.1 -> 10.0.0.3 SMAC1-> DMAC_FAKE| | | | |
 | | | | | |
 
+### Explaining packet transforms
+
+When talking about packet transforms, we need to think about a process that involves three mani steps: transforming, mapppng and routing. Let's reason through these steps using  the table shown above.
+
+#### Match action tables
+
+The transform step, as per the P4 model, is executed based on a set of **match/action** tables which are traversed sequencly by the P4 parser. The following are the example applicable tables.   
+##### Table ACL1
+
+|Match/Action|Value              |
+|------------|-------------------|
+|match       |dst add=`10.0.0.10`|
+|action      |Block              |
+|match       |dst add==`*`       |
+|action      |allow              |
+
+##### Table ACL2
+
+|Match/Action|Value              |
+|------------|-------------------|
+|match       |dst add=`10.0.0.11`|
+|action      |Block              |
+|match       |dst add==`*`       |
+|action      |allow              |
+
+##### Table ACL3
+
+|Match/action|Value              |
+|------------|-------------------|
+|match       |dst add==`*`       |
+|action      |allow              |
+
+#### Routing table
+
+The routing step is shown in the following routing table whne defines when a packet is routed from the source to the destination.
+
+|Match/action|Value                 |
+|------------|----------------------|
+|match       |dst add==`20.0.0.0/24`|
+|            |src add=`10.0.0.0/24` |
+|action      |allow                 |
+
+The last step to perfom is mapping that is shown in the following summary.
+
+#### Mapping
+
+|Source          |Destination     |Action                    |Routing/Mapping                    |
+|----------------|----------------|--------------------------|-----------------------------------|
+|`10.0.0.1`      |`10.0.0.10`     |Blocked (ACL1)            |Blocked                            |
+|`10.0.0.1`      |`10.0.0.11`     |Blocked (ACL1, ACL2)      |Blocked                            |
+|SMAC1           |DMAC_FAKE       |                          |                                   |
+|`10.0.0.1` (1)  |`10.0.0.2` (2)  |Allowed (ACL1, ACL2. ACL3)|Matched LPM route `10.0.0.0/24` (3)|
+|SMAC1           |DMAC_FAKE       |                          |                                   |
+
+
+- (1) Outer: Physical host IP VXLAN, VNI: custom, Inner Mac: SMAC1 
+- (2) Outer: Physical SDN Appliance IP, DMAC_FAKE
+- (3) Execute action VNET that will look up in the mapping table and take mapping action. 
+This mapping action is (from row 2 of the mapping table): Outer: SRC: `100.0.0.2` DST: `100.0.0.1` VXLAN VNI: 200 Inner Mac:
+SRC - SMAC1 DST - Mac Inner IP: `10.0.0.1` -> `10.0.0.2`.
+
+
+## Appendix
+
+### VNET to VNET without appliance
 
 The following figure shows the transformation steps in a traditional VNET setting i.e., without appliance.
 
