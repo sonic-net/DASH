@@ -113,7 +113,7 @@ docker tag dash/keysight:latest dash/keysight:1.0.0
     ```
     cd /vms
     
-    tar xjf IxNetworkWeb_KVM_9.20.2112.27.qcow2.tar.bz2
+    tar xjf IxNetworkWeb_KVM_9.20.2114.1.qcow2.tar.bz2
     ./IxLoad_Web_9.20_KVM.sh -z -e Y
     
     virt-install --name IxNetwork-920 --memory 16000 --vcpus 8 --disk /vms/IxNetworkWeb_KVM_9.20.2112.27.qcow2,bus=sata --import --os-variant centos7.0 --network bridge=br1,model=virtio --noautoconsole
