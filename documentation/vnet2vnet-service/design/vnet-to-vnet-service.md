@@ -243,7 +243,7 @@ The following table summarizes the process of transforming, mapping and routing.
 
 The following figure shows the transformation steps in a traditional VNET setting i.e., without appliance.
 
-![packet-transforms-vnet-to-vnet](./images/packet-transforms-vm-to-vm-vnet.svg)
+![packet-transforms-vm-to-vm-vnet](./images/packet-transforms-vm-to-vm-vnet.svg)
 
 <figcaption><i>Figure 2 - VNET to VNET without appliance</i></figcaption> <br/>
 
