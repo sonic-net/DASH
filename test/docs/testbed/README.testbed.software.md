@@ -53,7 +53,8 @@
     ```
     sudo apt -y install mc
     (edit)/etc/ssh/sshd_config PermitRootLogin yes
-    sudo passwd (dash)
+    sudo passwd
+    # we can use 'dash' as the default password
     sudo systemctl restart sshd
     ```
 - setup management port configuration using this sample `/etc/netplan/00-installer-config.yaml`:
