@@ -32,6 +32,7 @@ control outbound(inout headers_t hdr,
     table routing {
         key = {
             meta.eni : exact @name("meta.eni:eni");
+            meta.is_dst_ip_v6 : exact @name("meta.is_dst_ip_v6:v4_or_v6");
             meta.dst_ip_addr : lpm @name("meta.dst_ip_addr:destination");
         }
 
@@ -62,6 +63,7 @@ control outbound(inout headers_t hdr,
         key = {
             /* Flow for express route */
             meta.encap_data.dest_vnet_vni : exact @name("meta.encap_data.dest_vnet_vni:dest_vni");
+            meta.is_dst_ip_v6 : exact @name("meta.is_dst_ip_v6:v4_or_v6");
             meta.dst_ip_addr : exact @name("meta.dst_ip_addr:dip");
         }
 

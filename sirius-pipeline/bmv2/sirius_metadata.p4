@@ -32,6 +32,7 @@ struct metadata_t {
     bit<16> eni;
     bit<16> vm_id;
     bit<8> appliance_id;
+    bit<1> is_dst_ip_v6;
     IPv4ORv6Address dst_ip_addr;
     conntrack_data_t conntrack_data;
 }
