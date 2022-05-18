@@ -22,7 +22,7 @@ It is assumed that a TCP connection will be used as a control channel between th
 
 A block diagram of the transport protocol is shown in the following figure.
 
-![](images/xsight-labs-reliable-udp-figure.png)
+![](images/xsight-labs-reliable-udp-figure.svg)
 
 *Figure 1 - Reliable UDP Transport Block Diagram*
 
@@ -55,7 +55,7 @@ Keepalive control packets will also contain the sequence number that will be use
 ## Packet Format
 The packet format is shown in the following diagram. The transport layer contains an 8-byte header following the packet’s UDP header. For control packets, no application data is contained in the transport layer. For data packets, a variable number of bytes of application data, including 0 bytes will follow the 8-byte transport layer header.
 
-![](images/xsight-labs-reliable-udp-format.png)
+![](images/xsight-labs-reliable-udp-format.svg)
 
 *Figure 2- Transport Packet Format*
 
