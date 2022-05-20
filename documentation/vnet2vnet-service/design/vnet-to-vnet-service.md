@@ -136,22 +136,17 @@ The following is an example of packet transformation in VM to VM communication i
 
 ### Understanding packet transform
 
-When talking about packet transforms, we need to think about a process that
-involves three main steps: transforming, mapppng and routing. Let's walk
-through these steps using  the table shown above.
+When talking about packet transform, we need to think about a process that involves three main steps: transforming, mapppng and routing. Let's walk through these steps using  the table shown in the section below [Packet transform summary](#packet-transform-summary).
 
 #### Match action tables
 
 The transform step, as per the P4 model, see [P416 Language
-Specification](https://p4.org/p4-spec/docs/P4-16-v1.2.2.html), is executed based
-on a set of **match/action** tables which are traversed sequentially by the P4
-parser.
+Specification](https://p4.org/p4-spec/docs/P4-16-v1.2.2.html), is executed based on a set of **match/action** tables which are traversed sequentially by the P4 parser.
 
 > [!NOTE] A P4 program defines a packet-processing pipeline, but the rules
 > within each table are inserted by the control plane. When a rule matches a
 > packet, its action is invoked with parameters supplied by the control plane as
 > part of the rule.
-
 
 The following are the example applicable tables.
 
