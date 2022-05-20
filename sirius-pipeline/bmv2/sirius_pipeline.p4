@@ -121,6 +121,15 @@ control sirius_ingress(inout headers_t hdr,
             inbound_routing.apply();
         }
 
+        meta.dst_ip_addr = 0;
+        meta.is_dst_ip_v6 = 0;
+        if (hdr.ipv6.isValid()) {
+            meta.dst_ip_addr = hdr.ipv6.dst_addr;
+            meta.is_dst_ip_v6 = 1;
+        } else if (hdr.ipv4.isValid()) {
+            meta.dst_ip_addr = (bit<128>)hdr.ipv4.dst_addr;
+        }
+
         /* At this point the processing is done on customer headers */
 
         /* Put VM's MAC in the direction agnostic metadata field */

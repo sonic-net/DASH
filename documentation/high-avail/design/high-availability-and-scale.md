@@ -53,8 +53,21 @@ Protocol Requirements:
 ## Architecture
 
 ### High-level architecture of Rack Design for High Availability and Scale
+Two architectures are presented. In both cases, communications channels between DPUs are routed through the network.
 
-![hl-arch-rack-design-ha](images/hl-arch-rack-design-ha.png)
+* The near-term solution uses separate switches wired to "DASH Appliances" carrying six, 2-port DPUs. For redundancy, each DPU is wired to both switches (one link to each) as shown.
+* The longer-term solution uses integrated Smart Switches, containing captive DPUs wired to a main switching ASIC(s); DPU ports are not wired to front panels.
+
+
+See the following diagrams.
+
+**ToRs + DASH Appliances - HA Cross-wired Configuration**
+
+![dash-ha-appliance](images/dash-ha-appliance.svg)
+
+**Smart ToRs - HA Cross-wired Configuration**
+
+![dash-ha-smart-switch](images/dash-ha-smart-switch.svg)
 
 **Considerations**
 
