@@ -10,3 +10,4 @@ This folder contains DASH dataplane design and architecture documents.
 
 | Document                                               | Description                                |
 | ------------------------------------------------------ | ------------------------------------------ |
+|[dash-update-timing.md](dash-update-timing.md)|Routing, ACL, Mapping Updates (WIP)|

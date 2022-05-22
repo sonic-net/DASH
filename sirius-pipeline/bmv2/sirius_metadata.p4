@@ -33,10 +33,13 @@ struct metadata_t {
     bool dropped;
     direction_t direction;
     encap_data_t encap_data;
+    EthernetAddress eni_addr;
     bit<16> eni;
     bit<16> vm_id;
     bit<8> appliance_id;
     flow_data_t flow;
+    bit<1> is_dst_ip_v6;
+    IPv4ORv6Address dst_ip_addr;
     conntrack_data_t conntrack_data;
 }
 

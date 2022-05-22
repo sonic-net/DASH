@@ -11,20 +11,6 @@ control inbound(inout headers_t hdr,
                 inout metadata_t meta,
                 inout standard_metadata_t standard_metadata)
 {
-    action set_eni(bit<16> eni) {
-        meta.eni = eni;
-    }
-
-    table eni_lookup_to_vm {
-        key = {
-            hdr.ethernet.dst_addr : exact @name("hdr.ethernet.dst_addr:dmac");
-        }
-
-        actions = {
-            set_eni;
-        }
-    }
-
     action set_vm_attributes(EthernetAddress underlay_dmac,
                              IPv4Address underlay_dip,
                              bit<24> vni) {
@@ -58,8 +44,6 @@ control inbound(inout headers_t hdr,
     }
 
     apply {
-        eni_lookup_to_vm.apply();
-
         eni_to_vm.apply();
 
         vm.apply();

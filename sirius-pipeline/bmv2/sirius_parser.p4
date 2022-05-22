@@ -11,7 +11,7 @@ error {
 #define UDP_PORT_VXLAN 4789
 #define UDP_PROTO 17
 #define TCP_PROTO 6
-#define IPV4_ETHTYPE 0x800
+#define IPV4_ETHTYPE 0x0800
 #define IPV6_ETHTYPE 0x86dd
 
 parser sirius_parser(packet_in packet,
@@ -22,7 +22,8 @@ parser sirius_parser(packet_in packet,
     state start {
         packet.extract(hd.ethernet);
         transition select(hd.ethernet.ether_type) {
-            0x0800:  parse_ipv4;
+            IPV4_ETHTYPE:  parse_ipv4;
+            IPV6_ETHTYPE:  parse_ipv6;
             default: accept;
         }
     }
@@ -32,6 +33,15 @@ parser sirius_parser(packet_in packet,
         verify(hd.ipv4.version == 4w4, error.IPv4IncorrectVersion);
         verify(hd.ipv4.ihl == 4w5, error.IPv4OptionsNotSupported);
         transition select(hd.ipv4.protocol) {
+            UDP_PROTO: parse_udp;
+            TCP_PROTO: parse_tcp;
+            default: accept;
+        }
+    }
+
+    state parse_ipv6 {
+        packet.extract(hd.ipv6);
+        transition select(hd.ipv6.next_header) {
             UDP_PROTO: parse_udp;
             TCP_PROTO: parse_tcp;
             default: accept;
@@ -60,6 +70,7 @@ parser sirius_parser(packet_in packet,
         packet.extract(hd.inner_ethernet);
         transition select(hd.ethernet.ether_type) {
             IPV4_ETHTYPE: parse_inner_ipv4;
+            IPV6_ETHTYPE: parse_inner_ipv6;
             default: accept;
         }
     }
@@ -69,6 +80,15 @@ parser sirius_parser(packet_in packet,
         verify(hd.inner_ipv4.version == 4w4, error.IPv4IncorrectVersion);
         verify(hd.inner_ipv4.ihl == 4w5, error.IPv4OptionsNotSupported);
         transition select(hd.inner_ipv4.protocol) {
+            UDP_PROTO: parse_inner_udp;
+            TCP_PROTO: parse_inner_tcp;
+            default: accept;
+        }
+    }
+
+    state parse_inner_ipv6 {
+        packet.extract(hd.inner_ipv6);
+        transition select(hd.inner_ipv6.next_header) {
             UDP_PROTO: parse_inner_udp;
             TCP_PROTO: parse_inner_tcp;
             default: accept;

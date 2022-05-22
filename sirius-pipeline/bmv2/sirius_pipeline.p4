@@ -94,6 +94,20 @@ control sirius_ingress(inout headers_t hdr,
         const default_action = deny;
     }
 
+    action set_eni(bit<16> eni) {
+        meta.eni = eni;
+    }
+
+    table eni_ether_address_map {
+        key = {
+            meta.eni_addr : exact @name("meta.eni_addr:address");
+        }
+
+        actions = {
+            set_eni;
+        }
+    }
+
     apply {
         direction_lookup.apply();
 
@@ -107,6 +121,15 @@ control sirius_ingress(inout headers_t hdr,
             inbound_routing.apply();
         }
 
+        meta.dst_ip_addr = 0;
+        meta.is_dst_ip_v6 = 0;
+        if (hdr.ipv6.isValid()) {
+            meta.dst_ip_addr = hdr.ipv6.dst_addr;
+            meta.is_dst_ip_v6 = 1;
+        } else if (hdr.ipv4.isValid()) {
+            meta.dst_ip_addr = (bit<128>)hdr.ipv4.dst_addr;
+        }
+
         /* At this point the processing is done on customer headers */
 
         /* set common flow ports for TCP/UDP */
@@ -117,6 +140,13 @@ control sirius_ingress(inout headers_t hdr,
             meta.flow.src_port = hdr.udp.src_port;
             meta.flow.dst_port = hdr.udp.dst_port;
         }
+
+        /* Put VM's MAC in the direction agnostic metadata field */
+        meta.eni_addr = meta.direction == direction_t.OUTBOUND  ?
+                                          hdr.ethernet.src_addr :
+                                          hdr.ethernet.dst_addr;
+        eni_ether_address_map.apply();
+
 
         if (meta.direction == direction_t.OUTBOUND) {
             outbound.apply(hdr, meta, standard_metadata);
