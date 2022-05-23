@@ -195,6 +195,18 @@ The last step is mapping that is shown in the following table.
 
 #### Mapping
 
+The following is the mapping table.
+
+**VNET mapping**
+
+| | V4 underlay| V6 underlay| Mac-Address| Mapping Action | VNI
+|:----------|:----------|:----------|:----------|:----------|:--------------|
+| 10.0.0.1| 100.0.0.1| 3ffe :: 1| Mac1| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 100 |
+| 10.0.0.2| 100.0.0.2| 3ffe :: 2| Mac2| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 200 |
+| 10.0.0.3| 100.0.0.3| 3ffe :: 3| Mac3| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 300 |
+
+From the previopus table and considering the routing discussed before you get the following:
+
 |Source               |Destination                   |Action                    |Routing/Mapping                    |
 |---------------------|------------------------------|--------------------------|-----------------------------------|
 |`10.0.0.1`           |`10.0.0.10`                   |Blocked (ACL1)            |Blocked                            |
