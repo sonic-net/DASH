@@ -152,32 +152,38 @@ The following are the example applicable tables.
 
 ##### Table ACL1
 
+The following table presribes that the packets directed to the destination address `10.0.0.10` must be blocked, while the packets directed to all other destinations are allowed (default). 
+
 |Match/Action|Value              |
 |------------|-------------------|
+|default     |allow              |
 |match       |dst add=`10.0.0.10`|
-|action      |Block              |
-|match       |dst add==`*`       |
-|action      |allow              |
+|action      |block              |
+
 
 ##### Table ACL2
 
+The following table presribes that the packets directed to the destination address `10.0.0.11` must be blocked, while the packets directed to all other destinations are allowed (default). 
+
 |Match/Action|Value              |
 |------------|-------------------|
+|default     |allow              |
 |match       |dst add=`10.0.0.11`|
-|action      |Block              |
-|match       |dst add==`*`       |
-|action      |allow              |
+|action      |block              |
+
 
 ##### Table ACL3
 
+The following table presribes that the packets directed to all destinations are allowed (default). 
+
 |Match/action|Value              |
 |------------|-------------------|
-|match       |dst add==`*`       |
-|action      |allow              |
+|default     |allow              |
+
 
 #### Routing table
 
-The routing step shown in the following routing table defines when a packet is routed from the source to the destination.
+The routing step shown in the following table defines when a packet is routed from the source to the destination.
 
 |Match/action|Value                 |
 |------------|----------------------|
@@ -185,7 +191,7 @@ The routing step shown in the following routing table defines when a packet is r
 |            |src add=`10.0.0.0/24` |
 |action      |allow                 |
 
-The last step is mapping that is shown in the following summary.
+The last step is mapping that is shown in the following table.
 
 #### Mapping
 
