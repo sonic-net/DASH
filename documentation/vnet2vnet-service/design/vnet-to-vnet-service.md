@@ -128,11 +128,10 @@ The following is an example of packet transformation in VM to VM communication i
 ### VNET mapping table
 
 | | V4 underlay| V6 underlay| Mac-Address| Mapping Action | VNI
-|:----------|:----------|:----------|:----------|:----------|:----------
-| 10.0.0.1| 100.0.0.1| 3ffe :: 1| Mac1| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 100
-| 10.0.0.2| 100.0.0.2| 3ffe :: 2| Mac2| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 200
-| 10.0.0.3| 100.0.0.3| 3ffe :: 3| Mac3| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 300
-| | | | | |
+|:----------|:----------|:----------|:----------|:----------|:--------------|
+| 10.0.0.1| 100.0.0.1| 3ffe :: 1| Mac1| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 100 |
+| 10.0.0.2| 100.0.0.2| 3ffe :: 2| Mac2| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 200 |
+| 10.0.0.3| 100.0.0.3| 3ffe :: 3| Mac3| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 300 |
 
 ### Understanding packet transform
 
@@ -160,7 +159,6 @@ The following table presribes that the packets directed to the destination addre
 |match       |dst add=`10.0.0.10`|
 |action      |block              |
 
-
 ##### Table ACL2
 
 The following table presribes that the packets directed to the destination address `10.0.0.11` must be blocked, while the packets directed to all other destinations are allowed (default). 
@@ -171,7 +169,6 @@ The following table presribes that the packets directed to the destination addre
 |match       |dst add=`10.0.0.11`|
 |action      |block              |
 
-
 ##### Table ACL3
 
 The following table presribes that the packets directed to all destinations are allowed (default). 
@@ -179,7 +176,6 @@ The following table presribes that the packets directed to all destinations are 
 |Match/action|Value              |
 |------------|-------------------|
 |default     |allow              |
-
 
 #### Routing table
 
@@ -195,17 +191,7 @@ The last step is mapping that is shown in the following table.
 
 #### Mapping
 
-The following is the mapping table.
-
-**VNET mapping**
-
-| | V4 underlay| V6 underlay| Mac-Address| Mapping Action | VNI
-|:----------|:----------|:----------|:----------|:----------|:--------------|
-| 10.0.0.1| 100.0.0.1| 3ffe :: 1| Mac1| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 100 |
-| 10.0.0.2| 100.0.0.2| 3ffe :: 2| Mac2| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 200 |
-| 10.0.0.3| 100.0.0.3| 3ffe :: 3| Mac3| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 300 |
-
-From the previopus table and considering the routing discussed before you get the following:
+From the previopus [VNET mapping table](#vnet-mapping-table) table and considering the routing discussed before you get the following:
 
 |Source               |Destination                   |Action                    |Routing/Mapping                    |
 |---------------------|------------------------------|--------------------------|-----------------------------------|
@@ -217,7 +203,7 @@ From the previopus table and considering the routing discussed before you get th
 
 - (1) Outer: Physical host IP, VXLAN VNI: custom, Inner Mac: SMAC1
 - (2) Outer: Physical SDN Appliance IP, DMAC_FAKE
-- (3) Execute action VNET that will look up in the mapping table and take mapping action.
+- (3) **Execute action VNET** that will look up in the mapping table and take mapping action.
 This mapping action is (from row 2 of the mapping table):
   - Outer:
     - SRC: `100.0.0.2`
