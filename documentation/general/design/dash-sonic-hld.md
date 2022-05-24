@@ -449,7 +449,7 @@ SONiC for DASH shall have a lite swss initialization without the heavy-lift of e
 |     APP_DB Table    |      Key      |       Field      |                 SAI Attributes                    |                     Comment                     |
 |---------------------|---------------|------------------|---------------------------------------------------|-------------------------------------------------|
 | DASH_APPLIANCE      |               |                  |                                                   |                                                 |
-|                     | appliance_id  |                  |                                                   | Only one?                                       |
+|                     | appliance_id  |                  |                                                   |                                                 |
 |                     |               | sip              |                                                   | Missing from SAI                                |
 |                     |               | vm_vni           | sai_direction_lookup_entry_t.VNI                  |                                                 |
 | DASH_VNET           |               |                  |                                                   |                                                 |
@@ -462,20 +462,18 @@ SONiC for DASH shall have a lite swss initialization without the heavy-lift of e
 | DASH_QOS            |               |                  |                                                   |                                                 |
 |                     | qos_name      |                  |                                                   |                                                 |
 |                     |               | qos_id           |                                                   |                                                 |
-|                     |               | bw               |                                                   | Missing from SAI                                |
-|                     |               | cps              |                                                   | Missing from SAI                                |
-|                     |               | flows            |                                                   | Missing from SAI                                |
+|                     |               | bw               | SAI_ENI_ATTR_PPS                                  |                                                 |
+|                     |               | cps              | SAI_ENI_ATTR_CPS                                  |                                                 |
+|                     |               | flows            | SAI_ENI_ATTR_FLOWS                                |                                                 |
 | DASH_ENI            |               |                  |                                                   |                                                 |
 |                     | eni           |                  |                                                   |                                                 |
-|                     |               | eni_id*          | SAI_OUTBOUND_ENI_LOOKUP_FROM_VM_ENTRY_ATTR_ENI    |                                                 |
-|                     |               | mac_address*     | sai_outbound_eni_lookup_from_vm_entry_t.src_mac   |                                                 |
-|                     |               | eni_id**         | SAI_ENI_LOOKUP_TO_VM_ENTRY_ATTR_ENI               |                                                 |
-|                     |               | mac_address**    | sai_eni_lookup_to_vm_entry_t.src_mac              |                                                 |
-|                     |               | eni_id***        | sai_outbound_eni_to_vni_entry_t.ENI               |                                                 |
+|                     |               | eni_id*          | SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID       |                                                 |
+|                     |               | mac_address*     | sai_eni_ether_address_map_entry_t.address         |                                                 |
+|                     |               | eni_id**         | sai_outbound_eni_to_vni_entry_t.ENI               |                                                 |
 |                     |               | qos              |                                                   |                                                 |
-|                     |               | vnet***          | SAI_OUTBOUND_ENI_TO_VNI_ENTRY_ATTR_VNI            | VNI value taken from DASH_VNET table            |
+|                     |               | vnet**           | SAI_OUTBOUND_ENI_TO_VNI_ENTRY_ATTR_VNI            | VNI value taken from DASH_VNET table            |
 | DASH_ACL_V4_IN      |               |                  | SAI_DASH_ACL_ATTR_STAGE                           | SAI_DASH_ACL_STAGE_INBOUND*                     |
-|                     | eni           |                  | SAI_DASH_ACL_ATTR_ENI                             |                                                 |
+|                     | eni           |                  | SAI_DASH_ACL_ATTR_ENI_ID                          |                                                 |
 |                     |               | stage            | SAI_DASH_ACL_ATTR_STAGE                           | SAI_DASH_ACL_STAGE_INBOUND_STAGE{{stage}}       |
 |                     |               | acl_group_id     |                                                   |                                                 |
 | DASH_ACL_GROUP      |               |                  |                                                   |                                                 |
@@ -483,8 +481,8 @@ SONiC for DASH shall have a lite swss initialization without the heavy-lift of e
 |                     |               | ip_version       |                                                   |                                                 |
 | DASH_ACL_RULE       |               |                  |                                                   |                                                 |
 |                     | group_id      |                  |                                                   |                                                 |
-|                     | rule_num      |                  |                                                   | Why not put priority in the key?                |
-|                     |               | priority         |                                                   | Missing from SAI                                |
+|                     | rule_num      |                  |                                                   |                                                 |
+|                     |               | priority         | SAI_DASH_ACL_ATTR_PRIORITY                        |                                                 |
 |                     |               | action           | SAI_DASH_ACL_ATTR_ACTION                          |                                                 |
 |                     |               | terminating      | SAI_DASH_ACL_ATTR_ACTION                          | AND_CONTINUE if not terminating                 |
 |                     |               | protocol         | SAI_DASH_ACL_ATTR_PROTOCOL                        |                                                 |
@@ -503,20 +501,18 @@ SONiC for DASH shall have a lite swss initialization without the heavy-lift of e
 |                     |               | overlay_sip      |                                                   | Not supported yet                               |
 |                     |               | underlay_dip     |                                                   | Not supported yet                               |
 |                     |               | customer_addr    |                                                   | Not supported yet                               |
-|                     |               | metering_bucket  |                                                   | Missing SAI API                                 |
-|DASH_MAPPING_TABLE   |               |                  |                                                   |                                                 |
+|                     |               | metering_bucket  | SAI_OUTBOUND_ROUTING_ENTRY_ATTR_COUNTER_ID        |                                                 |
+| DASH_MAPPING_TABLE  |               |                  |                                                   |                                                 |
 |                     | vnet          |                  | sai_outbound_ca_to_pa_entry_t.dest_vni            | VNET's VNI                                      |
 |                     | ip_address    |                  | sai_outbound_ca_to_pa_entry_t.dip                 |                                                 |
 |                     |               | routing_type     |                                                   | Why needed here?                                |
 |                     |               | underlay_ip      | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP     |                                                 |
 |                     |               | mac_address      | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC     |                                                 |
-|                     |               | metering_bucket  |                                                   | Missing SAI API                                 |
+|                     |               | metering_bucket  | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_COUNTER_ID       |                                                 |
 
 TODO:
 * VNET peering
 * Inbound routing mapping
-* QoS
-* Counters
 
 ### 3.3.5 Underlay Routing
 DASH Appliance shall establish BGP session with the connected ToR and advertise the prefixes (VIP PA). In turn, the ToR shall advertise default route to appliance. With two ToRs connected, the appliance shall have route with gateway towards both ToRs and does ECMP routing. Orchagent install the route and resolves the neighbor (GW) mac and programs the underlay route/nexthop and neighbor. In the absence of a default-route, appliance shall send the packet back on the same port towards the recieving ToR and can derive the underlay dst mac from the src mac of the received packet or from the neighbor entry (IP/MAC) associated with the port. 
