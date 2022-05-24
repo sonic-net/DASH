@@ -4,7 +4,8 @@
 
 # Packet direction flow and transforms
 
-- [Selecting packet paths](#selecting-packet-paths)
+- [Selecting packet direction](#selecting-packet-direction)
+- [Selecting packet path](#selecting-packet-path)
   - [Fast path](#fast-path)
     - [Inbound fast path](#inbound-fast-path)
     - [Outbound fast path](#outbound-fast-path)
@@ -14,6 +15,8 @@
 - [Packet processing pipeline (sequential prefix match lookups)](#packet-processing-pipeline-sequential-prefix-match-lookups)
   - [ACL](#acl)
 - [Packet flow](#packet-flow)
+
+## Selecting packet direction
 
 On receiving a packet from the wire, the SDN appliance will determine the **packet direction**, **matching ENI**, and **packet processing strategy** based on *Encap Transformation and Rules Evaluation*.  
 
@@ -28,7 +31,7 @@ The following figure shows the preliminary steps to determine the packet directi
 ![eni-match-flow-direction](./images/sdn/eni-match-flow-direction.svg)
 
 
-## Selecting packet paths
+## Selecting packet path
 
 For the **first packet** of a TCP flow, the **slow path** is selected, running the transposition engine and matching at each layer.  
 For **subsequent packets**, the **fast path** is selected,
