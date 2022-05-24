@@ -17,12 +17,12 @@ match_kind {
     direct_counter(CounterType.packets_and_bytes) ## table_name ##_counter; \
     table table_name { \
         key = { \
-            meta.eni : exact @name("meta.eni:eni"); \
-            hdr.ipv4.dst_addr : list @name("hdr.ipv4.dst_addr:dip"); \
-            hdr.ipv4.src_addr : list @name("hdr.ipv4.src_addr:sip"); \
-            hdr.ipv4.protocol : list @name("hdr.ipv4.src_addr:protocol"); \
-            hdr.tcp.src_port : range_list @name("hdr.tcp.src_port:sport"); \
-            hdr.tcp.dst_port : range_list @name("hdr.tcp.dst_port:dport"); \
+            meta.acl_group_id : exact @name("meta.acl_group_id:acl_group_id"); \
+            hdr.ipv4.dst_addr : exact @name("hdr.ipv4.dst_addr:dip"); \
+            hdr.ipv4.src_addr : exact @name("hdr.ipv4.src_addr:sip"); \
+            hdr.ipv4.protocol : exact @name("hdr.ipv4.src_addr:protocol"); \
+            hdr.tcp.src_port : exact @name("hdr.tcp.src_port:sport"); \
+            hdr.tcp.dst_port : exact @name("hdr.tcp.dst_port:dport"); \
         } \
         actions = { \
             permit; \
@@ -40,7 +40,7 @@ match_kind {
             deny: {return;} \
         }
 
-/* 
+/*
  * This control results in a new set of tables every time
  * it is applied, i. e. inbound ACL tables are different
  * from outbound, and API will be generated for each of them

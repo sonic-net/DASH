@@ -29,7 +29,7 @@ def get_tables(ingress_pipeline):
     for table in ingress_pipeline[TABLES_TAG]:
         if len(table[KEY_TAG]) > 0:
             tables.append(table)
-    
+
     return tables
 
 
@@ -271,10 +271,6 @@ if not os.path.isfile(args.filepath):
     exit(1)
 
 
-if os.path.exists('./SAI'):
-    print('Directory ./SAI already exists. Please remove in order to proceed')
-    exit(1)
-
 # Get SAI dictionary from P4 dictionary
 print("Generating SAI API...")
 with open(args.filepath) as json_program_file:
@@ -283,9 +279,12 @@ with open(args.filepath) as json_program_file:
 sai_api = generate_sai_api(json_program, args.ignore_tables.split(','))
 sai_api['app_name'] = args.apiname
 
-# Clone a clean SAI repo
-print("Cloning SAI repository...")
-Repo.clone_from(args.sai_git_url, './SAI', branch=args.sai_git_branch)
+if os.path.exists('./SAI'):
+    print('Directory ./SAI already exists.')
+else:
+    # Clone a clean SAI repo
+    print("Cloning SAI repository...")
+    Repo.clone_from(args.sai_git_url, './SAI', branch=args.sai_git_branch)
 
 # Write SAI dictionary into SAI API headers
 write_sai_files(sai_api)

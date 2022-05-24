@@ -5,8 +5,8 @@
 #include "sirius_parser.p4"
 #include "sirius_vxlan.p4"
 #include "sirius_outbound.p4"
-#include "sirius_inbound.p4"
 #include "sirius_conntrack.p4"
+#include "sirius_acl.p4"
 
 control sirius_verify_checksum(inout headers_t hdr,
                          inout metadata_t meta)
@@ -82,9 +82,9 @@ control sirius_ingress(inout headers_t hdr,
         meta.dropped = true;
     }
 
-    table inbound_routing {
+    table vnet {
         key = {
-            hdr.vxlan.vni : exact @name("hdr.vxlan.vni:vni");
+            meta.lookup_vni : exact @name("meta.lookup_vni:vni");
         }
         actions = {
             vxlan_decap(hdr);
@@ -94,17 +94,40 @@ control sirius_ingress(inout headers_t hdr,
         const default_action = deny;
     }
 
-    action set_eni(bit<16> eni) {
+    action set_eni_attributes(bit<16> eni,
+                              bit<24> vni,
+                              bit<16> stage1_outbound_acl_group_id,
+                              bit<16> stage1_inbound_acl_group_id,
+                              bit<16> stage2_outbound_acl_group_id,
+                              bit<16> stage2_inbound_acl_group_id,
+                              bit<16> stage3_outbound_acl_group_id,
+                              bit<16> stage3_inbound_acl_group_id,
+                              bit<16> route_table_id,
+                              bit<16> vnet_id,
+                              bit<16> tunnel_id) {
         meta.eni = eni;
+        meta.encap_data.vni = vni;
+        if (meta.direction == direction_t.OUTBOUND) {
+            meta.stage1_acl_group_id = stage1_outbound_acl_group_id;
+            meta.stage2_acl_group_id = stage2_outbound_acl_group_id;
+            meta.stage3_acl_group_id = stage3_outbound_acl_group_id;
+        } else {
+            meta.stage1_acl_group_id = stage1_inbound_acl_group_id;
+            meta.stage2_acl_group_id = stage2_inbound_acl_group_id;
+            meta.stage3_acl_group_id = stage3_inbound_acl_group_id;
+        }
+        meta.route_table_id = route_table_id;
+        meta.vnet = vnet_id;
+        meta.tunnel_id = tunnel_id;
     }
 
-    table eni_ether_address_map {
+    table eni {
         key = {
-            meta.eni_addr : exact @name("meta.eni_addr:address");
+            meta.eni_addr : exact @name("meta.eni_addr:eni_addr");
         }
 
         actions = {
-            set_eni;
+            set_eni_attributes;
         }
     }
 
@@ -114,12 +137,10 @@ control sirius_ingress(inout headers_t hdr,
         appliance.apply();
 
         /* Outer header processing */
+        meta.lookup_vni = hdr.vxlan.vni;
+        vxlan_decap(hdr);
 
-        if (meta.direction == direction_t.OUTBOUND) {
-            vxlan_decap(hdr);
-        } else if (meta.direction == direction_t.INBOUND) {
-            inbound_routing.apply();
-        }
+        /* At this point the processing is done on customer headers */
 
         meta.dst_ip_addr = 0;
         meta.is_dst_ip_v6 = 0;
@@ -130,24 +151,77 @@ control sirius_ingress(inout headers_t hdr,
             meta.dst_ip_addr = (bit<128>)hdr.ipv4.dst_addr;
         }
 
-        /* At this point the processing is done on customer headers */
-
         /* Put VM's MAC in the direction agnostic metadata field */
         meta.eni_addr = meta.direction == direction_t.OUTBOUND  ?
                                           hdr.ethernet.src_addr :
                                           hdr.ethernet.dst_addr;
-        eni_ether_address_map.apply();
+
+        eni.apply();
+        if (meta.direction == direction_t.OUTBOUND) {
+            meta.lookup_vni = meta.encap_data.vni;
+        }
+        vnet.apply();
+
+        if (meta.direction == direction_t.OUTBOUND) {
+#ifdef STATEFUL_P4
+            ConntrackOut.apply(0);
+#endif /* STATEFUL_P4 */
+
+#ifdef PNA_CONNTRACK
+            ConntrackOut.apply(hdr, meta);
+#endif // PNA_CONNTRACK
+        } else {
+#ifdef STATEFUL_P4
+            ConntrackIn.apply(0);
+#endif /* STATEFUL_P4 */
+#ifdef PNA_CONNTRACK
+            ConntrackIn.apply(hdr, meta);
+#endif // PNA_CONNTRACK
+        }
+
+        /* ACL */
+        if (!meta.conntrack_data.allow_out) {
+            acl.apply(hdr, meta, standard_metadata);
+        }
+
+        if (meta.direction == direction_t.OUTBOUND) {
+#ifdef STATEFUL_P4
+            ConntrackIn.apply(1);
+#endif /* STATEFUL_P4 */
+
+#ifdef PNA_CONNTRACK
+        ConntrackIn.apply(hdr, meta);
+#endif // PNA_CONNTRACK
+        } else if (meta.direction == direction_t.INBOUND) {
+#ifdef STATEFUL_P4
+            ConntrackOut.apply(1);
+#endif /* STATEFUL_P4 */
+#ifdef PNA_CONNTRACK
+            ConntrackOut.apply(hdr, meta);
+#endif //PNA_CONNTRACK
+
+        }
 
         if (meta.direction == direction_t.OUTBOUND) {
             outbound.apply(hdr, meta, standard_metadata);
-        } else if (meta.direction == direction_t.INBOUND) {
-            inbound.apply(hdr, meta, standard_metadata);
         }
+
+        vxlan_encap(hdr,
+                    meta.encap_data.underlay_dmac,
+                    meta.encap_data.underlay_smac,
+                    meta.encap_data.underlay_dip,
+                    meta.encap_data.underlay_sip,
+                    hdr.ethernet.dst_addr,
+                    meta.encap_data.vni);
 
         eni_meter.apply();
 
         /* Send packet to port 1 by default if we reached the end of pipeline */
-        standard_metadata.egress_spec = 1;
+        if (meta.dropped) {
+            drop_action();
+        } else {
+            standard_metadata.egress_spec = 1;
+        }
     }
 }
 

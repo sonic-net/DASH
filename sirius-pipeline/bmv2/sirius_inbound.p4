@@ -6,47 +6,17 @@
 #include "sirius_vxlan.p4"
 #include "sirius_acl.p4"
 #include "sirius_conntrack.p4"
+#include "sirius_eni.p4"
+#include "sirius_tunnel.p4"
 
 control inbound(inout headers_t hdr,
                 inout metadata_t meta,
                 inout standard_metadata_t standard_metadata)
 {
-    action set_vm_attributes(EthernetAddress underlay_dmac,
-                             IPv4Address underlay_dip,
-                             bit<24> vni) {
-        meta.encap_data.underlay_dmac = underlay_dmac;
-        meta.encap_data.underlay_dip = underlay_dip;
-        meta.encap_data.vni = vni;
-    }
-
-    action set_vm_id(bit<16> vm_id) {
-        meta.vm_id = vm_id;
-    }
-
-    table eni_to_vm {
-        key = {
-            meta.eni: exact @name("meta.eni:eni");
-        }
-
-        actions = {
-            set_vm_id;
-        }
-    }
-
-    table vm {
-        key = {
-            meta.vm_id: exact @name("meta.vm_id:vm_id");
-        }
-
-        actions = {
-            set_vm_attributes;
-        }
-    }
-
     apply {
-        eni_to_vm.apply();
+        Eni.apply(hdr, meta, standard_metadata);
 
-        vm.apply();
+        Tunnel.apply(hdr, meta, standard_metadata);
 
         /* Check if PA is valid */
 

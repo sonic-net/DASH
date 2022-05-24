@@ -30,6 +30,14 @@ struct metadata_t {
     encap_data_t encap_data;
     EthernetAddress eni_addr;
     bit<16> eni;
+    bit<16> stage1_acl_group_id;
+    bit<16> stage2_acl_group_id;
+    bit<16> stage3_acl_group_id;
+    bit<16> acl_group_id;
+    bit<16> route_table_id;
+    bit<16> tunnel_id;
+    bit<16> vnet;
+    bit<24> lookup_vni;
     bit<16> vm_id;
     bit<8> appliance_id;
     bit<1> is_dst_ip_v6;

@@ -11,14 +11,14 @@ DOCKER_RUN := docker run \
 	--rm \
 	bmv2-$(USER)
 
-bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:
+bmv2/sirius_pipeline.bmv2/sirius_pipeline.json: bmv2/*.p4
 	$(DOCKER_RUN) p4c -b bmv2 bmv2/sirius_pipeline.p4 -o bmv2/sirius_pipeline.bmv2
 
 clean:
 	rm -rf bmv2/sirius_pipeline.bmv2
 
 run-switch:
-	$(DOCKER_RUN) simple_switch --log-console --interface 0@veth0 --interface 1@veth2 /bmv2/sirius_pipeline.bmv2/sirius_pipeline.json
+	$(DOCKER_RUN) sudo LD_LIBRARY_PATH=/usr/local/lib simple_switch --log-console --interface 0@veth0 --interface 1@veth2 /bmv2/sirius_pipeline.bmv2/sirius_pipeline.json
 
 docker:
 	docker build \

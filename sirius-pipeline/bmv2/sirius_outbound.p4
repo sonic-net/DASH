@@ -2,27 +2,12 @@
 #define _SIRIUS_OUTBOUND_P4_
 
 #include "sirius_headers.p4"
-#include "sirius_acl.p4"
-#include "sirius_conntrack.p4"
+#include "sirius_tunnel.p4"
 
 control outbound(inout headers_t hdr,
                  inout metadata_t meta,
                  inout standard_metadata_t standard_metadata)
 {
-    action set_vni(bit<24> vni) {
-        meta.encap_data.vni = vni;
-    }
-
-    table eni_to_vni {
-        key = {
-            meta.eni : exact @name("meta.eni:eni");
-        }
-
-        actions = {
-            set_vni;
-        }
-    }
-
     action route_vnet(bit<24> dest_vnet_vni) {
         meta.encap_data.dest_vnet_vni = dest_vnet_vni;
     }
@@ -75,29 +60,6 @@ control outbound(inout headers_t hdr,
     }
 
     apply {
-        eni_to_vni.apply();
-
-#ifdef STATEFUL_P4
-           ConntrackOut.apply(0);
-#endif /* STATEFUL_P4 */
-
-#ifdef PNA_CONNTRACK
-        ConntrackOut.apply(hdr, meta);
-#endif // PNA_CONNTRACK
-
-        /* ACL */
-        if (!meta.conntrack_data.allow_out) {
-            acl.apply(hdr, meta, standard_metadata);
-        }
-
-#ifdef STATEFUL_P4
-            ConntrackIn.apply(1);
-#endif /* STATEFUL_P4 */
-
-#ifdef PNA_CONNTRACK
-        ConntrackIn.apply(hdr, meta);
-#endif // PNA_CONNTRACK
-
         switch (routing.apply().action_run) {
             route_vnet: {
                 ca_to_pa.apply();
