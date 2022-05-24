@@ -4,7 +4,7 @@
 
 # Packet direction flow and transforms
 
-- [Fast and slow paths](#fast-and-slow-paths)
+- [Selecting packet paths](#selecting-packet-paths)
   - [Fast path](#fast-path)
     - [Inbound fast path](#inbound-fast-path)
     - [Outbound fast path](#outbound-fast-path)
@@ -28,9 +28,10 @@ The following figure shows the preliminary steps to determine the packet directi
 ![eni-match-flow-direction](./images/sdn/eni-match-flow-direction.svg)
 
 
-## Fast and slow paths
+## Selecting packet paths
 
-For the first packet of a TCP flow, we take the Slow Path, running the transposition engine and matching at each layer.  For subsequent packets, we take the Fast Path,
+For the **first packet** of a TCP flow, the **slow path** is selected, running the transposition engine and matching at each layer.  
+For **subsequent packets**, the **fast path** is selected,
 matching a unified flow via UFID and applying a transposition directly against rules.
 
 ### Fast path
