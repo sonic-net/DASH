@@ -112,7 +112,63 @@ The ACL pipeline has 3-5 levels; an ACL decision is based on the most restrictiv
 - Allow (non-terminate, proceed to next, continue to FW rules)  
 - Default action = Deny. This is the default value if no rules are matched; traffic should be dropped.  This is the default action of firewalls, however it is OK to be configurable.  If not, we want to default Deny/Drop if no rules are matched.
 
-- ACL Group:  evaluate rules based on Priority (within an ACL Group); Terminate vs non\-Terminate pertains to the Pipeline
+- ACL Group:  evaluate rules based on Priority (within an ACL Group); Terminate vs non-Terminate pertains to the Pipeline
+
+**ACL_LEVEL1 (VNET Lookup)**
+
+| Source| Destination| Source Port| Destination Port| Protocol| Action| Priority| Exit ACL pipeline on hit?(Is Terminating)
+|:----------|:----------|:----------|:----------|:----------|:----------|:----------|:----------
+| 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24| 10.0.0.10/32 10.0.0.11/32 10.0.0.12/32 10.0.0.13/32 10.0.0.14/32 30.0.0.0/24| *| *| TCP| Allow| 0| No
+| 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24| 10.0.0.200/32| *| *| TCP| Allow| 1| No
+| 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24| 10.0.0.201/32| *| *| TCP| Block| 2| Yes
+| 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24| 10.0.0.202/32| *| *| TCP| Allow| 3| Yes
+| 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24| 10.0.0.203/32| *| *| TCP| Allow| 4| No
+| *| 8.8.8.8/32| *| *| *| Block| 5| Yes
+| *| 8.8.8.8/32| *| *| *| Allow| 6| Yes
+| *| 9.9.9.9/32| *| *| *| Allow| 7| Yes
+| *| *| *| *| *| Block| 8| No
+| | | | | | | |
+| | | | | | | |
+
+**ACL_LEVEL2 (Customer/User FW rules - portal.azure.com)**
+
+| Source| Destination| Source Port| Destination Port| Protocol| Action| Priority| Exit ACL pipeline on hit?(Is Terminating)
+|:----------|:----------|:----------|:----------|:----------|:----------|:----------|:----------
+| 10.0.0.0/24| *| *| *| TCP| Allow| 1| No
+| 10.0.0.0/24| 10.0.0.202/32| *| *| TCP| Block| 1| Yes
+| 10.0.0.0/24| 10.0.0.203/32| *| *| TCP| Block| 1| Yes
+| *| 8.8.8.8/32| *| *| *| Allow| 2| No
+| *| 9.9.9.9/32| *| *| *| Block| 2| Yes
+| *| 1.1.1.2/32| *| *| *| Allow| 30| No
+| *| *| *| *| *| Block| 3| No
+| | | | | | | |
+| | | | | | | |
+
+**ACL_LEVEL3**
+
+Etc…
+
+**Order of evaluation / priority of evaluation**
+
+- ACL_LEVEL1 \-> ACL_LEVEL2
+
+**Test Scenarios and expected results**
+
+- For simplicity below table only has IP conditions, but the same combinations exist for ports also.
+
+- ACL rules are direction aware, below example is assuming a VM with source IP = 10.0.0.100 which is trying to send packets to various destinations and has above ACL rules on its v\-port.
+
+**Outbound Traffic example evaluation and outcome**
+
+| Source IP| Destination IP| Decision of ACL_LEVEL1| Decision of ACL_LEVEL2| Outcome
+|:----------|:----------|:----------|:----------|:----------
+| 10.0.0.100| 10.0.0.200| Allow (Terminating = false)| Allow (Terminating = false)| Allow
+| 100.0.0.100| 100.0.0.201| Block (Terminating = True)| Not evaluated or Ignored| Block
+| 100.0.0.100| 100.0.0.202| Allow (Terminating = True)| Not evaluated or Ignored| Allow
+| 100.0.0.100| 100.0.0.203| Allow (Terminating = false)| Block (Terminating = True)| Block
+| 100.0.0.100| 8.8.8.8| Block (Terminating = True)| Not evaluated or Ignored| Block
+| 100.0.0.100| 1.1.1.1| Block (Terminating = false)| Block (Terminating = false)| Block
+| 100.0.0.100| 1.1.1.2| Block (Terminating = false)| Allow (Terminating = false)| Allow
 
 ## Packet transforms
 
