@@ -10,8 +10,6 @@
 - [Scale per DPU (Card)](#scale-per-dpu-card)
 - [Scenario Milestone and Scoping](#scenario-milestone-and-scoping)
 - [Virtual Port and Packet Direction](#virtual-port-and-packet-direction)
-- [Packet processing Pipeline (Sequential prefix match lookups)](#packet-processing-pipeline-sequential-prefix-match-lookups)
-	- [ACL](#acl)
 - [Routes and Route-Action](#routes-and-route-action)
 - [Packet Flow](#packet-flow)
 	- [Inbound](#inbound)
@@ -92,6 +90,9 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
 	![sdn-virtual-port](images/sdn-virtual-port.svg)
 
+See also [Packet direction flow and transforms](sdn-packet-flow-transforms.md). 
+
+<!-- 
 - On receiving a packet from the wire, the SDN appliance will determine the Packet direction, matching ENI, and packet processing strategy based on *Encap Transformation and Rules Evaluation*.  Upon receiving a packet, the SDN appliance will determine:
 
 - Packet Direction - which is evaluated based off of the most-outer **VNI** lookup (implementation dependent) from the left-side (see figure below, a DASH optimized VM sending Outbound packets) behind the Appliance.  If there is no match, the direction is Inbound).
@@ -201,6 +202,7 @@ Etc…
 | 100.0.0.100| 1.1.1.1| Block (Terminating = false)| Block (Terminating = false)| Block
 | 100.0.0.100| 1.1.1.2| Block (Terminating = false)| Allow (Terminating = false)| Allow
 
+-->
 ## Routes and Route-Action
 
 - Routes are usually LPM based Outbound
