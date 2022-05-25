@@ -202,7 +202,7 @@ From the previopus [VNET mapping table](#vnet-mapping-table) table and consideri
 - (1) Outer: Physical host IP, VXLAN VNI: custom, Inner Mac: SMAC1
 - (2) Outer: Physical SDN Appliance IP, DMAC_FAKE
 - (3) **Execute action VNET** that will look up in the mapping table and take mapping action.
-This mapping action is (from row 2 of the mapping table):
+This mapping action is (row 2 of the [VNET mapping table](#vnet-mapping-table)):
   - Outer:
     - SRC: `100.0.0.1`
     - DST: `100.0.0.2`
