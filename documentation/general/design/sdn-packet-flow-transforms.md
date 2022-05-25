@@ -116,8 +116,8 @@ The ACL pipeline has 3-5 levels; an ACL decision is based on the most restrictiv
 
 ## Packet transforms
 
-The following sections desribe the transformations that a packet undergoes when moving from source to destination. These transformations are specific for each scenario.
-Notice that after rule processing is complete and transforms are identified, the corresponding flow is created in the flow table.
+This section describes the packet transformations that are specific for each scenario.
+After rule processing is complete and transforms are identified, the corresponding flow is created in the flow table.
 
 ### VM to VM (in VNET) communication
 
