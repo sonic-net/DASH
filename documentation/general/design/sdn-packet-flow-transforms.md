@@ -25,10 +25,11 @@
   - [Service Tunneling](#service-tunneling)
   - [Inbound from LB](#inbound-from-lb)
   - [Outbound NAT - L4](#outbound-nat---l4)
+- [References](#references)
 
 ## Packet flow - selecting packet direction
 
-On receiving a packet from the wire, the SDN appliance will determine the **packet direction**, **matching ENI**, and **packet processing strategy** based on *Encap Transformation and Rules Evaluation*.  
+On receiving a packet from the wire, the SDN appliance will determine the **packet direction**, **matching ENI**, and **packet processing strategy** based on *Encap Transformation and Rules Evaluation*. See also [2 Packet Flows](dash-sonic-hld.md#2-packet-flows) in the *SONiC-DASH integration high level design* document. 
 
 - **Packet direction**. It is evaluated based on the most-outer **VNI** lookup (implementation dependent) from the left-side (see figure below, a DASH optimized VM sending Outbound packets) behind the Appliance.  If there is no match, the direction is Inbound.
 
@@ -115,6 +116,9 @@ The ACL pipeline has 3-5 levels; an ACL decision is based on the most restrictiv
 
 ## Packet transforms
 
+The following sections desribe the transformations that a packet undergoes when moving from source to destination. These transformations are specific for each scenario.
+Notice that after rule processing is complete and transforms are identified, the corresponding flow is created in the flow table.
+
 ### VM to VM (in VNET) communication
 
 ![VMtoVM](./images/sdn/sdn-packet-transforms-vm-to-vm.svg)
@@ -145,3 +149,8 @@ The ACL pipeline has 3-5 levels; an ACL decision is based on the most restrictiv
 
 > [!NOTE]
 > L3 works in same way except port re-write
+
+## References
+
+- [Disaggregated API for SONiC Hosts (DASH) high level design](dash-high-level-design.md)
+- [SONiC-DASH integration high level design](dash-sonic-hld.md)
