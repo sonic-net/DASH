@@ -12,8 +12,6 @@
 - [Virtual Port and Packet Direction](#virtual-port-and-packet-direction)
 - [Routes and Route-Action](#routes-and-route-action)
 - [Packet Flow](#packet-flow)
-	- [Inbound](#inbound)
-	- [Outbound](#outbound)
 - [Packet Transform Examples](#packet-transform-examples)
 	- [VNET to VNET Traffic](#vnet-to-vnet-traffic)
 	- [VNET to Internet - TBD](#vnet-to-internet---tbd)
@@ -31,14 +29,6 @@
 - [Unit Testing and development](#unit-testing-and-development)
 - [Internal Partner dependencies](#internal-partner-dependencies)
 - [Packet transforms](#packet-transforms)
-	- [VNET](#vnet)
-	- [Scenario:  VM<->VM (in VNET) communication](#scenario--vm-vm-in-vnet-communication)
-	- [Internal Load balancer](#internal-load-balancer)
-	- [Private Link](#private-link)
-	- [Private Link Service](#private-link-service)
-	- [Service Tunneling](#service-tunneling)
-	- [Inbound from LB](#inbound-from-lb)
-	- [Outbound NAT - L4](#outbound-nat---l4)
 
 # SDN Features, Packet Transforms and Scale
 
@@ -274,6 +264,9 @@ Etc…
 For the first packet of a TCP flow, we take the Slow Path, running the transposition engine and matching at each layer.  For subsequent packets, we take the Fast Path,
 matching a unified flow via UFID and applying a transposition directly against rules.
 
+See also [Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction). 
+
+<!-- 
 ### Inbound
 
  **Fast Path - Flow Match**
@@ -289,6 +282,8 @@ matching a unified flow via UFID and applying a transposition directly against r
 
  **Slow Path (policy evaluation) - No flow match**
 ![OutSP](images/out_slow_path_pol_eval_no_flow_match.png)
+
+-->
 
 ## Packet Transform Examples
 
@@ -390,6 +385,9 @@ Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Ba
 
 ## Packet transforms
 
+See packet transforms in [Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-transforms). 
+
+<!-- 
 ### VNET
 
 ### Scenario:  VM<->VM (in VNET) communication
@@ -421,3 +419,4 @@ Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Ba
 ![OutNATL4](images/outbound_nat_l4.png)
 
 (L3 works in same way except port re-write)
+-->
