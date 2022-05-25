@@ -16,7 +16,7 @@ Last update: 05/16/2022
   - [V-Port definition](#v-port-definition)
   - [VNET definition](#vnet-definition)
   - [VNET mapping table](#vnet-mapping-table)
-  - [Understanding packet transform](#understanding-packet-transform)
+  - [Understanding packet handling](#understanding-packet-handling)
     - [Match action tables](#match-action-tables)
       - [Table ACL1](#table-acl1)
       - [Table ACL2](#table-acl2)
@@ -122,8 +122,8 @@ The following is an example of packet transformation in VM to VM communication i
 
 ### VNET definition
 
-- VNET1 ?? `10.0.0.0/24`
-- VNET2 ?? `20.0.0.0/24`
+- VNET1 `10.0.0.0/24`
+- VNET2 `20.0.0.0/24`
 
 ### VNET mapping table
 
@@ -133,13 +133,13 @@ The following is an example of packet transformation in VM to VM communication i
 | 10.0.0.2| 100.0.0.2| 3ffe :: 2| Mac2| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 200 |
 | 10.0.0.3| 100.0.0.3| 3ffe :: 3| Mac3| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 300 |
 
-### Understanding packet transform
+### Understanding packet handling
 
-When talking about packet transform, we need to think about a process that involves three main steps: transforming, mapppng and routing. Let's walk through these steps using  the table shown in the section below [Packet transform summary](#packet-transform-summary).
+When talking about packet handling, we need to think about a process that involves three main steps: transforming, mapppng and routing. Let's walk through these steps using  the table shown in the section below [Packet transform summary](#packet-transform-summary).
 
 #### Match action tables
 
-The transform step, as per the P4 model, see [P416 Language
+This step, as per the P4 model, see [P416 Language
 Specification](https://p4.org/p4-spec/docs/P4-16-v1.2.2.html), is executed based on a set of **match/action** tables which are traversed sequentially by the P4 parser.
 
 > [!NOTE] A P4 program defines a packet-processing pipeline, but the rules
@@ -151,7 +151,7 @@ The following are the example applicable tables.
 
 ##### Table ACL1
 
-The following table presribes that the packets directed to the destination address `10.0.0.10` must be blocked, while the packets directed to all other destinations are allowed (default). 
+The following table prescribes that the packets directed to the destination address `10.0.0.10` are blocked, while the packets directed to all other destinations are allowed (default). 
 
 |Match/Action|Value              |
 |------------|-------------------|
@@ -161,7 +161,7 @@ The following table presribes that the packets directed to the destination addre
 
 ##### Table ACL2
 
-The following table presribes that the packets directed to the destination address `10.0.0.11` must be blocked, while the packets directed to all other destinations are allowed (default). 
+The following table prescribes that the packets directed to the destination address `10.0.0.11` are blocked, while the packets directed to all other destinations are allowed (default). 
 
 |Match/Action|Value              |
 |------------|-------------------|
@@ -171,9 +171,9 @@ The following table presribes that the packets directed to the destination addre
 
 ##### Table ACL3
 
-The following table presribes that the packets directed to all destinations are allowed (default). 
+The following table prescribes that the packets directed to all destinations are allowed (default). 
 
-|Match/action|Value              |
+|Match/Action|Value              |
 |------------|-------------------|
 |default     |allow              |
 
@@ -181,13 +181,11 @@ The following table presribes that the packets directed to all destinations are 
 
 The routing step shown in the following table defines when a packet is routed from the source to the destination.
 
-|Match/action|Value                 |
+|Match/Action|Value                 |
 |------------|----------------------|
 |match       |dst add==`20.0.0.0/24`|
 |            |src add=`10.0.0.0/24` |
 |action      |allow                 |
-
-The last step is mapping that is shown in the following table.
 
 #### Mapping
 
