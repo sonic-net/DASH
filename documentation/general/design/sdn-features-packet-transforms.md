@@ -373,6 +373,8 @@ Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Ba
 
 ## Flow Replication
 
+See [DASH High-Availability](../../high-avail/README.md)
+
 ## Unit Testing and development
 
 - Need ability to run rule processing behavior on dev box / as part of merge validation.
