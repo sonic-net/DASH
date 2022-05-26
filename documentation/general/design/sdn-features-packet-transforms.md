@@ -80,7 +80,7 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
 	![sdn-virtual-port](images/sdn-virtual-port.svg)
 
-For information about packets**. see **[Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**. 
+For information about packets, see **[Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**. 
 
 <!-- 
 - On receiving a packet from the wire, the SDN appliance will determine the Packet direction, matching ENI, and packet processing strategy based on *Encap Transformation and Rules Evaluation*.  Upon receiving a packet, the SDN appliance will determine:
