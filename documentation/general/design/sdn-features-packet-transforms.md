@@ -13,10 +13,10 @@
 - [Routes and Route-Action](#routes-and-route-action)
 - [Packet Flow](#packet-flow)
 - [Packet Transform Examples](#packet-transform-examples)
-	- [VNET to VNET Traffic](#vnet-to-vnet-traffic)
-	- [VNET to Internet - TBD](#vnet-to-internet---tbd)
-	- [VNET to Service Endpoints - TBD](#vnet-to-service-endpoints---tbd)
-	- [VNET to Private Link  - TBD](#vnet-to-private-link----tbd)
+  - [VNET to VNET Traffic](#vnet-to-vnet-traffic)
+  - [VNET to Internet - TBD](#vnet-to-internet---tbd)
+  - [VNET to Service Endpoints - TBD](#vnet-to-service-endpoints---tbd)
+  - [VNET to Private Link  - TBD](#vnet-to-private-link----tbd)
 - [Metering](#metering)
 - [VNET Encryption](#vnet-encryption)
 - [Telemetry](#telemetry)
@@ -80,7 +80,7 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
 	![sdn-virtual-port](images/sdn-virtual-port.svg)
 
-See also [Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction). 
+For information about packets**. see **[Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**. 
 
 <!-- 
 - On receiving a packet from the wire, the SDN appliance will determine the Packet direction, matching ENI, and packet processing strategy based on *Encap Transformation and Rules Evaluation*.  Upon receiving a packet, the SDN appliance will determine:
@@ -264,7 +264,7 @@ Etc…
 For the first packet of a TCP flow, we take the Slow Path, running the transposition engine and matching at each layer.  For subsequent packets, we take the Fast Path,
 matching a unified flow via UFID and applying a transposition directly against rules.
 
-See also [Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction). 
+For information about packets, see **[Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**. 
 
 <!-- 
 ### Inbound
@@ -373,7 +373,7 @@ Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Ba
 
 ## Flow Replication
 
-See [DASH High-Availability](../../high-avail/README.md)
+For information about flow replication, see **[DASH High-Availability](../../high-avail/README.md)**.
 
 ## Unit Testing and development
 
