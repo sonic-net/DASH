@@ -448,7 +448,29 @@ SONiC for DASH shall have a lite swss initialization without the heavy-lift of e
 DASH Appliance shall establish BGP session with the connected ToR and advertise the prefixes (VIP PA). In turn, the ToR shall advertise default route to appliance. With two ToRs connected, the appliance shall have route with gateway towards both ToRs and does ECMP routing. Orchagent install the route and resolves the neighbor (GW) mac and programs the underlay route/nexthop and neighbor. In the absence of a default-route, appliance shall send the packet back on the same port towards the recieving ToR and can derive the underlay dst mac from the src mac of the received packet or from the neighbor entry (IP/MAC) associated with the port. 
 
 ### 3.3.5 Memory footprints
-TBD
+
+#### 3.3.5.1 SONiC  memory usage
+
+| Running components | Memory usage |
+|--|--|
+|Base Debian OS  | 159MB |
+|Base Debian OS + docker daemon  | 202MB |
+|Base Debian OS + docker containers | 1.3GB |
+
+#### 3.3.5.2 SONiC docker containers memory usage
+
+|Container| Memory usage |
+|--|--|
+| snmp | 52.5MB |
+| telemetry | 88.38MB |
+| lldp | 57.07MB |
+| syncd\* | 36.36MB |
+| swss | 53.5MB |
+| bgp | 74.66MB |
+| pmon\* | 108.1MB |
+| database | 83.56MB |
+
+\* These containers have vendor-specific components. Their memory usage will vary from vendor to vendor.
 
 ## 3.4 CLI
 
