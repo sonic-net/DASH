@@ -359,15 +359,15 @@ rigorously tested for performance and conformance. See [DASH Testing
 documentation](https://github.com/Azure/DASH/tree/main/test).
 
 SAI "schema" are represented as fixed c-language header files and derived
-metadata header files. The underlay and overlay schema have different origins:
+metadata header files. The **underlay** and **overlay** schema have different origins:
 
-- Traditional SAI headers are defined in the [OCP SAI project
+- DASH SAI **underlay**. Traditional **SAI headers** are defined in the [OCP SAI project
   repo](https://github.com/opencomputeproject/SAI/tree/master/inc).These are
-  hand-generated and maintained. DASH uses a subset of these to manage "underlay"
-  functions, e.g. device management, Layer 3 routing and so forth.
-- DASH SAI "overlay" objects are derived from a [P4 Behavioral
+  **hand-generated** and **maintained**. DASH uses a subset of these to manage "**underlay**"
+  functions, e.g. device management, Layer 3 routing and so forth. For more information, see [SWSS Lite (Underlay)](dash-sonic-hld.md#333-swss-lite-underlay). 
+- DASH SAI **overlay** objects are derived from a [P4 Behavioral
   Model](https://github.com/Azure/DASH/tree/main/sirius-pipeline). A script
-  reads the P4 model and generates SAI header files.
+  reads the P4 model and generates SAI header files. For more information, see [DASHOrch (Overlay)](dash-sonic-hld.md#332-dashorch-overlay).
 
 DASH uses an **enhanced syncd** to configure the dataplane using the technology
 supplier-specific SAI library.
@@ -384,7 +384,6 @@ including multi-core System On A Chip (SoC) ASICs, and the associated software.
 For simplicity, the software for such systems which interfaces to the SAI layer
 is collectively called the "ASIC driver." More importantly, the technology
 supplier SAI library will hide all details and present a uniform interface.
-
 
 > [!NOTE]
 > A dedicated group has been investigating the use of PINS.  
@@ -621,4 +620,4 @@ Some of the info from Kristina's *sanitized* doc.
 - [DASH conformance and performance testing](https://github.com/Azure/DASH/tree/main/test)
 - [SONiC DASH HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-sonic-hld.md)
 - [SONiC System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture)
-
+- [P4 as a Single Source of Truth for SONiC DASH -  2022 P4 Workshop](https://www.youtube.com/watch?v=mT7-t_aDozM)
