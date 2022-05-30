@@ -454,7 +454,6 @@ DASH Appliance shall establish BGP session with the connected ToR and advertise 
 | Running components | Memory usage |
 |--|--|
 |Base Debian OS  | 159MB |
-|Base Debian OS + docker daemon  | 202MB |
 |Base Debian OS + docker containers | 1.3GB |
 
 #### 3.3.5.2 SONiC docker containers memory usage
