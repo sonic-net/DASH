@@ -2,11 +2,12 @@
 
 [<< Back to DASH top-level Documents](../../README.md#contents) ]
 
->**NOTE**: This document is destined to be restructured into general- and per-service specifications.
+# SDN Features, Packet Transforms and Scale
 
-**Table of contents**
+> [!NOTE]
+> This document is in the process of being restructured into general and per-service specifications.
 
-- [First Target Scenario:  Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance](#first-target-scenario--highly-optimized-path-dedicated-appliance-little-processing-or-encap-to-sdn-appliance-and-policies-on-an-sdn-appliance)
+- [First Target Scenario:  SKU for Networked Virtual Appliance (NVA)](#first-target-scenario--sku-for-networked-virtual-appliance-nva)
 - [Scale per DPU (Card)](#scale-per-dpu-card)
 - [Scenario Milestone and Scoping](#scenario-milestone-and-scoping)
 - [Virtual Port and Packet Direction](#virtual-port-and-packet-direction)
@@ -30,12 +31,10 @@
 - [Internal Partner dependencies](#internal-partner-dependencies)
 - [Packet transforms](#packet-transforms)
 
-# SDN Features, Packet Transforms and Scale
-<!-- Updating content -->
 ## First Target Scenario:  SKU for Networked Virtual Appliance (NVA)
 
 Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance
-Why do we need this scenario?  There is a huge cost associated with establishing the first connection (and the CPS that can be established).
+Why do we need this scenario?  There is a huge cost associated with establishing the first connection (and the CPS that can be established)
 
 - A high Connections per Second (CPS) / Flow SKU for Networked Virtual Appliances (NVA)
 
