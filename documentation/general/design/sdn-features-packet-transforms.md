@@ -32,8 +32,9 @@
 
 # SDN Features, Packet Transforms and Scale
 <!-- Updating content -->
-## First Target Scenario:  Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance
+## First Target Scenario:  SKU for Networked Virtual Appliance (NVA)
 
+Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance
 Why do we need this scenario?  There is a huge cost associated with establishing the first connection (and the CPS that can be established).
 
 - A high Connections per Second (CPS) / Flow SKU for Networked Virtual Appliances (NVA)
