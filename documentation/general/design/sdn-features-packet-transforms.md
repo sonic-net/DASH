@@ -363,6 +363,8 @@ We need more information around Counters, Statistics, and we need to start think
 
 ## BGP
 
+Border Gateway Protocol (BGP) is a standardized exterior gateway protocol designed to exchange routing and reachability information among autonomous systems on the Internet. BGP is classified as a path-vector routing protocol and it makes routing decisions based on paths, network policies, or rule-sets configured by a network administrator. For more information, see [Border Gateway Protocol](https://en.wikipedia.org/wiki/Border_Gateway_Protocol).
+
 ## Watchdogs
 
 ## Servicing
