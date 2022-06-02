@@ -450,7 +450,7 @@ SONiC for DASH shall have a lite swss initialization without the heavy-lift of e
 |---------------------|---------------|------------------|---------------------------------------------------|-------------------------------------------------|
 | DASH_APPLIANCE      |               |                  |                                                   |                                                 |
 |                     | appliance_id  |                  |                                                   |                                                 |
-|                     |               | sip              |                                                   | Missing from SAI                                |
+|                     |               | sip              | sai_vip_entry_t.vip                               |                                                 |
 |                     |               | vm_vni           | sai_direction_lookup_entry_t.VNI                  |                                                 |
 | DASH_VNET           |               |                  |                                                   |                                                 |
 |                     | vnet_name     |                  |                                                   |                                                 |
