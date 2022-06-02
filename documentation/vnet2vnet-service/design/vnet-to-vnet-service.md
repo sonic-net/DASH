@@ -231,7 +231,7 @@ The following table summarizes the process of transforming, mapping and routing.
 
 - [P4 Open Source Programming Language](https://p4.org/)
 - [P4-16 Language Specification](https://p4.org/p4-spec/docs/P4-16-v1.2.2.html)
-- [P4 Language Consortium videos](https://www.youtube.com/results?search_query=P4+LANGUAGE+CONSORTIUM)
+
 
 ## Appendix
 
