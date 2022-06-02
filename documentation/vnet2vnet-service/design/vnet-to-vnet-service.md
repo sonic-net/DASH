@@ -27,7 +27,6 @@ Last update: 05/16/2022
 - [References](#references)
 - [Appendix](#appendix)
   - [VNET to VNET without appliance](#vnet-to-vnet-without-appliance)
-  - [Programming Protocol-independent Packet Processors (P4)](#programming-protocol-independent-packet-processors-p4)
 
 ## Overview
 
@@ -244,19 +243,3 @@ The following figure shows the transformation steps in a traditional VNET settin
 
 <figcaption><i>Figure 2 - VNET to VNET without appliance</i></figcaption> <br/>
 
-### Programming Protocol-independent Packet Processors (P4)
-
-P4 is protocol independent, but it enables programmers to express a rich set of protocols and other data plane behaviors.
-
-From the [P4 Open Source Programming Language](https://p4.org/) site you read the following:
-
-- P4 programs and compilers are target-specific. The target can be hardware-based (FPGA, Programmable ASICs) or software (running on x86).
-- A P4 program (prog.p4) classifies packets by header and the actions to take on incoming packets (e.g., forward, drop).
-- A P4 compiler generates the runtime mapping metadata to allow the control and data planes to communicate using P4Runtime (prog.p4info).
-- A P4 compiler also generates an executable for the target data plane (target_prog.bin), specifying the header formats and corresponding actions for the target device.
-
-The following figure shows the workflow when programming a target using P4.
-
-![pgm-target-via-p4](./images/pgm-target-via-p4.svg)
-
-<figcaption><i>Figure 3 - Programming target using P4</i></figcaption> <br/>
