@@ -130,12 +130,25 @@ The following figure shows the inbound pipeline that comprises the steps: Networ
 
 <figcaption><i>Figure 2 - VM to VM inbound pipeline</i></figcaption><br/>
 
+Packets coming from the Network might be of the following types: 
+
+- Encapped within VNET traffic (from VM to VM) 
+- Encapped traffic from MUX to VM 
+- Encapped traffic from Device to VM 
+- Direct traffic from infrastructure to VM (ex. Node to VM) (no encap) 
 
 The following figure shows the outbound pipeline that comprises the steps: VM --> ACLs --> Routing --> Network.
 
 ![packet-pipeline-processing-per-eni-outbound](./images/packet-pipeline-processing-per-eni-outbound.svg)
 
 <figcaption><i>Figure 3 - VM to VM outbound pipeline</i></figcaption><br/>
+
+Packet going outside to the Network might be of the following types: 
+
+- Direct traffic to Internet (no encap) 
+- Direct traffic to infrastructure (no encap) 
+- Encapped within VNET traffic (from VM to VM) 
+- Encapped traffic from VM to Device 
 
 ## Packet transform example
 
