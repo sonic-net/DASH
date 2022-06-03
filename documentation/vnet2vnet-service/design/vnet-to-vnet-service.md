@@ -11,7 +11,6 @@ Last update: 05/16/2022
 
 - [Overview](#overview)
 - [Moving packets from source VM to destination VM](#moving-packets-from-source-vm-to-destination-vm)
-- [Packet transforms](#packet-transforms)
 - [Processing pipeline](#processing-pipeline)
   - [ENI selection](#eni-selection)
   - [Policy processing per ENI](#policy-processing-per-eni)
@@ -29,6 +28,7 @@ Last update: 05/16/2022
   - [Packet transform summary](#packet-transform-summary)
 - [References](#references)
 - [Appendix](#appendix)
+  - [Packet transforms](#packet-transforms)
   - [VNET to VNET without DASH optimization](#vnet-to-vnet-without-dash-optimization)
 
 ## Overview
@@ -68,50 +68,6 @@ Appliance, and from the Appliance to the destination VM (after packet rules,
 routing, and transforms). This tunnel (along with some SDN feature work) will
 redirect the packets to a DPU, for example - in an appliance. This is where the
 DASH performance enhancements (so called *bump in the wire*) happens.
-
-## Packet transforms
-
-Packet transformation plays a crucial role when moving a packet from a source to
-a destination. Before we look at the example, let's define a few terms.
-
-- **Flows**. It describes a specific *conversation* between two hosts (SRC/DST
-  IP, SRC/DST Port). When flows are processed and policy is applied to them and
-  then routed, the SmartNIC (or DPU) records the outcomes of all those decisions in a
-  **transform** and places them in the **flow table** which resides locally on
-  the card itself.  
-
-  > [!NOTE] This is why sometimes the term *transform* and *flow* are used
-  > interchangeably.
-
-- **Transforms**. It is represented either by *iflow* (initiator) or *rflow*
-  (responder) in the **flow table**. It contains everything the SmartNIC needs to
-  route a packet to its destination without first having to apply a policy.
-  Whenever the SmartNIC receives a packet, it checks the local *flow table* to see if
-  the preparatory work has been done for this flow. The following can happen:
-
-  - When a *transform* or *flow* doesn’t exist in the *flow table*, a **slow
-    path** is executed and policy applied.
-  - When a *transform* or *flow* does exist in the *flow table*, a **fast path**
-    is executed and the values in the transform are used to forward the packet
-    to its destination without having to apply a policy first.
-
-- **Mapping table**. It is tied to the V-Port, and contains the CA:PA (IPv4,
-  IPv6) mapping, along with the FNI value of the CA for Inner Destination MAC
-  re-write and VNID to use for VXLAN encapsulation.
-
-  > [!NOTE] The Flexible Network Interface (FNI) is a 48-bit value which easily
-  > maps to MAC values. The MAC address of a VNIC (VM NIC or BareMetal NIC) is
-  > synonymous with FNI. It is one of the values used to identify a V-Port
-  > container ID.  
-
-- **Routing table**. A longest prefix match (LPM) table that once matched on
-  destination specifies the action to perform VXLAN encapsulation based on
-  variables already provided, VXLAN encap using a **mapping table** or *Overlay
-  Tunnel* lookup for variables, or *L3/L4 NAT*. Routing tables are mapped to the
-  V-Port.
-
-- **Flow table**. A global table on a SmartNIC that contains the transforms for all
-  of the per-FNI flows that have been processed through the data path pipeline.
 
 ## Processing pipeline
 
@@ -274,9 +230,54 @@ The following table summarizes the process of transforming, mapping and routing.
 
 ## Appendix
 
+### Packet transforms
+
+Packet transformation plays a crucial role when moving a packet from a source to
+a destination. Let's define a few terms.
+
+- **Flows**. It describes a specific *conversation* between two hosts (SRC/DST
+  IP, SRC/DST Port). When flows are processed and policy is applied to them and
+  then routed, the SmartNIC (or DPU) records the outcomes of all those decisions in a
+  **transform** and places them in the **flow table** which resides locally on
+  the card itself.  
+
+  > [!NOTE] This is why sometimes the term *transform* and *flow* are used
+  > interchangeably.
+
+- **Transforms**. It is represented either by *iflow* (initiator) or *rflow*
+  (responder) in the **flow table**. It contains everything the SmartNIC needs to
+  route a packet to its destination without first having to apply a policy.
+  Whenever the SmartNIC receives a packet, it checks the local *flow table* to see if
+  the preparatory work has been done for this flow. The following can happen:
+
+  - When a *transform* or *flow* doesn’t exist in the *flow table*, a **slow
+    path** is executed and policy applied.
+  - When a *transform* or *flow* does exist in the *flow table*, a **fast path**
+    is executed and the values in the transform are used to forward the packet
+    to its destination without having to apply a policy first.
+
+- **Mapping table**. It is tied to the V-Port, and contains the CA:PA (IPv4,
+  IPv6) mapping, along with the FNI value of the CA for Inner Destination MAC
+  re-write and VNID to use for VXLAN encapsulation.
+
+  > [!NOTE] The Flexible Network Interface (FNI) is a 48-bit value which easily
+  > maps to MAC values. The MAC address of a VNIC (VM NIC or BareMetal NIC) is
+  > synonymous with FNI. It is one of the values used to identify a V-Port
+  > container ID.  
+
+- **Routing table**. A longest prefix match (LPM) table that once matched on
+  destination specifies the action to perform VXLAN encapsulation based on
+  variables already provided, VXLAN encap using a **mapping table** or *Overlay
+  Tunnel* lookup for variables, or *L3/L4 NAT*. Routing tables are mapped to the
+  V-Port.
+
+- **Flow table**. A global table on a SmartNIC that contains the transforms for all
+  of the per-FNI flows that have been processed through the data path pipeline.
+
+
 ### VNET to VNET without DASH optimization 
 
-The following figure shows the transformation steps in a traditional VNET setting i.e., without appliance.
+The following figure shows the transformation steps in a traditional VNET setting i.e., without DASH optimization.
 
 ![packet-transforms-vm-to-vm-in-vnet-without-dash](./images/packet-transforms-vm-to-vm-in-vnet-without-dash.svg)
 
