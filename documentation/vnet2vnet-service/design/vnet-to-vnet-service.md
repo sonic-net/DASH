@@ -12,6 +12,9 @@ Last update: 05/16/2022
 - [Overview](#overview)
 - [Moving packets from source VM to destination VM](#moving-packets-from-source-vm-to-destination-vm)
 - [Packet transforms](#packet-transforms)
+- [Processing pipeline](#processing-pipeline)
+  - [ENI selection](#eni-selection)
+  - [Policy processing per ENI](#policy-processing-per-eni)
 - [Packet transform example](#packet-transform-example)
   - [V-Port definition](#v-port-definition)
   - [VNET definition](#vnet-definition)
@@ -26,7 +29,7 @@ Last update: 05/16/2022
   - [Packet transform summary](#packet-transform-summary)
 - [References](#references)
 - [Appendix](#appendix)
-  - [VNET to VNET without appliance](#vnet-to-vnet-without-appliance)
+  - [VNET to VNET without DASH optimization](#vnet-to-vnet-without-dash-optimization)
 
 ## Overview
 
@@ -42,7 +45,7 @@ The intent is to verify the following performance properties: **CPS**, **flow**,
 
 ![vm-to-vm-communication-vnet](./images/vm-to-vm-communication-vnet.svg)
 
-<figcaption><i>Figure 1 - VM to VM communiczation using appliance</i></figcaption><br/>
+<figcaption><i>Figure 1 - VM to VM communication using appliance</i></figcaption><br/>
 
 ## Moving packets from source VM to destination VM
 
@@ -109,6 +112,30 @@ a destination. Before we look at the example, let's define a few terms.
 
 - **Flow table**. A global table on a SmartNIC that contains the transforms for all
   of the per-FNI flows that have been processed through the data path pipeline.
+
+## Processing pipeline
+
+The processing pipeline must support both IPv4 and IPv6 protocols for both underlay and overlay, unless explicitly stated that some scenario is IPv4-only or IPv6-only. 
+
+### ENI selection 
+
+Once packet arrives on **Inbound** to the target (DPU), it must be forwarded to the correct ENI policy processing pipeline. 
+This ENI selection is done based on the **inner destination MAC** of the packet, which is matched against the MAC of the ENI. 
+
+### Policy processing per ENI
+
+The following figure shows the inbound pipeline that comprises the steps: Network --> Routing --> ACLs --> VM. 
+
+![packet-pipeline-processing-per-eni-inbound](./images/packet-pipeline-processing-per-eni-inbound.svg)
+
+<figcaption><i>Figure 2 - VM to VM inbound pipeline</i></figcaption><br/>
+
+
+The following figure shows the outbound pipeline that comprises the steps: VM --> ACLs --> Routing --> Network.
+
+![packet-pipeline-processing-per-eni-outbound](./images/packet-pipeline-processing-per-eni-outbound.svg)
+
+<figcaption><i>Figure 3 - VM to VM outbound pipeline</i></figcaption><br/>
 
 ## Packet transform example
 
@@ -234,11 +261,11 @@ The following table summarizes the process of transforming, mapping and routing.
 
 ## Appendix
 
-### VNET to VNET without appliance
+### VNET to VNET without DASH optimization 
 
 The following figure shows the transformation steps in a traditional VNET setting i.e., without appliance.
 
-![packet-transforms-vm-to-vm-vnet](./images/packet-transforms-vm-to-vm-vnet.svg)
+![packet-transforms-vm-to-vm-in-vnet-without-dash](./images/packet-transforms-vm-to-vm-in-vnet-without-dash.svg)
 
-<figcaption><i>Figure 2 - VNET to VNET without appliance</i></figcaption> <br/>
+<figcaption><i>Figure Appendix 1 - VNET to VNET without DASH optimization</i></figcaption> <br/>
 
