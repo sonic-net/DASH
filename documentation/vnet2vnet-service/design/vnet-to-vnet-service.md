@@ -12,7 +12,7 @@ Last update: 05/16/2022
 - [Overview](#overview)
 - [Moving packets from source VM to destination VM](#moving-packets-from-source-vm-to-destination-vm)
 - [Processing pipeline](#processing-pipeline)
-  - [ENI selection](#eni-selection)
+  - [Elastic Network Interface  selection](#elastic-network-interface--selection)
   - [Policy processing per ENI](#policy-processing-per-eni)
 - [Packet transform example](#packet-transform-example)
   - [V-Port definition](#v-port-definition)
@@ -73,9 +73,13 @@ DASH performance enhancements (so called *bump in the wire*) happens.
 
 The processing pipeline must support both IPv4 and IPv6 protocols for both underlay and overlay, unless explicitly stated that some scenario is IPv4-only or IPv6-only. 
 
-### ENI selection 
+### Elastic Network Interface  selection 
 
-Once packet arrives on **Inbound** to the target (DPU), it must be forwarded to the correct ENI policy processing pipeline. 
+The Elastic Network Interface (ENI), is an independent entity that has a collection of routing policies. ENI has specified identification criteria, which are also used to identify **packet direction**. The current version only supports **mac-address** as ENI identification criteria. 
+ 
+ENI created with identifier Mac1 assumes packets with **destination mac as Mac1 are inbound** and packets with **source mac as Mac2 are outbound**. This direction is used for matching appropriate inbound and outbound policies.  
+
+Once a packet arrives on **Inbound** to the target (DPU), it must be forwarded to the correct ENI policy processing pipeline. 
 This ENI selection is done based on the **inner destination MAC** of the packet, which is matched against the MAC of the ENI. 
 
 ### Policy processing per ENI
