@@ -14,6 +14,7 @@ Last update: 05/16/2022
 - [Processing pipeline](#processing-pipeline)
   - [Elastic Network Interface  selection](#elastic-network-interface--selection)
   - [Policy processing per ENI](#policy-processing-per-eni)
+- [Access Control Lists (ACL)](#access-control-lists-acl)
 - [Packet transform example](#packet-transform-example)
   - [V-Port definition](#v-port-definition)
   - [VNET definition](#vnet-definition)
@@ -88,17 +89,32 @@ This ENI selection is done based on the **inner destination MAC** of the packet,
 |-------|--------|
 |![packet-pipeline-processing-per-eni-inbound](./images/packet-pipeline-processing-per-eni-inbound.svg)|![packet-pipeline-processing-per-eni-outbound](./images/packet-pipeline-processing-per-eni-outbound.svg)|
 
-- The **inbound pipeline** comprises these steps: Network --> Routing --> ACLs --> VM. Packets coming from the Network might be of the following types: 
+- The **inbound pipeline** comprises these steps: `Network --> Routing --> ACLs --> VM`. Packets coming from the Network might be of the following types: 
   - Encapped within VNET traffic (from VM to VM) 
   - Encapped traffic from MUX to VM 
   - Encapped traffic from Device to VM 
   - Direct traffic from infrastructure to VM (ex. Node to VM) (no encap) 
-- The **outbound pipeline** comprises these steps: VM --> ACLs --> Routing --> Network. Packet going outside to the Network might be of the following types: 
+- The **outbound pipeline** comprises these steps: `VM --> ACLs --> Routing --> Network`. Packet going outside to the Network might be of the following types: 
   - Direct traffic to Internet (no encap) 
   - Direct traffic to infrastructure (no encap) 
   - Encapped within VNET traffic (from VM to VM) 
   - Encapped traffic from VM to Device 
 
+## Access Control Lists (ACL)
+
+ACLs must support multiple level/groups and packets must successfully pass through these groups in order to be moved to the **routing** layer. Up to 3 ACL groups are supported in each direction. The order of the ACL groups evaluation is always the same and will not change. See the example below.
+
+If there is no flow, the order of evaluation is as follows:
+
+- **Outbound**  
+  
+  `VM -> ACLStage1 -> ACLStage2 -> ACLStage3 -> Routing`
+
+- **Inbound**
+  
+  `Routing -> ACLStage1 -> ACLStage2 -> ACLStage3 -> VM`
+
+Each ACL group will have a distinct set of rules. 
 
 ## Packet transform example
 
