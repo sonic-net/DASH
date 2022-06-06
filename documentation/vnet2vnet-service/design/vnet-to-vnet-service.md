@@ -14,9 +14,9 @@ Last update: 05/16/2022
 - [Processing pipeline](#processing-pipeline)
   - [Elastic Network Interface](#elastic-network-interface)
   - [Policy processing per ENI](#policy-processing-per-eni)
-- [Access Control Lists](#access-control-lists)
-  - [Rules evaluation logic](#rules-evaluation-logic)
-  - [Terminating versus non-terminating rule](#terminating-versus-non-terminating-rule)
+  - [Access Control Lists](#access-control-lists)
+    - [Rules evaluation logic](#rules-evaluation-logic)
+    - [Terminating versus non-terminating rule](#terminating-versus-non-terminating-rule)
   - [Routing](#routing)
     - [Outbound](#outbound)
     - [Inbound](#inbound)
@@ -106,7 +106,7 @@ This ENI selection is done based on the **inner destination MAC** of the packet,
   - Encapped within VNET traffic (from VM to VM) 
   - Encapped traffic from VM to Device 
 
-## Access Control Lists
+### Access Control Lists
 
 Access Control Lists (ACLs) must support multiple level/groups and packets must successfully pass through these groups in order to be moved to the **routing** layer. Up to 3 ACL groups are supported in each direction. The order of the ACL groups evaluation is always the same and will not change. See the example below.
 
@@ -136,7 +136,7 @@ The following isd an example of what it means to be stateful:
 - VM must be able to **initiate traffic outbound** (which will be allowed by the outbound **allow** rule). This should then **automatically create temporary inbound allow rule for that specific flow ONLY to allow Internet to reply back (with SYN-ACK)**. 
 - Internet **must not be able to initiate connection to VM if there is deny Inbound rule**. 
 
-### Rules evaluation logic 
+#### Rules evaluation logic 
 
 The end result of the ACL logic for packet evaluation leads to a single outcome: **allow** or **deny**.
 
@@ -155,7 +155,7 @@ ACL groups need to be evaluated in order.
   - A smaller priority number means the rule will be evaluated first.
   - Priorities are unique withing an ACL group. Priorities might overlap across ACL groups.  
 
-### Terminating versus non-terminating rule 
+#### Terminating versus non-terminating rule 
 
 A rule can be **terminating** or **non-terminating**. 
 
