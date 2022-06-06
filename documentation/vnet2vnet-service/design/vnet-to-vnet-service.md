@@ -12,9 +12,11 @@ Last update: 05/16/2022
 - [Overview](#overview)
 - [Moving packets from source VM to destination VM](#moving-packets-from-source-vm-to-destination-vm)
 - [Processing pipeline](#processing-pipeline)
-  - [Elastic Network Interface  selection](#elastic-network-interface--selection)
+  - [Elastic Network Interface](#elastic-network-interface)
   - [Policy processing per ENI](#policy-processing-per-eni)
-- [Access Control Lists (ACL)](#access-control-lists-acl)
+- [Access Control Lists](#access-control-lists)
+  - [Rules evaluation logic](#rules-evaluation-logic)
+  - [Terminating versus non-terminating rule](#terminating-versus-non-terminating-rule)
 - [Packet transform example](#packet-transform-example)
   - [V-Port definition](#v-port-definition)
   - [VNET definition](#vnet-definition)
@@ -74,7 +76,7 @@ DASH performance enhancements (so called *bump in the wire*) happens.
 
 The processing pipeline must support both IPv4 and IPv6 protocols for both underlay and overlay, unless explicitly stated that some scenario is IPv4-only or IPv6-only. 
 
-### Elastic Network Interface  selection 
+### Elastic Network Interface  
 
 The Elastic Network Interface (ENI), is an independent entity that has a collection of routing policies. ENI has specified identification criteria, which are also used to identify **packet direction**. The current version only supports **mac-address** as ENI identification criteria. 
  
@@ -100,9 +102,9 @@ This ENI selection is done based on the **inner destination MAC** of the packet,
   - Encapped within VNET traffic (from VM to VM) 
   - Encapped traffic from VM to Device 
 
-## Access Control Lists (ACL)
+## Access Control Lists
 
-ACLs must support multiple level/groups and packets must successfully pass through these groups in order to be moved to the **routing** layer. Up to 3 ACL groups are supported in each direction. The order of the ACL groups evaluation is always the same and will not change. See the example below.
+Access Control Lists (ACLs) must support multiple level/groups and packets must successfully pass through these groups in order to be moved to the **routing** layer. Up to 3 ACL groups are supported in each direction. The order of the ACL groups evaluation is always the same and will not change. See the example below.
 
 If there is no flow, the order of evaluation is as follows:
 
@@ -114,7 +116,52 @@ If there is no flow, the order of evaluation is as follows:
   
   `Routing -> ACLStage1 -> ACLStage2 -> ACLStage3 -> VM`
 
-Each ACL group will have a distinct set of rules. 
+**Each ACL group has a distinct set of rules**
+
+ACLs are evaluated in both Inbound and Outbound direction and there are separate ACL groups for Inbound and Outbound. 
+
+ACL evaluation is done in stages, where the Stage1 ACL is evaluated first, if a packet is allowed through Stage1 it is processed by Stage2 ACL and so on. For a packet to be allowed it must be allowed in all 3 Stages or must hit a terminating allow rule. 
+
+The updating of the ACL Group (`ACLStage`) must be an atomic operation. No partial updates are allowed, as it might lead to security issues in the case of only partial rules being applied. 
+
+**ACLs must be stateful**
+
+The following isd an example of what it means to be stateful: 
+
+- Customer has **allow** for Outbound traffic (to Internet), but **deny** for Inbound (from Internet) 
+- VM must be able to **initiate traffic outbound** (which will be allowed by the outbound **allow** rule). This should then **automatically create temporary inbound allow rule for that specific flow ONLY to allow Internet to reply back (with SYN-ACK)**. 
+- Internet **must not be able to initiate connection to VM if there is deny Inbound rule**. 
+
+### Rules evaluation logic 
+
+The end result of the ACL logic for packet evaluation leads to a single outcome: **allow** or **deny**.
+
+- If the **allow** outcome is reached the **packet is moved to next processing pipeline**. 
+- If the **deny** outcome is reached the **packet is msilently dropped**. 
+
+ACL groups need to be evaluated in order. 
+
+- Each ACL group has a set of rules. Only a single rule can match in group/stage. 
+  - Once the rule is matched, its action is performed (**allow** or **deny**).
+  - The packet porcessing moves to the next ACL group/stage; a match is found, no further rules in same group are evaluated. 
+
+- Within an ACL group, rules are organized by priority (with lowest priority number being evaluated first). 
+  - No two rules have the same priority within a group. 
+  - Priority is only within rules in the same group. No priorities across groups are allowed. 
+  - A smaller priority number means the rule will be evaluated first.
+  - Priorities are unique withing an ACL group. Priorities might overlap across ACL groups.  
+
+### Terminating versus non-terminating rule 
+
+A rule can be **terminating** or **non-terminating**. 
+
+- **Terminating** rule means that this is the final outcome and further processing through other groups/stages must be skipped. 
+  - **Deny** rules are usually *terminating*. 
+
+- **Non-terminating** rule means that further processing through other groups/stages is required. 
+  - **Allow** rules are usually *non-terminating”*. 
+  - **Deny** rules can sometimes be also *non-terminating* (also known as **soft deny**). This means that a particular ACL group *proposes* to deny the packet, but its decision is not final, and can be **overridden**, switched to *allow* by the next group/stage. 
+
 
 ## Packet transform example
 
