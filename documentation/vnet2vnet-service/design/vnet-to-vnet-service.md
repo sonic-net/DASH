@@ -80,10 +80,12 @@ This ENI selection is done based on the **inner destination MAC** of the packet,
 
 ### Policy processing per ENI
 
-|Inbound|Outbound|Notes|
-|-------|--------|-----|
-|![packet-pipeline-processing-per-eni-inbound](./images/packet-pipeline-processing-per-eni-inbound.svg)|![packet-pipeline-processing-per-eni-outbound](./images/packet-pipeline-processing-per-eni-outbound.svg)|The inbound pipeline that comprises the steps: Network --> Routing --> ACLs --> VM. The outbound pipeline that comprises the steps: VM --> ACLs --> Routing --> Network.|
+|Inbound|Outbound|
+|-------|--------|
+|![packet-pipeline-processing-per-eni-inbound](./images/packet-pipeline-processing-per-eni-inbound.svg)|![packet-pipeline-processing-per-eni-outbound](./images/packet-pipeline-processing-per-eni-outbound.svg)|
 
+- The inbound pipeline that comprises the steps: Network --> Routing --> ACLs --> VM. 
+- The outbound pipeline that comprises the steps: VM --> ACLs --> Routing --> Network.
 
 The following figure shows the inbound pipeline that comprises the steps: Network --> Routing --> ACLs --> VM. 
 
