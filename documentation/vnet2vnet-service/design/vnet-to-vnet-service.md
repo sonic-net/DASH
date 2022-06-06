@@ -84,34 +84,17 @@ This ENI selection is done based on the **inner destination MAC** of the packet,
 |-------|--------|
 |![packet-pipeline-processing-per-eni-inbound](./images/packet-pipeline-processing-per-eni-inbound.svg)|![packet-pipeline-processing-per-eni-outbound](./images/packet-pipeline-processing-per-eni-outbound.svg)|
 
-- The inbound pipeline that comprises the steps: Network --> Routing --> ACLs --> VM. 
-- The outbound pipeline that comprises the steps: VM --> ACLs --> Routing --> Network.
+- The **inbound pipeline** comprises these steps: Network --> Routing --> ACLs --> VM. Packets coming from the Network might be of the following types: 
+  - Encapped within VNET traffic (from VM to VM) 
+  - Encapped traffic from MUX to VM 
+  - Encapped traffic from Device to VM 
+  - Direct traffic from infrastructure to VM (ex. Node to VM) (no encap) 
+- The **outbound pipeline** comprises these steps: VM --> ACLs --> Routing --> Network. Packet going outside to the Network might be of the following types: 
+  - Direct traffic to Internet (no encap) 
+  - Direct traffic to infrastructure (no encap) 
+  - Encapped within VNET traffic (from VM to VM) 
+  - Encapped traffic from VM to Device 
 
-The following figure shows the inbound pipeline that comprises the steps: Network --> Routing --> ACLs --> VM. 
-
-![packet-pipeline-processing-per-eni-inbound](./images/packet-pipeline-processing-per-eni-inbound.svg)
-
-<figcaption><i>Figure 2 - VM to VM inbound pipeline</i></figcaption><br/>
-
-Packets coming from the Network might be of the following types: 
-
-- Encapped within VNET traffic (from VM to VM) 
-- Encapped traffic from MUX to VM 
-- Encapped traffic from Device to VM 
-- Direct traffic from infrastructure to VM (ex. Node to VM) (no encap) 
-
-The following figure shows the outbound pipeline that comprises the steps: VM --> ACLs --> Routing --> Network.
-
-![packet-pipeline-processing-per-eni-outbound](./images/packet-pipeline-processing-per-eni-outbound.svg)
-
-<figcaption><i>Figure 3 - VM to VM outbound pipeline</i></figcaption><br/>
-
-Packet going outside to the Network might be of the following types: 
-
-- Direct traffic to Internet (no encap) 
-- Direct traffic to infrastructure (no encap) 
-- Encapped within VNET traffic (from VM to VM) 
-- Encapped traffic from VM to Device 
 
 ## Packet transform example
 
