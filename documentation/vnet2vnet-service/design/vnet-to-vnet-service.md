@@ -41,7 +41,7 @@ mechanisms. In particular it allows the following:
 - LPM support
 - ACL support
 
-The intent is to verify the following performance properties: **CPS**, **flow**, **PPS**, and **rule scale**.
+The intent is to verify the following performance properties: **Connections per Second** (CPS), **Flow**, **Packet per Second** (PPS), and **Rule Scale**.
 
 ![vm-to-vm-communication-vnet](./images/vm-to-vm-communication-vnet.svg)
 
@@ -79,6 +79,11 @@ Once packet arrives on **Inbound** to the target (DPU), it must be forwarded to 
 This ENI selection is done based on the **inner destination MAC** of the packet, which is matched against the MAC of the ENI. 
 
 ### Policy processing per ENI
+
+|Inbound|Outbound|Notes|
+|-------|--------|-----|
+|![packet-pipeline-processing-per-eni-inbound](./images/packet-pipeline-processing-per-eni-inbound.svg)|![packet-pipeline-processing-per-eni-outbound](./images/packet-pipeline-processing-per-eni-outbound.svg)|The inbound pipeline that comprises the steps: Network --> Routing --> ACLs --> VM. The outbound pipeline that comprises the steps: VM --> ACLs --> Routing --> Network.|
+
 
 The following figure shows the inbound pipeline that comprises the steps: Network --> Routing --> ACLs --> VM. 
 
