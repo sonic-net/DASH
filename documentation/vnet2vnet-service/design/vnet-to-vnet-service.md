@@ -17,6 +17,10 @@ Last update: 05/16/2022
 - [Access Control Lists](#access-control-lists)
   - [Rules evaluation logic](#rules-evaluation-logic)
   - [Terminating versus non-terminating rule](#terminating-versus-non-terminating-rule)
+  - [Routing](#routing)
+    - [Outbound](#outbound)
+    - [Inbound](#inbound)
+    - [Route rules processing](#route-rules-processing)
 - [Packet transform example](#packet-transform-example)
   - [V-Port definition](#v-port-definition)
   - [VNET definition](#vnet-definition)
@@ -162,6 +166,66 @@ A rule can be **terminating** or **non-terminating**.
   - **Allow** rules are usually *non-terminating”*. 
   - **Deny** rules can sometimes be also *non-terminating* (also known as **soft deny**). This means that a particular ACL group *proposes* to deny the packet, but its decision is not final, and can be **overridden**, switched to *allow* by the next group/stage. 
 
+
+### Routing 
+
+Routing must be based on the **Longest Prefix Match** (LPM) and must support all **underlay and overlay** combinations: 
+
+- inner IPv4 packet encapped in outer IPv4 packet 
+- inner IPv4 packet encapped in outer IPv6 packet 
+- inner IPv6 packet encapped in outer IPv4 packet 
+- inner IPv6 packet encapped in outer IPv6 packet 
+
+Routing pipeline must support the routing models shown below.
+
+#### Outbound 
+
+1. **Transpositions** 
+   - Direct traffic – pass thru with static SNAT/DNAT (IP, IP+Port
+   - Packet upcasting (IPv4 -> IPv6 packet transformation) 
+   - Packet downcasting (IPv6 -> IPv4 packet transformation) 
+1. **Encap** 
+   - VXLAN/GRE encap – static rule 
+   - VXLAN/GRE encap – based on mapping lookup 
+   - VXLAN/GRE encap – calculated based on part of SRC/DEST IP of inner packet 
+1. **Up to 3 levels of routing transforms** (example: transpose + encap + encap) 
+
+#### Inbound 
+
+1. **Decap** 
+   - VXLAN/GRE decap – static rule 
+   - VXLAN/GRE decap – based on mapping lookup 
+   - VXLAN/GRE decap – inner packet SRC/DEST IP calculated based on part of outer packet SRC/DEST IP 
+1. **Transpositions** 
+   - Direct traffic – pass thru with static SNAT/DNAT (IP, IP+Port) 
+   - Packet upcasting (IPv4 -> IPv6 packet transformation) 
+   - Packet downcasting (IPv6 -> IPv4 packet transformation) 
+1. **Up to 3 level of routing transforms** (example: decap + decap + transpose) 
+
+All routing rules must optionally allow for **stamping** the source MAC (to **enforce Source MAC correctness**), `correct/fix/override source mac`. 
+
+#### Route rules processing
+
+**Outbound (LPM)**
+
+Matching is based on destination IP only - using the Longest Prefix Match (LPM) algorithm. 
+
+Once the rule is match, the correct set of **transposition, encap** steps must be applied depending on the rule. 
+
+Only one rule will be matched. 
+
+**Inbound (Priority)** 
+
+All inbound rules are matched based on the priority order (with lower priority value rule matched first). 
+Matching is based on multiple fields (or must match if field is populated). The supported fields are: 
+
+- Most Outer Source IP Prefix 
+- Most Outer Destination IP Prefix 
+- VXLAN/GRE key 
+
+Once the rule is match, the correct set of **decap, transposition** steps must be applied depending on the rule. 
+
+Only one rule will be matched. 
 
 ## Packet transform example
 
