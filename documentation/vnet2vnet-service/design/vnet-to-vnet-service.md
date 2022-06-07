@@ -331,6 +331,13 @@ This mapping action is (row 2 of the [VNET mapping table](#vnet-mapping-table)):
 
 - [DMAC_FAKE](https://github.com/Azure/DASH/wiki/Glossary#dmac_fake). A hardcoded MAC address (ex: 12:34:56:78:9a:bc). It is not a MAC of an actual VM, it is simply a MAC address to "satisfy" the TCP/IP stack of Windows/Linux.
 
+The following figure shows the example processing pipeline.
+
+![packet-processing-pipeline-example](./images/packet-processing-pipeline-example.png)
+
+<figcaption><i>Figure 2 - Example processing pipeline</i></figcaption> <br/>
+
+
 ### Packet transform summary
 
 The following table summarizes the process of transforming, mapping and routing.  
