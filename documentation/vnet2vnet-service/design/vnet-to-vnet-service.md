@@ -363,19 +363,19 @@ The following table summarizes the process of transforming, mapping and routing.
 Packet transformation plays a crucial role when moving a packet from a source to
 a destination. Let's define a few terms.
 
-- **Flows**. It describes a specific *conversation* between two hosts (SRC/DST
-  IP, SRC/DST Port). When flows are processed and policy is applied to them and
-  then routed, the SmartNIC (or DPU) records the outcomes of all those decisions in a
-  **transform** and places them in the **flow table** which resides locally on
+- **Flow**. It describes a specific *conversation* between two hosts (SRC/DST
+  IP, SRC/DST Port). When a flow is processed and policy is applied to it and
+  then routed, the DPU (SmartNIC) records the outcomes of all those decisions in
+  a **transform** and places them in the **flow table** which resides locally on
   the card itself.  
 
-  > [!NOTE] This is why sometimes the term *transform* and *flow* are used
+  > [!NOTE] This is why sometimes the terms *transform* and *flow* are used
   > interchangeably.
 
-- **Transforms**. It is represented either by *iflow* (initiator) or *rflow*
-  (responder) in the **flow table**. It contains everything the SmartNIC needs to
-  route a packet to its destination without first having to apply a policy.
-  Whenever the SmartNIC receives a packet, it checks the local *flow table* to see if
+- **Transform**. It is represented either by *iflow* (initiator) or *rflow*
+  (responder) in the **flow table**. It **contains everything the DPU needs to
+  route a packet to its destination without first having to apply a policy**.
+  Whenever the DPU receives a packet, it checks the local *flow table* to see if
   the preparatory work has been done for this flow. The following can happen:
 
   - When a *transform* or *flow* doesn’t exist in the *flow table*, a **slow
@@ -393,13 +393,13 @@ a destination. Let's define a few terms.
   > synonymous with FNI. It is one of the values used to identify a V-Port
   > container ID.  
 
-- **Routing table**. A longest prefix match (LPM) table that once matched on
-  destination specifies the action to perform VXLAN encapsulation based on
-  variables already provided, VXLAN encap using a **mapping table** or *Overlay
-  Tunnel* lookup for variables, or *L3/L4 NAT*. Routing tables are mapped to the
-  V-Port.
+- **Routing table**. It is a match.action table, specifically a longest prefix
+  match (LPM) table that once matched on destination specifies the action to
+  perform VXLAN encapsulation based on variables already provided, VXLAN encap
+  using a **mapping table** or *Overlay Tunnel* lookup for variables, or *L3/L4
+  NAT*. Routing tables are mapped to the V-Port.
 
-- **Flow table**. A global table on a SmartNIC that contains the transforms for all
+- **Flow table**. A global table on a DPU that contains the transforms for all
   of the per-FNI flows that have been processed through the data path pipeline.
 
 
@@ -409,5 +409,5 @@ The following figure shows the transformation steps in a traditional VNET settin
 
 ![packet-transforms-vm-to-vm-in-vnet-without-dash](./images/packet-transforms-vm-to-vm-in-vnet-without-dash.svg)
 
-<figcaption><i>Figure Appendix 1 - VNET to VNET without DASH optimization</i></figcaption> <br/>
+<figcaption><i>Figure Appendix 1 - VNET to VNET without DASH optimization</i></figcaption> 
 
