@@ -19,13 +19,14 @@ control inbound(inout headers_t hdr,
         meta.encap_data.vni = vni;
     }
 
-    action set_vm_id(bit<16> vm_id) {
-        meta.vm_id = vm_id;
+    action set_vm_id(bit<16> inbound_vm_id) {
+        meta.inbound_vm_id = inbound_vm_id;
     }
 
+    @name("eni_to_vm|dash_vnet")
     table eni_to_vm {
         key = {
-            meta.eni: exact @name("meta.eni:eni");
+            meta.eni_id: exact @name("meta.eni_id:eni_id");
         }
 
         actions = {
@@ -33,9 +34,10 @@ control inbound(inout headers_t hdr,
         }
     }
 
+    @name("vm|dash_vnet")
     table vm {
         key = {
-            meta.vm_id: exact @name("meta.vm_id:vm_id");
+            meta.inbound_vm_id: exact @name("meta.inbound_vm_id:inbound_vm_id");
         }
 
         actions = {
