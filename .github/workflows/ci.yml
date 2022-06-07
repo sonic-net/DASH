@@ -14,4 +14,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: make docker
-      run: make docker
+      run: cd sirius-pipeline && make docker
