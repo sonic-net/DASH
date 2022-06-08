@@ -26,7 +26,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: limit make jobs to 1
-      run: sed -i 's/MAKEFLAGS=-j/MAKEFLAGS=-j1/g' Dockerfile
+      run: sed -i 's/MAKEFLAGS=-j/MAKEFLAGS=-j2/g' Dockerfile
     - name: Build docker image
       run: make docker
     - name: Build P4 software switch (bmv2) and P4RT
