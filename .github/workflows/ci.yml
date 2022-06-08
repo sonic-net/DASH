@@ -13,5 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - run: cd sirius-pipeline
+    - name: limit make jobs to 1
+      run: sed -i 's/MAKEFLAGS=-j/MAKEFLAGS=-j1/g' Dockerfile
     - name: make docker
-      run: cd sirius-pipeline && make docker
+      run: make docker
