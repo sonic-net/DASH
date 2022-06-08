@@ -1,0 +1,15 @@
+libsai.so: {% for api in api_names %}sai{{ api }}.cpp {% endfor %}
+	g++ \
+	    -c \
+	    -I ../SAI/inc/ \
+	    -I ../SAI/experimental/ \
+	    -fPIC \
+	    -g \
+	    utils.cpp \
+	    {% for api in api_names %}sai{{ api }}.cpp {% endfor %}
+	g++ \
+	    -shared \
+	    -g \
+	    -o libsai.so \
+	    utils.o \
+	    {% for api in api_names %}sai{{ api }}.o {% endfor %}

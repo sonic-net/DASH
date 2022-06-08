@@ -13,10 +13,10 @@ struct encap_data_t {
     EthernetAddress overlay_dmac;
 }
 
-enum direction_t {
-    INVALID,
-    OUTBOUND,
-    INBOUND
+enum bit<16> direction_t {
+    INVALID = 0,
+    OUTBOUND = 1,
+    INBOUND = 2
 }
 
 struct conntrack_data_t {
@@ -24,13 +24,20 @@ struct conntrack_data_t {
     bool allow_out;
 }
 
+struct eni_data_t {
+    bit<32> cps;
+    bit<32> pps;
+    bit<32> flows;
+}
+
 struct metadata_t {
     bool dropped;
     direction_t direction;
     encap_data_t encap_data;
     EthernetAddress eni_addr;
-    bit<16> eni;
-    bit<16> vm_id;
+    bit<16> eni_id;
+    eni_data_t eni_data;
+    bit<16> inbound_vm_id;
     bit<8> appliance_id;
     bit<1> is_dst_ip_v6;
     IPv4ORv6Address dst_ip_addr;
