@@ -17,13 +17,13 @@
  *    assistance with these files: Intel Corporation, Mellanox Technologies Ltd,
  *    Dell Products, L.P., Facebook, Inc., Marvell International Ltd.
  *
- * @file    saiexperimental{{ sai_api.app_name }}.h
+ * @file    saiexperimental{{ sai_api.app_name | replace('_', '') }}.h
  *
  * @brief   This module defines SAI P4 extension  interface
  */
 
-#if !defined (__SAIEXPERIMENTAL{{ sai_api.app_name | upper }}_H_)
-#define __SAIEXPERIMENTAL{{ sai_api.app_name | upper}}_H_
+#if !defined (__SAIEXPERIMENTAL{{ sai_api.app_name | replace('_', '') | upper }}_H_)
+#define __SAIEXPERIMENTAL{{ sai_api.app_name | replace('_', '') | upper}}_H_
 
 #include <saitypes.h>
 
@@ -78,15 +78,19 @@ typedef struct _sai_{{ table.name }}_t
 {% for key in table['keys'] %}
     /**
      * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.sai_key_name }}
+{% if key.sai_key_type == 'sai_object_id_t' %}
+     *
+     * @objects SAI_OBJECT_TYPE_{{ key.sai_key_name | replace('_id', '') | upper }}
+{% endif %}
      */
 {% if key.match_type == 'lpm' %}
-    {{ key.sai_lpm_type }} {{ key.sai_key_name }};
+    {{ key.sai_lpm_type }} {{ key.sai_key_name | lower }};
 {% elif key.match_type == 'list' %}
-    {{ key.sai_list_type }} {{ key.sai_key_name }};
+    {{ key.sai_list_type }} {{ key.sai_key_name | lower }};
 {% elif key.match_type == 'range_list' %}
-    {{ key.sai_range_list_type }} {{ key.sai_key_name }};
+    {{ key.sai_range_list_type }} {{ key.sai_key_name | lower }};
 {% else %}
-    {{ key.sai_key_type }} {{ key.sai_key_name }};
+    {{ key.sai_key_type }} {{ key.sai_key_name | lower }};
 {% endif %}
 
 {% endfor %}
@@ -94,7 +98,7 @@ typedef struct _sai_{{ table.name }}_t
 
 {% endif %}
 /**
- * @brief Attribute ID for {{ table.name }}
+ * @brief Attribute ID for {{ sai_api.app_name }}_{{ table.name }}
  */
 typedef enum _sai_{{ table.name }}_attr_t
 {
@@ -134,6 +138,9 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% if key.sai_key_type == 'sai_uint16_t' %}
      * @isvlan false
 {% endif %}
+{% if key.sai_key_type == 'sai_object_id_t' %}
+     * @objects SAI_OBJECT_TYPE_{{ key.sai_key_name | replace('_id', '') | upper }}
+{% endif %}
      */
 {% if not ns.firstattr %}
     SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }} = SAI_{{ table.name | upper }}_ATTR_START,
@@ -163,6 +170,10 @@ typedef enum _sai_{{ table.name }}_attr_t
      * @default 0:0:0:0:0:0
 {% elif param.type == 'bool' %}
      * @default false
+{% elif param.type == 'sai_object_id_t' %}
+     * @objects SAI_OBJECT_TYPE_{{ param.name | replace('_id', '') | upper }}
+     * @allownull true
+     * @default SAI_NULL_OBJECT_ID
 {% else %}
      * @default 0
 {% endif %}
@@ -187,6 +198,33 @@ typedef enum _sai_{{ table.name }}_attr_t
     SAI_{{ table.name | upper }}_ATTR_STAGE,
 
 {% endif %}
+{% if table.with_counters == 'true' %}
+    /**
+     * @brief Attach a counter
+     *
+     * When it is empty, then packet hits won't be counted
+     *
+     * @type sai_object_id_t
+     * @flags CREATE_AND_SET
+     * @objects SAI_OBJECT_TYPE_COUNTER
+     * @allownull true
+     * @default SAI_NULL_OBJECT_ID
+     */
+    SAI_{{ table.name | upper }}_ATTR_COUNTER_ID,
+
+{% endif %}
+{% if table['keys'] | selectattr('match_type', 'ne', 'exact') | list | length > 0 %}
+{% if table['keys'] | selectattr('match_type', 'eq', 'lpm') | list | length == 0 %}
+    /**
+     * @brief Rule priority in table
+     *
+     * @type sai_uint32_t
+     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
+     */
+    SAI_{{ table.name | upper }}_ATTR_PRIORITY,
+
+{% endif %}
+{% endif %}
     /**
      * @brief End of attributes
      */
@@ -203,7 +241,7 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% endfor %}
 {% for table in sai_api.tables %}
 /**
- * @brief Create {{ table.name }}
+ * @brief Create {{ sai_api.app_name }}_{{ table.name }}
  *
 {% if table.is_object == 'true' %}
  * @param[out] {{ table.name }}_id Entry id
@@ -227,7 +265,7 @@ typedef sai_status_t (*sai_create_{{ table.name }}_fn)(
         _In_ const sai_attribute_t *attr_list);
 
 /**
- * @brief Remove {{ table.name }}
+ * @brief Remove {{ sai_api.app_name }}_{{ table.name }}
  *
 {% if table.is_object == 'true' %}
  * @param[in] {{ table.name }}_id Entry id
@@ -245,7 +283,7 @@ typedef sai_status_t (*sai_remove_{{ table.name }}_fn)(
 {% endif %}
 
 /**
- * @brief Set attribute for {{ table.name }}
+ * @brief Set attribute for {{ sai_api.app_name }}_{{ table.name }}
  *
 {% if table.is_object == 'true' %}
  * @param[in] {{ table.name }}_id Entry id
@@ -265,7 +303,7 @@ typedef sai_status_t (*sai_set_{{ table.name }}_attribute_fn)(
         _In_ const sai_attribute_t *attr);
 
 /**
- * @brief Get attribute for {{ table.name }}
+ * @brief Get attribute for {{ sai_api.app_name }}_{{ table.name }}
  *
 {% if table.is_object == 'true' %}
  * @param[in] {{ table.name }}_id Entry id
@@ -288,7 +326,7 @@ typedef sai_status_t (*sai_get_{{ table.name }}_attribute_fn)(
 
 {% if table.is_object == 'false' %}
 /**
- * @brief Bulk create {{ table.name }}
+ * @brief Bulk create {{ sai_api.app_name }}_{{ table.name }}
  *
  * @param[in] object_count Number of objects to create
  * @param[in] {{ table.name }} List of object to create
@@ -313,7 +351,7 @@ typedef sai_status_t (*sai_bulk_create_{{ table.name }}_fn)(
         _Out_ sai_status_t *object_statuses);
 
 /**
- * @brief Bulk remove {{ table.name }}
+ * @brief Bulk remove {{ sai_api.app_name }}_{{ table.name }}
  *
  * @param[in] object_count Number of objects to remove
  * @param[in] {{ table.name }} List of objects to remove
@@ -350,11 +388,12 @@ typedef struct _sai_{{ sai_api.app_name }}_api_t
     sai_bulk_create_{{ table.name }}_fn      {{ " " * space_offset }}create_{{ table.name | replace("entry", "entries") }};
     sai_bulk_remove_{{ table.name }}_fn      {{ " " * space_offset }}remove_{{ table.name | replace("entry", "entries") }};
 {% endif %}
+
 {% endfor %}
 } sai_{{ sai_api.app_name }}_api_t;
 
 /**
  * @}
  */
-#endif /** __SAIEXPERIMENTAL{{ sai_api.app_name | upper}}_H_ */
+#endif /** __SAIEXPERIMENTAL{{ sai_api.app_name | replace('_', '') | upper}}_H_ */
 

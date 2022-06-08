@@ -36,11 +36,9 @@ Last update: 05/02/2022
     - [Low level architecture](#low-level-architecture-1)
 - [Example of network representation](#example-of-network-representation)
   - [Deployment](#deployment)
-- [SAI headers and behavioral model](#sai-headers-and-behavioral-model)
-  - [Switch Abstraction Interface (SAI) headers](#switch-abstraction-interface-sai-headers)
-  - [Behavioral model](#behavioral-model)
-  - [SONiC Integration testing](#sonic-integration-testing)
-  - [DASH services conformance and performance testing](#dash-services-conformance-and-performance-testing)
+- [Behavioral model](#behavioral-model)
+- [SONiC Integration testing](#sonic-integration-testing)
+- [DASH services conformance and performance testing](#dash-services-conformance-and-performance-testing)
 - [Appendix](#appendix)
   - [A day in the life of a DASH packet](#a-day-in-the-life-of-a-dash-packet)
   - [A day in the life of a DASH SDN controller](#a-day-in-the-life-of-a-dash-sdn-controller)
@@ -359,18 +357,20 @@ rigorously tested for performance and conformance. See [DASH Testing
 documentation](https://github.com/Azure/DASH/tree/main/test).
 
 SAI "schema" are represented as fixed c-language header files and derived
-metadata header files. The underlay and overlay schema have different origins:
+metadata header files. The **underlay** and **overlay** schema have different origins:
 
-- Traditional SAI headers are defined in the [OCP SAI project
+- DASH SAI **underlay** headers. Traditional **SAI headers** are defined in the [OCP SAI project
   repo](https://github.com/opencomputeproject/SAI/tree/master/inc).These are
-  hand-generated and maintained. DASH uses a subset of these to manage "underlay"
-  functions, e.g. device management, Layer 3 routing and so forth.
-- DASH SAI "overlay" objects are derived from a [P4 Behavioral
+  **hand-generated** and **maintained**. DASH uses a subset of these to manage "**underlay**"
+  functions, e.g. device management, Layer 3 routing and so forth. For more information, see [SWSS Lite (Underlay)](dash-sonic-hld.md#333-swss-lite-underlay). 
+- DASH SAI **overlay** objects. They are derived from a [P4 Behavioral
   Model](https://github.com/Azure/DASH/tree/main/sirius-pipeline). A script
-  reads the P4 model and generates SAI header files.
+  reads the P4 model and generates SAI header files. For more information, see [DASHOrch (Overlay)](dash-sonic-hld.md#332-dashorch-overlay).
 
-DASH uses an **enhanced syncd** to configure the dataplane using the technology
-supplier-specific SAI library.
+For more information see the [SAI README](../../../SAI/README.md) file.
+
+> [!NOTE]
+> DASH uses an **enhanced syncd** to configure the dataplane using the technology supplier-specific SAI library.
 
 ### ASIC Drivers
 
@@ -384,7 +384,6 @@ including multi-core System On A Chip (SoC) ASICs, and the associated software.
 For simplicity, the software for such systems which interfaces to the SAI layer
 is collectively called the "ASIC driver." More importantly, the technology
 supplier SAI library will hide all details and present a uniform interface.
-
 
 > [!NOTE]
 > A dedicated group has been investigating the use of PINS.  
@@ -530,28 +529,7 @@ datacenter.
 
 <figcaption><i>Figure 7 - DASH simplified deployment</i></figcaption><br/>
 
-## SAI headers and behavioral model
-
-> [!NOTE] TBD  - Describe in general terms the intent and where it *fits* in
-> the *big picture*. 
-
-### Switch Abstraction Interface (SAI) headers
-
-The Switch Abstraction Interface (SAI) is a common API that is supported by many
-switch ASIC technology suppliers. SONiC uses the API to work across multiple
-ASIC platforms naturally. DASH uses a combination of traditional SAI headers and
-new DASH pipeline-specific headers. Technology suppliers must implement this
-interface for their DASH devices. This interface is the primary integration
-point of DASH devices and the SONiC stack. It will be rigorously tested for
-performance and conformance. The SAI headers are the following:
-
-- **Overlay headers**. The headers for overlay are generated from the P4 code. 
-- **Underlay headers**. The headers for underlay are a filtered subset derived
-  from standard OCP SAI headers. 
-
-For more information see the [SAI README](../../../SAI/README.md) file.
-
-### Behavioral model
+## Behavioral model
 
 We are developing a **P4 defined behavioral model** to describe the behaviors
 per scenario and document them in a repeatable format. The behavioral model is
@@ -560,16 +538,16 @@ to auto-generate the APIs. The *implementation* itself does not have to be P4.
 
 For more information see the [pipeline README](../../../sirius-pipeline/README.md) file.
 
-### SONiC Integration testing
+## SONiC Integration testing
 
- Functional testing provides a suite of tests to validate that
+ SONiC integration testing provides a suite of tests to validate that
  the DASH devices satisfy the standard **SONiC functional requirements**. This
  is a **black-box testing**  concerned with validating whether the device works
  as intended with SONiC. For more information, see [SONiC testbed deployment and
  setup, SONiC testing, test report
  processing](https://github.com/Azure/sonic-mgmt/tree/master/docs).  
 
-### DASH services conformance and performance testing
+## DASH services conformance and performance testing
 
 Conformance and performance testing provides a suite of tests to verify that the
 DASH devices satisfy the standard **DASH conformance and performance
@@ -621,4 +599,4 @@ Some of the info from Kristina's *sanitized* doc.
 - [DASH conformance and performance testing](https://github.com/Azure/DASH/tree/main/test)
 - [SONiC DASH HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-sonic-hld.md)
 - [SONiC System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture)
-
+- [P4 as a Single Source of Truth for SONiC DASH -  2022 P4 Workshop](https://www.youtube.com/watch?v=mT7-t_aDozM)

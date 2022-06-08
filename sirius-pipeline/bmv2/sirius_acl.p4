@@ -13,16 +13,27 @@ match_kind {
     range_list
 }
 
+#ifdef DASH_MATCH
+#define LIST_MATCH list
+#define RANGE_LIST_MATCH range_list
+#else
+#define LIST_MATCH exact
+#define RANGE_LIST_MATCH exact
+#endif
+
+#define str(name) #name
+
 #define ACL_STAGE(table_name) \
     direct_counter(CounterType.packets_and_bytes) ## table_name ##_counter; \
+    @name(str(table_name##:dash_acl|dash_acl)) \
     table table_name { \
         key = { \
-            meta.eni : exact @name("meta.eni:eni"); \
-            hdr.ipv4.dst_addr : list @name("hdr.ipv4.dst_addr:dip"); \
-            hdr.ipv4.src_addr : list @name("hdr.ipv4.src_addr:sip"); \
-            hdr.ipv4.protocol : list @name("hdr.ipv4.src_addr:protocol"); \
-            hdr.tcp.src_port : range_list @name("hdr.tcp.src_port:sport"); \
-            hdr.tcp.dst_port : range_list @name("hdr.tcp.dst_port:dport"); \
+            meta.eni_id : exact @name("meta.eni_id:eni_id"); \
+            hdr.ipv4.dst_addr : LIST_MATCH @name("hdr.ipv4.dst_addr:dip"); \
+            hdr.ipv4.src_addr : LIST_MATCH @name("hdr.ipv4.src_addr:sip"); \
+            hdr.ipv4.protocol : LIST_MATCH @name("hdr.ipv4.src_addr:protocol"); \
+            hdr.tcp.src_port : RANGE_LIST_MATCH @name("hdr.tcp.src_port:src_port"); \
+            hdr.tcp.dst_port : RANGE_LIST_MATCH @name("hdr.tcp.dst_port:dst_port"); \
         } \
         actions = { \
             permit; \
