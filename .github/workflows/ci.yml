@@ -3,12 +3,22 @@ name: CI
 on:
   push:
     branches: [ "**" ]
+    paths-ignore:
+      - 'documentation/**'
+      - 'slides/**'
+      - 'images/**'
+      - '**.md'
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - 'documentation/**'
+      - 'slides/**'
+      - 'images/**'
+      - '**.md'
 
 jobs:
   build:
-
+    name: Build and test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -17,5 +27,15 @@ jobs:
     - uses: actions/checkout@v3
     - name: limit make jobs to 1
       run: sed -i 's/MAKEFLAGS=-j/MAKEFLAGS=-j1/g' Dockerfile
-    - name: make docker
+    - name: Build docker image
       run: make docker
+    - name: Build P4 software switch (bmv2) and P4RT
+      run: make bmv2/sirius_pipeline.bmv2/sirius_pipeline.json
+    - name: Generate SAI API
+      run: make sai
+    - name: make test
+      run: make test
+    - name: Run P4 software switch (bmv2)
+      run: make run-switch
+    - name: Test
+      run: make run-test
