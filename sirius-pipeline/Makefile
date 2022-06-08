@@ -3,7 +3,6 @@ SHELL = /bin/bash
 PWD := $(shell pwd)
 
 DOCKER_RUN := docker run \
-	-it \
 	--name simple_switch \
 	-v $(PWD)/bmv2:/bmv2 \
 	-v $(PWD)/SAI:/SAI \
