@@ -1,3 +1,5 @@
+[![CI](https://github.com/dgalan-xxia/DASH/workflows/CI/badge.svg)](https://github.com/dgalan-xxia/DASH/actions)
+
 # SONiC-DASH - Disaggregated API for SONiC Hosts - DRAFT/Work in Progress
 
 ## SONiC-DASH is a new open source project that will "deliver enterprise network performance to critical cloud applications".  The project extends functionality to stateful workloads.  
