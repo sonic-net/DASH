@@ -50,7 +50,7 @@ test:
 	    make
 
 run-test:
-	docker exec -it -w /tests/vnet_out simple_switch-$(USER) ./vnet_out
+	docker exec -w /tests/vnet_out simple_switch-$(USER) ./vnet_out
 
 docker:
 	docker build \
