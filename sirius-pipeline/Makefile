@@ -26,7 +26,7 @@ clean:
 
 run-switch:
 	$(DOCKER_RUN) \
-		-d 
+		-d \
 	    -v $(PWD)/bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:/etc/dash/sirius_pipeline.json \
 	    -v $(PWD)/bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.txt:/etc/dash/sirius_pipeline_p4rt.txt \
 	    --name simple_switch-$(USER) \
