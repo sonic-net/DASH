@@ -344,7 +344,7 @@ A high-level module interaction is captured in the following diagram.
 ### 3.3.1 DASH Schema Relationships
 The [figure below](#schema_relationships) illustrates the various schema and their transformations into the various SONiC layers, including:
 * gNMI northbound API, which uses YANG to specify schema
-* Redis APP_DB and DASH_APP_DB, which use [ABNF](https://github.com/Azure/SONiC/blob/master/doc/mgmt/Management%20Framework.md#12-design-overview) schema definition language. Redis objects can be directly manipulated using [SAI-redis](https://github.com/Azure/sonic-sairedis) clients.
+* Redis APP_DB, which uses [ABNF](https://github.com/Azure/SONiC/blob/master/doc/mgmt/Management%20Framework.md#12-design-overview) schema definition language. Redis objects can be directly manipulated using [SAI-redis](https://github.com/Azure/sonic-sairedis) clients.
 * JSON import/export formats
 * [SAI](https://github.com/Azure/DASH/tree/main/SAI) table and attribute objects
 
