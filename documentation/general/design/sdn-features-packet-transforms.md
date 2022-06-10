@@ -2,25 +2,22 @@
 
 [<< Back to DASH top-level Documents](../../README.md#contents) ]
 
->**NOTE**: This document is destined to be restructured into general- and per-service specifications.
+# SDN Features, Packet Transforms and Scale
 
-**Table of contents**
+> [!NOTE]
+> This document is in the process of being restructured into general and per-service specifications.
 
-- [First Target Scenario:  Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance](#first-target-scenario--highly-optimized-path-dedicated-appliance-little-processing-or-encap-to-sdn-appliance-and-policies-on-an-sdn-appliance)
+- [First Target Scenario:  SKU for Networked Virtual Appliance (NVA)](#first-target-scenario--sku-for-networked-virtual-appliance-nva)
 - [Scale per DPU (Card)](#scale-per-dpu-card)
 - [Scenario Milestone and Scoping](#scenario-milestone-and-scoping)
 - [Virtual Port and Packet Direction](#virtual-port-and-packet-direction)
-- [Packet processing Pipeline (Sequential prefix match lookups)](#packet-processing-pipeline-sequential-prefix-match-lookups)
-	- [ACL](#acl)
 - [Routes and Route-Action](#routes-and-route-action)
 - [Packet Flow](#packet-flow)
-	- [Inbound](#inbound)
-	- [Outbound](#outbound)
 - [Packet Transform Examples](#packet-transform-examples)
-	- [VNET to VNET Traffic](#vnet-to-vnet-traffic)
-	- [VNET to Internet - TBD](#vnet-to-internet---tbd)
-	- [VNET to Service Endpoints - TBD](#vnet-to-service-endpoints---tbd)
-	- [VNET to Private Link  - TBD](#vnet-to-private-link----tbd)
+  - [VNET to VNET Traffic](#vnet-to-vnet-traffic)
+  - [VNET to Internet - TBD](#vnet-to-internet---tbd)
+  - [VNET to Service Endpoints - TBD](#vnet-to-service-endpoints---tbd)
+  - [VNET to Private Link  - TBD](#vnet-to-private-link----tbd)
 - [Metering](#metering)
 - [VNET Encryption](#vnet-encryption)
 - [Telemetry](#telemetry)
@@ -33,20 +30,11 @@
 - [Unit Testing and development](#unit-testing-and-development)
 - [Internal Partner dependencies](#internal-partner-dependencies)
 - [Packet transforms](#packet-transforms)
-	- [VNET](#vnet)
-	- [Scenario:  VM<->VM (in VNET) communication](#scenario--vm-vm-in-vnet-communication)
-	- [Internal Load balancer](#internal-load-balancer)
-	- [Private Link](#private-link)
-	- [Private Link Service](#private-link-service)
-	- [Service Tunneling](#service-tunneling)
-	- [Inbound from LB](#inbound-from-lb)
-	- [Outbound NAT - L4](#outbound-nat---l4)
 
-# SDN Features, Packet Transforms and Scale
+## First Target Scenario:  SKU for Networked Virtual Appliance (NVA)
 
-## First Target Scenario:  Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance
-
-Why do we need this scenario?  There is a huge cost associated with establishing the first connection (and the CPS that can be established).
+Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance
+Why do we need this scenario?  There is a huge cost associated with establishing the first connection (and the CPS that can be established)
 
 - A high Connections per Second (CPS) / Flow SKU for Networked Virtual Appliances (NVA)
 
@@ -92,6 +80,9 @@ An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance wi
 
 	![sdn-virtual-port](images/sdn-virtual-port.svg)
 
+For information about packets, see **[Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**. 
+
+<!-- 
 - On receiving a packet from the wire, the SDN appliance will determine the Packet direction, matching ENI, and packet processing strategy based on *Encap Transformation and Rules Evaluation*.  Upon receiving a packet, the SDN appliance will determine:
 
 - Packet Direction - which is evaluated based off of the most-outer **VNI** lookup (implementation dependent) from the left-side (see figure below, a DASH optimized VM sending Outbound packets) behind the Appliance.  If there is no match, the direction is Inbound).
@@ -201,6 +192,7 @@ Etc…
 | 100.0.0.100| 1.1.1.1| Block (Terminating = false)| Block (Terminating = false)| Block
 | 100.0.0.100| 1.1.1.2| Block (Terminating = false)| Allow (Terminating = false)| Allow
 
+-->
 ## Routes and Route-Action
 
 - Routes are usually LPM based Outbound
@@ -272,6 +264,9 @@ Etc…
 For the first packet of a TCP flow, we take the Slow Path, running the transposition engine and matching at each layer.  For subsequent packets, we take the Fast Path,
 matching a unified flow via UFID and applying a transposition directly against rules.
 
+For information about packets, see **[Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**. 
+
+<!-- 
 ### Inbound
 
  **Fast Path - Flow Match**
@@ -287,6 +282,8 @@ matching a unified flow via UFID and applying a transposition directly against r
 
  **Slow Path (policy evaluation) - No flow match**
 ![OutSP](images/out_slow_path_pol_eval_no_flow_match.png)
+
+-->
 
 ## Packet Transform Examples
 
@@ -366,6 +363,8 @@ We need more information around Counters, Statistics, and we need to start think
 
 ## BGP
 
+Border Gateway Protocol (BGP) is a standardized exterior gateway protocol designed to exchange routing and reachability information among autonomous systems on the Internet. BGP is classified as a path-vector routing protocol and it makes routing decisions based on paths, network policies, or rule-sets configured by a network administrator. For more information, see [Border Gateway Protocol](https://en.wikipedia.org/wiki/Border_Gateway_Protocol).
+
 ## Watchdogs
 
 ## Servicing
@@ -375,6 +374,8 @@ We need more information around Counters, Statistics, and we need to start think
 Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Bandwidth Metering for Routing Rules to count bytes (each flow associated with a bandwidth counter when an LPM is hit \- many flows *may* share the same counters).
 
 ## Flow Replication
+
+For information about flow replication, see **[DASH High-Availability](../../high-avail/README.md)**.
 
 ## Unit Testing and development
 
@@ -388,6 +389,9 @@ Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Ba
 
 ## Packet transforms
 
+See packet transforms in [Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-transforms). 
+
+<!-- 
 ### VNET
 
 ### Scenario:  VM<->VM (in VNET) communication
@@ -419,3 +423,4 @@ Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Ba
 ![OutNATL4](images/outbound_nat_l4.png)
 
 (L3 works in same way except port re-write)
+-->
