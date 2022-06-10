@@ -70,6 +70,8 @@ Why do we need this scenario?  There is a huge cost associated with establishing
 
 ## Virtual Port (aka Elastic Network Interface / ENI) and Packet Direction
 
+<!--Each interface (called an Elastic Network Interface) is an independent entity which holds a collection of routing policies.  Typically there is a 1:1 mapping between a Virtual Machine (VM) NIC and the ENI (Virtual NIC).-->
+
 An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance will have multiple cards; 1 card will have multiple machines or bare-metal servers), which supports Virtual Ports.   These can map to policy buckets corresponding to customer workloads, example: Virtual Machines, Bare Metal servers.
 
 - The SDN controller will create these virtual ports / ENIs on an SDN appliance and associate corresponding SDN policies such as – Route, ACL, NAT etc. to these virtual ports.  In other words, our software will communicate with the cards, hold card inventory and SDN placement, call API’s that are exposed through the card create policies, setup ENI, routes, ACLs, NAT, and different rules.
