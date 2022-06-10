@@ -1,6 +1,6 @@
 ---
 Note: Work in progress
-Last update: 05/16/2022
+Last update: 06/09/2022
 ---
 
 [[<< Back to parent directory](../README.md)]
@@ -161,7 +161,7 @@ parser.
 
 The following are the example applicable tables.
 
-##### Table ACL1
+##### ACL1 table
 
 The following table prescribes that the packets directed to the destination
 address `10.0.0.10` are blocked, while the packets directed to all other
@@ -173,7 +173,7 @@ destinations are allowed (default).
 |match       |dst add=`10.0.0.10`|
 |action      |block              |
 
-##### Table ACL2
+##### ACL2 table
 
 The following table prescribes that the packets directed to the destination
 address `10.0.0.11` are blocked, while the packets directed to all other
@@ -185,7 +185,7 @@ destinations are allowed (default).
 |match       |dst add=`10.0.0.11`|
 |action      |block              |
 
-##### Table ACL3
+##### ACL3 table
 
 The following table prescribes that the packets directed to all destinations are
 allowed (default). 
@@ -194,7 +194,7 @@ allowed (default).
 |------------|-------------------|
 |default     |allow              |
 
-#### Routing table
+##### Routing table
 
 The routing step shown in the following table defines when a packet is routed
 from the source to the destination.
@@ -205,7 +205,7 @@ from the source to the destination.
 |            |src add=`10.0.0.0/24` |
 |action      |allow                 |
 
-#### Mapping
+##### Mapping table
 
 From the previopus [VNET mapping table](#vnet-mapping-table) table and
 considering the routing discussed before you get the following:
@@ -252,9 +252,9 @@ The following figure shows the example processing pipeline.
 
 ## Appendix
 
-### Packet transforms
+### Packet processing
 
-Packet transformation plays a crucial role when moving a packet from a source to
+Packet processing is based on a set of tables stored in the dataplane (DPU) and configured based on information sent by the control plane (SDN controller). The transformation plays a crucial role when moving a packet from a source to
 a destination. Let's define a few terms.
 
 - **Flow**. It describes a specific *conversation* between two hosts (SRC/DST
