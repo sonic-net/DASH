@@ -10,28 +10,25 @@ Last update: 06/09/2022
 # VNET to VNET scenario
 
 - [Overview](#overview)
-- [Moving packets from source VM to destination
-  VM](#moving-packets-from-source-vm-to-destination-vm)
-- [Packet flow in VNET](#packet-flow-in-vnet)
+- [Moving packets from source VM to destination VM](#moving-packets-from-source-vm-to-destination-vm)
+- [Packet flow in VNET to VNET](#packet-flow-in-vnet-to-vnet)
   - [Outbound packet processing pipeline](#outbound-packet-processing-pipeline)
-- [VM to VM communication in VNET
-  example](#vm-to-vm-communication-in-vnet-example)
+  - [Inbound packet processing pipeline](#inbound-packet-processing-pipeline)
+- [VM to VM communication in VNET example](#vm-to-vm-communication-in-vnet-example)
   - [V-Port definition](#v-port-definition)
   - [VNET definition](#vnet-definition)
   - [VNET mapping table](#vnet-mapping-table)
-    - [Match action tables](#match-action-tables)
-      - [Table ACL1](#table-acl1)
-      - [Table ACL2](#table-acl2)
-      - [Table ACL3](#table-acl3)
+  - [Match action tables](#match-action-tables)
+    - [ACL1 table](#acl1-table)
+    - [ACL2 table](#acl2-table)
+    - [ACL3 table](#acl3-table)
     - [Routing table](#routing-table)
-    - [Mapping](#mapping)
-  - [Packet transform summary](#packet-transform-summary)
+    - [Mapping table](#mapping-table)
 - [References](#references)
 - [Appendix](#appendix)
-  - [Packet transforms](#packet-transforms)
-  - [VNET to VNET without DASH
-    optimization](#vnet-to-vnet-without-dash-optimization)
-
+  - [Packet processing](#packet-processing)
+  - [VNET to VNET without DASH optimization](#vnet-to-vnet-without-dash-optimization)
+  
 ## Overview
 
 This scenario is the starting point to design, implement and test the core DASH
@@ -146,8 +143,7 @@ VNET.
 | 10.0.0.2| 100.0.0.2| 3ffe :: 2| Mac2| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 200 |
 | 10.0.0.3| 100.0.0.3| 3ffe :: 3| Mac3| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 300 |
 
-
-#### Match action tables
+### Match action tables
 
 This step, as per the P4 model, see [P416 Language
 Specification](https://p4.org/p4-spec/docs/P4-16-v1.2.2.html), is executed based
@@ -161,7 +157,7 @@ parser.
 
 The following are the example applicable tables.
 
-##### ACL1 table
+#### ACL1 table
 
 The following table prescribes that the packets directed to the destination
 address `10.0.0.10` are blocked, while the packets directed to all other
@@ -173,7 +169,7 @@ destinations are allowed (default).
 |match       |dst add=`10.0.0.10`|
 |action      |block              |
 
-##### ACL2 table
+#### ACL2 table
 
 The following table prescribes that the packets directed to the destination
 address `10.0.0.11` are blocked, while the packets directed to all other
@@ -185,7 +181,7 @@ destinations are allowed (default).
 |match       |dst add=`10.0.0.11`|
 |action      |block              |
 
-##### ACL3 table
+#### ACL3 table
 
 The following table prescribes that the packets directed to all destinations are
 allowed (default). 
@@ -194,7 +190,7 @@ allowed (default).
 |------------|-------------------|
 |default     |allow              |
 
-##### Routing table
+#### Routing table
 
 The routing step shown in the following table defines when a packet is routed
 from the source to the destination.
@@ -205,7 +201,7 @@ from the source to the destination.
 |            |src add=`10.0.0.0/24` |
 |action      |allow                 |
 
-##### Mapping table
+#### Mapping table
 
 From the previopus [VNET mapping table](#vnet-mapping-table) table and
 considering the routing discussed before you get the following:
