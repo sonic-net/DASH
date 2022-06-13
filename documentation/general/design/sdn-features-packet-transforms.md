@@ -92,119 +92,8 @@ The following applies:
 
 ![sdn-virtual-port](images/sdn-virtual-port.svg)
 
-For information about packets, see **[Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**. 
+For more information, see **[Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**.
 
-<!-- 
-- On receiving a packet from the wire, the SDN appliance will determine the Packet direction, matching ENI, and packet processing strategy based on *Encap Transformation and Rules Evaluation*.  Upon receiving a packet, the SDN appliance will determine:
-
-- Packet Direction - which is evaluated based off of the most-outer **VNI** lookup (implementation dependent) from the left-side (see figure below, a DASH optimized VM sending Outbound packets) behind the Appliance.  If there is no match, the direction is Inbound).
-
-- ENI Selection - Outbound uses source-MAC, Inbound uses destination-MAC
-- SLB decap (if packet was encapped by SLB)
-- Decap VNET GRE key
-
-  - Once the ENI is matched, the packet is first matched with flow table to check whether an existing flow already matches.  If a flow match is found, a corresponding match action is executed without entering into rule processing. Flow match direction is identified based on source and destination MAC.
-
-  - If no flow match is found, the ENI rule processing pipeline will execute.
-
-    - **Inbound rule** processing pipeline is executed if destination MAC in the packet matches the ENI MAC. Once rule pipeline is executed corresponding flows are created.
-
-    - **Outbound rule** processing pipeline is executed if source MAC in the packet matches the ENI MAC.
-
-      - Once outbound rule processing is complete and final transforms are identified, the corresponding flow is created in the flow table.
-
-      - Depending upon the implementation of the flow table, a corresponding inbound flow may also be inserted to enable response packets to match the flow and bypass the rule processing pipeline.
-
-      - **Example**: VM with IP 10.0.0.1 sends a packet to 8.8.8.8, VM Inbound ACL blocks all internet, VM outbound ACL allows 8.8.8.8 \- Response packet from 8.8.8.8 must be allowed without opening any inbound ACL due to the flow match.
-
-	![sdn-appliance](images/sdn-appliance.svg)
-
-- Note: the VNI is **static** on the 'left-side' (most-outer) of the diagram (there is only 1 encap) from the reserved VNI range
-- The VNI will be **different** depending upon the Inbound 'right-side' circumstance (Internet, ER Gateway for example)
-
-## Packet processing Pipeline (Sequential prefix match lookups)
-
-### ACL
-
-- The ACL pipeline has 3-5 levels; an ACL decision is based on the most restrictive match across all 3 levels.  The 1st layer (contains default rules) is *controlled by Azure/MSFT*.  The 2nd and 3rd layers are *Customer controlled*. The 4th and 5th layers might be for example, *VM/Subnet/Subscription* layers. These layers might be security rules or a top level entity controlled by an Administrator or an IT Department.
-
-- If an ACL rule with bit exit ACL pipeline on hit is matched, the ACL pipeline is abandoned.
-
-- Expected ACL scale \- max 100k prefixes, max 10k ports
-
-- ACL table entry count = 1000 per table. (NOTE: Each table entry can have comma separated prefix list.)
-
-- Action Definitions:  
-
-  - Block (terminate)
-
-    - If ‘terminate’ is not used here, the last line is the most important in ACL Level1
-
-  - Soft Block (general block, with specific permits, non-terminating, proceed to next group) or think of this as a Block, and then a ‘no’ for ‘termination’.
-
-  - Allow (non-terminate, proceed to next, continue to FW rules)  
-
-  - Default action = Deny (This is the default value if no rules are matched; traffic should be dropped.  This is the default action of firewalls, however it is OK to be configurable.  If not, we want to default Deny/Drop if no rules are matched).
-
-- ACL Group:  evaluate rules based on Priority (within an ACL Group); Terminate vs non\-Terminate pertains to the Pipeline
-
-**ACL_LEVEL1 (VNET Lookup)**
-
-| Source| Destination| Source Port| Destination Port| Protocol| Action| Priority| Exit ACL pipeline on hit?(Is Terminating)
-|:----------|:----------|:----------|:----------|:----------|:----------|:----------|:----------
-| 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24| 10.0.0.10/32 10.0.0.11/32 10.0.0.12/32 10.0.0.13/32 10.0.0.14/32 30.0.0.0/24| *| *| TCP| Allow| 0| No
-| 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24| 10.0.0.200/32| *| *| TCP| Allow| 1| No
-| 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24| 10.0.0.201/32| *| *| TCP| Block| 2| Yes
-| 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24| 10.0.0.202/32| *| *| TCP| Allow| 3| Yes
-| 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24| 10.0.0.203/32| *| *| TCP| Allow| 4| No
-| *| 8.8.8.8/32| *| *| *| Block| 5| Yes
-| *| 8.8.8.8/32| *| *| *| Allow| 6| Yes
-| *| 9.9.9.9/32| *| *| *| Allow| 7| Yes
-| *| *| *| *| *| Block| 8| No
-| | | | | | | |
-| | | | | | | |
-
-**ACL_LEVEL2 (Customer/User FW rules - portal.azure.com)**
-
-| Source| Destination| Source Port| Destination Port| Protocol| Action| Priority| Exit ACL pipeline on hit?(Is Terminating)
-|:----------|:----------|:----------|:----------|:----------|:----------|:----------|:----------
-| 10.0.0.0/24| *| *| *| TCP| Allow| 1| No
-| 10.0.0.0/24| 10.0.0.202/32| *| *| TCP| Block| 1| Yes
-| 10.0.0.0/24| 10.0.0.203/32| *| *| TCP| Block| 1| Yes
-| *| 8.8.8.8/32| *| *| *| Allow| 2| No
-| *| 9.9.9.9/32| *| *| *| Block| 2| Yes
-| *| 1.1.1.2/32| *| *| *| Allow| 30| No
-| *| *| *| *| *| Block| 3| No
-| | | | | | | |
-| | | | | | | |
-
-**ACL_LEVEL3**
-
-Etc…
-
-**Order of evaluation / priority of evaluation**
-
-- ACL_LEVEL1 \-> ACL_LEVEL2
-
-**Test Scenarios and expected results**
-
-- For simplicity below table only has IP conditions, but the same combinations exist for ports also.
-
-- ACL rules are direction aware, below example is assuming a VM with source IP = 10.0.0.100 which is trying to send packets to various destinations and has above ACL rules on its v\-port.
-
-**Outbound Traffic example evaluation and outcome**
-
-| Source IP| Destination IP| Decision of ACL_LEVEL1| Decision of ACL_LEVEL2| Outcome
-|:----------|:----------|:----------|:----------|:----------
-| 10.0.0.100| 10.0.0.200| Allow (Terminating = false)| Allow (Terminating = false)| Allow
-| 100.0.0.100| 100.0.0.201| Block (Terminating = True)| Not evaluated or Ignored| Block
-| 100.0.0.100| 100.0.0.202| Allow (Terminating = True)| Not evaluated or Ignored| Allow
-| 100.0.0.100| 100.0.0.203| Allow (Terminating = false)| Block (Terminating = True)| Block
-| 100.0.0.100| 8.8.8.8| Block (Terminating = True)| Not evaluated or Ignored| Block
-| 100.0.0.100| 1.1.1.1| Block (Terminating = false)| Block (Terminating = false)| Block
-| 100.0.0.100| 1.1.1.2| Block (Terminating = false)| Allow (Terminating = false)| Allow
-
--->
 ## Routes and Route-Action
 
 - Routes are usually LPM based Outbound
@@ -276,26 +165,7 @@ Etc…
 For the first packet of a TCP flow, we take the Slow Path, running the transposition engine and matching at each layer.  For subsequent packets, we take the Fast Path,
 matching a unified flow via UFID and applying a transposition directly against rules.
 
-For information about packets, see **[Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**. 
-
-<!-- 
-### Inbound
-
- **Fast Path - Flow Match**
- ![Inb](images/inb_fast_path_flow_match.png)
-
- **Slow Path - No flow match**
- ![InbSP](images/in_slow_path_no_flow_match.png)
-
-### Outbound
-
- **Fast path - flow match**
-![OutFP](images/out_fast_path_flow_match.png)
-
- **Slow Path (policy evaluation) - No flow match**
-![OutSP](images/out_slow_path_pol_eval_no_flow_match.png)
-
--->
+For more information, see **[Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**. 
 
 ## Packet Transform Examples
 
@@ -401,38 +271,4 @@ For information about flow replication, see **[DASH High-Availability](../../hig
 
 ## Packet transforms
 
-See packet transforms in [Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-transforms). 
-
-<!-- 
-### VNET
-
-### Scenario:  VM<->VM (in VNET) communication
-
-![VNETtoVNET](images/vm_to_vm.png)
-
-### Internal Load balancer
-
-![LB](images/vm_to_ilb.png)
-
-### Private Link
-
-![PL](images/private_link.png)
-
-### Private Link Service
-
-![PLS](images/private_link_service.png)
-
-### Service Tunneling
-
-![ST](images/service_tunneling.png)
-
-### Inbound from LB
-
-![InbfromLB](images/inbound_frm_ilb.png)
-
-### Outbound NAT - L4
-
-![OutNATL4](images/outbound_nat_l4.png)
-
-(L3 works in same way except port re-write)
--->
+See packet transforms in [Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-transforms).
