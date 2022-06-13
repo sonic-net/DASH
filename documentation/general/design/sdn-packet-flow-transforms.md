@@ -12,8 +12,9 @@
   - [Slow path](#slow-path)
     - [Inbound slow path](#inbound-slow-path)
     - [Outbound slow path](#outbound-slow-path)
-- [Packet processing pipeline (sequential prefix match lookups)](#packet-processing-pipeline-sequential-prefix-match-lookups)
-  - [ACL](#acl)
+- [Packet processing pipeline](#packet-processing-pipeline)
+  - [Access Control Lists (ACLs)](#access-control-lists-acls)
+    - [ACL groups](#acl-groups)
     - [ACL levels](#acl-levels)
     - [ACL rules](#acl-rules)
     - [ACL actions](#acl-actions)
@@ -29,17 +30,35 @@
 
 ## Packet flow - selecting packet direction
 
-On receiving a packet from the wire, the SDN appliance will determine the **packet direction**, **matching ENI**, and **packet processing strategy** based on *Encap Transformation and Rules Evaluation*. See also [2 Packet Flows](dash-sonic-hld.md#2-packet-flows) in the *SONiC-DASH integration high level design* document. 
+On receiving a packet from the wire, the SDN appliance will determine the
+**packet direction**, **matching ENI**, and **packet processing strategy** based
+on *Encap Transformation and Rules Evaluation*. See also [2 Packet
+Flows](dash-sonic-hld.md#2-packet-flows) in the *SONiC-DASH integration high
+level design* document. 
 
-- **Packet direction**. It is evaluated based on the most-outer **VNI** lookup (implementation dependent) from the left-side (see figure below, a DASH optimized VM sending Outbound packets) behind the Appliance.  If there is no match, the direction is Inbound.
+- **Packet direction**. It is evaluated based on the most-outer **VNI** lookup
+  (implementation dependent) from the left-side (see figure below, a DASH
+  optimized VM sending Outbound packets) behind the Appliance.  If there is no
+  match, the direction is Inbound.
 
 - **ENI selection**. Outbound uses source-MAC, Inbound uses destination-MAC
 - **SLB decap** if packet was encapped by SLB.
 - **Decap VNET** GRE key
 
-The following figure shows the preliminary steps to determine the packet direction prior to selecting a fast or slow path.
+The following figure shows the preliminary steps to determine the packet
+direction prior to selecting a fast or slow path.
 
 ![eni-match-flow-direction](./images/sdn/eni-match-flow-direction.svg)
+
+The Elastic Network Interface (ENI), is an independent entity that has a
+collection of routing policies. ENI has specified identification criteria, which
+are also used to identify **packet direction**. The current version only
+supports **mac-address** as ENI identification criteria. 
+
+Once a packet arrives on **Inbound** to the target (DPU), it must be forwarded
+to the correct ENI policy processing pipeline. This ENI selection is done based
+on the **inner destination MAC** of the packet, which is matched against the MAC
+of the ENI. 
 
 ## Packet flow - selecting packet path
 
@@ -81,14 +100,94 @@ If no flow match is found (**slow path**), the ENI rule processing pipeline will
 - Note: the VNI is **static** on the 'left-side' (most-outer) of the diagram (there is only 1 encap) from the reserved VNI range
 - The VNI will be **different** depending upon the Inbound 'right-side' circumstance (Internet, ER Gateway for example)
 
-<!-- 
+<!--
 **Example**: VM with IP 10.0.0.1 sends a packet to 8.8.8.8, VM Inbound ACL blocks all internet, VM outbound ACL allows 8.8.8.8 \- Response packet from 8.8.8.8 must be allowed without opening any inbound ACL due to the flow match.
 
  ![sdn-appliance](images/sdn-appliance.svg)
 -->
-## Packet processing pipeline (sequential prefix match lookups)
+## Packet processing pipeline
 
-### ACL
+The processing of a packet is based on a set of tables stored in the dataplane
+(DPU) and configured based on information sent by the control plane (SDN
+controller). 
+
+> [!NOTE] 
+> DASH processing pipeline must support both IPv4 and IPv6 protocols for both
+> underlay and overlay, unless explicitly stated that some scenario is IPv4-only 
+> or IPv6-only. 
+
+The following definitions apply:
+
+- **Flow**. It describes a specific *conversation* between two hosts (SRC/DST
+  IP, SRC/DST Port). When a flow is processed and policy is applied to it and
+  then routed, the DPU (SmartNIC) records the outcomes of all those decisions in
+  a **transform** and places them in the **flow table** which resides locally on
+  the card itself.  
+
+  > [!NOTE] This is why sometimes the terms *transform* and *flow* are used
+  > interchangeably.
+
+- **Transform**. It is represented either by *iflow* (initiator) or *rflow*
+  (responder) in the **flow table**. It **contains everything the DPU needs to
+  route a packet to its destination without first having to apply a policy**.
+  Whenever the DPU receives a packet, it checks the local *flow table* to see if
+  the preparatory work has been done for this flow. The following can happen:
+
+  - When a *transform* or *flow* doesn’t exist in the *flow table*, a **slow
+    path** is executed and policy applied.
+  - When a *transform* or *flow* does exist in the *flow table*, a **fast path**
+    is executed and the values in the transform are used to forward the packet
+    to its destination without having to apply a policy first.
+
+- **Mapping table**. It is tied to the V-Port, and contains the CA:PA (IPv4,
+  IPv6) mapping, along with the FNI value of the CA for Inner Destination MAC
+  re-write and VNID to use for VXLAN encapsulation.
+
+  > [!NOTE] The Flexible Network Interface (FNI) is a 48-bit value which easily
+  > maps to MAC values. The MAC address of a VNIC (VM NIC or BareMetal NIC) is
+  > synonymous with FNI. It is one of the values used to identify a V-Port
+  > container ID.  
+
+- **Routing table**. It is a match.action table, specifically a longest prefix
+  match (LPM) table that once matched on destination specifies the action to
+  perform VXLAN encapsulation based on variables already provided, VXLAN encap
+  using a **mapping table** or *Overlay Tunnel* lookup for variables, or *L3/L4
+  NAT*. Routing tables are mapped to the V-Port.
+
+- **Flow table**. A global table on a DPU that contains the transforms for all
+  of the per-FNI flows that have been processed through the data path pipeline.
+
+
+### Access Control Lists (ACLs)
+
+ACLs evaluation is done in stages, if a packet is allowed through the first stage, it is processed by the second ACL stage and so on. For a
+packet to be allowed it must be allowed in all the stages or must hit a
+terminating allow rule. 
+
+#### ACL groups
+
+ACLs are evaluated in both **Inbound** and **Outbound** direction; there are separate groups for Inbound and Outbound. 
+
+The updating of an ACL group must be an atomic operation. No
+partial updates are allowed, as it might lead to security issues in the case of
+only partial rules being applied. 
+
+ACL groups need to be evaluated in order. The following rules apply:
+
+- Each ACL group has a set of rules. Only a single rule can match in
+  group/stage. 
+  - Once the rule is matched, its action is performed (**allow** or **deny**).
+  - The packet porcessing moves to the next ACL group/stage; a match is found,
+    no further rules in same group are evaluated. 
+
+- Within an ACL group, rules are organized by priority (with lowest priority
+  number being evaluated first). 
+  - No two rules have the same priority within a group. 
+  - Priority is only within rules in the same group. No priorities across groups
+    are allowed. 
+  - A smaller priority number means the rule will be evaluated first.
+  - Priorities are unique withing an ACL group. Priorities might overlap across
+    ACL groups. 
 
 #### ACL levels
 
@@ -100,9 +199,30 @@ The ACL pipeline has 3-5 levels; an ACL decision is based on the most restrictiv
 
 #### ACL rules
 
+A rule can be **terminating** or **non-terminating**. 
+
+- **terminating** rule means that this is the final outcome and further
+  processing through other groups/stages must be skipped. 
+  - **deny** rules are usually *terminating*. 
+
+- **non-terminating** rule means that further processing through other
+  groups/stages is required. 
+  - **allow** rules are usually *non-terminating”*. 
+  - **deny** rules can sometimes be also *non-terminating* (also known as **soft
+    deny**). This means that a particular ACL group *proposes* to deny the
+    packet, but its decision is not final, and can be **overridden**, switched
+    to *allow* by the next group/stage. 
+
 - If an ACL rule with bit exit ACL pipeline on hit is matched, the ACL pipeline is abandoned.
 - Expected ACL scale \- max 100k prefixes, max 10k ports
 - ACL table entry count = 1000 per table. (NOTE: Each table entry can have comma separated prefix list.)
+
+The end result of the ACL logic for packet evaluation leads to a single outcome:
+**allow** or **deny**.
+
+- If the **allow** outcome is reached the **packet is moved to next processing
+  pipeline**. 
+- If the **deny** outcome is reached the **packet is silently dropped**. 
 
 #### ACL actions  
 
@@ -176,7 +296,7 @@ This section describes the packet transformations that are specific for each sce
 After rule processing is complete and transforms are identified, the corresponding flow is created in the flow table.
 
 > [!NOTE]
-> The following diagrams show transforms as they are done currently, without the appliance in the path. 
+> The following diagrams show transforms as they are done currently that is **without DASH enhancement**, without the appliance in the path. 
 
 ### VM to VM (in VNET) communication
 
