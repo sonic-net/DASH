@@ -133,7 +133,7 @@ matches the ENI MAC.
 The processing of a packet is based on a set of tables and policies stored in
 the dataplane (DPU) and configured based on information sent by the control
 plane (SDN controller). The following figure shows how tables and policies
-rleate to the Virtual Port (ENI). 
+relate to the Virtual Port (ENI). 
 
 ![sdn-virtual-port](images/sdn/sdn-virtual-port.svg)
 
