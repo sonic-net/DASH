@@ -17,8 +17,14 @@
 - [Scale per DPU (Card)](#scale-per-dpu-card)
 - [Scenario Milestone and Scoping](#scenario-milestone-and-scoping)
 - [Virtual Port (or Elastic Network Interface / ENI) and Packet Direction](#virtual-port-or-elastic-network-interface--eni-and-packet-direction)
-- [Routes and Route-Action](#routes-and-route-action)
+- [Routing (Routes and Route-Action)](#routing-routes-and-route-action)
+  - [Outbound routing](#outbound-routing)
+  - [Inbound routing](#inbound-routing)
+  - [Route rules processing](#route-rules-processing)
+    - [Outbound (LPM) route rules processing](#outbound-lpm-route-rules-processing)
+  - [Inbound (priority) route rules processing](#inbound-priority-route-rules-processing)
 - [Packet Flow](#packet-flow)
+- [Packet transforms](#packet-transforms)
 - [Packet Transform Examples](#packet-transform-examples)
   - [VNET to VNET Traffic](#vnet-to-vnet-traffic)
   - [VNET to Internet - TBD](#vnet-to-internet---tbd)
@@ -35,7 +41,6 @@
 - [Flow Replication](#flow-replication)
 - [Unit Testing and development](#unit-testing-and-development)
 - [Internal Partner dependencies](#internal-partner-dependencies)
-- [Packet transforms](#packet-transforms)
 
 ## First Target Scenario:  SKU for Networked Virtual Appliance (NVA)
 
@@ -115,28 +120,85 @@ The following applies:
 For more information, see **[Packet direction flow and
 transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**.
 
-## Routes and Route-Action
+## Routing (Routes and Route-Action)
+
+Routing must be based on the **Longest Prefix Match** (LPM) and must support all
+**underlay and overlay** combinations: 
+
+- inner IPv4 packet encapped in outer IPv4 packet 
+- inner IPv4 packet encapped in outer IPv6 packet 
+- inner IPv6 packet encapped in outer IPv4 packet 
+- inner IPv6 packet encapped in outer IPv6 packet 
+
+Routing pipeline must support the routing models shown below.
+
+### Outbound routing 
+
+1. **Transpositions** 
+   - Direct traffic – pass thru with static SNAT/DNAT (IP, IP+Port
+   - Packet upcasting (IPv4 -> IPv6 packet transformation) 
+   - Packet downcasting (IPv6 -> IPv4 packet transformation) 
+1. **Encap** 
+   - VXLAN/GRE encap – static rule 
+   - VXLAN/GRE encap – based on mapping lookup 
+   - VXLAN/GRE encap – calculated based on part of SRC/DEST IP of inner packet 
+1. **Up to 3 levels of routing transforms** (example: transpose + encap + encap) 
+
+### Inbound routing 
+
+1. **Decap** 
+   - VXLAN/GRE decap – static rule 
+   - VXLAN/GRE decap – based on mapping lookup 
+   - VXLAN/GRE decap – inner packet SRC/DEST IP calculated based on part of
+     outer packet SRC/DEST IP 
+1. **Transpositions** 
+   - Direct traffic – pass thru with static SNAT/DNAT (IP, IP+Port) 
+   - Packet upcasting (IPv4 -> IPv6 packet transformation) 
+   - Packet downcasting (IPv6 -> IPv4 packet transformation) 
+1. **Up to 3 level of routing transforms** (example: decap + decap + transpose) 
+
+All routing rules must optionally allow for **stamping** the source MAC (to
+**enforce Source MAC correctness**), `correct/fix/override source mac`. 
+
+### Route rules processing
+
+#### Outbound (LPM) route rules processing
+
+- Matching is based on destination IP only - using the Longest Prefix Match (LPM)
+algorithm.
+- Once the rule is match, the correct set of **transposition, encap** steps must
+be applied depending on the rule.
+- Only one rule will be matched.
+
+### Inbound (priority) route rules processing
+
+All inbound rules are matched based on the priority order (with lower priority
+value rule matched first). Matching is based on multiple fields (or must match
+if field is populated). The supported fields are: 
+
+- Most Outer Source IP Prefix 
+- Most Outer Destination IP Prefix 
+- VXLAN/GRE key 
+
+Once the rule is match, the correct set of **decap, transposition** steps must
+be applied depending on the rule. **Only one rule will be matched**. 
+
+Also notice the following: 
 
 - Routes are usually LPM based Outbound
-
 - Each route entry will have a prefix, and separate action entry
-
 - The lookup table is per ENI, but could be Global, or multiple Global lookup
   tables per ENIs
-
 - Outer Encap IPv4 using permits routing between servers within a Region; across
   the Region we use IPv6
 
-*Why would we want to use these?*
+**Why would we want to use these?**
 
 - Example:  to block prefixes to internal DataCenter IP addresses, but Customer
   uses prefixes inside of their own VNET
-
 - Example:  Lookup between CA (inside Cx own VNET) and PA (Provider Address)
   using lookup table (overwrite destination IP and MAC before encap)
-
 - Example:  Customer sends IPv4, we encap with IPv6
-
 - Example:  ExpressRoute with 2 different PAs specified (load balancing across
   multiple PAs) using 5 tuples of packet to choose 1st PA or 2nd PA
 
@@ -195,6 +257,11 @@ transposition directly against rules.
 
 For more information, see **[Packet direction flow and
 transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**. 
+
+## Packet transforms
+
+See packet transforms in [Packet direction flow and
+transforms](sdn-packet-flow-transforms.md#packet-transforms).
 
 ## Packet Transform Examples
 
@@ -323,7 +390,4 @@ High-Availability](../../high-avail/README.md)**.
 
 - Reduced tuple support on host.
 
-## Packet transforms
 
-See packet transforms in [Packet direction flow and
-transforms](sdn-packet-flow-transforms.md#packet-transforms).
