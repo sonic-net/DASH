@@ -107,9 +107,11 @@ If no flow match is found (**slow path**), the ENI rule processing pipeline will
 -->
 ## Packet processing pipeline
 
-The processing of a packet is based on a set of tables stored in the dataplane
+The processing of a packet is based on a set of tables and policies stored in the dataplane
 (DPU) and configured based on information sent by the control plane (SDN
-controller). 
+controller). The following figure shows how tables and policies rleate to the Virtual Port (ENI). 
+
+![sdn-virtual-port](images/sdn/sdn-virtual-port.svg)
 
 > [!NOTE] 
 > DASH processing pipeline must support both IPv4 and IPv6 protocols for both
@@ -160,6 +162,7 @@ The following definitions apply:
 
 ### Access Control Lists (ACLs)
 
+The Access Control Lists (ACLs) play a fundamental role during packet processsing. 
 ACLs evaluation is done in stages, if a packet is allowed through the first stage, it is processed by the second ACL stage and so on. For a
 packet to be allowed it must be allowed in all the stages or must hit a
 terminating allow rule. 

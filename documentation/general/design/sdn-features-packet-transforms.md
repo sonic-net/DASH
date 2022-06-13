@@ -90,7 +90,7 @@ The following applies:
 - A Virtual Port also has attributes like: *Flow time-out*, *QOS*, *port properties* related to the port.
 - The Virtual Port is the container which holds all policies.
 
-![sdn-virtual-port](images/sdn-virtual-port.svg)
+![sdn-virtual-port](images/sdn/sdn-virtual-port.svg)
 
 For more information, see **[Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**.
 
