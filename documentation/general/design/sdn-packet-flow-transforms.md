@@ -4,6 +4,8 @@
 
 # Packet direction flow and transforms
 
+- [Packet flow - selecting packet
+  direction](#packet-flow---selecting-packet-direction)
 - [Packet flow - selecting packet direction](#packet-flow---selecting-packet-direction)
 - [Packet flow - selecting packet path](#packet-flow---selecting-packet-path)
   - [Fast path](#fast-path)
@@ -21,6 +23,13 @@
 - [Packet transforms](#packet-transforms)
   - [VM to VM (in VNET) communication](#vm-to-vm-in-vnet-communication)
   - [Internal Load balancer (in VNET) communication](#internal-load-balancer-in-vnet-communication)
+  - [Private Link](#private-link)
+  - [Private Link Service](#private-link-service)
+  - [Service Tunneling](#service-tunneling)
+  - [Inbound from LB](#inbound-from-lb)
+  - [Outbound NAT - L4](#outbound-nat---l4)
+- [References](#references)
+    communication](#internal-load-balancer-in-vnet-communication)
   - [Private Link](#private-link)
   - [Private Link Service](#private-link-service)
   - [Service Tunneling](#service-tunneling)
@@ -62,13 +71,18 @@ of the ENI.
 
 ## Packet flow - selecting packet path
 
-For the **first packet** of a TCP flow, the **slow path** is selected, running the transposition engine and matching at each layer.  
-For **subsequent packets**, the **fast path** is selected,
-matching a unified flow via UFID and applying a transposition directly against rules.
+For the **first packet** of a TCP flow, the **slow path** is selected, running
+the transposition engine and matching at each layer.  
+For **subsequent packets**, the **fast path** is selected, matching a unified
+flow via UFID and applying a transposition directly against rules.
 
 ### Fast path
 
-Once the ENI is matched, the packet is first matched with flow table to check whether an existing flow already matches.  If a flow match is found (**fast path**), a corresponding match action is executed without entering into rule processing. Flow match direction is identified based on source and destination MAC.
+Once the ENI is matched, the packet is first matched with flow table to check
+whether an existing flow already matches.  If a flow match is found (**fast
+path**), a corresponding match action is executed without entering into rule
+processing. Flow match direction is identified based on source and destination
+MAC.
 
 #### Inbound fast path
 
@@ -80,25 +94,34 @@ Once the ENI is matched, the packet is first matched with flow table to check wh
 
 ### Slow path
 
-If no flow match is found (**slow path**), the ENI rule processing pipeline will execute.
+If no flow match is found (**slow path**), the ENI rule processing pipeline will
+execute.
 
 #### Inbound slow path
 
-**Inbound rule** processing pipeline is executed if destination MAC in the packet matches the ENI MAC. Once rule pipeline is executed corresponding flows are created.
+**Inbound rule** processing pipeline is executed if destination MAC in the
+packet matches the ENI MAC. Once rule pipeline is executed corresponding flows
+are created.
 
 ![inbound-slow-path](./images/sdn/inbound-slow-path-flow.svg)
 
 #### Outbound slow path
 
-**Outbound rule** processing pipeline is executed if source MAC in the packet matches the ENI MAC.
+**Outbound rule** processing pipeline is executed if source MAC in the packet
+matches the ENI MAC.
 
 ![outbound-slow-path](./images/sdn/outbound-slow-path-flow.svg)
 
-- Once outbound rule processing is complete and final transforms are identified, the corresponding flow is created in the flow table.
+- Once outbound rule processing is complete and final transforms are identified,
+  the corresponding flow is created in the flow table.
 
-- Depending upon the implementation of the flow table, a corresponding inbound flow may also be inserted to enable response packets to match the flow and bypass the rule processing pipeline.
-- Note: the VNI is **static** on the 'left-side' (most-outer) of the diagram (there is only 1 encap) from the reserved VNI range
-- The VNI will be **different** depending upon the Inbound 'right-side' circumstance (Internet, ER Gateway for example)
+- Depending upon the implementation of the flow table, a corresponding inbound
+  flow may also be inserted to enable response packets to match the flow and
+  bypass the rule processing pipeline.
+- Note: the VNI is **static** on the 'left-side' (most-outer) of the diagram
+  (there is only 1 encap) from the reserved VNI range
+- The VNI will be **different** depending upon the Inbound 'right-side'
+  circumstance (Internet, ER Gateway for example)
 
 <!--
 **Example**: VM with IP 10.0.0.1 sends a packet to 8.8.8.8, VM Inbound ACL blocks all internet, VM outbound ACL allows 8.8.8.8 \- Response packet from 8.8.8.8 must be allowed without opening any inbound ACL due to the flow match.
@@ -107,16 +130,16 @@ If no flow match is found (**slow path**), the ENI rule processing pipeline will
 -->
 ## Packet processing pipeline
 
-The processing of a packet is based on a set of tables and policies stored in the dataplane
-(DPU) and configured based on information sent by the control plane (SDN
-controller). The following figure shows how tables and policies rleate to the Virtual Port (ENI). 
+The processing of a packet is based on a set of tables and policies stored in
+the dataplane (DPU) and configured based on information sent by the control
+plane (SDN controller). The following figure shows how tables and policies
+rleate to the Virtual Port (ENI). 
 
 ![sdn-virtual-port](images/sdn/sdn-virtual-port.svg)
 
-> [!NOTE] 
-> DASH processing pipeline must support both IPv4 and IPv6 protocols for both
-> underlay and overlay, unless explicitly stated that some scenario is IPv4-only 
-> or IPv6-only. 
+> [!NOTE] DASH processing pipeline must support both IPv4 and IPv6 protocols for
+> both underlay and overlay, unless explicitly stated that some scenario is
+> IPv4-only or IPv6-only. 
 
 The following definitions apply:
 
@@ -162,18 +185,20 @@ The following definitions apply:
 
 ### Access Control Lists (ACLs)
 
-The Access Control Lists (ACLs) play a fundamental role during packet processsing. 
-ACLs evaluation is done in stages, if a packet is allowed through the first stage, it is processed by the second ACL stage and so on. For a
-packet to be allowed it must be allowed in all the stages or must hit a
-terminating allow rule. 
+The Access Control Lists (ACLs) play a fundamental role during packet
+processsing. ACLs evaluation is done in stages, if a packet is allowed through
+the first stage, it is processed by the second ACL stage and so on. For a packet
+to be allowed it must be allowed in all the stages or must hit a terminating
+allow rule. 
 
 #### ACL groups
 
-ACLs are evaluated in both **Inbound** and **Outbound** direction; there are separate groups for Inbound and Outbound. 
+ACLs are evaluated in both **Inbound** and **Outbound** direction; there are
+separate groups for Inbound and Outbound. 
 
-The updating of an ACL group must be an atomic operation. No
-partial updates are allowed, as it might lead to security issues in the case of
-only partial rules being applied. 
+The updating of an ACL group must be an atomic operation. No partial updates are
+allowed, as it might lead to security issues in the case of only partial rules
+being applied. 
 
 ACL groups need to be evaluated in order. The following rules apply:
 
@@ -194,11 +219,14 @@ ACL groups need to be evaluated in order. The following rules apply:
 
 #### ACL levels
 
-The ACL pipeline has 3-5 levels; an ACL decision is based on the most restrictive match across all 3 levels.  
+The ACL pipeline has 3-5 levels; an ACL decision is based on the most
+restrictive match across all 3 levels.  
 
 - The first layer (contains default rules) is *controlled by Azure/MSFT*.  
 - The second and 3rd layers are *Customer controlled*.
-- The 4th and 5th layers might be for example, *VM/Subnet/Subscription* layers. These layers might be security rules or a top level entity controlled by an Administrator or an IT Department.
+- The 4th and 5th layers might be for example, *VM/Subnet/Subscription* layers.
+  These layers might be security rules or a top level entity controlled by an
+  Administrator or an IT Department.
 
 #### ACL rules
 
@@ -216,9 +244,11 @@ A rule can be **terminating** or **non-terminating**.
     packet, but its decision is not final, and can be **overridden**, switched
     to *allow* by the next group/stage. 
 
-- If an ACL rule with bit exit ACL pipeline on hit is matched, the ACL pipeline is abandoned.
+- If an ACL rule with bit exit ACL pipeline on hit is matched, the ACL pipeline
+  is abandoned.
 - Expected ACL scale \- max 100k prefixes, max 10k ports
-- ACL table entry count = 1000 per table. (NOTE: Each table entry can have comma separated prefix list.)
+- ACL table entry count = 1000 per table. (NOTE: Each table entry can have comma
+  separated prefix list.)
 
 The end result of the ACL logic for packet evaluation leads to a single outcome:
 **allow** or **deny**.
@@ -230,12 +260,18 @@ The end result of the ACL logic for packet evaluation leads to a single outcome:
 #### ACL actions  
 
 - Block (terminate)
-- If ‘terminate’ is not used here, the last line is the most important in ACL Level1
-- Soft Block (general block, with specific permits, non-terminating, proceed to next group) or think of this as a Block, and then a ‘no’ for ‘termination’.
+- If ‘terminate’ is not used here, the last line is the most important in ACL
+  Level1
+- Soft Block (general block, with specific permits, non-terminating, proceed to
+  next group) or think of this as a Block, and then a ‘no’ for ‘termination’.
 - Allow (non-terminate, proceed to next, continue to FW rules)  
-- Default action = Deny. This is the default value if no rules are matched; traffic should be dropped.  This is the default action of firewalls, however it is OK to be configurable.  If not, we want to default Deny/Drop if no rules are matched.
+- Default action = Deny. This is the default value if no rules are matched;
+  traffic should be dropped.  This is the default action of firewalls, however
+  it is OK to be configurable.  If not, we want to default Deny/Drop if no rules
+  are matched.
 
-- ACL Group:  evaluate rules based on Priority (within an ACL Group); Terminate vs non-Terminate pertains to the Pipeline
+- ACL Group:  evaluate rules based on Priority (within an ACL Group); Terminate
+  vs non-Terminate pertains to the Pipeline
 
 **ACL_LEVEL1 (VNET Lookup)**
 
@@ -277,9 +313,12 @@ Etc…
 
 **Test Scenarios and expected results**
 
-- For simplicity below table only has IP conditions, but the same combinations exist for ports also.
+- For simplicity below table only has IP conditions, but the same combinations
+  exist for ports also.
 
-- ACL rules are direction aware, below example is assuming a VM with source IP = 10.0.0.100 which is trying to send packets to various destinations and has above ACL rules on its v\-port.
+- ACL rules are direction aware, below example is assuming a VM with source IP =
+  10.0.0.100 which is trying to send packets to various destinations and has
+  above ACL rules on its v\-port.
 
 **Outbound Traffic example evaluation and outcome**
 
@@ -295,11 +334,12 @@ Etc…
 
 ## Packet transforms
 
-This section describes the packet transformations that are specific for each scenario.
-After rule processing is complete and transforms are identified, the corresponding flow is created in the flow table.
+This section describes the packet transformations that are specific for each
+scenario. After rule processing is complete and transforms are identified, the
+corresponding flow is created in the flow table.
 
-> [!NOTE]
-> The following diagrams show transforms as they are done currently that is **without DASH enhancement**, without the appliance in the path. 
+> [!NOTE] The following diagrams show transforms as they are done currently that
+> is **without DASH enhancement**, without the appliance in the path. 
 
 ### VM to VM (in VNET) communication
 
@@ -329,10 +369,10 @@ After rule processing is complete and transforms are identified, the correspondi
 
 ![OutNATL4](./images/sdn/sdn-packet-transforms-outbound-nat-l4.svg)
 
-> [!NOTE]
-> L3 works in same way except port re-write
+> [!NOTE] L3 works in same way except port re-write
 
 ## References
 
-- [Disaggregated API for SONiC Hosts (DASH) high level design](dash-high-level-design.md)
+- [Disaggregated API for SONiC Hosts (DASH) high level
+  design](dash-high-level-design.md)
 - [SONiC-DASH integration high level design](dash-sonic-hld.md)

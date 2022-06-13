@@ -4,9 +4,15 @@
 
 # SDN Features, Packet Transforms and Scale
 
-> [!NOTE]
-> This document is in the process of being restructured into general and per-service specifications.
+> [!NOTE] This document is in the process of being restructured into general and
+> per-service specifications.
 
+- [First Target Scenario:  SKU for Networked Virtual Appliance
+  (NVA)](#first-target-scenario--sku-for-networked-virtual-appliance-nva)
+- [Scale per DPU (Card)](#scale-per-dpu-card)
+- [Scenario Milestone and Scoping](#scenario-milestone-and-scoping)
+- [Virtual Port (or Elastic Network Interface / ENI) and Packet
+  Direction](#virtual-port-or-elastic-network-interface--eni-and-packet-direction)
 - [First Target Scenario:  SKU for Networked Virtual Appliance (NVA)](#first-target-scenario--sku-for-networked-virtual-appliance-nva)
 - [Scale per DPU (Card)](#scale-per-dpu-card)
 - [Scenario Milestone and Scoping](#scenario-milestone-and-scoping)
@@ -33,16 +39,20 @@
 
 ## First Target Scenario:  SKU for Networked Virtual Appliance (NVA)
 
-Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance
-Why do we need this scenario?  There is a huge cost associated with establishing the first connection (and the CPS that can be established)
+Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN
+Appliance and Policies on an SDN Appliance Why do we need this scenario?  There
+is a huge cost associated with establishing the first connection (and the CPS
+that can be established)
 
-- A high Connections per Second (CPS) / Flow SKU for Networked Virtual Appliances (NVA)
+- A high Connections per Second (CPS) / Flow SKU for Networked Virtual
+  Appliances (NVA)
 
  ![sdn-high-cps](images/sdn-high-cps.svg)
 
 ## Scale per DPU (Card)
 
-**Note: Below are the expected numbers per Data Processing Unit (DPU); this applies to both IPV4 and IPV6 underlay and overlay*
+**Note: Below are the expected numbers per Data Processing Unit (DPU); this
+applies to both IPV4 and IPV6 underlay and overlay*
 
 **IPV6 numbers will be lower*
 
@@ -70,7 +80,11 @@ Why do we need this scenario?  There is a huge cost associated with establishing
 
 ## Virtual Port (or Elastic Network Interface / ENI) and Packet Direction
 
-An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance will have multiple cards; 1 card will have multiple machines or bare-metal servers), which supports Virtual Ports.   These can map to policy buckets corresponding to customer workloads, example: Virtual Machines, Bare Metal servers.
+An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance
+will have multiple cards; 1 card will have multiple machines or bare-metal
+servers), which supports Virtual Ports.   These can map to policy buckets
+corresponding to customer workloads, example: Virtual Machines, Bare Metal
+servers.
 
 The Elastic Network Interface (ENI), is an independent entity that has a
 collection of routing policies. ENI has specified identification criteria, which
@@ -82,17 +96,24 @@ to the correct ENI policy processing pipeline. This ENI selection is done based
 on the **inner destination MAC** of the packet, which is matched against the MAC
 of the ENI. 
 
-The SDN controller will create these virtual ports / ENIs on an SDN appliance and associate corresponding SDN policies such as – Route, ACL, NAT etc. to these virtual ports.  In other words, our software will communicate with the cards, hold card inventory and SDN placement, call API’s that are exposed through the card create policies, setup ENI, routes, ACLs, NAT, and different rules.
+The SDN controller will create these virtual ports / ENIs on an SDN appliance
+and associate corresponding SDN policies such as – Route, ACL, NAT etc. to these
+virtual ports.  In other words, our software will communicate with the cards,
+hold card inventory and SDN placement, call API’s that are exposed through the
+card create policies, setup ENI, routes, ACLs, NAT, and different rules.
 
 The following applies:
 
-- Each Virtual Port (ENI) will be created with an ENI identifier like – Mac address, VNI or more.
-- A Virtual Port also has attributes like: *Flow time-out*, *QOS*, *port properties* related to the port.
+- Each Virtual Port (ENI) will be created with an ENI identifier like – Mac
+  address, VNI or more.
+- A Virtual Port also has attributes like: *Flow time-out*, *QOS*, *port
+  properties* related to the port.
 - The Virtual Port is the container which holds all policies.
 
 ![sdn-virtual-port](images/sdn/sdn-virtual-port.svg)
 
-For more information, see **[Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**.
+For more information, see **[Packet direction flow and
+transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**.
 
 ## Routes and Route-Action
 
@@ -100,19 +121,24 @@ For more information, see **[Packet direction flow and transforms](sdn-packet-fl
 
 - Each route entry will have a prefix, and separate action entry
 
-- The lookup table is per ENI, but could be Global, or multiple Global lookup tables per ENIs
+- The lookup table is per ENI, but could be Global, or multiple Global lookup
+  tables per ENIs
 
-- Outer Encap IPv4 using permits routing between servers within a Region; across the Region we use IPv6
+- Outer Encap IPv4 using permits routing between servers within a Region; across
+  the Region we use IPv6
 
 *Why would we want to use these?*
 
-- Example:  to block prefixes to internal DataCenter IP addresses, but Customer uses prefixes inside of their own VNET
+- Example:  to block prefixes to internal DataCenter IP addresses, but Customer
+  uses prefixes inside of their own VNET
 
-- Example:  Lookup between CA (inside Cx own VNET) and PA (Provider Address) using lookup table (overwrite destination IP and MAC before encap)
+- Example:  Lookup between CA (inside Cx own VNET) and PA (Provider Address)
+  using lookup table (overwrite destination IP and MAC before encap)
 
 - Example:  Customer sends IPv4, we encap with IPv6
 
-- Example:  ExpressRoute with 2 different PAs specified (load balancing across multiple PAs) using 5 tuples of packet to choose 1st PA or 2nd PA
+- Example:  ExpressRoute with 2 different PAs specified (load balancing across
+  multiple PAs) using 5 tuples of packet to choose 1st PA or 2nd PA
 
 | Route Type| Example
 |:----------|:----------
@@ -162,10 +188,13 @@ For more information, see **[Packet direction flow and transforms](sdn-packet-fl
 
 ## Packet Flow
 
-For the first packet of a TCP flow, we take the Slow Path, running the transposition engine and matching at each layer.  For subsequent packets, we take the Fast Path,
-matching a unified flow via UFID and applying a transposition directly against rules.
+For the first packet of a TCP flow, we take the Slow Path, running the
+transposition engine and matching at each layer.  For subsequent packets, we
+take the Fast Path, matching a unified flow via UFID and applying a
+transposition directly against rules.
 
-For more information, see **[Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**. 
+For more information, see **[Packet direction flow and
+transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**. 
 
 ## Packet Transform Examples
 
@@ -183,13 +212,12 @@ For more information, see **[Packet direction flow and transforms](sdn-packet-fl
 
 - 20.0.0.0/24
 
-**VNET Mapping Table**
-| | V4 underlay| V6 underlay| Mac-Address| Mapping Action | VNI
-|:----------|:----------|:----------|:----------|:----------|:----------
-| 10.0.0.1| 100.0.0.1| 3ffe :: 1| Mac1| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 100
-| 10.0.0.2| 100.0.0.2| 3ffe :: 2| Mac2| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 200
-| 10.0.0.3| 100.0.0.3| 3ffe :: 3| Mac3| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 300
-| | | | | |
+**VNET Mapping Table** | | V4 underlay| V6 underlay| Mac-Address| Mapping Action
+| VNI |:----------|:----------|:----------|:----------|:----------|:---------- |
+10.0.0.1| 100.0.0.1| 3ffe :: 1| Mac1| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 100 |
+10.0.0.2| 100.0.0.2| 3ffe :: 2| Mac2| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 200 |
+10.0.0.3| 100.0.0.3| 3ffe :: 3| Mac3| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 300 | | |
+| | |
 
 **Packet Transforms**
 
@@ -210,7 +238,8 @@ For more information, see **[Packet direction flow and transforms](sdn-packet-fl
 
 ## Metering
 
-- Metering will be based on per flow stats, metering engine will consume per flow stats of bytes\-in and bytes\-out.
+- Metering will be based on per flow stats, metering engine will consume per
+  flow stats of bytes\-in and bytes\-out.
 
 ## VNET Encryption
 
@@ -218,24 +247,39 @@ For more information, see **[Packet direction flow and transforms](sdn-packet-fl
 
 ## Counters
 
-Counters are objects for counteing data per ENI. The following are their main characteristics:
+Counters are objects for counteing data per ENI. The following are their main
+characteristics:
 
-- A counter is associated with only one ENI that is, it is not shared among different ENIs.
-- If you define a counter as a global object, it cannot reference different ENIs.
+- A counter is associated with only one ENI that is, it is not shared among
+  different ENIs.
+- If you define a counter as a global object, it cannot reference different
+  ENIs.
 - The counters live as long as the related ENI exists.  
 - The counters persist after the flow is completed.
 - You use API calls to handle these counters.
 - When creating a route table, you will be able to reference the counters.
 
-The control plane is the consumer of counters that are defined in the data plane. The control plane queries every 10 seconds.
+The control plane is the consumer of counters that are defined in the data
+plane. The control plane queries every 10 seconds.
 
-Counters can be assigned on the route rule, or assigned onto a mapping. If mapping does not exist, you revert to the route rule counter. A complete definition will follow when we have more information other than software defined devices.  
+Counters can be assigned on the route rule, or assigned onto a mapping. If
+mapping does not exist, you revert to the route rule counter. A complete
+definition will follow when we have more information other than software defined
+devices.  
 
-In the flow table we list the packet counter called a metering packet; once we have the final implementation that does the packet processing, we can do metering.
+In the flow table we list the packet counter called a metering packet; once we
+have the final implementation that does the packet processing, we can do
+metering.
 
-Essentially, whenever a route table is accessed and we identify the right VNET target (based on the mapping from the underlay IP), will have an ID of the metering packet preprogrammed earlier.  We will reference this counter in the mappings. When the flow is created it will list this counter ID.  When the packet transits inbound or outbound through the specific flow, this counter is incremented and tracked separately for the inbound and outbound.
+Essentially, whenever a route table is accessed and we identify the right VNET
+target (based on the mapping from the underlay IP), will have an ID of the
+metering packet preprogrammed earlier.  We will reference this counter in the
+mappings. When the flow is created it will list this counter ID.  When the
+packet transits inbound or outbound through the specific flow, this counter is
+incremented and tracked separately for the inbound and outbound.
 
-We need more information around Counters, Statistics, and we need to start thinking about how to add Metering- and reconcile this in the P4 model.  
+We need more information around Counters, Statistics, and we need to start
+thinking about how to add Metering- and reconcile this in the P4 model.  
 
 **Questions**  
 
@@ -245,7 +289,12 @@ We need more information around Counters, Statistics, and we need to start think
 
 ## BGP
 
-Border Gateway Protocol (BGP) is a standardized exterior gateway protocol designed to exchange routing and reachability information among autonomous systems on the Internet. BGP is classified as a path-vector routing protocol and it makes routing decisions based on paths, network policies, or rule-sets configured by a network administrator. For more information, see [Border Gateway Protocol](https://en.wikipedia.org/wiki/Border_Gateway_Protocol).
+Border Gateway Protocol (BGP) is a standardized exterior gateway protocol
+designed to exchange routing and reachability information among autonomous
+systems on the Internet. BGP is classified as a path-vector routing protocol and
+it makes routing decisions based on paths, network policies, or rule-sets
+configured by a network administrator. For more information, see [Border Gateway
+Protocol](https://en.wikipedia.org/wiki/Border_Gateway_Protocol).
 
 ## Watchdogs
 
@@ -253,15 +302,20 @@ Border Gateway Protocol (BGP) is a standardized exterior gateway protocol design
 
 ## Debugging
 
-Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Bandwidth Metering for Routing Rules to count bytes (each flow associated with a bandwidth counter when an LPM is hit \- many flows *may* share the same counters).
+Counters per rule to trace an increment per layer, ACL hits, Packet Captures,
+Bandwidth Metering for Routing Rules to count bytes (each flow associated with a
+bandwidth counter when an LPM is hit \- many flows *may* share the same
+counters).
 
 ## Flow Replication
 
-For information about flow replication, see **[DASH High-Availability](../../high-avail/README.md)**.
+For information about flow replication, see **[DASH
+High-Availability](../../high-avail/README.md)**.
 
 ## Unit Testing and development
 
-- Need ability to run rule processing behavior on dev box / as part of merge validation.
+- Need ability to run rule processing behavior on dev box / as part of merge
+  validation.
 
 ## Internal Partner dependencies
 
@@ -271,4 +325,5 @@ For information about flow replication, see **[DASH High-Availability](../../hig
 
 ## Packet transforms
 
-See packet transforms in [Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-transforms).
+See packet transforms in [Packet direction flow and
+transforms](sdn-packet-flow-transforms.md#packet-transforms).
