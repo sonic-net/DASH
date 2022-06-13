@@ -13,9 +13,10 @@ control outbound(inout headers_t hdr,
         meta.encap_data.vni = vni;
     }
 
+    @name("eni_to_vni|dash_vnet")
     table eni_to_vni {
         key = {
-            meta.eni : exact @name("meta.eni:eni");
+            meta.eni_id : exact @name("meta.eni_id:eni_id");
         }
 
         actions = {
@@ -29,10 +30,12 @@ control outbound(inout headers_t hdr,
 
     direct_counter(CounterType.packets_and_bytes) routing_counter;
 
+    @name("routing|dash_vnet")
     table routing {
         key = {
-            meta.eni : exact @name("meta.eni:eni");
-            hdr.ipv4.dst_addr : lpm @name("hdr.ipv4.dst_addr:destination");
+            meta.eni_id : exact @name("meta.eni_id:eni_id");
+            meta.is_dst_ip_v6 : exact @name("meta.is_dst_ip_v6:v4_or_v6");
+            meta.dst_ip_addr : lpm @name("meta.dst_ip_addr:destination");
         }
 
         actions = {
@@ -58,11 +61,13 @@ control outbound(inout headers_t hdr,
 
     direct_counter(CounterType.packets_and_bytes) ca_to_pa_counter;
 
+    @name("ca_to_pa|dash_vnet")
     table ca_to_pa {
         key = {
             /* Flow for express route */
             meta.encap_data.dest_vnet_vni : exact @name("meta.encap_data.dest_vnet_vni:dest_vni");
-            hdr.ipv4.dst_addr : exact @name("hdr.ipv4.dst_addr:dip");
+            meta.is_dst_ip_v6 : exact @name("meta.is_dst_ip_v6:v4_or_v6");
+            meta.dst_ip_addr : exact @name("meta.dst_ip_addr:dip");
         }
 
         actions = {
@@ -107,8 +112,8 @@ control outbound(inout headers_t hdr,
                             meta.encap_data.underlay_sip,
                             meta.encap_data.overlay_dmac,
                             meta.encap_data.vni);
-            }
-        }
+             }
+         }
     }
 }
 
