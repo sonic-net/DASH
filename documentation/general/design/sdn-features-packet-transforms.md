@@ -10,7 +10,7 @@
 - [First Target Scenario:  SKU for Networked Virtual Appliance (NVA)](#first-target-scenario--sku-for-networked-virtual-appliance-nva)
 - [Scale per DPU (Card)](#scale-per-dpu-card)
 - [Scenario Milestone and Scoping](#scenario-milestone-and-scoping)
-- [Virtual Port and Packet Direction](#virtual-port-and-packet-direction)
+- [Virtual Port (or Elastic Network Interface / ENI) and Packet Direction](#virtual-port-or-elastic-network-interface--eni-and-packet-direction)
 - [Routes and Route-Action](#routes-and-route-action)
 - [Packet Flow](#packet-flow)
 - [Packet Transform Examples](#packet-transform-examples)
@@ -68,19 +68,29 @@ Why do we need this scenario?  There is a huge cost associated with establishing
 | 5 | Private Link Service Link Service (dest side of Private Link) IPv6 to IPv4; DNAT’ing     |  | |
 | 6 | Flow replication; supporting High Availability (HA); flow efficiently replicates to secondary card; Active/Passive (depending upon ENI policy) or can even have Active/Active; OR provision the same ENI over multiple devices w/o multiple SDN appliances – Primaries for a certain set of VMS can be on both     |  | Not a must have for Private Preview <img width=400/>|
 
-## Virtual Port (aka Elastic Network Interface / ENI) and Packet Direction
-
-<!--Each interface (called an Elastic Network Interface) is an independent entity which holds a collection of routing policies.  Typically there is a 1:1 mapping between a Virtual Machine (VM) NIC and the ENI (Virtual NIC).-->
+## Virtual Port (or Elastic Network Interface / ENI) and Packet Direction
 
 An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance will have multiple cards; 1 card will have multiple machines or bare-metal servers), which supports Virtual Ports.   These can map to policy buckets corresponding to customer workloads, example: Virtual Machines, Bare Metal servers.
 
-- The SDN controller will create these virtual ports / ENIs on an SDN appliance and associate corresponding SDN policies such as – Route, ACL, NAT etc. to these virtual ports.  In other words, our software will communicate with the cards, hold card inventory and SDN placement, call API’s that are exposed through the card create policies, setup ENI, routes, ACLs, NAT, and different rules.
-- Each Virtual Port will be created with an ENI identifier like – Mac address, VNI or more.
-  - Virtual Port will also have attributes like – Flow time-out, QOS, port properties related to the port.
+The Elastic Network Interface (ENI), is an independent entity that has a
+collection of routing policies. ENI has specified identification criteria, which
+are also used to identify **packet direction**. The current version only
+supports **mac-address** as ENI identification criteria. 
+  
+Once a packet arrives on **Inbound** to the target (DPU), it must be forwarded
+to the correct ENI policy processing pipeline. This ENI selection is done based
+on the **inner destination MAC** of the packet, which is matched against the MAC
+of the ENI. 
 
-  - Virtual Port is the container which holds all policies.
+The SDN controller will create these virtual ports / ENIs on an SDN appliance and associate corresponding SDN policies such as – Route, ACL, NAT etc. to these virtual ports.  In other words, our software will communicate with the cards, hold card inventory and SDN placement, call API’s that are exposed through the card create policies, setup ENI, routes, ACLs, NAT, and different rules.
 
-	![sdn-virtual-port](images/sdn-virtual-port.svg)
+The following applies:
+
+- Each Virtual Port (ENI) will be created with an ENI identifier like – Mac address, VNI or more.
+- A Virtual Port also has attributes like: *Flow time-out*, *QOS*, *port properties* related to the port.
+- The Virtual Port is the container which holds all policies.
+
+![sdn-virtual-port](images/sdn-virtual-port.svg)
 
 For information about packets, see **[Packet direction flow and transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**. 
 
