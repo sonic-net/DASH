@@ -16,13 +16,13 @@
 - [First Target Scenario:  SKU for Networked Virtual Appliance (NVA)](#first-target-scenario--sku-for-networked-virtual-appliance-nva)
 - [Scale per DPU (Card)](#scale-per-dpu-card)
 - [Scenario Milestone and Scoping](#scenario-milestone-and-scoping)
-- [Virtual Port (or Elastic Network Interface / ENI) and Packet Direction](#virtual-port-or-elastic-network-interface--eni-and-packet-direction)
+- [Virtual Port (aka Elastic Network Interface / ENI) and Packet Direction](#virtual-port-aka-elastic-network-interface--eni-and-packet-direction)
 - [Routing (Routes and Route-Action)](#routing-routes-and-route-action)
   - [Outbound routing](#outbound-routing)
   - [Inbound routing](#inbound-routing)
   - [Route rules processing](#route-rules-processing)
     - [Outbound (LPM) route rules processing](#outbound-lpm-route-rules-processing)
-  - [Inbound (priority) route rules processing](#inbound-priority-route-rules-processing)
+    - [Inbound (priority) route rules processing](#inbound-priority-route-rules-processing)
 - [Packet Flow](#packet-flow)
 - [Packet transforms](#packet-transforms)
 - [Packet Transform Examples](#packet-transform-examples)
@@ -83,7 +83,7 @@ applies to both IPV4 and IPV6 underlay and overlay*
 | 5 | Private Link Service Link Service (dest side of Private Link) IPv6 to IPv4; DNAT’ing     |  | |
 | 6 | Flow replication; supporting High Availability (HA); flow efficiently replicates to secondary card; Active/Passive (depending upon ENI policy) or can even have Active/Active; OR provision the same ENI over multiple devices w/o multiple SDN appliances – Primaries for a certain set of VMS can be on both     |  | Not a must have for Private Preview <img width=400/>|
 
-## Virtual Port (or Elastic Network Interface / ENI) and Packet Direction
+## Virtual Port (aka Elastic Network Interface / ENI) and Packet Direction
 
 An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance
 will have multiple cards; 1 card will have multiple machines or bare-metal
@@ -170,7 +170,7 @@ algorithm.
 be applied depending on the rule.
 - Only one rule will be matched.
 
-### Inbound (priority) route rules processing
+#### Inbound (priority) route rules processing
 
 All inbound rules are matched based on the priority order (with lower priority
 value rule matched first). Matching is based on multiple fields (or must match
