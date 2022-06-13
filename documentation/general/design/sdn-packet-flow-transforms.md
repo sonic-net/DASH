@@ -334,12 +334,12 @@ Etc…
 
 ## Packet transforms
 
-This section describes the packet transformations that are specific for each
+This section describes the packet transforms that are specific for each
 scenario. After rule processing is complete and transforms are identified, the
 corresponding flow is created in the flow table.
 
-> [!NOTE] The following diagrams show transforms as they are done currently that
-> is **without DASH enhancement**, without the appliance in the path. 
+> [!NOTE] The following diagrams show packet transforms as they are done currently that
+> is **without DASH optimization**.
 
 ### VM to VM (in VNET) communication
 
