@@ -1,6 +1,6 @@
 # SONiC-DASH HLD
 ## High Level Design Document
-### Rev 0.4
+### Rev 0.5
 
 # Table of Contents
 
@@ -33,6 +33,7 @@
 | 0.2 | 03/09/2022  |     Prince Sunny   | Packet Flows/DB Objects           |
 | 0.3 | 05/24/2022  |      Oleksandr     | Memory Footprints                 |
 | 0.4 | 06/01/2022  |     Prince Sunny   | Design Considerations             |
+| 0.5 | 06/13/2022  |     Chris Sommers  | Schema Relationships              |
 
 # About this Manual
 This document provides more detailed design of DASH APIs, DASH orchestration agent, Config and APP DB Schemas and other SONiC buildimage changes required to bring up SONiC image on an appliance card. General DASH HLD can be found at [dash_hld](./dash-high-level-design.md).
@@ -340,8 +341,23 @@ metering_bucket          = bucket_id                 ; metering and counter
 A high-level module interaction is captured in the following diagram.
 
   ![dash-high-level-diagram](./images/hld/dash-high-level-design.svg)
-  
-### 3.3.1 SONiC host containers
+
+
+### 3.3.1 DASH Schema Relationships
+The [figure below](#schema_relationships) illustrates the various schema and their transformations into the various SONiC layers, including:
+* gNMI northbound API, which uses YANG to specify schema
+* Redis APP_DB, which uses [ABNF](https://github.com/Azure/SONiC/blob/master/doc/mgmt/Management%20Framework.md#12-design-overview) schema definition language. Redis objects can be directly manipulated using [SAI-redis](https://github.com/Azure/sonic-sairedis) clients.
+* JSON import/export formats
+* [SAI](https://github.com/Azure/DASH/tree/main/SAI) table and attribute objects
+
+#### Canonical Test Data and schema transformations
+For testing purposes, it is convenient to express test configuartions in a single canonical format, and use this to drive the different API layers to verify correct behavior. A tentative JSON format for representing DASH service configurations is described in https://github.com/Azure/DASH/blob/main/documentation/gnmi/design/dash-reference-config-example.md. Test drivers can accept this input, transform it into different schemas and drive the associated interfaces. For example, a JSON representation of an ACL rule can be transformed into gNMI API calls, SAI-redis calls, SAI-thrift calls, etc.
+
+### Figure - Schema Relationships
+
+![Schema Relationships](images/hld/dash-high-level-design-schema.svg)
+
+### 3.3.2 SONiC host containers
 
 The following containers shall be enabled for sonichost and part of the image. Switch specific containers shall be disabled for the image built for the appliance card.
   
@@ -364,12 +380,12 @@ The following containers shall be enabled for sonichost and part of the image. S
 |	Resttapi | No |
 |	gNMI | Yes |
 
-### 3.3.2 DASHOrch (Overlay)
+### 3.3.3 DASHOrch (Overlay)
 A new orchestration agent "dashorch" shall be implemented that subscribes to DASH APP DB objects and programs the ASIC_DB via the SAI DASH API. DASHOrch shall have sub-orchestrations to handle ACLs, Routes, CA-PA mappings. DASH orchestration agent shall write the state of each tables to STATEDB that applications shall utilize to fetch the programmed status of configured objects.
   
 DASH APIs shall be exposed as gNMI interface and part of the SONiC gNMI container. Clients shall configure the SONiC via gRPC get/set calls. gNMI container has the config backend to translate/write DASH objects to CONFIG_DB and/or DASH APP_DB.
 
-### 3.3.3 SWSS Lite (Underlay)
+### 3.3.4 SWSS Lite (Underlay)
 SONiC for DASH shall have a lite swss initialization without the heavy-lift of existing switch based orchestration agents that SONiC currently have. The initialization shall be based on switch_type "dpu". For the underlay support, the following SAI APIs are expected to be supported:
   
 | Component                | SAI attribute                                         |
@@ -445,19 +461,19 @@ SONiC for DASH shall have a lite swss initialization without the heavy-lift of e
 |                          | SAI_SWITCH_ATTR_VXLAN_DEFAULT_PORT  |  
 |                          | SAI_SWITCH_ATTR_VXLAN_DEFAULT_ROUTER_MAC |  
 
-### 3.3.4 Underlay Routing
+### 3.3.5 Underlay Routing
 DASH Appliance shall establish BGP session with the connected ToR and advertise the prefixes (VIP PA). In turn, the ToR shall advertise default route to appliance. With two ToRs connected, the appliance shall have route with gateway towards both ToRs and does ECMP routing. Orchagent install the route and resolves the neighbor (GW) mac and programs the underlay route/nexthop and neighbor. In the absence of a default-route, appliance shall send the packet back on the same port towards the recieving ToR and can derive the underlay dst mac from the src mac of the received packet or from the neighbor entry (IP/MAC) associated with the port. 
 
-### 3.3.5 Memory footprints
+### 3.3.6 Memory footprints
 
-#### 3.3.5.1 SONiC  memory usage
+#### 3.3.6.1 SONiC  memory usage
 
 | Running components | Memory usage |
 |--|--|
 |Base Debian OS  | 159MB |
 |Base Debian OS + docker containers | 1.3GB |
 
-#### 3.3.5.2 SONiC docker containers memory usage
+#### 3.3.6.2 SONiC docker containers memory usage
 
 |Container| Memory usage |
 |--|--|
