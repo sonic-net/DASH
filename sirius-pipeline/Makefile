@@ -63,20 +63,20 @@ docker:
 	    .
 
 network:
-	ip link add name veth0 type veth peer name veth1
-	ip link set dev veth0 up
-	ip link set dev veth1 up
-	ip link set veth0 mtu 9500
-	ip link set veth1 mtu 9500
-	sysctl net.ipv6.conf.veth0.disable_ipv6=1
-	sysctl net.ipv6.conf.veth1.disable_ipv6=1
-	ip link add name veth2 type veth peer name veth3
-	ip link set dev veth2 up
-	ip link set dev veth3 up
-	ip link set veth2 mtu 9500
-	ip link set veth3 mtu 9500
-	sysctl net.ipv6.conf.veth2.disable_ipv6=1
-	sysctl net.ipv6.conf.veth3.disable_ipv6=1
+	sudo ip link add name veth0 type veth peer name veth1
+	sudo ip link set dev veth0 up
+	sudo ip link set dev veth1 up
+	sudo ip link set veth0 mtu 9500
+	sudo ip link set veth1 mtu 9500
+	sudo sysctl net.ipv6.conf.veth0.disable_ipv6=1
+	sudo sysctl net.ipv6.conf.veth1.disable_ipv6=1
+	sudo ip link add name veth2 type veth peer name veth3
+	sudo ip link set dev veth2 up
+	sudo ip link set dev veth3 up
+	sudo ip link set veth2 mtu 9500
+	sudo ip link set veth3 mtu 9500
+	sudo sysctl net.ipv6.conf.veth2.disable_ipv6=1
+	sudo sysctl net.ipv6.conf.veth3.disable_ipv6=1
 
 run-ixiac-test: ixiac-prereq
 	python3 -m pytest ../test/test-cases/udp_packet_fwd_test.py
