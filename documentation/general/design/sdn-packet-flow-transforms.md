@@ -4,8 +4,6 @@
 
 # Packet direction flow and transforms
 
-- [Packet flow - selecting packet
-  direction](#packet-flow---selecting-packet-direction)
 - [Packet flow - selecting packet direction](#packet-flow---selecting-packet-direction)
 - [Packet flow - selecting packet path](#packet-flow---selecting-packet-path)
   - [Fast path](#fast-path)
@@ -23,13 +21,6 @@
 - [Packet transforms](#packet-transforms)
   - [VM to VM (in VNET) communication](#vm-to-vm-in-vnet-communication)
   - [Internal Load balancer (in VNET) communication](#internal-load-balancer-in-vnet-communication)
-  - [Private Link](#private-link)
-  - [Private Link Service](#private-link-service)
-  - [Service Tunneling](#service-tunneling)
-  - [Inbound from LB](#inbound-from-lb)
-  - [Outbound NAT - L4](#outbound-nat---l4)
-- [References](#references)
-    communication](#internal-load-balancer-in-vnet-communication)
   - [Private Link](#private-link)
   - [Private Link Service](#private-link-service)
   - [Service Tunneling](#service-tunneling)
