@@ -34,9 +34,11 @@ jobs:
       run: make sai
     - name: make test
       run: make test
-    - name: prepare network
+    - name: Prepare network
       run: make network
     - name: Run P4 software switch (bmv2)
       run: make run-switch
-    - name: Test
+    - name: Test SAI
       run: make run-test
+    - name: Ixia-c Traffic Generator test
+      run: make run-ixiac-test
