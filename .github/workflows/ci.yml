@@ -36,6 +36,8 @@ jobs:
       run: make sai
     - name: make test
       run: make test
+    - name: prepare network
+      run: make network
     - name: Run P4 software switch (bmv2)
       run: make run-switch
     - name: Test
