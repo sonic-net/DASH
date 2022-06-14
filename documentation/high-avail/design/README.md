@@ -12,4 +12,4 @@ This folder contains DASH High Avalability and Scale design and architecture doc
 | ------------------------------------------------------ | ------------------------------------------ |
 | [high-availability-and-scale.md](high-availability-and-scale.md) | DASH High-Availability and Scale design document   |
 | [xsight-labs-ha-proposal-v1.md](xsight-labs-ha-proposal-v1.md) | Initial HA proposal document   |
-| [xsight-labs-ha-proposal-new-ideas.md)](xsight-labs-ha-proposal-new-ideas.md)|Addendum and correction to the initial HA proposal (preview)|
+| [xsight-labs-ha-proposal-new-ideas.md](xsight-labs-ha-proposal-new-ideas.md)|Addendum to the initial HA proposal (preview)|
