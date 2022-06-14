@@ -77,3 +77,14 @@ network:
 	ip link set veth3 mtu 9500
 	sysctl net.ipv6.conf.veth2.disable_ipv6=1
 	sysctl net.ipv6.conf.veth3.disable_ipv6=1
+
+run-ixiac-test: ixiac-prereq
+	python3 -m pytest ../test/test-cases/udp_packet_fwd_test.py
+
+ixiac-prereq: install-python-modules deploy-ixiac
+
+install-python-modules:
+	python3 -m pip install -r ../test/requirements.txt
+
+deploy-ixiac:
+	cd ../test/third-party/traffic_gen && ./deploy_ixiac.sh
