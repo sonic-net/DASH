@@ -79,7 +79,7 @@ whole. When the reply is returned to the sender, the opaque information can be
 used in an implementation specific manner to accomplish stateless or stateful
 synchronization operations.
 
-![ha-sync-operations](images/ha-sync-operations.png)
+![ha-sync-operations](images/ha-sync-operations.svg)
 
 Here are some examples of different HA approaches that are possible with this
 simple protocol. A vendor may select among these (or other possible) approaches.
@@ -118,7 +118,7 @@ sender modes. These modes only affect the sender behavior. All sender modes use
 the same protocol definition and the receiver behavior will always remain
 simple, stateless and interoperable with all sender modes.
 
-![ha-state-sync-packet-format](images/ha-state-sync-packet-format.png)
+![ha-state-sync-packet-format](images/ha-state-sync-packet-format.svg)
 
 We can produce the proposal with more detail, including the full packet/message
 formats. We are happy to get early feedback and discussion before formalizing
