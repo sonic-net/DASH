@@ -4,16 +4,15 @@ LABEL description="This Docker image includes all of the PI artifacts, \
 including the Thrift-based PI implementation for the bmv2 backend. It is \
 currently used to run CI tests."
 
-# Default to using 2 make jobs, which is a good default for CI. If you're
-# building locally or you know there are more cores available, you may want to
-# override this.
-ARG MAKEFLAGS=-j
+# Configure make to run as many parallel jobs as cores available
+ARG available_processors
+ARG MAKEFLAGS=-j$available_processors
 
 # Select the type of image we're building. Use `build` for a normal build, which
 # is optimized for image size. Use `test` if this image will be used for
 # testing; in this case, the source code and build-only dependencies will not be
 # removed from the image.
-ARG IMAGE_TYPE=test
+ARG IMAGE_TYPE=build
 
 # Select the compiler to use.
 # We install the default version of GCC (GCC 9), as well as clang 8 and clang 10.

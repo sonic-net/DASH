@@ -59,6 +59,7 @@ docker:
 	    --build-arg uid=$(shell id -u) \
 	    --build-arg guid=$(shell id -g) \
 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+	    --build-arg available_processors=$(shell nproc) \
 	    .
 
 network:
