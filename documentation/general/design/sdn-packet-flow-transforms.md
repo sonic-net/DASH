@@ -41,18 +41,16 @@
 
 On receiving a packet from the wire, the SDN appliance will determine the
 **packet direction**, **matching ENI**, and **packet processing strategy** based
-on *Encap Transformation and Rules Evaluation*. See also [2 Packet
+on *Encap Transformation and Rules Evaluation*. See also [Packet
 Flows](dash-sonic-hld.md#2-packet-flows) in the *SONiC-DASH integration high
 level design* document. 
 
-- **Packet direction**. It is evaluated based on the most-outer **VNI** lookup
-  (implementation dependent) from the left-side (see figure below, a DASH
-  optimized VM sending Outbound packets) behind the Appliance.  If there is no
-  match, the direction is Inbound.
-
+- **Packet direction**. It is evaluated based on the most-outer **Virtual
+  Network Identifier** (VNI) lookup (implementation dependent) behind the
+  Appliance.  If there is no match, the direction is **Inbound**.
 - **ENI selection**. Outbound uses source-MAC, Inbound uses destination-MAC
-- **SLB decap** if packet was encapped by SLB.
-- **Decap VNET** GRE key
+- **SLB decap** if packet was encapped by **Software Load Balancer** (SLB).
+- **Decap VNET** Generic Routing Encapsulation (GRE) key
 
 The following figure shows the preliminary steps to determine the packet
 direction prior to selecting a fast or slow path.
@@ -68,6 +66,12 @@ Once a packet arrives on **Inbound** to the target (DPU), it must be forwarded
 to the correct ENI policy processing pipeline. This ENI selection is done based
 on the **inner destination MAC** of the packet, which is matched against the MAC
 of the ENI. 
+
+Cloud Service Providers and enterprises that are deploying Software Defined
+Networking (SDN) can use **Software Load Balancer** (SLB) to evenly distribute
+tenant and tenant customer network traffic among virtual network resources. SLB
+enables multiple servers to host the same workload, providing high availability
+and scalability.
 
 ## Packet flow - selecting packet path
 
@@ -141,7 +145,7 @@ relate to the Virtual Port (ENI).
 > both underlay and overlay, unless explicitly stated that some scenario is
 > IPv4-only or IPv6-only. 
 
-The following definitions apply:
+Below are listed some of the most common packet processing terms. 
 
 - **Flow**. It describes a specific *conversation* between two hosts (SRC/DST
   IP, SRC/DST Port). When a flow is processed and policy is applied to it and
@@ -376,3 +380,6 @@ corresponding flow is created in the flow table.
 - [Disaggregated API for SONiC Hosts (DASH) high level
   design](dash-high-level-design.md)
 - [SONiC-DASH integration high level design](dash-sonic-hld.md)
+- [Understand the usage of virtual networks](https://docs.microsoft.com/en-us/windows-server/networking/sdn/manage/understanding-usage-of-virtual-networks-and-vlans)
+- [What is Software Load Balancer (SLB) for SDN?](https://docs.microsoft.com/en-us/azure-stack/hci/concepts/software-load-balancer)
+- [Software Defined Networking (SDN)](https://docs.microsoft.com/en-us/azure-stack/hci/concepts/software-defined-networking)
