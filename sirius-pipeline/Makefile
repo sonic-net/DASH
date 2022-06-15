@@ -49,7 +49,17 @@ test:
 	$(DOCKER_RUN) -w /tests/vnet_out bmv2-$(USER) \
 	    make
 
+timeout?=5
 run-test:
+	t=$(timeout); \
+	while [ $${t} -ge 1 ]; do \
+		if sudo lsof -i:9559 | grep LISTEN >/dev/null; then \
+			break; \
+		else \
+			sleep 1; \
+			t=`expr $$t - 1`; \
+		fi; \
+	done; \
 	docker exec -w /tests/vnet_out simple_switch-$(USER) ./vnet_out
 
 docker:
