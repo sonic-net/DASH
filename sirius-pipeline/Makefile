@@ -47,7 +47,7 @@ run-switch:
 sai:
 	$(DOCKER_RUN) -w /SAI $(DOCKER_IMG) \
 	    ./generate_dash_api.sh
-	$(DOCKER_RUN) -w /SAI/lib bmv2-$(USER) \
+	$(DOCKER_RUN) -w /SAI/lib $(DOCKER_IMG) \
 	    make
 
 test:
