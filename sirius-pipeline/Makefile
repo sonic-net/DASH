@@ -12,7 +12,8 @@ DOCKER_RUN := docker run \
 	-v $(PWD)/tests:/tests \
 	--network=host \
 	--rm \
-	-u chris
+	-u chris \
+	--privileged
 
 bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:
 	$(DOCKER_RUN) $(DOCKER_IMG) p4c \
