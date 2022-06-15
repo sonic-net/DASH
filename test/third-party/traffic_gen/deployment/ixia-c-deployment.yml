@@ -24,7 +24,3 @@ services:
     - OPT_LISTEN_PORT=${TCP_PORT_IFC2:-5556}
     - ARG_IFACE_LIST=virtual@af_packet,${IFC2}
     - OPT_NO_HUGEPAGES=Yes
-  aur:
-    image: ixiacom/ixia-c-app-usage-reporter:${AUR_VERSION:-latest}
-    network_mode: "host"
-    restart: always
