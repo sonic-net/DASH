@@ -87,6 +87,10 @@ MAC.
 
   ![outbound-fast-path](./images/sdn/outbound-fast-path-flow.svg)
 
+> [!NOTE] In the case of Software Load Balancer (SLB), in the fast path,
+> Internet Control Message Protocol (ICMP) redirect is **only supported in
+> TCP**; it is not supported in UDP.
+
 ### Slow path
 
 If no flow match is found (**slow path**), the ENI rule processing pipeline will
