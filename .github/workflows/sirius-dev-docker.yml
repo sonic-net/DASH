@@ -1,4 +1,4 @@
-name: Sirius-CI
+name: Sirius-docker-build-image
 
 on:
   push:
@@ -23,4 +23,4 @@ jobs:
     - name: Build docker image
       run: make docker
     - name: Publish docker image
-      run: echo "TO DO"
+      run: make docker-publish
