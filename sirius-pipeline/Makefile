@@ -11,7 +11,8 @@ DOCKER_RUN := docker run \
 	-v $(PWD)/SAI:/SAI \
 	-v $(PWD)/tests:/tests \
 	--network=host \
-	--rm
+	--rm \
+	-u chris
 
 bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:
 	$(DOCKER_RUN) $(DOCKER_IMG) p4c \
