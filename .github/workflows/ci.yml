@@ -32,7 +32,7 @@ jobs:
       run: make bmv2/sirius_pipeline.bmv2/sirius_pipeline.json
     - name: Generate SAI API
       run: make sai
-    - name: make test
+    - name: Build vnet_out test, verifies libsai bidning to c++
       run: make test
     - name: Prepare network
       run: make network
