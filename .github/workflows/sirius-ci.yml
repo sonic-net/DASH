@@ -8,6 +8,7 @@ on:
       - 'slides/**'
       - 'images/**'
       - '**.md'
+      #- 'sirius-pipeline/Dockerfile'
   pull_request:
     branches: [ "main" ]
     paths-ignore:
@@ -15,6 +16,7 @@ on:
       - 'slides/**'
       - 'images/**'
       - '**.md'
+      #- 'sirius-pipeline/Dockerfile'
   workflow_dispatch:
 
 jobs:
