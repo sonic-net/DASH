@@ -24,6 +24,8 @@ jobs:
         working-directory: ./sirius-pipeline
     steps:
     - uses: actions/checkout@v3
+    - name: temp debug steps
+      run: echo $(id $USER)
     - name: Build P4 software switch (bmv2) and P4RT
       run: make bmv2/sirius_pipeline.bmv2/sirius_pipeline.json
     - name: Generate SAI API
