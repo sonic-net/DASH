@@ -30,17 +30,22 @@ Last update: 06/09/2022
   
 ## Overview
 
-The VNET to VNET scenario is the starting point to design, implement and test the core DASH
-mechanisms. In particular it allows the following:
+The VNET to VNET scenario is the starting point to design, implement and test
+core DASH mechanisms in VM to VM communication, using an Appliance for
+rules and routing offload. In particular it allows the following:
 
-- VM to VM communication in VNET, using an Appliance for rules and routing
-  offload
-- Route support
-- LPM support
-- ACL support
+- Route/LPM support
+- Underlay IPv4 and IPv6
+- Stateful ACL support
+- TCP state tracking on flows
+- Telemetry and Monitoring
 
-The intent is to verify the following performance properties: **Connections per
-Second** (CPS), **Flow**, **Packet per Second** (PPS), and **Rule Scale**.
+The goal is to test the following performance properties: 
+
+- **Connections per Second** (CPS)
+- **Flow** 
+- **Packet per Second** (PPS)
+- **Rule Scale**
 
 ![vm-to-vm-communication-vnet](./images/vm-to-vm-communication-vnet.svg)
 
@@ -71,11 +76,12 @@ DASH performance enhancements (so called *bump in the wire*) happens.
 ## Packet flow in VNET to VNET
 
 When talking about packet flow, we need to think about a process that involves
-several steps, as explained next. 
+several steps, as explained below. 
 
+> [!NOTE] From [SONiC-DASH HLD](../../general/design/dash-sonic-hld.md)
 ### Outbound packet processing pipeline
-	
-  ![dash-outbound](../../general/design/images/dash-hld-outbound-packet-processing-pipeline.svg)
+
+![dash-outbound](../../general/design/images/dash-hld-outbound-packet-processing-pipeline.svg)
 
 <figcaption><i>Figure 2 - Outbound packet processing pipeline</i></figcaption><br/>
 
