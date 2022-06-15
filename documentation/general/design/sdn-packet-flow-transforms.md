@@ -296,7 +296,6 @@ The end result of the ACL logic for packet evaluation leads to a single outcome:
 | *| 1.1.1.2/32| *| *| *| Allow| 30| No
 | *| *| *| *| *| Block| 3| No
 | | | | | | | |
-| | | | | | | |
 
 **ACL_LEVEL3**
 
