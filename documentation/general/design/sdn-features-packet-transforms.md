@@ -88,15 +88,15 @@ applies to both IPV4 and IPV6 underlay and overlay*
 An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance
 will have multiple cards; 1 card will have multiple machines or bare-metal
 servers), which supports Virtual Ports.   These can map to policy buckets
-corresponding to customer workloads, example: Virtual Machines, Bare Metal
+corresponding to customer workloads, for example: Virtual Machines or Bare Metal servers
 servers.
 
 The Elastic Network Interface (ENI), is an independent entity that has a
-collection of routing policies. ENI has specified identification criteria, which
-are also used to identify **packet direction**. The current version only
+collection of routing policies. Usually there is a 1:1 mapping between the VM NIC (Physical NIC) and the ENI (Virtual NIC).  The ENI has specific match identification criteria, which
+is used to identify **packet direction**. The current version only
 supports **mac-address** as ENI identification criteria. 
   
-Once a packet arrives on **Inbound** to the target (DPU), it must be forwarded
+Once a packet arrives **Inbound** to the target (DPU), it must be forwarded
 to the correct ENI policy processing pipeline. This ENI selection is done based
 on the **inner destination MAC** of the packet, which is matched against the MAC
 of the ENI. 
@@ -105,13 +105,13 @@ The SDN controller will create these virtual ports / ENIs on an SDN appliance
 and associate corresponding SDN policies such as – Route, ACL, NAT etc. to these
 virtual ports.  In other words, our software will communicate with the cards,
 hold card inventory and SDN placement, call API’s that are exposed through the
-card create policies, setup ENI, routes, ACLs, NAT, and different rules.
+card:  create policies, setup ENI, routes, ACLs, NAT, and different rules.
 
 The following applies:
 
-- Each Virtual Port (ENI) will be created with an ENI identifier like – Mac
+- Each Virtual Port (ENI) will be created with an ENI identifier such as – Mac
   address, VNI or more.
-- A Virtual Port also has attributes like: *Flow time-out*, *QOS*, *port
+- A Virtual Port also has attributes such as : *flow time-out*, *QOS*, *port
   properties* related to the port.
 - The Virtual Port is the container which holds all policies.
 
@@ -123,14 +123,14 @@ transforms](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-directi
 ## Routing (Routes and Route-Action)
 
 Routing must be based on the **Longest Prefix Match** (LPM) and must support all
-**underlay and overlay** combinations: 
+**underlay and overlay** combinations described below:
 
 - inner IPv4 packet encapped in outer IPv4 packet 
 - inner IPv4 packet encapped in outer IPv6 packet 
 - inner IPv6 packet encapped in outer IPv4 packet 
 - inner IPv6 packet encapped in outer IPv6 packet 
 
-Routing pipeline must support the routing models shown below.
+The routing pipeline must support the routing models shown below.
 
 ### Outbound routing 
 
@@ -166,7 +166,7 @@ All routing rules must optionally allow for **stamping** the source MAC (to
 
 - Matching is based on destination IP only - using the Longest Prefix Match (LPM)
 algorithm.
-- Once the rule is match, the correct set of **transposition, encap** steps must
+- Once the rule is matched, the correct set of **transposition, encap** steps must
 be applied depending on the rule.
 - Only one rule will be matched.
 
@@ -180,7 +180,7 @@ if field is populated). The supported fields are:
 - Most Outer Destination IP Prefix 
 - VXLAN/GRE key 
 
-Once the rule is match, the correct set of **decap, transposition** steps must
+Once the rule is matched, the correct set of **decap, transposition** steps must
 be applied depending on the rule. **Only one rule will be matched**. 
 
 Also notice the following: 
