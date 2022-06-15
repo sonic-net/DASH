@@ -12,7 +12,7 @@ DOCKER_RUN := docker run \
 	-v $(PWD)/tests:/tests \
 	--network=host \
 	--rm \
-	-u chris \
+	-u root \
 	--privileged
 
 bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:
