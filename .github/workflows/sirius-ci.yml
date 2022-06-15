@@ -3,20 +3,16 @@ name: Sirius-CI
 on:
   push:
     branches: [ "**" ]
-    paths-ignore:
-      - 'documentation/**'
-      - 'slides/**'
-      - 'images/**'
-      - '**.md'
-      #- 'sirius-pipeline/Dockerfile'
+    paths:
+      - 'sirius-pipeline/**'
+      - '!sirius-pipeline/Dockerfile'
+      - '!sirius-pipeline/**.md'
   pull_request:
     branches: [ "main" ]
-    paths-ignore:
-      - 'documentation/**'
-      - 'slides/**'
-      - 'images/**'
-      - '**.md'
-      #- 'sirius-pipeline/Dockerfile'
+    paths:
+      - 'sirius-pipeline/**'
+      - '!sirius-pipeline/Dockerfile'
+      - '!sirius-pipeline/**.md'
   workflow_dispatch:
 
 jobs:
@@ -28,8 +24,6 @@ jobs:
         working-directory: ./sirius-pipeline
     steps:
     - uses: actions/checkout@v3
-    - name: Build docker image
-      run: make docker
     - name: Build P4 software switch (bmv2) and P4RT
       run: make bmv2/sirius_pipeline.bmv2/sirius_pipeline.json
     - name: Generate SAI API

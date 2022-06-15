@@ -2,6 +2,9 @@ SHELL = /bin/bash
 
 PWD := $(shell pwd)
 
+# Default Docker image, override from env var
+DOCKER_IMG ?=chrissommers/dash-bmv2:latest
+
 DOCKER_RUN := docker run \
 	--name simple_switch \
 	-v $(PWD)/bmv2:/bmv2 \
@@ -11,7 +14,7 @@ DOCKER_RUN := docker run \
 	--rm
 
 bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:
-	$(DOCKER_RUN) bmv2-$(USER) p4c \
+	$(DOCKER_RUN) $(DOCKER_IMG) p4c \
 	    -b \
 	    bmv2 \
 	    bmv2/sirius_pipeline.p4 \
@@ -30,7 +33,7 @@ run-switch:
 	    -v $(PWD)/bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:/etc/dash/sirius_pipeline.json \
 	    -v $(PWD)/bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.txt:/etc/dash/sirius_pipeline_p4rt.txt \
 	    --name simple_switch-$(USER) \
-	    bmv2-$(USER) \
+	    $(DOCKER_IMG) \
 	    sudo \
 	    env LD_LIBRARY_PATH=/usr/local/lib \
 	    simple_switch_grpc \
@@ -40,13 +43,13 @@ run-switch:
 	    --no-p4
 
 sai:
-	$(DOCKER_RUN) -w /SAI bmv2-$(USER) \
+	$(DOCKER_RUN) -w /SAI $(DOCKER_IMG) \
 	    ./generate_dash_api.sh
 	$(DOCKER_RUN) -w /SAI/lib bmv2-$(USER) \
 	    make
 
 test:
-	$(DOCKER_RUN) -w /tests/vnet_out bmv2-$(USER) \
+	$(DOCKER_RUN) -w /tests/vnet_out $(DOCKER_IMG) \
 	    make
 
 timeout?=5
@@ -64,13 +67,16 @@ run-test:
 
 docker:
 	docker build \
-	    -t bmv2-$(USER) \
+	    -t $(DOCKER_IMG) \
 	    --build-arg user=$(USER) \
 	    --build-arg uid=$(shell id -u) \
 	    --build-arg guid=$(shell id -g) \
 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
 	    --build-arg available_processors=$(shell nproc) \
 	    .
+
+docker-publish:
+	echo "TO DO when we have a proper repository"
 
 network:
 	sudo ip link add name veth0 type veth peer name veth1
@@ -89,7 +95,7 @@ network:
 	sudo sysctl net.ipv6.conf.veth3.disable_ipv6=1
 
 run-ixiac-test: ixiac-prereq
-	python3 -m pytest ../test/test-cases/sirius/hello_world.py
+	python3 -m pytest ../test/test-cases/bmv2_model/ -s
 
 ixiac-prereq: install-python-modules deploy-ixiac
 
