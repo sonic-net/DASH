@@ -24,14 +24,13 @@ Last update: 06/09/2022
     - [ACL3 table](#acl3-table)
     - [Routing table](#routing-table)
     - [Mapping table](#mapping-table)
-- [References](#references)
 - [Appendix](#appendix)
-  - [Packet processing](#packet-processing)
   - [VNET to VNET without DASH optimization](#vnet-to-vnet-without-dash-optimization)
+- [References](#references)
   
 ## Overview
 
-This scenario is the starting point to design, implement and test the core DASH
+The VNET to VNET scenario is the starting point to design, implement and test the core DASH
 mechanisms. In particular it allows the following:
 
 - VM to VM communication in VNET, using an Appliance for rules and routing
@@ -117,7 +116,7 @@ In the outbound flow, the criteria listed below are applied.
 - After LPM, the three ACL stages are processed in order. ACLs can have multiple `src/dst` IP ranges or port ranges as match criteria.
 
 > [!NOTE]
-> CA-PA mapping table are used for both encap and decap process
+> CA-PA mapping table are used for both encap and decap processing.
 
 
 ## VM to VM communication in VNET example 
@@ -239,60 +238,7 @@ The following figure shows the example processing pipeline.
 
 <figcaption><i>Figure 2 - Example processing pipeline</i></figcaption> <br/>
 
-
-## References
-
-- [P4 Getting
-  Started](https://github.com/p4lang/education/blob/master/GettingStarted.md)
-- [P4-16 Language Specification](https://p4.org/p4-spec/docs/P4-16-v1.2.2.html)
-
 ## Appendix
-
-### Packet processing
-
-Packet processing is based on a set of tables stored in the dataplane (DPU) and configured based on information sent by the control plane (SDN controller). The transformation plays a crucial role when moving a packet from a source to
-a destination. Let's define a few terms.
-
-- **Flow**. It describes a specific *conversation* between two hosts (SRC/DST
-  IP, SRC/DST Port). When a flow is processed and policy is applied to it and
-  then routed, the DPU (SmartNIC) records the outcomes of all those decisions in
-  a **transform** and places them in the **flow table** which resides locally on
-  the card itself.  
-
-  > [!NOTE] This is why sometimes the terms *transform* and *flow* are used
-  > interchangeably.
-
-- **Transform**. It is represented either by *iflow* (initiator) or *rflow*
-  (responder) in the **flow table**. It **contains everything the DPU needs to
-  route a packet to its destination without first having to apply a policy**.
-  Whenever the DPU receives a packet, it checks the local *flow table* to see if
-  the preparatory work has been done for this flow. The following can happen:
-
-  - When a *transform* or *flow* doesn’t exist in the *flow table*, a **slow
-    path** is executed and policy applied.
-  - When a *transform* or *flow* does exist in the *flow table*, a **fast path**
-    is executed and the values in the transform are used to forward the packet
-    to its destination without having to apply a policy first.
-
-- **Mapping table**. It is tied to the V-Port, and contains the CA:PA (IPv4,
-  IPv6) mapping, along with the FNI value of the CA for Inner Destination MAC
-  re-write and VNID to use for VXLAN encapsulation.
-
-  > [!NOTE] The Flexible Network Interface (FNI) is a 48-bit value which easily
-  > maps to MAC values. The MAC address of a VNIC (VM NIC or BareMetal NIC) is
-  > synonymous with FNI. It is one of the values used to identify a V-Port
-  > container ID.  
-
-- **Routing table**. It is a match.action table, specifically a longest prefix
-  match (LPM) table that once matched on destination specifies the action to
-  perform VXLAN encapsulation based on variables already provided, VXLAN encap
-  using a **mapping table** or *Overlay Tunnel* lookup for variables, or *L3/L4
-  NAT*. Routing tables are mapped to the V-Port.
-
-- **Flow table**. A global table on a DPU that contains the transforms for all
-  of the per-FNI flows that have been processed through the data path pipeline.
-
-
 ### VNET to VNET without DASH optimization 
 
 The following figure shows the transformation steps in a traditional VNET
@@ -301,3 +247,9 @@ setting i.e., without DASH optimization.
 ![packet-transforms-vm-to-vm-in-vnet-without-dash](./images/packet-transforms-vm-to-vm-in-vnet-without-dash.svg)
 
 <figcaption><i>Figure Appendix 1 - VNET to VNET without DASH optimization</i></figcaption> 
+
+## References
+
+- [P4 Getting
+  Started](https://github.com/p4lang/education/blob/master/GettingStarted.md)
+- [P4-16 Language Specification](https://p4.org/p4-spec/docs/P4-16-v1.2.2.html)
