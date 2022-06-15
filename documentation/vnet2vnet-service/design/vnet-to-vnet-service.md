@@ -83,7 +83,7 @@ several steps, as explained below.
 
 ![dash-outbound](../../general/design/images/dash-hld-outbound-packet-processing-pipeline.svg)
 
-<figcaption><i>Figure 2 - Outbound packet processing pipeline</i></figcaption><br/>
+<figcaption><i>Figure 2 - Outbound packet processing pipeline</i></figcaption><br/><br/>
 
 - The pipeline sets the **direction** as TX(**outbound**) based on the
   **incoming packet's VNI** that is matched against the **reserved VNI**
@@ -113,7 +113,7 @@ In the outbound flow, the criteria listed below are applied.
 	
   ![dash-outbound](../../general/design/images/dash-hld-inbound-packet-processing-pipeline.svg)
 
-<figcaption><i>Figure 3 - Intbound packet processing pipeline</i></figcaption><br/>
+<figcaption><i>Figure 3 - Intbound packet processing pipeline</i></figcaption><br/><br/>
 
 - The pipeline sets the direction as RX(**inbound**) based on the **incoming packet's VNI**, if it does not match against any reserved VNI.
 - Using the inner `dst-mac`, **maps to the corresponding ENI**. 
