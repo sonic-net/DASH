@@ -114,7 +114,7 @@ DASH Sonic implementation is targeted for appliance scenarios and must handles m
 12. During a delete operation, if there is a dependency (E.g. mappings still present when a VNET is deleted), implementation shall return *error* and shall not perform any force-deletions or delete dependencies implicitly. 
 13. During a bulk operation, if any part/subset of API fails, implementation shall return *error* for the entire API. Sonic implementation shall validate the entire API as pre-checks before applying and return accordingly.
 14. Implementation must have flexible memory allocation for ENI and not reserve max scale during initial create (e.g 100k routes). This is to allow oversubscription.
-15. Implementation must not have silent failures for APIs. E.g accepting an API from controller, returning success and failing in the backend.  
+15. Implementation must not have silent failures for APIs. E.g accepting an API from controller, returning success and failing in the backend. This is orthoganal to the idempotency of APIs described above for ADD and Delete operations. Intent is to ensure SDN controller and Sonic implementation is in-sync
 
 # 2 Packet Flows
 	
@@ -224,7 +224,7 @@ DASH_ACL_OUT:{{eni}}:{{stage}}
 ```
 
 ```
-key                      = DASH_ACL_IN:eni:stage ; ENI MAC and state as key; ACL stage can be {1, 2, 3 ..}
+key                      = DASH_ACL_IN:eni:stage ; ENI name and stage as key; ACL stage can be {1, 2, 3 ..}
 ; field                  = value 
 acl_group_id             = ACL group ID
 ```
@@ -614,7 +614,7 @@ For the example configuration above, the following is a brief explanation of loo
 		d. Mapping table for 10.1.1.1 shall be hit and it takes the action "vnet_encap". 
 		e. Encap action shall be performed and use PA address as specified by "underlay_ip"
 	2. Packet destined to 10.1.0.1:
-		a. LPM lookup hits for entry 10.1.0.24/24
+		a. LPM lookup hits for entry 10.1.0.0/24
 		b. The action in this case is "vnet" and the routing type for "vnet" is "maprouting", with overlay_ip specified
 		c. Next lookup shall happen on the "mapping" table for Vnet "Vnet1", but for overlay_ip 10.0.0.6
 		d. Mapping table for 10.0.0.6 shall be hit and it takes the action "vnet_encap". 
