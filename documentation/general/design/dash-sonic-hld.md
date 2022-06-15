@@ -75,9 +75,10 @@ At a high level the following should be supported:
   
 
 ## 1.2 CLI requirements
-Initial support is only for `show` commands
+Initial support is only for `show` and `clear` commands
 
-- User should be able to show the DASH configured objects
+- User shall be able to show the DASH configured objects
+- User shall be able to clear state of ENI, VNET or all
 
 ## 1.3 Warm Restart requirements
 Warm-restart support is not considered in Phase 1. TBD
@@ -87,28 +88,33 @@ Following are the minimal scaling requirements
 | Item                     | Expected value              |
 |--------------------------|-----------------------------|
 | VNETs                    | 1024                     |
-| ENI                      | 32 Per Card              |
+| ENI                      | 64 Per Card              |
 | Routes per ENI           | 100k                     |
 | NSGs per ENI             | 6                        |
 | ACLs per ENI             | 6x100K prefixes          |
 | ACLs per ENI             | 6x10K SRC/DST ports      |
 | CA-PA Mappings           | 10M                      |
-| Active Connections/ENI   | 1M                       |
+| Active Connections/ENI   | 1M (Bidirectional)       |
 
 ## 1.5 Design Considerations
 
 DASH Sonic implementation is targeted for appliance scenarios and must handles millions of updates. As such, the implementation is performance and scale focussed as compared to traditional switching and routing based solutions. The following are the design considerations.
 
-1. Implementation must support bulk updates of LPM and CA-PA Mapping tables. 
+1. Implementation must support single and bulk update of LPM and CA-PA Mapping tables. 
 2. During startup, it is possible to have scaled configurations applied successively. Implementation must support such bulk updates
 3. In normal operation, mapping updates can occur as much as 100 mappings/sec
 4. In normal operation, route updates can occur every 30 sec. 
 5. An add or delete of VM translates to updating ENI and routes in bulk context
-6. ACL operations (rules adding/deleting) must be handled atomically and should not have transient drop/forward cases
+6. ACL operations (rules adding/deleting) per group for a stage must be handled atomically and should not have transient drop/forward cases within the group. When a  rule is modified, controller shall send entire rules in the group and Sonic implementation replaces the old set with new set of rules.
 7. Implementation must support ability to get all ACL rules/groups based on guid. 
 8. In normal operation, mappings churn often followed by routes and least for ACLs.
-9. ENIs shall have an admin-state that enables normal connections and forwarding only *after* all configurations for an ENI is applied during initial creation.
-10. During VNET or ENI delete, implementation must support ability to delete all *mappings*, *routes* in a single API call.  
+9. ENIs shall have an admin-state that enables normal connections and forwarding only *after* all configurations for an ENI is applied during initial creation. When the ENI is admin-state down, the packets destined to this ENI shall be dropped. Order of operation/configuration shall be enforced by the controller. Sonic implementation shall honor the state set by controller and ENI shall accept and forward traffic only if the admin-state is set to 'up'. 
+10. During VNET or ENI delete, implementation must support ability to delete all *mappings* or *routes* in a single API call.
+11. Add and Delete APIs are idempotent. As an example, deleting an object that doesn't exists shall not return an error. 
+12. During a delete operation, if there is a dependency (E.g. mappings still present when a VNET is deleted), implementation shall return *error* and shall not perform any force-deletions or delete dependencies implicitly. 
+13. During a bulk operation, if any part/subset of API fails, implementation shall return *error* for the entire API. Sonic implementation shall validate the entire API as pre-checks before applying and return accordingly.
+14. Implementation must have flexible memory allocation for ENI and not reserve max scale during initial create (e.g 100k routes). This is to allow oversubscription.
+15. Implementation must not have silent failures for APIs. E.g accepting an API from controller, returning success and failing in the backend.  
 
 # 2 Packet Flows
 	
@@ -163,7 +169,6 @@ Following diagram captures the object reference model.
   
 ```
 DASH_VNET:{{vnet_name}} 
-    "vxlan_tunnel": {{tunnel_name}}
     "vni": {{vni}} 
     "guid": {{"string"}}
     "address_spaces": {{[list of addresses]}} (OPTIONAL)
@@ -249,7 +254,7 @@ key                      = DASH_ACL_RULE:group_id:rule_num ; unique rule num wit
 priority                 = INT32 value  ; priority of the rule, lower the value, higher the priority
 action                   = allow/deny
 terminating              = true/false   ; if true, stop processing further rules
-protocols                = list of INT ',' separated; E.g. 6-udp, 17-tcp
+protocols                = list of INT ',' separated; E.g. 6-udp, 17-tcp; if not provided, match on all protocols
 src_addr                 = list of source ip prefixes ',' separated
 dst_addr                 = list of destination ip prefixes ',' separated
 src_port                 = list of range of source ports ',' separated
@@ -493,12 +498,17 @@ DASH Appliance shall establish BGP session with the connected ToR and advertise 
 The following commands shall be added :
 
 ```
-	- show dash <eni> routes all
-	- show dash <eni> acls stage <ingress/egress/all>
-	- show dash <vnet> mappings
+	- show dash eni <eni>
+	- show dash eni <eni> routes all
+	- show dash eni <eni> acls stage <ingress/egress/all>
+	- show dash vnet <vnet>
+	- show dash vnet <vnet> mappings
 	- show dash route-types
 	- show dash qos
 	- show dash vnet brief
+	- sonic-clear dash all
+	- sonic-clear dash eni <eni>
+	- sonic-clear dash vnet <vnet>
 ```
 
 ## 3.5 Test Plan
