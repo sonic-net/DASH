@@ -6,8 +6,7 @@ def test_udp_unidirectional():
     This script does following:
     - Send 1000 packets from one port to another at a rate of
       1000 packets per second.
-    - Validate that total packets sent and received on both interfaces is as
-      expected using port metrics.
+    - Validate that total packets sent are received on the same interface
     """
     # create a new API instance where location points to controller
     api = snappi.api(location="https://localhost", verify=False)
@@ -29,7 +28,6 @@ def test_udp_unidirectional():
     f1= cfg.flows.flow(name="flow p1->p2")[0]
     # and assign source and destination ports for each
     f1.tx_rx.port.tx_name, f1.tx_rx.port.rx_name = p1.name, p2.name
-    #f2.tx_rx.port.tx_name, f2.tx_rx.port.rx_name = p2.name, p1.name
 
     # configure packet size, rate and duration for both flows
     f1.size.fixed = 128
@@ -41,28 +39,21 @@ def test_udp_unidirectional():
 
     # configure packet with Ethernet, IPv4 and UDP headers for both flows
     eth1, ip1, udp1 = f1.packet.ethernet().ipv4().udp()
-    #eth2, ip2, udp2 = f2.packet.ethernet().ipv4().udp()
 
     # set source and destination MAC addresses
     eth1.src.value, eth1.dst.value = "00:AA:00:00:04:00", "00:AA:00:00:00:AA"
-    #eth2.src.value, eth2.dst.value = "00:AA:00:00:00:AA", "00:AA:00:00:04:00"
 
     # set source and destination IPv4 addresses
     ip1.src.value, ip1.dst.value = "10.0.0.1", "10.0.0.2"
-    #ip2.src.value, ip2.dst.value = "10.0.0.2", "10.0.0.1"
 
     # set incrementing port numbers as source UDP ports
     udp1.src_port.increment.start = 5000
     udp1.src_port.increment.step = 2
     udp1.src_port.increment.count = 10
 
-    #udp2.src_port.increment.start = 6000
-    #udp2.src_port.increment.step = 4
-    #udp2.src_port.increment.count = 10
 
     # assign list of port numbers as destination UDP ports
     udp1.dst_port.values = [4000, 4044, 4060, 4074]
-    #udp2.dst_port.values = [8000, 8044, 8060, 8074, 8082, 8084]
 
     print("Pushing traffic configuration ...")
     api.set_config(cfg)

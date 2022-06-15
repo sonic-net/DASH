@@ -89,7 +89,7 @@ network:
 	sudo sysctl net.ipv6.conf.veth3.disable_ipv6=1
 
 run-ixiac-test: ixiac-prereq
-	python3 -m pytest ../test/test-cases/udp_packet_fwd_test.py
+	python3 -m pytest ../test/test-cases/sirius/hello_world.py
 
 ixiac-prereq: install-python-modules deploy-ixiac
 
