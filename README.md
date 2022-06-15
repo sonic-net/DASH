@@ -1,4 +1,4 @@
-[![CI](https://github.com/dgalan-xxia/DASH/workflows/CI/badge.svg)](https://github.com/dgalan-xxia/DASH/actions)
+[![Sirius-CI](https://github.com/dgalan-xxia/DASH/workflows/Sirius-CI/badge.svg)](https://github.com/dgalan-xxia/DASH/actions)
 
 # SONiC-DASH - Disaggregated API for SONiC Hosts - DRAFT/Work in Progress
 

@@ -1,4 +1,4 @@
-name: CI
+name: Sirius-CI
 
 on:
   push:
