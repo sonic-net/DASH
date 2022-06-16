@@ -22,7 +22,7 @@ jobs:
     name: Build and test
     runs-on: ubuntu-latest
     env:
-      docker_flags: -d -u root
+      docker_flags: -d -u root --privileged
     defaults:
       run:
         working-directory: ./sirius-pipeline
