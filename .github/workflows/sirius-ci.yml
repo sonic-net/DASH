@@ -43,6 +43,6 @@ jobs:
     - name: Run P4 software switch (bmv2)
       run: DOCKER_FLAGS=$docker_flags make run-switch
     - name: Test SAI
-      run: DOCKER_FLAGS=$docker_flags make run-test
+      run: DOCKER_FLAGS=-u root make run-test
     - name: Ixia-c Traffic Generator test
       run: DOCKER_FLAGS=$docker_flags make run-ixiac-test
