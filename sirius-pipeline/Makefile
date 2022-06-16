@@ -10,7 +10,6 @@ DOCKER_FLAGS ?=-it
 
 # Should override --name in make targets
 DOCKER_RUN := docker run \
-	--name bmv2_default \
 	-v $(PWD)/bmv2:/bmv2 \
 	-v $(PWD)/SAI:/SAI \
 	-v $(PWD)/tests:/tests \
@@ -39,15 +38,15 @@ clean:
 
 dash-shell:
 	$(DOCKER_RUN) \
-	    --name dashtool-$(USER) \
+	    --name dashshell-$(USER) \
 		 $(DOCKER_IMG) \
 	    bash
 
 run-switch:
 	$(DOCKER_RUN) \
+	    --name simple_switch-$(USER) \
 	    -v $(PWD)/bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:/etc/dash/sirius_pipeline.json \
 	    -v $(PWD)/bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.txt:/etc/dash/sirius_pipeline_p4rt.txt \
-	    --name simple_switch-$(USER) \
 	    $(DOCKER_IMG) \
 	    sudo \
 	    env LD_LIBRARY_PATH=/usr/local/lib \
@@ -58,16 +57,17 @@ run-switch:
 	    --no-p4
 
 sai:
-	# $(DOCKER_RUN) -w /SAI $(DOCKER_IMG) \
-	#     ./generate_dash_api.sh
-	$(DOCKER_RUN) -w /dash $(DOCKER_IMG) \
+	$(DOCKER_RUN) 
+		--name build_sai \
+		-w /dash $(DOCKER_IMG) \
 	    sirius-pipeline/SAI/generate_dash_api.sh
 	$(DOCKER_RUN) -w /SAI/lib $(DOCKER_IMG) \
 	    make
 
 test:
-	$(DOCKER_RUN) -w /tests/vnet_out  $(DOCKER_IMG) \
+	$(DOCKER_RUN) \
 		--name make_test \
+		-w /tests/vnet_out  $(DOCKER_IMG) \
 	    make
 
 timeout?=5
