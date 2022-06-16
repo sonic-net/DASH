@@ -128,12 +128,11 @@ In the outbound flow, the criteria listed below are applied.
 
 ## VM to VM communication in VNET example
 
-The following is an example of VM to VM communication in VNET. 
-
-(from Prince's SONiC-DASH HLD docunent)
-
-The following code snippet defines the values for VNET, ENI, routing types,
+The configuration example shown below defines the values for VNET, ENI, routing types,
 match/action tables, and routing tables.
+
+
+### Configuration example
 
 ``` 
 
@@ -231,10 +230,14 @@ DASH_VNET_MAPPING_TABLE:Vnet1:10.1.1.1: {
 }
 ```
 
-### LPM lookup steps for the entry 10.1.0.0/16
+The next sections describe the lookup behavior in the outbound direction. 
+For the inbound direction, after LPM/ACL lookup, the pipeline uses the
+`underlay_ip` as specified in the ENI table to Vxlan encapsulate the packet. ??
 
-Using the previous definitions, let's analyze the lookups involved in routing a
-packet for the entry `10.1.0.0/16`. Below the tables and types involved in the
+### Packet destined to 10.1.1.1
+
+Using the previous configuration, let's analyze the lookups involved in routing a
+packet destined to `10.1.1.1`. Below are the tables and types involved in the
 lookup steps. 
 
 #### DASH_ROUTE_TABLE
@@ -261,13 +264,13 @@ The following figure summurizes the lookup steps.
 
 <figcaption><i>Figure 5 - Example LPM lookup steps</i></figcaption> <br/><br/>
 
-1. We starting with the lookup of routing table `DASH_ROUTE_TABLE`. The action
+1. LPM lookup hits the routing table `DASH_ROUTE_TABLE:10.1.0.0/16`. The action
    is `vnet` and the value is `Vnet1`.
-2. Next we look up the `DASH_ROUTING_TYPE`. The value for `vnet` is
+2. Next a look up of the `DASH_ROUTING_TYPE:vnet` happens. The value for `vnet` is
    `maprouting`.
-3. Next we look up the `DASH_VNET_MAPPING_TABLE` for `Vnet1:10.1.1.1`. The
-   routing type is `vnet_encap`. 
-4. Encap action is performed and use PA address as specified by the
+3. The look up of the `DASH_VNET_MAPPING_TABLE` for `Vnet1:10.1.1.1` is done next. The
+   routing type is `vnet_encap`.
+   1. The encap action is performed which uses the Public Address (PA) as specified by the
    `underlay_ip`=`101.1.2.3` and `mac_address`=`F922839922A2`.  
 
 <!-- 
