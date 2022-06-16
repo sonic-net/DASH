@@ -264,14 +264,15 @@ The following figure summurizes the lookup steps.
 
 <figcaption><i>Figure 5 - Example LPM lookup steps</i></figcaption> <br/><br/>
 
-1. LPM lookup hits the routing table `DASH_ROUTE_TABLE:10.1.0.0/16`. The action
-   is `vnet` and the value is `Vnet1`.
+1. LPM lookup hits the routing table `DASH_ROUTE_TABLE:10.1.0.0/16`. 
+The action is `vnet` and the value is `Vnet1`.
 2. Next a look up of the `DASH_ROUTING_TYPE:vnet` happens. The value for `vnet` is
    `maprouting`.
-3. The look up of the `DASH_VNET_MAPPING_TABLE` for `Vnet1:10.1.1.1` is done next. The
-   routing type is `vnet_encap`.
-   1. The encap action is performed which uses the Public Address (PA) as specified by the
-   `underlay_ip`=`101.1.2.3` and `mac_address`=`F922839922A2`.  
+3. The look up of the `DASH_VNET_MAPPING_TABLE` for `Vnet1:10.1.1.1` is done next. 
+   1. The routing for `maprouting` is `vnet_encap`.
+4. The encap action is performed which uses the Public Address (PA) as specified by the
+   `underlay_ip`=`101.1.2.3` and `mac_address`=`F922839922A2`. 
+5. The packet is routed. 
 
 <!-- 
 ## VM to VM communication in VNET example 2
