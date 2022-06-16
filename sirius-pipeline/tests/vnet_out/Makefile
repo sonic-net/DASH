@@ -1,4 +1,7 @@
 vnet_out: vnet_out.cpp
+	echo "builing $@ ..."
+	pwd
+	ls -l
 	g++ \
 	    -I /SAI/SAI/inc \
 	    -I /SAI/SAI/experimental/ \
@@ -19,5 +22,8 @@ vnet_out: vnet_out.cpp
 	    -lpthread \
 	    -labsl_synchronization \
 	    -g
+	echo "built $@"
+	pwd
+	ls -l
 clean:
 	rm -rf vnet_out

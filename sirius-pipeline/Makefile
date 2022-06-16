@@ -31,9 +31,9 @@ bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:
 	    --p4runtime-files bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.json,bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.txt
 
 clean:
-	rm -rf bmv2/sirius_pipeline.bmv2
-	rm -rf SAI/lib
-	make -C tests/vnet_out clean
+	sudo rm -rf bmv2/sirius_pipeline.bmv2
+	sudo rm -rf SAI/lib
+	sudo make -C tests/vnet_out clean
 
 dash-shell:
 	$(DOCKER_RUN) \
