@@ -526,7 +526,7 @@ DASH_VNET:Vnet1: {
 DASH_ENI:F4939FEFC47E : { 
     "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
     "mac_address": "F4939FEFC47E",
-    "pa_addr": 25.1.1.1,
+    "underlay_ip": 25.1.1.1,
     "admin_state": "enabled",
     "vnet": "Vnet1"
 }
