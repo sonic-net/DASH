@@ -225,35 +225,23 @@ The following are the tables and types involved in the lookup steps.
 
 #### DASH_ROUTE_TABLE
 
+![packet-processing-pipeline-das-route-table-example](./images/packet-processing-pipeline-dash-route-table-example.svg)
 
-|Match/Action|Value                     |
-|------------|--------------------------|
-|match       |`F4939FEFC47E:10.1.0.0/16`|
-|action_type |`vnet`                    |
-|vnet        |`Vnet1`                   |
-|||
+
 
 #### DASH_ROUTING_TYPE
 
-|Match/Action|Value       |
-|------------|------------|
-|match       |`vnet`      |
-|action_type |`maprouting`|
-|||
+![packet-processing-pipeline-dash-routing-type-example](./images/packet-processing-pipeline-dash-routing-type-example.svg)
+
 
 #### DASH_VNET_MAPPING_TABLE
 
-|Match/Action|Value              |
-|------------|-------------------|
-|match       |src add=`10.1.1.1` |
-|routing_type|`vnet_encap`       |
-|underlay_ip |dst add=`101.1.2.3`|
-|mac_address |`F922839922A2`     |
-|||
+![packet-processing-pipeline-dash-vnet-mapping-table-example](./images/packet-processing-pipeline-dash-vnet-mapping-table-example.svg)
+
 
 The following figure summurizes the lookup steps.
 
-![packet-processing-pipeline-example-prince](./images/packet-processing-pipeline-example-prince.png)
+![packet-processing-pipeline-flow-example](./images/packet-processing-pipeline-flow-example.svg)
 
 <figcaption><i>Figure 2 - Example LPM lookup steps</i></figcaption> <br/><br/>
 
