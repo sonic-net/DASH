@@ -337,9 +337,6 @@ if not os.path.isfile(args.filepath):
 
 if os.path.exists('./SAI'):
     if args.overwrite == True:
-        print('Directory ./SAI already exists. Please remove in order to proceed')
-        exit(1)
-    else:
         # Delete and restore baseline SAI distro directories which get modified by this script
         # It's more efficient that recloning entire SAI repo; fetches from SAI submodule already stored locally under .git/
         # TODO - do this in main Makefile outside of container
