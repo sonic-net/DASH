@@ -19,6 +19,8 @@ vnet_out: vnet_out.cpp
 	    -lpthread \
 	    -labsl_synchronization \
 	    -g
-
+	echo "built $@"
+	pwd
+	ls -l
 clean:
 	rm -rf vnet_out
