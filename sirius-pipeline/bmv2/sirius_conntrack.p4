@@ -3,6 +3,46 @@
 
 #include "sirius_headers.p4"
 
+control XnRateLimit(inout metadata_t meta,
+                    inout standard_metadata_t standard_metadata)
+{
+    action drop() {
+        mark_to_drop(standard_metadata);
+    }
+    table m_filter {
+        key = {
+            #color 0:GREEN 1:YELLOW 2:RED
+            meta.xn_meter_tag: exact;
+        }
+        actions = {
+            drop;
+            NoAction;
+        }
+        default_action = drop;
+    }
+
+    #Direct meter
+    direct_meter<bit<32>>(MeterType.packets) xn_meter;
+    action m_action() {
+        xn_meter.read(meta.xn_meter_tag);
+    }
+    table xn_rate_meter {
+        key = {
+            meta.eni: exact;
+        }
+        actions = {
+            m_action;
+            NoAction;
+        }
+        default_action = NoAction;
+        meters = xn_meter;
+    }
+
+    apply {
+        xn_rate_meter.apply();
+        m_filter.apply();
+    }
+}
 #ifdef PNA_CONNTRACK
 
 #include "pna.p4"
@@ -52,6 +92,8 @@ control ConntrackIn(inout headers_t hdr,
           if (hdr.tcp.flags == 0x2 /* SYN */) {
             if (meta.direction == direction_t.OUTBOUND) {
                add_entry("conntrackIn_allow"); // New PNA Extern
+               #TODO Apply XN Rate-limiting only when entry addition is successful
+               XnRateLimit.apply();
                //adding failiure to be eventually handled
                set_entry_expire_time(EXPIRE_TIME_PROFILE_LONG);
             }
@@ -103,6 +145,8 @@ control ConntrackOut(inout headers_t hdr,
           if (hdr.tcp.flags == 0x2 /* SYN */) {
             if (meta.direction == direction_t.INBOUND) {
                add_entry("ConntrackOut_allow"); // New PNA Extern
+               #TODO Apply XN Rate-limiting only when entry addition is successful
+               XnRateLimit.apply();
                //adding failiure to be eventually handled
                set_entry_expire_time(EXPIRE_TIME_PROFILE_LONG);
             }
@@ -142,6 +186,7 @@ control ConntrackOut(inout headers_t hdr,
 
 state_context ConntrackCtx {
 }
+
 
 state_graph ConnGraphOut(inout state_context flow_ctx,
                              in headers_t headers,
