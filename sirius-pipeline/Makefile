@@ -13,7 +13,6 @@ DOCKER_RUN := docker run \
 	-v $(PWD)/bmv2:/bmv2 \
 	-v $(PWD)/SAI:/SAI \
 	-v $(PWD)/tests:/tests \
-	-v $(PWD)/..:/dash \
 	--network=host \
 	--rm \
 	$(DOCKER_FLAGS)
@@ -60,6 +59,7 @@ sai:
 	# Generate SAI library headers and implementation
 	$(DOCKER_RUN) \
 		--name build_sai-$(USER) \
+		-v $(PWD)/..:/dash \
 		-w /dash $(DOCKER_IMG) \
 	    sirius-pipeline/SAI/generate_dash_api.sh
 	# build libsai.so
