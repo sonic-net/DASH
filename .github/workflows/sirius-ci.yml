@@ -37,7 +37,7 @@ jobs:
     - name: Generate SAI API
       run: DOCKER_FLAGS=$docker_flags make sai
     - name: Build vnet_out test, verifies libsai binding to c++
-      run: DOCKER_FLAGS=$docker_flags make test
+      run: DOCKER_FLAGS="-d -u root --privileged" make test
     - name: Prepare network
       run: DOCKER_FLAGS=$docker_flags make network
     - name: Run P4 software switch (bmv2)
