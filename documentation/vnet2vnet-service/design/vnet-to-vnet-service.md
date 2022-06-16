@@ -19,16 +19,6 @@ Last update: 06/09/2022
     - [DASH_ROUTE_TABLE](#dash_route_table)
     - [DASH_ROUTING_TYPE](#dash_routing_type)
     - [DASH_VNET_MAPPING_TABLE](#dash_vnet_mapping_table)
-- [VM to VM communication in VNET example 2](#vm-to-vm-communication-in-vnet-example-2)
-  - [V-Port definition](#v-port-definition)
-  - [VNET definition](#vnet-definition)
-  - [VNET mapping table](#vnet-mapping-table)
-  - [Match action tables](#match-action-tables)
-    - [ACL1 table](#acl1-table)
-    - [ACL2 table](#acl2-table)
-    - [ACL3 table](#acl3-table)
-    - [Routing table](#routing-table)
-    - [Mapping table](#mapping-table)
 - [Appendix](#appendix)
   - [VNET to VNET without DASH optimization](#vnet-to-vnet-without-dash-optimization)
 - [References](#references)
@@ -232,35 +222,49 @@ Let's look at some routing.
 ### LPM lookup steps for entry 10.1.0.0/16
 
 The following are the tables and types involved in the lookup steps. 
+
 #### DASH_ROUTE_TABLE
 
-|Address range|action type|which VNET|
-|--|--|--|
-|F4939FEFC47E:10.1.0.0/16|vnet|Vnet1|
+
+|Match/Action|Value                     |
+|------------|--------------------------|
+|match       |`F4939FEFC47E:10.1.0.0/16`|
+|action_type |`vnet`                    |
+|vnet        |`Vnet1`                   |
+|||
 
 #### DASH_ROUTING_TYPE
 
-|Routing type|action type|
-|--|--|
-|vnet|maprouting|
+|Match/Action|Value       |
+|------------|------------|
+|match       |`vnet`      |
+|action_type |`maprouting`|
+|||
 
 #### DASH_VNET_MAPPING_TABLE
 
-|which VNET|Address|routing type|PA (underlay_ip)|mac|
-|--|--|--|--|--|
-|Vnet1|10.1.1.1|vnet_encap|101.1.2.3|F922839922A2|
+|Match/Action|Value              |
+|------------|-------------------|
+|match       |src add=`10.1.1.1` |
+|routing_type|`vnet_encap`       |
+|underlay_ip |dst add=`101.1.2.3`|
+|mac_address |`F922839922A2`     |
+|||
 
 The following figure summurizes the lookup steps.
 
 ![packet-processing-pipeline-example-prince](./images/packet-processing-pipeline-example-prince.png)
 
+<figcaption><i>Figure 2 - Example LPM lookup steps</i></figcaption> <br/><br/>
 
-1. The action in this case is "vnet" and the routing type for "vnet" is "maprouting"
-1. Next lookup shall happen on the "mapping" table for Vnet "Vnet1"
-1. Mapping table for 10.1.1.1 shall be hit and it takes the action "vnet_encap". 
-1. Encap action shall be performed and use PA address as specified by "underlay_ip"
-1. Packet destined to 10.1.0.1:
+1. Starting with the routing table `DASH_ROUTE_TABLE` lookup. The action is `vnet` and `VNET` value is `Vnet1`.
+2. Next we look up the `DASH_ROUTING_TYPE` for the `vnet` type. The `vnet` is "maprouting"
+3. Next lookup shall happen on the "mapping" table for Vnet "Vnet1"
+4. Mapping table for 10.1.1.1 shall be hit and it takes the action "vnet_encap". 
+5. Encap action shall be performed and use PA address as specified by "underlay_ip"
+6. Packet destined to 10.1.0.1:
 
+<!-- 
 ## VM to VM communication in VNET example 2
 
 (from SDN document)
@@ -382,7 +386,10 @@ The following figure shows the example processing pipeline.
 
 <figcaption><i>Figure 2 - Example processing pipeline</i></figcaption> <br/>
 
+-->
+
 ## Appendix
+
 ### VNET to VNET without DASH optimization 
 
 The following figure shows the transformation steps in a traditional VNET
