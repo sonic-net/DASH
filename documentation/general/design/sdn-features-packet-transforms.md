@@ -74,9 +74,9 @@ applies to both IPV4 and IPV6 underlay and overlay*
 
 ## Scenario Milestone and Scoping
 
-| Scenario | Feature | Perf | Timeline |
+| Scenario | Feature | Perfomance Metrics | Timeline |
 |:---------|:---------|:-----|-----|
-| 1 | <ul> <li>VNET <-> VNET </li> <li>Route Support </li> <li>LPM Support </li> <li>ACL Support</li> </ul>|CPS<br/>Flow<br/>PPS</br>Rule Scale<img width=400/></br> |
+| 1 | <ul> <li>VNET <-> VNET </li> <ul><li>Route Support </li> <li>LPM Support </li> <li>ACL Support</li></ul></ul>|CPS<br/>Flow<br/>PPS</br>Rule Scale<img width=400/></br> |
 | 2  | <ul> <li>Load Balancer Inbound</li><li>VIP Inbound</li></ul>  |  | |
 | 3 | Private Link Outbound (transposition), encapsulate and change packet IPv4 to IPv6 (4 bits embedded)  |  | |
 | 4 | L3 / L4 Source NAT (correlated w/#2) outbound perspective (Cx address) to Internet; changing Cx source IP to Public IP (1:1 mapping)  |  | |
