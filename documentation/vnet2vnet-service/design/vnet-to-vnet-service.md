@@ -14,8 +14,8 @@ Last update: 06/09/2022
 - [Packet flow in VNET to VNET](#packet-flow-in-vnet-to-vnet)
   - [Outbound packet processing pipeline](#outbound-packet-processing-pipeline)
   - [Inbound packet processing pipeline](#inbound-packet-processing-pipeline)
-- [VM to VM communication in VNET example 1](#vm-to-vm-communication-in-vnet-example-1)
-  - [LPM lookup steps for entry 10.1.0.0/16](#lpm-lookup-steps-for-entry-1010016)
+- [VM to VM communication in VNET example](#vm-to-vm-communication-in-vnet-example)
+  - [LPM lookup steps for the entry 10.1.0.0/16](#lpm-lookup-steps-for-the-entry-1010016)
     - [DASH_ROUTE_TABLE](#dash_route_table)
     - [DASH_ROUTING_TYPE](#dash_routing_type)
     - [DASH_VNET_MAPPING_TABLE](#dash_vnet_mapping_table)
@@ -120,12 +120,18 @@ In the outbound flow, the criteria listed below are applied.
 > CA-PA mapping table are used for both encap and decap processing.
 
 
-## VM to VM communication in VNET example 1
+## VM to VM communication in VNET example
+
+The following is an example of VM to VM communication in VNET. 
 
 (from Prince's SONiC-DASH HLD docunent)
 
-``` 
+The following code snippet defines the values for VNET, ENI, routing types, match/action tables, and routing tables.
+
+``` json
+
 /* Define Vnet1 */
+
 DASH_VNET:Vnet1: {
     "vni": 45654,
     "guid": "559c6ce8-26ab-4193-b946-ccc6e8f930b2"
@@ -140,7 +146,8 @@ DASH_ENI:F4939FEFC47E : {
     "vnet": "Vnet1"
 }
 
-/* Define types */
+/* Define routing types */
+
 DASH_ROUTING_TYPE:vnet: [
     {
          "name": "action1", 
@@ -217,40 +224,38 @@ DASH_VNET_MAPPING_TABLE:Vnet1:10.1.1.1: {
 }
 ```
 
-Let's look at some routing. 
+### LPM lookup steps for the entry 10.1.0.0/16
 
-### LPM lookup steps for entry 10.1.0.0/16
-
-The following are the tables and types involved in the lookup steps. 
+Using the previous definitions, let's analyze the lookups involved in routing a packet for the entry `10.1.0.0/16`. Below the tables and types involved in the lookup steps. 
 
 #### DASH_ROUTE_TABLE
 
 ![packet-processing-pipeline-das-route-table-example](./images/packet-processing-pipeline-dash-route-table-example.svg)
 
-
+<figcaption><i>Figure 2 - Example route table</i></figcaption> <br/><br/>
 
 #### DASH_ROUTING_TYPE
 
 ![packet-processing-pipeline-dash-routing-type-example](./images/packet-processing-pipeline-dash-routing-type-example.svg)
 
+<figcaption><i>Figure 3 - Example routing type</i></figcaption> <br/><br/>
 
 #### DASH_VNET_MAPPING_TABLE
 
 ![packet-processing-pipeline-dash-vnet-mapping-table-example](./images/packet-processing-pipeline-dash-vnet-mapping-table-example.svg)
 
+<figcaption><i>Figure 4 - Example mapping table</i></figcaption> <br/><br/>
 
 The following figure summurizes the lookup steps.
 
 ![packet-processing-pipeline-flow-example](./images/packet-processing-pipeline-flow-example.svg)
 
-<figcaption><i>Figure 2 - Example LPM lookup steps</i></figcaption> <br/><br/>
+<figcaption><i>Figure 5 - Example LPM lookup steps</i></figcaption> <br/><br/>
 
-1. Starting with the routing table `DASH_ROUTE_TABLE` lookup. The action is `vnet` and `VNET` value is `Vnet1`.
-2. Next we look up the `DASH_ROUTING_TYPE` for the `vnet` type. The `vnet` is "maprouting"
-3. Next lookup shall happen on the "mapping" table for Vnet "Vnet1"
-4. Mapping table for 10.1.1.1 shall be hit and it takes the action "vnet_encap". 
-5. Encap action shall be performed and use PA address as specified by "underlay_ip"
-6. Packet destined to 10.1.0.1:
+1. We starting with the lookup of routing table `DASH_ROUTE_TABLE`. The action is `vnet` and the value is `Vnet1`.
+2. Next we look up the `DASH_ROUTING_TYPE`. The value for `vnet` is `maprouting`.
+3. Next we look up the `DASH_VNET_MAPPING_TABLE` for `Vnet1:10.1.1.1`. The routing type is `vnet_encap`. 
+4. Encap action is performed and use PA address as specified by the `underlay_ip`=`101.1.2.3` and `mac_address`=`F922839922A2`.  
 
 <!-- 
 ## VM to VM communication in VNET example 2
@@ -385,10 +390,12 @@ setting i.e., without DASH optimization.
 
 ![packet-transforms-vm-to-vm-in-vnet-without-dash](./images/packet-transforms-vm-to-vm-in-vnet-without-dash.svg)
 
-<figcaption><i>Figure Appendix 1 - VNET to VNET without DASH optimization</i></figcaption> 
+<figcaption><i>Appendix Figure 1 - VNET to VNET without DASH optimization</i></figcaption> 
 
 ## References
 
+- [Disaggregated API for SONiC Hosts (DASH) high level design](../../general/design/dash-high-level-design.md)
+- [SONiC-DASH HLD](../../general/design/dash-sonic-hld.md)
 - [P4 Getting
   Started](https://github.com/p4lang/education/blob/master/GettingStarted.md)
 - [P4-16 Language Specification](https://p4.org/p4-spec/docs/P4-16-v1.2.2.html)
