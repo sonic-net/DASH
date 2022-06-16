@@ -57,10 +57,12 @@ run-switch:
 	    --no-p4
 
 sai:
+	# Generate SAI library headers and implementation
 	$(DOCKER_RUN) \
 		--name build_sai-$(USER) \
 		-w /dash $(DOCKER_IMG) \
 	    sirius-pipeline/SAI/generate_dash_api.sh
+	# build libsai.so
 	$(DOCKER_RUN) -w /SAI/lib $(DOCKER_IMG) \
 	    make
 
@@ -82,7 +84,7 @@ run-test:
 			t=`expr $$t - 1`; \
 		fi; \
 	done; \
-	docker exec -w /tests/vnet_out simple_switch-$(USER) ./vnet_out
+	docker exec $(DOCKER_FLAGS) -w /tests/vnet_out simple_switch-$(USER) ./vnet_out
 
 docker:
 	docker build \
