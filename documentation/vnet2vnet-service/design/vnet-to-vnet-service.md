@@ -15,7 +15,7 @@ Last update: 06/09/2022
   - [Outbound packet processing pipeline](#outbound-packet-processing-pipeline)
   - [Inbound packet processing pipeline](#inbound-packet-processing-pipeline)
 - [VM to VM communication in VNET example 1](#vm-to-vm-communication-in-vnet-example-1)
-  - [LPM lookup hits for entry 10.1.0.0/16](#lpm-lookup-hits-for-entry-1010016)
+  - [LPM lookup steps for entry 10.1.0.0/16](#lpm-lookup-steps-for-entry-1010016)
     - [DASH_ROUTE_TABLE](#dash_route_table)
     - [DASH_ROUTING_TYPE](#dash_routing_type)
     - [DASH_VNET_MAPPING_TABLE](#dash_vnet_mapping_table)
@@ -229,8 +229,9 @@ DASH_VNET_MAPPING_TABLE:Vnet1:10.1.1.1: {
 
 Let's look at some routing. 
 
-### LPM lookup hits for entry 10.1.0.0/16
+### LPM lookup steps for entry 10.1.0.0/16
 
+The following are the tables and types involved in the lookup steps. 
 #### DASH_ROUTE_TABLE
 
 |Address range|action type|which VNET|
@@ -249,6 +250,16 @@ Let's look at some routing.
 |--|--|--|--|--|
 |Vnet1|10.1.1.1|vnet_encap|101.1.2.3|F922839922A2|
 
+The following figure summurizes the lookup steps.
+
+![packet-processing-pipeline-example-prince](./images/packet-processing-pipeline-example-prince.png)
+
+
+1. The action in this case is "vnet" and the routing type for "vnet" is "maprouting"
+1. Next lookup shall happen on the "mapping" table for Vnet "Vnet1"
+1. Mapping table for 10.1.1.1 shall be hit and it takes the action "vnet_encap". 
+1. Encap action shall be performed and use PA address as specified by "underlay_ip"
+1. Packet destined to 10.1.0.1:
 
 ## VM to VM communication in VNET example 2
 
