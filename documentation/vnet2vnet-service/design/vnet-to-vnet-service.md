@@ -14,7 +14,12 @@ Last update: 06/09/2022
 - [Packet flow in VNET to VNET](#packet-flow-in-vnet-to-vnet)
   - [Outbound packet processing pipeline](#outbound-packet-processing-pipeline)
   - [Inbound packet processing pipeline](#inbound-packet-processing-pipeline)
-- [VM to VM communication in VNET example](#vm-to-vm-communication-in-vnet-example)
+- [VM to VM communication in VNET example 1](#vm-to-vm-communication-in-vnet-example-1)
+  - [LPM lookup hits for entry 10.1.0.0/16](#lpm-lookup-hits-for-entry-1010016)
+    - [DASH_ROUTE_TABLE](#dash_route_table)
+    - [DASH_ROUTING_TYPE](#dash_routing_type)
+    - [DASH_VNET_MAPPING_TABLE](#dash_vnet_mapping_table)
+- [VM to VM communication in VNET example 2](#vm-to-vm-communication-in-vnet-example-2)
   - [V-Port definition](#v-port-definition)
   - [VNET definition](#vnet-definition)
   - [VNET mapping table](#vnet-mapping-table)
@@ -125,7 +130,129 @@ In the outbound flow, the criteria listed below are applied.
 > CA-PA mapping table are used for both encap and decap processing.
 
 
-## VM to VM communication in VNET example 
+## VM to VM communication in VNET example 1
+
+(from Prince's SONiC-DASH HLD docunent)
+
+``` 
+/* Define Vnet1 */
+DASH_VNET:Vnet1: {
+    "vni": 45654,
+    "guid": "559c6ce8-26ab-4193-b946-ccc6e8f930b2"
+}
+
+/* Define ENI */
+DASH_ENI:F4939FEFC47E : { 
+    "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
+    "mac_address": "F4939FEFC47E",
+    "pa_addr": 25.1.1.1,
+    "admin_state": "enabled",
+    "vnet": "Vnet1"
+}
+
+/* Define types */
+DASH_ROUTING_TYPE:vnet: [
+    {
+         "name": "action1", 
+         "action_type: "maprouting" 
+    } 
+]
+
+DASH_ROUTING_TYPE:vnet_direct: [
+    {
+         "name": "action1", 
+         "action_type: "maprouting" 
+    }
+]
+
+DASH_ROUTING_TYPE:vnet_encap: [
+    {
+         "name": "action1",
+         "action_type: "staticencap",
+         "encap_type" "vxlan"
+    }
+]
+
+DASH_ROUTING_TYPE:privatelink: [
+    {
+         "name": "action1",
+         "action_type:"staticencap",
+         "encap_type":"vxlan"
+    },
+    {
+         "name": "action2",
+         "action_type:"staticencap",
+         "encap_type":"nvgre",
+         "vni":100
+    }
+]
+
+/* Define routing tables */
+
+DASH_ROUTE_TABLE:F4939FEFC47E:10.1.0.0/16: {
+    "action_type":"vnet",
+    "vnet":"Vnet1"
+}
+
+DASH_ROUTE_TABLE:F4939FEFC47E:10.1.0.0/24: {
+    "action_type":"vnet",
+    "vnet":"Vnet1",
+    "overlay_ip":"10.0.0.6"
+}
+
+DASH_ROUTE_TABLE:F4939FEFC47E:30.0.0.0/16: {
+    "action_type":"direct",
+}
+
+DASH_ROUTE_TABLE:F4939FEFC47E:10.2.5.0/24: {
+    "action_type":"drop",
+}
+
+DASH_VNET_MAPPING_TABLE:Vnet1:10.0.0.6: {
+    "routing_type":"vnet_encap",
+    "underlay_ip":2601:12:7a:1::1234,
+    "mac_address":F922839922A2
+}
+
+DASH_VNET_MAPPING_TABLE:Vnet1:10.0.0.5: {
+    "routing_type":"vnet_encap", 
+    "underlay_ip":100.1.2.3,
+    "mac_address":F922839922A2
+}
+
+DASH_VNET_MAPPING_TABLE:Vnet1:10.1.1.1: {
+    "routing_type":"vnet_encap", 
+    "underlay_ip":101.1.2.3,
+    "mac_address":F922839922A2
+}
+```
+
+Let's look at some routing. 
+
+### LPM lookup hits for entry 10.1.0.0/16
+
+#### DASH_ROUTE_TABLE
+
+|Address range|action type|which vnet|
+|--|--|--|
+|F4939FEFC47E:10.1.0.0/16|vnet|Vnet1|
+
+#### DASH_ROUTING_TYPE
+
+|Routing type|action type|
+|--|--|
+|vnet|maprouting|
+
+#### DASH_VNET_MAPPING_TABLE
+
+|Address|routing type|PA (underlay_ip)|mac|
+|--|--|--|--|
+|10.1.1.1|vnet_encap|101.1.2.3|F922839922A2|
+
+
+## VM to VM communication in VNET example 2
+
+(from Prince's SONiC-DASH HLD docunent)
 
 The following is an example of packet transfer in VM to VM communication in
 VNET.
