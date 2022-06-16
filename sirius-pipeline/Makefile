@@ -58,7 +58,7 @@ run-switch:
 
 sai:
 	$(DOCKER_RUN) \
-		--name build_sai \
+		--name build_sai-$(USER) \
 		-w /dash $(DOCKER_IMG) \
 	    sirius-pipeline/SAI/generate_dash_api.sh
 	$(DOCKER_RUN) -w /SAI/lib $(DOCKER_IMG) \
@@ -66,7 +66,7 @@ sai:
 
 test:
 	$(DOCKER_RUN) \
-		--name make_test \
+	    --name build-test-$(USER) \
 		-w /tests/vnet_out  $(DOCKER_IMG) \
 	    make
 
