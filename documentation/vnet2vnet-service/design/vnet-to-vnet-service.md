@@ -258,7 +258,7 @@ lookup steps.
 
 <figcaption><i>Figure 4 - Example mapping table</i></figcaption> <br/><br/>
 
-The following figure summurizes the lookup steps.
+The following are the processing pipeline (lookup) steps: 
 
 ![packet-processing-pipeline-flow-example](./images/packet-processing-pipeline-flow-example.svg)
 
@@ -266,13 +266,12 @@ The following figure summurizes the lookup steps.
 
 1. LPM lookup hits the routing table `DASH_ROUTE_TABLE:10.1.0.0/16`. 
 The action is `vnet` and the value is `Vnet1`.
-2. Next a look up of the `DASH_ROUTING_TYPE:vnet` happens. The value for `vnet` is
-   `maprouting`.
-3. The look up of the `DASH_VNET_MAPPING_TABLE` for `Vnet1:10.1.1.1` is done next. 
+2. Look up the `DASH_ROUTING_TYPE:vnet`. The value for `vnet` is `maprouting`.
+3. Look up the `DASH_VNET_MAPPING_TABLE:Vnet1:10.1.1.1`. 
    1. The routing for `maprouting` is `vnet_encap`.
-4. The encap action is performed which uses the Public Address (PA) as specified by the
+4. Perform encap which uses the Public Address (PA) as specified by the
    `underlay_ip`=`101.1.2.3` and `mac_address`=`F922839922A2`. 
-5. The packet is routed. 
+5. Route the packet. 
 
 <!-- 
 ## VM to VM communication in VNET example 2
