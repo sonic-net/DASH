@@ -8,8 +8,9 @@ DOCKER_IMG ?=chrissommers/dash-bmv2:latest
 # Set to -d for CI mode
 DOCKER_FLAGS ?=-it
 
+# Should override --name in make targets
 DOCKER_RUN := docker run \
-	--name simple_switch \
+	--name bmv2_default \
 	-v $(PWD)/bmv2:/bmv2 \
 	-v $(PWD)/SAI:/SAI \
 	-v $(PWD)/tests:/tests \
@@ -22,7 +23,9 @@ DOCKER_RUN := docker run \
 p4:bmv2/sirius_pipeline.bmv2/sirius_pipeline.json
 
 bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:
-	$(DOCKER_RUN) $(DOCKER_IMG) p4c \
+	$(DOCKER_RUN) \
+	--name p4c \
+	$(DOCKER_IMG) p4c \
 	    -b \
 	    bmv2 \
 	    bmv2/sirius_pipeline.p4 \
@@ -64,6 +67,7 @@ sai:
 
 test:
 	$(DOCKER_RUN) -w /tests/vnet_out  $(DOCKER_IMG) \
+		--name make_test \
 	    make
 
 timeout?=5
