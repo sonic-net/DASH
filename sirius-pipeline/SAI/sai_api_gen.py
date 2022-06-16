@@ -327,39 +327,33 @@ parser.add_argument('--print-sai-lib', type=bool)
 parser.add_argument('--sai-git-url', type=str, default='https://github.com/Opencomputeproject/SAI')
 parser.add_argument('--ignore-tables', type=str, default='', help='Comma separated list of tables to ignore')
 parser.add_argument('--sai-git-branch', type=str, default='master')
-parser.add_argument('--overwrite',  type=bool, default=False, help='Overwrite the existing SAI repo')
+parser.add_argument('--overwrite',  type=bool, default=False, help='Restore SAI subdirectories')
 args = parser.parse_args()
 
 if not os.path.isfile(args.filepath):
     print('File ' + args.filepath + ' does not exist')
     exit(1)
 
-"""
+
 if os.path.exists('./SAI'):
-    if args.overwrite == False:
+    if args.overwrite == True:
         print('Directory ./SAI already exists. Please remove in order to proceed')
         exit(1)
     else:
-        print('Directory ./SAI will be deleted...')
-        shutil.rmtree('./SAI')
-"""
-# Delete and restore baseline SAI distro directories which get modified by this script
-# It's more efficient that recloning entire SAI repo; fetches from SAI submodule already stored locally under .git/
-# TODO - use a loop, test if dir exists before delete
-if os.path.exists('./SAI'):
-    print ('Deleting modified SAI directories inc/, meta/, experimental/ prior to restoral...')
-    shutil.rmtree('./SAI/inc', ignore_errors=True)
-    shutil.rmtree('./SAI/meta', ignore_errors=True)
-    shutil.rmtree('./SAI/experimental', ignore_errors=True)
-    # This will pull in just needed directories from local .git/
-    print ('Restoring SAI directories inc/, meta/, experimental/ ...')
-    repo = Repo("SAI")
-    repo.git.checkout("--", "inc", "meta", "experimental")
-
+        # Delete and restore baseline SAI distro directories which get modified by this script
+        # It's more efficient that recloning entire SAI repo; fetches from SAI submodule already stored locally under .git/
+        # TODO - do this in main Makefile outside of container
+        print ('Deleting modified SAI directories inc/, meta/, experimental/ prior to restoral...')
+        shutil.rmtree('./SAI/inc', ignore_errors=True)
+        shutil.rmtree('./SAI/meta', ignore_errors=True)
+        shutil.rmtree('./SAI/experimental', ignore_errors=True)
+        # This will pull in just needed directories from local .git/
+        print ('Restoring SAI directories inc/, meta/, experimental/ ...')
+        repo = Repo("SAI")
+        repo.git.checkout("--", "inc", "meta", "experimental")
 else:
-    print("Can't find SAI/")
+    print('Directory ./SAI is missing, check Git submodule configuration')
     exit(1)
-
 
 if os.path.exists('./lib'):
     if args.overwrite == False:
