@@ -128,7 +128,7 @@ The following is an example of VM to VM communication in VNET.
 
 The following code snippet defines the values for VNET, ENI, routing types, match/action tables, and routing tables.
 
-``` json
+``` 
 
 /* Define Vnet1 */
 
