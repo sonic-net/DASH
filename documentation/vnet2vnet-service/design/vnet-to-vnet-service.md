@@ -263,7 +263,7 @@ The following figure summurizes the lookup steps.
 
 ## VM to VM communication in VNET example 2
 
-(from SDN docunent)
+(from SDN document)
 
 The following is an example of packet transfer in VM to VM communication in
 VNET.
