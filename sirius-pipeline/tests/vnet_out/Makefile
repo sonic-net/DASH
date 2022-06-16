@@ -1,5 +1,5 @@
 vnet_out: vnet_out.cpp
-	echo "builing $@ ..."
+	echo "buidling $@ ..."
 	pwd
 	ls -l
 	g++ \

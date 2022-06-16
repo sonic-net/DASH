@@ -22,7 +22,8 @@ jobs:
     name: Build and test
     runs-on: ubuntu-latest
     env:
-      docker_flags: -d -u root --privileged
+      docker_fg_flags: -u root --privileged
+      docker_bg_flags: -d -u root --privileged
     defaults:
       run:
         working-directory: ./sirius-pipeline
@@ -33,17 +34,17 @@ jobs:
     - name: Pull docker bmv2 image
       run: make docker-pull
     - name: Build P4 software switch (bmv2) and P4RT
-      run: DOCKER_FLAGS=$docker_flags make p4
+      run: DOCKER_FLAGS=$docker_fg_flags make p4
     - name: Generate SAI API
-      run: DOCKER_FLAGS=$docker_flags make sai
+      run: DOCKER_FLAGS=$docker_fg_flags make sai
     - name: Build vnet_out test, verifies libsai binding to c++
-      run: DOCKER_FLAGS="-u root --privileged" make test
+      run: DOCKER_FLAGS=$docker_fg_flags make test
     - name: Prepare network
-      run: DOCKER_FLAGS=$docker_flags make network
+      run: DOCKER_FLAGS=$docker_fg_flags make network
     - name: Run P4 software switch (bmv2)
-      run: DOCKER_FLAGS=$docker_flags make run-switch
+      run: DOCKER_FLAGS=$docker_bg_flags make run-switch
     - name: Test SAI
-      run: DOCKER_FLAGS="" make run-test
+      run: DOCKER_FLAGS=$docker_fg_flags make run-test
     - name: Ixia-c Traffic Generator test
       run: DOCKER_FLAGS=$docker_flags make run-ixiac-test
       
