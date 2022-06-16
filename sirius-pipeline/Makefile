@@ -84,7 +84,7 @@ run-test:
 			t=`expr $$t - 1`; \
 		fi; \
 	done; \
-	docker exec $(DOCKER_FLAGS) -w /tests/vnet_out simple_switch-$(USER) ./vnet_out
+	docker exec -w /tests/vnet_out simple_switch-$(USER) ./vnet_out
 
 docker:
 	docker build \
