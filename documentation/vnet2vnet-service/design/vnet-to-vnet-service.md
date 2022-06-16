@@ -233,7 +233,7 @@ Let's look at some routing.
 
 #### DASH_ROUTE_TABLE
 
-|Address range|action type|which vnet|
+|Address range|action type|which VNET|
 |--|--|--|
 |F4939FEFC47E:10.1.0.0/16|vnet|Vnet1|
 
@@ -245,14 +245,14 @@ Let's look at some routing.
 
 #### DASH_VNET_MAPPING_TABLE
 
-|Address|routing type|PA (underlay_ip)|mac|
-|--|--|--|--|
-|10.1.1.1|vnet_encap|101.1.2.3|F922839922A2|
+|which VNET|Address|routing type|PA (underlay_ip)|mac|
+|--|--|--|--|--|
+|Vnet1|10.1.1.1|vnet_encap|101.1.2.3|F922839922A2|
 
 
 ## VM to VM communication in VNET example 2
 
-(from Prince's SONiC-DASH HLD docunent)
+(from SDN docunent)
 
 The following is an example of packet transfer in VM to VM communication in
 VNET.
