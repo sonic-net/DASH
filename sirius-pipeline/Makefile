@@ -57,7 +57,7 @@ run-switch:
 	    --no-p4
 
 sai:
-	$(DOCKER_RUN) 
+	$(DOCKER_RUN) \
 		--name build_sai \
 		-w /dash $(DOCKER_IMG) \
 	    sirius-pipeline/SAI/generate_dash_api.sh
