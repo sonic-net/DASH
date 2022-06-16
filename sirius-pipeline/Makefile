@@ -5,15 +5,21 @@ PWD := $(shell pwd)
 # Default Docker image, override from env var
 DOCKER_IMG ?=chrissommers/dash-bmv2:latest
 
+# Set to -d for CI mode
+DOCKER_FLAGS ?=-it
+
 DOCKER_RUN := docker run \
 	--name simple_switch \
 	-v $(PWD)/bmv2:/bmv2 \
 	-v $(PWD)/SAI:/SAI \
 	-v $(PWD)/tests:/tests \
+	-v $(PWD)/..:/dash \
 	--network=host \
 	--rm \
-	-u root \
-	--privileged
+	$(DOCKER_FLAGS)
+
+#shorthand:
+p4:bmv2/sirius_pipeline.bmv2/sirius_pipeline.json
 
 bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:
 	$(DOCKER_RUN) $(DOCKER_IMG) p4c \
@@ -25,13 +31,17 @@ bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:
 
 clean:
 	rm -rf bmv2/sirius_pipeline.bmv2
-	rm -rf SAI/SAI
 	rm -rf SAI/lib
 	make -C tests/vnet_out clean
 
+dash-shell:
+	$(DOCKER_RUN) \
+	    --name dashtool-$(USER) \
+		 $(DOCKER_IMG) \
+	    bash
+
 run-switch:
 	$(DOCKER_RUN) \
-		-d \
 	    -v $(PWD)/bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:/etc/dash/sirius_pipeline.json \
 	    -v $(PWD)/bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.txt:/etc/dash/sirius_pipeline_p4rt.txt \
 	    --name simple_switch-$(USER) \
@@ -45,17 +55,20 @@ run-switch:
 	    --no-p4
 
 sai:
-	$(DOCKER_RUN) -w /SAI $(DOCKER_IMG) \
-	    ./generate_dash_api.sh
+	# $(DOCKER_RUN) -w /SAI $(DOCKER_IMG) \
+	#     ./generate_dash_api.sh
+	$(DOCKER_RUN) -w /dash $(DOCKER_IMG) \
+	    sirius-pipeline/SAI/generate_dash_api.sh
 	$(DOCKER_RUN) -w /SAI/lib $(DOCKER_IMG) \
 	    make
 
 test:
-	$(DOCKER_RUN) -w /tests/vnet_out $(DOCKER_IMG) \
+	$(DOCKER_RUN) -w /tests/vnet_out  $(DOCKER_IMG) \
 	    make
 
 timeout?=5
 run-test:
+	# Ensure P4Runtime server is listening
 	t=$(timeout); \
 	while [ $${t} -ge 1 ]; do \
 		if sudo lsof -i:9559 | grep LISTEN >/dev/null; then \
@@ -79,6 +92,9 @@ docker:
 
 docker-publish:
 	echo "TO DO when we have a proper repository"
+
+docker-pull:
+	docker pull $(DOCKER_IMG)
 
 network:
 	sudo ip link add name veth0 type veth peer name veth1
@@ -106,3 +122,7 @@ install-python-modules:
 
 deploy-ixiac:
 	cd ../test/third-party/traffic_gen && ./deploy_ixiac.sh
+
+install-docker-compose:
+	sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$$(uname -s)-$$(uname -m)" -o /usr/local/bin/docker-compose
+	sudo chmod +x /usr/local/bin/docker-compose
