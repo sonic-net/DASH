@@ -7,7 +7,6 @@
 #include "sirius_outbound.p4"
 #include "sirius_inbound.p4"
 #include "sirius_conntrack.p4"
-iinclude "oops.h"
 
 control sirius_verify_checksum(inout headers_t hdr,
                          inout metadata_t meta)
