@@ -10,21 +10,18 @@ Last update: 06/09/2022
 # VNET to VNET scenario
 
 - [Overview](#overview)
-- [Moving packets from source VM to destination
-  VM](#moving-packets-from-source-vm-to-destination-vm)
+- [Moving packets from source VM to destination VM](#moving-packets-from-source-vm-to-destination-vm)
 - [Packet flow in VNET to VNET](#packet-flow-in-vnet-to-vnet)
   - [Outbound packet processing pipeline](#outbound-packet-processing-pipeline)
   - [Inbound packet processing pipeline](#inbound-packet-processing-pipeline)
-- [VM to VM communication in VNET
-  example](#vm-to-vm-communication-in-vnet-example)
-  - [LPM lookup steps for the entry
-    10.1.0.0/16](#lpm-lookup-steps-for-the-entry-1010016)
+- [VM to VM communication in VNET example](#vm-to-vm-communication-in-vnet-example)
+  - [Configuration example](#configuration-example)
+  - [Routing a packet to address 10.1.1.1](#routing-a-packet-to-address-10111)
     - [DASH_ROUTE_TABLE](#dash_route_table)
     - [DASH_ROUTING_TYPE](#dash_routing_type)
     - [DASH_VNET_MAPPING_TABLE](#dash_vnet_mapping_table)
 - [Appendix](#appendix)
-  - [VNET to VNET without DASH
-    optimization](#vnet-to-vnet-without-dash-optimization)
+  - [VNET to VNET without DASH optimization](#vnet-to-vnet-without-dash-optimization)
 - [References](#references)
   
 ## Overview
@@ -234,7 +231,7 @@ The next sections describe the lookup behavior in the outbound direction. For
 the inbound direction, after LPM/ACL lookup, the pipeline uses the `underlay_ip`
 as specified in the ENI table to Vxlan encapsulate the packet. ??
 
-### Routing a packet destined to address 10.1.1.1
+### Routing a packet to address 10.1.1.1
 
 Using the previous configuration, let's analyze the steps involved in routing a
 packet destined to `10.1.1.1`. Below are the tables and types involved in the
