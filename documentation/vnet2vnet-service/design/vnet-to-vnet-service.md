@@ -17,6 +17,7 @@ Last update: 06/09/2022
 - [VM to VM communication in VNET example](#vm-to-vm-communication-in-vnet-example)
   - [Configuration example](#configuration-example)
   - [Routing a packet to address 10.1.1.1](#routing-a-packet-to-address-10111)
+- [Routing a packet to address 10.1.0.1](#routing-a-packet-to-address-10101)
 - [Appendix](#appendix)
   - [VNET to VNET without DASH optimization](#vnet-to-vnet-without-dash-optimization)
 - [References](#references)
@@ -233,18 +234,34 @@ as specified in the ENI table to Vxlan encapsulate the packet. ??
 Using the previous configuration, let's analyze the steps involved in routing a
 packet destined to `10.1.1.1`. Below are the processing pipeline (lookup) steps. 
 
-![packet-processing-pipeline-flow-example](./images/packet-processing-pipeline-flow-example.svg)
+![routing-packet-10.1.1.1](./images/routing-packet-10.1.1.1.svg)
 
-<figcaption><i>Figure 4 - processing pipeline lookup steps</i></figcaption> <br/><br/>
+<figcaption><i>Figure 4 -  Routing a packet to 10.1.1.1</i></figcaption> <br/><br/>
 
 1. Perform LPM lookup. 
 2. Select routing table `DASH_ROUTE_TABLE:10.1.0.0/16`. The action is `vnet` and the value is `Vnet1`.
-2. Look up `DASH_ROUTING_TYPE:vnet`. The value for `vnet` is `maprouting`.
-3. Look up `DASH_VNET_MAPPING_TABLE:Vnet1:10.1.1.1`. 
+3. Look up `DASH_ROUTING_TYPE:vnet`. The value for `vnet` is `maprouting`.
+4. Look up `DASH_VNET_MAPPING_TABLE:Vnet1:10.1.1.1`. 
    1. The routing for `routing` is `vnet_encap`.
-4. Perform encap using the Public Address (PA) as specified by the
-   `underlay_ip`=`101.1.2.3` and `mac_address`=`F922839922A2`. 
-5. Route the packet. 
+5. Perform encap using the Public Address (PA) as specified by the `underlay_ip`=`101.1.2.3`. 
+6. Route the packet. 
+
+## Routing a packet to address 10.1.0.1
+
+Using the previous configuration, let's analyze the steps involved in routing a
+packet destined to `10.1.0.1`. Below are the processing pipeline (lookup) steps. 
+
+![routing-packet-10.1.0.1](./images/routing-packet-10.1.0.1.svg)
+
+<figcaption><i>Figure 5 - Routing a packet to 10.1.0.1</i></figcaption> <br/><br/>
+
+1. Perform LPM lookup. 
+2. Select routing table `DASH_ROUTE_TABLE:10.1.0.0/24`. The action is `vnet` and the value is `Vnet1`; and the `overlay_ip`=`10.0.0.6`. 
+3. Look up `DASH_ROUTING_TYPE:vnet`. The value for `vnet` is `maprouting`.
+4. Look up `DASH_VNET_MAPPING_TABLE:Vnet1:10.0.0.6`. 
+   1. The routing for `routing` is `vnet_encap`.
+5. Perform encap using the Public Address (PA) as specified by the `underlay_ip`=`2601:12:7a:1::1234`. 
+6. Route the packet. 
 
 <!-- 
 ## VM to VM communication in VNET example 2
