@@ -128,8 +128,8 @@ In the outbound flow, the criteria listed below are applied.
 
 ## VM to VM communication in VNET example
 
-The configuration example shown below defines the values for VNET, ENI, routing types,
-match/action tables, and routing tables.
+The configuration example shown below defines the values for VNET, ENI, routing
+types, match/action tables, and routing tables.
 
 
 ### Configuration example
@@ -230,13 +230,13 @@ DASH_VNET_MAPPING_TABLE:Vnet1:10.1.1.1: {
 }
 ```
 
-The next sections describe the lookup behavior in the outbound direction. 
-For the inbound direction, after LPM/ACL lookup, the pipeline uses the
-`underlay_ip` as specified in the ENI table to Vxlan encapsulate the packet. ??
+The next sections describe the lookup behavior in the outbound direction. For
+the inbound direction, after LPM/ACL lookup, the pipeline uses the `underlay_ip`
+as specified in the ENI table to Vxlan encapsulate the packet. ??
 
-### Packet destined to 10.1.1.1
+### Routing a packet destined to address 10.1.1.1
 
-Using the previous configuration, let's analyze the lookups involved in routing a
+Using the previous configuration, let's analyze the steps involved in routing a
 packet destined to `10.1.1.1`. Below are the tables and types involved in the
 lookup steps. 
 
@@ -264,8 +264,8 @@ The following are the processing pipeline (lookup) steps:
 
 <figcaption><i>Figure 5 - Example LPM lookup steps</i></figcaption> <br/><br/>
 
-1. LPM lookup hits the routing table `DASH_ROUTE_TABLE:10.1.0.0/16`. 
-The action is `vnet` and the value is `Vnet1`.
+1. LPM lookup hits the routing table `DASH_ROUTE_TABLE:10.1.0.0/16`. The action
+is `vnet` and the value is `Vnet1`.
 2. Look up the `DASH_ROUTING_TYPE:vnet`. The value for `vnet` is `maprouting`.
 3. Look up the `DASH_VNET_MAPPING_TABLE:Vnet1:10.1.1.1`. 
    1. The routing for `maprouting` is `vnet_encap`.
