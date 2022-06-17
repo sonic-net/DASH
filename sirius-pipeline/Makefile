@@ -5,7 +5,7 @@ PWD := $(shell pwd)
 # Default Docker image, override from env var
 DOCKER_IMG ?=chrissommers/dash-bmv2:latest
 
-# Set to -d for CI mode
+# Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
 
 # Should override --name in make targets
@@ -30,9 +30,8 @@ bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:
 	    -o bmv2/sirius_pipeline.bmv2 \
 	    --p4runtime-files bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.json,bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.txt
 
-clean:
+clean:sai-clean
 	sudo rm -rf bmv2/sirius_pipeline.bmv2
-	sudo rm -rf SAI/lib
 	sudo make -C tests/vnet_out clean
 
 dash-shell:
@@ -56,15 +55,20 @@ run-switch:
 	    --no-p4
 
 sai:
-	# Generate SAI library headers and implementation
+	@echo "Generate SAI library headers and implementation..."
 	$(DOCKER_RUN) \
 		--name build_sai-$(USER) \
-		-v $(PWD)/..:/dash \
-		-w /dash $(DOCKER_IMG) \
-	    sirius-pipeline/SAI/generate_dash_api.sh
-	# build libsai.so
+		-w /SAI $(DOCKER_IMG) \
+	    ./generate_dash_api.sh
+	@echo "build libsai.so..."
 	$(DOCKER_RUN) -w /SAI/lib $(DOCKER_IMG) \
 	    make
+
+sai-clean:
+	@echo "Restoring SAI subdirectories to baseline..."
+	rm -rf SAI/SAI/inc SAI/SAI/experimental SAI/SAI/meta
+	cd SAI/SAI && git checkout -- inc experimental meta
+	sudo rm -rf SAI/lib
 
 test:
 	$(DOCKER_RUN) \

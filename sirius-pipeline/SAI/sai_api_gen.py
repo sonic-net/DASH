@@ -5,7 +5,6 @@ try:
     import json
     import argparse
     import shutil
-    from git import Repo
     from jinja2 import Template, Environment, FileSystemLoader
 except ImportError as ie:
     print("Import failed for " + ie.name)
@@ -324,9 +323,7 @@ parser = argparse.ArgumentParser(description='P4 SAI API generator')
 parser.add_argument('filepath', type=str, help='Path to P4 program RUNTIME JSON file')
 parser.add_argument('apiname', type=str, help='Name of the new SAI API')
 parser.add_argument('--print-sai-lib', type=bool)
-parser.add_argument('--sai-git-url', type=str, default='https://github.com/Opencomputeproject/SAI')
 parser.add_argument('--ignore-tables', type=str, default='', help='Comma separated list of tables to ignore')
-parser.add_argument('--sai-git-branch', type=str, default='master')
 parser.add_argument('--overwrite',  type=bool, default=False, help='Restore SAI subdirectories')
 args = parser.parse_args()
 
@@ -334,24 +331,6 @@ if not os.path.isfile(args.filepath):
     print('File ' + args.filepath + ' does not exist')
     exit(1)
 
-"""
-if os.path.exists('./SAI'):
-    if args.overwrite == True:
-        # Delete and restore baseline SAI distro directories which get modified by this script
-        # It's more efficient that recloning entire SAI repo; fetches from SAI submodule already stored locally under .git/
-        # TODO - do this in main Makefile outside of container
-        print ('Deleting modified SAI directories inc/, meta/, experimental/ prior to restoral...')
-        shutil.rmtree('./SAI/inc', ignore_errors=True)
-        shutil.rmtree('./SAI/meta', ignore_errors=True)
-        shutil.rmtree('./SAI/experimental', ignore_errors=True)
-        # This will pull in just needed directories from local .git/
-        print ('Restoring SAI directories inc/, meta/, experimental/ ...')
-        repo = Repo("SAI")
-        repo.git.checkout("--", "inc", "meta", "experimental")
-else:
-    print('Directory ./SAI is missing, check Git submodule configuration')
-    exit(1)
-"""
 if os.path.exists('./lib'):
     if args.overwrite == False:
         print('Directory ./lib already exists. Please remove in order to proceed')

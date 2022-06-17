@@ -64,3 +64,13 @@ Run the traffic tests:
 ```
 make run-ixiac-test
 ```
+
+# Developer Workflows
+
+## Committing new code
+
+Since the SAI/SAI diretory gets modified in place when bmv2 SAI artifacts are generated, it will "taint" the SAI/SAI submodule and appear as "dirty" when you invoke `git status`. You do not want to check in changes to the SAI/SAI submodule. This makes it inconvenient to  do `git commit -a`. An easy remedy is to restore the SAI/SAI directory to pristine state as follows:
+```
+make sai-clean
+```
+Then you can do git status, git commit -a etc. and not involve the modified SAI/SAI submodule.

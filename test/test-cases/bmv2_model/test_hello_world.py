@@ -31,11 +31,13 @@ def test_udp_unidirectional():
 
     # configure packet size, rate and duration for both flows
     f1.size.fixed = 128
+    pkt_count=1000
+    pps=1000
     for f in cfg.flows:
-        # send 1000 packets and stop
-        f.duration.fixed_packets.packets = 1000
-        # send 1000 packets per second
-        f.rate.pps = 1000
+        # send pkt_count packets and stop
+        f.duration.fixed_packets.packets = pkt_count
+        # send pps packets per second
+        f.rate.pps = pps
 
     # configure packet with Ethernet, IPv4 and UDP headers for both flows
     eth1, ip1, udp1 = f1.packet.ethernet().ipv4().udp()
