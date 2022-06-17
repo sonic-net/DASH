@@ -50,5 +50,5 @@ Any use of third-party trademarks or logos are subject to those third-party's po
 
 <!-- dash icon -->
 <div align="center">
-<img src="documentation/images/icons/dash-icon-xlarge.png" style="align:center;"/>
+<img src="documentation/images/icons/dash-icon-medium.svg" style="align:center;"/>
 <div/> 
