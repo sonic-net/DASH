@@ -18,6 +18,8 @@ Last update: 06/09/2022
   - [Configuration example](#configuration-example)
   - [Routing a packet to address 10.1.1.1](#routing-a-packet-to-address-10111)
 - [Routing a packet to address 10.1.0.1](#routing-a-packet-to-address-10101)
+- [Routing a packet to address 30.0.0.1](#routing-a-packet-to-address-30001)
+- [Routing a packet to address 10.2.5.1](#routing-a-packet-to-address-10251)
 - [Appendix](#appendix)
   - [VNET to VNET without DASH optimization](#vnet-to-vnet-without-dash-optimization)
 - [References](#references)
@@ -256,12 +258,38 @@ packet destined to `10.1.0.1`. Below are the processing pipeline (lookup) steps.
 <figcaption><i>Figure 5 - Routing a packet to 10.1.0.1</i></figcaption> <br/><br/>
 
 1. Perform LPM lookup. 
-2. Select routing table `DASH_ROUTE_TABLE:10.1.0.0/24`. The action is `vnet` and the value is `Vnet1`; and the `overlay_ip`=`10.0.0.6`. 
+2. Select routing table `DASH_ROUTE_TABLE:10.1.0.0/24`. The action type is `vnet` and the value is `Vnet1`; and the `overlay_ip`=`10.0.0.6`. 
 3. Look up `DASH_ROUTING_TYPE:vnet`. The value for `vnet` is `maprouting`.
 4. Look up `DASH_VNET_MAPPING_TABLE:Vnet1:10.0.0.6`. 
    1. The routing for `routing` is `vnet_encap`.
 5. Perform encap using the Public Address (PA) as specified by the `underlay_ip`=`2601:12:7a:1::1234`. 
-6. Route the packet. 
+6. Route the packet.  
+
+## Routing a packet to address 30.0.0.1
+
+Using the previous configuration, let's analyze the steps involved in routing a
+packet destined to `30.0.0.1`. Below are the processing pipeline (lookup) steps. 
+
+![routing-packet-30.0.0.1](./images/routing-packet-30.0.0.1.svg)
+
+<figcaption><i>Figure 6 - Routing a packet to 30.0.0.1</i></figcaption> <br/><br/>
+
+1. Perform LPM lookup. 
+2. Select routing table `DASH_ROUTE_TABLE:30.0.0.0/16`. The `action_type` is `direct`.
+3. Route the packet directly without any encap.  
+
+## Routing a packet to address 10.2.5.1
+
+Using the previous configuration, let's analyze the steps involved in routing a
+packet destined to `10.2.5.1`. Below are the processing pipeline (lookup) steps. 
+
+![routing-packet-30.0.0.1](./images/routing-packet-10.2.5.1.svg)
+
+<figcaption><i>Figure 7 - Routing a packet to 10.2.5.1</i></figcaption> <br/><br/>
+
+1. Perform LPM lookup. 
+2. Select routing table `DASH_ROUTE_TABLE:10.2.5.0/24`. The `action_type` is `drop`.
+3. Drop the packet.  
 
 <!-- 
 ## VM to VM communication in VNET example 2
