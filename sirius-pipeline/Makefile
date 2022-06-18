@@ -85,6 +85,8 @@ sai-test:
 	    make
 
 timeout?=5
+
+run-test:run-sai-test
 run-sai-test:
 	# Ensure P4Runtime server is listening
 	t=$(timeout); \
