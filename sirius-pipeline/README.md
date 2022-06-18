@@ -68,14 +68,14 @@ Follow instructions for [Install docker-compose](#install-docker-compose), then:
 make run-ixiac-test    # UDP traffic, by default it echos back
 ```
 # CI (Continuous Integration) Via Git Actions
-This project contains [Git Actions](https://docs.github.com/en/actions) to perform continuous integration whenever certain actions are performed:
+This project contains [Git Actions](https://docs.github.com/en/actions) to perform continuous integration whenever certain actions are performed. These are specified in YAML files under [.github/workflows](../.github/workflows) directory.
 
-* A Commit or Pull Request of P4 code, Makefiles, scripts, etc.  will trigger a build of all artifacts and run tests, all in the Azure cloud. Status can be viewed on the Github repo using the "Actions" link in the top of the page. This will be true for forked repos as well as the main Azure/DASH repo.
+* [sirius-ci.yml](../.github/workflows/sirius-ci.yml): A Commit or Pull Request of P4 code, Makefiles, scripts, etc.  will trigger a build of all artifacts and run tests, all in the Azure cloud. Status can be viewed on the Github repo using the "Actions" link in the top of the page. This will be true for forked repos as well as the main Azure/DASH repo.
 
   Two tests are currently executed in the CI pipeline. These will be increased extensively over time:
   * The `make run-test` target does a trivial SAI access using a c++ client program. This verifies the libsai-to-P4runtime adaptor over a socket. The test program acts as a P4Runtime client, and the bmv2 simple_switch process is the server.
   * The `make run-ixiac-test` target spins up a two-port software (DPDK) traffic-generator engine using the free version of [ixia-c](https://github.com/open-traffic-generator/ixia-c) controlled by a Python [snappi](https://github.com/open-traffic-generator/snappi) client. Using this approach allows the same scripts to eventually be scaled to line-rate using hardware-based traffic generators.
-
+* [sirius-dev-docker.yml](../.github/workflows/sirius-dev-docker.yml): A commit of the [Dockerfile](Dockerfile) will trigger the [make docker](#build-docker-dev-container) build target and rebuild the `dash-bmv2` docker container. It will not publish it though, so it's ephemeral and disappears when the Git runner terminates. The main benefit of this is it may run much faster in the cloud than locally, allowing you to test for a successful build of changes more quickly.
 * The CI badge will be updated according to the CI build status and appear on the front page of the repo as well as the top-level README page. You can click on this icon to drill down into the Git Actions history and view pass/fail details. Typical icons appear below:
 
 ![CI-badge-passing.svg](../assets/CI-badge-passing.svg)  
@@ -91,9 +91,9 @@ A typical "Failed" CI log appears below. You can click on the arrow next to the 
 # Detailed Build Workflow
 This explains the various build steps in more details. The CI pipeline does most of these steps as well. All filenames and directories mentioned in the sections below are relative to the `sirius-pipeline` directory (containing this README) unless otherwise specified. 
 
-Building starts by retrieving a pre-built `dash-bmv2` Docker image from a Docker registry ,then executing a series of targets in the main [Makefile](Makefile) via `make <target>`. It is designed to be run either manually; via user-supplied scripts; or from a CI pipeline in the cloud.
+Building starts by retrieving a pre-built `dash-bmv2` Docker image from a Docker registry, then executing a series of targets in the main [Makefile](Makefile) via `make <target>`. It is designed to be run either manually; via user-supplied scripts; or from a CI pipeline in the cloud.
 
-See the diagram below. You can read the [Dockerfile](Dockerfile) and all `Makefile`s to get a deeper understanding of the build process.
+See the diagram below. You can read the [Dockerfile](Dockerfile) and all `Makefiles` to get a deeper understanding of the build process.
 
 ## Build Workflow Diagram
 
@@ -113,7 +113,7 @@ In addition it downloads several other OSS projects such as, `grpc`, `p4c`, etc.
 >**TODO**  Build official versions and publish to a public Docker registry, and retrieve on demand.
 
 ## Optional - Manually Pull the pre-built Docker image
-This is optional, the Docker image will be pulled automatically the first time you run `make p4`. This image contains all the build- and run-time components and packages. You can also do this to restore an image. If you want to use a substitue image, tag it with `dash-bmv2:latest`.
+This is optional, the Docker image will be pulled automatically the first time you run `make p4`. This image contains all the build- and run-time components and packages. You can also do this to restore an image. If you want to use a substitute image, tag it with `dash-bmv2:latest`.
 
 ```
 make docker-pull
@@ -152,7 +152,7 @@ make sai
 This target generates SAI headers from the P4Info which was described above. It uses [Jinja2](https://jinja.palletsprojects.com/en/3.1.x/) which renders [SAI/templates](SAI/templates) into c++ source code for the SAI headers corresponding to the DASH API as defined in the P4 code. It then compiles this code into a shared library `libsai.so` which will later be used to link to a test server (Thrift) or `syncd` daemon for production.
 
 This consists of two main steps
-* Generate the SAI headers and implementation code via [SAI/generate_dash_api.sh](SAI/generate_dash_api.sh) script, which is merely a wrapper which calls the real workhorse: [SAI/sai_api_gen.py](SAI/sai_api_gen.py). This uses templates stored in `SAI/templates/`.
+* Generate the SAI headers and implementation code via [SAI/generate_dash_api.sh](SAI/generate_dash_api.sh) script, which is merely a wrapper which calls the real workhorse: [SAI/sai_api_gen.py](SAI/sai_api_gen.py). This uses templates stored in [SAI/templates](SAI/templates).
 
   Headers are emitted into the imported `SAI` submodule (under `SAI/SAI`) under its `inc`, `meta` and `experimental` directories.
 
@@ -161,11 +161,11 @@ This consists of two main steps
 
 ### Restore SAI Submodule
 As mentioend above, the `make sai` target generates code into the `SAI` submodule (e.g. at `./SAI/SAI`). This "dirties" what is otherwise a cloned Git repo from `opencomputeproject/SAI`.
-
-To ensure the baseline code is restored prior to each run, the modified directories under SAI are deleted, then restored via `git checkout -- <path, path, ...>` . This retrieves the subtrees from the SAI submodule, which is stored intact in the local project's Git repo (e.g. under `DASH/.git/modules/sirius-pipeline/SAI/SAI`)
 ```
 make sai-clean
 ```
+
+To ensure the baseline code is restored prior to each run, the modified directories under SAI are deleted, then restored via `git checkout -- <path, path, ...>` . This retrieves the subtrees from the SAI submodule, which is stored intact in the local project's Git repo (e.g. under `DASH/.git/modules/sirius-pipeline/SAI/SAI`)
 
 ## Build SAI client test program(s)
 This compiles a simple libsai client program to verify the libsai-to-p4runtime-to-bmv2 stack. It performs table access(es).
@@ -204,7 +204,7 @@ See also:
 * https://www.cyberithub.com/how-to-install-docker-compose-on-ubuntu-20-04-lts-step-by-step/
   
 
-Installation of `docker-compose` has to be done just once. You can use another technique based on your platform and preferences. The following will download and install a linux executable under `/usr/local/bin`. You should have a path to this directory. You can edit the below command to locate it somewhere else as desired, just change the path as needed.
+Installation of `docker-compose` has to be done just once. You can use another technique based on your platform and preferences. The following will download and install a linux executable under `/usr/local/bin`. You should have a PATH to this directory. You can edit the below command to locate it somewhere else as desired, just change the path as needed.
 
 >**NOTE** Use docker-compose 1.29.2 or later!
 
@@ -220,7 +220,7 @@ docker-compose version 1.29.2, build 5becea4c
 ```
 
 ## Run ixia-x traffic-generator test
-From a different terminal, run ixiac traffic tests. The first time this runs, it will pull Python packages for the [snappi](https://github.com/open-traffic-generator/snappi) client as well as Docker images for the [ixia-c](https://github.com/open-traffic-generator/ixia-c) controller and traffic engines.
+From a different terminal, run ixia-c traffic tests. The first time this runs, it will pull Python packages for the [snappi](https://github.com/open-traffic-generator/snappi) client as well as Docker images for the [ixia-c](https://github.com/open-traffic-generator/ixia-c) controller and traffic engines.
 ```
 make run-ixiac-test
 ```
