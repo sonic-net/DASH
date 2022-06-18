@@ -61,9 +61,7 @@ RUN cd / && git clone --depth=1 -b v1.43.2 https://github.com/google/grpc.git &&
     cd cmake/build && \
     cmake -DBUILD_SHARED_LIBS=ON -DgRPC_INSTALL=ON --parallel 1 ../.. && \
     make  && \
-    make install && \
-    cd .. && \
-    [ X${IMAGE_TYPE} .eq "Xbuild" ] &&  rm -rf grpc
+    make install
 
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
@@ -106,9 +104,7 @@ RUN apt update && \
  	cd build && \
  	cmake --parallel 1 .. && \
  	make && \
- 	make install && \
-     cd .. && \
-    [ X${IMAGE_TYPE} .eq "Xbuild" ] &&  rm -rf p4c
+ 	make install
 
 ENV BM_RUNTIME_DEPS libboost-program-options1.71.0 \
                     libboost-system1.71.0 \
@@ -130,9 +126,7 @@ RUN apt-get update -qq && \
     ./autogen.sh && \
     ./configure --with-pdfixed --with-pi --with-stress-tests --enable-debugger --enable-coverage --enable-Werror && \
     make  && \
-    make install && \
-    cd .. && \
-    [ X${IMAGE_TYPE} .eq "Xbuild" ] &&  rm -rf behavioral-model
+    make install
 
 WORKDIR /
 

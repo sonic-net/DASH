@@ -23,7 +23,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
   - [Configure networking for bmv2](#configure-networking-for-bmv2)
   - [Run software switch](#run-software-switch)
   - [Run simple SAI library test](#run-simple-sai-library-test)
-  - [Install Docker-compose on your system](#install-docker-compose-on-your-system)
+  - [Install docker-compose](#install-docker-compose)
   - [Run ixia-x traffic-generator test](#run-ixia-x-traffic-generator-test)
   - [About ixia-x traffic-generator](#about-ixia-x-traffic-generator)
 - [Developer Workflows](#developer-workflows)
@@ -62,6 +62,9 @@ make run-switch     # will run in foreground with logging
 Use a different terminal:
 ```
 make run-test          # Simple SAI table accessor, no traffic
+```
+Follow instructions for [Install docker-compose](#install-docker-compose), then:
+```
 make run-ixiac-test    # UDP traffic, by default it echos back
 ```
 # CI (Continuous Integration) Via Git Actions
@@ -193,7 +196,7 @@ From a different terminal, run SAI client tests.
 make run-test
 ```
 
-## Install Docker-compose on your system
+## Install docker-compose
 It is assumed you already have Docker on your system.
 The `docker-compose` command is used to orchestrate the ixia-c containers. You need to install it to run the ixia-c test scripts (`ixia-c` itself doesn't require docker-compose; it's merely convenient for instantiating it using a declarative `.yml` file).
 
