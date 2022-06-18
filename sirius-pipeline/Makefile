@@ -1,5 +1,7 @@
 SHELL = /bin/bash
 
+all:p4 sai test
+
 PWD := $(shell pwd)
 
 # Default Docker image, override from env var
@@ -16,6 +18,10 @@ DOCKER_RUN := docker run \
 	--network=host \
 	--rm \
 	$(DOCKER_FLAGS)
+
+SAI/SAI:
+	@echo "Initializing SAI submodule..."
+	git submodule update --init
 
 #shorthand:
 p4:bmv2/sirius_pipeline.bmv2/sirius_pipeline.json
@@ -54,7 +60,7 @@ run-switch:
 	    --log-console \
 	    --no-p4
 
-sai:
+sai: SAI/SAI p4
 	@echo "Generate SAI library headers and implementation..."
 	$(DOCKER_RUN) \
 		--name build_sai-$(USER) \
@@ -70,14 +76,16 @@ sai-clean:
 	cd SAI/SAI && git checkout -- inc experimental meta
 	sudo rm -rf SAI/lib
 
-test:
+test:sai-test
+
+sai-test:
 	$(DOCKER_RUN) \
 	    --name build-test-$(USER) \
 		-w /tests/vnet_out  $(DOCKER_IMG) \
 	    make
 
 timeout?=5
-run-test:
+run-sai-test:
 	# Ensure P4Runtime server is listening
 	t=$(timeout); \
 	while [ $${t} -ge 1 ]; do \

@@ -61,7 +61,9 @@ RUN cd / && git clone --depth=1 -b v1.43.2 https://github.com/google/grpc.git &&
     cd cmake/build && \
     cmake -DBUILD_SHARED_LIBS=ON -DgRPC_INSTALL=ON --parallel 1 ../.. && \
     make  && \
-    make install
+    make install && \
+    cd .. && \
+    [ X${IMAGE_TYPE} .eq "Xbuild" ] &&  rm -rf grpc
 
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
@@ -79,11 +81,8 @@ RUN apt-get update && \
     make install
 
 
-# RUN git clone https://github.com/marian-pritsak/DASH-1.git && \
 RUN pip install gitpython
 RUN pip install jinja2
-# ./sai_api_gen.py rt_sirius.json --ignore-tables=appliance,eni_meter,slb_decap         --sai-git-url=https://github.com/marian-pritsak/SAI.git         --sai-git-branch=base         --impl_filepath=./impl.cpp         dash 
-#g++ -I./SAI/inc/ -I./SAI/experimental/ impl.cpp -L/usr/local/lib/ -lpiprotogrpc -lpiprotobuf -lprotobuf -lgrpc++ -lpiall -lpi_dummy
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -92,7 +91,7 @@ RUN apt update && \
     apt install -y cmake automake libjudy-dev libgmp-dev libpcap-dev \
     libboost-dev libboost-test-dev libboost-program-options-dev libboost-system-dev \
     libboost-filesystem-dev libboost-thread-dev libevent-dev libtool flex bison pkg-config g++ libssl-dev && \
-    apt-get install -y cmake g++ git automake libtool libgc-dev bison flex \
+    apt-get install -y cmake g++  automake libtool libgc-dev bison flex \
 	    libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev \
 	    libboost-graph-dev llvm pkg-config python python-ply python3-pip \
 	    tcpdump && \
@@ -107,7 +106,9 @@ RUN apt update && \
  	cd build && \
  	cmake --parallel 1 .. && \
  	make && \
- 	make install
+ 	make install && \
+     cd .. && \
+    [ X${IMAGE_TYPE} .eq "Xbuild" ] &&  rm -rf p4c
 
 ENV BM_RUNTIME_DEPS libboost-program-options1.71.0 \
                     libboost-system1.71.0 \
@@ -117,8 +118,6 @@ ENV BM_RUNTIME_DEPS libboost-program-options1.71.0 \
                     libpcap0.8 \
                     python3 \
                     python-is-python3
-
-RUN apt-get update && apt-get install -y git
 
 WORKDIR /
 
@@ -131,7 +130,9 @@ RUN apt-get update -qq && \
     ./autogen.sh && \
     ./configure --with-pdfixed --with-pi --with-stress-tests --enable-debugger --enable-coverage --enable-Werror && \
     make  && \
-    make install
+    make install && \
+    cd .. && \
+    [ X${IMAGE_TYPE} .eq "Xbuild" ] &&  rm -rf behavioral-model
 
 WORKDIR /
 

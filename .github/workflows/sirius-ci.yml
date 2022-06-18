@@ -37,14 +37,14 @@ jobs:
       run: DOCKER_FLAGS=$docker_fg_flags make p4
     - name: Generate SAI API
       run: DOCKER_FLAGS=$docker_fg_flags make sai
-    - name: Build vnet_out test, verifies libsai binding to c++
+    - name: Build libsai c++ tests
       run: DOCKER_FLAGS=$docker_fg_flags make test
     - name: Prepare network
       run: DOCKER_FLAGS=$docker_fg_flags make network
     - name: Run P4 software switch (bmv2)
       run: DOCKER_FLAGS=$docker_bg_flags make run-switch
-    - name: Test SAI
-      run: DOCKER_FLAGS=$docker_fg_flags make run-test
+    - name: Test SAI library
+      run: DOCKER_FLAGS=$docker_fg_flags make run-sai-test
     - name: Ixia-c Traffic Generator test
       run: DOCKER_FLAGS=$docker_flags make run-ixiac-test
       
