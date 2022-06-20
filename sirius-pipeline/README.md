@@ -4,6 +4,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 - [Sirius Pipeline](#sirius-pipeline)
 - [TODO](#todo)
 - [Quick-start](#quick-start)
+  - [Prerequisites](#prerequisites)
   - [Get the right branch](#get-the-right-branch)
   - [Build Artifacts](#build-artifacts)
   - [Run bmv2 software switch](#run-bmv2-software-switch)
@@ -40,6 +41,10 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 * Make a smaller Docker image by stripping unneeded sources (e.g. grpc, p4c), apt caches etc. Current 12G image is large. Possibly use staged docker builds to permit precise copying of only necessary components.
 
 # Quick-start
+## Prerequisites
+* Ubuntu 20.04 bare-metal or VM (as tested - please let us know if other OSes work for you!)
+* Docker
+* [Install docker-compose](#install-docker-compose) 1.29.2 or later (needed only to [Run ixia-x traffic-generator test](#run-ixia-x-traffic-generator-test)).
 ## Get the right branch
 
 **Optional** - if you require a particular dev branch.
