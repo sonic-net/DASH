@@ -32,6 +32,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
     - [Committing new code - submodule considerations](#committing-new-code---submodule-considerations)
 
 # TODO
+* **BUG** CI Badge for failed builds displays as "Passing"
 * Use modified bmv2 which adds stateful processing. Current version is vanilla bmv2. This will require building it instead of using a prebuilt bmv2 docker image, see [Build Docker dev container](#build-docker-dev-container).
 * Integrate SAI-thrift server from [OCP/SAI](https://github.com/opencomputeproject/SAI)
 * Add DASH sevice test cases including SAI-thrift pipeline configuration and traffic tests
