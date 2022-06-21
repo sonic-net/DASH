@@ -5,6 +5,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 - [TODO](#todo)
 - [Quick-start](#quick-start)
   - [Prerequisites](#prerequisites)
+  - [Clone this repo](#clone-this-repo)
   - [Get the right branch](#get-the-right-branch)
   - [Build Artifacts](#build-artifacts)
   - [Run bmv2 software switch](#run-bmv2-software-switch)
@@ -40,12 +41,25 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 * Use Azure Container Registry (ACR) for Docker images instead of temporary Dockerhub registry
 * Use dedicated higher-performance runners instead of free Azure 2-core instances
 * Make a smaller Docker image by stripping unneeded sources (e.g. grpc, p4c), apt caches etc. Current 12G image is large. Possibly use staged docker builds to permit precise copying of only necessary components.
+* Explore use of [virtualenv](https://virtualenv.pypa.io/en/latest/) to avoid contaiminating the local environment with this project's particular Python requirements.
+* Add a `make network-clean` target to undo the effect of `make network`
 
 # Quick-start
 ## Prerequisites
 * Ubuntu 20.04 bare-metal or VM (as tested - please let us know if other OSes work for you!)
 * Docker
 * [Install docker-compose](#install-docker-compose) 1.29.2 or later (needed only to [Run ixia-x traffic-generator test](#run-ixia-x-traffic-generator-test)).
+
+## Clone this repo
+```
+git clone <repo URL>
+```
+>**NOTE** You *don't* need to use `--recursive` even though we use git submodules; the `Makefile` takes care of initializing any submodules the first time (e.g. `SAI`) and avoids unnecessary recursion, which is slow but harlmess.
+
+If you prefer initializing the submodule manually, you can perform this step after `git clone`:
+```
+git submodule update --init # NOTE --recursive not needed (yet)
+```
 ## Get the right branch
 
 **Optional** - if you require a particular dev branch.
