@@ -2,7 +2,7 @@
 This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://github.com/p4lang/behavioral-model) from [p4lang](https://github.com/p4lang).
 
 - [Sirius Pipeline](#sirius-pipeline)
-- [TODO](#todo)
+- [TODOs](#todos)
 - [Quick-start](#quick-start)
   - [Prerequisites](#prerequisites)
   - [Clone this repo](#clone-this-repo)
@@ -11,6 +11,8 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
   - [Run bmv2 software switch](#run-bmv2-software-switch)
   - [Run tests](#run-tests)
 - [CI (Continuous Integration) Via Git Actions](#ci-continuous-integration-via-git-actions)
+    - [CI Build log - Passing example](#ci-build-log---passing-example)
+    - [CI Build log - Fail example](#ci-build-log---fail-example)
 - [Detailed Build Workflow](#detailed-build-workflow)
   - [Build Workflow Diagram](#build-workflow-diagram)
   - [Build Docker dev container](#build-docker-dev-container)
@@ -30,13 +32,16 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
   - [About ixia-x traffic-generator](#about-ixia-x-traffic-generator)
 - [Installing Prequisites](#installing-prequisites)
   - [Install docker](#install-docker)
+  - [Install Python 3](#install-python-3)
+  - [Install pip3](#install-pip3)
   - [Install docker-compose](#install-docker-compose)
 - [Developer Workflows](#developer-workflows)
   - [About Git Submodules](#about-git-submodules)
-    - [Committing new code - submodule considerations](#committing-new-code---submodule-considerations)
+    - [Why use a submodule?](#why-use-a-submodule)
+    - [Typical Workflow: Committing new code - ignoring SAI submodule](#typical-workflow-committing-new-code---ignoring-sai-submodule)
+    - [Committing new SAI submodule version](#committing-new-sai-submodule-version)
 
-# TODO
-* **BUG** CI Badge for failed builds displays as "Passing"
+# TODOs
 * Mystery - why does vnet_out test via `make run-test` need to be run to allow `run-ixiac-test` to pass?
 * Use modified bmv2 which adds stateful processing. Current version is vanilla bmv2. This will require building it instead of using a prebuilt bmv2 docker image, see [Build Docker dev container](#build-docker-dev-container).
 * Integrate SAI-thrift server from [OCP/SAI](https://github.com/opencomputeproject/SAI)
@@ -107,15 +112,27 @@ This project contains [Git Actions](https://docs.github.com/en/actions) to perfo
 
   ![CI-badge-passing.svg](../assets/CI-badge-passing.svg)  ![CI-badge-failing.svg](../assets/CI-badge-failing.svg)  
 
+### CI Build log - Passing example
 
 A typical "Good" CI log appears below, this can be watched in real-time:
 
 ![CI-build-log-ok.png](../assets/CI-build-log-ok.png)  
 
-A typical "Failed" CI log appears below. You can click on the arrow next to the red circled "X" and see details. In this example there is a (deliberate) P4 syntax error.
+### CI Build log - Fail example
+A typical "Failed" CI log appears below. You can click on the arrow next to the red circled "X" and see details. In this example there is a (deliberate) P4 coding error.
 
-![CI-build-log-fail.png](../assets/CI-build-log-fail.png)  
+![CI-build-log-fail.png](../assets/CI-build-log-fail.png)
 
+Let's drill down into the Build P4 step which failed. We see a a bad statement. (There is no `#import` keyword for P4 or the C preprocessor).
+```
+#import DOH.h
+```
+
+![CI-build-log-fail-p4-drilldown.png](../assets/CI-build-log-fail-p4-drilldown.png)  
+
+The main README for this repo shows the CI failing badge:
+
+![CI-fail-README-badge](../assets/CI-fail-README-badge.png)
 # Detailed Build Workflow
 This explains the various build steps in more details. The CI pipeline does most of these steps as well. All filenames and directories mentioned in the sections below are relative to the `sirius-pipeline` directory (containing this README) unless otherwise specified. 
 
@@ -260,8 +277,27 @@ See also:
 ## Install docker
 Need for basically everythng to build/test sirius-pipeline.
 
-**TODO**
+See:
+* https://docs.docker.com/desktop/linux/install/
 
+## Install Python 3
+This is probably already installed in your Linux OS, but if not:
+
+See:
+* https://docs.python-guide.org/starting/install3/linux/
+
+```
+sudo apt install -y python3
+```
+  
+## Install pip3
+See:
+* https://pip.pypa.io/en/latest/installation/
+
+You can probably use the following command for most cases:
+```
+sudo apt install -y python3-pip
+```
 
 ## Install docker-compose
 It is assumed you already have Docker on your system.
@@ -285,49 +321,44 @@ To test installation, execute the following. The output on the second line is an
 docker-compose --version
 docker-compose version 1.29.2, build 5becea4c
 ```
-- [Sirius Pipeline](#sirius-pipeline)
-- [TODO](#todo)
-- [Quick-start](#quick-start)
-  - [Prerequisites](#prerequisites)
-  - [Clone this repo](#clone-this-repo)
-  - [Get the right branch](#get-the-right-branch)
-  - [Build Artifacts](#build-artifacts)
-  - [Run bmv2 software switch](#run-bmv2-software-switch)
-  - [Run tests](#run-tests)
-- [CI (Continuous Integration) Via Git Actions](#ci-continuous-integration-via-git-actions)
-- [Detailed Build Workflow](#detailed-build-workflow)
-  - [Build Workflow Diagram](#build-workflow-diagram)
-  - [Build Docker dev container](#build-docker-dev-container)
-  - [Optional - Manually Pull the pre-built Docker image](#optional---manually-pull-the-pre-built-docker-image)
-  - [Optional - expert - build a new Docker image](#optional---expert---build-a-new-docker-image)
-  - [Optional - Expert/Admin - Publish Docker Image](#optional---expertadmin---publish-docker-image)
-  - [Optional - expert - exec a container shell](#optional---expert---exec-a-container-shell)
-  - [Compile P4 Code](#compile-p4-code)
-  - [Build libsai.so adaptor library](#build-libsaiso-adaptor-library)
-    - [Restore SAI Submodule](#restore-sai-submodule)
-  - [Build SAI client test program(s)](#build-sai-client-test-programs)
-  - [Create veth pairs for bmv2](#create-veth-pairs-for-bmv2)
-  - [Run software switch](#run-software-switch)
-  - [Run simple SAI library test](#run-simple-sai-library-test)
-  - [Run ixia-x traffic-generator test](#run-ixia-x-traffic-generator-test)
-    - [About ixia-c components and setp/teardown](#about-ixia-c-components-and-setpteardown)
-  - [About ixia-x traffic-generator](#about-ixia-x-traffic-generator)
-- [Installing Prequisites](#installing-prequisites)
-  - [Install docker](#install-docker)
-  - [Install docker-compose](#install-docker-compose)
-- [Developer Workflows](#developer-workflows)
-  - [About Git Submodules](#about-git-submodules)
-    - [Committing new code - submodule considerations](#committing-new-code---submodule-considerations)
+
 # Developer Workflows
 ## About Git Submodules
 See also:
 * https://git-scm.com/book/en/v2/Git-Tools-Submodules
 * https://www.atlassian.com/git/tutorials/git-submodule#:~:text=A%20git%20submodule%20is%20a,the%20host%20repository%20is%20updated
 
-### Committing new code - submodule considerations
+### Why use a submodule?
+A Git submodule is like a symbolic link to another repo. It "points" to some other repo via a URL, and is also pinned to a specific revision of that repo. For example, the `DASH/sirius-pipeline/SAI` directory looks like this in Github. The `SAI @ fe69c82` means this is a submodule pointing to the SAI project (at the opencompute-project repo), in particular the `fe69c82` commit SHA.
 
-Since the SAI/SAI directory gets modified in place when bmv2 SAI artifacts are generated, it will "taint" the SAI/SAI submodule and appear as "dirty" when you invoke `git status`. You do not want to check in changes to the SAI/SAI submodule. This makes it inconvenient to  do `git commit -a`. An easy remedy is to restore the SAI/SAI directory to pristine state as follows:
+![sai-submodule-in-repo](../assets/sai-submodule-in-repo.png)
+
+Advantages of this approach:
+* Don't need to "manually" clone another repo used by this project
+* Precise configuration control - we want a specific revision, not "latest" which might break a DASH build if something under `SAI` changes.
+* It's a well-known practice; for example the `SAI` project and the `sonic-buildimage` projects both use suibmodules to great advantage.
+
+### Typical Workflow: Committing new code - ignoring SAI submodule
+
+>**NOTE:** You **do not want to check in changes to the SAI/SAI submodule** unless you're deliberately upgrading to a new commit level of the SAI submodule.
+
+Since the SAI/SAI directory gets modified in place when bmv2 SAI artifacts are generated, it will "taint" the SAI/SAI submodule and appear as "dirty" when you invoke `git status`. This makes it inconvenient to  do `git commit -a`, which will commit everything which has changed. An easy remedy is to restore the SAI/SAI directory to pristine state as follows:
 ```
 make sai-clean
 ```
 Then you can do git status, git commit -a etc. and not involve the modified SAI/SAI submodule.
+
+### Committing new SAI submodule version
+To upgrade to a newer version of `SAI`, for example following a SAI enhancement which the DASH project needs, or will benefit from, we need to change the commit SHA of the submodule. This requires the following steps, in abbreviated form:
+* Inside the `SAI/SAI` directory, pull the desired version of SAI, e.g. to get latest:
+  ```
+  git pull
+  ```
+* Go to the top level in the DASH project
+* Add the SAI submodule to the current commit stage; commit; and push:
+  ```
+  git add SAI/SAI
+  git commit [-a]
+  git push
+  ```
+  Since we haven't gone through this process yet, it is subject to more clarification or adjustments.
