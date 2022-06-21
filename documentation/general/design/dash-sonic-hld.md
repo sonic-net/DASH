@@ -518,91 +518,93 @@ Refer DASH documentation for the test plan.
 ## 3.6 Example configuration
 
 ```
-DASH_VNET:Vnet1: {
-    "vni": 45654,
-    "guid": "559c6ce8-26ab-4193-b946-ccc6e8f930b2"
-}
-
-DASH_ENI:F4939FEFC47E : { 
-    "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
-    "mac_address": "F4939FEFC47E",
-    "underlay_ip": 25.1.1.1,
-    "admin_state": "enabled",
-    "vnet": "Vnet1"
-}
-
-DASH_ROUTING_TYPE:vnet: [
+[
     {
-         "name": "action1", 
-         "action_type: "maprouting" 
-    }
-]
-
-DASH_ROUTING_TYPE:vnet_direct: [
-    {
-         "name": "action1", 
-         "action_type: "maprouting" 
-    }
-]
-
-DASH_ROUTING_TYPE:vnet_encap: [
-    {
-         "name": "action1",
-         "action_type: "staticencap",
-         "encap_type" "vxlan"
-    }
-]
-
-DASH_ROUTING_TYPE:privatelink: [
-    {
-         "name": "action1",
-         "action_type:"staticencap",
-         "encap_type":"vxlan"
+        "DASH_VNET:Vnet1": {
+            "vni": "45654",
+            "guid": "559c6ce8-26ab-4193-b946-ccc6e8f930b2"
+        },
+        "OP": "SET"
     },
     {
-         "name": "action2",
-         "action_type:"staticencap",
-         "encap_type":"nvgre",
-         "vni":100
+        "DASH_ENI:F4939FEFC47E": {
+	    "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
+	    "mac_address": "F4939FEFC47E",
+	    "underlay_ip": "25.1.1.1",
+	    "admin_state": "enabled",
+	    "vnet": "Vnet1"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTING_TYPE:vnet": {
+            "name": "action1",
+            "action_type": "maprouting"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTING_TYPE:vnet_direct": {
+            "name": "action1",
+            "action_type": "maprouting"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTING_TYPE:vnet_encap": {
+             "name": "action1",
+             "action_type": "staticencap",
+             "encap_type": "vxlan"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTE_TABLE:F4939FEFC47E:10.1.0.0/16": {
+            "action_type":"vnet",
+            "vnet":"Vnet1"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTE_TABLE:F4939FEFC47E:10.1.0.0/24": {
+            "action_type":"vnet_direct",
+            "vnet":"Vnet1",
+            "overlay_ip":"10.0.0.6"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTE_TABLE:F4939FEFC47E:10.2.5.0/24": {
+            "action_type":"drop"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_VNET_MAPPING_TABLE:Vnet1:10.0.0.6": {
+            "routing_type":"vnet_encap",
+            "underlay_ip":"2601:12:7a:1::1234",
+            "mac_address":"F922839922A2"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_VNET_MAPPING_TABLE:Vnet1:10.0.0.5": {
+            "routing_type":"vnet_encap",
+            "underlay_ip":"100.1.2.3",
+            "mac_address":"F922839922A2"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_VNET_MAPPING_TABLE:Vnet1:10.1.1.1": {
+            "routing_type":"vnet_encap",
+            "underlay_ip":"101.1.2.3",
+            "mac_address":"F922839922A2"
+        },
+        "OP": "SET"
     }
 ]
 
-DASH_ROUTE_TABLE:F4939FEFC47E:10.1.0.0/16: {
-    "action_type":"vnet",
-    "vnet":"Vnet1"
-}
-
-DASH_ROUTE_TABLE:F4939FEFC47E:10.1.0.0/24: {
-    "action_type":"vnet",
-    "vnet":"Vnet1",
-    "overlay_ip":"10.0.0.6"
-}
-
-DASH_ROUTE_TABLE:F4939FEFC47E:30.0.0.0/16: {
-    "action_type":"direct",
-}
-
-DASH_ROUTE_TABLE:F4939FEFC47E:10.2.5.0/24: {
-    "action_type":"drop",
-}
-
-DASH_VNET_MAPPING_TABLE:Vnet1:10.0.0.6: {
-    "routing_type":"vnet_encap",
-    "underlay_ip":2601:12:7a:1::1234,
-    "mac_address":F922839922A2
-}
-
-DASH_VNET_MAPPING_TABLE:Vnet1:10.0.0.5: {
-    "routing_type":"vnet_encap", 
-    "underlay_ip":100.1.2.3,
-    "mac_address":F922839922A2
-}
-
-DASH_VNET_MAPPING_TABLE:Vnet1:10.1.1.1: {
-    "routing_type":"vnet_encap", 
-    "underlay_ip":101.1.2.3,
-    "mac_address":F922839922A2
-}
 ```
 
 For the example configuration above, the following is a brief explanation of lookup behavior in the outbound direction:
