@@ -22,33 +22,40 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
   - [Build libsai.so adaptor library](#build-libsaiso-adaptor-library)
     - [Restore SAI Submodule](#restore-sai-submodule)
   - [Build SAI client test program(s)](#build-sai-client-test-programs)
-  - [Configure networking for bmv2](#configure-networking-for-bmv2)
+  - [Create veth pairs for bmv2](#create-veth-pairs-for-bmv2)
   - [Run software switch](#run-software-switch)
   - [Run simple SAI library test](#run-simple-sai-library-test)
-  - [Install docker-compose](#install-docker-compose)
   - [Run ixia-x traffic-generator test](#run-ixia-x-traffic-generator-test)
+    - [About ixia-c components and setp/teardown](#about-ixia-c-components-and-setpteardown)
   - [About ixia-x traffic-generator](#about-ixia-x-traffic-generator)
+- [Installing Prequisites](#installing-prequisites)
+  - [Install docker](#install-docker)
+  - [Install docker-compose](#install-docker-compose)
 - [Developer Workflows](#developer-workflows)
   - [About Git Submodules](#about-git-submodules)
     - [Committing new code - submodule considerations](#committing-new-code---submodule-considerations)
 
 # TODO
 * **BUG** CI Badge for failed builds displays as "Passing"
+* Mystery - why does vnet_out test via `make run-test` need to be run to allow `run-ixiac-test` to pass?
 * Use modified bmv2 which adds stateful processing. Current version is vanilla bmv2. This will require building it instead of using a prebuilt bmv2 docker image, see [Build Docker dev container](#build-docker-dev-container).
 * Integrate SAI-thrift server from [OCP/SAI](https://github.com/opencomputeproject/SAI)
 * Add DASH sevice test cases including SAI-thrift pipeline configuration and traffic tests
 * Build Docker image automatically when Dockerfile changes, publish and pull from permanent repo
 * Use Azure Container Registry (ACR) for Docker images instead of temporary Dockerhub registry
-* Use dedicated higher-performance runners instead of free Azure 2-core instances
+* Use dedicated higher-performance runners instead of [free Azure 2-core GitHub runner instances]((https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources))
 * Make a smaller Docker image by stripping unneeded sources (e.g. grpc, p4c), apt caches etc. Current 12G image is large. Possibly use staged docker builds to permit precise copying of only necessary components.
 * Explore use of [virtualenv](https://virtualenv.pypa.io/en/latest/) to avoid contaiminating the local environment with this project's particular Python requirements.
-* Add a `make network-clean` target to undo the effect of `make network`
+* Add prerequisites instructions for installing Docker, pip3
 
 # Quick-start
 ## Prerequisites
-* Ubuntu 20.04 bare-metal or VM (as tested - please let us know if other OSes work for you!)
-* Docker
-* [Install docker-compose](#install-docker-compose) 1.29.2 or later (needed only to [Run ixia-x traffic-generator test](#run-ixia-x-traffic-generator-test)).
+
+See [Installing Prequisites](#installing-prequisites) for details.
+
+* Ubuntu 20.04, bare-metal or VM (as tested - please let us know if other OSes work for you!)
+* docker, docker-compose (1.29.2 or later)
+* python3, pip3
 
 ## Clone this repo
 ```
@@ -196,7 +203,7 @@ This compiles a simple libsai client program to verify the libsai-to-p4runtime-t
 make test
 ```
 
-## Configure networking for bmv2
+## Create veth pairs for bmv2
 This needs to be run just once. It will create veth pairs, set their MTU, disable IPV6, etc.
 
 **TODO:** Write a make target to undo the `make-network` modifications.
@@ -204,8 +211,16 @@ This needs to be run just once. It will create veth pairs, set their MTU, disabl
 ```
 make network
 ```
+
+You can delete the veth pairs when you're done testing via this command:
+```
+make network-clean
+```
 ## Run software switch
 This will run an interactive docker container in the foreground. This will spew out verbose content when control APIs are called or packets are processed. Use additional terminals to run other test scripts.
+
+>**NOTE:** Stop the process (CTRL-c) to shut down the switch container.
+
 ```
 make run-switch   # launches bmv2 with P4Runtime server
 ```
@@ -215,6 +230,37 @@ From a different terminal, run SAI client tests.
 ```
 make run-test
 ```
+
+## Run ixia-x traffic-generator test
+Remeber to [Install docker-compose](#install-docker-compose).
+
+From a different terminal, run [ixia-c](https://github.com/open-traffic-generator/ixia-c) traffic tests. The first time this runs, it will pull Python packages for the [snappi](https://github.com/open-traffic-generator/snappi) client as well as Docker images for the [ixia-c](https://github.com/open-traffic-generator/ixia-c) controller and traffic engines.
+
+```
+make run-ixiac-test
+```
+### About ixia-c components and setp/teardown
+The first time you run ixia-c traffic tests, the `ixiac-prereq` make target will run two dependent targets:
+* `install-python-modules` - downloads and installs snappi Python client libraries
+* `deploy-ixiac` - downloads two docker images (ixia-c controller, and ixia-c traffic engine or TE), then spins up one controller container and two traffic engines.
+
+ixia-c always requires a dedicated CPU core for the receiver. and can use dedicated or shared CPU cores for the traffic engines and controller. In this project, two cores total are required: one for the ixia-c receiver, and one shared core which handles the TE transmitters, controller, and all other processes including the P4 BMV2 switch, P4Runtime server, test clients, etc. This accommodates smaller clound iknstances like the "free" azure CI runners provided by Github [described here](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources)
+
+
+## About ixia-x traffic-generator
+
+See also:
+* [../test/test-cases/bmv2_model](../test/test-cases/bmv2_model) for ixia-c test cases
+* [../test/third-party/traffic_gen/README.md](../test/third-party/traffic_gen/README.md) for ixia-c configuration info
+* [../test/third-party/traffic_gen/deployment/README.md](../test/third-party/traffic_gen/deployment/README.md)
+
+# Installing Prequisites
+
+## Install docker
+Need for basically everythng to build/test sirius-pipeline.
+
+**TODO**
+
 
 ## Install docker-compose
 It is assumed you already have Docker on your system.
@@ -238,19 +284,39 @@ To test installation, execute the following. The output on the second line is an
 docker-compose --version
 docker-compose version 1.29.2, build 5becea4c
 ```
-
-## Run ixia-x traffic-generator test
-From a different terminal, run ixia-c traffic tests. The first time this runs, it will pull Python packages for the [snappi](https://github.com/open-traffic-generator/snappi) client as well as Docker images for the [ixia-c](https://github.com/open-traffic-generator/ixia-c) controller and traffic engines.
-```
-make run-ixiac-test
-```
-## About ixia-x traffic-generator
-
-See also:
-* [../test/test-cases/bmv2_model](../test/test-cases/bmv2_model) for ixia-c test cases
-* [../test/third-party/traffic_gen/README.md](../test/third-party/traffic_gen/README.md) for ixia-c configuration info
-* [../test/third-party/traffic_gen/deployment/README.md](../test/third-party/traffic_gen/deployment/README.md)
-
+- [Sirius Pipeline](#sirius-pipeline)
+- [TODO](#todo)
+- [Quick-start](#quick-start)
+  - [Prerequisites](#prerequisites)
+  - [Clone this repo](#clone-this-repo)
+  - [Get the right branch](#get-the-right-branch)
+  - [Build Artifacts](#build-artifacts)
+  - [Run bmv2 software switch](#run-bmv2-software-switch)
+  - [Run tests](#run-tests)
+- [CI (Continuous Integration) Via Git Actions](#ci-continuous-integration-via-git-actions)
+- [Detailed Build Workflow](#detailed-build-workflow)
+  - [Build Workflow Diagram](#build-workflow-diagram)
+  - [Build Docker dev container](#build-docker-dev-container)
+  - [Optional - Manually Pull the pre-built Docker image](#optional---manually-pull-the-pre-built-docker-image)
+  - [Optional - expert - build a new Docker image](#optional---expert---build-a-new-docker-image)
+  - [Optional - Expert/Admin - Publish Docker Image](#optional---expertadmin---publish-docker-image)
+  - [Optional - expert - exec a container shell](#optional---expert---exec-a-container-shell)
+  - [Compile P4 Code](#compile-p4-code)
+  - [Build libsai.so adaptor library](#build-libsaiso-adaptor-library)
+    - [Restore SAI Submodule](#restore-sai-submodule)
+  - [Build SAI client test program(s)](#build-sai-client-test-programs)
+  - [Create veth pairs for bmv2](#create-veth-pairs-for-bmv2)
+  - [Run software switch](#run-software-switch)
+  - [Run simple SAI library test](#run-simple-sai-library-test)
+  - [Run ixia-x traffic-generator test](#run-ixia-x-traffic-generator-test)
+    - [About ixia-c components and setp/teardown](#about-ixia-c-components-and-setpteardown)
+  - [About ixia-x traffic-generator](#about-ixia-x-traffic-generator)
+- [Installing Prequisites](#installing-prequisites)
+  - [Install docker](#install-docker)
+  - [Install docker-compose](#install-docker-compose)
+- [Developer Workflows](#developer-workflows)
+  - [About Git Submodules](#about-git-submodules)
+    - [Committing new code - submodule considerations](#committing-new-code---submodule-considerations)
 # Developer Workflows
 ## About Git Submodules
 See also:

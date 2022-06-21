@@ -36,7 +36,7 @@ bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:
 	    -o bmv2/sirius_pipeline.bmv2 \
 	    --p4runtime-files bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.json,bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.txt
 
-clean:sai-clean
+clean:sai-clean network-clean undeploy-ixiac
 	sudo rm -rf bmv2/sirius_pipeline.bmv2
 	sudo make -C tests/vnet_out clean
 
@@ -78,7 +78,7 @@ sai-clean:
 
 test:sai-test
 
-sai-test:
+sai-test:sai
 	$(DOCKER_RUN) \
 	    --name build-test-$(USER) \
 		-w /tests/vnet_out  $(DOCKER_IMG) \
@@ -132,6 +132,11 @@ network:
 	sudo sysctl net.ipv6.conf.veth2.disable_ipv6=1
 	sudo sysctl net.ipv6.conf.veth3.disable_ipv6=1
 
+network-clean:
+	# Note, deleting one member (e.g. veth0) deletes its peer (e.g. veth1)
+	-sudo ip link delete dev veth0
+	-sudo ip link delete dev veth2
+
 run-ixiac-test: ixiac-prereq
 	python3 -m pytest ../test/test-cases/bmv2_model/ -s
 
@@ -142,6 +147,9 @@ install-python-modules:
 
 deploy-ixiac:
 	cd ../test/third-party/traffic_gen && ./deploy_ixiac.sh
+
+undeploy-ixiac:
+	cd ../test/third-party/traffic_gen && ./undeploy_ixiac.sh
 
 install-docker-compose:
 	sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$$(uname -s)-$$(uname -m)" -o /usr/local/bin/docker-compose
