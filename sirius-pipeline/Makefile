@@ -60,7 +60,8 @@ run-switch:
 	    --log-console \
 	    --no-p4
 
-sai: SAI/SAI p4
+phony:sai
+sai: p4 | SAI/SAI 
 	@echo "Generate SAI library headers and implementation..."
 	$(DOCKER_RUN) \
 		--name build_sai-$(USER) \

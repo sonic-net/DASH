@@ -20,7 +20,7 @@ on:
 jobs:
   build:
     name: Build and test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       docker_fg_flags: -u root --privileged
       docker_bg_flags: -d -u root --privileged
@@ -44,7 +44,7 @@ jobs:
     - name: Run P4 software switch (bmv2)
       run: DOCKER_FLAGS=$docker_bg_flags make run-switch
     - name: Test SAI library
-      run: DOCKER_FLAGS=$docker_fg_flags make run-sai-test
+      run: DOCKER_FLAGS=$docker_fg_flags make run-test
     - name: Ixia-c Traffic Generator test
-      run: DOCKER_FLAGS=$docker_flags make run-ixiac-test
+      run:  make run-ixiac-test
       

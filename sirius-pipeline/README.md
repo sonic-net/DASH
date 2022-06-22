@@ -28,8 +28,8 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
   - [Run software switch](#run-software-switch)
   - [Run simple SAI library test](#run-simple-sai-library-test)
   - [Run ixia-x traffic-generator test](#run-ixia-x-traffic-generator-test)
-    - [About ixia-c components and setp/teardown](#about-ixia-c-components-and-setpteardown)
-  - [About ixia-x traffic-generator](#about-ixia-x-traffic-generator)
+    - [ixia-c components and setup/teardown](#ixia-c-components-and-setupteardown)
+    - [About ixia-x traffic-generator](#about-ixia-x-traffic-generator)
 - [Installing Prequisites](#installing-prequisites)
   - [Install docker](#install-docker)
   - [Install Python 3](#install-python-3)
@@ -51,7 +51,6 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 * Use dedicated higher-performance runners instead of [free Azure 2-core GitHub runner instances]((https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources))
 * Make a smaller Docker image by stripping unneeded sources (e.g. grpc, p4c), apt caches etc. Current 12G image is large. Possibly use staged docker builds to permit precise copying of only necessary components.
 * Explore use of [virtualenv](https://virtualenv.pypa.io/en/latest/) to avoid contaiminating the local environment with this project's particular Python requirements.
-* Add prerequisites instructions for installing Docker, pip3
 
 # Quick-start
 ## Prerequisites
@@ -257,7 +256,7 @@ From a different terminal, run [ixia-c](https://github.com/open-traffic-generato
 ```
 make run-ixiac-test
 ```
-### About ixia-c components and setp/teardown
+### ixia-c components and setup/teardown
 The first time you run ixia-c traffic tests, the `ixiac-prereq` make target will run two dependent targets:
 * `install-python-modules` - downloads and installs snappi Python client libraries
 * `deploy-ixiac` - downloads two docker images (ixia-c controller, and ixia-c traffic engine or TE), then spins up one controller container and two traffic engines.
@@ -265,7 +264,7 @@ The first time you run ixia-c traffic tests, the `ixiac-prereq` make target will
 ixia-c always requires a dedicated CPU core for the receiver. and can use dedicated or shared CPU cores for the traffic engines and controller. In this project, two cores total are required: one for the ixia-c receiver, and one shared core which handles the TE transmitters, controller, and all other processes including the P4 BMV2 switch, P4Runtime server, test clients, etc. This accommodates smaller clound iknstances like the "free" azure CI runners provided by Github [described here](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources)
 
 
-## About ixia-x traffic-generator
+### About ixia-x traffic-generator
 
 See also:
 * [../test/test-cases/bmv2_model](../test/test-cases/bmv2_model) for ixia-c test cases

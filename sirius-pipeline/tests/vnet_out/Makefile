@@ -1,5 +1,5 @@
 vnet_out: vnet_out.cpp
-	echo "buidling $@ ..."
+	echo "building $@ ..."
 	g++ \
 	    -I /SAI/SAI/inc \
 	    -I /SAI/SAI/experimental/ \
