@@ -1,6 +1,5 @@
 ---
-Note: Work in progress
-Last update: 06/09/2022
+Last update: 06/22/2022
 ---
 
 [[<< Back to parent directory](../README.md)]
