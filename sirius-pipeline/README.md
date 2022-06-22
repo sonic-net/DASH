@@ -129,6 +129,11 @@ This project contains [Git Actions](https://docs.github.com/en/actions) to perfo
 
   ![CI-badge-passing.svg](../assets/CI-badge-passing.svg)  ![CI-badge-failing.svg](../assets/CI-badge-failing.svg)  
 
+Badges have flexibility, for example we could show the status of more than one branch at a time.
+
+See:
+* https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows
+* https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/adding-a-workflow-status-badge)
 ### CI Build log - Passing example
 
 A typical "Good" CI log appears below, this can be watched in real-time:
