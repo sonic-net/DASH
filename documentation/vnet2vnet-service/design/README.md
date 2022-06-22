@@ -10,3 +10,4 @@ This folder contains DASH VNET-to-VNET Service design and architecture documents
 
 | Document                                               | Description                                |
 | ------------------------------------------------------ | ------------------------------------------ |
+|[VNET to VNET scenario](vnet-to-vnet-service.md)|Implement and test core DASH mechanisms in VM to VM communication|
