@@ -617,7 +617,7 @@ For the example configuration above, the following is a brief explanation of loo
 		e. Encap action shall be performed and use PA address as specified by "underlay_ip"
 	2. Packet destined to 10.1.0.1:
 		a. LPM lookup hits for entry 10.1.0.0/24
-		b. The action in this case is "vnet" and the routing type for "vnet" is "maprouting", with overlay_ip specified
+		b. The action in this case is "vnet_direct" and the routing type for "vnet" is "maprouting", with overlay_ip specified
 		c. Next lookup shall happen on the "mapping" table for Vnet "Vnet1", but for overlay_ip 10.0.0.6
 		d. Mapping table for 10.0.0.6 shall be hit and it takes the action "vnet_encap". 
 		e. Encap action shall be performed and use PA address as specified by "underlay_ip"
