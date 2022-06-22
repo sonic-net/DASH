@@ -41,7 +41,7 @@ Last update: 06/22/2022
 - [Appendix](#appendix)
   - [A day in the life of a DASH packet](#a-day-in-the-life-of-a-dash-packet)
   - [A day in the life of a DASH SDN controller](#a-day-in-the-life-of-a-dash-sdn-controller)
-  - [A day in the life of a DASH container](#a-day-in-the-life-of-a-dash-container)
+  - [A day in the life of a gNMI container](#a-day-in-the-life-of-a-gnmi-container)
 - [References](#references)
 
 ## Introduction
@@ -578,14 +578,13 @@ testing](https://github.com/Azure/DASH/tree/main/test).
 ### A day in the life of a DASH packet
 
 > [!NOTE] TBD - Engineering help needed. 
-
-Some of the info from Kristina's *sanitized* doc.
+> Add link to the SDN packet pipeline document when ready. See PR [dash-sdn-and-packet-transform-documentation-update](https://github.com/Azure/DASH/pull/125).
 
 ### A day in the life of a DASH SDN controller
 
 > [!NOTE] TBD - Engineering help needed.
 
-### A day in the life of a DASH container
+### A day in the life of a gNMI container
 
 > [!NOTE] TBD - Engineering help needed.
 
