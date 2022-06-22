@@ -4,6 +4,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 >**IMPORTANT:** Developers, read [Typical Workflow: Committing new code - ignoring SAI submodule](#typical-workflow-committing-new-code---ignoring-sai-submodule) before committing code.
 
 - [Sirius Pipeline](#sirius-pipeline)
+- [Known Issues](#known-issues)
 - [TODOs](#todos)
 - [Quick-start](#quick-start)
   - [Prerequisites](#prerequisites)
@@ -12,6 +13,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
   - [Build Artifacts](#build-artifacts)
   - [Run bmv2 software switch](#run-bmv2-software-switch)
   - [Run tests](#run-tests)
+  - [Cleanup](#cleanup)
 - [CI (Continuous Integration) Via Git Actions](#ci-continuous-integration-via-git-actions)
     - [CI Build log - Passing example](#ci-build-log---passing-example)
     - [CI Build log - Fail example](#ci-build-log---fail-example)
@@ -21,7 +23,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
   - [Optional - Manually Pull the pre-built Docker image](#optional---manually-pull-the-pre-built-docker-image)
   - [Optional - expert - build a new Docker image](#optional---expert---build-a-new-docker-image)
   - [Optional - Expert/Admin - Publish Docker Image](#optional---expertadmin---publish-docker-image)
-  - [Optional - expert - exec a container shell](#optional---expert---exec-a-container-shell)
+  - [Optional - expert - `exec` a container shell](#optional---expert---exec-a-container-shell)
   - [Compile P4 Code](#compile-p4-code)
   - [Build libsai.so adaptor library](#build-libsaiso-adaptor-library)
     - [Restore SAI Submodule](#restore-sai-submodule)
@@ -43,15 +45,20 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
     - [Typical Workflow: Committing new code - ignoring SAI submodule](#typical-workflow-committing-new-code---ignoring-sai-submodule)
     - [Committing new SAI submodule version](#committing-new-sai-submodule-version)
 
+# Known Issues
+* vnet_out test via `make run-test` need to be run to allow `run-ixiac-test` to pass
+* Prebuilt Docker image is too large (> 12G)
+
 # TODOs
-* Mystery - why does vnet_out test via `make run-test` need to be run to allow `run-ixiac-test` to pass?
 * Use modified bmv2 which adds stateful processing. Current version is vanilla bmv2. This will require building it instead of using a prebuilt bmv2 docker image, see [Build Docker dev container](#build-docker-dev-container).
 * Integrate SAI-thrift server from [OCP/SAI](https://github.com/opencomputeproject/SAI)
 * Add DASH sevice test cases including SAI-thrift pipeline configuration and traffic tests
 * Build Docker image automatically when Dockerfile changes, publish and pull from permanent repo
 * Use Azure Container Registry (ACR) for Docker images instead of temporary Dockerhub registry
 * Use dedicated higher-performance runners instead of [free Azure 2-core GitHub runner instances]((https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources))
-* Make a smaller Docker image by stripping unneeded sources (e.g. grpc, p4c), apt caches etc. Current 12G image is large. Possibly use staged docker builds to permit precise copying of only necessary components.
+* Make a smaller Docker image by stripping unneeded sources (e.g. grpc, p4c), apt caches etc. Current 12G image is large. Possibly use staged docker builds to permit precise copying of only necessary components. Consider contents of the base image (`p4lang/behavioral-model:no-pi`). For example, see:
+  * https://devopscube.com/reduce-docker-image-size/
+  * https://developers.redhat.com/articles/2022/01/17/reduce-size-container-images-dockerslim
 * Explore use of [virtualenv](https://virtualenv.pypa.io/en/latest/) to avoid contaiminating the local environment with this project's particular Python requirements.
 
 # Quick-start
@@ -59,7 +66,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 
 See [Installing Prequisites](#installing-prequisites) for details.
 
-* Ubuntu 20.04, bare-metal or VM (as tested - please let us know if other OSes work for you!)
+* Ubuntu 20.04, bare-metal or VM
 * docker, docker-compose (1.29.2 or later)
 * python3, pip3
 
@@ -100,6 +107,15 @@ Follow instructions for [Install docker-compose](#install-docker-compose), then:
 ```
 make run-ixiac-test    # UDP traffic, by default it echos back
 ```
+The setup for ixia-c traffic tests is as follows. More info is available [here](#about-ixia-x-traffic-generator).
+
+![ixia-c setup](../test/third-party/traffic_gen/deployment/ixia-c.drawio.svg)
+## Cleanup
+
+* `CTRL-c` - kill the switch container
+* `make network-clean` - delete veth pairs
+* `make undeploy-ixiac` - kill ixia-c containers
+
 # CI (Continuous Integration) Via Git Actions
 This project contains [Git Actions](https://docs.github.com/en/actions) to perform continuous integration whenever certain actions are performed. These are specified in YAML files under [.github/workflows](../.github/workflows) directory.
 
@@ -150,7 +166,7 @@ The `make docker` target creates a docker image named `dash-bmv2`. This contains
 
 During subsequent build steps, the docker image is used to spawn a container in which various `make` targets or other scripts are executed. So, the execution environment for most build steps is inside the docker container, not the normal user environment.
 
-When the container is run, various local subdirectories are "mounted" as volumes in the container, for example local `SAI/` is mounted as the container's `/SAI/` directory. The container thus reads and writes the local development environment directories and files.
+When the container is run, various local subdirectories are "mounted" as volumes in the container, for example local `./SAI/` is mounted as the container's `/SAI/` directory. The container thus reads and writes the local development environment directories and files.
 
 >**NOTE** The base docker image is [p4lang/behavioral-model:no-pi](https://hub.docker.com/r/p4lang/behavioral-model). This is the vanilla bmv2. To use a modified bmv2 engine, it must be built from sources and this base container may need to change.
 
@@ -172,8 +188,8 @@ make docker
 ## Optional - Expert/Admin - Publish Docker Image
 This step publishes the local Docker image to the registry and requires credentials. It should be done selectively by repo maintainers. For now there is no `make` target to do this.
 
-## Optional - expert - exec a container shell
-This step runs a container and executes `bash` shell, giving you a terminal in the container. It's primarily useful to examine the container contents or debug.
+## Optional - expert - `exec` a container shell
+This step runs a new container and executes `bash` shell, giving you a terminal in the container. It's primarily useful to examine the container contents or debug.
 ```
 make dash-shell
 ```
@@ -225,8 +241,6 @@ make test
 ## Create veth pairs for bmv2
 This needs to be run just once. It will create veth pairs, set their MTU, disable IPV6, etc.
 
-**TODO:** Write a make target to undo the `make-network` modifications.
-
 ```
 make network
 ```
@@ -263,7 +277,7 @@ The first time you run ixia-c traffic tests, the `ixiac-prereq` make target will
 * `install-python-modules` - downloads and installs snappi Python client libraries
 * `deploy-ixiac` - downloads two docker images (ixia-c controller, and ixia-c traffic engine or TE), then spins up one controller container and two traffic engines.
 
-ixia-c always requires a dedicated CPU core for the receiver. and can use dedicated or shared CPU cores for the traffic engines and controller. In this project, two cores total are required: one for the ixia-c receiver, and one shared core which handles the TE transmitters, controller, and all other processes including the P4 BMV2 switch, P4Runtime server, test clients, etc. This accommodates smaller clound iknstances like the "free" azure CI runners provided by Github [described here](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources)
+ixia-c always requires a dedicated CPU core for the receiver, capable of full DPDK performance, but can use dedicated or shared CPU cores for the transmitter and controller, at reduced performance. In this project, two cores total are required: one for the ixia-c receiver, and one shared core which handles the TE transmitters, controller, and all other processes including the P4 BMV2 switch, P4Runtime server, test clients, etc. This accommodates smaller cloud instances like the "free" Azure CI runners provided by Github [described here](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources)
 
 
 ### About ixia-x traffic-generator
@@ -271,12 +285,12 @@ ixia-c always requires a dedicated CPU core for the receiver. and can use dedica
 See also:
 * [../test/test-cases/bmv2_model](../test/test-cases/bmv2_model) for ixia-c test cases
 * [../test/third-party/traffic_gen/README.md](../test/third-party/traffic_gen/README.md) for ixia-c configuration info
-* [../test/third-party/traffic_gen/deployment/README.md](../test/third-party/traffic_gen/deployment/README.md)
+* [../test/third-party/traffic_gen/deployment/README.md](../test/third-party/traffic_gen/deployment/README.md) for docker-compose configuration and diagram
 
 # Installing Prequisites
 
 ## Install docker
-Need for basically everythng to build/test sirius-pipeline.
+Need for basically everything to build/test sirius-pipeline.
 
 See:
 * https://docs.docker.com/desktop/linux/install/
@@ -337,13 +351,13 @@ A Git submodule is like a symbolic link to another repo. It "points" to some oth
 Advantages of this approach:
 * Don't need to "manually" clone another repo used by this project
 * Precise configuration control - we want a specific revision, not "latest" which might break a DASH build if something under `SAI` changes.
-* It's a well-known practice; for example the `SAI` project and the `sonic-buildimage` projects both use suibmodules to great advantage.
+* It's a well-known practice; for example the `SAI` project and the `sonic-buildimage` projects both use submodules to great advantage.
 
 ### Typical Workflow: Committing new code - ignoring SAI submodule
 
 >**NOTE:** You **do not want to check in changes to the SAI/SAI submodule** unless you're deliberately upgrading to a new commit level of the SAI submodule.
 
-Since the SAI/SAI directory gets modified in place when bmv2 SAI artifacts are generated, it will "taint" the SAI/SAI submodule and appear as "dirty" when you invoke `git status`. This makes it inconvenient to  do `git commit -a`, which will commit everything which has changed. An easy remedy is to restore the SAI/SAI directory to pristine state as follows:
+Since the SAI/SAI directory gets modified in-place when bmv2 SAI artifacts are generated, it will "taint" the SAI/SAI submodule and appear as "dirty" when you invoke `git status`. This makes it inconvenient to  do `git commit -a`, which will commit everything which has changed. An easy remedy is to restore the SAI/SAI directory to pristine state as follows:
 ```
 make sai-clean
 ```
