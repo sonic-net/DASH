@@ -26,7 +26,12 @@ SAI/SAI:
 #shorthand:
 p4:bmv2/sirius_pipeline.bmv2/sirius_pipeline.json
 
+p4-clean:
+	-rm -rf bmv2/sirius_pipeline.bmv2/sirius_pipeline.json
+	-rm -rf bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.txt
+	
 bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:
+	@echo "Compile P4 program..."
 	$(DOCKER_RUN) \
 	--name p4c \
 	$(DOCKER_IMG) p4c \
@@ -36,16 +41,19 @@ bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:
 	    -o bmv2/sirius_pipeline.bmv2 \
 	    --p4runtime-files bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.json,bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.txt
 
-clean:sai-clean network-clean undeploy-ixiac
+phony:clean
+clean: p4-clean sai-clean test-clean network-clean undeploy-ixiac
 	sudo rm -rf bmv2/sirius_pipeline.bmv2
 	sudo make -C tests/vnet_out clean
 
+phony:dash-shell
 dash-shell:
 	$(DOCKER_RUN) \
 	    --name dashshell-$(USER) \
 		 $(DOCKER_IMG) \
 	    bash
 
+phony:run-switch
 run-switch:
 	$(DOCKER_RUN) \
 	    --name simple_switch-$(USER) \
@@ -60,6 +68,7 @@ run-switch:
 	    --log-console \
 	    --no-p4
 
+# TODO - create separate rules for headers, libsai.so
 phony:sai
 sai: p4 | SAI/SAI 
 	@echo "Generate SAI library headers and implementation..."
@@ -71,15 +80,22 @@ sai: p4 | SAI/SAI
 	$(DOCKER_RUN) -w /SAI/lib $(DOCKER_IMG) \
 	    make
 
+phony:sai-clean
 sai-clean:
 	@echo "Restoring SAI subdirectories to baseline..."
 	rm -rf SAI/SAI/inc SAI/SAI/experimental SAI/SAI/meta
 	cd SAI/SAI && git checkout -- inc experimental meta
 	sudo rm -rf SAI/lib
 
+phony:test sai-test
 test:sai-test
 
-sai-test:sai
+test-clean:
+	sudo make -C tests/vnet_out clean
+
+
+#TODO - use libsai.so, headers as dep
+sai-test:SAI/SAI
 	$(DOCKER_RUN) \
 	    --name build-test-$(USER) \
 		-w /tests/vnet_out  $(DOCKER_IMG) \
