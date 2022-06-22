@@ -219,7 +219,7 @@ DASH_ACL_OUT:{{eni}}:{{stage}}
 ```
 
 ```
-key                      = DASH_ACL_IN:eni:stage ; ENI MAC and state as key; ACL stage can be {1, 2, 3 ..}
+key                      = DASH_ACL_IN:eni:stage ; ENI MAC and stage as key; ACL stage can be {1, 2, 3 ..}
 ; field                  = value 
 acl_group_id             = ACL group ID
 ```
@@ -516,7 +516,7 @@ DASH_VNET:Vnet1: {
 DASH_ENI:F4939FEFC47E : { 
     "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
     "mac_address": "F4939FEFC47E",
-    "pa_addr": 25.1.1.1,
+    "underlay_ip": 25.1.1.1,
     "admin_state": "enabled",
     "vnet": "Vnet1"
 }
@@ -604,7 +604,7 @@ For the example configuration above, the following is a brief explanation of loo
 		d. Mapping table for 10.1.1.1 shall be hit and it takes the action "vnet_encap". 
 		e. Encap action shall be performed and use PA address as specified by "underlay_ip"
 	2. Packet destined to 10.1.0.1:
-		a. LPM lookup hits for entry 10.1.0.24/24
+		a. LPM lookup hits for entry 10.1.0.0/24
 		b. The action in this case is "vnet" and the routing type for "vnet" is "maprouting", with overlay_ip specified
 		c. Next lookup shall happen on the "mapping" table for Vnet "Vnet1", but for overlay_ip 10.0.0.6
 		d. Mapping table for 10.0.0.6 shall be hit and it takes the action "vnet_encap". 
