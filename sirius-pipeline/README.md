@@ -6,6 +6,9 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 - [Sirius Pipeline](#sirius-pipeline)
 - [Known Issues](#known-issues)
 - [TODOs](#todos)
+  - [Loose Ends](#loose-ends)
+  - [Desired Optimizations](#desired-optimizations)
+  - [Roadmap](#roadmap)
 - [Quick-start](#quick-start)
   - [Prerequisites](#prerequisites)
   - [Clone this repo](#clone-this-repo)
@@ -33,7 +36,10 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
   - [Run simple SAI library test](#run-simple-sai-library-test)
   - [Run ixia-x traffic-generator test](#run-ixia-x-traffic-generator-test)
     - [ixia-c components and setup/teardown](#ixia-c-components-and-setupteardown)
-    - [About ixia-x traffic-generator](#about-ixia-x-traffic-generator)
+    - [About snappi and ixia-c traffic-generator](#about-snappi-and-ixia-c-traffic-generator)
+      - [Opensource Sites:](#opensource-sites)
+      - [DASH-specific info:](#dash-specific-info)
+- [Configuration Management](#configuration-management)
 - [Installing Prequisites](#installing-prequisites)
   - [Install docker](#install-docker)
   - [Install Python 3](#install-python-3)
@@ -46,21 +52,38 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
     - [Committing new SAI submodule version](#committing-new-sai-submodule-version)
 
 # Known Issues
-* vnet_out test via `make run-test` need to be run to allow `run-ixiac-test` to pass
-* Prebuilt Docker image is too large (> 12G)
+* The vnet_out test via `make run-test` needs to be run to allow `run-ixiac-test` to pass. Need to understand why this is so.
+* Prebuilt Docker image is too large (> 12G), see [Desired Optimizations](#desired-optimizations).
 
 # TODOs
-* Use modified bmv2 which adds stateful processing. Current version is vanilla bmv2. This will require building it instead of using a prebuilt bmv2 docker image, see [Build Docker dev container](#build-docker-dev-container).
-* Integrate SAI-thrift server from [OCP/SAI](https://github.com/opencomputeproject/SAI)
-* Add DASH sevice test cases including SAI-thrift pipeline configuration and traffic tests
+## Loose Ends
+These are work items to complete the project with existing features and functionality.
+
+* Use specific tags on docker images (not `:latest`)
+* Check for veths in run-switch, create automatically?
+
+## Desired Optimizations
+* Make smaller docker image or images to speed up downloading, reduce memory footprint, etc.
+  * Make a smaller Docker image by stripping unneeded sources (e.g. grpc, p4c), apt caches etc. Current 12G image is large. Possibly use staged docker builds to permit precise copying of only necessary components. Consider contents of the base image (`p4lang/behavioral-model:no-pi`). For example, see:
+    * https://devopscube.com/reduce-docker-image-size/
+    * https://developers.redhat.com/articles/2022/01/17/reduce-size-container-images-dockerslim
+  * Break the current docker image into multiple smaller images, one for each purpose in the build workflow. For example:
+    * Compiling p4 code to produce .json outputs. Should we use [p4lang/p4c](https://hub.docker.com/r/p4lang/p4c) pre-built docker instead of building it into our current all-in-one image? 
+    * Generating the SAI headers, P4Runtime adaptor and producing `libsai.so`
+    * Running the bmv2 switch
+    * Building the SAI-thrift server
+    * Running the SAI-thrift server
+* Consider building the behavioral-model base image from p4lang source at a known version, instead of pulling from Dockerhub, see [Configuration Management](#configuration-management). We might add p4lang/behavioral-model at a known commit level and build a docker image ourselves, so we can control the contents more precisely.
 * Build Docker image automatically when Dockerfile changes, publish and pull from permanent repo
 * Use Azure Container Registry (ACR) for Docker images instead of temporary Dockerhub registry
 * Use dedicated higher-performance runners instead of [free Azure 2-core GitHub runner instances]((https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources))
-* Make a smaller Docker image by stripping unneeded sources (e.g. grpc, p4c), apt caches etc. Current 12G image is large. Possibly use staged docker builds to permit precise copying of only necessary components. Consider contents of the base image (`p4lang/behavioral-model:no-pi`). For example, see:
-  * https://devopscube.com/reduce-docker-image-size/
-  * https://developers.redhat.com/articles/2022/01/17/reduce-size-container-images-dockerslim
 * Explore use of [virtualenv](https://virtualenv.pypa.io/en/latest/) to avoid contaiminating the local environment with this project's particular Python requirements.
-* Check for veths in run-switch, crete automatically?
+
+## Roadmap
+These are significant feature or functionality work items.
+* Use modified bmv2 which adds stateful processing. Current version is vanilla bmv2. This will require building it instead of using a prebuilt bmv2 docker image, see [Build Docker dev container](#build-docker-dev-container).
+* Integrate SAI-thrift server from [OCP/SAI](https://github.com/opencomputeproject/SAI)
+* Add DASH sevice test cases including SAI-thrift pipeline configuration and traffic tests
 
 # Quick-start
 ## Prerequisites
@@ -286,12 +309,28 @@ The first time you run ixia-c traffic tests, the `ixiac-prereq` make target will
 ixia-c always requires a dedicated CPU core for the receiver, capable of full DPDK performance, but can use dedicated or shared CPU cores for the transmitter and controller, at reduced performance. In this project, two cores total are required: one for the ixia-c receiver, and one shared core which handles the TE transmitters, controller, and all other processes including the P4 BMV2 switch, P4Runtime server, test clients, etc. This accommodates smaller cloud instances like the "free" Azure CI runners provided by Github [described here](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources)
 
 
-### About ixia-x traffic-generator
+### About snappi and ixia-c traffic-generator
+#### Opensource Sites:
+* Vendor-neutral [Open Traffic Generator](https://github.com/open-traffic-generator) model and API
+* [Ixia-c](https://github.com/open-traffic-generator/ixia-c), a powerful traffic generator based on Open Traffic Generator API
+* [Ixia-c Slack support channel](https://github.com/open-traffic-generator/ixia-c/blob/main/docs/support.md)
 
-See also:
+#### DASH-specific info:
 * [../test/test-cases/bmv2_model](../test/test-cases/bmv2_model) for ixia-c test cases
 * [../test/third-party/traffic_gen/README.md](../test/third-party/traffic_gen/README.md) for ixia-c configuration info
 * [../test/third-party/traffic_gen/deployment/README.md](../test/third-party/traffic_gen/deployment/README.md) for docker-compose configuration and diagram
+
+# Configuration Management
+"Configuration Management" here refers to maintaining version control over the various components used in the build and test workflows. It's mandatory to identify and lock down the versions of critical components, so that multiple versions and branches of the complete project can be built and tested in a reproducible and predictable way, at any point in the future.
+
+Here are the critical components and description of their role, and how versions are controlled:
+* DASH repo - controlled by Git source-code control, tracked by commit SHA, tag, branch, etc.
+* Docker image(s) - identified by the `repo/image_name:tag`, e.g. `repo/dash-bmv2:v1`. Note that `latest` is not a reliable way to control a Docker image.
+  * Docker images which we pull from thirdy-party repos, e.g. [p4lang/behavioral-model](https://hub.docker.com/r/p4lang/behavioral-model), may not have "version" tags in the strictest sense, but rather "variant" tags like `:no-pi` which is a build *option*, not a code version.
+  * Docker images which we build, e.g. `dash-bmv2`, are controlled by us so we can specify their contents and tag images appropriately. Once built, the contents are fixed. However, rebuilding from the same Dockerfile in the future is not guaranteed to produce the same contents. In fact, it's very unlikely to be the same,  because the image may `apt install` the "latest" Ubuntu packages. So, every rebuild of a Docker image must be carefully retested. In some cases it may be necessary to specify the versions of consituent packages such as `grpc` etc.
+  * Docker images which we build might be based `FROM` another Docker image, therefore it depends upon its content. Some might have ambiguous version tags  (e.g. `p4lang/behavioral-mode:no-pi` - it gets rebuilt and updated constantly, but what is its version?). Since Docker images are built in layers and a docker `pull` retrieves those layers from various registries, it might compose a final image which has surprising content if the base image changes.
+* Git Submodules - the SHA commit of the submodule is fixed, so when it is expanded into the workspace it is of a known version.
+
 
 # Installing Prequisites
 
