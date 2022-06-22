@@ -338,7 +338,7 @@ For information about packets, see **[Packet direction flow and transforms](sdn-
 
 ## Counters
 
-Counters are objects for counteing data per ENI. The following are their main characteristics:
+Counters are objects for counting data per ENI. The following are their main characteristics:
 
 - A counter is associated with only one ENI that is, it is not shared among different ENIs.
 - If you define a counter as a global object, it cannot reference different ENIs.
@@ -349,11 +349,13 @@ Counters are objects for counteing data per ENI. The following are their main ch
 
 The control plane is the consumer of counters that are defined in the data plane. The control plane queries every 10 seconds.
 
-Counters can be assigned on the route rule, or assigned onto a mapping. If mapping does not exist, you revert to the route rule counter. A complete definition will follow when we have more information other than software defined devices.  
+Counters can be assigned on the route rule, or assigned onto a mapping. If the mapping does not exist, you revert to the route rule counter. A complete definition will follow when we have more information other than software defined devices.  
 
-In the flow table we list the packet counter called a metering packet; once we have the final implementation that does the packet processing, we can do metering.
+In the flow table we list the packet counter called a 'metering' packet; once we have the final implementation that does the packet processing, we can do metering.
 
 Essentially, whenever a route table is accessed and we identify the right VNET target (based on the mapping from the underlay IP), will have an ID of the metering packet preprogrammed earlier.  We will reference this counter in the mappings. When the flow is created it will list this counter ID.  When the packet transits inbound or outbound through the specific flow, this counter is incremented and tracked separately for the inbound and outbound.
+
+Some specific counters (such as memory use of a card, etc...) are global, however most of the counters should be per ENI as processing of rules and drops, accepts, list of flows etc are per ENI.
 
 We need more information around Counters, Statistics, and we need to start thinking about how to add Metering- and reconcile this in the P4 model.  
 
