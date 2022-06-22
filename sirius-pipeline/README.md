@@ -60,6 +60,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
   * https://devopscube.com/reduce-docker-image-size/
   * https://developers.redhat.com/articles/2022/01/17/reduce-size-container-images-dockerslim
 * Explore use of [virtualenv](https://virtualenv.pypa.io/en/latest/) to avoid contaiminating the local environment with this project's particular Python requirements.
+* Check for veths in run-switch, crete automatically?
 
 # Quick-start
 ## Prerequisites

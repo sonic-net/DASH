@@ -117,7 +117,7 @@ def captures_ok(api, cfg):
     return all(result)
 
 
-def wait_for(func, timeout=10, interval=0.2):
+def wait_for(func, timeout=20, interval=0.2):
     """
     Keeps calling the `func` until it returns true or `timeout` occurs
     every `interval` seconds.
