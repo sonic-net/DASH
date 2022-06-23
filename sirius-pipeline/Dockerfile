@@ -61,7 +61,9 @@ RUN cd / && git clone --depth=1 -b v1.43.2 https://github.com/google/grpc.git &&
     cd cmake/build && \
     cmake -DBUILD_SHARED_LIBS=ON -DgRPC_INSTALL=ON --parallel 1 ../.. && \
     make  && \
-    make install
+    make install && \
+    cd / && \
+    rm -rf grpc
 
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
