@@ -36,7 +36,8 @@ P4_SRC=bmv2/sirius_pipeline.p4
 $(P4_ARTIFACTS):
 	@echo "Compile P4 program $(P4_SRC) ..."
 	docker run \
-	--rm -it --name p4c \
+	--rm --name p4c \
+	$(DOCKER_FLAGS) \
 	-v $(PWD)/bmv2:/bmv2 \
 	-w / \
 	$(DOCKER_P4C_IMG) p4c \
