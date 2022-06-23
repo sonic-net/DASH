@@ -324,12 +324,12 @@ ixia-c always requires a dedicated CPU core for the receiver, capable of full DP
 "Configuration Management" here refers to maintaining version control over the various components used in the build and test workflows. It's mandatory to identify and lock down the versions of critical components, so that multiple versions and branches of the complete project can be built and tested in a reproducible and predictable way, at any point in the future.
 
 Here are the critical components and description of their role, and how versions are controlled:
-* DASH repo - controlled by Git source-code control, tracked by commit SHA, tag, branch, etc.
-* Docker image(s) - identified by the `repo/image_name:tag`, e.g. `repo/dash-bmv2:v1`. Note that `latest` is not a reliable way to control a Docker image.
-  * Docker images which we pull from thirdy-party repos, e.g. [p4lang/behavioral-model](https://hub.docker.com/r/p4lang/behavioral-model), may not have "version" tags in the strictest sense, but rather "variant" tags like `:no-pi` which is a build *option*, not a code version.
+* DASH repo - controlled by Git source-code control, tracked by commit SHA, tag, branch, etc. This is the main project and its components should also be controlled.
+* Docker image(s) - identified by the `repo/image_name:tag`, e.g. `repo/dash-bmv2:v1`. Note that `latest` is not a reliable way to control a Docker image. These images are used for building artifacts; and for running processes, e.g. the "P4 bmv2 switch."
+  * Docker images which we pull from third-party repos, e.g. [p4lang/behavioral-model](https://hub.docker.com/r/p4lang/behavioral-model), may not have "version" tags in the strictest sense, but rather "variant" tags like `:no-pi` which is a build *option*, not a code version.
   * Docker images which we build, e.g. `dash-bmv2`, are controlled by us so we can specify their contents and tag images appropriately. Once built, the contents are fixed. However, rebuilding from the same Dockerfile in the future is not guaranteed to produce the same contents. In fact, it's very unlikely to be the same,  because the image may `apt install` the "latest" Ubuntu packages. So, every rebuild of a Docker image must be carefully retested. In some cases it may be necessary to specify the versions of consituent packages such as `grpc` etc.
   * Docker images which we build might be based `FROM` another Docker image, therefore it depends upon its content. Some might have ambiguous version tags  (e.g. `p4lang/behavioral-mode:no-pi` - it gets rebuilt and updated constantly, but what is its version?). Since Docker images are built in layers and a docker `pull` retrieves those layers from various registries, it might compose a final image which has surprising content if the base image changes.
-* Git Submodules - the SHA commit of the submodule is fixed, so when it is expanded into the workspace it is of a known version.
+* Git Submodules - these reference external Git repos as resources. They are controlled by the SHA commit of the submodule, which is "committed" to the top level project (see [About Git Submodules](#about-git-submodules)). The versions are always known and explicitly specified.
 
 
 # Installing Prequisites
