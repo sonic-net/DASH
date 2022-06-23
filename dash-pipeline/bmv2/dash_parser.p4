@@ -1,7 +1,7 @@
 #ifndef _SIRIUS_PARSER_P4_
 #define _SIRIUS_PARSER_P4_
 
-#include "sirius_headers.p4"
+#include "dash_headers.p4"
 
 error {
     IPv4IncorrectVersion,
@@ -14,7 +14,7 @@ error {
 #define IPV4_ETHTYPE 0x0800
 #define IPV6_ETHTYPE 0x86dd
 
-parser sirius_parser(packet_in packet,
+parser dash_parser(packet_in packet,
                 out headers_t hd,
                 inout metadata_t meta,
                 inout standard_metadata_t standard_meta)
@@ -106,7 +106,7 @@ parser sirius_parser(packet_in packet,
     }
 }
 
-control sirius_deparser(packet_out packet,
+control dash_deparser(packet_out packet,
                    in headers_t hdr)
 {
     apply {

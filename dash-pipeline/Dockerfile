@@ -83,7 +83,7 @@ RUN apt-get update && \
 # RUN git clone https://github.com/marian-pritsak/DASH-1.git && \
 RUN pip install gitpython
 RUN pip install jinja2
-# ./sai_api_gen.py rt_sirius.json --ignore-tables=appliance,eni_meter,slb_decap         --sai-git-url=https://github.com/marian-pritsak/SAI.git         --sai-git-branch=base         --impl_filepath=./impl.cpp         dash 
+# ./sai_api_gen.py rt_dash.json --ignore-tables=appliance,eni_meter,slb_decap         --sai-git-url=https://github.com/marian-pritsak/SAI.git         --sai-git-branch=base         --impl_filepath=./impl.cpp         dash 
 #g++ -I./SAI/inc/ -I./SAI/experimental/ impl.cpp -L/usr/local/lib/ -lpiprotogrpc -lpiprotobuf -lprotobuf -lgrpc++ -lpiall -lpi_dummy
 
 ENV DEBIAN_FRONTEND noninteractive
