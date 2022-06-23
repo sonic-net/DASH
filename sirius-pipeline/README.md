@@ -13,6 +13,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
   - [Prerequisites](#prerequisites)
   - [Clone this repo](#clone-this-repo)
   - [Get the right branch](#get-the-right-branch)
+  - [Super-quick approach for the adventurous!](#super-quick-approach-for-the-adventurous)
   - [Build Artifacts](#build-artifacts)
   - [Run bmv2 software switch](#run-bmv2-software-switch)
   - [Run tests](#run-tests)
@@ -22,8 +23,11 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
     - [CI Build log - Fail example](#ci-build-log---fail-example)
 - [Detailed Build Workflow](#detailed-build-workflow)
   - [Build Workflow Diagram](#build-workflow-diagram)
-  - [Build Docker dev container](#build-docker-dev-container)
-  - [Optional - Manually Pull the pre-built Docker image](#optional---manually-pull-the-pre-built-docker-image)
+  - [Docker Image(s)](#docker-images)
+  - [Building Docker Images](#building-docker-images)
+    - [dash-bmv2 Docker image](#dash-bmv2-docker-image)
+  - [Optional - Manually Pull pre-built Docker image(s)](#optional---manually-pull-pre-built-docker-images)
+  - [Optional - Override default Docker image version(s)](#optional---override-default-docker-image-versions)
   - [Optional - expert - build a new Docker image](#optional---expert---build-a-new-docker-image)
   - [Optional - Expert/Admin - Publish Docker Image](#optional---expertadmin---publish-docker-image)
   - [Optional - expert - `exec` a container shell](#optional---expert---exec-a-container-shell)
@@ -41,6 +45,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
       - [DASH-specific info:](#dash-specific-info)
 - [Configuration Management](#configuration-management)
 - [Installing Prequisites](#installing-prequisites)
+  - [Install git](#install-git)
   - [Install docker](#install-docker)
   - [Install Python 3](#install-python-3)
   - [Install pip3](#install-pip3)
@@ -53,30 +58,30 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 
 # Known Issues
 * The vnet_out test via `make run-test` needs to be run to allow `run-ixiac-test` to pass. Need to understand why this is so.
-* Prebuilt Docker image is too large (> 12G), see [Desired Optimizations](#desired-optimizations).
+* Prebuilt Docker image is too large , see [Desired Optimizations](#desired-optimizations).
 
 # TODOs
 ## Loose Ends
 These are work items to complete the project with existing features and functionality.
 
-* Use specific tags on docker images (not `:latest`)
 * Check for veths in run-switch, create automatically?
 
 ## Desired Optimizations
 * Make smaller docker image or images to speed up downloading, reduce memory footprint, etc.
-  * Make a smaller Docker image by stripping unneeded sources (e.g. grpc, p4c), apt caches etc. Current 12G image is large. Possibly use staged docker builds to permit precise copying of only necessary components. Consider contents of the base image (`p4lang/behavioral-model:no-pi`). For example, see:
+  * Make a smaller Docker image by stripping unneeded sources), apt caches etc. Current image is large. Possibly use staged docker builds to permit precise copying of only necessary components. Consider contents of the base image (`p4lang/behavioral-model:no-pi`). For example, see:
     * https://devopscube.com/reduce-docker-image-size/
     * https://developers.redhat.com/articles/2022/01/17/reduce-size-container-images-dockerslim
   * Break the current docker image into multiple smaller images, one for each purpose in the build workflow. For example:
-    * Compiling p4 code to produce .json outputs. Should we use [p4lang/p4c](https://hub.docker.com/r/p4lang/p4c) pre-built docker instead of building it into our current all-in-one image? 
+    * Compiling p4 code to produce .json outputs. - **DONE** Uses public `p4lang/p4c` docker image.
     * Generating the SAI headers, P4Runtime adaptor and producing `libsai.so`
+    * Building the bmv2 switch
     * Running the bmv2 switch
-    * Building the SAI-thrift server
-    * Running the SAI-thrift server
+    * Future - Building the SAI-thrift server
+    * Future - Running the SAI-thrift server
 * Consider building the behavioral-model base image from p4lang source at a known version, instead of pulling from Dockerhub, see [Configuration Management](#configuration-management). We might add p4lang/behavioral-model at a known commit level and build a docker image ourselves, so we can control the contents more precisely.
 * Build Docker image automatically when Dockerfile changes, publish and pull from permanent repo
 * Use Azure Container Registry (ACR) for Docker images instead of temporary Dockerhub registry
-* Use dedicated higher-performance runners instead of [free Azure 2-core GitHub runner instances]((https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources))
+* Use dedicated higher-performance runners instead of [free Azure 2-core GitHub runner instances](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources)
 * Explore use of [virtualenv](https://virtualenv.pypa.io/en/latest/) to avoid contaiminating the local environment with this project's particular Python requirements.
 
 ## Roadmap
@@ -86,11 +91,14 @@ These are significant feature or functionality work items.
 * Add DASH sevice test cases including SAI-thrift pipeline configuration and traffic tests
 
 # Quick-start
+
 ## Prerequisites
 
 See [Installing Prequisites](#installing-prequisites) for details.
 
 * Ubuntu 20.04, bare-metal or VM
+* 2 CPU cores minimum, 7GB RAM, 14Gb HD; same as [free Azure 2-core GitHub runner instances](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources), we'll try to live within these limits
+* git - tested with version 2.25.1
 * docker, docker-compose (1.29.2 or later)
 * python3, pip3
 
@@ -110,6 +118,19 @@ git submodule update --init # NOTE --recursive not needed (yet)
 ```
 git checkout <branch>
 ```
+## Super-quick approach for the adventurous!
+In one terminal:
+```
+make clean all network run-switch
+```
+In another terminal:
+```
+make run-all-tests clean
+```
+The final `clean` above will kill the switch, delete artifacts and veth pairs.
+
+Below we break down the steps in more detail.
+
 ## Build Artifacts
 ```
 make clean # optional, as needed
@@ -134,11 +155,17 @@ make run-ixiac-test    # UDP traffic, by default it echos back
 The setup for ixia-c traffic tests is as follows. More info is available [here](#about-ixia-x-traffic-generator).
 
 ![ixia-c setup](../test/third-party/traffic_gen/deployment/ixia-c.drawio.svg)
+
 ## Cleanup
 
-* `CTRL-c` - kill the switch container
+* `CTRL-c` - kill the switch container from within the iteractive terminal
+* `make kill-switch` - kills the switch container from another terminal
 * `make network-clean` - delete veth pairs
 * `make undeploy-ixiac` - kill ixia-c containers
+* `make p4-clean` - delete P4 artifacts
+* `make sai-clean` - delete SAI artifacts
+* `make clean` - does all of the above
+
 
 # CI (Continuous Integration) Via Git Actions
 This project contains [Git Actions](https://docs.github.com/en/actions) to perform continuous integration whenever certain actions are performed. These are specified in YAML files under [.github/workflows](../.github/workflows) directory.
@@ -190,37 +217,55 @@ See the diagram below. You can read the [Dockerfile](Dockerfile) and all `Makefi
 
 ![dash-p4-bmv2-thrift-workflow](images/dash-p4-bmv2-thrift-workflow.svg)
 
-## Build Docker dev container
-The `make docker` target creates a docker image named `dash-bmv2`. This contains a build/compilation environment used to produce project artifacts. It also contains an execution environment to run the bmv2 model and test programs. It includes numerous Ubuntu packages.
+## Docker Image(s)
+One or more docker images are used to compile artifacts, such as P4 code, or run processses, such as the bmv2 simple switch.
 
-During subsequent build steps, the docker image is used to spawn a container in which various `make` targets or other scripts are executed. So, the execution environment for most build steps is inside the docker container, not the normal user environment.
+Some docker images are pulled from public repositories, e.g. `p4lang/p4c` is used to compile P4 source code. Others are built in this project, published to a Docker registry such as Azure Container Service (ACR), then pulled on demand by any user or CI runner as needed. These docker images are updated occassionally as the project evolves, as seldom as possible. They should be tagged with fixed labels to support [Configuration Management](#configuration-management).
+
+## Building Docker Images
+Docker images are not built routinely. Rather, then are built as-needed by an image maintainer and pushed to the docker registry.
+
+The `make docker-XXX` targets create a docker images named `dash-XXX` where XXX is the name of the image, e.g. `docker-bmv2`. Docker images are built using a Dockerfile.
+
+During subsequent build steps, the docker image(s) are used to spawn containers in which various `make` targets or other scripts are executed. So, the execution environment for most build steps is inside the docker container, not the normal user environment.
 
 When the container is run, various local subdirectories are "mounted" as volumes in the container, for example local `./SAI/` is mounted as the container's `/SAI/` directory. The container thus reads and writes the local development environment directories and files.
 
+The following sections describe the various docker images.
+### dash-bmv2 Docker image
+Image name can be overridden via environment variable `DOCKER_BMV2_IMG`.
+
 >**NOTE** The base docker image is [p4lang/behavioral-model:no-pi](https://hub.docker.com/r/p4lang/behavioral-model). This is the vanilla bmv2. To use a modified bmv2 engine, it must be built from sources and this base container may need to change.
 
-In addition it downloads several other OSS projects such as, `grpc`, `p4c`, etc. and builds them from source. The entire process can take one to several hours. It only needs to be built once per user environment.
+In addition it includes several other OSS projects such as, `grpc`, `p4c`, etc. and builds them from source. The entire build process can take one to several hours. Pulling the prebuilt image from a registry avoids this wait.
 
->**TODO**  Build official versions and publish to a public Docker registry, and retrieve on demand.
+This image is used by all the make build targets except `make p4`. It is also used to execute bmv2 simple switch and P4Runtime.
+>**TODO:** This image should be broken into smaller ones for each build step, and optimized as well.
 
-## Optional - Manually Pull the pre-built Docker image
-This is optional, the Docker image will be pulled automatically the first time you run `make p4`. This image contains all the build- and run-time components and packages. You can also do this to restore an image. If you want to use a substitute image, tag it with `dash-bmv2:latest`.
+## Optional - Manually Pull pre-built Docker image(s)
+This is optional, the Docker images will be pulled automatically the first time you run a `make` command which needs such an image You can also do this to restore an image.
 
 ```
-make docker-pull
+make docker-pull-xxx  # where xxx = image name, e.g. bmv2
 ```
+## Optional - Override default Docker image version(s)
+You can override the image in use by setting an environment variable, for example:
+```
+DOCKER_BMV2_IMG=some-repo/dash-bmv2:some-tag make sai
+```
+If you do multiple make targets in one command (e.g. `make all`), you can override multiple image names in the same command line by setting appropriate environment variables.
 ## Optional - expert - build a new Docker image
 This step builds a new Docker image on demand, but you shouldn't have to if you use the prebuilt one retrieved from a Docker registry. Note, this step can exceed one hour depending upon CPU speed and network bandwidth. 
 ```
-make docker
+make docker-XXX  ### where XXX = image name, e.g. bmv2
 ```
 ## Optional - Expert/Admin - Publish Docker Image
-This step publishes the local Docker image to the registry and requires credentials. It should be done selectively by repo maintainers. For now there is no `make` target to do this.
+This step publishes the local Docker image to the registry and requires credentials. It should be done selectively by repo maintainers. For now there are no `make` target sto do this.
 
 ## Optional - expert - `exec` a container shell
 This step runs a new container and executes `bash` shell, giving you a terminal in the container. It's primarily useful to examine the container contents or debug.
 ```
-make dash-shell
+make dash-shell # runs dash-bmv2 image by default
 ```
 
 ## Compile P4 Code
@@ -333,6 +378,11 @@ Here are the critical components and description of their role, and how versions
 
 
 # Installing Prequisites
+
+## Install git
+```
+sudo apt install -y git
+```
 
 ## Install docker
 Need for basically everything to build/test sirius-pipeline.

@@ -90,7 +90,7 @@ sai: p4 | SAI/SAI
 	    make
 
 .PHONY:sai-clean
-sai-clean:
+sai-clean: SAI/SAI 
 	@echo "Restoring SAI subdirectories to baseline..."
 	rm -rf SAI/SAI/inc SAI/SAI/experimental SAI/SAI/meta
 	cd SAI/SAI && git checkout -- inc experimental meta
