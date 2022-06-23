@@ -5,10 +5,12 @@ on:
     branches: [ "**" ]
     paths:
       - 'sirius-pipeline/Dockerfile'
+      - 'sirius-pipeline/.dockerignore'
   pull_request:
     branches: [ "main" ]
     paths:
       - 'sirius-pipeline/Dockerfile'
+      - 'sirius-pipeline/.dockerignore'
   workflow_dispatch:
 
 jobs:
