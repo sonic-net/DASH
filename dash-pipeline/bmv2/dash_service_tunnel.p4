@@ -1,7 +1,7 @@
 #ifndef _SIRIUS_SERVICE_TUNNEL_P4_
 #define _SIRIUS_SERVICE_TUNNEL_P4_
 
-#include "sirius_headers.p4"
+#include "dash_headers.p4"
 
 /* Encodes V4 in V6 */
 action service_tunnel_encode(inout headers_t hdr,

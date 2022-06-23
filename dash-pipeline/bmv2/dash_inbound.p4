@@ -1,11 +1,11 @@
 #ifndef _SIRIUS_INBOUND_P4_
 #define _SIRIUS_INBOUND_P4_
 
-#include "sirius_headers.p4"
-#include "sirius_service_tunnel.p4"
-#include "sirius_vxlan.p4"
-#include "sirius_acl.p4"
-#include "sirius_conntrack.p4"
+#include "dash_headers.p4"
+#include "dash_service_tunnel.p4"
+#include "dash_vxlan.p4"
+#include "dash_acl.p4"
+#include "dash_conntrack.p4"
 
 control inbound(inout headers_t hdr,
                 inout metadata_t meta,

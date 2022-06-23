@@ -11,24 +11,24 @@ DOCKER_RUN := docker run \
 	--network=host \
 	--rm
 
-bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:
+bmv2/dash_pipeline.bmv2/dash_pipeline.json:
 	$(DOCKER_RUN) bmv2-$(USER) p4c \
 	    -b \
 	    bmv2 \
-	    bmv2/sirius_pipeline.p4 \
-	    -o bmv2/sirius_pipeline.bmv2 \
-	    --p4runtime-files bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.json,bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.txt
+	    bmv2/dash_pipeline.p4 \
+	    -o bmv2/dash_pipeline.bmv2 \
+	    --p4runtime-files bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.json,bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt
 
 clean:
-	rm -rf bmv2/sirius_pipeline.bmv2
+	rm -rf bmv2/dash_pipeline.bmv2
 	rm -rf SAI/SAI
 	rm -rf SAI/lib
 	make -C tests/vnet_out clean
 
 run-switch:
 	$(DOCKER_RUN) \
-	    -v $(PWD)/bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:/etc/dash/sirius_pipeline.json \
-	    -v $(PWD)/bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.txt:/etc/dash/sirius_pipeline_p4rt.txt \
+	    -v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline.json:/etc/dash/dash_pipeline.json \
+	    -v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
 	    --name simple_switch-$(USER) \
 	    bmv2-$(USER) \
 	    sudo \

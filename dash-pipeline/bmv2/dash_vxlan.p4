@@ -1,7 +1,7 @@
 #ifndef _SIRIUS_VXLAN_P4_
 #define _SIRIUS_VXLAN_P4_
 
-#include "sirius_headers.p4"
+#include "dash_headers.p4"
 
 action vxlan_encap(inout headers_t hdr,
                    in EthernetAddress underlay_dmac,
