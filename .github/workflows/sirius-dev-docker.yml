@@ -1,0 +1,26 @@
+name: Sirius-docker-build-image
+
+on:
+  push:
+    branches: [ "**" ]
+    paths:
+      - 'sirius-pipeline/Dockerfile'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'sirius-pipeline/Dockerfile'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build docker dev image
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: ./sirius-pipeline
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build docker image
+      run: make docker
+    - name: Publish docker image
+      run: make docker-publish

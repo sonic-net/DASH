@@ -4,16 +4,15 @@ LABEL description="This Docker image includes all of the PI artifacts, \
 including the Thrift-based PI implementation for the bmv2 backend. It is \
 currently used to run CI tests."
 
-# Default to using 2 make jobs, which is a good default for CI. If you're
-# building locally or you know there are more cores available, you may want to
-# override this.
-ARG MAKEFLAGS=-j
+# Configure make to run as many parallel jobs as cores available
+ARG available_processors
+ARG MAKEFLAGS=-j$available_processors
 
 # Select the type of image we're building. Use `build` for a normal build, which
 # is optimized for image size. Use `test` if this image will be used for
 # testing; in this case, the source code and build-only dependencies will not be
 # removed from the image.
-ARG IMAGE_TYPE=test
+ARG IMAGE_TYPE=build
 
 # Select the compiler to use.
 # We install the default version of GCC (GCC 9), as well as clang 8 and clang 10.
@@ -80,11 +79,8 @@ RUN apt-get update && \
     make install
 
 
-# RUN git clone https://github.com/marian-pritsak/DASH-1.git && \
 RUN pip install gitpython
 RUN pip install jinja2
-# ./sai_api_gen.py rt_sirius.json --ignore-tables=appliance,eni_meter,slb_decap         --sai-git-url=https://github.com/marian-pritsak/SAI.git         --sai-git-branch=base         --impl_filepath=./impl.cpp         dash 
-#g++ -I./SAI/inc/ -I./SAI/experimental/ impl.cpp -L/usr/local/lib/ -lpiprotogrpc -lpiprotobuf -lprotobuf -lgrpc++ -lpiall -lpi_dummy
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -93,7 +89,7 @@ RUN apt update && \
     apt install -y cmake automake libjudy-dev libgmp-dev libpcap-dev \
     libboost-dev libboost-test-dev libboost-program-options-dev libboost-system-dev \
     libboost-filesystem-dev libboost-thread-dev libevent-dev libtool flex bison pkg-config g++ libssl-dev && \
-    apt-get install -y cmake g++ git automake libtool libgc-dev bison flex \
+    apt-get install -y cmake g++  automake libtool libgc-dev bison flex \
 	    libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev \
 	    libboost-graph-dev llvm pkg-config python python-ply python3-pip \
 	    tcpdump && \
@@ -118,8 +114,6 @@ ENV BM_RUNTIME_DEPS libboost-program-options1.71.0 \
                     libpcap0.8 \
                     python3 \
                     python-is-python3
-
-RUN apt-get update && apt-get install -y git
 
 WORKDIR /
 

@@ -5,7 +5,6 @@ try:
     import json
     import argparse
     import shutil
-    from git import Repo
     from jinja2 import Template, Environment, FileSystemLoader
 except ImportError as ie:
     print("Import failed for " + ie.name)
@@ -324,28 +323,20 @@ parser = argparse.ArgumentParser(description='P4 SAI API generator')
 parser.add_argument('filepath', type=str, help='Path to P4 program RUNTIME JSON file')
 parser.add_argument('apiname', type=str, help='Name of the new SAI API')
 parser.add_argument('--print-sai-lib', type=bool)
-parser.add_argument('--sai-git-url', type=str, default='https://github.com/Opencomputeproject/SAI')
 parser.add_argument('--ignore-tables', type=str, default='', help='Comma separated list of tables to ignore')
-parser.add_argument('--sai-git-branch', type=str, default='master')
-parser.add_argument('--overwrite',  type=bool, default=False, help='Overwrite the existing SAI repo')
+parser.add_argument('--overwrite',  type=bool, default=False, help='Restore SAI subdirectories')
 args = parser.parse_args()
 
 if not os.path.isfile(args.filepath):
     print('File ' + args.filepath + ' does not exist')
     exit(1)
 
-if os.path.exists('./SAI'):
-    if args.overwrite == False:
-        print('Directory ./SAI already exists. Please remove in order to proceed')
-        exit(1)
-    else:
-        shutil.rmtree('./SAI')
-
 if os.path.exists('./lib'):
     if args.overwrite == False:
         print('Directory ./lib already exists. Please remove in order to proceed')
         exit(1)
     else:
+        print('Directory ./lib will be deleted...')
         shutil.rmtree('./lib')
 
 # Get SAI dictionary from P4 dictionary
@@ -355,9 +346,6 @@ with open(args.filepath) as json_program_file:
 
 sai_apis = generate_sai_apis(json_program, args.ignore_tables.split(','))
 
-# Clone a clean SAI repo
-print("Cloning SAI repository...")
-Repo.clone_from(args.sai_git_url, './SAI', branch=args.sai_git_branch)
 os.mkdir("lib")
 
 # Write SAI dictionary into SAI API headers

@@ -1,6 +1,5 @@
-# Ignore backup files
 *.bkp
-
-# Ignore logs
 *.log
-
+__pycache__/
+sirius-pipeline/bmv2/sirius_pipeline.bmv2/
+sirius-pipeline/SAI/lib/

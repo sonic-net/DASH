@@ -1,0 +1,50 @@
+name: Sirius-CI
+
+on:
+  push:
+    branches: [ "**" ]
+    paths:
+      - '.github/workflows/sirius-ci.yml'
+      - 'sirius-pipeline/**'
+      - '!sirius-pipeline/Dockerfile'
+      - '!sirius-pipeline/**.md'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '.github/workflows/sirius-ci.yml'
+      - 'sirius-pipeline/**'
+      - '!sirius-pipeline/Dockerfile'
+      - '!sirius-pipeline/**.md'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-20.04
+    env:
+      docker_fg_flags: -u root --privileged
+      docker_bg_flags: -d -u root --privileged
+    defaults:
+      run:
+        working-directory: ./sirius-pipeline
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install SAI submodule
+      run: git submodule update --init
+    - name: Pull docker bmv2 image
+      run: make docker-pull
+    - name: Build P4 software switch (bmv2) and P4RT
+      run: DOCKER_FLAGS=$docker_fg_flags make p4
+    - name: Generate SAI API
+      run: DOCKER_FLAGS=$docker_fg_flags make sai
+    - name: Build libsai c++ tests
+      run: DOCKER_FLAGS=$docker_fg_flags make test
+    - name: Prepare network
+      run: DOCKER_FLAGS=$docker_fg_flags make network
+    - name: Run P4 software switch (bmv2)
+      run: DOCKER_FLAGS=$docker_bg_flags make run-switch
+    - name: Test SAI library
+      run: DOCKER_FLAGS=$docker_fg_flags make run-test
+    - name: Ixia-c Traffic Generator test
+      run:  make run-ixiac-test
+      
