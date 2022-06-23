@@ -21,7 +21,7 @@ on:
 
 jobs:
   build:
-    name: Build and test
+    name: Build and Test Sirius Pipeline
     runs-on: ubuntu-20.04
     env:
       docker_fg_flags: -u root --privileged
@@ -31,19 +31,21 @@ jobs:
         working-directory: ./sirius-pipeline
     steps:
     - uses: actions/checkout@v3
+    - name: Pull docker p4c image
+      run: make docker-pull-p4c
+    - name: Build P4 software switch (bmv2) and P4Info
+      run: DOCKER_FLAGS=$docker_fg_flags make p4
     - name: Install SAI submodule
       run: git submodule update --init
     - name: Pull docker bmv2 image
-      run: make docker-pull
-    - name: Build P4 software switch (bmv2) and P4RT
-      run: DOCKER_FLAGS=$docker_fg_flags make p4
+      run: make docker-pull-bmv2
     - name: Generate SAI API
       run: DOCKER_FLAGS=$docker_fg_flags make sai
     - name: Build libsai c++ tests
       run: DOCKER_FLAGS=$docker_fg_flags make test
     - name: Prepare network
       run: DOCKER_FLAGS=$docker_fg_flags make network
-    - name: Run P4 software switch (bmv2)
+    - name: Run P4 software switch (bmv2) with P4Runtime
       run: DOCKER_FLAGS=$docker_bg_flags make run-switch
     - name: Test SAI library
       run: DOCKER_FLAGS=$docker_fg_flags make run-test

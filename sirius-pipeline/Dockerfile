@@ -81,32 +81,9 @@ RUN apt-get update && \
     make install
 
 
-RUN pip install gitpython
 RUN pip install jinja2
 
 ENV DEBIAN_FRONTEND noninteractive
-
-RUN apt update && \
-    apt install -y g++ gcc git make automake sudo && \
-    apt install -y cmake automake libjudy-dev libgmp-dev libpcap-dev \
-    libboost-dev libboost-test-dev libboost-program-options-dev libboost-system-dev \
-    libboost-filesystem-dev libboost-thread-dev libevent-dev libtool flex bison pkg-config g++ libssl-dev && \
-    apt-get install -y cmake g++  automake libtool libgc-dev bison flex \
-	    libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev \
-	    libboost-graph-dev llvm pkg-config python python-ply python3-pip \
-	    tcpdump && \
-    pip3 install  scapy ply ipaddr && \
-    apt-get install -y autoconf automake libtool curl make g++ unzip
-
-
- RUN git clone --recursive https://github.com/p4lang/p4c.git && \
-     cd p4c && \
- 	git submodule update --init --recursive && \
- 	mkdir build && \
- 	cd build && \
- 	cmake --parallel 1 .. && \
- 	make && \
- 	make install
 
 ENV BM_RUNTIME_DEPS libboost-program-options1.71.0 \
                     libboost-system1.71.0 \
@@ -129,6 +106,9 @@ RUN apt-get update -qq && \
     ./configure --with-pdfixed --with-pi --with-stress-tests --enable-debugger --enable-coverage --enable-Werror && \
     make  && \
     make install
+
+# TODO move to bmv2
+RUN apt-get update && apt-get install -y --no-install-recommends  sudo
 
 WORKDIR /
 
