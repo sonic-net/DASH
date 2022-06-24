@@ -105,11 +105,6 @@ See [Installing Prequisites](#installing-prequisites) for details.
 ## Clone this repo
 ```
 git clone <repo URL>
-```
->**NOTE** You *don't* need to use `--recursive` even though we use git submodules; the `Makefile` takes care of initializing any submodules the first time (e.g. `SAI`) and avoids unnecessary recursion, which is slow but harmless.
-
-If you prefer initializing the submodule manually, you can perform this step after `git clone`:
-```
 git submodule update --init # NOTE --recursive not needed (yet)
 ```
 ## Get the right branch
