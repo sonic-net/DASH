@@ -1,16 +1,16 @@
-name: Sirius-docker-build-image
+name: DASH-docker-bmv2-build-image
 
 on:
   push:
     branches: [ "**" ]
     paths:
-      - 'sirius-pipeline/Dockerfile'
-      - 'sirius-pipeline/.dockerignore'
+      - 'dash-pipeline/Dockerfile'
+      - 'dash-pipeline/.dockerignore'
   pull_request:
     branches: [ "main" ]
     paths:
-      - 'sirius-pipeline/Dockerfile'
-      - 'sirius-pipeline/.dockerignore'
+      - 'dash-pipeline/Dockerfile'
+      - 'dash-pipeline/.dockerignore'
   workflow_dispatch:
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-20.04
     defaults:
       run:
-        working-directory: ./sirius-pipeline
+        working-directory: ./dash-pipeline
     steps:
     - uses: actions/checkout@v3
     - name: Build docker image
