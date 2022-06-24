@@ -15,7 +15,7 @@ This document describes the DASH test workflow with SAI-thrift. In particular, i
 
 ### Summary
 
-- DASH dataplane behavior is specified by a "Sirius" P4 behavior model.
+- DASH dataplane behavior is specified by a "DASH" P4 behavior model.
 - The P4 program can generate SAI overlay headers. Combined with a subset of standard SAI underlay headers, we have a complete "DASH API".
 - Vendors implement a `libsai` for their device.
 - The **saithrift** tool transforms the  SAI headers into a **Thrift client** library and a **Thrift server** skeleton.
@@ -52,9 +52,9 @@ The descriptions below are listed in rough order of dependency, culminating in t
 
 ## P4 to SAI Interface Transformation
 
-> **TODO** This could be covered in the [README](../../sirius-pipeline/README.md) file of the directory `../../sirius-pipeline`.
+> **TODO** This could be covered in the [README](../../dash-pipeline/README.md) file of the directory `../../dash-pipeline`.
 
-A P4 program, [sirius_pipeline.p4](../../sirius-pipeline/sirius_pipeline.p4), describes the behavior of the sirius dataplane according to the well-known [P4 programming language](https://github.com/p4lang/p4-spec) and associated architectural models. The details are not covered here. Suffice to say the P4 program comprises a *single source of truth* for the dataplane behavior.
+A P4 program, [dash_pipeline.p4](../../dash-pipeline/dash_pipeline.p4), describes the behavior of the DASH dataplane according to the well-known [P4 programming language](https://github.com/p4lang/p4-spec) and associated architectural models. The details are not covered here. Suffice to say the P4 program comprises a *single source of truth* for the dataplane behavior.
 
 Besides describing the dataplane behavior, the P4 source code can be parsed by the community [p4c](https://github.com/p4lang/p4c) compiler and, via a suitable backend (**TODO** - provide link when it becomes part of this repo) it emits [SAI](https://www.opencompute.org/projects/sai) header files describing the abstract dataplane API to the [underlay](../../SAI/underlay) portion of the dataplane. The [overlay](../../SAI/overlay) portion of the DASH dataplane is a subset of the standard SAI header files, e.g. as typically used by [SONiC](https://azure.github.io/SONiC/).
 

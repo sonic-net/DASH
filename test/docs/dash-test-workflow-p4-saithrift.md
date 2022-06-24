@@ -68,7 +68,7 @@ The diagram shows a few details about the design of the [P4-DPDK](https://github
 
 The P4-DPDK dataplane has an internal, compiled [Table-Driven Interface (TDI)](https://github.com/p4lang/tdi). This abstraction is analogous to the Switch Abstraction Interface (SAI), except tailored to P4 Dataplanes.
 
-A libsai library will be developed which maps SAI conceptual APIs into the [sirius_pipeline.p4](../sirius_pipeline.p4) TDI implementation, all done in-process. This is very efficient because it avoids serialization over P4Runtime.
+A libsai library will be developed which maps SAI conceptual APIs into the [dash_pipeline.p4](../dash_pipeline.p4) TDI implementation, all done in-process. This is very efficient because it avoids serialization over P4Runtime.
 
 The P4-DPDK dataplane also has a built-in P4Runtime server which can be used develop and test the P4 Model. This is not part of the official DASH test workflow. Note that P4RT and saithrift servers are available simultaneously and operate "in parallel," sharing the native TDI layer.
 
