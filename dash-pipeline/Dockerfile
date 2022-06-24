@@ -1,18 +1,11 @@
 FROM p4lang/behavioral-model:no-pi
-LABEL maintainer="P4 Developers <p4-dev@lists.p4.org>"
-LABEL description="This Docker image includes all of the PI artifacts, \
-including the Thrift-based PI implementation for the bmv2 backend. It is \
-currently used to run CI tests."
+LABEL maintainer="SONIC-DASH Community"
+LABEL description="DASH pipeline P4 Behavioral Model and toolchain"
 
 # Configure make to run as many parallel jobs as cores available
 ARG available_processors
 ARG MAKEFLAGS=-j$available_processors
 
-# Select the type of image we're building. Use `build` for a normal build, which
-# is optimized for image size. Use `test` if this image will be used for
-# testing; in this case, the source code and build-only dependencies will not be
-# removed from the image.
-ARG IMAGE_TYPE=build
 
 # Select the compiler to use.
 # We install the default version of GCC (GCC 9), as well as clang 8 and clang 10.
@@ -92,7 +85,8 @@ ENV BM_RUNTIME_DEPS libboost-program-options1.71.0 \
                     libgmp10 \
                     libpcap0.8 \
                     python3 \
-                    python-is-python3
+                    python-is-python3 \
+                    sudo
 
 WORKDIR /
 
@@ -106,9 +100,6 @@ RUN apt-get update -qq && \
     ./configure --with-pdfixed --with-pi --with-stress-tests --enable-debugger --enable-coverage --enable-Werror && \
     make  && \
     make install
-
-# TODO move to bmv2
-RUN apt-get update && apt-get install -y --no-install-recommends  sudo
 
 WORKDIR /
 

@@ -1,22 +1,22 @@
-name: Sirius-CI
+name: DASH-CI
 
 on:
   push:
     branches: [ "**" ]
     paths:
-      - '.github/workflows/sirius-ci.yml'
-      - 'sirius-pipeline/**'
-      - '!sirius-pipeline/Dockerfile'
-      - '!sirius-pipeline/.dockerignore'
-      - '!sirius-pipeline/**.md'
+      - '.github/workflows/dash-ci.yml'
+      - 'dash-pipeline/**'
+      - '!dash-pipeline/Dockerfile'
+      - '!dash-pipeline/.dockerignore'
+      - '!dash-pipeline/**.md'
   pull_request:
     branches: [ "main" ]
     paths:
-      - '.github/workflows/sirius-ci.yml'
-      - 'sirius-pipeline/**'
-      - '!sirius-pipeline/Dockerfile'
-      - '!sirius-pipeline/.dockerignore'
-      - '!sirius-pipeline/**.md'
+      - '.github/workflows/dash-ci.yml'
+      - 'dash-pipeline/**'
+      - '!dash-pipeline/Dockerfile'
+      - '!dash-pipeline/.dockerignore'
+      - '!dash-pipeline/**.md'
   workflow_dispatch:
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
       docker_bg_flags: -d -u root --privileged
     defaults:
       run:
-        working-directory: ./sirius-pipeline
+        working-directory: ./dash-pipeline
     steps:
     - uses: actions/checkout@v3
     - name: Pull docker p4c image

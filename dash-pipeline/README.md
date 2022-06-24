@@ -1,9 +1,9 @@
-# Sirius Pipeline
+# DASH Pipeline
 This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://github.com/p4lang/behavioral-model) from [p4lang](https://github.com/p4lang).
 
 >**IMPORTANT:** Developers, read [Typical Workflow: Committing new code - ignoring SAI submodule](#typical-workflow-committing-new-code---ignoring-sai-submodule) before committing code.
 
-- [Sirius Pipeline](#sirius-pipeline)
+- [DASH Pipeline](#dash-pipeline)
 - [Known Issues](#known-issues)
 - [TODOs](#todos)
   - [Loose Ends](#loose-ends)
@@ -170,12 +170,12 @@ The setup for ixia-c traffic tests is as follows. More info is available [here](
 # CI (Continuous Integration) Via Git Actions
 This project contains [Git Actions](https://docs.github.com/en/actions) to perform continuous integration whenever certain actions are performed. These are specified in YAML files under [.github/workflows](../.github/workflows) directory.
 
-* [sirius-ci.yml](../.github/workflows/sirius-ci.yml): A Commit or Pull Request of P4 code, Makefiles, scripts, etc.  will trigger a build of all artifacts and run tests, all in the Azure cloud. Status can be viewed on the Github repo using the "Actions" link in the top of the page. This will be true for forked repos as well as the main Azure/DASH repo.
+* [dash-ci.yml](../.github/workflows/dash-ci.yml): A Commit or Pull Request of P4 code, Makefiles, scripts, etc.  will trigger a build of all artifacts and run tests, all in the Azure cloud. Status can be viewed on the Github repo using the "Actions" link in the top of the page. This will be true for forked repos as well as the main Azure/DASH repo.
 
   Two tests are currently executed in the CI pipeline. These will be increased extensively over time:
   * The `make run-test` target does a trivial SAI access using a c++ client program. This verifies the libsai-to-P4runtime adaptor over a socket. The test program acts as a P4Runtime client, and the bmv2 simple_switch process is the server.
   * The `make run-ixiac-test` target spins up a two-port software (DPDK) traffic-generator engine using the free version of [ixia-c](https://github.com/open-traffic-generator/ixia-c) controlled by a Python [snappi](https://github.com/open-traffic-generator/snappi) client. Using this approach allows the same scripts to eventually be scaled to line-rate using hardware-based traffic generators.
-* [sirius-dev-docker.yml](../.github/workflows/sirius-dev-docker.yml): A commit of the [Dockerfile](Dockerfile) will trigger the [make docker](#build-docker-dev-container) build target and rebuild the `dash-bmv2` docker container. It will not publish it though, so it's ephemeral and disappears when the Git runner terminates. The main benefit of this is it may run much faster in the cloud than locally, allowing you to test for a successful build of changes more quickly.
+* [dash-dev-docker.yml](../.github/workflows/dash-dev-docker.yml): A commit of the [Dockerfile](Dockerfile) will trigger the [make docker](#build-docker-dev-container) build target and rebuild the `dash-bmv2` docker container. It will not publish it though, so it's ephemeral and disappears when the Git runner terminates. The main benefit of this is it may run much faster in the cloud than locally, allowing you to test for a successful build of changes more quickly.
 * The CI badge will be updated according to the CI build status and appear on the front page of the repo (it's actually on the top-level README). You can click on this icon to drill down into the Git Actions history and view pass/fail details. Typical icons appear below:
 
   ![CI-badge-passing.svg](../assets/CI-badge-passing.svg)  ![CI-badge-failing.svg](../assets/CI-badge-failing.svg)  
@@ -207,7 +207,7 @@ The main README for this repo shows the CI failing badge:
 
 ![CI-fail-README-badge](../assets/CI-fail-README-badge.png)
 # Detailed Build Workflow
-This explains the various build steps in more details. The CI pipeline does most of these steps as well. All filenames and directories mentioned in the sections below are relative to the `sirius-pipeline` directory (containing this README) unless otherwise specified. 
+This explains the various build steps in more details. The CI pipeline does most of these steps as well. All filenames and directories mentioned in the sections below are relative to the `dash-pipeline` directory (containing this README) unless otherwise specified. 
 
 Building starts by retrieving a pre-built `dash-bmv2` Docker image from a Docker registry, then executing a series of targets in the main [Makefile](Makefile) via `make <target>`. It is designed to be run either manually; via user-supplied scripts; or from a CI pipeline in the cloud.
 
@@ -273,8 +273,8 @@ make dash-shell # runs dash-bmv2 image by default
 make p4
 ```
 The primary outputs of interest are:
- * `bmv2/sirius_pipeline.bmv2/sirius_pipeline.json` - the "P4 object code" which is actually metadata interpreted by the bmv2 "engine" to execute the P4 pipeline.
- * `bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.json` - the "P4Info" metadata which describes all the P4 entities (P4 tables, counters, etc.). This metadata is used downstream as follows:
+ * `bmv2/dash_pipeline.bmv2/dash_pipeline.json` - the "P4 object code" which is actually metadata interpreted by the bmv2 "engine" to execute the P4 pipeline.
+ * `bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.json` - the "P4Info" metadata which describes all the P4 entities (P4 tables, counters, etc.). This metadata is used downstream as follows:
     * P4Runtime controller used to manage the bmv2 program. The SAI API adaptor converts SAI library "c" code calls to P4Runtime socket calls.
     * P4-to-SAI header code generation (see next step below)
 
@@ -301,7 +301,7 @@ As mentioend above, the `make sai` target generates code into the `SAI` submodul
 make sai-clean
 ```
 
-To ensure the baseline code is restored prior to each run, the modified directories under SAI are deleted, then restored via `git checkout -- <path, path, ...>` . This retrieves the subtrees from the SAI submodule, which is stored intact in the local project's Git repo (e.g. under `DASH/.git/modules/sirius-pipeline/SAI/SAI`)
+To ensure the baseline code is restored prior to each run, the modified directories under SAI are deleted, then restored via `git checkout -- <path, path, ...>` . This retrieves the subtrees from the SAI submodule, which is stored intact in the local project's Git repo (e.g. under `DASH/.git/modules/dash-pipeline/SAI/SAI`)
 
 ## Build SAI client test program(s)
 This compiles a simple libsai client program to verify the libsai-to-p4runtime-to-bmv2 stack. It performs table access(es).
@@ -385,7 +385,7 @@ sudo apt install -y git
 ```
 
 ## Install docker
-Need for basically everything to build/test sirius-pipeline.
+Need for basically everything to build/test dash-pipeline.
 
 See:
 * https://docs.docker.com/desktop/linux/install/
@@ -439,7 +439,7 @@ See also:
 * https://www.atlassian.com/git/tutorials/git-submodule#:~:text=A%20git%20submodule%20is%20a,the%20host%20repository%20is%20updated
 
 ### Why use a submodule?
-A Git submodule is like a symbolic link to another repo. It "points" to some other repo via a URL, and is also pinned to a specific revision of that repo. For example, the `DASH/sirius-pipeline/SAI` directory looks like this in Github. The `SAI @ fe69c82` means this is a submodule pointing to the SAI project (at the opencompute-project repo), in particular the `fe69c82` commit SHA.
+A Git submodule is like a symbolic link to another repo. It "points" to some other repo via a URL, and is also pinned to a specific revision of that repo. For example, the `DASH/dash-pipeline/SAI` directory looks like this in Github. The `SAI @ fe69c82` means this is a submodule pointing to the SAI project (at the opencompute-project repo), in particular the `fe69c82` commit SHA.
 
 ![sai-submodule-in-repo](../assets/sai-submodule-in-repo.png)
 

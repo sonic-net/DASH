@@ -68,8 +68,8 @@ __attribute__((constructor))
 static void Init() {
     nextId = 0;
     const grpc::string _grpcTarget = "0.0.0.0:9559";
-    char test_json[] = "/etc/dash/sirius_pipeline.json";
-    char test_proto_json[] = "/etc/dash/sirius_pipeline_p4rt.txt";
+    char test_json[] = "/etc/dash/dash_pipeline.json";
+    char test_proto_json[] = "/etc/dash/dash_pipeline_p4rt.txt";
     int dev_id = 0;
 
     auto p4info = parse_p4info(test_proto_json);

@@ -1,7 +1,7 @@
 #ifndef _SIRIUS_CONNTRACK_P4_
 #define _SIRIUS_CONNTRACK_P4_
 
-#include "sirius_headers.p4"
+#include "dash_headers.p4"
 
 #ifdef PNA_CONNTRACK
 
