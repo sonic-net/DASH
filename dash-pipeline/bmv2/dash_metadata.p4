@@ -1,7 +1,7 @@
 #ifndef _SIRIUS_METADATA_P4_
 #define _SIRIUS_METADATA_P4_
 
-#include "sirius_headers.p4"
+#include "dash_headers.p4"
 
 struct encap_data_t {
     bit<24> vni;

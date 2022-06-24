@@ -24,15 +24,15 @@ SAI/SAI:
 	@echo "Initializing SAI submodule..."
 	git submodule update --init
 
-P4_ARTIFACTS=bmv2/sirius_pipeline.bmv2/sirius_pipeline.json bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.txt
+P4_ARTIFACTS=bmv2/dash_pipeline.bmv2/dash_pipeline.json bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt
 
-p4: bmv2/sirius_pipeline.bmv2/sirius_pipeline.json
+p4: bmv2/dash_pipeline.bmv2/dash_pipeline.json
 
 .PHONY:p4-clean
 p4-clean:
 	-sudo rm -rf $(P4_ARTIFACTS)
 
-P4_SRC=bmv2/sirius_pipeline.p4
+P4_SRC=bmv2/dash_pipeline.p4
 $(P4_ARTIFACTS):
 	@echo "Compile P4 program $(P4_SRC) ..."
 	docker run \
@@ -44,12 +44,12 @@ $(P4_ARTIFACTS):
 	    -b \
 	    bmv2 \
 	    $(P4_SRC) \
-	    -o bmv2/sirius_pipeline.bmv2 \
-	    --p4runtime-files bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.json,bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.txt
+	    -o bmv2/dash_pipeline.bmv2 \
+	    --p4runtime-files bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.json,bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt
 
 .PHONY:clean
 clean: kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac
-	sudo rm -rf bmv2/sirius_pipeline.bmv2
+	sudo rm -rf bmv2/dash_pipeline.bmv2
 	sudo make -C tests/vnet_out clean
 
 .PHONY:dash-shell
@@ -63,8 +63,8 @@ dash-shell:
 run-switch:
 	$(DOCKER_RUN) \
 	    --name simple_switch-$(USER) \
-	    -v $(PWD)/bmv2/sirius_pipeline.bmv2/sirius_pipeline.json:/etc/dash/sirius_pipeline.json \
-	    -v $(PWD)/bmv2/sirius_pipeline.bmv2/sirius_pipeline_p4rt.txt:/etc/dash/sirius_pipeline_p4rt.txt \
+	    -v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline.json:/etc/dash/dash_pipeline.json \
+	    -v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
 	    $(DOCKER_BMV2_IMG) \
 	    sudo \
 	    env LD_LIBRARY_PATH=/usr/local/lib \
@@ -127,7 +127,7 @@ run-sai-test:
 	done; \
 	docker exec -w /tests/vnet_out simple_switch-$(USER) ./vnet_out
 
-docker:
+docker-bmv2:
 	docker build \
 	    -t $(DOCKER_BMV2_IMG) \
 	    --build-arg user=$(USER) \

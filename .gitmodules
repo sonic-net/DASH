@@ -1,4 +1,4 @@
-[submodule "sirius-pipeline/SAI/SAI"]
-	path = sirius-pipeline/SAI/SAI
+[submodule "SAI"]
+	path = dash-pipeline/SAI/SAI
 	url = https://github.com/opencomputeproject/SAI.git
 	branch = master

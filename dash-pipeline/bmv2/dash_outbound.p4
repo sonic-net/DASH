@@ -1,9 +1,9 @@
 #ifndef _SIRIUS_OUTBOUND_P4_
 #define _SIRIUS_OUTBOUND_P4_
 
-#include "sirius_headers.p4"
-#include "sirius_acl.p4"
-#include "sirius_conntrack.p4"
+#include "dash_headers.p4"
+#include "dash_acl.p4"
+#include "dash_conntrack.p4"
 
 control outbound(inout headers_t hdr,
                  inout metadata_t meta,
