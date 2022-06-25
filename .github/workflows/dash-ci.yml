@@ -6,16 +6,16 @@ on:
     paths:
       - '.github/workflows/dash-ci.yml'
       - 'dash-pipeline/**'
-      - '!dash-pipeline/Dockerfile'
-      - '!dash-pipeline/.dockerignore'
+      - '!dash-pipeline/dockerfiles/**'
+      - '!**.dockerignore'
       - '!dash-pipeline/**.md'
   pull_request:
     branches: [ "main" ]
     paths:
       - '.github/workflows/dash-ci.yml'
       - 'dash-pipeline/**'
-      - '!dash-pipeline/Dockerfile'
-      - '!dash-pipeline/.dockerignore'
+      - '!dash-pipeline/dockerfiles/**'
+      - '!**.dockerignore'
       - '!dash-pipeline/**.md'
   workflow_dispatch:
 
