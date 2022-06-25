@@ -1,0 +1,30 @@
+name: DASH-docker-bmv2-build-image
+
+on:
+  push:
+    branches: [ "**" ]
+    paths:
+      - 'dash-pipeline/dockerfiles/Dockerfile.bmv2'
+      - 'dash-pipeline/.dockerignore'
+      - 'dash-pipeline/dockerfiles/.dockerignore'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'dash-pipeline/dockerfiles/Dockerfile.bmv2'
+      - 'dash-pipeline/.dockerignore'
+      - 'dash-pipeline/dockerfiles/.dockerignore'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build docker dash-bmv2 image
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: ./dash-pipeline
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build dash-bmv2 docker image
+      run: make docker-bmv2
+    - name: Publish dash-bmv2 docker image
+      run: make docker-publish-bmv2
