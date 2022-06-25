@@ -5,8 +5,9 @@ all:p4 sai test
 PWD := $(shell pwd)
 
 # Default Docker images, override from env var
-DOCKER_BMV2_IMG ?=chrissommers/dash-bmv2:pr127-220623
 DOCKER_P4C_IMG ?=p4lang/p4c:stable
+DOCKER_BMV2_IMG ?=chrissommers/dash-bmv2:pr127-220623
+DOCKER_SAITHRIFT_IMG ?=chrissommers/dash-saithrift-bldr:220624
 
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
@@ -92,9 +93,29 @@ sai: p4 | SAI/SAI
 .PHONY:sai-clean
 sai-clean: SAI/SAI 
 	@echo "Restoring SAI subdirectories to baseline..."
-	rm -rf SAI/SAI/inc SAI/SAI/experimental SAI/SAI/meta
+	sudo rm -rf SAI/SAI/inc SAI/SAI/experimental SAI/SAI/meta
 	cd SAI/SAI && git checkout -- inc experimental meta
 	sudo rm -rf SAI/lib
+
+
+###############################
+# SAI-THRIFT SERVER TARGETS
+###############################
+
+# Note we have to mount main DASH dir to allow container to "see" the parent Git repo for the SAI submodule
+DOCKER_RUN_SAITHRIFT =\
+	docker run \
+	-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/saithrift \
+	$(DOCKER_SAITHRIFT_IMG) \
+
+sai-thrift-server:
+	$(DOCKER_RUN_SAITHRIFT) \
+	    make $@
+
+sai-thrift-server-clean:
+	$(DOCKER_RUN_SAITHRIFT) \
+	    make $@
+
 
 .PHONY:test sai-test
 test:sai-test
@@ -136,6 +157,17 @@ docker-bmv2:
 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
 	    --build-arg available_processors=$(shell nproc) \
 	    .
+
+docker-saithrift-bldr:
+	docker build \
+	    -t $(DOCKER_SAITHRIFT_IMG) \
+	    --build-arg user=$(USER) \
+	    --build-arg uid=$(shell id -u) \
+	    --build-arg guid=$(shell id -g) \
+	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+	    --build-arg available_processors=$(shell nproc) \
+		-f dockerfiles/Dockerfile.saithrift \
+		dockerfiles
 
 docker-publish:
 	echo "TO DO when we have a proper repository"
