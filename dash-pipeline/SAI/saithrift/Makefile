@@ -18,7 +18,7 @@ sai-thrift-server:
 
 	@echo "Build SAI thrift server and libraries..."
 
-	cd $(SAI) && export SAITHRIFTV2=y && make saithrift-build saithrift-install
+	cd $(SAI) && export SAITHRIFTV2=y && export GEN_SAIRPC_OPTS="-ve" && make saithrift-build saithrift-install
 
 	# NOTE: commands below is a workaround (WA) and needed until packaging of SAI python is fixed.
 	# Re-generate python SAI thrift library again
