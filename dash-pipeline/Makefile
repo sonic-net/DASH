@@ -176,10 +176,10 @@ docker-saithrift-bldr:
 	    --build-arg available_processors=$(shell nproc) \
 		dockerfiles
 
-docker-publish-saithrift:
+docker-publish-saithrift-bldr:
 	echo "TO DO when we have a proper repository"
 
-docker-pull-saithrift:
+docker-pull-saithrift-bldr:
 	docker pull $(DOCKER_SAITHRIFT_IMG)
 
 docker-pull-p4c:

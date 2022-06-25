@@ -25,6 +25,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build dash-saithrift docker image
-      run: make docker-saithrift
+      run: make docker-saithrift-bldr
     - name: Publish dash-saithrift docker image
-      run: make docker-publish-saithrift
+      run: make docker-publish-saithrift-bldr
