@@ -46,7 +46,9 @@ saiexperimentalbmtor.h  saiexperimentaldashacl.h  saiexperimentaldash.h  saiexpe
 ```
 However the generated RPC code has no string "dash":
 ```
-$ grep -rn --include=*.h --include=*.cpp dash  # no results
+DASH/dash-pipeline$ grep -rni --include=*.h --include=*.cpp dash SAI/SAI/meta/generated/
+
+<nothing>
 ```
 Previous experiments by myself which called `SAI/meta/gensairpc.pl -ve` did in fact generate DASH-related code (althogh it failed to build fully as well).
 
@@ -84,11 +86,18 @@ make[3]: Leaving directory '/dash/dash-pipeline/SAI/SAI/meta'
 
 Also I don't see the `-e` flag passed to `perl -Irpc gensairpc.pl`. Shouldn't there be a way to specify that with an ENV variable? Has this script been verified for experimental headers?
 
-Here's the portion of `meta/Makefile` which makes the RPC. I don't see a way to request the `-e` flag. I recommend an env variable such as `GENRPC_OPTS` which is passed to the perl script.
+Here's the portion of `meta/Makefile` which makes the RPC. I don't see a way to request the `-e` flag. I recommend an env variable such as `GENRPC_OPTS` which is passed to the perl script like below:
+
+```
+rpc sai.thrift sai_rpc_server.cpp sai_adapter.py: xml $(XMLDEPS) gensairpc.pl
+	perl -Irpc gensairpc.pl $(GENRPC_OPTS)
 ```
 
-rpc sai.thrift sai_rpc_server.cpp sai_adapter.py: xml $(XMLDEPS) gensairpc.pl
-	perl -Irpc gensairpc.pl
+Lots of generated code appears for DASH:
+```
+DASH/dash-pipeline$ grep -rni --include=*.h --include=*.cpp dash SAI/SAI/meta/generated/
+
+<410 lines of code>
 ```
 
 This part fails:
