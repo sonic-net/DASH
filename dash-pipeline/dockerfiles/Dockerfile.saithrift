@@ -30,7 +30,10 @@ RUN wget http://archive.apache.org/dist/thrift/0.11.0/thrift-0.11.0.tar.gz && \
     make && \
     make install && \
     cd lib/py && \
-    python setup.py sdist 
+    python setup.py sdist && \
+    sudo cp dist/* /usr/lib && \
+    cd / && \
+    rm -rf thrift-0.11.0
 
 WORKDIR /
 

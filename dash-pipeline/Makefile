@@ -7,7 +7,7 @@ PWD := $(shell pwd)
 # Default Docker images, override from env var
 DOCKER_P4C_IMG ?=p4lang/p4c:stable
 DOCKER_BMV2_IMG ?=chrissommers/dash-bmv2:pr127-220623
-DOCKER_SAITHRIFT_IMG ?=chrissommers/dash-saithrift-bldr:220624
+DOCKER_SAITHRIFT_IMG ?=chrissommers/dash-saithrift-bldr:220625
 
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
