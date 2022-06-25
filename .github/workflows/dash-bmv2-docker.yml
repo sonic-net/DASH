@@ -5,12 +5,14 @@ on:
   push:
     branches: [ "**" ]
     paths:
+      - '.github/workflows/dash-bmv2-docker.yml'
       - 'dash-pipeline/dockerfiles/Dockerfile.bmv2'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
     branches: [ "main" ]
     paths:
+      - '.github/workflows/dash-bmv2-docker.yml'
       - 'dash-pipeline/dockerfiles/Dockerfile.bmv2'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
