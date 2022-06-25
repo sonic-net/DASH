@@ -159,6 +159,12 @@ docker-bmv2:
 	    --build-arg available_processors=$(shell nproc) \
 	    dockerfiles
 
+docker-publish-bmv2:
+	echo "TO DO when we have a proper repository"
+
+docker-pull-bmv2:
+	docker pull $(DOCKER_BMV2_IMG)
+
 docker-saithrift-bldr:
 	docker build \
 		-f dockerfiles/Dockerfile.saithrift \
@@ -170,11 +176,11 @@ docker-saithrift-bldr:
 	    --build-arg available_processors=$(shell nproc) \
 		dockerfiles
 
-docker-publish:
+docker-publish-saithrift:
 	echo "TO DO when we have a proper repository"
 
-docker-pull-bmv2:
-	docker pull $(DOCKER_BMV2_IMG)
+docker-pull-saithrift:
+	docker pull $(DOCKER_SAITHRIFT_IMG)
 
 docker-pull-p4c:
 	docker pull $(DOCKER_P4C_IMG)
