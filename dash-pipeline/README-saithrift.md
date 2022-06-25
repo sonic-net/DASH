@@ -30,8 +30,11 @@ To build:
 make clean                   # prepare environment
 make p4                      # compile P4, generate P4Info
 make sai                     # autogen sai headers and libsai.so from P4Info
-make sai-meta                # Modifies files under SAI/SAI
 make sai-thrift-server       # generate sai rpc server and libraries
+```
+OR, just:
+```
+make clean all sai-thrift-server
 ```
 
 It suceeds up to compiling the final Thrift RPC server, where it fails linking to `libsai`. I suspect there are some missing APIs needed in libsai.so. This library is generated from P4 code as described in the main [README](README.md), see the links at the top of this page. 
