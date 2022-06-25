@@ -150,23 +150,24 @@ run-sai-test:
 
 docker-bmv2:
 	docker build \
+		-f dockerfiles/Dockerfile.bmv2 \
 	    -t $(DOCKER_BMV2_IMG) \
 	    --build-arg user=$(USER) \
 	    --build-arg uid=$(shell id -u) \
 	    --build-arg guid=$(shell id -g) \
 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
 	    --build-arg available_processors=$(shell nproc) \
-	    .
+	    dockerfiles
 
 docker-saithrift-bldr:
 	docker build \
+		-f dockerfiles/Dockerfile.saithrift \
 	    -t $(DOCKER_SAITHRIFT_IMG) \
 	    --build-arg user=$(USER) \
 	    --build-arg uid=$(shell id -u) \
 	    --build-arg guid=$(shell id -g) \
 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
 	    --build-arg available_processors=$(shell nproc) \
-		-f dockerfiles/Dockerfile.saithrift \
 		dockerfiles
 
 docker-publish:

@@ -79,7 +79,7 @@ These are work items to complete the project with existing features and function
     * Future - Building the SAI-thrift server
     * Future - Running the SAI-thrift server
 * Consider building the behavioral-model base image from p4lang source at a known version, instead of pulling from Dockerhub, see [Configuration Management](#configuration-management). We might add p4lang/behavioral-model at a known commit level and build a docker image ourselves, so we can control the contents more precisely.
-* Build Docker image automatically when Dockerfile changes, publish and pull from permanent repo
+* Build a Docker image automatically when its Dockerfile changes, publish and pull from permanent repo
 * Use Azure Container Registry (ACR) for Docker images instead of temporary Dockerhub registry
 * Use dedicated higher-performance runners instead of [free Azure 2-core GitHub runner instances](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources)
 * Explore use of [virtualenv](https://virtualenv.pypa.io/en/latest/) to avoid contaiminating the local environment with this project's particular Python requirements.
@@ -170,7 +170,7 @@ This project contains [Git Actions](https://docs.github.com/en/actions) to perfo
   Two tests are currently executed in the CI pipeline. These will be increased extensively over time:
   * The `make run-test` target does a trivial SAI access using a c++ client program. This verifies the libsai-to-P4runtime adaptor over a socket. The test program acts as a P4Runtime client, and the bmv2 simple_switch process is the server.
   * The `make run-ixiac-test` target spins up a two-port software (DPDK) traffic-generator engine using the free version of [ixia-c](https://github.com/open-traffic-generator/ixia-c) controlled by a Python [snappi](https://github.com/open-traffic-generator/snappi) client. Using this approach allows the same scripts to eventually be scaled to line-rate using hardware-based traffic generators.
-* [dash-dev-docker.yml](../.github/workflows/dash-dev-docker.yml): A commit of the [Dockerfile](Dockerfile) will trigger the [make docker](#build-docker-dev-container) build target and rebuild the `dash-bmv2` docker container. It will not publish it though, so it's ephemeral and disappears when the Git runner terminates. The main benefit of this is it may run much faster in the cloud than locally, allowing you to test for a successful build of changes more quickly.
+* [dash-dev-docker.yml](../.github/workflows/dash-dev-docker.yml): A commit of a Dockerfile under [dockerfiles](dockerfiles) will trigger the [make docker-XXX](#build-docker-dev-container) build target and rebuild the corresponding docker container. It will not publish it though, so it's ephemeral and disappears when the Git runner terminates. The main benefit of this is it may run much faster in the cloud than locally, allowing you to test for a successful build of changes more quickly.
 * The CI badge will be updated according to the CI build status and appear on the front page of the repo (it's actually on the top-level README). You can click on this icon to drill down into the Git Actions history and view pass/fail details. Typical icons appear below:
 
   ![CI-badge-passing.svg](../assets/CI-badge-passing.svg)  ![CI-badge-failing.svg](../assets/CI-badge-failing.svg)  
@@ -206,7 +206,7 @@ This explains the various build steps in more details. The CI pipeline does most
 
 Building starts by retrieving a pre-built `dash-bmv2` Docker image from a Docker registry, then executing a series of targets in the main [Makefile](Makefile) via `make <target>`. It is designed to be run either manually; via user-supplied scripts; or from a CI pipeline in the cloud.
 
-See the diagram below. You can read the [Dockerfile](Dockerfile) and all `Makefiles` to get a deeper understanding of the build process.
+See the diagram below. You can read the [dockerfiles](dockerfiles) and all `Makefiles` in various directoriesto get a deeper understanding of the build process.
 
 ## Build Workflow Diagram
 
