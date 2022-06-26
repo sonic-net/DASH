@@ -36,9 +36,7 @@ RUN wget http://archive.apache.org/dist/thrift/0.11.0/thrift-0.11.0.tar.gz && \
     python setup.py sdist && \
     sudo cp dist/* /usr/lib && \
     cd / && \
-    rm -rf thrift-0.11.0
-
-# RUN apt-get install -y python3 python3-pip && pip3 install jinja2
+    rm -rf thrift-0.11.0 thrift-0.11.0.tar.gz
 
 WORKDIR /
 
