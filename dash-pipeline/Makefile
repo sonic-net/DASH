@@ -34,6 +34,7 @@ p4-clean:
 	-sudo rm -rf $(P4_ARTIFACTS)
 
 P4_SRC=bmv2/dash_pipeline.p4
+# TODO add p4 source dependencies
 $(P4_ARTIFACTS):
 	@echo "Compile P4 program $(P4_SRC) ..."
 	docker run \
@@ -80,12 +81,18 @@ kill-switch:
 
 # TODO - create separate rules for headers, libsai.so
 .PHONY:sai
-sai: p4 | SAI/SAI 
+
+sai:sai-headers libsai
+
+sai-headers: p4 | SAI/SAI 
 	@echo "Generate SAI library headers and implementation..."
 	$(DOCKER_RUN) \
 		--name build_sai-$(USER) \
-		-w /SAI $(DOCKER_BMV2_IMG) \
+		-w /SAI $(DOCKER_SAITHRIFT_IMG) \
 	    ./generate_dash_api.sh
+
+# TODO - add SAI header dependencies
+libsai:
 	@echo "build libsai.so..."
 	$(DOCKER_RUN) -w /SAI/lib $(DOCKER_BMV2_IMG) \
 	    make
