@@ -132,7 +132,7 @@ The following applies:
 
 ![sdn-virtual-port](images/sdn/sdn-virtual-port.svg)
 
-For more information, see **[SDN pipeline basic elements](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**.
+For more information, see **[SDN pipeline basic elements](sdn-pipeline-basic-elements.md#packet-flow---selecting-packet-direction)**.
 
 ## Routing (Routes and Route-Action)
 
@@ -269,11 +269,11 @@ transposition engine and matching at each layer.  For subsequent packets, we
 take the Fast Path, matching a unified flow via UFID and applying a
 transposition directly against rules.
 
-For more information, see **[SDN pipeline basic elements](sdn-packet-flow-transforms.md#packet-flow---selecting-packet-direction)**. 
+For more information, see **[SDN pipeline basic elements](sdn-pipeline-basic-elements.md#packet-flow---selecting-packet-direction)**. 
 
 ## Packet transforms
 
-See packet transforms in [SDN pipeline basic elements](sdn-packet-flow-transforms.md#packet-transforms).
+See packet transforms in **[SDN pipeline basic elements](sdn-pipeline-basic-elements.md#packet-transforms)**.
 
 ## Packet Transform Examples
 
