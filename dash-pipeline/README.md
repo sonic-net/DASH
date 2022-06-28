@@ -8,7 +8,7 @@ make docker
 ## Build pipeline
 ```
 make clean
-make bmv2/sirius_pipeline.bmv2/sirius_pipeline.json
+make bmv2/dash_pipeline.bmv2/dash_pipeline.json
 make sai
 make test
 ```

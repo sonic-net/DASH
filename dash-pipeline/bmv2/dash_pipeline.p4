@@ -1,26 +1,26 @@
 #include <core.p4>
 #include <v1model.p4>
-#include "sirius_headers.p4"
-#include "sirius_metadata.p4"
-#include "sirius_parser.p4"
-#include "sirius_vxlan.p4"
-#include "sirius_outbound.p4"
-#include "sirius_inbound.p4"
-#include "sirius_conntrack.p4"
+#include "dash_headers.p4"
+#include "dash_metadata.p4"
+#include "dash_parser.p4"
+#include "dash_vxlan.p4"
+#include "dash_outbound.p4"
+#include "dash_inbound.p4"
+#include "dash_conntrack.p4"
 
-control sirius_verify_checksum(inout headers_t hdr,
+control dash_verify_checksum(inout headers_t hdr,
                          inout metadata_t meta)
 {
     apply { }
 }
 
-control sirius_compute_checksum(inout headers_t hdr,
+control dash_compute_checksum(inout headers_t hdr,
                           inout metadata_t meta)
 {
     apply { }
 }
 
-control sirius_ingress(inout headers_t hdr,
+control dash_ingress(inout headers_t hdr,
                   inout metadata_t meta,
                   inout standard_metadata_t standard_metadata)
 {
@@ -85,10 +85,12 @@ control sirius_ingress(inout headers_t hdr,
 
     action set_eni_attrs(bit<32> cps,
                          bit<32> pps,
-                         bit<32> flows) {
-        meta.eni_data.cps   = cps;
-        meta.eni_data.pps   = pps;
-        meta.eni_data.flows = flows;
+                         bit<32> flows,
+                         bit<1> admin_state) {
+        meta.eni_data.cps         = cps;
+        meta.eni_data.pps         = pps;
+        meta.eni_data.flows       = flows;
+        meta.eni_data.admin_state = admin_state;
     }
 
     @name("eni|dash")
@@ -208,6 +210,10 @@ control sirius_ingress(inout headers_t hdr,
                                           hdr.ethernet.dst_addr;
         eni_ether_address_map.apply();
         eni.apply();
+        if (meta.eni_data.admin_state == 0) {
+            deny();
+            return;
+        }
 
         if (meta.direction == direction_t.OUTBOUND) {
             outbound.apply(hdr, meta, standard_metadata);
@@ -222,16 +228,16 @@ control sirius_ingress(inout headers_t hdr,
     }
 }
 
-control sirius_egress(inout headers_t hdr,
+control dash_egress(inout headers_t hdr,
                  inout metadata_t meta,
                  inout standard_metadata_t standard_metadata)
 {
     apply { }
 }
 
-V1Switch(sirius_parser(),
-         sirius_verify_checksum(),
-         sirius_ingress(),
-         sirius_egress(),
-         sirius_compute_checksum(),
-         sirius_deparser()) main;
+V1Switch(dash_parser(),
+         dash_verify_checksum(),
+         dash_ingress(),
+         dash_egress(),
+         dash_compute_checksum(),
+         dash_deparser()) main;
