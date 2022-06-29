@@ -26,8 +26,8 @@ Last update: 06/22/2022
 ## Overview
 
 The VNET to VNET scenario is the starting point to design, implement and test
-core DASH mechanisms in VM to VM communication, using an Appliance for rules and
-routing offload. In particular it allows the following:
+core DASH mechanisms in VM to VM communication in VNET, using an Appliance for rules and
+routing offload. The scenario allows the following:
 
 - Route/LPM support
 - Underlay IPv4 and IPv6
@@ -74,6 +74,7 @@ When talking about packet flow, we need to think about a process that involves
 several steps, as explained below. 
 
 > [!NOTE] From [SONiC-DASH HLD](../../general/design/dash-sonic-hld.md)
+
 ### Outbound packet processing pipeline
 
 ![dash-outbound](../../general/design/images/dash-hld-outbound-packet-processing-pipeline.svg)
@@ -85,7 +86,7 @@ several steps, as explained below.
   assigned to the **VM->Appliance**.
 - Using the inner `src-mac`, **maps to the corresponding ENI**.
 - The incoming packet will always be **VXLAN encapped** and the outer `dst-ip`
-  is the **appliance VIP**. 
+  is the **appliance VIP**.
 - The pipeline parses the VNI, and for **VM traffic**, the VNI shall be a
   **special reserved VNI**-
 - Everything else shall be treated as network traffic(RX). 
@@ -100,13 +101,13 @@ In the outbound flow, the criteria listed below are applied.
   restrictive of the three ACLs combined.
 - After the ACL stages, the appliance performs **LPM routing** based on the
   **inner dst-ip** and applies the respective action: **encap**, **subsequent**
-  **CA-PA mapping**. 
+  **CA-PA mapping**.
 - Finally, it **updates** the **connection tracking table** for both inbound and
   outbound.
 
 ### Inbound packet processing pipeline
-	
-  ![dash-outbound](../../general/design/images/dash-hld-inbound-packet-processing-pipeline.svg)
+
+![dash-outbound](../../general/design/images/dash-hld-inbound-packet-processing-pipeline.svg)
 
 <figcaption><i>Figure 3 - Intbound packet processing pipeline</i></figcaption><br/><br/>
 
@@ -228,7 +229,7 @@ DASH_VNET_MAPPING_TABLE:Vnet1:10.1.1.1: {
 
 The next sections describe the lookup behavior in the outbound direction. For
 the inbound direction, after LPM/ACL lookup, the pipeline uses the `underlay_ip`
-as specified in the ENI table to Vxlan encapsulate the packet. ??
+as specified in the ENI table to Vxlan encapsulate the packet.
 
 ### Routing a packet to address 10.1.1.1
 
@@ -289,130 +290,6 @@ packet destined to `10.2.5.1`. Below are the processing pipeline (lookup) steps.
 1. Perform LPM lookup. 
 2. Select routing table `DASH_ROUTE_TABLE:10.2.5.0/24`. The `action_type` is `drop`.
 3. Drop the packet.  
-
-<!-- 
-## VM to VM communication in VNET example 2
-
-(from SDN document)
-
-The following is an example of packet transfer in VM to VM communication in
-VNET.
-
-### V-Port definition
-
-- Physical address = `100.0.0.2`
-- V-Port Mac = `V-PORT_MAC`
-
-### VNET definition
-
-- VNET1 `10.0.0.0/24`
-- VNET2 `20.0.0.0/24`
-
-### VNET mapping table
-
-| | V4 underlay| V6 underlay| Mac-Address| Mapping Action | VNI
-|:----------|:----------|:----------|:----------|:----------|:--------------|
-| 10.0.0.1| 100.0.0.1| 3ffe :: 1| Mac1| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 100 |
-| 10.0.0.2| 100.0.0.2| 3ffe :: 2| Mac2| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 200 |
-| 10.0.0.3| 100.0.0.3| 3ffe :: 3| Mac3| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 300 |
-
-### Match action tables
-
-This step, as per the P4 model, see [P416 Language
-Specification](https://p4.org/p4-spec/docs/P4-16-v1.2.2.html), is executed based
-on a set of **match/action** tables which are traversed sequentially by the P4
-parser.
-
-> [!NOTE] A P4 program defines a packet-processing pipeline, but the rules
-> within each table are inserted by the control plane. When a rule matches a
-> packet, its action is invoked with parameters supplied by the control plane as
-> part of the rule.
-
-The following are the example applicable tables.
-
-#### ACL1 table
-
-The following table prescribes that the packets directed to the destination
-address `10.0.0.10` are blocked, while the packets directed to all other
-destinations are allowed (default). 
-
-|Match/Action|Value              |
-|------------|-------------------|
-|default     |allow              |
-|match       |dst add=`10.0.0.10`|
-|action      |block              |
-
-#### ACL2 table
-
-The following table prescribes that the packets directed to the destination
-address `10.0.0.11` are blocked, while the packets directed to all other
-destinations are allowed (default). 
-
-|Match/Action|Value              |
-|------------|-------------------|
-|default     |allow              |
-|match       |dst add=`10.0.0.11`|
-|action      |block              |
-
-#### ACL3 table
-
-The following table prescribes that the packets directed to all destinations are
-allowed (default). 
-
-|Match/Action|Value              |
-|------------|-------------------|
-|default     |allow              |
-
-#### Routing table
-
-The routing step shown in the following table defines when a packet is routed
-from the source to the destination.
-
-|Match/Action|Value                 |
-|------------|----------------------|
-|match       |dst add==`20.0.0.0/24`|
-|            |src add=`10.0.0.0/24` |
-|action      |allow                 |
-
-#### Mapping table
-
-From the previopus [VNET mapping table](#vnet-mapping-table) table and
-considering the routing discussed before you get the following:
-
-|Source               |Destination                   |Action                    |Routing/Mapping                    |
-|---------------------|------------------------------|--------------------------|-----------------------------------|
-|`10.0.0.1`           |`10.0.0.10`                   |Blocked (ACL1)            |Blocked                            |
-|`10.0.0.1` SMAC1     |`10.0.0.11` DMAC_FAKE         |Blocked (ACL1, ACL2)      |Blocked                            |
-|`10.0.0.1` (1) SMAC1 |`10.0.0.2` (2) DMAC_FAKE      |Allowed (ACL1, ACL2. ACL3)|Matched LPM route `10.0.0.0/24` (3)|
-
-**Notes**
-
-- (1) Outer: Physical host IP, VXLAN VNI: custom, Inner Mac: SMAC1
-- (2) Outer: Physical SDN Appliance IP, DMAC_FAKE
-- (3) **Execute action VNET** that will look up in the mapping table and take
-mapping action. This mapping action is (row 2 of the [VNET mapping
-table](#vnet-mapping-table)):
-  - Outer:
-    - SRC: `100.0.0.1`
-    - DST: `100.0.0.2`
-  - VXLAN
-    - VNI: 200
-  - Inner Mac:
-    - SRC - SMAC1 DST
-  - Mac1
-    - Inner IP: `10.0.0.1` -> `10.0.0.2`.
-
-- [DMAC_FAKE](https://github.com/Azure/DASH/wiki/Glossary#dmac_fake). A
-  hardcoded MAC address (ex: 12:34:56:78:9a:bc). It is not a MAC of an actual
-  VM, it is simply a MAC address to "satisfy" the TCP/IP stack of Windows/Linux.
-
-The following figure shows the example processing pipeline.
-
-![packet-processing-pipeline-example](./images/packet-processing-pipeline-example.png)
-
-<figcaption><i>Figure 2 - Example processing pipeline</i></figcaption> <br/>
-
--->
 
 ## Appendix
 
