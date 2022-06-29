@@ -1,0 +1,181 @@
+#include <mutex>
+#include <unordered_map>
+#include <atomic>
+#include <limits>
+#include <stdint.h>
+#include <PI/pi.h>
+#include <grpcpp/grpcpp.h>
+#include "p4/v1/p4runtime.grpc.pb.h"
+#include "utils.h"
+#include "saitypes.h"
+#include <fstream>
+#include <google/protobuf/text_format.h>
+#include <google/rpc/code.pb.h>
+
+#if __APPLE__
+#include <net/ethernet.h>
+#else
+#include <netinet/ether.h>
+#include <netinet/in.h>
+#endif
+
+#define LOG(x) std::cerr<<x
+
+using namespace std;
+
+static std::shared_ptr<grpc::Channel> _grpcChannel;
+static const grpc::string _grpcTarget = "localhost:9876";
+static int deviceId;
+static unordered_map<sai_object_id_t, p4::v1::TableEntry *> tableEntryMap;
+static std::mutex tableLock;
+static atomic<sai_object_id_t> nextId;
+static std::unique_ptr<p4::v1::P4Runtime::Stub> stub;
+
+int leadingNonZeroBits(const uint32_t ipv4) {
+    auto firstSetBit  = __builtin_ffs(ipv4);
+    if (0==firstSetBit) {
+        return 0;
+    }
+    return 33 -  firstSetBit;
+}
+
+int leadingNonZeroBits(const sai_ip6_t ipv6) {
+    int trailingZeros = 0;
+    for (int i = 0; i < 16; i+=4) {
+        auto num = static_cast<uint32_t>(ipv6[i]) +  
+        (static_cast<uint32_t>(ipv6[i+1]) << 8) + 
+        (static_cast<uint32_t>(ipv6[i+2]) << 16) + 
+        (static_cast<uint32_t>(ipv6[i+3]) << 24);
+        auto firstSetBit  = leadingNonZeroBits(num);
+        if (firstSetBit > 0) {
+            return 129-trailingZeros-firstSetBit;
+        }
+        trailingZeros += 32;
+    }
+    return 0;
+}
+
+p4::config::v1::P4Info parse_p4info(const char *path) {
+    p4::config::v1::P4Info p4info;
+    std::ifstream istream(path);
+    assert(istream.good());
+    google::protobuf::io::IstreamInputStream istream_(&istream);
+    google::protobuf::TextFormat::Parse(&istream_, &p4info);
+    return p4info;
+}
+
+__attribute__((constructor))
+static void Init() {
+    nextId = 0;
+    const grpc::string _grpcTarget = "0.0.0.0:9559";
+    char test_json[] = "/etc/dash/dash_pipeline.json";
+    char test_proto_json[] = "/etc/dash/dash_pipeline_p4rt.txt";
+    int dev_id = 0;
+
+    auto p4info = parse_p4info(test_proto_json);
+
+    auto set_election_id = [](p4::v1::Uint128 *election_id) {
+        election_id->set_high(0);
+        election_id->set_low(1);
+    };
+
+    grpc::ClientContext stream_context;
+    _grpcChannel = grpc::CreateChannel(_grpcTarget, grpc::InsecureChannelCredentials());
+    stub = p4::v1::P4Runtime::NewStub(_grpcChannel);
+    auto stream = stub->StreamChannel(&stream_context);
+    {
+        p4::v1::StreamMessageRequest request;
+        auto arbitration = request.mutable_arbitration();
+        arbitration->set_device_id(dev_id);
+        set_election_id(arbitration->mutable_election_id());
+        stream->Write(request);
+        p4::v1::StreamMessageResponse response;
+        stream->Read(&response);
+        assert(response.update_case() == p4::v1::StreamMessageResponse::kArbitration);
+        assert(response.arbitration().status().code() == ::google::rpc::Code::OK);
+    }
+    {
+        p4::v1::SetForwardingPipelineConfigRequest request;
+        request.set_device_id(dev_id);
+        request.set_action(
+                p4::v1::SetForwardingPipelineConfigRequest_Action_VERIFY_AND_COMMIT);
+        set_election_id(request.mutable_election_id());
+        auto config = request.mutable_config();
+        config->set_allocated_p4info(&p4info);
+        std::ifstream istream(test_json);
+        config->mutable_p4_device_config()->assign(
+                (std::istreambuf_iterator<char>(istream)),
+                 std::istreambuf_iterator<char>());
+
+        p4::v1::SetForwardingPipelineConfigResponse rep;
+        grpc::ClientContext context;
+        auto status = stub->SetForwardingPipelineConfig(
+                &context, request, &rep);
+        assert(status.ok());
+        config->release_p4info();
+    }
+}
+
+int GetDeviceId() {
+    return deviceId;
+}
+
+grpc::StatusCode MutateTableEntry(p4::v1::TableEntry *entry, p4::v1::Update_Type updateType) {
+    p4::v1::WriteRequest request;
+    request.set_device_id(GetDeviceId());
+    auto update = request.add_updates();
+    update->set_type(updateType);
+    auto entity = update->mutable_entity();
+    entity->set_allocated_table_entry(entry);
+    
+    p4::v1::WriteResponse rep;
+    grpc::ClientContext context;
+    grpc::Status status = stub->Write(&context, request, &rep);
+    if (status.ok()) {
+        LOG("GRPC call Write::add_one_entry OK: ");
+    }
+    else {
+        LOG("GRPC ERROR["<< status.error_code() <<"]: " << status.error_message() << ", " << status.error_details());
+        LOG("GRPC call Write::add_one_entry ERROR: " << std::endl << entry->ShortDebugString());
+    }
+    //MILIND?? What is this? reference release? memory release?
+    entity->release_table_entry();
+    return status.error_code();
+}
+
+bool InsertInTable(p4::v1::TableEntry *entry, sai_object_id_t *objId) {
+    auto retCode = MutateTableEntry(entry, p4::v1::Update_Type_INSERT);
+    if (grpc::StatusCode::OK != retCode) {
+        delete entry;
+        return false;
+    }
+
+    tableLock.lock();
+    *objId = nextId++;
+    tableEntryMap[*objId] = entry;
+    tableLock.unlock();
+    return true;
+}
+
+bool RemoveFromTable(sai_object_id_t id) {
+    tableLock.lock();
+    auto itr = tableEntryMap.find(id);
+    if (itr == tableEntryMap.end()) {
+        tableLock.unlock();
+        LOG("id: " << id << " not present in the table for deletion!" <<endl);
+        return false;
+    }
+
+    auto entry = itr->second;
+    auto retCode = MutateTableEntry(entry, p4::v1::Update_Type_DELETE);
+    if (grpc::StatusCode::OK != retCode) {
+        tableLock.unlock();
+        return false;
+    }
+
+    tableEntryMap.erase(itr);
+    tableLock.unlock();
+    delete entry;
+    return true;
+}
+

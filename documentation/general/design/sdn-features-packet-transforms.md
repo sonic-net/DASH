@@ -2,25 +2,48 @@
 
 [<< Back to DASH top-level Documents](../../README.md#contents) ]
 
->**NOTE**: This document is destined to be restructured into general- and per-service specifications.
+# SDN Features, Packet Transforms and Scale
 
-**Table of contents**
+> [!NOTE] This document is in the process of being restructured into general and
+> per-service specifications.
 
-- [First Target Scenario:  Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance](#first-target-scenario--highly-optimized-path-dedicated-appliance-little-processing-or-encap-to-sdn-appliance-and-policies-on-an-sdn-appliance)
+- [First Target Scenario:  SKU for Networked Virtual Appliance
+  (NVA)](#first-target-scenario--sku-for-networked-virtual-appliance-nva)
 - [Scale per DPU (Card)](#scale-per-dpu-card)
 - [Scenario Milestone and Scoping](#scenario-milestone-and-scoping)
-- [Virtual Port and Packet Direction](#virtual-port-and-packet-direction)
-- [Packet processing Pipeline (Sequential prefix match lookups)](#packet-processing-pipeline-sequential-prefix-match-lookups)
-	- [ACL](#acl)
-- [Routes and Route-Action](#routes-and-route-action)
+- [Virtual Port (or Elastic Network Interface / ENI) and Packet
+  Direction](#virtual-port-or-elastic-network-interface--eni-and-packet-direction)
+- [First Target Scenario:  SKU for Networked Virtual Appliance
+  (NVA)](#first-target-scenario--sku-for-networked-virtual-appliance-nva)
+- [Scale per DPU (Card)](#scale-per-dpu-card)
+- [Scenario Milestone and Scoping](#scenario-milestone-and-scoping)
+- [Virtual Port (aka Elastic Network Interface / ENI) and Packet
+  Direction](#virtual-port-aka-elastic-network-interface--eni-and-packet-direction)
+- [Routing (Routes and Route-Action)](#routing-routes-and-route-action)
+  - [Outbound routing](#outbound-routing)
+  - [Inbound routing](#inbound-routing)
+  - [Route rules processing](#route-rules-processing)
+    - [Outbound (LPM) route rules
+      processing](#outbound-lpm-route-rules-processing)
+    - [Inbound (priority) route rules
+      processing](#inbound-priority-route-rules-processing)
+- [First Target Scenario:  SKU for Networked Virtual Appliance (NVA)](#first-target-scenario--sku-for-networked-virtual-appliance-nva)
+- [Scale per DPU (Card)](#scale-per-dpu-card)
+- [Scenario Milestone and Scoping](#scenario-milestone-and-scoping)
+- [Virtual Port (aka Elastic Network Interface / ENI) and Packet Direction](#virtual-port-aka-elastic-network-interface--eni-and-packet-direction)
+- [Routing (Routes and Route-Action)](#routing-routes-and-route-action)
+  - [Outbound routing](#outbound-routing)
+  - [Inbound routing](#inbound-routing)
+  - [Route rules processing](#route-rules-processing)
+    - [Outbound (LPM) route rules processing](#outbound-lpm-route-rules-processing)
+    - [Inbound (priority) route rules processing](#inbound-priority-route-rules-processing)
 - [Packet Flow](#packet-flow)
-	- [Inbound](#inbound)
-	- [Outbound](#outbound)
+- [Packet transforms](#packet-transforms)
 - [Packet Transform Examples](#packet-transform-examples)
-	- [VNET to VNET Traffic](#vnet-to-vnet-traffic)
-	- [VNET to Internet - TBD](#vnet-to-internet---tbd)
-	- [VNET to Service Endpoints - TBD](#vnet-to-service-endpoints---tbd)
-	- [VNET to Private Link  - TBD](#vnet-to-private-link----tbd)
+  - [VNET to VNET Traffic](#vnet-to-vnet-traffic)
+  - [VNET to Internet - TBD](#vnet-to-internet---tbd)
+  - [VNET to Service Endpoints - TBD](#vnet-to-service-endpoints---tbd)
+  - [VNET to Private Link  - TBD](#vnet-to-private-link----tbd)
 - [Metering](#metering)
 - [VNET Encryption](#vnet-encryption)
 - [Telemetry](#telemetry)
@@ -32,29 +55,23 @@
 - [Flow Replication](#flow-replication)
 - [Unit Testing and development](#unit-testing-and-development)
 - [Internal Partner dependencies](#internal-partner-dependencies)
-- [Packet transforms](#packet-transforms)
-	- [VNET](#vnet)
-	- [Scenario:  VM<->VM (in VNET) communication](#scenario--vm-vm-in-vnet-communication)
-	- [Internal Load balancer](#internal-load-balancer)
-	- [Private Link](#private-link)
-	- [Private Link Service](#private-link-service)
-	- [Service Tunneling](#service-tunneling)
-	- [Inbound from LB](#inbound-from-lb)
-	- [Outbound NAT - L4](#outbound-nat---l4)
 
-# SDN Features, Packet Transforms and Scale
+## First Target Scenario:  SKU for Networked Virtual Appliance (NVA)
 
-## First Target Scenario:  Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN Appliance and Policies on an SDN Appliance
+Highly Optimized Path, Dedicated Appliance, Little Processing or Encap to SDN
+Appliance and Policies on an SDN Appliance Why do we need this scenario?  There
+is a huge cost associated with establishing the first connection (and the CPS
+that can be established)
 
-Why do we need this scenario?  There is a huge cost associated with establishing the first connection (and the CPS that can be established).
-
-- A high Connections per Second (CPS) / Flow SKU for Networked Virtual Appliances (NVA)
+- A high Connections per Second (CPS) / Flow SKU for Networked Virtual
+  Appliances (NVA)
 
  ![sdn-high-cps](images/sdn-high-cps.svg)
 
 ## Scale per DPU (Card)
 
-**Note: Below are the expected numbers per Data Processing Unit (DPU); this applies to both IPV4 and IPV6 underlay and overlay*
+**Note: Below are the expected numbers per Data Processing Unit (DPU); this
+applies to both IPV4 and IPV6 underlay and overlay*
 
 **IPV6 numbers will be lower*
 
@@ -71,155 +88,133 @@ Why do we need this scenario?  There is a huge cost associated with establishing
 
 ## Scenario Milestone and Scoping
 
-| Scenario | Feature | Perf | Timeline |
+| Scenario | Feature | Perfomance Metrics | Timeline |
 |:---------|:---------|:-----|-----|
-| 1 | <ul> <li>VNET <-> VNET </li> <li>Route Support </li> <li>LPM Support </li> <li>ACL Support</li> </ul>|CPS<br/>Flow<br/>PPS</br>Rule Scale<img width=400/></br> |
+| 1 | <ul> <li>VNET <-> VNET </li> <ul><li>Route Support </li> <li>LPM Support </li> <li>ACL Support</li></ul></ul>|CPS<br/>Flow<br/>PPS</br>Rule Scale<img width=400/></br> |
 | 2  | <ul> <li>Load Balancer Inbound</li><li>VIP Inbound</li></ul>  |  | |
 | 3 | Private Link Outbound (transposition), encapsulate and change packet IPv4 to IPv6 (4 bits embedded)  |  | |
 | 4 | L3 / L4 Source NAT (correlated w/#2) outbound perspective (Cx address) to Internet; changing Cx source IP to Public IP (1:1 mapping)  |  | |
 | 5 | Private Link Service Link Service (dest side of Private Link) IPv6 to IPv4; DNAT’ing     |  | |
 | 6 | Flow replication; supporting High Availability (HA); flow efficiently replicates to secondary card; Active/Passive (depending upon ENI policy) or can even have Active/Active; OR provision the same ENI over multiple devices w/o multiple SDN appliances – Primaries for a certain set of VMS can be on both     |  | Not a must have for Private Preview <img width=400/>|
 
-## Virtual Port and Packet Direction
+## Virtual Port (aka Elastic Network Interface / ENI) and Packet Direction
 
-An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance will have multiple cards; 1 card will have multiple machines or bare-metal servers), which supports Virtual Ports.   These can map to policy buckets corresponding to customer workloads, example: Virtual Machines, Bare Metal servers.
+An SDN appliance in a multi-tenant network appliance (meaning 1 SDN appliance
+will have multiple cards; 1 card will have multiple machines or bare-metal
+servers), which supports Virtual Ports.   These can map to policy buckets
+corresponding to customer workloads, for example: Virtual Machines or Bare Metal
+servers servers.
 
-- The SDN controller will create these virtual ports on SDN appliance and associate corresponding SDN policies like – Route, ACL, NAT etc. to these virtual ports.  In other words, our software will communicate with the cards, hold card inventory and SDN placement, call API’s that are exposed through the card create policies, setup ENI, routes, ACLs, NAT, and different rules.
-- Each Virtual port will be created with an ENI identifier like – Mac address, VNI or more.
-  - Virtual port will also have attributes like – Flow time-out, QOS, port properties related to the port.
+The Elastic Network Interface (ENI), is an independent entity that has a
+collection of routing policies. Usually there is a 1:1 mapping between the VM
+NIC (Physical NIC) and the ENI (Virtual NIC).  The ENI has specific match
+identification criteria, which is used to identify **packet direction**. The
+current version only supports **mac-address** as ENI identification criteria. 
+  
+Once a packet arrives **Inbound** to the target (DPU), it must be forwarded to
+the correct ENI policy processing pipeline. This ENI selection is done based on
+the **inner destination MAC** of the packet, which is matched against the MAC of
+the ENI. 
 
-  - Virtual port is the container which holds all policies.
+The SDN controller will create these virtual ports / ENIs on an SDN appliance
+and associate corresponding SDN policies such as – Route, ACL, NAT etc. to these
+virtual ports.  In other words, our software will communicate with the cards,
+hold card inventory and SDN placement, call API’s that are exposed through the
+card:  create policies, setup ENI, routes, ACLs, NAT, and different rules.
 
-	![sdn-virtual-port](images/sdn-virtual-port.svg)
+The following applies:
 
-- On receiving a packet from the wire, the SDN appliance will determine the Packet direction, matching ENI, and packet processing strategy based on *Encap Transformation and Rules Evaluation*.  Upon receiving a packet, the SDN appliance will determine:
+- Each Virtual Port (ENI) will be created with an ENI identifier such as – Mac
+  address, VNI or more.
+- A Virtual Port also has attributes such as : *flow time-out*, *QOS*, *port
+  properties* related to the port.
+- The Virtual Port is the container which holds all policies.
 
-- Packet Direction - which is evaluated based off of the most-outer **VNI** lookup (implementation dependent) from the left-side (see figure below, a DASH optimized VM sending Outbound packets) behind the Appliance.  If there is no match, the direction is Inbound).
+![sdn-virtual-port](images/sdn/sdn-virtual-port.svg)
 
-- ENI Selection - Outbound uses source-MAC, Inbound uses destination-MAC
-- SLB decap (if packet was encapped by SLB)
-- Decap VNET GRE key
+For more information, see **[SDN pipeline basic elements](sdn-pipeline-basic-elements.md#packet-flow---selecting-packet-direction)**.
 
-  - Once the ENI is matched, the packet is first matched with flow table to check whether an existing flow already matches.  If a flow match is found, a corresponding match action is executed without entering into rule processing. Flow match direction is identified based on source and destination MAC.
+## Routing (Routes and Route-Action)
 
-  - If no flow match is found, the ENI rule processing pipeline will execute.
+Routing must be based on the **Longest Prefix Match** (LPM) and must support all
+**underlay and overlay** combinations described below:
 
-    - **Inbound rule** processing pipeline is executed if destination MAC in the packet matches the ENI MAC. Once rule pipeline is executed corresponding flows are created.
+- inner IPv4 packet encapped in outer IPv4 packet 
+- inner IPv4 packet encapped in outer IPv6 packet 
+- inner IPv6 packet encapped in outer IPv4 packet 
+- inner IPv6 packet encapped in outer IPv6 packet 
 
-    - **Outbound rule** processing pipeline is executed if source MAC in the packet matches the ENI MAC.
+The routing pipeline must support the routing models shown below.
 
-      - Once outbound rule processing is complete and final transforms are identified, the corresponding flow is created in the flow table.
+### Outbound routing 
 
-      - Depending upon the implementation of the flow table, a corresponding inbound flow may also be inserted to enable response packets to match the flow and bypass the rule processing pipeline.
+1. **Transpositions** 
+   - Direct traffic – pass thru with static SNAT/DNAT (IP, IP+Port
+   - Packet upcasting (IPv4 -> IPv6 packet transformation) 
+   - Packet downcasting (IPv6 -> IPv4 packet transformation) 
+1. **Encap** 
+   - VXLAN/GRE encap – static rule 
+   - VXLAN/GRE encap – based on mapping lookup 
+   - VXLAN/GRE encap – calculated based on part of SRC/DEST IP of inner packet 
+1. **Up to 3 levels of routing transforms** (example: transpose + encap + encap) 
 
-      - **Example**: VM with IP 10.0.0.1 sends a packet to 8.8.8.8, VM Inbound ACL blocks all internet, VM outbound ACL allows 8.8.8.8 \- Response packet from 8.8.8.8 must be allowed without opening any inbound ACL due to the flow match.
+### Inbound routing 
 
-	![sdn-appliance](images/sdn-appliance.svg)
+1. **Decap** 
+   - VXLAN/GRE decap – static rule 
+   - VXLAN/GRE decap – based on mapping lookup 
+   - VXLAN/GRE decap – inner packet SRC/DEST IP calculated based on part of
+     outer packet SRC/DEST IP 
+1. **Transpositions** 
+   - Direct traffic – pass thru with static SNAT/DNAT (IP, IP+Port) 
+   - Packet upcasting (IPv4 -> IPv6 packet transformation) 
+   - Packet downcasting (IPv6 -> IPv4 packet transformation) 
+1. **Up to 3 level of routing transforms** (example: decap + decap + transpose) 
 
-- Note: the VNI is **static** on the 'left-side' (most-outer) of the diagram (there is only 1 encap) from the reserved VNI range
-- The VNI will be **different** depending upon the Inbound 'right-side' circumstance (Internet, ER Gateway for example)
+All routing rules must optionally allow for **stamping** the source MAC (to
+**enforce Source MAC correctness**), `correct/fix/override source mac`. 
 
-## Packet processing Pipeline (Sequential prefix match lookups)
+### Route rules processing
 
-### ACL
+#### Outbound (LPM) route rules processing
 
-- The ACL pipeline has 3-5 levels; an ACL decision is based on the most restrictive match across all 3 levels.  The 1st layer (contains default rules) is *controlled by Azure/MSFT*.  The 2nd and 3rd layers are *Customer controlled*. The 4th and 5th layers might be for example, *VM/Subnet/Subscription* layers. These layers might be security rules or a top level entity controlled by an Administrator or an IT Department.
+- Matching is based on destination IP only - using the Longest Prefix Match
+(LPM) algorithm.
+- Once the rule is matched, the correct set of **transposition, encap** steps
+must be applied depending on the rule.
+- Only one rule will be matched.
 
-- If an ACL rule with bit exit ACL pipeline on hit is matched, the ACL pipeline is abandoned.
+#### Inbound (priority) route rules processing
 
-- Expected ACL scale \- max 100k prefixes, max 10k ports
+All inbound rules are matched based on the priority order (with lower priority
+value rule matched first). Matching is based on multiple fields (or must match
+if field is populated). The supported fields are: 
 
-- ACL table entry count = 1000 per table. (NOTE: Each table entry can have comma separated prefix list.)
+- Most Outer Source IP Prefix 
+- Most Outer Destination IP Prefix 
+- VXLAN/GRE key 
 
-- Action Definitions:  
+Once the rule is matched, the correct set of **decap, transposition** steps must
+be applied depending on the rule. **Only one rule will be matched**. 
 
-  - Block (terminate)
-
-    - If ‘terminate’ is not used here, the last line is the most important in ACL Level1
-
-  - Soft Block (general block, with specific permits, non-terminating, proceed to next group) or think of this as a Block, and then a ‘no’ for ‘termination’.
-
-  - Allow (non-terminate, proceed to next, continue to FW rules)  
-
-  - Default action = Deny (This is the default value if no rules are matched; traffic should be dropped.  This is the default action of firewalls, however it is OK to be configurable.  If not, we want to default Deny/Drop if no rules are matched).
-
-- ACL Group:  evaluate rules based on Priority (within an ACL Group); Terminate vs non\-Terminate pertains to the Pipeline
-
-**ACL_LEVEL1 (VNET Lookup)**
-
-| Source| Destination| Source Port| Destination Port| Protocol| Action| Priority| Exit ACL pipeline on hit?(Is Terminating)
-|:----------|:----------|:----------|:----------|:----------|:----------|:----------|:----------
-| 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24| 10.0.0.10/32 10.0.0.11/32 10.0.0.12/32 10.0.0.13/32 10.0.0.14/32 30.0.0.0/24| *| *| TCP| Allow| 0| No
-| 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24| 10.0.0.200/32| *| *| TCP| Allow| 1| No
-| 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24| 10.0.0.201/32| *| *| TCP| Block| 2| Yes
-| 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24| 10.0.0.202/32| *| *| TCP| Allow| 3| Yes
-| 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24| 10.0.0.203/32| *| *| TCP| Allow| 4| No
-| *| 8.8.8.8/32| *| *| *| Block| 5| Yes
-| *| 8.8.8.8/32| *| *| *| Allow| 6| Yes
-| *| 9.9.9.9/32| *| *| *| Allow| 7| Yes
-| *| *| *| *| *| Block| 8| No
-| | | | | | | |
-| | | | | | | |
-
-**ACL_LEVEL2 (Customer/User FW rules - portal.azure.com)**
-
-| Source| Destination| Source Port| Destination Port| Protocol| Action| Priority| Exit ACL pipeline on hit?(Is Terminating)
-|:----------|:----------|:----------|:----------|:----------|:----------|:----------|:----------
-| 10.0.0.0/24| *| *| *| TCP| Allow| 1| No
-| 10.0.0.0/24| 10.0.0.202/32| *| *| TCP| Block| 1| Yes
-| 10.0.0.0/24| 10.0.0.203/32| *| *| TCP| Block| 1| Yes
-| *| 8.8.8.8/32| *| *| *| Allow| 2| No
-| *| 9.9.9.9/32| *| *| *| Block| 2| Yes
-| *| 1.1.1.2/32| *| *| *| Allow| 30| No
-| *| *| *| *| *| Block| 3| No
-| | | | | | | |
-| | | | | | | |
-
-**ACL_LEVEL3**
-
-Etc…
-
-**Order of evaluation / priority of evaluation**
-
-- ACL_LEVEL1 \-> ACL_LEVEL2
-
-**Test Scenarios and expected results**
-
-- For simplicity below table only has IP conditions, but the same combinations exist for ports also.
-
-- ACL rules are direction aware, below example is assuming a VM with source IP = 10.0.0.100 which is trying to send packets to various destinations and has above ACL rules on its v\-port.
-
-**Outbound Traffic example evaluation and outcome**
-
-| Source IP| Destination IP| Decision of ACL_LEVEL1| Decision of ACL_LEVEL2| Outcome
-|:----------|:----------|:----------|:----------|:----------
-| 10.0.0.100| 10.0.0.200| Allow (Terminating = false)| Allow (Terminating = false)| Allow
-| 100.0.0.100| 100.0.0.201| Block (Terminating = True)| Not evaluated or Ignored| Block
-| 100.0.0.100| 100.0.0.202| Allow (Terminating = True)| Not evaluated or Ignored| Allow
-| 100.0.0.100| 100.0.0.203| Allow (Terminating = false)| Block (Terminating = True)| Block
-| 100.0.0.100| 8.8.8.8| Block (Terminating = True)| Not evaluated or Ignored| Block
-| 100.0.0.100| 1.1.1.1| Block (Terminating = false)| Block (Terminating = false)| Block
-| 100.0.0.100| 1.1.1.2| Block (Terminating = false)| Allow (Terminating = false)| Allow
-
-## Routes and Route-Action
+Also notice the following: 
 
 - Routes are usually LPM based Outbound
-
 - Each route entry will have a prefix, and separate action entry
+- The lookup table is per ENI, but could be Global, or multiple Global lookup
+  tables per ENIs
+- Outer Encap IPv4 using permits routing between servers within a Region; across
+  the Region we use IPv6
 
-- The lookup table is per ENI, but could be Global, or multiple Global lookup tables per ENIs
+**Why would we want to use these?**
 
-- Outer Encap IPv4 using permits routing between servers within a Region; across the Region we use IPv6
-
-*Why would we want to use these?*
-
-- Example:  to block prefixes to internal DataCenter IP addresses, but Customer uses prefixes inside of their own VNET
-
-- Example:  Lookup between CA (inside Cx own VNET) and PA (Provider Address) using lookup table (overwrite destination IP and MAC before encap)
-
+- Example:  to block prefixes to internal DataCenter IP addresses, but Customer
+  uses prefixes inside of their own VNET
+- Example:  Lookup between CA (inside Cx own VNET) and PA (Provider Address)
+  using lookup table (overwrite destination IP and MAC before encap)
 - Example:  Customer sends IPv4, we encap with IPv6
-
-- Example:  ExpressRoute with 2 different PAs specified (load balancing across multiple PAs) using 5 tuples of packet to choose 1st PA or 2nd PA
+- Example:  ExpressRoute with 2 different PAs specified (load balancing across
+  multiple PAs) using 5 tuples of packet to choose 1st PA or 2nd PA
 
 | Route Type| Example
 |:----------|:----------
@@ -269,24 +264,16 @@ Etc…
 
 ## Packet Flow
 
-For the first packet of a TCP flow, we take the Slow Path, running the transposition engine and matching at each layer.  For subsequent packets, we take the Fast Path,
-matching a unified flow via UFID and applying a transposition directly against rules.
+For the first packet of a TCP flow, we take the Slow Path, running the
+transposition engine and matching at each layer.  For subsequent packets, we
+take the Fast Path, matching a unified flow via UFID and applying a
+transposition directly against rules.
 
-### Inbound
+For more information, see **[SDN pipeline basic elements](sdn-pipeline-basic-elements.md#packet-flow---selecting-packet-direction)**. 
 
- **Fast Path - Flow Match**
- ![Inb](images/inb_fast_path_flow_match.png)
+## Packet transforms
 
- **Slow Path - No flow match**
- ![InbSP](images/in_slow_path_no_flow_match.png)
-
-### Outbound
-
- **Fast path - flow match**
-![OutFP](images/out_fast_path_flow_match.png)
-
- **Slow Path (policy evaluation) - No flow match**
-![OutSP](images/out_slow_path_pol_eval_no_flow_match.png)
+See packet transforms in **[SDN pipeline basic elements](sdn-pipeline-basic-elements.md#packet-transforms)**.
 
 ## Packet Transform Examples
 
@@ -304,13 +291,13 @@ matching a unified flow via UFID and applying a transposition directly against r
 
 - 20.0.0.0/24
 
-**VNET Mapping Table**
-| | V4 underlay| V6 underlay| Mac-Address| Mapping Action | VNI
-|:----------|:----------|:----------|:----------|:----------|:----------
-| 10.0.0.1| 100.0.0.1| 3ffe :: 1| Mac1| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 100
-| 10.0.0.2| 100.0.0.2| 3ffe :: 2| Mac2| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 200
-| 10.0.0.3| 100.0.0.3| 3ffe :: 3| Mac3| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 300
-| | | | | |
+**VNET Mapping Table** | | V4 underlay| V6 underlay| Mac-Address| Mapping
+Action| VNI |
+|:----------|:----------|:----------|:----------|:----------|:---------- |
+|10.0.0.1| 100.0.0.1| 3ffe :: 1| Mac1| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 100 |
+|10.0.0.2| 100.0.0.2| 3ffe :: 2| Mac2| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 200 |
+|10.0.0.3| 100.0.0.3| 3ffe :: 3| Mac3| VXLAN_ENCAP_WITH_DMAC_DE-WRITE| 300 | | |
+| | | | |
 
 **Packet Transforms**
 
@@ -331,7 +318,8 @@ matching a unified flow via UFID and applying a transposition directly against r
 
 ## Metering
 
-- Metering will be based on per flow stats, metering engine will consume per flow stats of bytes\-in and bytes\-out.
+- Metering will be based on per flow stats, metering engine will consume per
+  flow stats of bytes\-in and bytes\-out.
 
 ## VNET Encryption
 
@@ -339,24 +327,43 @@ matching a unified flow via UFID and applying a transposition directly against r
 
 ## Counters
 
-Counters are objects for counteing data per ENI. The following are their main characteristics:
+Counters are objects for counting data per ENI. The following are their main
+characteristics:
 
-- A counter is associated with only one ENI that is, it is not shared among different ENIs.
-- If you define a counter as a global object, it cannot reference different ENIs.
+- A counter is associated with only one ENI that is, it is not shared among
+  different ENIs.
+- If you define a counter as a global object, it cannot reference different
+  ENIs.
 - The counters live as long as the related ENI exists.  
 - The counters persist after the flow is completed.
 - You use API calls to handle these counters.
 - When creating a route table, you will be able to reference the counters.
 
-The control plane is the consumer of counters that are defined in the data plane. The control plane queries every 10 seconds.
+The control plane is the consumer of counters that are defined in the data
+plane. The control plane queries every 10 seconds.
 
-Counters can be assigned on the route rule, or assigned onto a mapping. If mapping does not exist, you revert to the route rule counter. A complete definition will follow when we have more information other than software defined devices.  
+Counters can be assigned on the route rule, or assigned onto a mapping. If the
+mapping does not exist, you revert to the route rule counter. A complete
+definition will follow when we have more information other than software defined
+devices.  
 
-In the flow table we list the packet counter called a metering packet; once we have the final implementation that does the packet processing, we can do metering.
+In the flow table we list the packet counter called a 'metering' packet; once we
+have the final implementation that does the packet processing, we can do
+metering.
 
-Essentially, whenever a route table is accessed and we identify the right VNET target (based on the mapping from the underlay IP), will have an ID of the metering packet preprogrammed earlier.  We will reference this counter in the mappings. When the flow is created it will list this counter ID.  When the packet transits inbound or outbound through the specific flow, this counter is incremented and tracked separately for the inbound and outbound.
+Essentially, whenever a route table is accessed and we identify the right VNET
+target (based on the mapping from the underlay IP), will have an ID of the
+metering packet preprogrammed earlier.  We will reference this counter in the
+mappings. When the flow is created it will list this counter ID.  When the
+packet transits inbound or outbound through the specific flow, this counter is
+incremented and tracked separately for the inbound and outbound.
 
-We need more information around Counters, Statistics, and we need to start thinking about how to add Metering- and reconcile this in the P4 model.  
+Some specific counters (such as memory use of a card, etc...) are global,
+however most of the counters should be per ENI as processing of rules and drops,
+accepts, list of flows etc are per ENI.
+
+We need more information around Counters, Statistics, and we need to start
+thinking about how to add Metering- and reconcile this in the P4 model.  
 
 **Questions**  
 
@@ -366,19 +373,33 @@ We need more information around Counters, Statistics, and we need to start think
 
 ## BGP
 
+Border Gateway Protocol (BGP) is a standardized exterior gateway protocol
+designed to exchange routing and reachability information among autonomous
+systems on the Internet. BGP is classified as a path-vector routing protocol and
+it makes routing decisions based on paths, network policies, or rule-sets
+configured by a network administrator. For more information, see [Border Gateway
+Protocol](https://en.wikipedia.org/wiki/Border_Gateway_Protocol).
+
 ## Watchdogs
 
 ## Servicing
 
 ## Debugging
 
-Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Bandwidth Metering for Routing Rules to count bytes (each flow associated with a bandwidth counter when an LPM is hit \- many flows *may* share the same counters).
+Counters per rule to trace an increment per layer, ACL hits, Packet Captures,
+Bandwidth Metering for Routing Rules to count bytes (each flow associated with a
+bandwidth counter when an LPM is hit \- many flows *may* share the same
+counters).
 
 ## Flow Replication
 
+For information about flow replication, see **[DASH
+High-Availability](../../high-avail/README.md)**.
+
 ## Unit Testing and development
 
-- Need ability to run rule processing behavior on dev box / as part of merge validation.
+- Need ability to run rule processing behavior on dev box / as part of merge
+  validation.
 
 ## Internal Partner dependencies
 
@@ -386,36 +407,4 @@ Counters per rule to trace an increment per layer, ACL hits, Packet Captures, Ba
 
 - Reduced tuple support on host.
 
-## Packet transforms
 
-### VNET
-
-### Scenario:  VM<->VM (in VNET) communication
-
-![VNETtoVNET](images/vm_to_vm.png)
-
-### Internal Load balancer
-
-![LB](images/vm_to_ilb.png)
-
-### Private Link
-
-![PL](images/private_link.png)
-
-### Private Link Service
-
-![PLS](images/private_link_service.png)
-
-### Service Tunneling
-
-![ST](images/service_tunneling.png)
-
-### Inbound from LB
-
-![InbfromLB](images/inbound_frm_ilb.png)
-
-### Outbound NAT - L4
-
-![OutNATL4](images/outbound_nat_l4.png)
-
-(L3 works in same way except port re-write)

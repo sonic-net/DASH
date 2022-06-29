@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="-5 -5 805 805">
+	<g id="YinYang" fill="#000" stroke="none" stroke-width="0" fill-rule="evenodd">
+		<title>Yin-Yang, by Adam Stanislav</title>
+		<desc>The entire graphic is drawn as a single path filled with black (or any other color you change the value of “fill” in line 4). The other half, usually shown in white is created here as a hole in the path. That means it is completely transparent, and has whatever color its background has. To achieve this, not just with SVG but with other vector formats, any black portion of the path is drawn counterclockwise, any “white” portion clockwise. Also, this graphic is taking advantage of the kappa constant described in my e-book Bézier Circles and other shapes, freely downloadable from https://www.smashwords.com/books/view/483578 .</desc>
+
+		<!-- Note to self: Relative Bézier differences (“c”) are differences of a point from the STARTING point of the curve segment, not from the most recent point. -->
+		<path d="M400 0C179.086 0 0 179.086 0 400 0 620.914 179.086 800 400 800 620.914 800 800 620.914 800 400 800 179.086 620.914 0 400 0zM400 10C184.609 10 10 184.609 10 400 10 615.391 184.609 790 400 790 292.304 790 205 682.304 205 600 205 492.3 292.304 400 400 400 507.7 400 600 292.304 600 200 600 92.304 507.7 10 400 10zM400 665c35.895 0 65-29.105 65-65 0-35.895-29.105-65-65-65-35.895 0-65 29.105-65 65 0 35.895 29.105 65 65 65zM400 132c-37.555 0-68 30.445-68 68 0 37.555 30.445 68 68 68 37.555 0 68-30.445 68-68 0-37.555-30.445-68-68-68z"/>
+	</g>
+</svg>

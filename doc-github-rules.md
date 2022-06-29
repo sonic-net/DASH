@@ -3,7 +3,7 @@
 **Table of contents**
 - [Create issues](#create-issues)
 - [Create a fork](#create-a-fork)
-  - [Create a Pull Request](#create-a-pull-request)
+  - [Create a Pull Request (PR)](#create-a-pull-request-pr)
 - [Create a Pull Request from a branch in the original repository](#create-a-pull-request-from-a-branch-in-the-original-repository)
 - [PR Review Phase](#pr-review-phase)
 - [PR Accept Phase](#pr-accept-phase)
@@ -16,6 +16,7 @@
   - [Adding draft issues to your project](#adding-draft-issues-to-your-project)
   - [Reorder rows](#reorder-rows)
   - [Adding your project to a repository](#adding-your-project-to-a-repository)
+  - [Excluding files from being pushed to the remote repository](#excluding-files-from-being-pushed-to-the-remote-repository)
 - [Tools](#tools)
 
 This document describes a short process to effectively use GitHub to achieve the following main goals:
@@ -53,7 +54,7 @@ If you use the Github desktop app, see [Cloning and forking repositories from Gi
 It's good practice to regularly sync your fork with the original repository. 
 For more information, see [Syncing a fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork).
 
-### Create a Pull Request
+### Create a Pull Request (PR)
 
 You can make any changes to a fork, including making branches and opening pull requests. 
 If you want to contribute to the original repository, you can submit a pull request.
@@ -74,17 +75,36 @@ For more information, see [Creating a pull request](https://docs.github.com/en/p
 If you use the Github desktop app, see [Creating an issue or pull request](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/working-with-your-remote-repository-on-github-or-github-enterprise/creating-an-issue-or-pull-request). 
 
 ## PR Review Phase
+
 Pull requests generally are open to community review and get accepted as-is or with requested changes. The more impactful the changes, the more review activity is to be expected.
 
+The following are the main steps of the review process:
+
+- You can review changes in a pull request one file at a time. 
+- While reviewing the files in a pull request, you can leave individual comments on specific changes. 
+- After you finish reviewing each file, you can mark the file as viewed. This collapses the file, helping you identify the files you still need to review. 
+- A progress bar in the pull request header shows the number of files you've viewed. 
+- After reviewing as many files as you want, you can approve the pull request or request additional changes by submitting your review with a summary comment. 
+
+For more information, see [Reviewing proposed changes in a pull request](https://docs.github.com/en/enterprise-cloud@latest/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/reviewing-proposed-changes-in-a-pull-request).
+
+See also [Searching issues and pull requests](https://docs.github.com/en/enterprise-cloud@latest/search-github/searching-on-github/searching-issues-and-pull-requests). 
+
 ## PR Accept Phase
+
 Once a PR has received sufficient review and concerns are satisfied, a designated person with sufficient [permissions](https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-roles-for-an-organization#permissions-for-each-role) can accept the Pull Request. 
 
 ## Directly Editing Artifacts
 Contributors with write access permission or higher have rights to directly edit documents and push changes. This practice should be used very sparingly, and only in the draft stages of documents, or to make trivial changes in documents already in use.
 
 > [!WARNING]
-> Direct edits (without proper review phases) to "released" documents short-circuits the normal community process and can result in breaking changes and significant disruption, resulting in potential impact to downstream consumers.
+> Direct edits (without proper PR and review) to "released" artifacts short-circuits the normal community process and can result in breaking changes and significant disruption, resulting in potential impact to downstream consumers.
 
+## Avoid Directly Committing New Artifacts
+As a corrollary to the hazards of directly editing documents, contributors with write access permission or higher have rights to directly commit new documents. This should be avoided. Skipping the normal PR and review process prevents reviewers from making inline comments against "Files Changed" etc. Only summary comments of the commit itself are possible, which is less useful.
+
+> [!WARNING]
+> Direct commits (without proper PR and review) of new artifacts short-circuits the normal community process and should be avoided. 
 
 ## Use checklists for large issues or PRs
 
@@ -166,6 +186,16 @@ You can list relevant projects in a repository. You can only list projects that 
 
 In order for **repository members to see a project listed in a repository**, they **must have visibility** for the project. For more information, see [Managing the visibility of your projects (beta)](https://docs.github.com/en/issues/trying-out-the-new-projects-experience/managing-the-visibility-of-your-projects) and [Managing access to projects (beta)](https://docs.github.com/en/issues/trying-out-the-new-projects-experience/managing-access-to-projects).
 
+### Excluding files from being pushed to the remote repository 
+
+When working on a project, you’ll want to exclude specific files or directories
+from being pushed to the remote repository. This is where `.gitignore` file
+comes into the picture. This file specifies what untracked files Git must ignore
+so tey are not pushed to the remote repository.
+For more information, see [Ignoring Files and Directories in Git
+(.gitignore)](https://linuxize.com/post/gitignore-ignoring-files-in-git/). 
+See also [A collection of .gitignore templates](https://github.com/github/gitignore). 
+
 ## Tools
 
 - [GitHub desktop](https://desktop.github.com/ "Cntrl+Left Click to open in a new tab")
@@ -175,5 +205,3 @@ In order for **repository members to see a project listed in a repository**, the
   - [Gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens). Supercharge the Git capabilities. 
   - [Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one). Create the ToC for an article.
 - [Drawing tool: diagrams.net](https://www.diagrams.net/)
-
-  

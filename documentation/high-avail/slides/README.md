@@ -2,12 +2,14 @@
 
 [ [ << Back to DASH top-level Documents](../../README.md#contents) ]
 
-# DASH Dataplane Design Documents
+# DASH High-Availability presentations
 
-This folder contains DASH dataplane design and architecture documents.
+This folder contains DASH High Avalability and Scale presentations
 
 # Contents
 
 | Document                                               | Description                                |
 | ------------------------------------------------------ | ------------------------------------------ |
-|[dash-update-timing.md](dash-update-timing.md)|Routing, ACL, Mapping Updates (WIP)|
+| [DASH High Availability.pptx](DASH%20High%20Availability.pptx) | Protocol definition work group         |
+
+
