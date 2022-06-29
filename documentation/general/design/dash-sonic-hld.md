@@ -541,8 +541,6 @@ DASH Appliance shall establish BGP session with the connected ToR and advertise 
 
 ### 3.3.6 Memory footprints
 
-TBD
-
 #### 3.3.6.1 SONiC  memory usage
 
 | Running components | Memory usage |
