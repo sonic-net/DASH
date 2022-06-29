@@ -1,0 +1,33 @@
+FROM amd64/ubuntu:20.04
+LABEL maintainer="SONIC-DASH Community"
+LABEL description="DASH gRPC 1.43.2 docker image, no sources"
+
+# Configure make to run as many parallel jobs as cores available
+ARG available_processors
+ARG MAKEFLAGS=-j$available_processors
+
+ARG CC=gcc
+ARG CXX=g++
+# Set TZ to avoid interactive installer
+ENV TZ=America/Los_Angeles
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ENV GIT_SSL_NO_VERIFY=true
+
+WORKDIR /
+RUN apt-get update -qq && apt-get install -qq --no-install-recommends \
+                git \
+                build-essential \
+                autoconf \
+                libtool \
+                pkg-config \
+                cmake && \
+                git clone --depth=1 -b v1.43.2 https://github.com/google/grpc.git && \
+                    cd grpc/ && \
+                    git submodule update --init --recursive && \
+                    mkdir -p cmake/build && \
+                    cd cmake/build && \
+                    cmake -DBUILD_SHARED_LIBS=ON -DgRPC_INSTALL=ON --parallel 1 ../.. && \
+                    make  && \
+                    make install && \
+                    cd / && \
+                    rm -rf grpc

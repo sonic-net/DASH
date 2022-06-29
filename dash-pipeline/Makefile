@@ -5,9 +5,31 @@ all:p4 sai test
 PWD := $(shell pwd)
 
 # Default Docker images, override from env var
+# https://hub.docker.com/r/p4lang/p4c
 DOCKER_P4C_IMG ?=p4lang/p4c:stable
+
+# OK
 DOCKER_BMV2_IMG ?=chrissommers/dash-bmv2:pr127-220623
-DOCKER_SAITHRIFT_IMG ?=chrissommers/dash-saithrift-bldr:220625
+
+# BAD - ./vnet_out: symbol lookup error: /SAI/lib/libsai.so: undefined symbol: _ZTVN2p42v19P4Runtime4Stub5asyncE
+#DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2-bldr:220626
+
+#OK
+DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2:pr127-220623
+
+# https://hub.docker.com/r/p4lang/behavioral-model
+# Bad - ./vnet_out: symbol lookup error: /SAI/lib/libsai.so: undefined symbol: _ZN4grpc13ClientContextC1Ev
+#DOCKER_BMV2_RUN_IMG ?=p4lang/behavioral-model:latest
+
+DOCKER_BMV2_RUN_IMG ?=chrissommers/dash-bmv2:pr127-220623
+#DOCKER_BMV2_RUN_IMG ?=p4lang/behavioral-model:stable
+
+# Bad - no simple_switch_grpc
+#DOCKER_BMV2_RUN_IMG ?=chrissommers/dash-bmv2:pr127-220626
+
+
+#DOCKER_SAITHRIFT_IMG ?=chrissommers/dash-saithrift-bldr:220625
+DOCKER_SAITHRIFT_IMG ?=chrissommers/dash-bmv2:pr127-220623
 
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
@@ -24,6 +46,23 @@ DOCKER_RUN := docker run \
 SAI/SAI:
 	@echo "Initializing SAI submodule..."
 	git submodule update --init
+
+
+.PHONY:clean
+clean: kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac
+	sudo rm -rf bmv2/dash_pipeline.bmv2
+	sudo make -C tests/vnet_out clean
+
+.PHONY:dash-shell
+dash-shell:
+	$(DOCKER_RUN) \
+	    --name dashshell-$(USER) \
+		 $(DOCKER_BMV2_IMG) \
+	    bash
+
+######################################
+# P4 Source code compile TARGETS
+######################################
 
 P4_ARTIFACTS=bmv2/dash_pipeline.bmv2/dash_pipeline.json bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt
 
@@ -49,35 +88,11 @@ $(P4_ARTIFACTS):
 	    -o bmv2/dash_pipeline.bmv2 \
 	    --p4runtime-files bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.json,bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt
 
-.PHONY:clean
-clean: kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac
-	sudo rm -rf bmv2/dash_pipeline.bmv2
-	sudo make -C tests/vnet_out clean
 
-.PHONY:dash-shell
-dash-shell:
-	$(DOCKER_RUN) \
-	    --name dashshell-$(USER) \
-		 $(DOCKER_BMV2_IMG) \
-	    bash
+######################################
+# DASH SAI HEADER & libsai.so TARGETS
+######################################
 
-.PHONY:run-switch
-run-switch:
-	$(DOCKER_RUN) \
-	    --name simple_switch-$(USER) \
-	    -v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline.json:/etc/dash/dash_pipeline.json \
-	    -v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
-	    $(DOCKER_BMV2_IMG) \
-	    sudo \
-	    env LD_LIBRARY_PATH=/usr/local/lib \
-	    simple_switch_grpc \
-	    --interface 0@veth0 \
-	    --interface 1@veth2 \
-	    --log-console \
-	    --no-p4
-
-kill-switch:
-	-docker kill simple_switch-$(USER)
 
 # TODO - create separate rules for headers, libsai.so
 .PHONY:sai
@@ -94,7 +109,8 @@ sai-headers: p4 | SAI/SAI
 # TODO - add SAI header dependencies
 libsai:
 	@echo "build libsai.so..."
-	$(DOCKER_RUN) -w /SAI/lib $(DOCKER_BMV2_IMG) \
+	$(DOCKER_RUN) -w /SAI/lib \
+	$(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
 .PHONY:sai-clean
@@ -103,6 +119,28 @@ sai-clean: SAI/SAI
 	sudo rm -rf SAI/SAI/inc SAI/SAI/experimental SAI/SAI/meta
 	cd SAI/SAI && git checkout -- inc experimental meta
 	sudo rm -rf SAI/lib
+
+######################################
+# P4 Behavioral-model (switch) TARGETS
+######################################
+
+.PHONY:run-switch
+run-switch: network
+	$(DOCKER_RUN) \
+	    --name simple_switch-$(USER) \
+		-u root \
+	    -v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline.json:/etc/dash/dash_pipeline.json \
+	    -v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
+	    $(DOCKER_BMV2_RUN_IMG) \
+	    env LD_LIBRARY_PATH=/usr/local/lib \
+	    simple_switch_grpc \
+	    --interface 0@veth0 \
+	    --interface 1@veth2 \
+	    --log-console \
+	    --no-p4
+
+kill-switch:
+	-docker kill simple_switch-$(USER)
 
 
 ###############################
@@ -124,6 +162,11 @@ sai-thrift-server-clean:
 	    make $@
 
 
+
+###############################
+# SAI TEST TARGETS
+###############################
+
 .PHONY:test sai-test
 test:sai-test
 
@@ -135,7 +178,7 @@ test-clean:
 sai-test:SAI/SAI
 	$(DOCKER_RUN) \
 	    --name build-test-$(USER) \
-		-w /tests/vnet_out  $(DOCKER_BMV2_IMG) \
+		-w /tests/vnet_out  $(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
 timeout?=5
@@ -155,6 +198,11 @@ run-sai-test:
 	done; \
 	docker exec -w /tests/vnet_out simple_switch-$(USER) ./vnet_out
 
+
+###############################
+# DOCKER BUILD/PUBLISH TARGETS
+###############################
+
 docker-bmv2:
 	docker build \
 		-f dockerfiles/Dockerfile.bmv2 \
@@ -167,6 +215,24 @@ docker-bmv2:
 	    dockerfiles
 
 docker-publish-bmv2:
+	echo "TO DO when we have a proper repository"
+
+docker-pull-bmv2:
+	docker pull $(DOCKER_BMV2_IMG)
+
+
+docker-bmv2-bldr:
+	docker build \
+		-f dockerfiles/Dockerfile.bmv2-bldr \
+	    -t $(DOCKER_BMV2_BLDR_IMG) \
+	    --build-arg user=$(USER) \
+	    --build-arg uid=$(shell id -u) \
+	    --build-arg guid=$(shell id -g) \
+	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+	    --build-arg available_processors=$(shell nproc) \
+	    dockerfiles
+
+docker-publish-bmv2-bldr:
 	echo "TO DO when we have a proper repository"
 
 docker-pull-bmv2:
@@ -192,26 +258,54 @@ docker-pull-saithrift-bldr:
 docker-pull-p4c:
 	docker pull $(DOCKER_P4C_IMG)
 
-network:
+###############################
+# BMV2-PKTGEN NETWORKING TARGETS
+###############################
+
+network:veth0 veth2
+
+veth0: /sys/class/net/veth0
+/sys/class/net/veth0:
+
 	sudo ip link add name veth0 type veth peer name veth1
 	sudo ip link set dev veth0 up
 	sudo ip link set dev veth1 up
 	sudo ip link set veth0 mtu 9500
 	sudo ip link set veth1 mtu 9500
+	# sudo sysctl net.ipv4.conf.veth0.forwarding=0
+	# sudo sysctl net.ipv4.conf.veth1.forwarding=0
 	sudo sysctl net.ipv6.conf.veth0.disable_ipv6=1
+	#https://superuser.com/questions/33196/how-to-disable-autoconfiguration-on-ipv6-in-linux
+	sudo sysctl net.ipv6.conf.veth0.autoconf=0
+	sudo sysctl net.ipv6.conf.veth0.accept_ra=0
 	sudo sysctl net.ipv6.conf.veth1.disable_ipv6=1
+	sudo sysctl net.ipv6.conf.veth1.autoconf=0
+	sudo sysctl net.ipv6.conf.veth1.accept_ra=0
+
+veth2: /sys/class/net/veth2
+/sys/class/net/veth2:
 	sudo ip link add name veth2 type veth peer name veth3
 	sudo ip link set dev veth2 up
 	sudo ip link set dev veth3 up
 	sudo ip link set veth2 mtu 9500
 	sudo ip link set veth3 mtu 9500
+	# sudo sysctl net.ipv4.conf.veth2.forwarding=0
+	# sudo sysctl net.ipv4.conf.veth3.forwarding=0
 	sudo sysctl net.ipv6.conf.veth2.disable_ipv6=1
+	sudo sysctl net.ipv6.conf.veth2.autoconf=0
+	sudo sysctl net.ipv6.conf.veth2.accept_ra=0
 	sudo sysctl net.ipv6.conf.veth3.disable_ipv6=1
+	sudo sysctl net.ipv6.conf.veth3.autoconf=0
+	sudo sysctl net.ipv6.conf.veth3.accept_ra=0
 
 network-clean:
 	# Note, deleting one member (e.g. veth0) deletes its peer (e.g. veth1)
 	-sudo ip link delete dev veth0
 	-sudo ip link delete dev veth2
+
+###############################
+# IXIA-C TARGETS
+###############################
 
 run-ixiac-test: ixiac-prereq
 	python3 -m pytest ../test/test-cases/bmv2_model/ -s
@@ -226,6 +320,11 @@ deploy-ixiac:
 
 undeploy-ixiac:
 	cd ../test/third-party/traffic_gen && ./undeploy_ixiac.sh
+
+
+###############################
+# ENVIRONMENT SETUP TARGETS
+###############################
 
 install-docker-compose:
 	sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$$(uname -s)-$$(uname -m)" -o /usr/local/bin/docker-compose

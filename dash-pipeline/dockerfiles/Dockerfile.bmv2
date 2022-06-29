@@ -1,3 +1,4 @@
+# https://hub.docker.com/r/p4lang/behavioral-model
 FROM p4lang/behavioral-model:no-pi
 LABEL maintainer="SONIC-DASH Community"
 LABEL description="DASH pipeline P4 Behavioral Model and toolchain"
@@ -34,11 +35,12 @@ ENV PI_DEPS automake \
             libmicrohttpd-dev \
             doxygen \
             valgrind \
-                vim \
-                git-core \
-                python3 \
-                cmake \
-                python3-pip
+            vim \
+            git-core \
+            python3 \
+            cmake \
+            python3-pip
+
 ENV PI_RUNTIME_DEPS libboost-system1.71.0 \
                     libboost-thread1.71.0 \
                     libpcap0.8 \
@@ -75,30 +77,30 @@ RUN apt-get update && \
 
 RUN pip install jinja2
 
-ENV DEBIAN_FRONTEND noninteractive
+# ENV DEBIAN_FRONTEND noninteractive
 
-ENV BM_RUNTIME_DEPS libboost-program-options1.71.0 \
-                    libboost-system1.71.0 \
-                    libboost-filesystem1.71.0 \
-                    libboost-thread1.71.0 \
-                    libgmp10 \
-                    libpcap0.8 \
-                    python3 \
-                    python-is-python3 \
-                    sudo
+# ENV BM_RUNTIME_DEPS libboost-program-options1.71.0 \
+#                     libboost-system1.71.0 \
+#                     libboost-filesystem1.71.0 \
+#                     libboost-thread1.71.0 \
+#                     libgmp10 \
+#                     libpcap0.8 \
+#                     python3 \
+#                     python-is-python3 \
+#                     sudo
 
-WORKDIR /
+# WORKDIR /
 
-RUN git clone https://github.com/p4lang/behavioral-model.git
+# RUN git clone https://github.com/p4lang/behavioral-model.git
 
-WORKDIR /behavioral-model/
+# WORKDIR /behavioral-model/
 
-RUN apt-get update -qq && \
-    apt-get install -qq --no-install-recommends $BM_DEPS $BM_RUNTIME_DEPS && \
-    ./autogen.sh && \
-    ./configure --with-pdfixed --with-pi --with-stress-tests --enable-debugger --enable-coverage --enable-Werror && \
-    make  && \
-    make install
+# RUN apt-get update -qq && \
+#     apt-get install -qq --no-install-recommends $BM_DEPS $BM_RUNTIME_DEPS && \
+#     ./autogen.sh && \
+#     ./configure --with-pdfixed --with-pi --with-stress-tests --enable-debugger --enable-coverage --enable-Werror && \
+#     make  && \
+#     make install
 
 WORKDIR /
 
