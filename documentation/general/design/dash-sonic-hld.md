@@ -561,6 +561,8 @@ TBD
 |                     |               | underlay_ip      | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP     |                                                 |
 |                     |               | mac_address      | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC     |                                                 |
 |                     |               | metering_bucket  | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_COUNTER_ID       |                                                 |
+|                     | vnet*         |                  | sai_pa_validation_entry_t.vni                     | VNET's VNI                                      |
+|                     |               | underlay_ip*     | sai_pa_validation_entry_t.sip                     | SAI_PA_VALIDATION_ENTRY_ATTR_ACTION is permit   |
 
 ## 3.4 CLI
 
