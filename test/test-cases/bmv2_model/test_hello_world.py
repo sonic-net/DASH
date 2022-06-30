@@ -32,7 +32,7 @@ def test_udp_unidirectional():
 
     # configure packet size, rate and duration for both flows
     f1.size.fixed, f2.size.fixed = 128, 256
-    pkt_count=1000
+    pkt_count=500
     pps=1000
     for f in cfg.flows:
         # send pkt_count packets and stop

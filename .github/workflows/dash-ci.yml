@@ -12,6 +12,7 @@ on:
       - '!dash-pipeline/**.md'
       - '!dash-pipeline/**.svg'
       - '!dash-pipeline/**.png'
+      - '!dash-pipeline/**.txt'
   pull_request:
     branches: [ "main" ]
     paths:
@@ -23,6 +24,7 @@ on:
       - '!dash-pipeline/**.md'
       - '!dash-pipeline/**.svg'
       - '!dash-pipeline/**.png'
+      - '!dash-pipeline/**.txt'
   workflow_dispatch:
 
 jobs:
