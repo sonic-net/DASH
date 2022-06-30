@@ -33,7 +33,7 @@ def test_udp_unidirectional():
     # configure packet size, rate and duration for both flows
     f1.size.fixed, f2.size.fixed = 128, 256
     pkt_count=500
-    pps=1000
+    pps=100
     for f in cfg.flows:
         # send pkt_count packets and stop
         f.duration.fixed_packets.packets = pkt_count
@@ -125,7 +125,7 @@ def captures_ok(api, cfg):
     return all(result)
 
 
-def wait_for(func, timeout=20, interval=0.2):
+def wait_for(func, timeout=60, interval=0.2):
     """
     Keeps calling the `func` until it returns true or `timeout` occurs
     every `interval` seconds.
