@@ -23,6 +23,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build docker image
-      run: make docker
+      run: make docker-bmv2
     - name: Publish docker image
       run: make docker-publish
