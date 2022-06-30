@@ -5,18 +5,24 @@ on:
     branches: [ "**" ]
     paths:
       - '.github/workflows/dash-ci.yml'
+      - 'test/test-cases/bmv2_model/**.py'
       - 'dash-pipeline/**'
       - '!dash-pipeline/Dockerfile'
       - '!dash-pipeline/.dockerignore'
       - '!dash-pipeline/**.md'
+      - '!dash-pipeline/**.svg'
+      - '!dash-pipeline/**.png'
   pull_request:
     branches: [ "main" ]
     paths:
       - '.github/workflows/dash-ci.yml'
+      - 'test/test-cases/bmv2_model/**.py'
       - 'dash-pipeline/**'
       - '!dash-pipeline/Dockerfile'
       - '!dash-pipeline/.dockerignore'
       - '!dash-pipeline/**.md'
+      - '!dash-pipeline/**.svg'
+      - '!dash-pipeline/**.png'
   workflow_dispatch:
 
 jobs:
