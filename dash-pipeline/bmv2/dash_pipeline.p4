@@ -85,10 +85,12 @@ control dash_ingress(inout headers_t hdr,
 
     action set_eni_attrs(bit<32> cps,
                          bit<32> pps,
-                         bit<32> flows) {
-        meta.eni_data.cps   = cps;
-        meta.eni_data.pps   = pps;
-        meta.eni_data.flows = flows;
+                         bit<32> flows,
+                         bit<1> admin_state) {
+        meta.eni_data.cps         = cps;
+        meta.eni_data.pps         = pps;
+        meta.eni_data.flows       = flows;
+        meta.eni_data.admin_state = admin_state;
     }
 
     @name("eni|dash")
@@ -208,6 +210,10 @@ control dash_ingress(inout headers_t hdr,
                                           hdr.ethernet.dst_addr;
         eni_ether_address_map.apply();
         eni.apply();
+        if (meta.eni_data.admin_state == 0) {
+            deny();
+            return;
+        }
 
         if (meta.direction == direction_t.OUTBOUND) {
             outbound.apply(hdr, meta, standard_metadata);
