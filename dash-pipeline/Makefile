@@ -72,10 +72,11 @@ p4: bmv2/dash_pipeline.bmv2/dash_pipeline.json
 p4-clean:
 	-sudo rm -rf $(P4_ARTIFACTS)
 
-P4_SRC=bmv2/dash_pipeline.p4
+P4_SRC=$(wildcard bmv2/*.p4)
+P4_MAIN=bmv2/dash_pipeline.p4
 # TODO add p4 source dependencies
-$(P4_ARTIFACTS):
-	@echo "Compile P4 program $(P4_SRC) ..."
+$(P4_ARTIFACTS): $(P4_SRC)
+	@echo "Compile P4 program $(P4_MAIN) ..."
 	docker run \
 	--rm --name p4c \
 	$(DOCKER_FLAGS) \
@@ -84,7 +85,7 @@ $(P4_ARTIFACTS):
 	$(DOCKER_P4C_IMG) p4c \
 	    -b \
 	    bmv2 \
-	    $(P4_SRC) \
+	    $(P4_MAIN) \
 	    -o bmv2/dash_pipeline.bmv2 \
 	    --p4runtime-files bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.json,bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt
 
