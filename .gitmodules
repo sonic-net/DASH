@@ -1,0 +1,4 @@
+[submodule "SAI"]
+	path = dash-pipeline/SAI/SAI
+	url = https://github.com/opencomputeproject/SAI.git
+	branch = master
