@@ -19,6 +19,12 @@ vnet_out: vnet_out.cpp
 	    -lpi_dummy \
 	    -lpthread \
 	    -labsl_synchronization \
+	    -labsl_status \
+		-labsl_raw_hash_set \
+		-lgpr \
+		-lre2 \
+		-lssl \
+		-laddress_sorting \
 	    -g
 
 		#	    -labsl \

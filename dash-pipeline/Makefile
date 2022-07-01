@@ -9,27 +9,24 @@ PWD := $(shell pwd)
 DOCKER_P4C_IMG ?=p4lang/p4c:stable
 
 # OK
-DOCKER_BMV2_IMG ?=chrissommers/dash-bmv2:pr127-220623
+#DOCKER_BMV2_IMG ?=chrissommers/dash-bmv2:pr127-220623
 
-# BAD - ./vnet_out: symbol lookup error: /SAI/lib/libsai.so: undefined symbol: _ZTVN2p42v19P4Runtime4Stub5asyncE
-#DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2-bldr:220626
+# OK
+DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2-bldr:220630
 
 #OK
-DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2:pr127-220623
+#DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2:pr127-220623
 
-# https://hub.docker.com/r/p4lang/behavioral-model
-# Bad - ./vnet_out: symbol lookup error: /SAI/lib/libsai.so: undefined symbol: _ZN4grpc13ClientContextC1Ev
-#DOCKER_BMV2_RUN_IMG ?=p4lang/behavioral-model:latest
+#OK:
+#DOCKER_BMV2_RUN_IMG ?=chrissommers/dash-bmv2:pr127-220623
 
-DOCKER_BMV2_RUN_IMG ?=chrissommers/dash-bmv2:pr127-220623
+# Bad libgrpc++.so.1.43: cannot open shared object file: No such file or directory
 #DOCKER_BMV2_RUN_IMG ?=p4lang/behavioral-model:stable
 
-# Bad - no simple_switch_grpc
-#DOCKER_BMV2_RUN_IMG ?=chrissommers/dash-bmv2:pr127-220626
+#OK chrissommers/dash-bmv2-bldr:220630
+DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 
-
-#DOCKER_SAITHRIFT_IMG ?=chrissommers/dash-saithrift-bldr:220625
-DOCKER_SAITHRIFT_IMG ?=chrissommers/dash-bmv2:pr127-220623
+DOCKER_SAITHRIFT_IMG ?=chrissommers/dash-saithrift-bldr:220625
 
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it

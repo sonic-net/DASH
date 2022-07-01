@@ -1,4 +1,9 @@
-FROM chrissommers/grpc:1.43.2 as grpc
+# https://hub.docker.com/r/p4lang/pi/tags
+# use for libraries missing from behavioral-model
+
+# NOTE: ":stable" has "experimental" P4RT funcs, latest has non-experimental
+# https://hub.docker.com/r/p4lang/pi
+FROM p4lang/pi:latest as p4pi
 
 # https://hub.docker.com/r/p4lang/behavioral-model
 FROM p4lang/behavioral-model:latest
@@ -84,16 +89,14 @@ RUN apt-get update && \
 WORKDIR /usr/local/lib/
 
 # Copy libabsl .a files from p4pi, make shared lib for our use and delete .a's
-COPY --from=grpc /usr/local/lib/lib*grpc*.so* \
-        /usr/local/lib/libabsl*.so* \
-        /usr/local/lib/libgpr*.so* \
-        /usr/local/lib/libupb*.so* \
-        /usr/local/lib/libre2*.so* \
-        /usr/local/lib/libaddress_sorting*.so* \
-        /usr/local/lib/libssl*.so* \
-        /usr/local/lib/libcrypto*.so* \
-        ./
-   
+COPY --from=p4pi /usr/local/lib/libabsl_*.a ./
+#RUN g++ -Wl,--whole-archive /usr/local/lib/libabsl_*.a -Wl,--no-whole-archive
+RUN g++ -shared /usr/local/lib/libabsl_*.a -o libabsl.so && \
+    rm libabsl_*.a
+
+
+WORKDIR /
+
 ARG user
 ARG uid
 ARG guid
@@ -109,5 +112,3 @@ RUN useradd $user -l -u $uid -g $guid -d /var/$user -m -s /bin/bash
 RUN echo "$user ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers
 
 USER $user
-
-CMD /bin/bash
