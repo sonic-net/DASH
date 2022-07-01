@@ -25,16 +25,6 @@ def test_udp_unidirectional():
 
 
     # add two traffic flows
-<<<<<<< HEAD
-    f1= cfg.flows.flow(name="flow p1->p2")[0]
-    # and assign source and destination ports for each
-    f1.tx_rx.port.tx_name, f1.tx_rx.port.rx_name = p1.name, p2.name
-
-    # configure packet size, rate and duration for both flows
-    f1.size.fixed = 128
-    pkt_count=1000
-    pps=1000
-=======
     f1, f2 = cfg.flows.flow(name="flow p1->p2").flow(name="flow p2->p1")
     # and assign source and destination ports for each
     f1.tx_rx.port.tx_name, f1.tx_rx.port.rx_name = p1.name, p2.name
@@ -44,23 +34,12 @@ def test_udp_unidirectional():
     f1.size.fixed, f2.size.fixed = 128, 256
     pkt_count=500
     pps=100
->>>>>>> upstream/main
     for f in cfg.flows:
         # send pkt_count packets and stop
         f.duration.fixed_packets.packets = pkt_count
         # send pps packets per second
         f.rate.pps = pps
 
-<<<<<<< HEAD
-    # configure packet with Ethernet, IPv4 and UDP headers for both flows
-    eth1, ip1, udp1 = f1.packet.ethernet().ipv4().udp()
-
-    # set source and destination MAC addresses
-    eth1.src.value, eth1.dst.value = "00:AA:00:00:04:00", "00:AA:00:00:00:AA"
-
-    # set source and destination IPv4 addresses
-    ip1.src.value, ip1.dst.value = "10.0.0.1", "10.0.0.2"
-=======
      # configure packet with Ethernet, IPv4 and UDP headers for both flows
     eth1, ip1, udp1 = f1.packet.ethernet().ipv4().udp()
     eth2, ip2, udp2 = f2.packet.ethernet().ipv4().udp()
@@ -72,18 +51,12 @@ def test_udp_unidirectional():
     # set source and destination IPv4 addresses
     ip1.src.value, ip1.dst.value = "10.0.0.1", "10.0.0.2"
     ip2.src.value, ip2.dst.value = "10.0.0.2", "10.0.0.1"
->>>>>>> upstream/main
 
     # set incrementing port numbers as source UDP ports
     udp1.src_port.increment.start = 5000
     udp1.src_port.increment.step = 2
     udp1.src_port.increment.count = 10
 
-<<<<<<< HEAD
-
-    # assign list of port numbers as destination UDP ports
-    udp1.dst_port.values = [4000, 4044, 4060, 4074]
-=======
     udp2.src_port.increment.start = 6000
     udp2.src_port.increment.step = 4
     udp2.src_port.increment.count = 10
@@ -91,7 +64,6 @@ def test_udp_unidirectional():
     # assign list of port numbers as destination UDP ports
     udp1.dst_port.values = [4000, 4044, 4060, 4074]
     udp2.dst_port.values = [8000, 8044, 8060, 8074, 8082, 8084]
->>>>>>> upstream/main
 
     print("Pushing traffic configuration ...")
     api.set_config(cfg)
@@ -153,11 +125,7 @@ def captures_ok(api, cfg):
     return all(result)
 
 
-<<<<<<< HEAD
-def wait_for(func, timeout=20, interval=0.2):
-=======
 def wait_for(func, timeout=60, interval=0.2):
->>>>>>> upstream/main
     """
     Keeps calling the `func` until it returns true or `timeout` occurs
     every `interval` seconds.
