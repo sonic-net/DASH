@@ -28,6 +28,7 @@ struct eni_data_t {
     bit<32> cps;
     bit<32> pps;
     bit<32> flows;
+    bit<1>  admin_state;
 }
 
 struct metadata_t {

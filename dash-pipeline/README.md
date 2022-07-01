@@ -1,6 +1,11 @@
 # DASH Pipeline
 This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://github.com/p4lang/behavioral-model) from [p4lang](https://github.com/p4lang).
 
+The workflows described here are primarily driven by a [Makefile](Makefile) and are suitable for a variety of use-cases:
+* Manual execution by developers - edit, build, test; commit and push to GitHub
+* Automated script-based execution in a development or production environment, e.g. regression testing
+* Cloud-based CI (Continuous Integration) build and test, every time code is pushed to GitHub or a Pull Request is submitted to the upstream repository.
+
 >**IMPORTANT:** Developers, read [Typical Workflow: Committing new code - ignoring SAI submodule](#typical-workflow-committing-new-code---ignoring-sai-submodule) before committing code.
 
 - [DASH Pipeline](#dash-pipeline)
@@ -207,6 +212,86 @@ This explains the various build steps in more details. The CI pipeline does most
 Building starts by retrieving a pre-built `dash-bmv2` Docker image from a Docker registry, then executing a series of targets in the main [Makefile](Makefile) via `make <target>`. It is designed to be run either manually; via user-supplied scripts; or from a CI pipeline in the cloud.
 
 See the diagram below. You can read the [dockerfiles](dockerfiles) and all `Makefiles` in various directoriesto get a deeper understanding of the build process.
+
+## Build Workflow Diagram
+
+![dash-p4-bmv2-thrift-workflow](images/dash-p4-bmv2-thrift-workflow.svg)
+
+## Docker Image(s)
+One or more docker images are used to compile artifacts, such as P4 code, or run processses, such as the bmv2 simple switch.
+
+Some docker images are pulled from public repositories, e.g. `p4lang/p4c` is used to compile P4 source code. Others are built in this project, published to a Docker registry such as Azure Container Service (ACR), then pulled on demand by any user or CI runner as needed. These docker images are updated occassionally as the project evolves, as seldom as possible. They should be tagged with fixed labels to support [Configuration Management](#configuration-management).
+
+## Building Docker Images
+Docker images are not built routinely. Rather, then are built as-needed by an image maintainer and pushed to the docker registry.
+
+The `make docker-XXX` targets create a docker images named `dash-XXX` where XXX is the name of the image, e.g. `docker-bmv2`. Docker images are built using a Dockerfile.
+
+During subsequent build steps, the docker image(s) are used to spawn containers in which various `make` targets or other scripts are executed. So, the execution environment for most build steps is inside the docker container, not the normal user environment.
+
+When the container is run, various local subdirectories are "mounted" as volumes in the container, for example local `./SAI/` is mounted as the container's `/SAI/` directory. The container thus reads and writes the local development environment directories and files.
+
+The following sections describe the various docker images.
+### dash-bmv2 Docker image
+Image name can be overridden via environment variable `DOCKER_BMV2_IMG`.
+
+>**NOTE** The base docker image is [p4lang/behavioral-model:no-pi](https://hub.docker.com/r/p4lang/behavioral-model). This is the vanilla bmv2. To use a modified bmv2 engine, it must be built from sources and this base container may need to change.
+
+In addition it includes several other OSS projects such as, `grpc`, `p4c`, etc. and builds them from source. The entire build process can take one to several hours. Pulling the prebuilt image from a registry avoids this wait.
+
+This image is used by all the make build targets except `make p4`. It is also used to execute bmv2 simple switch and P4Runtime.
+>**TODO:** This image should be broken into smaller ones for each build step, and optimized as well.
+
+## Optional - Manually Pull pre-built Docker image(s)
+This is optional, the Docker images will be pulled automatically the first time you run a `make` command which needs such an image You can also do this to restore an image.
+
+```
+make docker-pull-xxx  # where xxx = image name, e.g. bmv2
+```
+## Optional - Override default Docker image version(s)
+You can override the image in use by setting an environment variable, for example:
+```
+DOCKER_BMV2_IMG=some-repo/dash-bmv2:some-tag make sai
+```
+If you do multiple make targets in one command (e.g. `make all`), you can override multiple image names in the same command line by setting appropriate environment variables.
+## Optional - expert - build a new Docker image
+This step builds a new Docker image on demand, but you shouldn't have to if you use the prebuilt one retrieved from a Docker registry. Note, this step can exceed one hour depending upon CPU speed and network bandwidth. 
+```
+make docker-XXX  ### where XXX = image name, e.g. bmv2
+```
+## Optional - Expert/Admin - Publish Docker Image
+This step publishes the local Docker image to the registry and requires credentials. It should be done selectively by repo maintainers. For now there are no `make` target sto do this.
+
+## Optional - expert - `exec` a container shell
+This step runs a new container and executes `bash` shell, giving you a terminal in the container. It's primarily useful to examine the container contents or debug.
+```
+make dash-shell # runs dash-bmv2 image by default
+```
+
+## Compile P4 Code
+```
+make p4
+```
+The primary outputs of interest are:
+ * `bmv2/dash_pipeline.bmv2/dash_pipeline.json` - the "P4 object code" which is actually metadata interpreted by the bmv2 "engine" to execute the P4 pipeline.
+ * `bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.json` - the "P4Info" metadata which describes all the P4 entities (P4 tables, counters, etc.). This metadata is used downstream as follows:
+    * P4Runtime controller used to manage the bmv2 program. The SAI API adaptor converts SAI library "c" code calls to P4Runtime socket calls.
+    * P4-to-SAI header code generation (see next step below)
+
+## Build libsai.so adaptor library
+This library is the crucial item to allow integration with a Network Operating System (NOS) like SONiC. It wraps an implementtion specific "SDK" with standard Switch Abstraction Interface (SAI) APIs. In this case, an adaptor translates SAI API table/attribute CRUD operations into equivalent P4Runtime RPC calls, which is the native RPC API for bmv2.
+
+![CI-build-log-fail-p4-drilldown.png](../assets/CI-build-log-fail-p4-drilldown.png)  
+
+The main README for this repo shows the CI failing badge:
+
+![CI-fail-README-badge](../assets/CI-fail-README-badge.png)
+# Detailed Build Workflow
+This explains the various build steps in more details. The CI pipeline does most of these steps as well. All filenames and directories mentioned in the sections below are relative to the `dash-pipeline` directory (containing this README) unless otherwise specified. 
+
+Building starts by retrieving a pre-built `dash-bmv2` Docker image from a Docker registry, then executing a series of targets in the main [Makefile](Makefile) via `make <target>`. It is designed to be run either manually; via user-supplied scripts; or from a CI pipeline in the cloud.
+
+See the diagram below. You can read the [Dockerfile](Dockerfile) and all `Makefiles` to get a deeper understanding of the build process.
 
 ## Build Workflow Diagram
 

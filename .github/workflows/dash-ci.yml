@@ -5,18 +5,26 @@ on:
     branches: [ "**" ]
     paths:
       - '.github/workflows/dash-ci.yml'
+      - 'test/test-cases/bmv2_model/**.py'
       - 'dash-pipeline/**'
-      - '!dash-pipeline/dockerfiles/**'
-      - '!**.dockerignore'
+      - '!dash-pipeline/Dockerfile'
+      - '!dash-pipeline/.dockerignore'
       - '!dash-pipeline/**.md'
+      - '!dash-pipeline/**.svg'
+      - '!dash-pipeline/**.png'
+      - '!dash-pipeline/**.txt'
   pull_request:
     branches: [ "main" ]
     paths:
       - '.github/workflows/dash-ci.yml'
+      - 'test/test-cases/bmv2_model/**.py'
       - 'dash-pipeline/**'
-      - '!dash-pipeline/dockerfiles/**'
-      - '!**.dockerignore'
+      - '!dash-pipeline/Dockerfile'
+      - '!dash-pipeline/.dockerignore'
       - '!dash-pipeline/**.md'
+      - '!dash-pipeline/**.svg'
+      - '!dash-pipeline/**.png'
+      - '!dash-pipeline/**.txt'
   workflow_dispatch:
 
 jobs:
@@ -37,12 +45,19 @@ jobs:
       run: DOCKER_FLAGS=$docker_fg_flags make p4
     - name: Install SAI submodule
       run: git submodule update --init
+<<<<<<< HEAD
     - name: Pull docker saithrift image
       run: make docker-pull-saithrift-bldr
     - name: Generate SAI API
       run: DOCKER_FLAGS=$docker_fg_flags make sai
     - name: Pull docker bmv2 image
       run: make docker-pull-bmv2
+=======
+    - name: Pull docker bmv2 image
+      run: make docker-pull-bmv2
+    - name: Generate SAI API
+      run: DOCKER_FLAGS=$docker_fg_flags make sai
+>>>>>>> upstream/main
     - name: Build libsai c++ tests
       run: DOCKER_FLAGS=$docker_fg_flags make test
     - name: Prepare network
