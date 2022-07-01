@@ -233,8 +233,8 @@ docker-bmv2-bldr:
 docker-publish-bmv2-bldr:
 	echo "TO DO when we have a proper repository"
 
-docker-pull-bmv2:
-	docker pull $(DOCKER_BMV2_IMG)
+docker-pull-bmv2-bldr:
+	docker pull $(DOCKER_BMV2_BLDR_IMG)
 
 docker-saithrift-bldr:
 	docker build \
