@@ -6,27 +6,20 @@ PWD := $(shell pwd)
 
 # Default Docker images, override from env var
 # https://hub.docker.com/r/p4lang/p4c
-DOCKER_P4C_IMG ?=p4lang/p4c:stable
+# p4lang version 971MB - works:
+#DOCKER_P4C_BMV2_IMG ?=p4lang/p4c:stable
 
-# OK
-#DOCKER_BMV2_IMG ?=chrissommers/dash-bmv2:pr127-220623
+# Slimmed-down version bmv2 backend only 632MB - works:
+DOCKER_P4C_BMV2_IMG ?=chrissommers/dash-p4c-bmv2:220701
 
-# OK
+# Builds sai-P4rt clients to run inside bmvs process
 DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2-bldr:220630
 
-#OK
-#DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2:pr127-220623
-
-#OK:
-#DOCKER_BMV2_RUN_IMG ?=chrissommers/dash-bmv2:pr127-220623
-
-# Bad libgrpc++.so.1.43: cannot open shared object file: No such file or directory
-#DOCKER_BMV2_RUN_IMG ?=p4lang/behavioral-model:stable
-
-#OK chrissommers/dash-bmv2-bldr:220630
+# Runs bmv2 process - consider slimmer if don't need sai/p4rt clients inside
 DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 
-DOCKER_SAITHRIFT_IMG ?=chrissommers/dash-saithrift-bldr:220625
+# Compiles sai headers, libsai, saithrift client-server
+DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220625
 
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
@@ -71,20 +64,25 @@ p4-clean:
 
 P4_SRC=$(wildcard bmv2/*.p4)
 P4_MAIN=bmv2/dash_pipeline.p4
-# TODO add p4 source dependencies
+P4_OUTDIR=bmv2/dash_pipeline.bmv2
+# Compile P4 into bmv2 .json fle and P4info for SAI header autogeneration
 $(P4_ARTIFACTS): $(P4_SRC)
 	@echo "Compile P4 program $(P4_MAIN) ..."
+	mkdir -p $(P4_OUTDIR) && \
 	docker run \
-	--rm --name p4c \
+	--rm \
+	--name dash-p4c-$(USER) \
 	$(DOCKER_FLAGS) \
 	-v $(PWD)/bmv2:/bmv2 \
 	-w / \
-	$(DOCKER_P4C_IMG) p4c \
-	    -b \
-	    bmv2 \
+	$(DOCKER_P4C_BMV2_IMG) p4c \
 	    $(P4_MAIN) \
-	    -o bmv2/dash_pipeline.bmv2 \
-	    --p4runtime-files bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.json,bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt
+		-b bmv2 \
+		-o $(P4_OUTDIR) \
+	    --p4runtime-files $(P4_OUTDIR)/dash_pipeline_p4rt.json,$(P4_OUTDIR)/dash_pipeline_p4rt.txt
+
+		# -I /usr/local/share/p4c \
+	    # -o $(P4_OUTDIR)/dash_pipeline.json \
 
 
 ######################################
@@ -101,7 +99,7 @@ sai-headers: p4 | SAI/SAI
 	@echo "Generate SAI library headers and implementation..."
 	$(DOCKER_RUN) \
 		--name build_sai-$(USER) \
-		-w /SAI $(DOCKER_SAITHRIFT_IMG) \
+		-w /SAI $(DOCKER_SAITHRIFT_BLDR_IMG) \
 	    ./generate_dash_api.sh
 
 # TODO - add SAI header dependencies
@@ -148,8 +146,10 @@ kill-switch:
 # Note we have to mount main DASH dir to allow container to "see" the parent Git repo for the SAI submodule
 DOCKER_RUN_SAITHRIFT =\
 	docker run \
+	--rm \
+	--name dash-saithrift-bldr-$(USER) \
 	-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/saithrift \
-	$(DOCKER_SAITHRIFT_IMG) \
+	$(DOCKER_SAITHRIFT_BLDR_IMG) \
 
 sai-thrift-server:
 	$(DOCKER_RUN_SAITHRIFT) \
@@ -175,7 +175,7 @@ test-clean:
 #TODO - use libsai.so, headers as dep
 sai-test:SAI/SAI
 	$(DOCKER_RUN) \
-	    --name build-test-$(USER) \
+	    --name dash-build-test-$(USER) \
 		-w /tests/vnet_out  $(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
@@ -201,22 +201,22 @@ run-sai-test:
 # DOCKER BUILD/PUBLISH TARGETS
 ###############################
 
-docker-bmv2:
-	docker build \
-		-f dockerfiles/Dockerfile.bmv2 \
-	    -t $(DOCKER_BMV2_IMG) \
-	    --build-arg user=$(USER) \
-	    --build-arg uid=$(shell id -u) \
-	    --build-arg guid=$(shell id -g) \
-	    --build-arg hostname=$(shell echo $$HOSTNAME) \
-	    --build-arg available_processors=$(shell nproc) \
-	    dockerfiles
+# docker-bmv2:
+# 	docker build \
+# 		-f dockerfiles/Dockerfile.bmv2 \
+# 	    -t $(DOCKER_BMV2_IMG) \
+# 	    --build-arg user=$(USER) \
+# 	    --build-arg uid=$(shell id -u) \
+# 	    --build-arg guid=$(shell id -g) \
+# 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+# 	    --build-arg available_processors=$(shell nproc) \
+# 	    dockerfiles
 
-docker-publish-bmv2:
-	echo "TO DO when we have a proper repository"
+# docker-publish-bmv2:
+# 	echo "TO DO when we have a proper repository"
 
-docker-pull-bmv2:
-	docker pull $(DOCKER_BMV2_IMG)
+# docker-pull-bmv2:
+# 	docker pull $(DOCKER_BMV2_IMG)
 
 
 docker-bmv2-bldr:
@@ -239,7 +239,7 @@ docker-pull-bmv2-bldr:
 docker-saithrift-bldr:
 	docker build \
 		-f dockerfiles/Dockerfile.saithrift \
-	    -t $(DOCKER_SAITHRIFT_IMG) \
+	    -t $(DOCKER_SAITHRIFT_BLDR_IMG) \
 	    --build-arg user=$(USER) \
 	    --build-arg uid=$(shell id -u) \
 	    --build-arg guid=$(shell id -g) \
@@ -251,10 +251,24 @@ docker-publish-saithrift-bldr:
 	echo "TO DO when we have a proper repository"
 
 docker-pull-saithrift-bldr:
-	docker pull $(DOCKER_SAITHRIFT_IMG)
+	docker pull $(DOCKER_SAITHRIFT_BLDR_IMG)
 
-docker-pull-p4c:
-	docker pull $(DOCKER_P4C_IMG)
+docker-dash-p4c:
+	docker build \
+		-f dockerfiles/Dockerfile.p4c-bmv2 \
+	    -t $(DOCKER_P4C_BMV2_IMG) \
+	    --build-arg user=$(USER) \
+	    --build-arg uid=$(shell id -u) \
+	    --build-arg guid=$(shell id -g) \
+	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+	    --build-arg available_processors=$(shell nproc) \
+		dockerfiles
+
+docker-pull-dash-p4c:
+	docker pull $(DOCKER_P4C_BMV2_IMG)
+
+docker-puublish-dash-p4c:
+	echo "TO DO when we have a proper repository"
 
 ###############################
 # BMV2-PKTGEN NETWORKING TARGETS

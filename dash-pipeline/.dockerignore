@@ -1,7 +1,1 @@
-bmv2
-images
-SAI
-tests
-*.md
-Makefile
-*.p4
+*

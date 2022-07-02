@@ -1,4 +1,6 @@
-FROM amd64/ubuntu:20.04
+# This Dockerfile creates a simple scratch layer with just gRPC libraries, to copy into other images.
+# gRPC is built from source, then the libraries are copied into a scratch image.
+FROM amd64/ubuntu:20.04 as builder
 LABEL maintainer="SONIC-DASH Community"
 LABEL description="DASH gRPC 1.43.2 docker image, no sources"
 
@@ -31,3 +33,8 @@ RUN apt-get update -qq && apt-get install -qq --no-install-recommends \
                     make install && \
                     cd / && \
                     rm -rf grpc
+
+# Just copy all libs needed to run bmv2 and build client apps for its P4Runtime etc.
+FROM scratch
+COPY --from=builder /usr/local/lib/* usr/local/lib/
+
