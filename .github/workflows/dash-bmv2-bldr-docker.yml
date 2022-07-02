@@ -1,4 +1,4 @@
-name: DASH-docker-bmv2-build-image
+name: DASH-docker-bmv2-bldr-build-image
 
 
 on:

@@ -259,7 +259,7 @@ docker-publish-dash-p4c:
 
 docker-dash-grpc:
 	docker build \
-		-f dockerfiles/Dockerfile.grpc1.43.1 \
+		-f dockerfiles/Dockerfile.grpc1.43.2 \
 	    -t $(DOCKER_GRPC_IMG) \
 	    --build-arg user=$(USER) \
 	    --build-arg uid=$(shell id -u) \
