@@ -21,6 +21,9 @@ DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 # Compiles sai headers, libsai, saithrift client-server
 DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220625
 
+# Compiles sai headers, libsai, saithrift client-server
+DOCKER_GRPC_IMG ?=chrissommers/dash-grpc:1.43.2
+
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
 
@@ -201,24 +204,6 @@ run-sai-test:
 # DOCKER BUILD/PUBLISH TARGETS
 ###############################
 
-# docker-bmv2:
-# 	docker build \
-# 		-f dockerfiles/Dockerfile.bmv2 \
-# 	    -t $(DOCKER_BMV2_IMG) \
-# 	    --build-arg user=$(USER) \
-# 	    --build-arg uid=$(shell id -u) \
-# 	    --build-arg guid=$(shell id -g) \
-# 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
-# 	    --build-arg available_processors=$(shell nproc) \
-# 	    dockerfiles
-
-# docker-publish-bmv2:
-# 	echo "TO DO when we have a proper repository"
-
-# docker-pull-bmv2:
-# 	docker pull $(DOCKER_BMV2_IMG)
-
-
 docker-bmv2-bldr:
 	docker build \
 		-f dockerfiles/Dockerfile.bmv2-bldr \
@@ -235,7 +220,7 @@ docker-publish-bmv2-bldr:
 
 docker-pull-bmv2-bldr:
 	docker pull $(DOCKER_BMV2_BLDR_IMG)
-
+###############################
 docker-saithrift-bldr:
 	docker build \
 		-f dockerfiles/Dockerfile.saithrift \
@@ -246,12 +231,13 @@ docker-saithrift-bldr:
 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
 	    --build-arg available_processors=$(shell nproc) \
 		dockerfiles
-
 docker-publish-saithrift-bldr:
 	echo "TO DO when we have a proper repository"
 
 docker-pull-saithrift-bldr:
 	docker pull $(DOCKER_SAITHRIFT_BLDR_IMG)
+
+###############################
 
 docker-dash-p4c:
 	docker build \
@@ -267,7 +253,25 @@ docker-dash-p4c:
 docker-pull-dash-p4c:
 	docker pull $(DOCKER_P4C_BMV2_IMG)
 
-docker-puublish-dash-p4c:
+docker-publish-dash-p4c:
+	echo "TO DO when we have a proper repository"
+###############################
+
+docker-dash-grpc:
+	docker build \
+		-f dockerfiles/Dockerfile.grpc1.43.1 \
+	    -t $(DOCKER_GRPC_IMG) \
+	    --build-arg user=$(USER) \
+	    --build-arg uid=$(shell id -u) \
+	    --build-arg guid=$(shell id -g) \
+	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+	    --build-arg available_processors=$(shell nproc) \
+		dockerfiles
+
+docker-pull-dash-grpc:
+	docker pull $(DOCKER_GRPC_IMG)
+
+docker-publish-dash-grpc:
 	echo "TO DO when we have a proper repository"
 
 ###############################
