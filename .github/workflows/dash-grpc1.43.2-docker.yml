@@ -28,6 +28,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build dash-grpc1.43.2 docker image
-      run: make docker-grpc
+      run: make docker-dash-grpc
     - name: Publish dash-bmv2 docker image
-      run: make docker-publish-grpc
+      run: make docker-publish-dash-grpc
