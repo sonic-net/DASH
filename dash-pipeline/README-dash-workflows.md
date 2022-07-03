@@ -1,34 +1,14 @@
-
 - [Detailed DASH Behavioral Model Build Workflow](#detailed-dash-behavioral-model-build-workflow)
-  - [Build Workflow Diagram](#build-workflow-diagram)
   - [Docker Image(s)](#docker-images)
-  - [Building Docker Images](#building-docker-images)
-    - [dash-bmv2 Docker image](#dash-bmv2-docker-image)
-  - [Optional - Manually Pull pre-built Docker image(s)](#optional---manually-pull-pre-built-docker-images)
-  - [Optional - Override default Docker image version(s)](#optional---override-default-docker-image-versions)
-  - [Optional - expert - build a new Docker image](#optional---expert---build-a-new-docker-image)
-  - [Optional - Expert/Admin - Publish Docker Image](#optional---expertadmin---publish-docker-image)
-  - [Optional - expert - `exec` a container shell](#optional---expert---exec-a-container-shell)
+  - [Build Workflow Diagram](#build-workflow-diagram)
   - [Compile P4 Code](#compile-p4-code)
   - [Build libsai.so adaptor library](#build-libsaiso-adaptor-library)
-- [Detailed Build Workflow](#detailed-build-workflow)
-  - [Build Workflow Diagram](#build-workflow-diagram-1)
-  - [Docker Image(s)](#docker-images-1)
-  - [Building Docker Images](#building-docker-images-1)
-    - [dash-bmv2 Docker image](#dash-bmv2-docker-image-1)
-  - [Optional - Manually Pull pre-built Docker image(s)](#optional---manually-pull-pre-built-docker-images-1)
-  - [Optional - Override default Docker image version(s)](#optional---override-default-docker-image-versions-1)
-  - [Optional - expert - build a new Docker image](#optional---expert---build-a-new-docker-image-1)
-  - [Optional - Expert/Admin - Publish Docker Image](#optional---expertadmin---publish-docker-image-1)
-  - [Optional - expert - `exec` a container shell](#optional---expert---exec-a-container-shell-1)
-  - [Compile P4 Code](#compile-p4-code-1)
-  - [Build libsai.so adaptor library](#build-libsaiso-adaptor-library-1)
     - [Restore SAI Submodule](#restore-sai-submodule)
   - [Build SAI client test program(s)](#build-sai-client-test-programs)
   - [Create veth pairs for bmv2](#create-veth-pairs-for-bmv2)
   - [Run software switch](#run-software-switch)
   - [Run simple SAI library test](#run-simple-sai-library-test)
-  - [Run ixia-x traffic-generator test](#run-ixia-x-traffic-generator-test)
+  - [Run ixia-c traffic-generator test](#run-ixia-c-traffic-generator-test)
     - [ixia-c components and setup/teardown](#ixia-c-components-and-setupteardown)
     - [About snappi and ixia-c traffic-generator](#about-snappi-and-ixia-c-traffic-generator)
       - [Opensource Sites:](#opensource-sites)
@@ -47,144 +27,15 @@ The workflows described here are primarily driven by a [Makefile](Makefile) and 
 * Automated script-based execution in a development or production environment, e.g. regression testing
 * Cloud-based CI (Continuous Integration) build and test, every time code is pushed to GitHub or a Pull Request is submitted to the upstream repository.
 
-Building starts by retrieving a pre-built Docker images from a Docker registry, then executing a series of targets in the main [Makefile](Makefile) via `make <target>`. It is designed to be run either manually; via user-supplied scripts; or from a CI pipeline in the cloud.
-
 See the diagram below. You can read the [dockerfiles](dockerfiles) and all `Makefiles` in various directories to get a deeper understanding of the build process.
-
-## Build Workflow Diagram
-
-![dash-p4-bmv2-thrift-workflow](images/dash-p4-bmv2-thrift-workflow.svg)
-
 ## Docker Image(s)
-One or more docker images are used to compile artifacts, such as P4 code, or run processses, such as the bmv2 simple switch.
-
-Some docker images are pulled from public repositories, e.g. `p4lang/p4c` is used to compile P4 source code. Others are built in this project, published to a Docker registry such as Azure Container Service (ACR), then pulled on demand by any user or CI runner as needed. These docker images are updated occassionally as the project evolves, as seldom as possible. They should be tagged with fixed labels to support [Configuration Management](#configuration-management).
-
-## Building Docker Images
-Docker images are not built routinely. Rather, then are built as-needed by an image maintainer and pushed to the docker registry.
-
-The `make docker-XXX` targets create a docker images named `dash-XXX` where XXX is the name of the image, e.g. `docker-bmv2-bldr`. Docker images are built using a Dockerfile. See the [Makefile](Makefile) or type `make docker[TAB]` and let tab-completion provide the available targets.
-
-During subsequent build steps, the docker image(s) are used to spawn containers in which various `make` targets or other scripts are executed. So, the execution environment for most build steps is inside the docker container, not the normal user environment.
-
-When the container is run, various local subdirectories are "mounted" as volumes in the container, for example local `./SAI/` is mounted as the container's `/SAI/` directory. The container thus reads and writes the local development environment directories and files.
-
-The following sections describe the various docker images.
-### dash-bmv2 Docker image
-Image name can be overridden via environment variable `DOCKER_BMV2_IMG`.
-
->**NOTE** The base docker image is [p4lang/behavioral-model:no-pi](https://hub.docker.com/r/p4lang/behavioral-model). This is the vanilla bmv2. To use a modified bmv2 engine, it must be built from sources and this base container may need to change.
-
-In addition it includes several other OSS projects such as, `grpc`, `p4c`, etc. and builds them from source. The entire build process can take one to several hours. Pulling the prebuilt image from a registry avoids this wait.
-
-This image is used by all the make build targets except `make p4`. It is also used to execute bmv2 simple switch and P4Runtime.
->**TODO:** This image should be broken into smaller ones for each build step, and optimized as well.
-
-## Optional - Manually Pull pre-built Docker image(s)
-This is optional, the Docker images will be pulled automatically the first time you run a `make` command which needs such an image You can also do this to restore an image.
-
-```
-make docker-pull-xxx  # where xxx = image name, e.g. bmv2
-```
-## Optional - Override default Docker image version(s)
-You can override the image in use by setting an environment variable, for example:
-```
-DOCKER_BMV2_IMG=some-repo/dash-bmv2:some-tag make sai
-```
-If you do multiple make targets in one command (e.g. `make all`), you can override multiple image names in the same command line by setting appropriate environment variables.
-## Optional - expert - build a new Docker image
-This step builds a new Docker image on demand, but you shouldn't have to if you use the prebuilt one retrieved from a Docker registry. Note, this step can exceed one hour depending upon CPU speed and network bandwidth. 
-```
-make docker-XXX  ### where XXX = image name, e.g. bmv2
-```
-## Optional - Expert/Admin - Publish Docker Image
-This step publishes the local Docker image to the registry and requires credentials. It should be done selectively by repo maintainers. For now there are no `make` target sto do this.
-
-## Optional - expert - `exec` a container shell
-This step runs a new container and executes `bash` shell, giving you a terminal in the container. It's primarily useful to examine the container contents or debug.
-```
-make dash-shell # runs dash-bmv2 image by default
-```
-
-## Compile P4 Code
-```
-make p4
-```
-The primary outputs of interest are:
- * `bmv2/dash_pipeline.bmv2/dash_pipeline.json` - the "P4 object code" which is actually metadata interpreted by the bmv2 "engine" to execute the P4 pipeline.
- * `bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.json` - the "P4Info" metadata which describes all the P4 entities (P4 tables, counters, etc.). This metadata is used downstream as follows:
-    * P4Runtime controller used to manage the bmv2 program. The SAI API adaptor converts SAI library "c" code calls to P4Runtime socket calls.
-    * P4-to-SAI header code generation (see next step below)
-
-## Build libsai.so adaptor library
-This library is the crucial item to allow integration with a Network Operating System (NOS) like SONiC. It wraps an implementtion specific "SDK" with standard Switch Abstraction Interface (SAI) APIs. In this case, an adaptor translates SAI API table/attribute CRUD operations into equivalent P4Runtime RPC calls, which is the native RPC API for bmv2.
-
-![CI-build-log-fail-p4-drilldown.png](../assets/CI-build-log-fail-p4-drilldown.png)  
-
-The main README for this repo shows the CI failing badge:
-
-![CI-fail-README-badge](../assets/CI-fail-README-badge.png)
-# Detailed Build Workflow
-This explains the various build steps in more details. The CI pipeline does most of these steps as well. All filenames and directories mentioned in the sections below are relative to the `dash-pipeline` directory (containing this README) unless otherwise specified. 
-
-Building starts by retrieving a pre-built `dash-bmv2` Docker image from a Docker registry, then executing a series of targets in the main [Makefile](Makefile) via `make <target>`. It is designed to be run either manually; via user-supplied scripts; or from a CI pipeline in the cloud.
+Several docker images are used to compile artifacts, such as P4 code, or run processses, such as the bmv2 simple switch. These Dockerfiles should not change often and are stored/retrieved from an external docker registry. See [README-dash.docker](README-dash.docker.md) for details. When a Dockerfile does change, it needs to be published in the resgistry. Dockerfile changes also trigger rebuilds of the docker images in the CI pipeline.
 
 See the diagram below. You can read the [Dockerfile](Dockerfile) and all `Makefiles` to get a deeper understanding of the build process.
 
 ## Build Workflow Diagram
 
 ![dash-p4-bmv2-thrift-workflow](images/dash-p4-bmv2-thrift-workflow.svg)
-
-## Docker Image(s)
-One or more docker images are used to compile artifacts, such as P4 code, or run processses, such as the bmv2 simple switch.
-
-Some docker images are pulled from public repositories, e.g. `p4lang/p4c` is used to compile P4 source code. Others are built in this project, published to a Docker registry such as Azure Container Service (ACR), then pulled on demand by any user or CI runner as needed. These docker images are updated occassionally as the project evolves, as seldom as possible. They should be tagged with fixed labels to support [Configuration Management](#configuration-management).
-
-## Building Docker Images
-Docker images are not built routinely. Rather, then are built as-needed by an image maintainer and pushed to the docker registry.
-
-The `make docker-XXX` targets create a docker images named `dash-XXX` where XXX is the name of the image, e.g. `docker-bmv2`. Docker images are built using a Dockerfile.
-
-During subsequent build steps, the docker image(s) are used to spawn containers in which various `make` targets or other scripts are executed. So, the execution environment for most build steps is inside the docker container, not the normal user environment.
-
-When the container is run, various local subdirectories are "mounted" as volumes in the container, for example local `./SAI/` is mounted as the container's `/SAI/` directory. The container thus reads and writes the local development environment directories and files.
-
-The following sections describe the various docker images.
-### dash-bmv2 Docker image
-Image name can be overridden via environment variable `DOCKER_BMV2_IMG`.
-
->**NOTE** The base docker image is [p4lang/behavioral-model:no-pi](https://hub.docker.com/r/p4lang/behavioral-model). This is the vanilla bmv2. To use a modified bmv2 engine, it must be built from sources and this base container may need to change.
-
-In addition it includes several other OSS projects such as, `grpc`, `p4c`, etc. and builds them from source. The entire build process can take one to several hours. Pulling the prebuilt image from a registry avoids this wait.
-
-This image is used by all the make build targets except `make p4`. It is also used to execute bmv2 simple switch and P4Runtime.
->**TODO:** This image should be broken into smaller ones for each build step, and optimized as well.
-
-## Optional - Manually Pull pre-built Docker image(s)
-This is optional, the Docker images will be pulled automatically the first time you run a `make` command which needs such an image You can also do this to restore an image.
-
-```
-make docker-pull-xxx  # where xxx = image name, e.g. bmv2
-```
-## Optional - Override default Docker image version(s)
-You can override the image in use by setting an environment variable, for example:
-```
-DOCKER_BMV2_IMG=some-repo/dash-bmv2:some-tag make sai
-```
-If you do multiple make targets in one command (e.g. `make all`), you can override multiple image names in the same command line by setting appropriate environment variables.
-## Optional - expert - build a new Docker image
-This step builds a new Docker image on demand, but you shouldn't have to if you use the prebuilt one retrieved from a Docker registry. Note, this step can exceed one hour depending upon CPU speed and network bandwidth. 
-```
-make docker-XXX  ### where XXX = image name, e.g. bmv2
-```
-## Optional - Expert/Admin - Publish Docker Image
-This step publishes the local Docker image to the registry and requires credentials. It should be done selectively by repo maintainers. For now there are no `make` target sto do this.
-
-## Optional - expert - `exec` a container shell
-This step runs a new container and executes `bash` shell, giving you a terminal in the container. It's primarily useful to examine the container contents or debug.
-```
-make dash-shell # runs dash-bmv2 image by default
-```
 
 ## Compile P4 Code
 ```
@@ -214,7 +65,7 @@ This consists of two main steps
 * Compile the implementation source code into `libsai.so`, providing the definitive DASH dataplane API. Note this `libsai` makes calls to bmv2's emdedded P4Runtime Server and must be linked with numerous libraries, see `tests/vnet_out/Makefile` to gain insights.
 
 ### Restore SAI Submodule
-As mentioend above, the `make sai` target generates code into the `SAI` submodule (e.g. at `./SAI/SAI`). This "dirties" what is otherwise a cloned Git repo from `opencomputeproject/SAI`.
+As mentioned above, the `make sai` target generates code into the `SAI` submodule (e.g. at `./SAI/SAI`). This "dirties" what is otherwise a cloned Git repo from `opencomputeproject/SAI`.
 ```
 make sai-clean
 ```
@@ -256,7 +107,7 @@ From a different terminal, run SAI client tests.
 make run-test
 ```
 
-## Run ixia-x traffic-generator test
+## Run ixia-c traffic-generator test
 Remeber to [Install docker-compose](#install-docker-compose).
 
 From a different terminal, run [ixia-c](https://github.com/open-traffic-generator/ixia-c) traffic tests. The first time this runs, it will pull Python packages for the [snappi](https://github.com/open-traffic-generator/snappi) client as well as Docker images for the [ixia-c](https://github.com/open-traffic-generator/ixia-c) controller and traffic engines.
@@ -323,12 +174,18 @@ To upgrade to a newer version of `SAI`, for example following a SAI enhancement 
   ```
   Since we haven't gone through this process yet, it is subject to more clarification or adjustments.
   # Configuration Management
+
+>**TODO** Needs updating
+
 "Configuration Management" here refers to maintaining version control over the various components used in the build and test workflows. It's mandatory to identify and lock down the versions of critical components, so that multiple versions and branches of the complete project can be built and tested in a reproducible and predictable way, at any point in the future.
 
-Here are the critical components and description of their role, and how versions are controlled:
+Below are the critical components and description of their role, and how versions are controlled:
 * DASH repo - controlled by Git source-code control, tracked by commit SHA, tag, branch, etc. This is the main project and its components should also be controlled.
 * Docker image(s) - identified by the `repo/image_name:tag`, e.g. `repo/dash-bmv2:v1`. Note that `latest` is not a reliable way to control a Docker image. These images are used for building artifacts; and for running processes, e.g. the "P4 bmv2 switch."
   * Docker images which we pull from third-party repos, e.g. [p4lang/behavioral-model](https://hub.docker.com/r/p4lang/behavioral-model), may not have "version" tags in the strictest sense, but rather "variant" tags like `:no-pi` which is a build *option*, not a code version.
   * Docker images which we build, e.g. `dash-bmv2`, are controlled by us so we can specify their contents and tag images appropriately. Once built, the contents are fixed. However, rebuilding from the same Dockerfile in the future is not guaranteed to produce the same contents. In fact, it's very unlikely to be the same,  because the image may `apt install` the "latest" Ubuntu packages. So, every rebuild of a Docker image must be carefully retested. In some cases it may be necessary to specify the versions of consituent packages such as `grpc` etc.
   * Docker images which we build might be based `FROM` another Docker image, therefore it depends upon its content. Some might have ambiguous version tags  (e.g. `p4lang/behavioral-mode:no-pi` - it gets rebuilt and updated constantly, but what is its version?). Since Docker images are built in layers and a docker `pull` retrieves those layers from various registries, it might compose a final image which has surprising content if the base image changes.
 * Git Submodules - these reference external Git repos as resources. They are controlled by the SHA commit of the submodule, which is "committed" to the top level project (see [About Git Submodules](#about-git-submodules)). The versions are always known and explicitly specified.
+
+See:
+* [Why you should pin your docker images with SHA instead of tags](https://rockbag.medium.com/why-you-should-pin-your-docker-images-with-sha-instead-of-tags-fd132443b8a6)

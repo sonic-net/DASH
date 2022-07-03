@@ -46,13 +46,6 @@ clean: kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac
 	sudo rm -rf bmv2/dash_pipeline.bmv2
 	sudo make -C tests/vnet_out clean
 
-.PHONY:dash-shell
-dash-shell:
-	$(DOCKER_RUN) \
-	    --name dashshell-$(USER) \
-		 $(DOCKER_BMV2_IMG) \
-	    bash
-
 ######################################
 # P4 Source code compile TARGETS
 ######################################
