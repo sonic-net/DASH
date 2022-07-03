@@ -28,6 +28,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build dash-p4c-bmv2 docker image
-      run: make docker-p4c-bmv2
-    - name: Publish dash-bmv2 docker image
-      run: make docker-publish-p4c-bmv2
+      run: make docker-dash-p4c
+    - name: Publish dash-p4c-bmv2 docker image
+      run: make docker-publish-dash-p4c
