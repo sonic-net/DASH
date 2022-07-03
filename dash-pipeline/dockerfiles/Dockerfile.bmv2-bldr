@@ -3,7 +3,9 @@
 FROM chrissommers/dash-grpc:1.43.2 as grpc
 
 # https://hub.docker.com/r/p4lang/behavioral-model
-FROM p4lang/behavioral-model:latest
+#FROM p4lang/behavioral-model:latest
+#latest on 2022-07-03:
+FROM p4lang/behavioral-model@sha256:ce45720e28a96a50f275c1b511cd84c2558b62f2cf7a7e506765183bc3fb2e32
 LABEL maintainer="SONIC-DASH Community"
 LABEL description="DASH pipeline P4 Behavioral Model build toolchain"
 
