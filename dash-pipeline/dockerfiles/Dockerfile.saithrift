@@ -1,4 +1,6 @@
-FROM amd64/ubuntu:18.04
+#FROM amd64/ubuntu:18.04
+# amd64/ubuntu:18.04 on 2022-07-03
+FROM amd64/ubuntu@sha256:8da4e9509bfe5e09df6502e7a8e93c63e4d0d9dbaa9f92d7d767f96d6c20a78a
 LABEL maintainer="SONiC-DASH Community "
 LABEL description="This Docker image contains the toolchain to build \
 the sai-thrift server for DASH."
