@@ -1,3 +1,10 @@
+
+See also:
+* [README.md](README.md) Top-level README for dash-pipeline
+* [README-dash-ci](README-dash-ci.md) for CI pipelines.
+* [README-dash-docker](README-dash-docker.md) for Docker usage.
+
+**Table of Contents**
 - [Detailed DASH Behavioral Model Build Workflow](#detailed-dash-behavioral-model-build-workflow)
   - [Docker Image(s)](#docker-images)
   - [Build Workflow Diagram](#build-workflow-diagram)
@@ -11,13 +18,18 @@
   - [Run ixia-c traffic-generator test](#run-ixia-c-traffic-generator-test)
     - [ixia-c components and setup/teardown](#ixia-c-components-and-setupteardown)
     - [About snappi and ixia-c traffic-generator](#about-snappi-and-ixia-c-traffic-generator)
-      - [Opensource Sites:](#opensource-sites)
-      - [DASH-specific info:](#dash-specific-info)
+      - [Opensource Sites](#opensource-sites)
+      - [DASH-specific info](#dash-specific-info)
   - [About Git Submodules](#about-git-submodules)
     - [Why use a submodule?](#why-use-a-submodule)
     - [Typical Workflow: Committing new code - ignoring SAI submodule](#typical-workflow-committing-new-code---ignoring-sai-submodule)
     - [Committing new SAI submodule version](#committing-new-sai-submodule-version)
 - [Configuration Management](#configuration-management)
+  - [DASH Repo Versioning](#dash-repo-versioning)
+  - [Submodules](#submodules)
+  - [Docker Image Versioning](#docker-image-versioning)
+    - [Project-Specific Images](#project-specific-images)
+    - [Third-party Docker Images](#third-party-docker-images)
 # Detailed DASH Behavioral Model Build Workflow
 
 This explains the various build steps in more details. The CI pipeline does most of these steps as well. All filenames and directories mentioned in the sections below are relative to the `dash-pipeline` directory (containing this README) unless otherwise specified. 
@@ -39,6 +51,7 @@ See the diagram below. You can read the [Dockerfile](Dockerfile) and all `Makefi
 
 ## Compile P4 Code
 ```
+make p4-clean # optional
 make p4
 ```
 The primary outputs of interest are:
@@ -51,6 +64,7 @@ The primary outputs of interest are:
 This library is the crucial item to allow integration with a Network Operating System (NOS) like SONiC. It wraps an implementtion specific "SDK" with standard Switch Abstraction Interface (SAI) APIs. In this case, an adaptor translates SAI API table/attribute CRUD operations into equivalent P4Runtime RPC calls, which is the native RPC API for bmv2.
 
 ```
+make sai-clean  # optional
 make sai
 ```
 
@@ -75,8 +89,6 @@ To ensure the baseline code is restored prior to each run, the modified director
 ## Build SAI client test program(s)
 This compiles a simple libsai client program to verify the libsai-to-p4runtime-to-bmv2 stack. It performs table access(es).
 
-**TODO:** Write libsai client test programs which configure the dataplane and performs traffic tests.
-
 ```
 make test
 ```
@@ -93,16 +105,16 @@ You can delete the veth pairs when you're done testing via this command:
 make network-clean
 ```
 ## Run software switch
-This will run an interactive docker container in the foreground. This will spew out verbose content when control APIs are called or packets are processed. Use additional terminals to run other test scripts.
+This will run an interactive docker container in the foreground. The main process is `simple_switch_grpc` which  includes an embedded P4Runtime server. This will spew out verbose content when control APIs are called or packets are processed. Use additional terminals to run other test scripts.
 
->**NOTE:** Stop the process (CTRL-c) to shut down the switch container.
+>**NOTE:** Stop the process (CTRL-c) to shut down the switch container. You can also invoke `make kill-switch` fro another terminal or script.
 
 ```
 make run-switch   # launches bmv2 with P4Runtime server
 ```
 
 ## Run simple SAI library test
-From a different terminal, run SAI client tests.
+From a different terminal, run SAI client tests. This exercises the `libsai.so` shared library including P4Runtime client adaptor, which communicates to the running `simple_switch_grpc` process over a socket.
 ```
 make run-test
 ```
@@ -124,12 +136,12 @@ ixia-c always requires a dedicated CPU core for the receiver, capable of full DP
 
 
 ### About snappi and ixia-c traffic-generator
-#### Opensource Sites:
+#### Opensource Sites
 * Vendor-neutral [Open Traffic Generator](https://github.com/open-traffic-generator) model and API
 * [Ixia-c](https://github.com/open-traffic-generator/ixia-c), a powerful traffic generator based on Open Traffic Generator API
 * [Ixia-c Slack support channel](https://github.com/open-traffic-generator/ixia-c/blob/main/docs/support.md)
 
-#### DASH-specific info:
+#### DASH-specific info
 * [../test/test-cases/bmv2_model](../test/test-cases/bmv2_model) for ixia-c test cases
 * [../test/third-party/traffic_gen/README.md](../test/third-party/traffic_gen/README.md) for ixia-c configuration info
 * [../test/third-party/traffic_gen/deployment/README.md](../test/third-party/traffic_gen/deployment/README.md) for docker-compose configuration and diagram
@@ -172,20 +184,42 @@ To upgrade to a newer version of `SAI`, for example following a SAI enhancement 
   git commit [-a]
   git push
   ```
-  Since we haven't gone through this process yet, it is subject to more clarification or adjustments.
-  # Configuration Management
-
->**TODO** Needs updating
+Since we haven't gone through this process yet, it is subject to more clarification or adjustments.
+# Configuration Management
 
 "Configuration Management" here refers to maintaining version control over the various components used in the build and test workflows. It's mandatory to identify and lock down the versions of critical components, so that multiple versions and branches of the complete project can be built and tested in a reproducible and predictable way, at any point in the future.
 
-Below are the critical components and description of their role, and how versions are controlled:
-* DASH repo - controlled by Git source-code control, tracked by commit SHA, tag, branch, etc. This is the main project and its components should also be controlled.
-* Docker image(s) - identified by the `repo/image_name:tag`, e.g. `repo/dash-bmv2:v1`. Note that `latest` is not a reliable way to control a Docker image. These images are used for building artifacts; and for running processes, e.g. the "P4 bmv2 switch."
-  * Docker images which we pull from third-party repos, e.g. [p4lang/behavioral-model](https://hub.docker.com/r/p4lang/behavioral-model), may not have "version" tags in the strictest sense, but rather "variant" tags like `:no-pi` which is a build *option*, not a code version.
-  * Docker images which we build, e.g. `dash-bmv2`, are controlled by us so we can specify their contents and tag images appropriately. Once built, the contents are fixed. However, rebuilding from the same Dockerfile in the future is not guaranteed to produce the same contents. In fact, it's very unlikely to be the same,  because the image may `apt install` the "latest" Ubuntu packages. So, every rebuild of a Docker image must be carefully retested. In some cases it may be necessary to specify the versions of consituent packages such as `grpc` etc.
-  * Docker images which we build might be based `FROM` another Docker image, therefore it depends upon its content. Some might have ambiguous version tags  (e.g. `p4lang/behavioral-mode:no-pi` - it gets rebuilt and updated constantly, but what is its version?). Since Docker images are built in layers and a docker `pull` retrieves those layers from various registries, it might compose a final image which has surprising content if the base image changes.
-* Git Submodules - these reference external Git repos as resources. They are controlled by the SHA commit of the submodule, which is "committed" to the top level project (see [About Git Submodules](#about-git-submodules)). The versions are always known and explicitly specified.
+The sections below discuss version control of critical components.
+## DASH Repo Versioning
+The DASH GitHub repo, i.e. [https://github.com/Azure/DASH](https://github.com/Azure/DASH) is controlled by Git source-code control, tracked by commit SHA, tag, branch, etc. This is the main project and its components should also be controlled.
+## Submodules
+As discussed in [About Git Submodules](#about-git-submodules), submodules are controlled by the SHA commit of the submodule, which is "committed" to the top level project (see [About Git Submodules](#about-git-submodules)). The versions are always known and explicitly specified.
+## Docker Image Versioning
+Docker image(s) are identified by their `repo/image_name:tag`, e.g. `p4lang/dp4c:latest`.
+### Project-Specific Images
+Docker images which we build, e.g. `dash-bmv2-bldr`, are controlled by us so we can specify their contents and tag images appropriately. It is important to version-control the contents of these images so that future builds of these images produce the same desired behavior. This meains controlling the versions of base Docker images, OS packages added via `apt install` etc.
+### Third-party Docker Images
+Docker images which we pull from third-party repos, e.g. [p4lang/behavioral-model](https://hub.docker.com/r/p4lang/behavioral-model) may have "version" tags like `:latest`, `:stable`, `:no-pi`. Such tags are not reliable as packages are often updated, so `:latest` and even `:stable` change over time. We use such images directly or as base images in our own Dockerfiles, e.g. in `FROM` statements.
+
+Similarly, common OS base images like [amd64/ubuntu:20.04](https://hub.docker.com/layers/ubuntu/amd64/ubuntu/20.04/images/sha256-b2339eee806d44d6a8adc0a790f824fb71f03366dd754d400316ae5a7e3ece3e?context=explore) have the tag `20.04` but this does not guarantee that the image won't suddenly change, which could break our builds.
+
+To ensure predictable and stable behavior, we should use SHA values for tags, e.g. `@sha256:ce45720e...` instead of `:latest`.
+
+Example:
+
+***Not reliable:***
+```
+# Can change daily:
+FROM p4lang/behavioral-model:latest
+```
+***Reliable:***
+```
+# p4lang/behavioral-model:latest on 2022-07-03:
+FROM p4lang/behavioral-model@sha256:ce45720e28a96a50f275c1b511cd84c2558b62f2cf7a7e506765183bc3fb2e32
+```
+The screencap below shows how to obtain the SAH digest of a docker image on Dockerhub, corresponding to the example above.
+
+![dockerhub-p4lang-bm-latest](images/dockerhub-p4lang-bm-latest.png)
 
 See:
 * [Why you should pin your docker images with SHA instead of tags](https://rockbag.medium.com/why-you-should-pin-your-docker-images-with-sha-instead-of-tags-fd132443b8a6)

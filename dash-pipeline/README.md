@@ -1,12 +1,14 @@
-# DASH Pipeline
-This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://github.com/p4lang/behavioral-model) from [p4lang](https://github.com/p4lang). It includes the P4 program which models the DASH overlay dataplane; Dockerfiles; build and test infrastructure; and CI (Continuous Integration) spec files.
 
 See also:
 * [README-dash-workflows.md](README-dash-workflows.md) for build workflows and Make targets.
 * [README-dash-ci](README-dash-ci.md) for CI pipelines.
+* [README-dash-docker](README-dash-docker.md) for Docker usage.
+# DASH Pipeline
+This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://github.com/p4lang/behavioral-model) from [p4lang](https://github.com/p4lang). It includes the P4 program which models the DASH overlay dataplane; Dockerfiles; build and test infrastructure; and CI (Continuous Integration) spec files.
 
 >**IMPORTANT:** Developers, read [Typical Workflow: Committing new code - ignoring SAI submodule](README-dash-workflows.md#typical-workflow-committing-new-code---ignoring-sai-submodule) before committing code.
 
+**Table of Contents**
 - [DASH Pipeline](#dash-pipeline)
 - [Known Issues](#known-issues)
 - [TODOs](#todos)

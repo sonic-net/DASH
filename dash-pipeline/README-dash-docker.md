@@ -14,7 +14,7 @@
 # DASH Docker Images
 
 ## Disclaimer Specific Docker Image Details
-We avoid describing specific docker images used in DASH to prevent documentation drift. Look at [Makefile](Makefile) and in the [dockerfiles](dockerfiles) directory for current details.
+Below we'll lay out general principles; we avoid describing specific docker images used in DASH, to prevent documentation drift. Look at [Makefile](Makefile) and in the [dockerfiles](dockerfiles) directory for current details.
 
 ## Overview
 One or more docker images are used extensively to run the build and test workflows:
