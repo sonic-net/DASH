@@ -1,3 +1,4 @@
+**[>> Can't wait? Jump to Quick-Start!](#quick-start)**
 
 See also:
 * [README-dash-workflows.md](README-dash-workflows.md) for build workflows and Make targets.
@@ -32,11 +33,11 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
   - [Install docker-compose](#install-docker-compose)
 
 # Known Issues
-* The vnet_out test via `make run-test` needs to be run to allow `run-ixiac-test` to pass. Need to understand why this is so.
-
+* P4 code doesn't loop packets back to same port.
+* P4 code mark-to-drop not set when meta.drop is set.
 # TODOs
 ## Loose Ends
-These are work items to complete the project with existing features and functionality.
+* The vnet_out test via `make run-test` needs to be run to allow `run-ixiac-test` to pass, likely due to P4Runtime server loading the "forwarding pipeline config" automatically. Need a more explicit way to initialize the switch.
 
 ## Desired Optimizations
 * Build a Docker image automatically when its Dockerfile changes, publish and pull from permanent repo
