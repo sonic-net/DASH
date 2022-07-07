@@ -86,10 +86,18 @@ $(P4_ARTIFACTS): $(P4_SRC)
 ######################################
 
 
+# Note we have to mount main DASH dir to allow container to "see" the parent Git repo for the SAI submodule
+DOCKER_RUN_SAITHRIFT =\
+	docker run \
+	--rm \
+	--name dash-saithrift-bldr-$(USER) \
+	-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/saithrift \
+	$(DOCKER_SAITHRIFT_BLDR_IMG) \
+
 # TODO - create separate rules for headers, libsai.so
 .PHONY:sai
 
-sai:sai-headers libsai
+sai:sai-headers sai-meta libsai
 
 sai-headers: p4 | SAI/SAI 
 	@echo "Generate SAI library headers and implementation..."
@@ -98,10 +106,20 @@ sai-headers: p4 | SAI/SAI
 		-w /SAI $(DOCKER_SAITHRIFT_BLDR_IMG) \
 	    ./generate_dash_api.sh
 
+sai-meta:
+	@echo "Generate SAI metadata..."
+	docker run \
+		--rm \
+		--name dash-saithrift-bldr-$(USER) \
+		-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/SAI/meta \
+		$(DOCKER_SAITHRIFT_BLDR_IMG) \
+	    make
+
 # TODO - add SAI header dependencies
 libsai:
 	@echo "build libsai.so..."
 	$(DOCKER_RUN) -w /SAI/lib \
+	--name build_libsai-$(USER) \
 	$(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
@@ -138,14 +156,6 @@ kill-switch:
 ###############################
 # SAI-THRIFT SERVER TARGETS
 ###############################
-
-# Note we have to mount main DASH dir to allow container to "see" the parent Git repo for the SAI submodule
-DOCKER_RUN_SAITHRIFT =\
-	docker run \
-	--rm \
-	--name dash-saithrift-bldr-$(USER) \
-	-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/saithrift \
-	$(DOCKER_SAITHRIFT_BLDR_IMG) \
 
 sai-thrift-server:
 	$(DOCKER_RUN_SAITHRIFT) \

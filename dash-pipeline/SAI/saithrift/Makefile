@@ -6,6 +6,26 @@ LIB=../lib
 
 META=../SAI/meta
 
+SAIRPC_EXTRA_LIBS="\
+		-L/lib/ -Wl,-rpath=/lib -lm \
+		-L/usr/local/lib/ -Wl,-rpath=/usr/local/lib \
+	    -lpthread \
+	    -lpiprotogrpc \
+	    -lpiprotobuf \
+	    -lprotobuf \
+	    -lgrpc++ \
+	    -lgrpc \
+	    -lpiall \
+	    -lpi_dummy \
+	    -lpthread \
+	    -labsl_synchronization \
+	    -labsl_status \
+		-labsl_raw_hash_set \
+		-lgpr \
+		-lre2 \
+		-lssl \
+		-laddress_sorting"
+
 # Below based on: https://github.com/opencomputeproject/SAI/blob/088627dd90c3420daf96d294c661b4a152afb01e/ptf/SAI_PTF_user-guide.md
 # Dependencies are assumed to be installed, e.g. in the docker container
 sai-thrift-server:
@@ -18,7 +38,10 @@ sai-thrift-server:
 
 	@echo "Build SAI thrift server and libraries..."
 
-	cd $(SAI) && export SAITHRIFTV2=y && export GEN_SAIRPC_OPTS="-ve" && make saithrift-build saithrift-install
+	cd $(SAI) && export SAITHRIFTV2=y && \
+		export GEN_SAIRPC_OPTS="-ve" && \
+		export SAIRPC_EXTRA_LIBS=$(SAIRPC_EXTRA_LIBS) && \
+		make saithrift-build saithrift-install
 
 	# NOTE: commands below is a workaround (WA) and needed until packaging of SAI python is fixed.
 	# Re-generate python SAI thrift library again

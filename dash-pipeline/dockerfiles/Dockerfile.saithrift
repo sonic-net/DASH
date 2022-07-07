@@ -1,9 +1,12 @@
+
+FROM chrissommers/dash-grpc:1.43.2 as grpc
+FROM chrissommers/dash-bmv2-bldr:220630 as bmv2
 #FROM amd64/ubuntu:18.04
 # amd64/ubuntu:18.04 on 2022-07-03
 FROM amd64/ubuntu@sha256:8da4e9509bfe5e09df6502e7a8e93c63e4d0d9dbaa9f92d7d767f96d6c20a78a
 LABEL maintainer="SONiC-DASH Community "
 LABEL description="This Docker image contains the toolchain to build \
-the sai-thrift server for DASH."
+the sai-thrift client & server + sai-P4Runtime adaptor layer, for DASH."
 
 
 # Configure make to run as many parallel jobs as cores available
@@ -39,6 +42,23 @@ RUN wget http://archive.apache.org/dist/thrift/0.11.0/thrift-0.11.0.tar.gz && \
     sudo cp dist/* /usr/lib && \
     cd / && \
     rm -rf thrift-0.11.0 thrift-0.11.0.tar.gz
+
+COPY --from=grpc /usr/local/lib/lib*grpc*.so* \
+        /usr/local/lib/libabsl*.so* \
+        /usr/local/lib/libgpr*.so* \
+        /usr/local/lib/libupb*.so* \
+        /usr/local/lib/libre2*.so* \
+        /usr/local/lib/libaddress_sorting*.so* \
+        /usr/local/lib/libssl*.so* \
+        /usr/local/lib/libcrypto*.so* \
+        /usr/local/lib/
+
+COPY --from=bmv2 /usr/local/lib/libpiprotogrpc.so* \
+        /usr/local/lib/libprotobuf.so* \
+        /usr/local/lib/libpiprotobuf.so* \
+        /usr/local/lib/libpiall.so* \
+        /usr/local/lib/libpi_dummy.so* \
+        /usr/local/lib/
 
 WORKDIR /
 
