@@ -151,6 +151,15 @@ sai-thrift-server:
 	$(DOCKER_RUN_SAITHRIFT) \
 	    make $@
 
+sai-thrift-server-bash:
+	docker run \
+	--rm \
+	-it \
+	--name dash-saithrift-bldr-$(USER) \
+	-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/saithrift \
+	$(DOCKER_SAITHRIFT_BLDR_IMG) \
+	/bin/bash
+
 sai-thrift-server-clean:
 	$(DOCKER_RUN_SAITHRIFT) \
 	    make $@

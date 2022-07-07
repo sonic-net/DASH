@@ -1,4 +1,4 @@
-all: meta sai-thrift-server
+all: sai-thrift-server
 # SAI submodule used by below targets; modified in-place!
 SAI=../SAI
 # Host dir where sai-thrift artifacts will be installed
@@ -31,6 +31,8 @@ sai-thrift-server:
 	cp /thrift-0.11.0/lib/py/dist/* $(LIB)
 
 sai-thrift-server-clean:
-	echo "TODO: make $@"
-
-clean: sai-meta-clean sai-thrift-server-clean
+	cd $(SAI) && export SAITHRIFTV2=y  && make clean
+	rm -rf $(SAI)/test/saithriftv2/gen-cpp/
+	rm -rf $(SAI)/test/saithriftv2/obj/
+	
+clean: sai-thrift-server-clean
