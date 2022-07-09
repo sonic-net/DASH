@@ -3,3 +3,4 @@
 __pycache__/
 dash-pipeline/bmv2/dash_pipeline.bmv2/
 dash-pipeline/SAI/lib/
+dash-pipeline/SAI/rpc/

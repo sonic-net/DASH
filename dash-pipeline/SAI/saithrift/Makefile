@@ -1,8 +1,9 @@
-all: sai-thrift-server
+all: sai-thrift-server sai-thrift-server-install
 # SAI submodule used by below targets; modified in-place!
-SAI=../SAI
+SAI=$(shell pwd)/../SAI
 # Host dir where sai-thrift artifacts will be installed
-LIB=../lib
+LIB=$(shell pwd)/../lib
+RPC_INST_DIR=$(shell pwd)/../rpc
 
 META=../SAI/meta
 
@@ -31,32 +32,34 @@ SAIRPC_EXTRA_LIBS="\
 sai-thrift-server:
 	# Copy headers to /usr/include/sai
 	sudo mkdir -p /usr/include/sai
-	sudo cp $(SAI)/inc/sai*.h $(SAI)/experimental/*.h /usr/include/sai/
+	sudo cp $(SAI)/inc/sai*.h /usr/include/sai/
+	sudo cp -r $(SAI)/experimental/ /usr/include/
 
 	# Install vendor specific SAI library i.e. DASH bmv2 libsai.so in /usr/lib.
 	sudo cp $(LIB)/libsai.so /usr/lib
 
 	@echo "Build SAI thrift server and libraries..."
-
+	mkdir -p $(RPC_INST_DIR)
 	cd $(SAI) && export SAITHRIFTV2=y && \
 		export GEN_SAIRPC_OPTS="-ve" && \
 		export SAIRPC_EXTRA_LIBS=$(SAIRPC_EXTRA_LIBS) && \
-		make saithrift-build #&& \
-	# 	sudo make saithrift-install
+		make saithrift-build && \
+		export DESTDIR=$(RPC_INST_DIR) && make saithrift-install
 
-	# # NOTE: commands below is a workaround (WA) and needed until packaging of SAI python is fixed.
-	# # Re-generate python SAI thrift library again
+	# NOTE: commands below is a workaround (WA) and needed until packaging of SAI python is fixed.
+	# Re-generate python SAI thrift library again
 
-	# cd $(SAI)/test/saithriftv2 && make install-pylib
-	# # Copy auto-generated python SAI thrift library to your Test controller host.
-	# cp $(SAI)/test/saithriftv2/dist/saithrift-0.9.tar.gz $(LIB)
+	cd $(SAI)/test/saithriftv2 && export DESTDIR=$(RPC_INST_DIR) && make install-pylib
+	# Copy auto-generated python SAI thrift library to your Test controller host.
+	cp $(SAI)/test/saithriftv2/dist/saithrift-0.9.tar.gz $(RPC_INST_DIR)
 
-	# # Copy thrift libs from builder image onto host
-	# cp /thrift-0.11.0/lib/py/dist/* $(LIB)
+	# Copy thrift libs from builder image onto host
+	cp /usr/lib/libthrift*so* /usr/lib/thrift-0.11.0.tar.gz $(RPC_INST_DIR)
 
 sai-thrift-server-clean:
 	cd $(SAI) && export SAITHRIFTV2=y  && make clean
 	rm -rf $(SAI)/test/saithriftv2/gen-cpp/
 	rm -rf $(SAI)/test/saithriftv2/obj/
+	rm -rf $(RPC_INST_DIR)
 	
 clean: sai-thrift-server-clean

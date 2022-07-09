@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 
-all:p4 sai test
+all:p4 sai sai-thrift-server test
 
 PWD := $(shell pwd)
 
@@ -162,6 +162,17 @@ kill-switch:
 sai-thrift-server:
 	$(DOCKER_RUN_SAITHRIFT) \
 	    make $@
+
+run-sai-thrift-server:
+	docker run \
+	--rm \
+	-it \
+	--net=host \
+	--name dash-saithrift-server-$(USER) \
+	-v $(PWD)/SAI:/SAI -w /SAI/rpc \
+	-e LD_LIBRARY_PATH=/SAI/lib:/usr/local/lib \
+	$(DOCKER_SAITHRIFT_BLDR_IMG) \
+	./usr/sbin/saiserver
 
 sai-thrift-server-bash:
 	docker run \
