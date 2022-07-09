@@ -102,6 +102,7 @@ sai:sai-headers sai-meta libsai
 sai-headers: p4 | SAI/SAI 
 	@echo "Generate SAI library headers and implementation..."
 	$(DOCKER_RUN) \
+		$(DOCKER_FLAGS) \
 		--name build_sai-$(USER) \
 		-w /SAI $(DOCKER_SAITHRIFT_BLDR_IMG) \
 	    ./generate_dash_api.sh
@@ -109,6 +110,7 @@ sai-headers: p4 | SAI/SAI
 sai-meta:
 	@echo "Generate SAI metadata..."
 	docker run \
+		$(DOCKER_FLAGS) \
 		--rm \
 		--name dash-saithrift-bldr-$(USER) \
 		-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/SAI/meta \
@@ -118,9 +120,11 @@ sai-meta:
 # TODO - add SAI header dependencies
 libsai:
 	@echo "build libsai.so..."
-	$(DOCKER_RUN) -w /SAI/lib \
-	--name build_libsai-$(USER) \
-	$(DOCKER_BMV2_BLDR_IMG) \
+	$(DOCKER_RUN) \
+		$(DOCKER_FLAGS) \
+		-w /SAI/lib \
+		--name build_libsai-$(USER) \
+		$(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
 libsai-clean:
