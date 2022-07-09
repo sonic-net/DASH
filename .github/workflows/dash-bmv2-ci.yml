@@ -45,6 +45,7 @@ jobs:
       run: DOCKER_FLAGS=$docker_fg_flags make p4
     - name: Install SAI submodule
       run: git submodule update --init
+    - name: Relax ownership of SAI submodule
       run: git config --global --add safe.directory ./dash-pipeline/SAI/SAI
     - name: Pull docker saithrift-bldr image
       run: make docker-pull-saithrift-bldr
