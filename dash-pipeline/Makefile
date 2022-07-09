@@ -169,10 +169,15 @@ run-sai-thrift-server:
 	-it \
 	--net=host \
 	--name dash-saithrift-server-$(USER) \
+	-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline.json:/etc/dash/dash_pipeline.json \
+	-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
 	-v $(PWD)/SAI:/SAI -w /SAI/rpc \
 	-e LD_LIBRARY_PATH=/SAI/lib:/usr/local/lib \
 	$(DOCKER_SAITHRIFT_BLDR_IMG) \
 	./usr/sbin/saiserver
+
+kill-sai-thrift-server:
+	-docker kill dash-saithrift-server-$(USER)
 
 sai-thrift-server-bash:
 	docker run \
