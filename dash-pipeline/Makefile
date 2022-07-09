@@ -19,7 +19,7 @@ DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2-bldr:220630
 DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 
 # Compiles sai headers, libsai, saithrift client-server
-DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220625
+DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220708
 
 # Compiles sai headers, libsai, saithrift client-server
 DOCKER_GRPC_IMG ?=chrissommers/dash-grpc:1.43.2

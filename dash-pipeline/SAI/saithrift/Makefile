@@ -7,7 +7,7 @@ LIB=../lib
 META=../SAI/meta
 
 SAIRPC_EXTRA_LIBS="\
-		-L/lib/ -Wl,-rpath=/lib -lm \
+		-L/lib/x86_64-linux-gnu -Wl,-rpath=/lib/x86_64-linux-gnu -lm \
 		-L/usr/local/lib/ -Wl,-rpath=/usr/local/lib \
 	    -lpthread \
 	    -lpiprotogrpc \
@@ -41,17 +41,18 @@ sai-thrift-server:
 	cd $(SAI) && export SAITHRIFTV2=y && \
 		export GEN_SAIRPC_OPTS="-ve" && \
 		export SAIRPC_EXTRA_LIBS=$(SAIRPC_EXTRA_LIBS) && \
-		make saithrift-build saithrift-install
+		make saithrift-build #&& \
+	# 	sudo make saithrift-install
 
-	# NOTE: commands below is a workaround (WA) and needed until packaging of SAI python is fixed.
-	# Re-generate python SAI thrift library again
+	# # NOTE: commands below is a workaround (WA) and needed until packaging of SAI python is fixed.
+	# # Re-generate python SAI thrift library again
 
-	cd $(SAI)/test/saithriftv2 && make install-pylib
-	# Copy auto-generated python SAI thrift library to your Test controller host.
-	cp $(SAI)/test/saithriftv2/dist/saithrift-0.9.tar.gz $(LIB)
+	# cd $(SAI)/test/saithriftv2 && make install-pylib
+	# # Copy auto-generated python SAI thrift library to your Test controller host.
+	# cp $(SAI)/test/saithriftv2/dist/saithrift-0.9.tar.gz $(LIB)
 
-	# Copy thrift libs from builder image onto host
-	cp /thrift-0.11.0/lib/py/dist/* $(LIB)
+	# # Copy thrift libs from builder image onto host
+	# cp /thrift-0.11.0/lib/py/dist/* $(LIB)
 
 sai-thrift-server-clean:
 	cd $(SAI) && export SAITHRIFTV2=y  && make clean
