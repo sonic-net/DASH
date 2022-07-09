@@ -45,8 +45,8 @@ control outbound(inout headers_t hdr,
         counters = routing_counter;
     }
 
-    action set_tunnel_mapping(IPv4Address underlay_dip,
-                              EthernetAddress overlay_dmac,
+    action set_tunnel_mapping(EthernetAddress overlay_dmac,
+                              bit<16> tunnel_id,
                               bit<1> use_dst_vni) {
         /*
            if (use_dst_vni)
@@ -56,7 +56,7 @@ control outbound(inout headers_t hdr,
         */
         meta.encap_data.vni = meta.encap_data.vni * (bit<24>)(~use_dst_vni) + meta.encap_data.dest_vnet_vni * (bit<24>)use_dst_vni;
         meta.encap_data.overlay_dmac = overlay_dmac;
-        meta.encap_data.underlay_dip = underlay_dip;
+        meta.tunnel_id = tunnel_id;
     }
 
     direct_counter(CounterType.packets_and_bytes) ca_to_pa_counter;
@@ -104,14 +104,6 @@ control outbound(inout headers_t hdr,
         switch (routing.apply().action_run) {
             route_vnet: {
                 ca_to_pa.apply();
-
-                vxlan_encap(hdr,
-                            meta.encap_data.underlay_dmac,
-                            meta.encap_data.underlay_smac,
-                            meta.encap_data.underlay_dip,
-                            meta.encap_data.underlay_sip,
-                            meta.encap_data.overlay_dmac,
-                            meta.encap_data.vni);
              }
          }
     }

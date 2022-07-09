@@ -71,13 +71,6 @@ control inbound(inout headers_t hdr,
         ConntrackOut.apply(hdr, meta);
 #endif //PNA_CONNTRACK
 
-        vxlan_encap(hdr,
-                    meta.encap_data.underlay_dmac,
-                    meta.encap_data.underlay_smac,
-                    meta.encap_data.underlay_dip,
-                    meta.encap_data.underlay_sip,
-                    hdr.ethernet.dst_addr,
-                    meta.encap_data.vni);
     }
 }
 
