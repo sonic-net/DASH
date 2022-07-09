@@ -77,10 +77,6 @@ $(P4_ARTIFACTS): $(P4_SRC)
 		-o $(P4_OUTDIR) \
 	    --p4runtime-files $(P4_OUTDIR)/dash_pipeline_p4rt.json,$(P4_OUTDIR)/dash_pipeline_p4rt.txt
 
-		# -I /usr/local/share/p4c \
-	    # -o $(P4_OUTDIR)/dash_pipeline.json \
-
-
 ######################################
 # DASH SAI HEADER & libsai.so TARGETS
 ######################################
@@ -101,6 +97,7 @@ sai:sai-headers sai-meta libsai
 
 sai-headers: p4 | SAI/SAI 
 	@echo "Generate SAI library headers and implementation..."
+	mkdir -p SAI/lib
 	$(DOCKER_RUN) \
 		$(DOCKER_FLAGS) \
 		--name build_sai-$(USER) \
