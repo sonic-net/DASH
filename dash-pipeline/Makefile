@@ -179,6 +179,7 @@ test-clean:
 	make -C tests clean
 
 
+.PHONY:sai-test
 sai-test:SAI/SAI SAI/lib/libsai.so
 	$(DOCKER_RUN) \
 	    --name dash-build-test-$(USER) \
@@ -188,6 +189,7 @@ sai-test:SAI/SAI SAI/lib/libsai.so
 timeout?=5
 run-all-tests:run-test run-ixiac-test
 
+.PHONY:run-test
 run-test:run-sai-test
 run-sai-test:
 	# Ensure P4Runtime server is listening
@@ -202,7 +204,11 @@ run-sai-test:
 	done; \
 	docker exec -w /tests/vnet_out simple_switch-$(USER) ./vnet_out
 
-init-switch: sai-test
+# Make sure we have executable
+tests/init_switch/init_switch:sai-test
+
+.PHONY:init-switch
+init-switch:
 	# Ensure P4Runtime server is listening
 	t=$(timeout); \
 	while [ $${t} -ge 1 ]; do \
