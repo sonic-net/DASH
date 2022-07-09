@@ -46,7 +46,7 @@ jobs:
     - name: Install SAI submodule
       run: git submodule update --init
     - name: Relax ownership of SAI submodule
-      run: pushd SAI/SAI && git config --global --add safe.directory '*' && popd
+      run: pushd .. && git config --global --add safe.directory '*' && popd
     - name: Pull docker saithrift-bldr image
       run: make docker-pull-saithrift-bldr
     - name: Generate SAI API
