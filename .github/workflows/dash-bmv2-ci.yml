@@ -32,8 +32,10 @@ jobs:
     name: Build and Test Sirius Pipeline
     runs-on: ubuntu-20.04
     env:
-      docker_fg_flags: -u root --privileged
-      docker_bg_flags: -d -u root --privileged
+      # docker_fg_flags: -u root --privileged
+      # docker_bg_flags: -d -u root --privileged
+      docker_fg_flags: 
+      docker_bg_flags: -d
     defaults:
       run:
         working-directory: ./dash-pipeline
@@ -45,8 +47,6 @@ jobs:
       run: DOCKER_FLAGS=$docker_fg_flags make p4
     - name: Install SAI submodule
       run: git submodule update --init
-    - name: Relax ownership of SAI submodule
-      run: pushd .. && git config --global --add safe.directory '*' && popd
     - name: Pull docker saithrift-bldr image
       run: make docker-pull-saithrift-bldr
     - name: Generate SAI API
