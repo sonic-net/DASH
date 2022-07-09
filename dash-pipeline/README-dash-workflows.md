@@ -13,6 +13,8 @@ See also:
   - [Build SAI client test program(s)](#build-sai-client-test-programs)
   - [Create veth pairs for bmv2](#create-veth-pairs-for-bmv2)
   - [Run software switch](#run-software-switch)
+  - [Initialize software switch](#initialize-software-switch)
+    - [Use wireshark to decode P4Runtime messages in the SAI-P4RT adaptor](#use-wireshark-to-decode-p4runtime-messages-in-the-sai-p4rt-adaptor)
   - [Run simple SAI library test](#run-simple-sai-library-test)
   - [Run ixia-c traffic-generator test](#run-ixia-c-traffic-generator-test)
     - [ixia-c components and setup/teardown](#ixia-c-components-and-setupteardown)
@@ -106,11 +108,26 @@ make network-clean
 ## Run software switch
 This will run an interactive docker container in the foreground. The main process is `simple_switch_grpc` which  includes an embedded P4Runtime server. This will spew out verbose content when control APIs are called or packets are processed. Use additional terminals to run other test scripts.
 
->**NOTE:** Stop the process (CTRL-c) to shut down the switch container. You can also invoke `make kill-switch` fro another terminal or script.
+>**NOTE:** Stop the process (CTRL-c) to shut down the switch container. You can also invoke `make kill-switch` from another terminal or script.
 
 ```
 make run-switch   # launches bmv2 with P4Runtime server
 ```
+## Initialize software switch
+The `bmv2` switch does not start up loaded with your P4 program; it is a "blank slate" awaiting a
+`SetForwardingPipelineConfigRequest` gRPC message which contains the output of the p4c compiler (P4 bmv2 JSON) and P4Info), as described in [Compile P4 Code](#compile-p4-code). In our current implementation, this is done via a static initializer in the`libsai.so` shared library, which won't get loaded and activated (by the Linux loader) until an API call is made to the library. This can be triggered by e.g. a SAI table accessor. What if we want to initialize the switch without calling any SAI table APIs?
+
+The `init_switch` test program and corresponding make target shown below makes a benign dummy call to the library to cause it to load and perform a `SetForwardingPipelineConfigRequest`.
+```
+make init-switch
+```
+A message similar to the following will be emitted in the running switch's console:
+```
+GRPC call SetForwardingPipelineConfig 0.0.0.0:9559 => /etc/dash/dash_pipeline.json, /etc/dash/dash_pipeline_p4rt.txt
+Switch is initialized.
+```
+### Use wireshark to decode P4Runtime messages in the SAI-P4RT adaptor
+>**Hint:** You can monitor P4Runtime messages using Wireshark or similar. Select interface `lo`, filter on `tcp.port==9559`. Right-click on a captured packet and select "Decode as..." and configure port 9559 to decode as HTTP2 (old versions of Wireshark might lack this choice).
 
 ## Run simple SAI library test
 From a different terminal, run SAI client tests. This exercises the `libsai.so` shared library including P4Runtime client adaptor, which communicates to the running `simple_switch_grpc` process over a socket.
