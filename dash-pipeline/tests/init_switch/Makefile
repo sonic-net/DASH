@@ -1,11 +1,12 @@
-all:vnet_out
-vnet_out: vnet_out.cpp
+all:init_switch
+init_switch: init_switch.cpp
 	echo "building $@ ..."
 	g++ \
+	    -I /SAI/lib \
 	    -I /SAI/SAI/inc \
 	    -I /SAI/SAI/experimental/ \
-	    -o vnet_out \
-	    vnet_out.cpp \
+	    -o init_switch \
+	    init_switch.cpp \
 	    -Wl,-rpath,/SAI/lib \
 	    -L/SAI/lib/ \
 	    -lsai \
@@ -29,4 +30,4 @@ vnet_out: vnet_out.cpp
 	    -g
 
 clean:
-	rm -rf vnet_out
+	rm -rf init_switch

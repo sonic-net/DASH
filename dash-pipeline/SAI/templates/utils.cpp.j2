@@ -69,6 +69,8 @@ p4::config::v1::P4Info parse_p4info(const char *path) {
     return p4info;
 }
 
+
+// This gets called when library first loaded; requires a libsai func call to trigger this
 __attribute__((constructor))
 static void Init() {
     nextId = 0;
@@ -114,6 +116,7 @@ static void Init() {
 
         p4::v1::SetForwardingPipelineConfigResponse rep;
         grpc::ClientContext context;
+        LOG("GRPC call SetForwardingPipelineConfig " + _grpcTarget + " => " + test_json + ", " + test_proto_json <<endl);
         auto status = stub->SetForwardingPipelineConfig(
                 &context, request, &rep);
         assert(status.ok());

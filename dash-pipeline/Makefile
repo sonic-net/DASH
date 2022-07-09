@@ -43,8 +43,8 @@ SAI/SAI:
 
 .PHONY:clean
 clean: kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac
-	sudo rm -rf bmv2/dash_pipeline.bmv2
-	sudo make -C tests/vnet_out clean
+	rm -rf bmv2/dash_pipeline.bmv2
+	make -C tests/vnet_out clean
 
 ######################################
 # P4 Source code compile TARGETS
@@ -56,7 +56,7 @@ p4: bmv2/dash_pipeline.bmv2/dash_pipeline.json
 
 .PHONY:p4-clean
 p4-clean:
-	-sudo rm -rf $(P4_ARTIFACTS)
+	-rm -rf $(P4_ARTIFACTS)
 
 P4_SRC=$(wildcard bmv2/*.p4)
 P4_MAIN=bmv2/dash_pipeline.p4
@@ -123,12 +123,14 @@ libsai:
 	$(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
+libsai-clean:
+	-rm -rf SAI/lib/libsai.so
+
 .PHONY:sai-clean
-sai-clean: SAI/SAI 
+sai-clean: SAI/SAI libsai-clean
 	@echo "Restoring SAI subdirectories to baseline..."
-	sudo rm -rf SAI/SAI/inc SAI/SAI/experimental SAI/SAI/meta
+	rm -rf SAI/SAI/inc SAI/SAI/experimental SAI/SAI/meta
 	cd SAI/SAI && git checkout -- inc experimental meta
-	sudo rm -rf SAI/lib
 
 ######################################
 # P4 Behavioral-model (switch) TARGETS
@@ -137,17 +139,17 @@ sai-clean: SAI/SAI
 .PHONY:run-switch
 run-switch: network
 	$(DOCKER_RUN) \
-	    --name simple_switch-$(USER) \
+		--name simple_switch-$(USER) \
 		-u root \
-	    -v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline.json:/etc/dash/dash_pipeline.json \
-	    -v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
-	    $(DOCKER_BMV2_RUN_IMG) \
-	    env LD_LIBRARY_PATH=/usr/local/lib \
-	    simple_switch_grpc \
-	    --interface 0@veth0 \
-	    --interface 1@veth2 \
-	    --log-console \
-	    --no-p4
+		-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline.json:/etc/dash/dash_pipeline.json \
+		-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
+		$(DOCKER_BMV2_RUN_IMG) \
+		env LD_LIBRARY_PATH=/usr/local/lib \
+		simple_switch_grpc \
+		--interface 0@veth0 \
+		--interface 1@veth2 \
+		--log-console \
+		--no-p4
 
 kill-switch:
 	-docker kill simple_switch-$(USER)
@@ -184,19 +186,20 @@ sai-thrift-server-clean:
 test:sai-test
 
 test-clean:
-	sudo make -C tests/vnet_out clean
+	make -C tests clean
 
 
-#TODO - use libsai.so, headers as dep
-sai-test:SAI/SAI
+.PHONY:sai-test
+sai-test:SAI/SAI SAI/lib/libsai.so
 	$(DOCKER_RUN) \
 	    --name dash-build-test-$(USER) \
-		-w /tests/vnet_out  $(DOCKER_BMV2_BLDR_IMG) \
+		-w /tests  $(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
 timeout?=5
 run-all-tests:run-test run-ixiac-test
 
+.PHONY:run-test
 run-test:run-sai-test
 run-sai-test:
 	# Ensure P4Runtime server is listening
@@ -211,6 +214,22 @@ run-sai-test:
 	done; \
 	docker exec -w /tests/vnet_out simple_switch-$(USER) ./vnet_out
 
+# Make sure we have executable
+tests/init_switch/init_switch:sai-test
+
+.PHONY:init-switch
+init-switch:
+	# Ensure P4Runtime server is listening
+	t=$(timeout); \
+	while [ $${t} -ge 1 ]; do \
+		if sudo lsof -i:9559 | grep LISTEN >/dev/null; then \
+			break; \
+		else \
+			sleep 1; \
+			t=`expr $$t - 1`; \
+		fi; \
+	done; \
+	docker exec -w /tests/init_switch simple_switch-$(USER) ./init_switch
 
 ###############################
 # DOCKER BUILD/PUBLISH TARGETS
@@ -300,15 +319,17 @@ veth0: /sys/class/net/veth0
 	sudo ip link set dev veth1 up
 	sudo ip link set veth0 mtu 9500
 	sudo ip link set veth1 mtu 9500
-	# sudo sysctl net.ipv4.conf.veth0.forwarding=0
-	# sudo sysctl net.ipv4.conf.veth1.forwarding=0
 	sudo sysctl net.ipv6.conf.veth0.disable_ipv6=1
 	#https://superuser.com/questions/33196/how-to-disable-autoconfiguration-on-ipv6-in-linux
 	sudo sysctl net.ipv6.conf.veth0.autoconf=0
 	sudo sysctl net.ipv6.conf.veth0.accept_ra=0
+	sudo sysctl net.ipv6.conf.veth0.accept_ra_pinfo=0
+	sudo sysctl net.ipv6.conf.veth0.router_solicitations=0
 	sudo sysctl net.ipv6.conf.veth1.disable_ipv6=1
 	sudo sysctl net.ipv6.conf.veth1.autoconf=0
 	sudo sysctl net.ipv6.conf.veth1.accept_ra=0
+	sudo sysctl net.ipv6.conf.veth1.accept_ra_pinfo=0
+	sudo sysctl net.ipv6.conf.veth1.router_solicitations=0
 
 veth2: /sys/class/net/veth2
 /sys/class/net/veth2:
@@ -317,14 +338,16 @@ veth2: /sys/class/net/veth2
 	sudo ip link set dev veth3 up
 	sudo ip link set veth2 mtu 9500
 	sudo ip link set veth3 mtu 9500
-	# sudo sysctl net.ipv4.conf.veth2.forwarding=0
-	# sudo sysctl net.ipv4.conf.veth3.forwarding=0
 	sudo sysctl net.ipv6.conf.veth2.disable_ipv6=1
 	sudo sysctl net.ipv6.conf.veth2.autoconf=0
 	sudo sysctl net.ipv6.conf.veth2.accept_ra=0
+	sudo sysctl net.ipv6.conf.veth2.accept_ra_pinfo=0
+	sudo sysctl net.ipv6.conf.veth2.router_solicitations=0
 	sudo sysctl net.ipv6.conf.veth3.disable_ipv6=1
 	sudo sysctl net.ipv6.conf.veth3.autoconf=0
 	sudo sysctl net.ipv6.conf.veth3.accept_ra=0
+	sudo sysctl net.ipv6.conf.veth3.accept_ra_pinfo=0
+	sudo sysctl net.ipv6.conf.veth3.router_solicitations=0
 
 network-clean:
 	# Note, deleting one member (e.g. veth0) deletes its peer (e.g. veth1)
@@ -335,7 +358,7 @@ network-clean:
 # IXIA-C TARGETS
 ###############################
 
-run-ixiac-test: ixiac-prereq
+run-ixiac-test: ixiac-prereq init-switch
 	python3 -m pytest ../test/test-cases/bmv2_model/ -s
 
 ixiac-prereq: install-python-modules deploy-ixiac

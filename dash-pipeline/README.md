@@ -37,8 +37,8 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 * P4 code mark-to-drop not set when meta.drop is set.
 # TODOs
 ## Loose Ends
-* The vnet_out test via `make run-test` needs to be run to allow `run-ixiac-test` to pass, likely due to P4Runtime server loading the "forwarding pipeline config" automatically. Need a more explicit way to initialize the switch.
-
+Small items to complete given the exsting features and state, e.g. excluing major roadmap items.
+* n/a
 ## Desired Optimizations
 * Build a Docker image automatically when its Dockerfile changes, publish and pull from permanent repo
 * Use Azure Container Registry (ACR) for Docker images instead of temporary Dockerhub registry
@@ -47,8 +47,8 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 
 ## Roadmap
 These are significant feature or functionality work items.
-* Use modified bmv2 which adds stateful processing. Current version is vanilla bmv2. This will require building it instead of using a prebuilt bmv2 docker image, see [Build Docker dev container](#build-docker-dev-container).
-* Integrate SAI-thrift server from [OCP/SAI](https://github.com/opencomputeproject/SAI)
+* Use modified bmv2 which adds stateful processing. Current version is vanilla bmv2. This will require building it instead of using a prebuilt bmv2 docker image, see [Build Docker dev container](#build-docker-dev-container). [**WIP**]
+* Integrate SAI-thrift server from [OCP/SAI](https://github.com/opencomputeproject/SAI) [**WIP**]
 * Add DASH sevice test cases including SAI-thrift pipeline configuration and traffic tests
 
 # Quick-start
@@ -60,7 +60,8 @@ See [Installing Prequisites](#installing-prequisites) for details.
 * Ubuntu 20.04, bare-metal or VM
 * 2 CPU cores minimum, 7GB RAM, 14Gb HD; same as [free Azure 2-core GitHub runner instances](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources), we'll try to live within these limits
 * git - tested with version 2.25.1
-* docker, docker-compose (1.29.2 or later)
+* docker
+* [docker-compose](#install-docker-compose) (**1.29.2 or later**)
 * python3, pip3
 
 ## Clone this repo
@@ -158,6 +159,8 @@ You can probably use the following command for most cases:
 sudo apt install -y python3-pip
 ```
 ## Install docker-compose
+>**NOTE** Use docker-compose 1.29.2 or later! The `.yml` file format changed. Using an older version might result in an error such as: <br/> `ERROR: Invalid interpolation format for "controller" option in service "services": "ixiacom/ixia-c-controller:${CONTROLLER_VERSION:-latest}"`
+
 It is assumed you already have Docker on your system.
 The `docker-compose` command is used to orchestrate the ixia-c containers. You need to install it to run the ixia-c test scripts (`ixia-c` itself doesn't require docker-compose; it's merely convenient for instantiating it using a declarative `.yml` file).
 
@@ -167,7 +170,6 @@ See also:
 
 Installation of `docker-compose` has to be done just once. You can use another technique based on your platform and preferences. The following will download and install a linux executable under `/usr/local/bin`. You should have a PATH to this directory. You can edit the below command to locate it somewhere else as desired, just change the path as needed.
 
->**NOTE** Use docker-compose 1.29.2 or later!
 
 ```
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
