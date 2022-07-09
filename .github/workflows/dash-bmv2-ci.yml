@@ -32,8 +32,8 @@ jobs:
     name: Build and Test Sirius Pipeline
     runs-on: ubuntu-20.04
     env:
-      docker_fg_flags: --privileged
-      docker_bg_flags: -d --privileged
+      docker_fg_flags:
+      docker_bg_flags: -d
     defaults:
       run:
         working-directory: ./dash-pipeline
@@ -48,7 +48,7 @@ jobs:
     - name: Pull docker saithrift-bldr image
       run: make docker-pull-saithrift-bldr
     - name: Generate SAI API
-      run: DOCKER_FLAGS=$docker_fg_flags make sai
+      run: DOCKER_FLAGS="-u root" make sai
     - name: Generate SAI-Thrift client and server
       run: DOCKER_FLAGS=$docker_fg_flags make sai-thrift-server
     - name: Pull docker bmv2-bldr image
