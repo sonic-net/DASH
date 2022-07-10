@@ -104,7 +104,7 @@ sai-headers: p4 | SAI/SAI
 		-w /SAI $(DOCKER_SAITHRIFT_BLDR_IMG) \
 	    ./generate_dash_api.sh
 	# Fixup perms from generate_dash_api using sudo to call python,so subsequent scripts can access
-	sudo chmod -R 777 $(PWD)/SAI/SAI
+	sudo chmod -R a+rw $(PWD)/SAI/SAI
 
 sai-meta:
 	@echo "Generate SAI metadata..."
