@@ -106,7 +106,7 @@ sai-headers: p4 | SAI/SAI
 	# Fixup perms from generate_dash_api using sudo to call python,so subsequent scripts can access
 	sudo chmod -R a+rw $(PWD)/SAI/SAI
 	user=$(USER)
-	sudo chown -R $(user) .
+	sudo --preserve-env=user chown -R $(user) .
 
 sai-meta:
 	@echo "Generate SAI metadata..."
