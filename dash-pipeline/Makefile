@@ -109,7 +109,7 @@ sai-headers: p4 | SAI/SAI
 
 sai-meta:
 	@echo "Generate SAI metadata..."
-	./add_safe_git_dirs.sh
+	# ./add_safe_git_dirs.sh
 	docker run \
 		$(DOCKER_FLAGS) \
 		--rm \
