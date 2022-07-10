@@ -32,41 +32,41 @@ jobs:
     name: Build and Test Sirius Pipeline
     runs-on: ubuntu-20.04
     env:
-      docker_fg_flags:
-      docker_bg_flags: -d
+      docker_fg_flags: -u root --privileged
+      docker_bg_flags: -d -u root --privileged
     defaults:
       run:
         working-directory: ./dash-pipeline
     steps:
     - uses: actions/checkout@v3
     - name: Pull docker p4c image
-      run: make docker-pull-dash-p4c
+      run:  make docker-pull-dash-p4c
     - name: Build P4 software switch (bmv2) and P4Info
-      run: sudo DOCKER_FLAGS=$docker_fg_flags make p4
+      run:  DOCKER_FLAGS=$docker_fg_flags make p4
     - name: Install SAI submodule
-      run: sudo git submodule update --init
+      run:  git submodule update --init
     - name: Pull docker saithrift-bldr image
-      run: make docker-pull-saithrift-bldr
+      run:  make docker-pull-saithrift-bldr
     - name: Generate SAI API
-      run: sudo DOCKER_FLAGS=$docker_fg_flags make sai
+      run:  DOCKER_FLAGS=$docker_fg_flags make sai
     - name: Generate SAI-Thrift client and server
-      run: sudo DOCKER_FLAGS=$docker_fg_flags make sai-thrift-server
+      run:  DOCKER_FLAGS=$docker_fg_flags make sai-thrift-server
     - name: Pull docker bmv2-bldr image
-      run: make docker-pull-bmv2-bldr
+      run:  make docker-pull-bmv2-bldr
     - name: Build libsai c++ tests
-      run: sudo DOCKER_FLAGS=$docker_fg_flags make test
+      run:  DOCKER_FLAGS=$docker_fg_flags make test
     - name: Prepare network
-      run: DOCKER_FLAGS=$docker_fg_flags make network
+      run:  DOCKER_FLAGS=$docker_fg_flags make network
     - name: Run P4 software switch (bmv2) with P4Runtime
-      run: sudo DOCKER_FLAGS=$docker_bg_flags make run-switch
+      run:  DOCKER_FLAGS=$docker_bg_flags make run-switch
     - name: Test SAI library
-      run: sudo DOCKER_FLAGS=$docker_fg_flags make run-test
+      run:  DOCKER_FLAGS=$docker_fg_flags make run-test
     - name: Ixia-c Traffic Generator test
-      run:  sudo make run-ixiac-test
+      run:  make run-ixiac-test
     - name: SAI-Thrift-server test
-      run:  sudo make run-sai-thrift-server
+      run:  make run-sai-thrift-server
     - name: Shutdown sai-thrift server
-      run:  sudo make kill-sai-thrift-server
+      run:  make kill-sai-thrift-server
     - name: Shutdown ixia-c
-      run:  sudo make undeploy-ixiac
+      run:  make undeploy-ixiac
       
