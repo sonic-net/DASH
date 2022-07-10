@@ -114,9 +114,9 @@ sai-meta:
 		$(DOCKER_FLAGS) \
 		--rm \
 		--name dash-saithrift-bldr-$(USER) \
-		-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/SAI/meta \
+		-v $(PWD)/..:/dash -w /dash \
 		$(DOCKER_SAITHRIFT_BLDR_IMG) \
-	    make
+	    ./dash-pipeline/make_meta_wrapper.sh
 
 # TODO - add SAI header dependencies
 libsai:
