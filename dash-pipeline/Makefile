@@ -109,7 +109,10 @@ sai-headers: p4 | SAI/SAI
 
 sai-meta:
 	@echo "Generate SAI metadata..."
-	# ./add_safe_git_dirs.sh
+	# hack - remove scripts which cause Git ownership failures in CI pipelines
+	# We don't need them, they're to check that SAI headers didn't experience enum changes etc.
+	sed -ie '/checkenumlock.sh/d' SAI/SAI/meta/Makefile
+	sed -ie '/checkancestry.sh/d' SAI/SAI/meta/Makefile
 	docker run \
 		$(DOCKER_FLAGS) \
 		--rm \
