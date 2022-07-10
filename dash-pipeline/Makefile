@@ -98,7 +98,7 @@ sai:sai-headers sai-meta libsai
 sai-headers: p4 | SAI/SAI 
 	@echo "Generate SAI library headers and implementation..."
 	mkdir -p SAI/lib
-	git config --global --add safe.directory /dash/dash-pipeline/SAI/SAI 
+	git config --global --add safe.directory '*' 
 	$(DOCKER_RUN) \
 		$(DOCKER_FLAGS) \
 		--name build_sai-$(USER) \
