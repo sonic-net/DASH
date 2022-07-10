@@ -50,7 +50,7 @@ jobs:
     - name: Generate SAI API
       run:  DOCKER_FLAGS=$docker_fg_flags make sai
     - name: Generate SAI-Thrift client and server
-      run:  DOCKER_FLAGS=$docker_fg_flags make sai-thrift-server
+      run:  sudo DOCKER_FLAGS=$docker_fg_flags make sai-thrift-server
     - name: Pull docker bmv2-bldr image
       run:  make docker-pull-bmv2-bldr
     - name: Build libsai c++ tests
