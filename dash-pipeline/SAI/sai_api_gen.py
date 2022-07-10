@@ -324,29 +324,19 @@ parser.add_argument('filepath', type=str, help='Path to P4 program RUNTIME JSON 
 parser.add_argument('apiname', type=str, help='Name of the new SAI API')
 parser.add_argument('--print-sai-lib', type=bool)
 parser.add_argument('--ignore-tables', type=str, default='', help='Comma separated list of tables to ignore')
-parser.add_argument('--overwrite',  type=bool, default=False, help='Restore SAI subdirectories')
 args = parser.parse_args()
 
 if not os.path.isfile(args.filepath):
     print('File ' + args.filepath + ' does not exist')
     exit(1)
 
-# if os.path.exists('./lib'):
-#     if args.overwrite == False:
-#         print('Directory ./lib already exists. Please remove in order to proceed')
-#         exit(1)
-#     else:
-#         print('Directory ./lib will be deleted...')
-#         shutil.rmtree('./lib')
-
+# 
 # Get SAI dictionary from P4 dictionary
 print("Generating SAI API...")
 with open(args.filepath) as json_program_file:
     json_program = json.load(json_program_file)
 
 sai_apis = generate_sai_apis(json_program, args.ignore_tables.split(','))
-
-# os.mkdir("lib")
 
 # Write SAI dictionary into SAI API headers
 sai_api_name_list = []
