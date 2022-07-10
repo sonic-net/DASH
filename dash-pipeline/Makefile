@@ -105,9 +105,12 @@ sai-headers: p4 | SAI/SAI
 	    ./generate_dash_api.sh
 	# Fixup perms from generate_dash_api using sudo to call python,so subsequent scripts can access
 	sudo chmod -R a+rw $(PWD)/SAI/SAI
+	user=$(USER)
+	sudo chown -R $(user) .
 
 sai-meta:
 	@echo "Generate SAI metadata..."
+	./add_safe_git_dirs.sh
 	docker run \
 		$(DOCKER_FLAGS) \
 		--rm \
