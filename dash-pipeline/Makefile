@@ -98,14 +98,12 @@ sai:sai-headers sai-meta libsai
 sai-headers: p4 | SAI/SAI 
 	@echo "Generate SAI library headers and implementation..."
 	mkdir -p SAI/lib
-	# use -u root so python can write files in CI - unsolved mystery
 	$(DOCKER_RUN) \
 		$(DOCKER_FLAGS) \
-		-u root \
 		--name build_sai-$(USER) \
 		-w /SAI $(DOCKER_SAITHRIFT_BLDR_IMG) \
 	    ./generate_dash_api.sh
-	# Fixup perms so subsequent scripts can access
+	# Fixup perms from generate_dash_api using sudo to call python,so subsequent scripts can access
 	sudo chmod -R 777 $(PWD)/SAI/SAI
 
 sai-meta:
