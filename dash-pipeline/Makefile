@@ -174,7 +174,7 @@ sai-thrift-server:
 run-sai-thrift-server:
 	docker run \
 	--rm \
-	-it \
+	$(DOCKER_FLAGS) \
 	--net=host \
 	--name dash-saithrift-server-$(USER) \
 	-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline.json:/etc/dash/dash_pipeline.json \
