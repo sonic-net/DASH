@@ -85,6 +85,7 @@ $(P4_ARTIFACTS): $(P4_SRC)
 # Note we have to mount main DASH dir to allow container to "see" the parent Git repo for the SAI submodule
 DOCKER_RUN_SAITHRIFT =\
 	docker run \
+	$(DOCKER_FLAGS) \
 	--rm \
 	--name dash-saithrift-bldr-$(USER) \
 	-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/saithrift \
