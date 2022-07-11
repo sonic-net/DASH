@@ -223,8 +223,12 @@ control dash_ingress(inout headers_t hdr,
 
         eni_meter.apply();
 
-        /* Send packet to port 1 by default if we reached the end of pipeline */
-        standard_metadata.egress_spec = 1;
+        if (meta.dropped) {
+            drop_action();
+        } else {
+            /* Send packet to port 1 by default if we reached the end of pipeline */
+            standard_metadata.egress_spec = 1;
+        }
     }
 }
 

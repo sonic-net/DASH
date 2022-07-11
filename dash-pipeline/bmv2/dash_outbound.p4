@@ -28,6 +28,22 @@ control outbound(inout headers_t hdr,
         meta.encap_data.dest_vnet_vni = dest_vnet_vni;
     }
 
+    action route_vnet_direct(bit<24> dest_vnet_vni,
+                             bit<1> is_overlay_nh_ip_v6,
+                             IPv4ORv6Address overlay_nh_ip) {
+        meta.encap_data.dest_vnet_vni = dest_vnet_vni;
+        meta.lkup_dst_ip_addr = overlay_nh_ip;
+        meta.is_lkup_dst_ip_v6 = is_overlay_nh_ip_v6;
+    }
+
+    action route_direct() {
+        /* send to underlay router without any encap */
+    }
+
+    action drop() {
+        meta.dropped = true;
+    }
+
     direct_counter(CounterType.packets_and_bytes) routing_counter;
 
     @name("routing|dash_vnet")
@@ -40,7 +56,11 @@ control outbound(inout headers_t hdr,
 
         actions = {
             route_vnet; /* for expressroute - ecmp of overlay */
+            route_vnet_direct;
+            route_direct;
+            drop;
         }
+        const default_action = drop;
 
         counters = routing_counter;
     }
@@ -66,8 +86,8 @@ control outbound(inout headers_t hdr,
         key = {
             /* Flow for express route */
             meta.encap_data.dest_vnet_vni : exact @name("meta.encap_data.dest_vnet_vni:dest_vni");
-            meta.is_dst_ip_v6 : exact @name("meta.is_dst_ip_v6:v4_or_v6");
-            meta.dst_ip_addr : exact @name("meta.dst_ip_addr:dip");
+            meta.is_lkup_dst_ip_v6 : exact @name("meta.is_lkup_dst_ip_v6:v4_or_v6");
+            meta.lkup_dst_ip_addr : exact @name("meta.lkup_dst_ip_addr:dip");
         }
 
         actions = {
@@ -100,6 +120,9 @@ control outbound(inout headers_t hdr,
 #ifdef PNA_CONNTRACK
         ConntrackIn.apply(hdr, meta);
 #endif // PNA_CONNTRACK
+
+        meta.lkup_dst_ip_addr = meta.dst_ip_addr;
+        meta.is_lkup_dst_ip_v6 = meta.is_dst_ip_v6;
 
         switch (routing.apply().action_run) {
             route_vnet: {
