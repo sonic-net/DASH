@@ -42,7 +42,7 @@ SAI/SAI:
 
 
 .PHONY:clean
-clean: kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac
+clean: kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac sai-thrift-server-clean
 	rm -rf bmv2/dash_pipeline.bmv2
 	make -C tests/vnet_out clean
 
@@ -196,11 +196,11 @@ sai-thrift-server-bash:
 	$(DOCKER_SAITHRIFT_BLDR_IMG) \
 	/bin/bash
 
-sai-thrift-server-clean:
+sai-thrift-server-clean: kill-sai-thrift-server
 	$(DOCKER_RUN_SAITHRIFT) \
 	    make $@
 
-
+run-sai-thrift-server-test: run-sai-thrift-server
 
 ###############################
 # SAI TEST TARGETS
@@ -221,7 +221,7 @@ sai-test:SAI/SAI SAI/lib/libsai.so
 	    make
 
 timeout?=5
-run-all-tests:run-test run-ixiac-test
+run-all-tests:run-test run-ixiac-test run-sai-thrift-server-test
 
 .PHONY:run-test
 run-test:run-sai-test

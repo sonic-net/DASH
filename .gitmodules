@@ -1,4 +1,4 @@
 [submodule "SAI"]
 	path = dash-pipeline/SAI/SAI
 	url = https://github.com/chrispsommers/SAI.git
-	branch = add-SAIRPC_EXTRA_LIBS
+	branch = saithriftv2-fixes-for-extensions
