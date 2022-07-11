@@ -39,10 +39,6 @@ sai-thrift-server:
 	sudo cp $(LIB)/libsai.so /usr/lib
 
 	@echo "Build SAI thrift server and libraries..."
-	# used sudo to workaround a CI issue, should not need it.
-	sudo mkdir -p $(RPC_INST_DIR)
-	# fix perms due to sudo mkdir above
-	sudo chmod a+rw $(SAI)
 
 	cd $(SAI) && export SAITHRIFTV2=y && \
 		export GEN_SAIRPC_OPTS="-ve" && \
