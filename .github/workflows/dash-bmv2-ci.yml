@@ -64,7 +64,7 @@ jobs:
     - name: Ixia-c Traffic Generator test
       run:  make run-ixiac-test
     - name: SAI-Thrift-server test
-      run:  make run-sai-thrift-server
+      run:  DOCKER_FLAGS=$docker_bg_flags make run-sai-thrift-server
     - name: Shutdown sai-thrift server
       run:  make kill-sai-thrift-server
     - name: Shutdown ixia-c
