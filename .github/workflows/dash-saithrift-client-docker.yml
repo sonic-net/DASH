@@ -1,0 +1,32 @@
+name: DASH-docker-saithrift-client-image
+
+on:
+  push:
+    branches: [ "**" ]
+    paths:
+      - '.github/workflows/dash-saithrift-client-docker.yml'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client'
+      - 'dash-pipeline/.dockerignore'
+      - 'dash-pipeline/dockerfiles/.dockerignore'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '.github/workflows/dash-saithrift-client-docker.yml'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client'
+      - 'dash-pipeline/.dockerignore'
+      - 'dash-pipeline/dockerfiles/.dockerignore'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build docker dash-saithrift-client image
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: ./dash-pipeline
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build dash-saithrift-client docker image
+      run: make docker-saithrift-client
+    - name: Publish dash-saithrift-client docker image
+      run: make docker-publish-saithrift-client
