@@ -12,7 +12,7 @@
       curl \
       git \
       make
-    sudo apt -y install apt-get install ubuntu-desktop (TODO: remove this depedency)
+    sudo apt -y install ubuntu-desktop (TODO: remove this depedency)
     ```
 - install Docker (all credits to https://docs.docker.com/engine/install/ubuntu/ )
     ```
