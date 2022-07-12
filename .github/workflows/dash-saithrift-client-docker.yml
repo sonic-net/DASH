@@ -5,6 +5,8 @@ on:
     branches: [ "**" ]
     paths:
       - '.github/workflows/dash-saithrift-client-docker.yml'
+      - 'dash-pipeline/Makefile'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift'
       - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
@@ -12,6 +14,8 @@ on:
     branches: [ "main" ]
     paths:
       - '.github/workflows/dash-saithrift-client-docker.yml'
+      - 'dash-pipeline/Makefile'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift'
       - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
@@ -27,6 +31,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build dash-saithrift-client docker image
-      run: make docker-saithrift-client
+      # We need artifacts from sai-thrift-server build steps to copy into this image
+      run: make clean p4 sai sai-thrift-server docker-saithrift-client
     - name: Publish dash-saithrift-client docker image
       run: make docker-publish-saithrift-client
