@@ -304,10 +304,9 @@ docker-saithrift-client:
 	    --build-arg available_processors=$(shell nproc) \
 		SAI/
 
-run-saithrift-client:
+DOCKER_RUN_SAITHRIFT_CLIENT=\
 	docker run \
 	-u root \
-	-v $(PWD)/bmv2:/bmv2 \
 	-v $(PWD)/SAI/saithrift/tests:/saithrift/tests \
 	--network=host \
 	--rm \
@@ -315,6 +314,12 @@ run-saithrift-client:
 	$(DOCKER_FLAGS) \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG)
 
+
+run-saithrift-client-bash:
+	$(DOCKER_RUN_SAITHRIFT_CLIENT) /bin/bash
+
+run-saithrift-client-tests:
+	$(DOCKER_RUN_SAITHRIFT_CLIENT) /saithrift/tests/run-saithrift-tests.sh
 
 docker-publish-saithrift-client:
 	echo "TO DO when we have a proper repository"
