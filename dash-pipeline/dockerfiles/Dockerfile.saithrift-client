@@ -1,0 +1,31 @@
+
+# TODO use builder pattern, create reduced image - python + libs
+FROM chrissommers/dash-saithrift-bldr:220708
+LABEL maintainer="SONiC-DASH Community "
+LABEL description="This Docker image contains the toolchain to run\
+the sai-thrift client and test programsfor DASH."
+
+RUN sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1 && \
+    update-alternatives --list python && \
+    python --version
+
+WORKDIR /
+ADD lib/libsai.so /usr/local/lib/
+ADD rpc/usr/local/lib/python3.8/site-packages/sai* /usr/local/lib/python3.8/site-packages/
+ADD rpc/saithrift-0.9.tar.gz /
+ADD rpc/thrift-0.11.0.tar.gz /
+RUN cd /saithrift-0.9 && \
+    sudo python3 setup.py install && \
+    cd / &&\
+    sudo rm -rf saithrift-0.9 &&\
+    cd thrift-0.11.0 && \
+    sudo python3 setup.py install && \
+    cd / &&\
+    sudo rm -rf thrift-0.11.0 
+
+# Note tests are copied into docker image, but can override by mounting a newer tests at runtime    
+ADD saithrift/tests /saithrift/tests/
+
+RUN sudo python3 -m pip install -r /saithrift/tests/requirements.txt
+
+CMD ["/bin/bash"]

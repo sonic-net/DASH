@@ -5,9 +5,9 @@ all:p4 sai sai-thrift-server test
 PWD := $(shell pwd)
 
 # Default Docker images, override from env var
-# https://hub.docker.com/r/p4lang/p4c
-# p4lang version 971MB - works:
-#DOCKER_P4C_BMV2_IMG ?=p4lang/p4c:stable
+
+# Needed Libraries only
+DOCKER_GRPC_IMG ?=chrissommers/dash-grpc:1.43.2
 
 # Slimmed-down version bmv2 backend only 632MB - works:
 DOCKER_P4C_BMV2_IMG ?=chrissommers/dash-p4c-bmv2:220701
@@ -22,7 +22,7 @@ DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220708
 
 # Compiles sai headers, libsai, saithrift client-server
-DOCKER_GRPC_IMG ?=chrissommers/dash-grpc:1.43.2
+DOCKER_SAITHRIFT_CLIENT_IMG ?=chrissommers/dash-saithrift-client:220711
 
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
@@ -286,11 +286,41 @@ docker-saithrift-bldr:
 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
 	    --build-arg available_processors=$(shell nproc) \
 		dockerfiles
+
 docker-publish-saithrift-bldr:
 	echo "TO DO when we have a proper repository"
 
 docker-pull-saithrift-bldr:
 	docker pull $(DOCKER_SAITHRIFT_BLDR_IMG)
+###############################
+docker-saithrift-client:
+	docker build \
+		-f dockerfiles/Dockerfile.saithrift-client \
+	    -t $(DOCKER_SAITHRIFT_CLIENT_IMG) \
+	    --build-arg user=$(USER) \
+	    --build-arg uid=$(shell id -u) \
+	    --build-arg guid=$(shell id -g) \
+	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+	    --build-arg available_processors=$(shell nproc) \
+		SAI/
+
+run-saithrift-client:
+	docker run \
+	-u root \
+	-v $(PWD)/bmv2:/bmv2 \
+	-v $(PWD)/SAI/saithrift/tests:/saithrift/tests \
+	--network=host \
+	--rm \
+	-w /saithrift/tests \
+	$(DOCKER_FLAGS) \
+	$(DOCKER_SAITHRIFT_CLIENT_IMG)
+
+
+docker-publish-saithrift-client:
+	echo "TO DO when we have a proper repository"
+
+docker-pull-saithrift-client:
+	docker pull $(DOCKER_SAITHRIFT_CLIENT_IMG)
 
 ###############################
 
