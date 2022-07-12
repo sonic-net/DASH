@@ -29,7 +29,7 @@ on:
 
 jobs:
   build:
-    name: Build and Test Sirius Pipeline
+    name: Build and Test DASH Pipeline
     runs-on: ubuntu-20.04
     env:
       docker_fg_flags: -u root --privileged
