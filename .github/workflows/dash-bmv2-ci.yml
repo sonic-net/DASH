@@ -66,7 +66,7 @@ jobs:
     - name: Launch SAI-Thrift-server
       run:  DOCKER_FLAGS=$docker_bg_flags make run-sai-thrift-server
     - name: Run sai-thrift client tests
-      run:  make run-saithrift-client-tests
+      run:  DOCKER_FLAGS=$docker_fg_flags make run-saithrift-client-tests
     - name: Shutdown sai-thrift server
       run:  make kill-sai-thrift-server
     - name: Shutdown ixia-c
