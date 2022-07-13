@@ -9,7 +9,11 @@ RUN sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8
     update-alternatives --list python && \
     python --version
 
-WORKDIR /
+# Note: tests are copied into docker image, but can override by mounting a newer tests at runtime    
+ADD saithrift/pytest /saithrift/pytest/
+ADD saithrift/ptf /saithrift/ptf/
+RUN sudo python3 -m pip install -r /saithrift/pytest/requirements.txt
+ADD SAI/ptf /SAI/ptf/
 ADD lib/libsai.so /usr/local/lib/
 ADD rpc/usr/local/lib/python3.8/site-packages/sai* /usr/local/lib/python3.8/site-packages/
 ADD rpc/saithrift-0.9.tar.gz /
@@ -23,9 +27,13 @@ RUN cd /saithrift-0.9 && \
     cd / &&\
     sudo rm -rf thrift-0.11.0 
 
-# Note tests are copied into docker image, but can override by mounting a newer tests at runtime    
-ADD saithrift/tests /saithrift/tests/
+# Install PTF and scapy
+ADD SAI/test/ptf /SAI/test/ptf
+RUN cd /SAI/test/ptf && \
+    sudo python setup.py install && \
+    sudo pip3 install scapy pysubnettree
 
-RUN sudo python3 -m pip install -r /saithrift/tests/requirements.txt
+WORKDIR /
+
 
 CMD ["/bin/bash"]

@@ -35,6 +35,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 # Known Issues
 * P4 code doesn't loop packets back to same port.
 * P4 code mark-to-drop not set when meta.drop is set.
+* Permission and ownership issues in DOcker images, one remedy is `chmod -R o+rw  SAI tests bmv2` prior to `make all`
 # TODOs
 ## Loose Ends
 Small items to complete given the exsting features and state, e.g. excluing major roadmap items.

@@ -36,9 +36,13 @@ DOCKER_RUN := docker run \
 	--rm \
 	$(DOCKER_FLAGS)
 
-SAI/SAI:
+SAI/SAI: sai-submodule
+
+sai-submodule:
 	@echo "Initializing SAI submodule..."
 	git submodule update --init
+	@echo "Initializing SAI submodule..."
+	cd SAI/SAI/test && git submodule update --init ptf
 
 
 .PHONY:clean
@@ -307,10 +311,10 @@ docker-saithrift-client:
 DOCKER_RUN_SAITHRIFT_CLIENT=\
 	docker run \
 	-u root \
-	-v $(PWD)/SAI/saithrift/tests:/saithrift/tests \
+	-v $(PWD)/SAI/saithrift/:/saithrift-host/ \
 	--network=host \
 	--rm \
-	-w /saithrift/tests \
+	-w /saithrift-host/ \
 	$(DOCKER_FLAGS) \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG)
 
