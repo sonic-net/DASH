@@ -87,7 +87,7 @@ $(P4_ARTIFACTS): $(P4_SRC)
 
 
 # Note we have to mount main DASH dir to allow container to "see" the parent Git repo for the SAI submodule
-DOCKER_RUN_SAITHRIFT =\
+DOCKER_RUN_SAITHRIFT_BLDR =\
 	docker run \
 	$(DOCKER_FLAGS) \
 	--rm \
@@ -172,10 +172,10 @@ kill-switch:
 ###############################
 
 sai-thrift-server:
-	$(DOCKER_RUN_SAITHRIFT) \
+	$(DOCKER_RUN_SAITHRIFT_BLDR) \
 	    make $@
 
-run-sai-thrift-server:
+DOCKER_RUN_SAITHRIFT_SRVR =\
 	docker run \
 	--rm \
 	$(DOCKER_FLAGS) \
@@ -185,23 +185,21 @@ run-sai-thrift-server:
 	-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
 	-v $(PWD)/SAI:/SAI -w /SAI/rpc \
 	-e LD_LIBRARY_PATH=/SAI/lib:/usr/local/lib \
-	$(DOCKER_SAITHRIFT_BLDR_IMG) \
+	$(DOCKER_SAITHRIFT_BLDR_IMG)
+
+run-sai-thrift-server:
+	$(DOCKER_RUN_SAITHRIFT_SRVR) \
 	./usr/sbin/saiserver
 
 kill-sai-thrift-server:
 	-docker kill dash-saithrift-server-$(USER)
 
-sai-thrift-server-bash:
-	docker run \
-	--rm \
-	-it \
-	--name dash-saithrift-bldr-$(USER) \
-	-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/saithrift \
-	$(DOCKER_SAITHRIFT_BLDR_IMG) \
+run-sai-thrift-server-bash:
+	$(DOCKER_RUN_SAITHRIFT_SRVR) \
 	/bin/bash
 
 sai-thrift-server-clean: kill-sai-thrift-server
-	$(DOCKER_RUN_SAITHRIFT) \
+	$(DOCKER_RUN_SAITHRIFT_BLDR) \
 	    make $@
 
 run-sai-thrift-server-test: run-sai-thrift-server
@@ -259,6 +257,8 @@ init-switch:
 	done; \
 	docker exec -w /tests/init_switch simple_switch-$(USER) ./init_switch
 
+run-saithrift-client-tests: run-saithrift-pytests
+
 ###############################
 # DOCKER BUILD/PUBLISH TARGETS
 ###############################
@@ -308,7 +308,7 @@ docker-saithrift-client:
 	    --build-arg available_processors=$(shell nproc) \
 		SAI/
 
-DOCKER_RUN_SAITHRIFT_CLIENT=\
+DOCKER_RUN_SAITHRIFT_BLDR_CLIENT=\
 	docker run \
 	-u root \
 	-v $(PWD)/SAI/saithrift/:/saithrift-host/ \
@@ -320,10 +320,10 @@ DOCKER_RUN_SAITHRIFT_CLIENT=\
 
 
 run-saithrift-client-bash:
-	$(DOCKER_RUN_SAITHRIFT_CLIENT) /bin/bash
+	$(DOCKER_RUN_SAITHRIFT_BLDR_CLIENT) /bin/bash
 
-run-saithrift-client-tests:
-	$(DOCKER_RUN_SAITHRIFT_CLIENT) /saithrift/tests/run-saithrift-tests.sh
+run-saithrift-pytests:
+	$(DOCKER_RUN_SAITHRIFT_BLDR_CLIENT) /saithrift-host/run-saithrift-pytests.sh
 
 docker-publish-saithrift-client:
 	echo "TO DO when we have a proper repository"
