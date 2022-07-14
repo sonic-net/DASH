@@ -39,7 +39,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 # TODOs
 ## Loose Ends
 Small items to complete given the exsting features and state, e.g. excluing major roadmap items.
-* n/a
+* Update SAI submodule to upstream when PRs are merged (currently using dev branches for URLs)
 ## Desired Optimizations
 * Build a Docker image automatically when its Dockerfile changes, publish and pull from permanent repo
 * Use Azure Container Registry (ACR) for Docker images instead of temporary Dockerhub registry

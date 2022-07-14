@@ -39,8 +39,8 @@ class TestSaiThrift():
         client = SaithriftClient().client
         print ("test_saithrift_session OK")
 
-    # def test_sai_thrift_get_switch_attribute(self):
-    #     client = SaithriftClient().client
-    #     attr = adapter.sai_thrift_get_switch_attribute(
-    #         client, number_of_active_ports=True)
+    def test_sai_thrift_get_switch_attribute(self):
+        client = SaithriftClient().client
+        attr = adapter.sai_thrift_get_switch_attribute(
+            client, number_of_active_ports=True)
 
