@@ -98,7 +98,7 @@ DOCKER_RUN_SAITHRIFT_BLDR =\
 # TODO - create separate rules for headers, libsai.so
 .PHONY:sai
 
-sai:sai-headers sai-meta libsai
+sai: sai-clean sai-headers sai-meta libsai
 
 sai-headers: p4 | SAI/SAI 
 	@echo "Generate SAI library headers and implementation..."

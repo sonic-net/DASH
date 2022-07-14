@@ -5,16 +5,21 @@ See also:
 
 **Table of Contents**
 - [Detailed DASH Behavioral Model Build Workflow](#detailed-dash-behavioral-model-build-workflow)
+  - [TODO](#todo)
   - [Docker Image(s)](#docker-images)
   - [Build Workflow Diagram](#build-workflow-diagram)
   - [Compile P4 Code](#compile-p4-code)
   - [Build libsai.so adaptor library](#build-libsaiso-adaptor-library)
     - [Restore SAI Submodule](#restore-sai-submodule)
-  - [Build SAI client test program(s)](#build-sai-client-test-programs)
+  - [Build sai-thrift-server](#build-sai-thrift-server)
+  - [Build SAI c++ client test program(s)](#build-sai-c-client-test-programs)
   - [Create veth pairs for bmv2](#create-veth-pairs-for-bmv2)
   - [Run software switch](#run-software-switch)
   - [Initialize software switch](#initialize-software-switch)
     - [Use wireshark to decode P4Runtime messages in the SAI-P4RT adaptor](#use-wireshark-to-decode-p4runtime-messages-in-the-sai-p4rt-adaptor)
+  - [Run sai-thrift-server](#run-sai-thrift-server)
+  - [Build sai-thrift-client docker image](#build-sai-thrift-client-docker-image)
+  - [Run saithrift-client tests](#run-saithrift-client-tests)
   - [Run simple SAI library test](#run-simple-sai-library-test)
   - [Run ixia-c traffic-generator test](#run-ixia-c-traffic-generator-test)
     - [ixia-c components and setup/teardown](#ixia-c-components-and-setupteardown)
@@ -41,7 +46,16 @@ The workflows described here are primarily driven by a [Makefile](Makefile) and 
 * Cloud-based CI (Continuous Integration) build and test, every time code is pushed to GitHub or a Pull Request is submitted to the upstream repository.
 
 See the diagram below. You can read the [dockerfiles](dockerfiles) and all `Makefiles` in various directories to get a deeper understanding of the build process.
+## TODO
+* Document specific task workflows and required build steps and dependencies, e.g.:
+  * P4 code development
+  * SAI adaptor development
+  * Test-case development
+  * Docker development
+* Assign more uniform `make` target names.
 ## Docker Image(s)
+>**NOTE** P4 code or test-case developers generally **don't** need to build `p4c`, `saithrift-bldr,` or `bmv2` docker images; they are pulled automatically, on-demand, from a registry. They contain static tooling. Developers who create and maintain the Docker images **do** need to build and push new images.
+
 Several docker images are used to compile artifacts, such as P4 code, or run processses, such as the bmv2 simple switch. These Dockerfiles should not change often and are stored/retrieved from an external docker registry. See [README-dash.docker](README-dash.docker.md) for details. When a Dockerfile does change, it needs to be published in the resgistry. Dockerfile changes also trigger rebuilds of the docker images in the CI pipeline.
 
 See the diagram below. You can read the [Dockerfile](Dockerfile) and all `Makefiles` to get a deeper understanding of the build process.
@@ -62,7 +76,7 @@ The primary outputs of interest are:
     * P4-to-SAI header code generation (see next step below)
 
 ## Build libsai.so adaptor library
-This library is the crucial item to allow integration with a Network Operating System (NOS) like SONiC. It wraps an implementtion specific "SDK" with standard Switch Abstraction Interface (SAI) APIs. In this case, an adaptor translates SAI API table/attribute CRUD operations into equivalent P4Runtime RPC calls, which is the native RPC API for bmv2.
+This library is the crucial item to allow integration with a Network Operating System (NOS) like SONiC. It wraps an implementation specific "SDK" with standard Switch Abstraction Interface (SAI) APIs. In this case, an adaptor translates SAI API table/attribute CRUD operations into equivalent P4Runtime RPC calls, which is the native RPC API for bmv2.
 
 ```
 make sai-clean  # optional
@@ -87,8 +101,13 @@ make sai-clean
 
 To ensure the baseline code is restored prior to each run, the modified directories under SAI are deleted, then restored via `git checkout -- <path, path, ...>` . This retrieves the subtrees from the SAI submodule, which is stored intact in the local project's Git repo (e.g. under `DASH/.git/modules/dash-pipeline/SAI/SAI`)
 
-## Build SAI client test program(s)
-This compiles a simple libsai client program to verify the libsai-to-p4runtime-to-bmv2 stack. It performs table access(es).
+## Build sai-thrift-server
+This builds a docker image which contains a sai-thrift-server daemon, which is linked to the `libsai` library and also includes the SAI-to-P4Runtime adaptor.
+```
+make sai-thrift-server
+```
+## Build SAI c++ client test program(s)
+This compiles simple libsai client program(s) to verify the libsai-to-p4runtime-to-bmv2 stack. It performs table access(es).
 
 ```
 make test
@@ -128,7 +147,40 @@ Switch is initialized.
 ```
 ### Use wireshark to decode P4Runtime messages in the SAI-P4RT adaptor
 >**Hint:** You can monitor P4Runtime messages using Wireshark or similar. Select interface `lo`, filter on `tcp.port==9559`. Right-click on a captured packet and select "Decode as..." and configure port 9559 to decode as HTTP2 (old versions of Wireshark might lack this choice).
+## Run sai-thrift-server
+>**Note:** the bmv2 switch must be running, see 
+When this server is launched, it will establish a P4Runtime session (behind the scenes) to the running `bmv2` switch daemon . The thrift server listens on port `9092` for Thrift messages carrying SAI rpc commands. These commands are dispatched the the SAI library handlers. These handlers translate them into corresponding P4Runtime RPC commands and are sent to the bmv2 daemon onto a socket at standard P4Runtime port `9559`.
+```
+make run-sai-thrift-server
+```
+When the server starts, the first SAI command it receives will load the `libsai.so` shared library and establish a P4Runtime connection. This results in a console message similar to below. Note this message doesn't necessairly appear when the daemon starts. This also loads the bmv2 behavioral model with the P4 "object code" (JSON file), see [Initialize software switch](#initialize-software-switch).
+```
+GRPC call SetForwardingPipelineConfig 0.0.0.0:9559 => /etc/dash/dash_pipeline.json, /etc/dash/dash_pipeline_p4rt.txt
+Switch is initialized.
+```
 
+To stop it:
+```
+make kill sai-thrift-server
+```
+
+## Build sai-thrift-client docker image
+```
+run-saithrift-client-tests
+```
+This will build a docker image which has all libraries needed to talk to the sai-thrift-server daemon, including:
+* sai-thrift client libraries (Python)
+* PTF framework from [OCP SAI repo](https://github.com/opencomputeproject/SAI.git), including all test cases
+* The [PTF repo](https://github.com/p4lang/ptf) imported from p4lang
+* Scapy etc.
+## Run saithrift-client tests
+To run all tests which use the thrift-sai interface, execute the following. You must have the bmv2 switch and saithrift-server running.
+```
+make run-saithrift-client-tests
+```
+This will launch a sai-thrift-client docker container and execute tests under `SAI/saithrift`, including:
+* Pytests under `SAI/saithrift/pytest` (WIP)
+* PTF Tests under `SAI/saithrift/PTF` (TODO)
 ## Run simple SAI library test
 From a different terminal, run SAI client tests. This exercises the `libsai.so` shared library including P4Runtime client adaptor, which communicates to the running `simple_switch_grpc` process over a socket.
 ```
@@ -136,7 +188,9 @@ make run-test
 ```
 
 ## Run ixia-c traffic-generator test
-Remeber to [Install docker-compose](#install-docker-compose).
+>**TODO:** Replace with suitable Pytests or PTF tests which use sai-thrift to configure the switch.
+
+Remember to [Install docker-compose](#install-docker-compose).
 
 From a different terminal, run [ixia-c](https://github.com/open-traffic-generator/ixia-c) traffic tests. The first time this runs, it will pull Python packages for the [snappi](https://github.com/open-traffic-generator/snappi) client as well as Docker images for the [ixia-c](https://github.com/open-traffic-generator/ixia-c) controller and traffic engines.
 
