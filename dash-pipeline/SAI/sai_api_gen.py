@@ -269,10 +269,14 @@ def write_sai_files(sai_api):
     new_lines = []
     for line in lines:
         if 'Add new experimental APIs above this line' in line:
-            new_lines.append('    SAI_API_' + sai_api['app_name'].upper() + ',\n\n')
+            new_line = '    SAI_API_' + sai_api['app_name'].upper() + ',\n'
+            if new_line not in lines:
+                new_lines.append(new_line + '\n')
         if 'new experimental object type includes' in line:
             new_lines.append(line)
-            new_lines.append('#include "saiexperimental' + sai_api['app_name'].replace('_', '') + '.h"\n')
+            new_line = '#include "saiexperimental' + sai_api['app_name'].replace('_', '') + '.h"\n'
+            if new_line not in lines:
+                new_lines.append(new_line)
             continue
 
         new_lines.append(line)
@@ -288,7 +292,9 @@ def write_sai_files(sai_api):
     for line in lines:
         if 'Add new experimental object types above this line' in line:
             for table in sai_api[TABLES_TAG]:
-                new_lines.append('    SAI_OBJECT_TYPE_' + table[NAME_TAG].upper() + ',\n\n')
+                new_line = '    SAI_OBJECT_TYPE_' + table[NAME_TAG].upper() + ',\n'
+                if new_line not in lines:
+                    new_lines.append(new_line + '\n')
 
         new_lines.append(line)
 
@@ -304,11 +310,15 @@ def write_sai_files(sai_api):
         if 'Add new experimental entries above this line' in line:
             for table in sai_api[TABLES_TAG]:
                 if table['is_object'] == 'false':
-                    new_lines.append('    /** @validonly object_type == SAI_OBJECT_TYPE_' + table[NAME_TAG].upper() + ' */\n')
-                    new_lines.append('    sai_' + table[NAME_TAG] + '_t ' + table[NAME_TAG] + ';\n\n')
+                    new_line = '    sai_' + table[NAME_TAG] + '_t ' + table[NAME_TAG] + ';\n'
+                    if new_line not in lines:
+                        new_lines.append('    /** @validonly object_type == SAI_OBJECT_TYPE_' + table[NAME_TAG].upper() + ' */\n')
+                        new_lines.append(new_line + '\n')
         if 'new experimental object type includes' in line:
             new_lines.append(line)
-            new_lines.append('#include "../experimental/saiexperimental' + sai_api['app_name'].replace('_', '') + '.h"\n')
+            new_line = '#include "../experimental/saiexperimental' + sai_api['app_name'].replace('_', '') + '.h"\n'
+            if new_line not in lines:
+                new_lines.append(new_line)
             continue
 
         new_lines.append(line)
