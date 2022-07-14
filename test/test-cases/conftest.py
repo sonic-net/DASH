@@ -47,10 +47,10 @@ def utils():
 
 @pytest.fixture
 def create_ixload_session_url(tbinfo):
-    ixload_settings = {}
+ixload_settings = {}
     tb = tbinfo['stateful'][0]
     tg = {
-        'chassis_list': tb['server'],
+        'server': tb['server'],
         'tgen':  tb['tgen'],
         'vxlan': tb['vxlan'],
         'dpu': tb
@@ -61,24 +61,27 @@ def create_ixload_session_url(tbinfo):
         # TEST CONFIG
         test_settings = TestSettings.IxLoadTestSettings()
         test_settings.gatewayServer = tbinfo['stateful'][0]['server'][0]['addr']
+        test_settings.gatewayPort = "8080"
+        test_settings.httpRedirect = True
         test_settings.apiVersion = "v0"
         test_settings.ixLoadVersion = "9.20.0.279"
 
-        slot1 = tg['tgen'][0][1]
-        port1 = tg['tgen'][0][2]
-        slot2 = tg['tgen'][1][1]
-        port2 = tg['tgen'][1][2]
+        # aggregated 2ips
+        slot1 = tg['tgen'][0]['interfaces'][0][1]
+        s1port1 = tg['tgen'][0]['interfaces'][0][2]
+        s1port2 = tg['tgen'][0]['interfaces'][1][2]
+
+        slot2 = tg['tgen'][0]['interfaces'][2][1]
+        s2port1 = tg['tgen'][0]['interfaces'][2][2]
+        s2port2 = tg['tgen'][0]['interfaces'][3][2]
 
         test_settings.portListPerCommunity = {
             # format: { community name : [ port list ] }
-            "Traffic1@Network1": [(1, slot1, port1)],
-            "Traffic2@Network2": [(1, slot2, port2)]
+            "Traffic1@Network1": [(1, slot1, s1port1), (1, slot1, s1port2)],
+            "Traffic2@Network2": [(1, slot2, s2port1), (1, slot2, s2port2)]
         }
-
-        chassisList = tg['tgen'][0][0]
+        chassisList = tg['tgen'][0]['interfaces'][0][0]
         test_settings.chassisList = [chassisList]
-
-        #test_settings.chassisList = ["10.36.79.165"]
 
         return test_settings
 
@@ -97,11 +100,9 @@ def create_ixload_session_url(tbinfo):
     connection.setApiKey(test_settings.apiKey)
 
     ixload_settings['connection'] = connection
-    #ixload_settings['session_url'] = session_url
     ixload_settings['test_settings'] = test_settings
 
     yield ixload_settings
-
 
 def getTestClass(*args, **kwargs):
     if test_type:

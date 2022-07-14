@@ -11,6 +11,7 @@ from ixnetwork_restpy import SessionAssistant
 from ixnetwork_restpy.assistants.statistics.statviewassistant import StatViewAssistant
 from tabulate import tabulate
 from testdata_vxlan_1vpc_1ip import testdata
+from future.utils import iteritems
 
 data = []
 
@@ -258,10 +259,420 @@ class Test_Dpu:
             Dev. status: DONE
         """
         session = create_ixload_session_url
-        #session_url = session['session_url']
         connection = session['connection']
         test_settings = session['test_settings']
 
+        def _patch_test_setting(url_patch_dict, setting):
+
+            url = url_patch_dict['base_url'] + url_patch_dict[setting]['url']
+
+            return requests.patch(url, json=url_patch_dict[setting]['json'])
+
+        def _get_timeline_link(timelines, timeline_key):
+
+            link = ""
+            link_test = ""
+
+            for elem in timelines:
+                if elem['name'] in timeline_key:
+                    link_init = elem['links'][0]['href']
+                    link_init_list = link_init.split("/")
+                    link_init_list.pop(len(link_init_list) - 1)
+                    link_test = '/'.join(link_init_list)
+
+            shaved = link_test.split("/")
+            for i in range(5):
+                shaved.pop(0)
+            shaved.insert(0, "")
+            link = "/".join(shaved)
+
+            return link
+
+        def _set_timeline_settings(test_settings, rampDownTime, sustainTime):
+
+            timeline_url = 'http://' + test_settings.gatewayServer + ":{}".format(
+                test_settings.gatewayPort) + '/api/v1/' + session_url + '/ixload/test/activeTest/timelineList'
+            response = requests.get(timeline_url, headers=headers)
+            timelines = response.json()
+
+            timeline1_url = 'http://' + test_settings.gatewayServer + ":{}".format(
+                test_settings.gatewayPort) + '/api/v1/' + session_url + \
+                            _get_timeline_link(timelines, "Timeline1")
+            timeline1_settings = {"rampDownTime": rampDownTime, "sustainTime": sustainTime}
+            requests.patch(timeline1_url, json=timeline1_settings)
+
+            timeline2_url = 'http://' + test_settings.gatewayServer + ":{}".format(
+                test_settings.gatewayPort) + '/api/v1/' + session_url + \
+                            _get_timeline_link(timelines, "Timeline2")
+            timeline2_settings = {"rampDownTime": rampDownTime, "sustainTime": sustainTime}
+            requests.patch(timeline2_url, json=timeline2_settings)
+
+            timeline_matchLongest_url = 'http://' + test_settings.gatewayServer + ":{}".format(
+                test_settings.gatewayPort) + '/api/v1/' + session_url + \
+                                        _get_timeline_link(timelines, "<Match Longest>")
+            matchLongest_settings = {"sustainTime": sustainTime}
+            requests.patch(timeline_matchLongest_url, json=matchLongest_settings)
+
+            return
+
+        def _getTestCurrentState(connection, sessionUrl):
+
+            activeTestUrl = "%s/ixload/test/activeTest" % (sessionUrl)
+            testObj = connection.httpGet(activeTestUrl)
+
+            return testObj.currentState
+
+        def _print_final_table(test_run_results):
+            stat_table = []
+            stat_columns = ["It", "Objective CPS", "Obtained CPS", "HTTP Requests Failed", "TCP Retries",
+                            "TCP Resets TX", "TCP Resets RX", "Pass/Fail"]
+            for iter in test_run_results:
+                stat_table.append(iter)
+            print("\n%s" % tabulate(stat_table, headers=stat_columns, tablefmt='psql', floatfmt=".2f"))
+
+        def _poll_stats(connection, sessionUrl, watchedStatsDict, pollingInterval=4):
+
+            statSourceList = list(watchedStatsDict)
+
+            # retrieve stats for a given stat dict
+            # all the stats will be saved in the dictionary below
+
+            # statsDict format:
+            # {
+            #   statSourceName: {
+            #                       timestamp:  {
+            #                                       statCaption : value
+            #                                   }
+            #                   }
+            # }
+            stats_dict = {}
+
+            # remember the timstamps that were already collected - will be ignored in future
+            collectedTimestamps = {}  # format { statSource : [2000, 4000, ...] }
+            testIsRunning = True
+
+            # check stat sources
+            for statSource in statSourceList[:]:
+                statSourceUrl = "%s/ixload/stats/%s/values" % (sessionUrl, statSource)
+                statSourceReply = connection.httpRequest("GET", statSourceUrl)
+                if statSourceReply.status_code != 200:
+                    statSourceList.remove(statSource)
+
+            # check the test state, and poll stats while the test is still running
+            while testIsRunning:
+
+                # the polling interval is configurable. by default, it's set to 4 seconds
+                time.sleep(pollingInterval)
+
+                for statSource in statSourceList:
+                    valuesUrl = "%s/ixload/stats/%s/values" % (sessionUrl, statSource)
+
+                    valuesObj = connection.httpGet(valuesUrl)
+                    valuesDict = valuesObj.getOptions()
+
+                    # get just the new timestamps - that were not previously retrieved in another stats polling iteration
+                    newTimestamps = [int(timestamp) for timestamp in list(valuesDict) if
+                                     timestamp not in collectedTimestamps.get(statSource, [])]
+                    newTimestamps.sort()
+
+                    for timestamp in newTimestamps:
+                        timeStampStr = str(timestamp)
+
+                        collectedTimestamps.setdefault(statSource, []).append(timeStampStr)
+
+                        timestampDict = stats_dict.setdefault(statSource, {}).setdefault(timestamp, {})
+
+                        # save the values for the current timestamp, and later print them
+                        for caption, value in iteritems(valuesDict[timeStampStr].getOptions()):
+                            if caption in watchedStatsDict[statSource]:
+                                timestampDict[caption] = value
+                                stat_table_row = []
+                                for table_row in timestampDict.keys():
+                                    stat_table_row.append(table_row)
+                                table = []
+                                columns = ['Stat Source', 'Time Stamp', 'Stat Name', 'Value']
+                                for i, stat in enumerate(stat_table_row):
+                                    table.append([statSource, timeStampStr, stat, timestampDict[stat]])
+                                # print("\n%s" % tabulate(table, headers=columns, tablefmt='psql'))
+
+                testIsRunning = _getTestCurrentState(connection, sessionUrl) == "Running"
+
+            print("Stopped receiving stats.")
+            return stats_dict
+
+        def _get_stats_global(stats_dict):
+            stats_global = []
+
+            for key in stats_dict['HTTPClient'].keys():
+                if key in stats_dict['HTTPClient'] and key in stats_dict['HTTPServer']:
+                    stats_global.append([key, stats_dict['HTTPClient'][key]['HTTP Simulated Users'],
+                                         stats_dict['HTTPClient'][key]['HTTP Concurrent Connections'],
+                                         stats_dict['HTTPClient'][key]['TCP CPS'],
+                                         stats_dict['HTTPClient'][key]['HTTP Connect Time (us)'],
+                                         stats_dict['HTTPServer'][key]['HTTP Requests Failed'],
+                                         stats_dict['HTTPServer'][key]['TCP Retries'],
+                                         stats_dict['HTTPServer'][key]['TCP Resets Sent'],
+                                         stats_dict['HTTPServer'][key]['TCP Resets Received']])
+
+            return stats_global
+
+        def _check_for_error_stats(test_stats, error_type):
+
+            error_dict = {
+                error_type: {
+                    "first_time": 0,
+                    "last_time": 0,
+                    "num_of_seq_timestamps": 0
+                }
+            }
+
+            timestamps_l = [i[0] for i in test_stats]
+            errors_l = [i[1] for i in test_stats]
+            seen = set()
+            dupes = {}
+
+            first_time = 0
+            for i, x in enumerate(errors_l):
+                if x in seen:
+                    dupes.setdefault(x, []).append(i)
+                else:
+                    seen.add(x)
+
+            # insert timestamp index location at beginning of list
+            for key in dupes.keys():
+                dupes[key].insert(0, dupes[key][0] - 1)
+
+            # make list of lens of each duplicates, then remove and remove rest of error entries from dupes dict
+            errors_l = [len(dupes[x]) for x in dupes.keys()]
+            max_index = errors_l.index(max(errors_l))
+            errors_l.pop(max_index)
+
+            # keep only the highest number of stable
+            for i, key in enumerate(list(dupes)):
+                if i != max_index:
+                    dupes.pop(key, None)
+
+            for key in dupes.keys():
+                error_dict[error_type]["first_time"] = dupes[key][0]
+                error_dict[error_type]["last_time"] = dupes[key][-1]
+
+                if list(dupes.keys())[0] != 0:
+                    error_dict[error_type]["num_of_seq_timestamps"] = len(dupes[key])
+                else:
+                    error_dict[error_type]["num_of_seq_timestamps"] = 0
+
+            return error_dict
+
+        def _get_max_cps(test_stats, cps_stats):
+
+            cps_list = []
+            for cps in cps_stats:
+                cps_list.append(cps[1])
+
+            stats = deepcopy(cps_list)
+            for i, elem in enumerate(stats):
+                if elem == '""':
+                    stats[i] = 0
+
+            stats.sort()
+            max_cps = stats[-1]
+            cps_max_w_ts = cps_stats[cps_list.index(max_cps)]
+
+            return cps_max_w_ts
+
+        def _get_effective_cps(cps_stats, http_requests_dict, tcp_retries_dict, tcp_resets_tx_dict, tcp_resets_rx_dict):
+
+            error_list = [http_requests_dict, tcp_retries_dict, tcp_resets_tx_dict, tcp_resets_rx_dict]
+            num_of_timestamps = len(cps_stats)
+
+            seq_l = [list(x.values())[0]["num_of_seq_timestamps"] for x in error_list]
+            error_list[seq_l.index(max(seq_l))]
+            key = list(error_list[seq_l.index(max(seq_l))].keys())[0]
+            first_time = error_list[seq_l.index(max(seq_l))][key]["first_time"]
+            last_time = error_list[seq_l.index(max(seq_l))][key]["last_time"]
+
+            effective_cps_ts = {
+                "first_time": cps_stats[first_time][0],
+                "last_time": cps_stats[last_time][0]
+            }
+
+            if max(seq_l) != 0:
+                avg = 0
+                effective_cps_l = []
+                for i, cps in enumerate(cps_stats):
+                    if i >= first_time and i <= last_time:
+                        effective_cps_l.append(cps)
+                        avg += cps[1]
+                effective_cps = avg / error_list[seq_l.index(max(seq_l))][key]["num_of_seq_timestamps"]
+            else:
+                effective_cps = 0
+                effective_cps_ts = {"first_time": 0, "last_time": cps_stats[last_time][0]}
+
+            return effective_cps, effective_cps_ts
+
+        def _get_latency_ranges(test_stats):
+
+            latency_stats = {
+                "latency_min": 0,
+                "latency_max": 0,
+                "latency_avg": 0
+            }
+
+            only_lat_stats = []
+            for lat_stat in test_stats:
+                if lat_stat[4] == '""':
+                    lat_stat[4] = 0
+                only_lat_stats.append(lat_stat[4])
+
+            latency_stats["latency_min"] = min(only_lat_stats)
+            latency_stats["latency_max"] = max(only_lat_stats)
+
+            lat_addr = 0
+            for elem in only_lat_stats:
+                lat_addr += elem
+
+            latency_stats["latency_avg"] = lat_addr / len(only_lat_stats)
+
+            return latency_stats
+
+        def _get_testrun_results(stats_dict):
+
+            stats_global = _get_stats_global(stats_dict)
+
+            failures_dict = {"http_requests_failed": 0, "tcp_retries": 0, "tcp_resets_tx": 0,
+                             "tcp_resets_rx": 0, "total": 0}
+
+            # get and compare stats
+            http_requests_failed_l = [[x[0], x[5]] for x in stats_global]
+            http_requests_failed = max([x[1] for x in http_requests_failed_l])
+            failures_dict["http_requests_failed"] = http_requests_failed
+            # http_requests_dict = _check_for_error_stats(http_requests_failed_l, "http_requests_failed")
+
+            tcp_retries_l = [[x[0], x[6]] for x in stats_global]
+            tcp_retries = max([x[1] for x in tcp_retries_l])
+            failures_dict["tcp_retries"] = tcp_retries
+            # tcp_retries_dict = _check_for_error_stats(tcp_retries_l, "tcp_retries")
+
+            tcp_resets_tx_l = [[x[0], x[7]] for x in stats_global]
+            tcp_resets_tx = max([x[1] for x in tcp_resets_tx_l])
+            failures_dict["tcp_resets_tx"] = tcp_resets_tx
+            # tcp_resets_tx_dict = _check_for_error_stats(tcp_resets_tx_l, "tcp_resets_tx")
+
+            tcp_resets_rx_l = [[x[0], x[8]] for x in stats_global]
+            tcp_resets_rx = max([x[1] for x in tcp_resets_rx_l])
+            failures_dict["tcp_resets_rx"] = tcp_resets_rx
+            # tcp_resets_rx_dict = _check_for_error_stats(tcp_resets_rx_l, "tcp_resets_rx")
+
+            failures = http_requests_failed + tcp_retries + tcp_resets_tx + tcp_resets_rx
+            failures_dict["total"] = failures
+
+            cps_stats = [[x[0], x[3]] for x in stats_global]
+            cps_max_w_ts = _get_max_cps(stats_global, cps_stats)
+            cps_max = cps_max_w_ts[1]
+            # effective_cps, effective_cps_ts = _get_effective_cps(cps_stats, http_requests_dict, tcp_retries_dict,
+            #                                                     tcp_resets_tx_dict, tcp_resets_rx_dict)
+
+            latency_ranges = _get_latency_ranges(stats_global)
+
+            return failures_dict, cps_max, cps_max_w_ts, latency_ranges
+
+        def _print_stat_table(cps_max_w_ts, failures_dict, latency_ranges):
+
+            stat_table = []
+            stat_columns = ["Timestamp (s)", "TCP Max CPS", "Total Failures"]
+            stat_table.append([int(cps_max_w_ts[0]) / 1000, int(cps_max_w_ts[1]), failures_dict["total"]])
+
+            stat_f_table = []
+            stat_f_columns = ["HTTP Requests Failed", "TCP Retries", "TCP Resets TX", "TCP Resets RX"]
+            stat_f_table.append([failures_dict["http_requests_failed"], failures_dict["tcp_retries"],
+                                 failures_dict["tcp_resets_tx"], failures_dict["tcp_resets_rx"]])
+
+            lat_table = []
+            lat_table.append(
+                [latency_ranges["latency_min"], latency_ranges["latency_max"], latency_ranges["latency_avg"]])
+            lat_stat_columns = ["Connect Time min (us)", "Connect Time max (us)", "Connect Time avg (us)"]
+
+            print("\n%s" % tabulate(stat_table, headers=stat_columns, tablefmt='psql'))
+            print("\n%s" % tabulate(stat_f_table, headers=stat_f_columns, tablefmt='psql'))
+            print("\n%s" % tabulate(lat_table, headers=lat_stat_columns, tablefmt='psql'))
+
+        def _run_cps_search(connection, session_url, MAX_CPS, MIN_CPS,
+                            threshold, target_failures, test_settings, start_value=0):
+
+            test_run_results = []
+            test_value = start_value
+            test_iteration = 1
+            while ((MAX_CPS - MIN_CPS) > threshold):
+                test_result = ""
+                IxLoadUtils.log(
+                    "----Test Iteration %d------------------------------------------------------------------"
+                    % test_iteration)
+                old_value = test_value
+                IxLoadUtils.log("Testing CPS Objective = %d" % test_value)
+                kActivityOptionsToChange = {
+                    # format: { activityName : { option : value } }
+                    "HTTPClient1": {
+                        "enableConstraint": False,
+                        "userObjectiveType": "connectionRate",
+                        "userObjectiveValue": int(test_value),
+                    }
+                }
+                IxLoadUtils.log("Updating CPS objective value settings...")
+                IxLoadUtils.changeActivityOptions(connection, session_url, kActivityOptionsToChange)
+                IxLoadUtils.log("CPS objective value updated.")
+
+                IxLoadUtils.log("Applying config...")
+                IxLoadUtils.applyConfiguration(connection, session_url)
+
+                # IxLoadUtils.log("Saving rxf")
+                # IxLoadUtils.saveRxf(connection, session_url, "C:\\automation\\1ip_test.rxf")
+
+                IxLoadUtils.log("Starting the test...")
+                IxLoadUtils.runTest(connection, session_url)
+                IxLoadUtils.log("Test started.")
+
+                IxLoadUtils.log("Test running and extracting stats...")
+                stats_dict = _poll_stats(connection, session_url, stats_test_settings)
+                IxLoadUtils.log("Test finished.")
+
+                failures_dict, cps_max, cps_max_w_ts, latency_ranges = _get_testrun_results(stats_dict)
+
+                _print_stat_table(cps_max_w_ts, failures_dict, latency_ranges)
+
+                if cps_max < test_value:
+                    test = False
+                else:
+                    test = True
+
+                if test:
+                    IxLoadUtils.log('Test Iteration Pass')
+                    test_result = "Pass"
+                    MIN_CPS = test_value
+                    test_value = (MAX_CPS + MIN_CPS) / 2
+                else:
+                    IxLoadUtils.log('Test Iteration Fail')
+                    test_result = "Fail"
+                    MAX_CPS = test_value
+                    test_value = (MAX_CPS + MIN_CPS) / 2
+                objective_cps = old_value
+                obtained_cps = cps_max_w_ts[1]
+                test_run_results.append(
+                    [test_iteration, objective_cps, obtained_cps, failures_dict["http_requests_failed"],
+                     failures_dict["tcp_retries"], failures_dict["tcp_resets_tx"],
+                     failures_dict["tcp_resets_rx"], test_result])
+                IxLoadUtils.log("Iteration Ended...")
+                IxLoadUtils.log('MIN_CPS = %d' % MIN_CPS)
+                IxLoadUtils.log('Current MAX_CPS = %d' % MAX_CPS)
+                IxLoadUtils.log('Previous CPS Objective value = %d' % old_value)
+                print(' ')
+                test_iteration += 1
+                IxLoadUtils.releaseConfiguration(connection, session_url)
+
+            cps_max_w_ts[1] = MIN_CPS
+
+            return cps_max_w_ts, failures_dict, test_run_results, latency_ranges
+
+        # Beginning of testcase
         kCommunities = [
             # format: {option1: value1, option2: value2}
             {},  # default community with no options
@@ -273,22 +684,6 @@ class Test_Dpu:
             'Traffic2@Network2': ['HTTP Server']
         }
 
-        kIpOptionsToChange = {
-            'IP-R1': {
-                'count': 1,
-                'ipAddress': '193.0.0.1',
-                'prefix': 8,
-                'incrementBy': "0.0.0.1",
-                'gatewayAddress': '193.0.0.9'
-            },
-            'IP-R2': {
-                'count': 1,
-                'ipAddress': '193.0.0.9',
-                'prefix': 8,
-                'incrementBy': '0.0.0.1',
-                'gatewayAddress': '193.0.0.1'
-            }
-        }
         kNewCommands = {
             # format: { agent name : [ { field : value } ] }
             "HTTPClient1": [
@@ -300,37 +695,164 @@ class Test_Dpu:
             ],
         }
 
-        stats_dict = {
-            'HTTPClient': ['TCP Connections Established',
-                           'HTTP Simulated Users',
-                           'HTTP Connections',
-                           'HTTP Transactions',
-                           'HTTP Connection Attempts'
+        stats_test_settings = {
+            'HTTPClient': ['HTTP Simulated Users',
+                           'HTTP Concurrent Connections',
+                           'TCP CPS',
+                           'HTTP Connect Time (us)',
                            ],
-            'HTTPServer': ['TCP Connections Established',
-                           'TCP Connection Requests Failed'
-                           ]
+            'HTTPServer': ['HTTP Requests Failed',
+                           'TCP Retries',
+                           'TCP Resets Sent',
+                           'TCP Resets Received',
+                           ],
         }
 
-        kActivityOptionsToChange = {
-            # format: { activityName : { option : value } }
-            "HTTPClient1": {
-                "enableConstraint": True,
-                "constraintValue": 200,
-                "userObjectiveType": "connectionRate",
-                "userObjectiveValue": 3000000
-            }
-        }
+        stats_dict = {}
 
         location = inspect.getfile(inspect.currentframe())
 
-        # Added
+        headers = {'Accept': 'application/json'}
         session_url = IxLoadUtils.createNewSession(connection, test_settings.ixLoadVersion)
+        base_url = 'http://' + test_settings.gatewayServer + ":{}".format(test_settings.gatewayPort) + \
+                   '/api/v1/' + session_url
+
+        url_patch_dict = {
+            'base_url': base_url,
+            'allow_routes': {
+                'json': {"allowRouteConflicts": True},
+                'url': "/ixload/preferences"
+            },
+            'client_vlan_settings': {
+                'json': {"firstId": 101},
+                'url': "/ixload/test/activeTest/communityList/0/network/stack/childrenList/2/vlanRangeList/1"
+            },
+            'http_version': {
+                'json': {"httpVersion": 1},
+                'url': "/ixload/test/activeTest/communityList/0/activityList/0/agent"
+            },
+            'http_tcp_conns_per_user': {
+                'json': {"maxSessions": 1},
+                'url': "/ixload/test/activeTest/communityList/0/activityList/0/agent"
+            },
+            'client_disable_tcp_tw_recycle': {
+                'json': {"tcp_tw_recycle": False},
+                'url': "/ixload/test/activeTest/communityList/0/network/globalPlugins/2"
+            },
+            'server_disable_tcp_tw_recycle': {
+                'json': {"tcp_tw_recycle": False},
+                'url': "/ixload/test/activeTest/communityList/1/network/globalPlugins/5"
+            },
+            'cps_aggregation_type': {
+                'json': {"aggregationType": "kRate"},
+                'url': "/ixload/stats/HTTPClient/configuredStats/229"
+            },
+            'cps_stat_caption': {
+                'json': {"caption": "TCP CPS"},
+                'url': "/ixload/stats/HTTPClient/configuredStats/229"
+            }
+        }
 
         IxLoadUtils.log('Creating communities...')
-
         IxLoadUtils.addCommunities(connection, session_url, kCommunities)
         IxLoadUtils.log('Communities created.')
+
+        IxLoadUtils.log('Creating activities..')
+        IxLoadUtils.addActivities(connection, session_url, kActivities)
+        IxLoadUtils.log('Activities created..')
+
+        IxLoadUtils.log("Enabling Forceful Ownership of Ports")
+        IxLoadUtils.enableForcefullyTakeOwnershipAndResetPorts(connection, session_url)
+        IxLoadUtils.log("Forceful Ownership Complete")
+
+        response = _patch_test_setting(url_patch_dict, 'allow_routes')
+
+        IxLoadUtils.log("Clearing commands %s..." % (list(kNewCommands)))
+        IxLoadUtils.clearAgentsCommandList(connection, session_url, list(kNewCommands))
+        IxLoadUtils.log("Command lists cleared.")
+
+        IxLoadUtils.log("Adding IPv4 ranges ...")
+        IxLoadUtils.HttpUtils.addIpRange(connection, session_url, "Traffic1@Network1", "IP-1", {"ipType": "IPv4"})
+        IxLoadUtils.HttpUtils.addIpRange(connection, session_url, "Traffic2@Network2", "IP-2", {"ipType": "IPv4"})
+
+        IxLoadUtils.log("Changing IPv4 ranges for test run ...")
+        IxLoadUtils.log("Setting Client IPv4 ranges ...")
+        clientIpOptionsToChange = {'count': 2, 'ipAddress': testdata['val_map'][2]['iipv4']['ip'],
+                                   'prefix': testdata['val_map'][2]['iipv4']['prefix'], 'incrementBy': '1.0.0.0',
+                                   'gatewayAddress': testdata['val_map'][2]['iipv4']['gip'],
+                                   'gatewayIncrement': '1.0.0.0'}
+        IxLoadUtils.HttpUtils.changeRangeOptions(connection, session_url, "Traffic1@Network1", "IP-1", "rangeList",
+                                                 "IP-R1", clientIpOptionsToChange)
+
+        IxLoadUtils.log("Setting Server IPv4 ranges ...")
+        serverIpOptionsToChange = {'count': 2, 'ipAddress': testdata['val_map'][1]['iipv4']['ip'],
+                                   'prefix': testdata['val_map'][1]['iipv4']['prefix'], 'incrementBy': '1.0.0.0',
+                                   'gatewayAddress': testdata['val_map'][1]['iipv4']['gip'],
+                                   'gatewayIncrement': '1.0.0.0'}
+        IxLoadUtils.HttpUtils.changeRangeOptions(connection, session_url, "Traffic2@Network2", "IP-2", "rangeList",
+                                                 "IP-R2", serverIpOptionsToChange)
+
+        IxLoadUtils.log("Disabling autoMacGeneration ...")
+        automac = {"autoMacGeneration": False}
+        IxLoadUtils.HttpUtils.changeRangeOptions(connection, session_url, "Traffic1@Network1", "IP-1", "rangeList",
+                                                 "IP-R1", automac)
+        IxLoadUtils.HttpUtils.changeRangeOptions(connection, session_url, "Traffic2@Network2", "IP-2", "rangeList",
+                                                 "IP-R2", automac)
+
+        IxLoadUtils.log("Setting Client MAC and VLAN settings ...")
+        vlan_enabled = {"enabled": True}
+        clientMacOptionsToChange = {"mac": testdata['val_map'][2]['ieth']['mac'], "incrementBy": '00:00:00:08:00:00'}
+        IxLoadUtils.HttpUtils.changeRangeOptions(connection, session_url, "Traffic1@Network1", "MAC/VLAN-1",
+                                                 "macRangeList", "MAC-R1", clientMacOptionsToChange)
+
+        IxLoadUtils.HttpUtils.changeRangeOptions(connection, session_url, "Traffic1@Network1", "MAC/VLAN-1",
+                                                 "vlanRangeList", "VLAN-R1", vlan_enabled)
+
+        # Sku2 vlan ID
+        response = _patch_test_setting(url_patch_dict, 'client_vlan_settings')
+
+        IxLoadUtils.log("Setting Server MAC and VLAN settings ...")
+        serverMacOptionsToChange = {"mac": testdata['val_map'][1]['ieth']['mac'], "incrementBy": '00:00:00:08:00:00'}
+        IxLoadUtils.HttpUtils.changeRangeOptions(connection, session_url, "Traffic2@Network2", "MAC/VLAN-2",
+                                                 "macRangeList", "MAC-R2", serverMacOptionsToChange)
+
+        IxLoadUtils.HttpUtils.changeRangeOptions(connection, session_url, "Traffic2@Network2", "MAC/VLAN-2",
+                                                 "vlanRangeList", "VLAN-R3", vlan_enabled)
+
+        IxLoadUtils.log("Disabling Unused IP ranges ...")
+        kIpOptionsToChange = {
+            # format : { IP Range name : { optionName : optionValue } }
+            'IP-R3': {
+                'count': 1,
+                'enabled': False,
+            },
+            'IP-R4': {
+                'count': 1,
+                'enabled': False,
+            }
+        }
+        IxLoadUtils.changeIpRangesParams(connection, session_url, kIpOptionsToChange)
+
+        # Turn off TCP settings
+        IxLoadUtils.log("Adjusting Test Settings, TCP, HTTP ...")
+        response = _patch_test_setting(url_patch_dict, 'http_version')
+        response = _patch_test_setting(url_patch_dict, 'http_tcp_conns_per_user')
+
+        response = _patch_test_setting(url_patch_dict, 'client_disable_tcp_tw_recycle')
+        response = _patch_test_setting(url_patch_dict, 'server_disable_tcp_tw_recycle')
+
+        IxLoadUtils.log("Adjusting Test Timeline settings ...")
+        rampDownTime = 10
+        sustainTime = 180
+        _set_timeline_settings(test_settings, rampDownTime, sustainTime)
+
+        #  Change TCP Connections Established to CPS caption name and to use kRate aggregationType
+        response = _patch_test_setting(url_patch_dict, 'cps_aggregation_type')
+        response = _patch_test_setting(url_patch_dict, 'cps_stat_caption')
+
+        IxLoadUtils.log("Adding new commands %s..." % (list(kNewCommands)))
+        IxLoadUtils.addCommands(connection, session_url, kNewCommands)
+        IxLoadUtils.log("Commands added.")
 
         IxLoadUtils.log("Clearing chassis list...")
         IxLoadUtils.clearChassisList(connection, session_url)
@@ -340,49 +862,23 @@ class Test_Dpu:
         IxLoadUtils.addChassisList(connection, session_url, test_settings.chassisList)
         IxLoadUtils.log("Chassis added.")
 
-        IxLoadUtils.log("Enabling Forceful Ownership of Ports")
-        IxLoadUtils.enableForcefullyTakeOwnershipAndResetPorts(connection, session_url)
-        IxLoadUtils.log("Forceful Ownership Complete")
-
-        IxLoadUtils.log('Creating activities..')
-        IxLoadUtils.addActivities(connection, session_url, kActivities)
-        IxLoadUtils.log('Activities created..')
-
-        IxLoadUtils.log("Clearing commands %s..." % (list(kNewCommands)))
-        IxLoadUtils.clearAgentsCommandList(connection, session_url, list(kNewCommands))
-        IxLoadUtils.log("Command lists cleared.")
-
-        IxLoadUtils.log("Updating activity options...")
-        IxLoadUtils.changeActivityOptions(connection, session_url, kActivityOptionsToChange)
-        IxLoadUtils.log("Updated activity options.")
-
-        new_sustain = {'sustainTime': 30}
-        new_sustain2 = {'sustainTime': 0}
-        url = 'http://' + test_settings.gatewayServer + ':8080' + '/api/v1/' + session_url + \
-            '/ixload/test/activeTest/timelineList'
-        response = requests.get(url)
-        if response.status_code == 200:
-            timelineList = response.json()
-            for i, elem in enumerate(timelineList):
-                url2 = url + '/{}'.format(i)
-                if elem['name'] == '<Match Longest>':
-                    requests.patch(url2, json=new_sustain)
-                else:
-                    requests.patch(url2, json=new_sustain2)
-
-        IxLoadUtils.log("Adding new commands %s..." % (list(kNewCommands)))
-        IxLoadUtils.addCommands(connection, session_url, kNewCommands)
-        IxLoadUtils.log("Commands added.")
-
         IxLoadUtils.log("Assigning new ports...")
         IxLoadUtils.assignPorts(connection, session_url, test_settings.portListPerCommunity)
         IxLoadUtils.log("Ports assigned.")
 
-        IxLoadUtils.log("Starting the test...")
-        IxLoadUtils.runTest(connection, session_url)
-        IxLoadUtils.log("Test started.")
+        initial_objective = 3000000
+        threshold = 100000
+        target_failures = 1000
+        MAX_CPS = 9000000
+        MIN_CPS = 0
+        cps_max_w_ts, failures_dict, test_run_results, latency_ranges = _run_cps_search(connection, session_url,
+                                                                                        MAX_CPS,
+                                                                                        MIN_CPS, threshold,
+                                                                                        target_failures, test_settings,
+                                                                                        initial_objective)
 
-        IxLoadUtils.log("Polling values for stats %s..." % (stats_dict))
-        IxLoadUtils.pollStats(connection, session_url, stats_dict)
+        IxLoadUtils.log("Test Complete Final Values")
+        _print_final_table(test_run_results)
 
-        IxLoadUtils.log("Test finished.")
+        IxLoadUtils.deleteAllSessions(connection)
+
