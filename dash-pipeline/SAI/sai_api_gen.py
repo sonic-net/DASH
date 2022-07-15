@@ -182,7 +182,10 @@ def generate_sai_apis(program, ignore_tables):
             continue
 
         table_name, api_name = table_name.split('|')
-        sai_table_data[NAME_TAG] = table_name.replace('.' , '_')
+        if '.' in table_name:
+            sai_table_data[NAME_TAG] = table_name.split('.')[-1]
+        else:
+            sai_table_data[NAME_TAG] = table_name
         sai_table_data['id'] =  table[PREAMBLE_TAG]['id']
         sai_table_data['with_counters'] = table_with_counters(program, sai_table_data['id'])
 
@@ -380,6 +383,15 @@ for sai_api in sai_apis:
                 for table_name in all_table_names:
                     if table_ref.endswith(table_name):
                         param[OBJECT_NAME_TAG] = table_name
+    # Update object name reference for keys
+    for table in sai_api[TABLES_TAG]:
+        for key in table['keys']:
+            if 'sai_key_type' in key:
+                if key['sai_key_type'] == 'sai_object_id_t':
+                    table_ref = key['sai_key_name'][:-len("_id")]
+                    for table_name in all_table_names:
+                        if table_ref.endswith(table_name):
+                            key[OBJECT_NAME_TAG] = table_name
     # Write SAI dictionary into SAI API headers
     write_sai_files(sai_api)
     write_sai_impl_files(sai_api)
