@@ -47,7 +47,7 @@ def utils():
 
 @pytest.fixture
 def create_ixload_session_url(tbinfo):
-ixload_settings = {}
+    ixload_settings = {}
     tb = tbinfo['stateful'][0]
     tg = {
         'server': tb['server'],
