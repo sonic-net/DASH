@@ -24,6 +24,7 @@ MATCH_FIELDS_TAG = 'matchFields'
 NOACTION = 'NoAction'
 STAGES_TAG = 'stages'
 PARAM_ACTIONS = 'paramActions'
+OBJECT_NAME_TAG = 'objectName'
 
 def get_sai_key_type(key_size, key_header, key_field):
     if key_size == 1:
@@ -34,6 +35,8 @@ def get_sai_key_type(key_size, key_header, key_field):
         return 'sai_object_id_t', "u16"
     elif key_size <= 16:
         return 'sai_uint16_t', "u16"
+    elif key_size == 32 and ('ip_addr_family' in key_field):
+        return 'sai_ip_addr_family_t', "u32"
     elif key_size == 32 and ('addr' in key_field or 'ip' in key_header):
         return 'sai_ip_address_t', "ipaddr"
     elif key_size == 32 and ('_id' in key_field):
@@ -72,7 +75,6 @@ def get_sai_list_type(key_size, key_header, key_field):
         return 'sai_u64_list_t', "no mapping"
     raise ValueError(f'key_size={key_size} is not supported')
 
-
 def get_sai_range_list_type(key_size, key_header, key_field):
     if key_size <= 8:
         return 'sai_u8_range_list_t', 'u8rangelist'
@@ -107,7 +109,7 @@ def get_sai_key_data(key):
     else:
         raise ValueError(f'No valid match tag found')
 
-    if sai_key_data['match_type'] == 'exact':
+    if sai_key_data['match_type'] == 'exact' or  sai_key_data['match_type'] == 'optional':
         sai_key_data['sai_key_type'], sai_key_data['sai_key_field'] = get_sai_key_type(key_size, key_header, key_field)
     elif sai_key_data['match_type'] == 'lpm':
         sai_key_data['sai_lpm_type'], sai_key_data['sai_lpm_field'] = get_sai_lpm_type(key_size, key_header, key_field)
@@ -165,6 +167,7 @@ def fill_action_params(table_params, param_names, action):
 
 def generate_sai_apis(program, ignore_tables):
     sai_apis = []
+    table_names = []
     all_actions = extract_action_data(program)
     tables = sorted(program[TABLES_TAG], key=lambda k: k[PREAMBLE_TAG][NAME_TAG])
     for table in tables:
@@ -224,6 +227,7 @@ def generate_sai_apis(program, ignore_tables):
             sai_table_data['is_object'] = 'false'
             sai_table_data['name'] = sai_table_data['name'] + '_entry'
 
+        table_names.append(sai_table_data[NAME_TAG])
         is_new_api = True
         for sai_api in sai_apis:
             if sai_api['app_name'] == api_name:
@@ -237,7 +241,7 @@ def generate_sai_apis(program, ignore_tables):
             new_api[TABLES_TAG] = [sai_table_data]
             sai_apis.append(new_api)
 
-    return sai_apis
+    return sai_apis, table_names
 
 def write_sai_impl_files(sai_api):
     env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
@@ -366,14 +370,23 @@ print("Generating SAI API...")
 with open(args.filepath) as json_program_file:
     json_program = json.load(json_program_file)
 
-sai_apis = generate_sai_apis(json_program, args.ignore_tables.split(','))
+sai_apis, all_table_names = generate_sai_apis(json_program, args.ignore_tables.split(','))
 
-# Write SAI dictionary into SAI API headers
 sai_api_name_list = []
 for sai_api in sai_apis:
+    # Update object name reference for action params
+    for table in sai_api[TABLES_TAG]:
+        for param in table[ACTION_PARAMS_TAG]:
+            if param['type'] == 'sai_object_id_t':
+                table_ref = param[NAME_TAG][:-len("_id")]
+                for table_name in all_table_names:
+                    if table_ref.endswith(table_name):
+                        param[OBJECT_NAME_TAG] = table_name
+    # Write SAI dictionary into SAI API headers
     write_sai_files(sai_api)
     write_sai_impl_files(sai_api)
     sai_api_name_list.append(sai_api['app_name'].replace('_', ''))
+
 write_sai_makefile(sai_api_name_list)
 
 if args.print_sai_lib:
