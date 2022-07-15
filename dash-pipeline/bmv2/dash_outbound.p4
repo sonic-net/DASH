@@ -29,11 +29,11 @@ control outbound(inout headers_t hdr,
     }
 
     action route_vnet_direct(bit<24> dest_vnet_vni,
-                             bit<1> is_overlay_nh_ip_v6,
+                             bit<1> is_overlay_nh_ip_v4_or_v6,
                              IPv4ORv6Address overlay_nh_ip) {
         meta.encap_data.dest_vnet_vni = dest_vnet_vni;
         meta.lkup_dst_ip_addr = overlay_nh_ip;
-        meta.is_lkup_dst_ip_v6 = is_overlay_nh_ip_v6;
+        meta.is_lkup_dst_ip_v6 = is_overlay_nh_ip_v4_or_v6;
     }
 
     action route_direct() {

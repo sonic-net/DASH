@@ -14,6 +14,7 @@ NAME_TAG = 'name'
 TABLES_TAG = 'tables'
 BITWIDTH_TAG = 'bitwidth'
 ACTIONS_TAG = 'actions'
+ACTION_PARAMS_TAG = 'actionParams'
 PREAMBLE_TAG = 'preamble'
 OTHER_MATCH_TYPE_TAG = 'otherMatchType'
 MATCH_TYPE_TAG = 'matchType'
@@ -22,6 +23,7 @@ ACTION_REFS_TAG = 'actionRefs'
 MATCH_FIELDS_TAG = 'matchFields'
 NOACTION = 'NoAction'
 STAGES_TAG = 'stages'
+PARAM_ACTIONS = 'paramActions'
 
 def get_sai_key_type(key_size, key_header, key_field):
     if key_size == 1:
@@ -145,15 +147,21 @@ def table_with_counters(program, table_id):
             return 'true'
     return 'false'
 
-def remove_dupl_action_params(action_params, in_action):
-    out_action = in_action
-    params = []
-    for param in in_action[PARAMS_TAG]:
-        if param[NAME_TAG] not in action_params:
-            action_params.append(param[NAME_TAG])
-            params.append(param)
-    out_action[PARAMS_TAG] = params
-    return out_action
+def fill_action_params(table_params, param_names, action):
+    for param in action[PARAMS_TAG]:
+        # skip v4/v6 selector
+        if 'v4_or_v6' in param[NAME_TAG]:
+           continue
+        if param[NAME_TAG] not in param_names:
+            param_names.append(param[NAME_TAG])
+            param[PARAM_ACTIONS] = [action[NAME_TAG]]
+            table_params.append(param)
+        else:
+            # ensure that same param passed to multiple actions of the
+            # same P4 table does not generate more than 1 SAI attribute
+            for tbl_param in table_params:
+                if tbl_param[NAME_TAG] == param[NAME_TAG]:
+                    tbl_param[PARAM_ACTIONS].append(action[NAME_TAG])
 
 def generate_sai_apis(program, ignore_tables):
     sai_apis = []
@@ -164,6 +172,7 @@ def generate_sai_apis(program, ignore_tables):
         sai_table_data['keys'] = []
         sai_table_data[ACTIONS_TAG] = []
         sai_table_data[STAGES_TAG] = []
+        sai_table_data[ACTION_PARAMS_TAG] = []
 
         table_control, table_name = table[PREAMBLE_TAG][NAME_TAG].split('.', 1)
         if table_name in ignore_tables:
@@ -198,14 +207,12 @@ def generate_sai_apis(program, ignore_tables):
                 continue
             sai_table_data['keys'].append(get_sai_key_data(key))
 
-        action_params = []
+        param_names = []
         for action in table[ACTION_REFS_TAG]:
             action_id = action["id"]
             if all_actions[action_id][NAME_TAG] != NOACTION:
-                # ensure that same parameter passed to multiple actions for the same table
-                # does not generate more than 1 SAI attribute
-                action = remove_dupl_action_params(action_params, all_actions[action_id])
-                sai_table_data[ACTIONS_TAG].append(action)
+                fill_action_params(sai_table_data[ACTION_PARAMS_TAG], param_names, all_actions[action_id])
+                sai_table_data[ACTIONS_TAG].append(all_actions[action_id])
 
         if len(sai_table_data['keys']) == 1 and sai_table_data['keys'][0]['sai_key_name'].endswith(table_name.split('.')[-1] + '_id'):
             sai_table_data['is_object'] = 'true'
