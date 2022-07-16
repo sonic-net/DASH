@@ -72,7 +72,9 @@ control outbound(inout headers_t hdr,
 
         actions = {
             set_tunnel_mapping;
+            @defaultonly drop;
         }
+        const default_action = drop;
 
         counters = ca_to_pa_counter;
     }
