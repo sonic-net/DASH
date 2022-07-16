@@ -5,7 +5,10 @@ on:
     branches: [ "**" ]
     paths:
       - '.github/workflows/dash-bmv2-ci.yml'
-      - 'test/test-cases/bmv2_model/**.py'
+      - 'test/**.py'
+      - 'test/**requirements.txt'
+      - 'test/**.sh'
+      - 'test/**.yml'
       - 'dash-pipeline/**'
       - '!dash-pipeline/docker files/Dockerfile.*'
       - '!dash-pipeline/.dockerignore'
@@ -17,7 +20,10 @@ on:
     branches: [ "main" ]
     paths:
       - '.github/workflows/dash-bmv2-ci.yml'
-      - 'test/test-cases/bmv2_model/**.py'
+      - 'test/**.py'
+      - 'test/**requirements.txt'
+      - 'test/**.sh'
+      - 'test/**.yml'
       - 'dash-pipeline/**'
       - '!dash-pipeline/docker files/Dockerfile.*'
       - '!dash-pipeline/.dockerignore'
