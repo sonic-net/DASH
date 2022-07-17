@@ -62,8 +62,9 @@ The workflows described here are primarily driven by a [Makefile](Makefile) and 
     - [Committing new SAI submodule version](#committing-new-sai-submodule-version)
 
 # Known Issues
-* The vnet_out test via `make run-test` needs to be run to allow `run-ixiac-test` to pass. Need to understand why this is so.
+* The vnet_out test via `make run-test` needs to be run to allow `run-ixiac-test` to pass. 
 * Prebuilt Docker image is too large , see [Desired Optimizations](#desired-optimizations).
+* Docker images have permissions and ownership issues, see https://github.com/Azure/DASH/issues/143. Use `make fix-perms` as temporary workaround.
 
 # TODOs
 ## Loose Ends
@@ -121,7 +122,7 @@ git checkout <branch>
 ## Super-quick approach for the adventurous!
 In one terminal:
 ```
-make clean all network run-switch
+make clean && make all network run-switch
 ```
 In another terminal:
 ```

@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 
-all:p4 sai test
+all:fix-perms p4 sai test
 
 PWD := $(shell pwd)
 
@@ -20,13 +20,18 @@ DOCKER_RUN := docker run \
 	--rm \
 	$(DOCKER_FLAGS)
 
+.PHONY: fix-perms
+fix-perms:
+	@echo "### Applying Fix permissions workaround..."
+	sudo chmod -R o+rw SAI/ bmv2/ tests/
+
 SAI/SAI:
 	@echo "Initializing SAI submodule..."
 	git submodule update --init
 
 P4_ARTIFACTS=bmv2/dash_pipeline.bmv2/dash_pipeline.json bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt
 
-p4: bmv2/dash_pipeline.bmv2/dash_pipeline.json
+p4: fix-perms bmv2/dash_pipeline.bmv2/dash_pipeline.json
 
 .PHONY:p4-clean
 p4-clean:
@@ -48,7 +53,7 @@ $(P4_ARTIFACTS):
 	    --p4runtime-files bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.json,bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt
 
 .PHONY:clean
-clean: kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac
+clean: fix-perms kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac
 	sudo rm -rf bmv2/dash_pipeline.bmv2
 	sudo make -C tests/vnet_out clean
 
@@ -79,7 +84,7 @@ kill-switch:
 
 # TODO - create separate rules for headers, libsai.so
 .PHONY:sai
-sai: p4 | SAI/SAI 
+sai: fix-perms p4 | SAI/SAI 
 	@echo "Generate SAI library headers and implementation..."
 	$(DOCKER_RUN) \
 		--name build_sai-$(USER) \
