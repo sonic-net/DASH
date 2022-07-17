@@ -1,8 +1,13 @@
 SHELL = /bin/bash
 
-all:p4 sai test
+all:fix-perms p4 sai test
 
 PWD := $(shell pwd)
+
+.PHONY: fix-perms
+fix-perms:
+	@echo "### Applying Fix permissions workaround..."
+	sudo chmod -R o+rw SAI/ bmv2/ tests/
 
 # Default Docker images, override from env var
 # https://hub.docker.com/r/p4lang/p4c
@@ -42,7 +47,7 @@ SAI/SAI:
 
 
 .PHONY:clean
-clean: kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac
+clean: fix-perms kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac
 	rm -rf bmv2/dash_pipeline.bmv2
 	make -C tests/vnet_out clean
 
@@ -52,7 +57,7 @@ clean: kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac
 
 P4_ARTIFACTS=bmv2/dash_pipeline.bmv2/dash_pipeline.json bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt
 
-p4: bmv2/dash_pipeline.bmv2/dash_pipeline.json
+p4: fix-perms bmv2/dash_pipeline.bmv2/dash_pipeline.json
 
 .PHONY:p4-clean
 p4-clean:
@@ -89,9 +94,9 @@ $(P4_ARTIFACTS): $(P4_SRC)
 # TODO - create separate rules for headers, libsai.so
 .PHONY:sai
 
-sai:sai-headers libsai
+sai:fix-perms sai-headers libsai
 
-sai-headers: p4 | SAI/SAI 
+sai-headers: fix-perms p4 | SAI/SAI 
 	@echo "Generate SAI library headers and implementation..."
 	$(DOCKER_RUN) \
 		--name build_sai-$(USER) \
@@ -99,17 +104,17 @@ sai-headers: p4 | SAI/SAI
 	    ./generate_dash_api.sh
 
 # TODO - add SAI header dependencies
-libsai:
+libsai: fix-perms 
 	@echo "build libsai.so..."
 	$(DOCKER_RUN) -w /SAI/lib \
 	$(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
-libsai-clean:
+libsai-clean:fix-perms 
 	-rm -rf SAI/lib/libsai.so
 
 .PHONY:sai-clean
-sai-clean: SAI/SAI libsai-clean
+sai-clean: fix-perms SAI/SAI libsai-clean
 	@echo "Restoring SAI subdirectories to baseline..."
 	rm -rf SAI/SAI/inc SAI/SAI/experimental SAI/SAI/meta
 	cd SAI/SAI && git checkout -- inc experimental meta
@@ -149,7 +154,7 @@ DOCKER_RUN_SAITHRIFT =\
 	-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/saithrift \
 	$(DOCKER_SAITHRIFT_BLDR_IMG) \
 
-sai-thrift-server:
+sai-thrift-server:fix-perms 
 	$(DOCKER_RUN_SAITHRIFT) \
 	    make $@
 
@@ -180,7 +185,7 @@ test-clean:
 
 
 .PHONY:sai-test
-sai-test:SAI/SAI SAI/lib/libsai.so
+sai-test: fix-perms SAI/SAI SAI/lib/libsai.so
 	$(DOCKER_RUN) \
 	    --name dash-build-test-$(USER) \
 		-w /tests  $(DOCKER_BMV2_BLDR_IMG) \

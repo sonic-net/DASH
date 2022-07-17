@@ -33,8 +33,15 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
   - [Install docker-compose](#install-docker-compose)
 
 # Known Issues
+<<<<<<< HEAD
 * P4 code doesn't loop packets back to same port.
 * P4 code mark-to-drop not set when meta.drop is set.
+=======
+* The vnet_out test via `make run-test` needs to be run to allow `run-ixiac-test` to pass. 
+* Prebuilt Docker image is too large , see [Desired Optimizations](#desired-optimizations).
+* Docker images have permissions and ownership issues, see https://github.com/Azure/DASH/issues/143. Use `make fix-perms` as temporary workaround.
+
+>>>>>>> 5928f61... Temporary workaround for container permissions issues per https://github.com/Azure/DASH/issues/143. Executes chmod as required. Permanent fix will require some Docker mods.
 # TODOs
 ## Loose Ends
 Small items to complete given the exsting features and state, e.g. excluing major roadmap items.
@@ -80,7 +87,11 @@ Eager to see it work? Try this:
 
 In one terminal:
 ```
+<<<<<<< HEAD
 make clean all run-switch
+=======
+make clean && make all network run-switch
+>>>>>>> 5928f61... Temporary workaround for container permissions issues per https://github.com/Azure/DASH/issues/143. Executes chmod as required. Permanent fix will require some Docker mods.
 ```
 In another terminal:
 ```
