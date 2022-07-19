@@ -1,6 +1,5 @@
-# Ignore backup files
 *.bkp
-
-# Ignore logs
 *.log
-
+__pycache__/
+dash-pipeline/bmv2/dash_pipeline.bmv2/
+dash-pipeline/SAI/lib/

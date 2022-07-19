@@ -1,0 +1,10 @@
+pytest
+tabulate
+pandas
+PyYAML
+
+# Keysight libs
+ixnetwork-restpy
+snappi
+snappi-ixnetwork
+ixload

@@ -103,7 +103,7 @@ Practially speaking, however, devices will have varying numbers of traffic ports
 While it is the intent to build a community wherein participants contribute public test cases, it is also anticipated and natural that members will retain proprietary test cases as well, for commercial reasons. It is hoped that the community test framework and library of test cases can still form the core of vendor testbeds. This will avoid "reinventing the wheel," reduce the friction of adapting and contributing vendor-developed test cases to the community and vice versa, and maximize the utility and hardening of this repository for the common good. One possiblity is to use [Git Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) to import this test repository into in-house repositories, which can be extended locally with private enhancements and additions.
 
 ## P4 Model-Based Testing
-The [DASH P4 behavioral models](../../sirius-pipeline/README.md) describe the DASH pipeline in an abstract, machine-readable and unambiguous fashion. There are multiple potential applications:
+The [DASH P4 behavioral models](../../dash-pipeline/README.md) describe the DASH pipeline in an abstract, machine-readable and unambiguous fashion. There are multiple potential applications:
 
 * It is a clear contract and specification for the dataplane, supplementing or replacing traditional diagrams, text documents etc.
 * The P4 code can be used to generate dataplane programming APIs
