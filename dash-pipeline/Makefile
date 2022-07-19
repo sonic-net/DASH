@@ -22,7 +22,7 @@ DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220708
 
 # Compiles sai headers, libsai, saithrift client-server
-DOCKER_SAITHRIFT_CLIENT_IMG ?=chrissommers/dash-saithrift-client:220711
+DOCKER_SAITHRIFT_CLIENT_IMG ?=chrissommers/dash-saithrift-client:220718
 
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
