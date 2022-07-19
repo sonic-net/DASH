@@ -144,6 +144,12 @@ sai-clean: SAI/SAI libsai-clean
 	rm -rf SAI/SAI/inc SAI/SAI/experimental SAI/SAI/meta
 	cd SAI/SAI && git checkout -- inc experimental meta
 
+
+# Run to recreate same environment as building sai-thrift client & server
+run-sai-thrift-bldr-bash:
+	$(DOCKER_RUN_SAITHRIFT_BLDR) \
+	    /bin/bash
+
 ######################################
 # P4 Behavioral-model (switch) TARGETS
 ######################################

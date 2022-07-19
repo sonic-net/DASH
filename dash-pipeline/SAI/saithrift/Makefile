@@ -33,6 +33,8 @@ sai-thrift-server:
 	# Copy headers to /usr/include/sai
 	sudo mkdir -p /usr/include/sai
 	sudo cp $(SAI)/inc/sai*.h /usr/include/sai/
+	# Following is workaround for https://github.com/opencomputeproject/SAI/issues/1537
+	sudo cp $(SAI)/experimental/sai*.h /usr/include/sai/
 	sudo cp -r $(SAI)/experimental/ /usr/include/
 
 	# Install vendor specific SAI library i.e. DASH bmv2 libsai.so in /usr/lib.
