@@ -1,7 +1,11 @@
 # DASH saithrift pytests
+## Production - Launch container, run tests in one shot
+```
+make run-saithrift-client-tests
+```
 
-
-# Run Tests Inside saithrift-client container
+**TODO:** - pass params to the container to select tests etc.
+# Developer: Run Tests Inside saithrift-client container
 Enter the container, this will place you in the `/saithrift` directory of the continer which corresponds to the contents of the `DASH/dash-pipline/SAI/saithrift` directory when the container *image* was built.
 ```
 make run-saithrift-client-bash 
