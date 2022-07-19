@@ -208,8 +208,6 @@ sai-thrift-server-clean: kill-sai-thrift-server
 	$(DOCKER_RUN_SAITHRIFT_BLDR) \
 	    make $@
 
-run-sai-thrift-server-test: run-sai-thrift-server
-
 ###############################
 # SAI TEST TARGETS
 ###############################
@@ -229,7 +227,7 @@ sai-test:SAI/SAI SAI/lib/libsai.so
 	    make
 
 timeout?=5
-run-all-tests:run-test run-ixiac-test run-sai-thrift-server-test
+run-all-tests:run-test run-ixiac-test run-saithrift-client-tests
 
 .PHONY:run-test
 run-test:run-sai-test

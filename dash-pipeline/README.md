@@ -79,11 +79,15 @@ git checkout <branch>
 ## I feel lucky!
 Eager to see it work? Try this:
 
-In one terminal:
+In first terminal (console will print bmv2 logs):
 ```
 make clean all run-switch
 ```
-In another terminal:
+In second terminal (console will print sai-thrift server logs):
+```
+make run-sai-thrift-server
+```
+In third terminal (console will print test results):
 ```
 make run-all-tests clean
 ```
