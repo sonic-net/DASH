@@ -179,6 +179,7 @@ control dash_ingress(inout headers_t hdr,
             return;
         }
 
+        /* If Outer VNI matches with a reserved VNI, then the direction is Outbound - */
         meta.direction = direction_t.INBOUND;
         direction_lookup.apply();
 
