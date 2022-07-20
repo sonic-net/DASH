@@ -208,9 +208,11 @@ sai_switch_api_t sai_switch_api = {
 
 
 /* TODO [cs] This should be auto-generated or part of per-API, auto-generated include file */
-//extern "C" {
-    /*extern*/ sai_dash_vnet_api_t sai_dash_vnet_api_impl;
-//}
+extern sai_dash_api_t sai_dash_api_impl;
+extern sai_dash_vnet_api_t sai_dash_vnet_api_impl;
+extern sai_dash_acl_api_t sai_dash_acl_api_impl;
+
+
 /* TODO [cs] This should be auto-generated */
 sai_status_t sai_api_query(
         _In_ sai_api_t api,
@@ -219,6 +221,10 @@ sai_status_t sai_api_query(
         switch(api) {
         case SAI_API_SWITCH:
             *api_method_table = (void *)&sai_switch_api;
+            break;
+        
+        case SAI_API_DASH:
+            *api_method_table = (void *)&sai_dash_api_impl;
             break;
         
         case SAI_API_DASH_VNET:

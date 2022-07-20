@@ -40,6 +40,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 ## Loose Ends
 Small items to complete given the exsting features and state, e.g. excluing major roadmap items.
 * Update SAI submodule to upstream when PRs are merged (currently using dev branches for URLs)
+* Produce "dev" and "distro" versions of docker images. Dev images mount to host FS and use artifacts built on the host. Distro images are entirely self-contained including all artifacts.
 ## Desired Optimizations
 * Build a Docker image automatically when its Dockerfile changes, publish and pull from permanent repo
 * Use Azure Container Registry (ACR) for Docker images instead of temporary Dockerhub registry
@@ -81,7 +82,7 @@ Eager to see it work? Try this:
 
 In first terminal (console will print bmv2 logs):
 ```
-make clean all run-switch
+make clean && make all run-switch
 ```
 In second terminal (console will print sai-thrift server logs):
 ```
