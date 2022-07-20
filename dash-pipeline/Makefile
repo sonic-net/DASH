@@ -82,10 +82,6 @@ $(P4_ARTIFACTS): $(P4_SRC)
 		-o $(P4_OUTDIR) \
 	    --p4runtime-files $(P4_OUTDIR)/dash_pipeline_p4rt.json,$(P4_OUTDIR)/dash_pipeline_p4rt.txt
 
-		# -I /usr/local/share/p4c \
-	    # -o $(P4_OUTDIR)/dash_pipeline.json \
-
-
 ######################################
 # DASH SAI HEADER & libsai.so TARGETS
 ######################################
