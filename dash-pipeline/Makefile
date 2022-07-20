@@ -1,6 +1,11 @@
 SHELL = /bin/bash
 
-all:p4 sai sai-thrift-server test
+all:fix-perms p4 sai sai-thrift-server test
+
+.PHONY: fix-perms
+fix-perms:
+	@echo "### Applying Fix permissions workaround..."
+	sudo chmod -R o+rw SAI/ bmv2/ tests/
 
 PWD := $(shell pwd)
 
@@ -19,7 +24,7 @@ DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2-bldr:220630
 DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 
 # Compiles sai headers, libsai, saithrift client-server
-DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220708
+DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220719
 
 # Compiles sai headers, libsai, saithrift client-server
 DOCKER_SAITHRIFT_CLIENT_IMG ?=chrissommers/dash-saithrift-client:220718
@@ -46,7 +51,7 @@ sai-submodule:
 
 
 .PHONY:clean
-clean: kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac sai-thrift-server-clean
+clean: fix-perms kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac sai-thrift-server-clean
 	rm -rf bmv2/dash_pipeline.bmv2
 	make -C tests/vnet_out clean
 
@@ -56,7 +61,7 @@ clean: kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac sa
 
 P4_ARTIFACTS=bmv2/dash_pipeline.bmv2/dash_pipeline.json bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt
 
-p4: bmv2/dash_pipeline.bmv2/dash_pipeline.json
+p4: fix-perms bmv2/dash_pipeline.bmv2/dash_pipeline.json
 
 .PHONY:p4-clean
 p4-clean:
@@ -98,9 +103,9 @@ DOCKER_RUN_SAITHRIFT_BLDR =\
 # TODO - create separate rules for headers, libsai.so
 .PHONY:sai
 
-sai: sai-clean sai-headers sai-meta libsai
+sai: fix-perms sai-clean sai-headers sai-meta libsai
 
-sai-headers: p4 | SAI/SAI 
+sai-headers: fix-perms p4 | SAI/SAI 
 	@echo "Generate SAI library headers and implementation..."
 	mkdir -p SAI/lib
 	$(DOCKER_RUN) \
@@ -111,7 +116,7 @@ sai-headers: p4 | SAI/SAI
 	# Fixup perms from generate_dash_api using sudo to call python,so subsequent scripts can access
 	sudo chmod -R a+rw $(PWD)/SAI/SAI
 
-sai-meta:
+sai-meta: fix-perms 
 	@echo "Generate SAI metadata..."
 	# hack - remove scripts which cause Git ownership failures in CI pipelines
 	# We don't need them, they're to check that SAI headers didn't experience enum changes etc.
@@ -126,7 +131,7 @@ sai-meta:
 	    make
 
 # TODO - add SAI header dependencies
-libsai:
+libsai: fix-perms 
 	@echo "build libsai.so..."
 	$(DOCKER_RUN) \
 		$(DOCKER_FLAGS) \
@@ -135,11 +140,11 @@ libsai:
 		$(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
-libsai-clean:
+libsai-clean: fix-perms 
 	-rm -rf SAI/lib/libsai.so
 
 .PHONY:sai-clean
-sai-clean: SAI/SAI libsai-clean
+sai-clean: fix-perms SAI/SAI libsai-clean
 	@echo "Restoring SAI subdirectories to baseline..."
 	rm -rf SAI/SAI/inc SAI/SAI/experimental SAI/SAI/meta
 	cd SAI/SAI && git checkout -- inc experimental meta
@@ -189,7 +194,8 @@ DOCKER_RUN_SAITHRIFT_SRVR =\
 	--name dash-saithrift-server-$(USER) \
 	-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline.json:/etc/dash/dash_pipeline.json \
 	-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
-	-v $(PWD)/SAI:/SAI -w /SAI/rpc \
+	-v $(PWD)/SAI:/SAI -w /SAI/rpc/usr/sbin \
+	-v $(PWD)/SAI/SAI/meta:/meta \
 	-e LD_LIBRARY_PATH=/SAI/lib:/usr/local/lib \
 	$(DOCKER_SAITHRIFT_BLDR_IMG)
 
