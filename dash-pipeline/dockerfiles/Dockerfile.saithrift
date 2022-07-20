@@ -5,7 +5,7 @@ FROM chrissommers/dash-bmv2-bldr:220630 as bmv2
 FROM amd64/ubuntu@sha256:b2339eee806d44d6a8adc0a790f824fb71f03366dd754d400316ae5a7e3ece3e as builder
 LABEL maintainer="SONiC-DASH Community "
 LABEL description="This Docker image contains the toolchain to build \
-the sai-thrift client & server + sai-P4Runtime adaptor layer, for DASH."
+the saithrift client & server + sai-P4Runtime adaptor layer, for DASH."
 
 
 # Configure make to run as many parallel jobs as cores available
@@ -50,7 +50,7 @@ RUN wget http://archive.apache.org/dist/thrift/0.11.0/thrift-0.11.0.tar.gz && \
 # TODO - merge into first RUN layer (or delete?) this is for dev only
 RUN sudo apt install -y gdb
 
-# Used to make sai-thrift server
+# Used to make saithrift server
 COPY --from=grpc /usr/local/lib/lib*grpc*.so* \
         /usr/local/lib/libabsl*.so* \
         /usr/local/lib/libgpr*.so* \
@@ -65,7 +65,7 @@ COPY --from=grpc  /usr/local/lib/libssl*.so* \
         /usr/local/lib/libcrypto*.so* \
         /lib/x86_64-linux-gnu/
 
-# Used to make sai-thrift server
+# Used to make saithrift server
 COPY --from=bmv2 /usr/local/lib/libpiprotogrpc.so* \
         /usr/local/lib/libprotobuf.so* \
         /usr/local/lib/libpiprotobuf.so* \

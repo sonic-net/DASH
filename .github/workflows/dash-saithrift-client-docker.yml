@@ -44,6 +44,6 @@ jobs:
     - name: Generate SAI API
       run:  DOCKER_FLAGS=$docker_fg_flags make sai
     - name: Generate SAI-Thrift client and server code and libs
-      run:  DOCKER_FLAGS=$docker_fg_flags make sai-thrift-server
-    - name: Build sai-thrift client docker image 
+      run:  DOCKER_FLAGS=$docker_fg_flags make saithrift-server
+    - name: Build saithrift client docker image 
       run:  DOCKER_FLAGS=$docker_fg_flags make docker-saithrift-client

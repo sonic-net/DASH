@@ -49,7 +49,6 @@ Small items to complete given the exsting features and state, e.g. excluing majo
 ## Roadmap
 These are significant feature or functionality work items.
 * Use modified bmv2 which adds stateful processing. Current version is vanilla bmv2. This will require building it instead of using a prebuilt bmv2 docker image, see [Build Docker dev container](#build-docker-dev-container). [**WIP**]
-* Integrate SAI-thrift server from [OCP/SAI](https://github.com/opencomputeproject/SAI) [**WIP**]
 * Add DASH sevice test cases including SAI-thrift pipeline configuration and traffic tests
 
 # Quick-start
@@ -83,7 +82,7 @@ In first terminal (console will print bmv2 logs):
 ```
 make clean && make all run-switch
 ```
-In second terminal (console will print sai-thrift server logs):
+In second terminal (console will print saithrift server logs):
 ```
 make clean && make all network run-switch
 ```

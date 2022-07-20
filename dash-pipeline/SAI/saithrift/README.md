@@ -5,10 +5,10 @@
 # Debugging Server with GDB
 `gdb` is built into the saithrift server image for easy debugging. Server code is compiled with the `-g` flag to include debug symbols. The saithrift server source code is available from withint the running DOcker container via volume mounts. Below is shown some a typical workflow:
 
-## Run Interactive sai-thrift-server container
+## Run Interactive saithrift-server container
 This starts the container and opens a bash session instead of running the server like normal. The working directory `/SAI/rpc/usr/sbin` contains the saiserver.
 ```
-$ make run-sai-thrift-server-bash 
+$ make run-saithrift-server-bash 
 docker run --rm -it --net=host --name dash-saithrift-server-chris -v /home/chris/chris-DASH/DASH/dash-pipeline/bmv2/dash_pipeline.bmv2/dash_pipeline.json:/etc/dash/dash_pipeline.json -v /home/chris/chris-DASH/DASH/dash-pipeline/bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt -v /home/chris/chris-DASH/DASH/dash-pipeline/SAI:/SAI -w /SAI/rpc/usr/sbin -v /home/chris/chris-DASH/DASH/dash-pipeline/SAI/SAI/meta:/meta -e LD_LIBRARY_PATH=/SAI/lib:/usr/local/lib chrissommers/dash-saithrift-bldr:220719 \
 /bin/bash
 chris@chris-z4:/SAI/rpc/usr/sbin$
@@ -34,7 +34,7 @@ For help, type "help".
 Type "apropos word" to search for commands related to "word"...
 Reading symbols from saiserver...
 ```
-Point gdb to the mounted source directory which which must be build locally via `make sai-thrift-server`:
+Point gdb to the mounted source directory which which must be build locally via `make saithrift-server`:
 ```
 (gdb) dir /meta
 Source directories searched: /meta:$cdir:$cwd

@@ -3,7 +3,7 @@
 FROM chrissommers/dash-saithrift-bldr:220708
 LABEL maintainer="SONiC-DASH Community "
 LABEL description="This Docker image contains the toolchain to run\
-the sai-thrift client and test programsfor DASH."
+the saithrift client and test programsfor DASH."
 
 RUN sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1 && \
     update-alternatives --list python && \

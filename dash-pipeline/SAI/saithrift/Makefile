@@ -1,7 +1,7 @@
-all: sai-thrift-server sai-thrift-server-install
+all: saithrift-server saithrift-server-install
 # SAI submodule used by below targets; modified in-place!
 SAI=$(shell pwd)/../SAI
-# Host dir where sai-thrift artifacts will be installed
+# Host dir where saithrift artifacts will be installed
 LIB=$(shell pwd)/../lib
 RPC_INST_DIR=$(shell pwd)/../rpc
 
@@ -29,7 +29,7 @@ SAIRPC_EXTRA_LIBS="\
 
 # Below based on: https://github.com/opencomputeproject/SAI/blob/088627dd90c3420daf96d294c661b4a152afb01e/ptf/SAI_PTF_user-guide.md
 # Dependencies are assumed to be installed, e.g. in the docker container
-sai-thrift-server:
+saithrift-server:
 	# Copy headers to /usr/include/sai
 	sudo mkdir -p /usr/include/sai
 	sudo cp $(SAI)/inc/sai*.h /usr/include/sai/
@@ -58,10 +58,10 @@ sai-thrift-server:
 	# Copy thrift libs from builder image onto host
 	cp /usr/lib/libthrift*so* /usr/lib/thrift-0.11.0.tar.gz $(RPC_INST_DIR)
 
-sai-thrift-server-clean:
+saithrift-server-clean:
 	cd $(SAI) && export SAITHRIFTV2=y  && make clean
 	rm -rf $(SAI)/test/saithriftv2/gen-cpp/
 	rm -rf $(SAI)/test/saithriftv2/obj/
 	rm -rf $(RPC_INST_DIR)
 	
-clean: sai-thrift-server-clean
+clean: saithrift-server-clean

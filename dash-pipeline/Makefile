@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 
-all:fix-perms p4 sai sai-thrift-server test
+all:fix-perms p4 sai saithrift-server test
 
 .PHONY: fix-perms
 fix-perms:
@@ -51,7 +51,7 @@ sai-submodule:
 
 
 .PHONY:clean
-clean: fix-perms kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac sai-thrift-server-clean
+clean: fix-perms kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac saithrift-server-clean
 	rm -rf bmv2/dash_pipeline.bmv2
 	make -C tests/vnet_out clean
 
@@ -150,8 +150,8 @@ sai-clean: fix-perms SAI/SAI libsai-clean
 	cd SAI/SAI && git checkout -- inc experimental meta
 
 
-# Run to recreate same environment as building sai-thrift client & server
-run-sai-thrift-bldr-bash:
+# Run to recreate same environment as building saithrift client & server
+run-saithrift-bldr-bash:
 	$(DOCKER_RUN_SAITHRIFT_BLDR) \
 	    /bin/bash
 
@@ -182,7 +182,7 @@ kill-switch:
 # SAI-THRIFT SERVER TARGETS
 ###############################
 
-sai-thrift-server:
+saithrift-server:
 	$(DOCKER_RUN_SAITHRIFT_BLDR) \
 	    make $@
 
@@ -200,18 +200,18 @@ DOCKER_RUN_SAITHRIFT_SRVR =\
 	-e LD_LIBRARY_PATH=/SAI/lib:/usr/local/lib \
 	$(DOCKER_SAITHRIFT_BLDR_IMG)
 
-run-sai-thrift-server:
+run-saithrift-server:
 	$(DOCKER_RUN_SAITHRIFT_SRVR) \
 	./saiserver
 
-kill-sai-thrift-server:
+kill-saithrift-server:
 	-docker kill dash-saithrift-server-$(USER)
 
-run-sai-thrift-server-bash:
+run-saithrift-server-bash:
 	$(DOCKER_RUN_SAITHRIFT_SRVR) \
 	/bin/bash
 
-sai-thrift-server-clean: kill-sai-thrift-server
+saithrift-server-clean: kill-saithrift-server
 	$(DOCKER_RUN_SAITHRIFT_BLDR) \
 	    make $@
 
