@@ -194,14 +194,15 @@ DOCKER_RUN_SAITHRIFT_SRVR =\
 	--name dash-saithrift-server-$(USER) \
 	-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline.json:/etc/dash/dash_pipeline.json \
 	-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
-	-v $(PWD)/SAI:/SAI -w /SAI/rpc/usr/sbin \
+	-v $(PWD)/SAI:/SAI \
 	-v $(PWD)/SAI/SAI/meta:/meta \
+	-w /SAI/rpc/usr/sbin \
 	-e LD_LIBRARY_PATH=/SAI/lib:/usr/local/lib \
 	$(DOCKER_SAITHRIFT_BLDR_IMG)
 
 run-sai-thrift-server:
 	$(DOCKER_RUN_SAITHRIFT_SRVR) \
-	./usr/sbin/saiserver
+	./saiserver
 
 kill-sai-thrift-server:
 	-docker kill dash-saithrift-server-$(USER)
