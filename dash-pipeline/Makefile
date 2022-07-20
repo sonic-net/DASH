@@ -138,34 +138,34 @@ kill-switch:
 	-docker kill simple_switch-$(USER)
 
 
-###############################
-# SAI-THRIFT SERVER TARGETS
-###############################
+#################################
+# SAI-THRIFT SERVER TARGETS - WIP
+#################################
 
 # Note we have to mount main DASH dir to allow container to "see" the parent Git repo for the SAI submodule
-DOCKER_RUN_SAITHRIFT =\
-	docker run \
-	--rm \
-	--name dash-saithrift-bldr-$(USER) \
-	-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/saithrift \
-	$(DOCKER_SAITHRIFT_BLDR_IMG) \
+# DOCKER_RUN_SAITHRIFT =\
+# 	docker run \
+# 	--rm \
+# 	--name dash-saithrift-bldr-$(USER) \
+# 	-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/saithrift \
+# 	$(DOCKER_SAITHRIFT_BLDR_IMG) \
 
-sai-thrift-server:fix-perms 
-	$(DOCKER_RUN_SAITHRIFT) \
-	    make $@
+# sai-thrift-server:fix-perms 
+# 	$(DOCKER_RUN_SAITHRIFT) \
+# 	    make $@
 
-sai-thrift-server-bash:
-	docker run \
-	--rm \
-	-it \
-	--name dash-saithrift-bldr-$(USER) \
-	-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/saithrift \
-	$(DOCKER_SAITHRIFT_BLDR_IMG) \
-	/bin/bash
+# sai-thrift-server-bash:
+# 	docker run \
+# 	--rm \
+# 	-it \
+# 	--name dash-saithrift-bldr-$(USER) \
+# 	-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/saithrift \
+# 	$(DOCKER_SAITHRIFT_BLDR_IMG) \
+# 	/bin/bash
 
-sai-thrift-server-clean:
-	$(DOCKER_RUN_SAITHRIFT) \
-	    make $@
+# sai-thrift-server-clean:
+# 	$(DOCKER_RUN_SAITHRIFT) \
+# 	    make $@
 
 
 
