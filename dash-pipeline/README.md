@@ -33,16 +33,9 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
   - [Install docker-compose](#install-docker-compose)
 
 # Known Issues
-<<<<<<< HEAD
 * P4 code doesn't loop packets back to same port.
 * P4 code mark-to-drop not set when meta.drop is set.
-* Permission and ownership issues in Docker images, one remedy is `chmod -R o+rw  SAI tests bmv2` prior to `make all`
-=======
-* The vnet_out test via `make run-test` needs to be run to allow `run-ixiac-test` to pass. 
-* Prebuilt Docker image is too large , see [Desired Optimizations](#desired-optimizations).
-* Docker images have permissions and ownership issues, see https://github.com/Azure/DASH/issues/143. Use `make fix-perms` as temporary workaround.
-
->>>>>>> 5928f61... Temporary workaround for container permissions issues per https://github.com/Azure/DASH/issues/143. Executes chmod as required. Permanent fix will require some Docker mods.
+* Permission and ownership issues in Docker images, permanent fix is needed.
 # TODOs
 ## Loose Ends
 Small items to complete given the exsting features and state, e.g. excluing major roadmap items.
@@ -52,7 +45,6 @@ Small items to complete given the exsting features and state, e.g. excluing majo
 * Build a Docker image automatically when its Dockerfile changes, publish and pull from permanent repo
 * Use Azure Container Registry (ACR) for Docker images instead of temporary Dockerhub registry
 * Use dedicated higher-performance runners instead of [free Azure 2-core GitHub runner instances](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources)
-* Explore use of [virtualenv](https://virtualenv.pypa.io/en/latest/) to avoid contaminating the local environment with this project's particular Python requirements. Alternative - containerize all test resources such as ixia-c tests using snappi. (May become moot if we use `sai-thrift-client` container which includes snappi).
 
 ## Roadmap
 These are significant feature or functionality work items.
@@ -93,11 +85,7 @@ make clean && make all run-switch
 ```
 In second terminal (console will print sai-thrift server logs):
 ```
-<<<<<<< HEAD
-make run-sai-thrift-server
-=======
 make clean && make all network run-switch
->>>>>>> 5928f61... Temporary workaround for container permissions issues per https://github.com/Azure/DASH/issues/143. Executes chmod as required. Permanent fix will require some Docker mods.
 ```
 In third terminal (console will print test results):
 ```
