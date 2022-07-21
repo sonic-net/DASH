@@ -258,8 +258,8 @@ packet destined to `10.1.0.1`. Below are the processing pipeline (lookup) steps.
 <figcaption><i>Figure 5 - Routing a packet to 10.1.0.1</i></figcaption> <br/><br/>
 
 1. Perform LPM lookup. 
-2. Select routing table `DASH_ROUTE_TABLE:10.1.0.0/24`. The action type is `vnet` and the value is `Vnet1`; and the `overlay_ip`=`10.0.0.6`. 
-3. Look up `DASH_ROUTING_TYPE:vnet`. The value for `vnet` is `maprouting`.
+2. Select routing table `DASH_ROUTE_TABLE:10.1.0.0/24`. The action type is `vnet_direct` and the value is `Vnet1`; and the `overlay_ip`=`10.0.0.6`. 
+3. Look up `DASH_ROUTING_TYPE:vnet`. The value for `vnet_direct` is `maprouting`.
 4. Look up `DASH_VNET_MAPPING_TABLE:Vnet1:10.0.0.6`. 
    1. The routing for `routing` is `vnet_encap`.
 5. Perform encap using the Public Address (PA) as specified by the `underlay_ip`=`2601:12:7a:1::1234`. 
