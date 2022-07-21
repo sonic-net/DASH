@@ -3,6 +3,7 @@
 #include <atomic>
 #include <limits>
 #include <stdint.h>
+#include <string.h>
 #include <PI/pi.h>
 #include <grpcpp/grpcpp.h>
 #include "p4/v1/p4runtime.grpc.pb.h"
@@ -129,7 +130,13 @@ int GetDeviceId() {
     return deviceId;
 }
 
+string updateTypeStr(p4::v1::Update_Type updateType) {
+    const google::protobuf::EnumDescriptor *descriptor = p4::v1::Update_Type_descriptor();
+    return descriptor->FindValueByNumber(updateType)->name();
+}
+
 grpc::StatusCode MutateTableEntry(p4::v1::TableEntry *entry, p4::v1::Update_Type updateType) {
+
     p4::v1::WriteRequest request;
     request.set_device_id(GetDeviceId());
     auto update = request.add_updates();
@@ -141,11 +148,11 @@ grpc::StatusCode MutateTableEntry(p4::v1::TableEntry *entry, p4::v1::Update_Type
     grpc::ClientContext context;
     grpc::Status status = stub->Write(&context, request, &rep);
     if (status.ok()) {
-        LOG("GRPC call Write::add_one_entry OK: ");
+        LOG("GRPC call Write::" << updateTypeStr(updateType) << " OK" << std::endl);
     }
     else {
         LOG("GRPC ERROR["<< status.error_code() <<"]: " << status.error_message() << ", " << status.error_details());
-        LOG("GRPC call Write::add_one_entry ERROR: " << std::endl << entry->ShortDebugString());
+        LOG("GRPC call Write::" << updateTypeStr(updateType) << " ERROR: " << std::endl << entry->ShortDebugString());
     }
     //MILIND?? What is this? reference release? memory release?
     entity->release_table_entry();

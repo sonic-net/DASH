@@ -286,7 +286,7 @@ sai_status_t sai_remove_{{ table.name }}(
     {% endfor %}
 
     retCode = MutateTableEntry(matchActionEntry, p4::v1::Update_Type_DELETE);
-    if (grpc::StatusCode::OK != retCode) {
+    if (grpc::StatusCode::OK == retCode) {
         delete matchActionEntry;
         return 0;
     }
