@@ -1,4 +1,4 @@
-[![DASH-model-CI](https://github.com/dgalan-xxia/DASH/workflows/Sirius-CI/badge.svg?branch=main)](https://github.com/dgalan-xxia/DASH/actions/workflows/sirius-ci.yml)
+[![DASH-bmv2-CI](https://github.com/Azure/DASH/workflows/DASH-BMV2-CI/badge.svg?branch=main)](https://github.com/Azure/DASH/actions/workflows/dash-bmv2-ci.yml)
 
 # SONiC-DASH - Disaggregated API for SONiC Hosts - DRAFT/Work in Progress
 

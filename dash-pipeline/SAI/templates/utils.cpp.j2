@@ -7,7 +7,12 @@
 #include <grpcpp/grpcpp.h>
 #include "p4/v1/p4runtime.grpc.pb.h"
 #include "utils.h"
+extern "C" {
+#include "sai.h"
+#include "saiobject.h"
+#include "saistatus.h"
 #include "saitypes.h"
+}
 #include <fstream>
 #include <google/protobuf/text_format.h>
 #include <google/rpc/code.pb.h>
@@ -64,6 +69,8 @@ p4::config::v1::P4Info parse_p4info(const char *path) {
     return p4info;
 }
 
+
+// This gets called when library first loaded; requires a libsai func call to trigger this
 __attribute__((constructor))
 static void Init() {
     nextId = 0;
@@ -109,6 +116,7 @@ static void Init() {
 
         p4::v1::SetForwardingPipelineConfigResponse rep;
         grpc::ClientContext context;
+        LOG("GRPC call SetForwardingPipelineConfig " + _grpcTarget + " => " + test_json + ", " + test_proto_json <<endl);
         auto status = stub->SetForwardingPipelineConfig(
                 &context, request, &rep);
         assert(status.ok());
@@ -178,4 +186,41 @@ bool RemoveFromTable(sai_object_id_t id) {
     delete entry;
     return true;
 }
+
+/* [cs] placeholders to satisfy sairpcgen until actual callbacks are written */
+
+
+sai_status_t sai_api_query(
+        _In_ sai_api_t api,
+        _Out_ void **api_method_table) { return SAI_STATUS_SUCCESS; }
+
+
+sai_status_t sai_object_type_get_availability(
+        _In_ sai_object_id_t switch_id,
+        _In_ sai_object_type_t object_type,
+        _In_ uint32_t attr_count,
+        _In_ const sai_attribute_t *attr_list,
+        _Out_ uint64_t *count) { return SAI_STATUS_SUCCESS; }
+        
+sai_object_type_t sai_object_type_query(
+        _In_ sai_object_id_t object_id) { return SAI_STATUS_SUCCESS; }
+
+
+sai_object_id_t sai_switch_id_query(
+        _In_ sai_object_id_t object_id) { return SAI_STATUS_SUCCESS; }
+
+sai_status_t sai_query_attribute_enum_values_capability(
+        _In_ sai_object_id_t switch_id,
+        _In_ sai_object_type_t object_type,
+        _In_ sai_attr_id_t attr_id,
+        _Inout_ sai_s32_list_t *enum_values_capability) { return SAI_STATUS_SUCCESS; }
+
+sai_status_t sai_api_initialize(
+        _In_ uint64_t flags,
+        _In_ const sai_service_method_table_t *services) { return SAI_STATUS_SUCCESS; }
+
+sai_status_t sai_log_set(
+        _In_ sai_api_t api,
+        _In_ sai_log_level_t log_level) { return SAI_STATUS_SUCCESS; }
+
 

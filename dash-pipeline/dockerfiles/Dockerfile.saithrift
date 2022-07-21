@@ -1,0 +1,61 @@
+#FROM amd64/ubuntu:18.04
+# amd64/ubuntu:18.04 on 2022-07-03
+FROM amd64/ubuntu@sha256:8da4e9509bfe5e09df6502e7a8e93c63e4d0d9dbaa9f92d7d767f96d6c20a78a
+LABEL maintainer="SONiC-DASH Community "
+LABEL description="This Docker image contains the toolchain to build \
+the sai-thrift server for DASH."
+
+
+# Configure make to run as many parallel jobs as cores available
+ARG available_processors
+ARG MAKEFLAGS=-j$available_processors
+ENV SAI_PTF_DEPS    sudo git python python-pip wget doxygen graphviz aspell-en \
+                    libgetopt-long-descriptive-perl libconst-fast-perl \
+                    libtemplate-perl libnamespace-autoclean-perl libmoose-perl libmoosex-aliases-perl
+
+ENV DASH_SAIGEN_DEPS python3 python3-pip
+
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends $SAI_PTF_DEPS $DASH_SAIGEN_DEPS && \
+    pip install ctypesgen && \
+    pip3 install jinja2
+
+ENV SAI_THRIFT_DEPS automake bison flex g++ git libboost-all-dev libevent-dev libssl-dev libtool make pkg-config
+
+RUN wget http://archive.apache.org/dist/thrift/0.11.0/thrift-0.11.0.tar.gz && \
+    tar -xf thrift-0.11.0.tar.gz && \
+    apt-get install -y $SAI_THRIFT_DEPS && \
+    cd thrift-0.11.0 && \
+    ./bootstrap.sh && \
+    ./configure --prefix=/usr --with-cpp --with-python \
+        --with-qt4=no --with-qt5=no --with-csharp=no --with-java=no --with-erlang=no \
+        --with-nodejs=no --with-lua=no --with-per=no --with-php=no --with-dart=no \
+        --with-ruby=no --with-haskell=no --with-go=no --with-rs=no --with-haxe=no \
+        --with-dotnetcore=no --with-d=no && \
+    make && \
+    make install && \
+    cd lib/py && \
+    python setup.py sdist && \
+    sudo cp dist/* /usr/lib && \
+    cd / && \
+    rm -rf thrift-0.11.0 thrift-0.11.0.tar.gz
+
+WORKDIR /
+
+ARG user
+ARG uid
+ARG guid
+ARG hostname
+
+ENV BUILD_HOSTNAME $hostname
+ENV USER $user
+
+RUN groupadd -f -r -g $guid g$user
+
+RUN useradd $user -l -u $uid -g $guid -d /var/$user -m -s /bin/bash
+
+RUN echo "$user ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers
+
+USER $user
+
+CMD ["/bin/bash"]

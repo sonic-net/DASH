@@ -1,5 +1,6 @@
 libsai.so: {% for api in api_names %}sai{{ api }}.cpp {% endfor %}
 	g++ \
+		-fpermissive \
 	    -c \
 	    -I ../SAI/inc/ \
 	    -I ../SAI/experimental/ \
