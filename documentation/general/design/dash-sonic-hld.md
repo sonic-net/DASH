@@ -56,7 +56,7 @@ This document provides more detailed design of DASH APIs, DASH orchestration age
 
 At a high level the following should be supported:
   
-- Bringup SONiC image for DEVICE_METADATA subtype - `appliance`
+- Bringup SONiC image for DEVICE_METADATA subtype - `Appliance`
 - Bringup Swss/Syncd containers for switch_type - `dpu`
 - Able to program DASH objects configured via gRPC client to appliance card via SAI DASH API
 
@@ -134,7 +134,7 @@ After the ACL stage, it does LPM routing based on the inner dst-ip and applies t
 	
    ![dash-inbound](./images/dash-hld-inbound-packet-processing-pipeline.svg)
 
-Based on the incoming packet's VNI, if it does not match against any reserved VNI, the pipeline shall set the direction as RX(Inbound) and using the inner dst-mac, maps to the corresponding ENI. In the inbound flow, Routing (LPM) lookup happens based on VNI and SRC PA prefix and maps to VNET. Using the VNET mapping tables, source PA address is validated against the list of mappings. If the check passes, decap action is performed, else dropped. After LPM is the three stage ACL, processed in order. ACLs can have multiple src/dst IP ranges or port ranges as match criteria.
+Based on the incoming packet's VNI, if it does not match against any reserved VNI, the pipeline shall set the direction as RX(Inbound) and using the inner dst-mac, maps to the corresponding ENI. In the inbound flow, Priority based "Routing Rule" lookup happens based on VNI and SRC PA prefix and maps to VNET. Using the VNET mapping tables, source PA address is validated against the list of mappings. If the check passes, decap action is performed, else dropped. After LPM is the three stage ACL, processed in order. ACLs can have multiple src/dst IP ranges or port ranges as match criteria.
 	
 It is worth noting that CA-PA mapping table shall be used for both encap and decap process
 	
@@ -151,8 +151,8 @@ For DASH objects, the proposal is to use the existing APP_DB instance and object
 ```
 "DEVICE_METADATA": {
     "localhost": {
-        "subtype": "appliance",
-        "type": "sonichost",
+        "subtype": "Appliance",
+        "type": "SonicHost",
         "switch_type": "dpu",
         "sub_role": "None"
      }
@@ -201,7 +201,7 @@ DASH_ENI:{{eni}}
     "qos": {{qos_name}}
     "underlay_ip": {{ip_addr}}
     "admin_state": {{enabled/disabled}}
-    "vnet": {{[list of vnets]}}
+    "vnet": {{vnet_name}}
 ```
 ```
 key                      = DASH_ENI:eni ; ENI MAC as key
@@ -210,7 +210,7 @@ mac_address              = MAC address as string
 qos                      = Associated Qos profile
 underlay_ip              = PA address for Inbound encapsulation to VM
 admin_state              = Enabled after all configurations are applied. 
-vnet                     = list of Vnets that ENI belongs to
+vnet                     = Vnet that ENI belongs to
 ```
 ### 3.2.4 ACL
   
@@ -268,7 +268,7 @@ DASH_ROUTING_TYPE:{{routing_type}}: [
         "action_name":{{string}}
         "action_type": {{action_type}} 
         "encap_type": {{encap type}} (OPTIONAL)
-        "vni": {{list of vni}} (OPTIONAL)
+        "vni": {{vni}} (OPTIONAL)
     ]
 ```
 
@@ -286,14 +286,14 @@ vni                      = vni value associated with the corresponding action. A
 ```
 DASH_APPLIANCE:{{appliance_id}} 
     "sip": {{ip_address}}
-    "vm_vni": {{list of vnis}}
+    "vm_vni": {{vni}}
 ```
 
 ```
 key                      = DASH_APPLIANCE:id ; attributes specific for the appliance
 ; field                  = value 
 sip                      = source ip address, to be used in encap
-vm_vni                   = list of VNIs that need special treatment. Chosen for setting direction etc. 
+vm_vni                   = VM VNI that is used for setting direction. Also used for inbound encap to VM
 ```
 
 ### 3.2.7 ROUTE TABLE
@@ -307,14 +307,14 @@ DASH_ROUTE_TABLE:{{eni}}:{{prefix}}
     "underlay_ip":{{ip_address}} (OPTIONAL)
     "overlay_sip":{{ip_address}} (OPTIONAL)
     "underlay_dip":{{ip_address}} (OPTIONAL)
-    "metering_bucket": {{bucket_id}}(OPTIONAL) 
+    "metering_bucket": {{bucket_id}} (OPTIONAL) 
 ```
   
 ```
 key                      = DASH_ROUTE_TABLE:eni:prefix ; ENI route table with CA prefix
 ; field                  = value 
 action_type              = routing_type              ; reference to routing type
-vnet                     = vnet name                 ; vnet name if routing_type is {vnet, vnet_direct}
+vnet                     = vnet name                 ; destination vnet name if routing_type is {vnet, vnet_direct}
 appliance                = appliance id              ; appliance id if routing_type is {appliance} 
 overlay_ip               = ip_address                ; overlay_ip to override if routing_type is {servicetunnel}, overly_ip to lookup if routing_type is {vnet_direct}, use dst ip from packet if not specified
 underlay_ip              = ip_address                ; underlay_ip to override if routing_type is {servicetunnel}, use dst ip from packet if not specified
@@ -330,7 +330,8 @@ DASH_VNET_MAPPING_TABLE:{{vnet}}:{{ip_address}}
     "routing_type": {{routing_type}} 
     "underlay_ip":{{ip_address}}
     "mac_address":{{mac_address}} (OPTIONAL) 
-    "metering_bucket": {{bucket_id}}(OPTIONAL)
+    "metering_bucket": {{bucket_id}} (OPTIONAL)
+    "use_dst_vni": {{bool}} (OPTIONAL)
 ```
 ```
 key                      = DASH_VNET_MAPPING_TABLE:vnet:ip_address ; CA-PA mapping table for Vnet
@@ -339,6 +340,7 @@ action_type              = routing_type              ; reference to routing type
 underlay_ip              = ip_address                ; PA address for the CA
 mac_address              = MAC address as string     ; Inner dst mac
 metering_bucket          = bucket_id                 ; metering and counter
+use_dst_vni              = bool                      ; if true, use the destination VNET VNI for encap. if false or not specified, user source VNI
 ```
 
 ## 3.3 Module Interaction
@@ -630,4 +632,4 @@ For the example configuration above, the following is a brief explanation of loo
 		b. The action in this case is "drop". 
 		c. Packets gets dropped
 	
-For the inbound direction, after LPM/ACL lookup, pipeline shall use the "underlay_ip" as specified in the ENI table to Vxlan encapsulate the packet
+For the inbound direction, after Route/ACL lookup, pipeline shall use the "underlay_ip" as specified in the ENI table to Vxlan encapsulate the packet and VNI shall be the ```vm_vni``` specified in the APPLIANCE table 
