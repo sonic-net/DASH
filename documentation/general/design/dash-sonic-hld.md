@@ -340,7 +340,7 @@ action_type              = routing_type              ; reference to routing type
 underlay_ip              = ip_address                ; PA address for the CA
 mac_address              = MAC address as string     ; Inner dst mac
 metering_bucket          = bucket_id                 ; metering and counter
-use_dst_vni              = bool                      ; if true, use the destination VNET VNI for encap. if false or not specified, user source VNI
+use_dst_vni              = bool                      ; if true, use the destination VNET VNI for encap. If false or not specified, use source VNI
 ```
 
 ## 3.3 Module Interaction
