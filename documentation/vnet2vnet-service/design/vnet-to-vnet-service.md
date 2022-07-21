@@ -195,7 +195,7 @@ DASH_ROUTE_TABLE:F4939FEFC47E:10.1.0.0/16: {
 }
 
 DASH_ROUTE_TABLE:F4939FEFC47E:10.1.0.0/24: {
-    "action_type":"vnet",
+    "action_type":"vnet_direct",
     "vnet":"Vnet1",
     "overlay_ip":"10.0.0.6"
 }
