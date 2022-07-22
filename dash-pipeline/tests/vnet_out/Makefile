@@ -1,5 +1,5 @@
 all:vnet_out
-vnet_out: vnet_out.cpp /SAI/lib/libsai.so
+vnet_out: vnet_out.cpp
 	echo "building $@ ..."
 	g++ \
 	    -I /SAI/SAI/inc \

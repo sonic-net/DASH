@@ -1,5 +1,5 @@
 all:init_switch
-init_switch: init_switch.cpp /SAI/lib/libsai.so
+init_switch: init_switch.cpp
 	echo "building $@ ..."
 	g++ \
 	    -I /SAI/lib \

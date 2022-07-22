@@ -9,22 +9,16 @@ extern sai_status_t sai_create_direction_lookup_entry(
         _In_ const sai_direction_lookup_entry_t *direction_lookup_entry,
         _In_ uint32_t attr_count,
         _In_ const sai_attribute_t *attr_list);
-extern sai_status_t sai_remove_direction_lookup_entry(
-        _In_ const sai_direction_lookup_entry_t *direction_lookup_entry);
 
 extern sai_status_t sai_create_eni_ether_address_map_entry(
         _In_ const sai_eni_ether_address_map_entry_t *outbound_eni_lookup_from_vm_entry,
         _In_ uint32_t attr_count,
         _In_ const sai_attribute_t *attr_list);
-extern sai_status_t sai_remove_eni_ether_address_map_entry(
-        _In_ const sai_eni_ether_address_map_entry_t *outbound_eni_lookup_from_vm_entry);
 
 extern sai_status_t sai_create_outbound_eni_to_vni_entry(
         _In_ const sai_outbound_eni_to_vni_entry_t *outbound_eni_to_vni_entry,
         _In_ uint32_t attr_count,
         _In_ const sai_attribute_t *attr_list);
-extern sai_status_t sai_remove_outbound_eni_to_vni_entry(
-        _In_ const sai_outbound_eni_to_vni_entry_t *outbound_eni_to_vni_entry);
 
 extern sai_dash_api_t sai_dash_api_impl;
 
@@ -89,29 +83,8 @@ int main(int argc, char **argv)
         std::cout << "Failed to create ENI To VNI" << std::endl;
         return 1;
     }
+
     attrs.clear();
-
-    // Delete everything in reverse order
-    status = sai_remove_outbound_eni_to_vni_entry(&e2v);
-    if (status != SAI_STATUS_SUCCESS)
-    {
-        std::cout << "Failed to remove ENI To VNI" << std::endl;
-        return 1;
-    }
-
-    status = sai_remove_eni_ether_address_map_entry(&eam);
-    if (status != SAI_STATUS_SUCCESS)
-    {
-        std::cout << "Failed to remove ENI Lookup From VM" << std::endl;
-        return 1;
-    }
-
-    status = sai_remove_direction_lookup_entry(&dle);
-    if (status != SAI_STATUS_SUCCESS)
-    {
-        std::cout << "Failed to remove Direction Lookup Entry" << std::endl;
-        return 1;
-    }
 
 
     std::cout << "Done." << std::endl;
