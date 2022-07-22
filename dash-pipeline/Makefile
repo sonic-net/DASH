@@ -2,6 +2,13 @@ SHELL = /bin/bash
 
 all:fix-perms p4 sai saithrift-server test
 
+.PHONY:clean
+clean: fix-perms kill-all p4-clean sai-clean test-clean network-clean saithrift-server-clean
+	rm -rf bmv2/dash_pipeline.bmv2
+
+kill-all: kill-saithrift-server kill-switch undeploy-ixiac
+
+
 .PHONY: fix-perms
 fix-perms:
 	@echo "### Applying Fix permissions workaround..."
@@ -50,11 +57,6 @@ sai-submodule:
 	cd SAI/SAI/test && git submodule update --init ptf
 
 
-.PHONY:clean
-clean: fix-perms kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac saithrift-server-clean
-	rm -rf bmv2/dash_pipeline.bmv2
-	make -C tests/vnet_out clean
-
 ######################################
 # P4 Source code compile TARGETS
 ######################################
@@ -65,7 +67,7 @@ p4: fix-perms bmv2/dash_pipeline.bmv2/dash_pipeline.json
 
 .PHONY:p4-clean
 p4-clean:
-	-rm -rf $(P4_ARTIFACTS)
+	-rm -rf bmv2/dash_pipeline.bmv2
 
 P4_SRC=$(wildcard bmv2/*.p4)
 P4_MAIN=bmv2/dash_pipeline.p4
@@ -182,7 +184,7 @@ kill-switch:
 # SAI-THRIFT SERVER TARGETS
 ###############################
 
-saithrift-server:
+saithrift-server:fix-perms
 	$(DOCKER_RUN_SAITHRIFT_BLDR) \
 	    make $@
 
@@ -211,7 +213,7 @@ run-saithrift-server-bash:
 	$(DOCKER_RUN_SAITHRIFT_SRVR) \
 	/bin/bash
 
-saithrift-server-clean: kill-saithrift-server
+saithrift-server-clean:
 	$(DOCKER_RUN_SAITHRIFT_BLDR) \
 	    make $@
 
