@@ -86,11 +86,15 @@ control dash_ingress(inout headers_t hdr,
     action set_eni_attrs(bit<32> cps,
                          bit<32> pps,
                          bit<32> flows,
-                         bit<1> admin_state) {
-        meta.eni_data.cps         = cps;
-        meta.eni_data.pps         = pps;
-        meta.eni_data.flows       = flows;
-        meta.eni_data.admin_state = admin_state;
+                         bit<1> admin_state,
+                         IPv4Address vm_underlay_dip,
+                         bit<24> vm_vni) {
+        meta.eni_data.cps            = cps;
+        meta.eni_data.pps            = pps;
+        meta.eni_data.flows          = flows;
+        meta.eni_data.admin_state    = admin_state;
+        meta.encap_data.underlay_dip = vm_underlay_dip;
+        meta.encap_data.vni          = vm_vni;
     }
 
     @name("eni|dash")
@@ -182,6 +186,7 @@ control dash_ingress(inout headers_t hdr,
             return;
         }
 
+        /* If Outer VNI matches with a reserved VNI, then the direction is Outbound - */
         meta.direction = direction_t.INBOUND;
         direction_lookup.apply();
 

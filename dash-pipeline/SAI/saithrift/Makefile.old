@@ -1,0 +1,45 @@
+all:sai-meta sai-thrift-rpc sai-thrift-server
+
+META=../SAI/meta
+RPC_SRCS=$(META)/sai_rpc_frontend.cpp $(META)/sai_rpc_server.cpp
+
+sai-meta:
+	@echo "Generating sai meta sources..."
+	cd $(META) && $(MAKE)
+
+sai-meta-clean:
+	@echo "Cleaning sai meta source..."
+	cd $(META) && $(MAKE) clean
+
+sai-thrift-rpc: 
+	@echo "Generating sai-thrift RPC client/server sources..."
+	cd $(META) && ./gensairpc.pl -ve
+
+sai-thrift-server: $(RPC_SRCS) 
+	@echo "Generating sai-thrift RPC server daemon..."
+	g++ \
+		-Wno-conversion \
+	    -I /SAI/SAI/inc \
+	    -I /SAI/SAI/experimental/ \
+	    -I /SAI/SAI/meta/generated/gen-cpp \
+	    -I /SAI/SAI/meta/ \
+	    -o saithrift_server \
+	    $(RPC_SRCS) \
+	    -Wl,-rpath,/SAI/lib \
+	    -L/SAI/lib/ \
+	    -lsai \
+	    -L/usr/local/lib/ \
+	    -lpthread \
+	    -lpiprotogrpc \
+	    -lpiprotobuf \
+	    -lprotobuf \
+	    -lgrpc++ \
+	    -lgrpc \
+	    -lpiall \
+	    -lpi_dummy \
+	    -lpthread \
+	    -labsl_synchronization \
+	    -g
+
+clean:
+	rm -rf vnet_out

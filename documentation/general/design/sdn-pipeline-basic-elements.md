@@ -38,7 +38,7 @@ level design* document.
 
 - **Packet direction**. It is evaluated based on the most-outer **Virtual
   Network Identifier** (VNI) lookup (implementation dependent) behind the
-  Appliance.  If there is no match, the direction is **Inbound**.
+  Appliance.  If there is no match, the direction is **Inbound**. If it matches with a reserved VNI, then the direction is Outbound.
 - **ENI selection**. Outbound uses source-MAC, Inbound uses destination-MAC
 - **SLB decap** if packet was encapped by **Software Load Balancer** (SLB).
 - **Decap VNET** Generic Routing Encapsulation (GRE) key
