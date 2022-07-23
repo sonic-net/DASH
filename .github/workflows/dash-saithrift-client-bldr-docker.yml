@@ -1,31 +1,30 @@
-name: DASH-docker-saithrift-client-image
+name: DASH-docker-saithrift-client-bldr-image
 
 on:
   push:
     branches: [ "**" ]
     paths:
-      - '.github/workflows/dash-saithrift-client-docker.yml'
+      - '.github/workflows/dash-saithrift-client-bldr-docker.yml'
+      - '.github/workflows/dash-saithrift-client-bldr-docker.yml'
       - 'dash-pipeline/Makefile'
       - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-bldr'
       - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client-bldr'
-      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
     branches: [ "main" ]
     paths:
-      - '.github/workflows/dash-saithrift-client-docker.yml'
+      - '.github/workflows/dash-saithrift-client-bldr-docker.yml'
       - 'dash-pipeline/Makefile'
       - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-bldr'
       - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client-bldr'
-      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build dash-saithrift-client-image
+    name: Build dash-saithrift-client-bldr-image
     runs-on: ubuntu-20.04
     env:
       docker_fg_flags: -u root --privileged
@@ -48,4 +47,4 @@ jobs:
     - name: Generate SAI-Thrift client and server code and libs
       run:  DOCKER_FLAGS=$docker_fg_flags make saithrift-server
     - name: Build saithrift client docker image 
-      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saithrift-client
+      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saithrift-client-bldr

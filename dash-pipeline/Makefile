@@ -1,7 +1,7 @@
 SHELL = /bin/bash
 
 # "All" type targets for convenience
-all:fix-perms p4 sai saithrift-server test
+all:fix-perms p4 sai saithrift-server docker-saithrift-client test
 
 run-all-tests:run-test deploy-ixiac run-saithrift-client-tests
 
@@ -33,11 +33,15 @@ DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2-bldr:220630
 # Runs bmv2 process - consider slimmer if don't need sai/p4rt clients inside
 DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 
-# Compiles sai headers, libsai, saithrift client-server
+# Compiles sai headers, libsai, saithrift server & client/server libs
 DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220719
 
-# Compiles sai headers, libsai, saithrift client-server
-DOCKER_SAITHRIFT_CLIENT_IMG ?=chrissommers/dash-saithrift-client:220718
+# Base image with test frameworks, DASH client libs not installed
+DOCKER_SAITHRIFT_CLIENT_BLDR_IMG ?=chrissommers/dash-saithrift-client-bldr:220723
+
+# Client image built locally with saithrift client libs + PTF & Pytest frameworks
+# TODO: consider some other tagging scheme
+DOCKER_SAITHRIFT_CLIENT_IMG ?= local/dash-saithrift-client:latest
 
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
@@ -299,7 +303,7 @@ docker-pull-bmv2-bldr:
 ###############################
 docker-saithrift-bldr:
 	docker build \
-		-f dockerfiles/Dockerfile.saithrift \
+		-f dockerfiles/Dockerfile.saithrift-bldr \
 	    -t $(DOCKER_SAITHRIFT_BLDR_IMG) \
 	    --build-arg user=$(USER) \
 	    --build-arg uid=$(shell id -u) \
@@ -313,19 +317,37 @@ docker-publish-saithrift-bldr:
 
 docker-pull-saithrift-bldr:
 	docker pull $(DOCKER_SAITHRIFT_BLDR_IMG)
+
 ###############################
-docker-saithrift-client:
+# Builder, has base packages to make client docker
+docker-saithrift-client-bldr:
 	docker build \
-		-f dockerfiles/Dockerfile.saithrift-client \
-	    -t $(DOCKER_SAITHRIFT_CLIENT_IMG) \
+		-f dockerfiles/Dockerfile.saithrift-client-bldr \
+	    -t $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG) \
 	    --build-arg user=$(USER) \
 	    --build-arg uid=$(shell id -u) \
 	    --build-arg guid=$(shell id -g) \
 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
 	    --build-arg available_processors=$(shell nproc) \
-		SAI/
+		SAI
 
-DOCKER_RUN_SAITHRIFT_BLDR_CLIENT=\
+docker-pull-saithrift-client-bldr:
+	docker pull $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG)
+
+docker-publish-saithrift-client-bldr:
+	echo "TO DO when we have a proper repository"
+
+###############################
+		
+# Client image, rebuild any time SAI interface changes
+# TODO - add sai header (inc/ and experimental) dependencies
+docker-saithrift-client:
+	docker build \
+		-f dockerfiles/Dockerfile.saithrift-client \
+	    -t $(DOCKER_SAITHRIFT_CLIENT_IMG) \
+		SAI
+
+DOCKER_RUN_SAITHRIFT_CLIENT=\
 	docker run \
 	-u root \
 	-v $(PWD)/SAI/saithrift/:/saithrift-host/ \
@@ -335,22 +357,15 @@ DOCKER_RUN_SAITHRIFT_BLDR_CLIENT=\
 	$(DOCKER_FLAGS) \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG)
 
-
 run-saithrift-client-bash:
-	$(DOCKER_RUN_SAITHRIFT_BLDR_CLIENT) /bin/bash
+	$(DOCKER_RUN_SAITHRIFT_CLIENT) /bin/bash
 
 run-saithrift-pytests:deploy-ixiac
-	$(DOCKER_RUN_SAITHRIFT_BLDR_CLIENT) /saithrift-host/run-saithrift-pytests.sh
+	$(DOCKER_RUN_SAITHRIFT_CLIENT) /saithrift-host/run-saithrift-pytests.sh
 
 # Note - if add ixia-c usage to PTF tests, add dependency deploy-ixiac
 run-saithrift-ptftests:
-	$(DOCKER_RUN_SAITHRIFT_BLDR_CLIENT) /saithrift-host/run-saithrift-ptftests.sh
-
-docker-publish-saithrift-client:
-	echo "TO DO when we have a proper repository"
-
-docker-pull-saithrift-client:
-	docker pull $(DOCKER_SAITHRIFT_CLIENT_IMG)
+	$(DOCKER_RUN_SAITHRIFT_CLIENT) /saithrift-host/run-saithrift-ptftests.sh
 
 ###############################
 

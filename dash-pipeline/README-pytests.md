@@ -34,7 +34,7 @@ python -m pytest --markers
 
 <...SKIP built-in markers...>
 ```
-## Using Merkers
+## Using Markers
 ### Run all pytests
 ```
 python -m pytest -s

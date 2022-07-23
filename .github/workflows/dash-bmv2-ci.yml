@@ -57,6 +57,8 @@ jobs:
       run:  DOCKER_FLAGS=$docker_fg_flags make sai
     - name: Generate saithrift-server
       run:  DOCKER_FLAGS=$docker_fg_flags make saithrift-server
+    - name: Generate saithrift-client local docker
+      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saithrift-client
     - name: Pull docker bmv2-bldr image
       run:  make docker-pull-bmv2-bldr
     - name: Build libsai c++ tests
