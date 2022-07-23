@@ -3,6 +3,7 @@
 #include <atomic>
 #include <limits>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <PI/pi.h>
 #include <grpcpp/grpcpp.h>
@@ -195,13 +196,36 @@ bool RemoveFromTable(sai_object_id_t id) {
     return true;
 }
 
-/* [cs] placeholders to satisfy sairpcgen until actual callbacks are written */
+/* TODO [cs] placeholders to satisfy sairpcgen until actual callbacks are written
+ *           Replace with some reasonable minimal code to support PTF tests
+ *           Put in own template files e.g. sai_switch.cpp.j2 sai_switch.h.j2
+ *           Update sai_api_gen.py accordingly.
+ */
 
-sai_switch_api_t sai_switch_api = {
-    .create_switch = (void *)0,
+sai_status_t sai_create_switch_dummy(
+        _Out_ sai_object_id_t *switch_id,
+        _In_ uint32_t attr_count,
+        _In_ const sai_attribute_t *attr_list) {
+
+    *switch_id = 0; // 
+    fprintf(stderr, "sai_create_switch_dummy()\n");
+    return SAI_STATUS_SUCCESS;
+}
+
+sai_status_t sai_get_switch_attribute_dummy(
+        _In_ sai_object_id_t switch_id,
+        _In_ uint32_t attr_count,
+        _Inout_ sai_attribute_t *attr_list) {
+
+    fprintf(stderr, "sai_get_switch_attribute_dummy()\n");
+    return SAI_STATUS_SUCCESS;
+}
+
+sai_switch_api_t sai_switch_api_impl = {
+    .create_switch = sai_create_switch_dummy,
     .remove_switch = (void *)0,
     .set_switch_attribute = (void *)0,
-    .get_switch_attribute = (void *)0,
+    .get_switch_attribute = sai_get_switch_attribute_dummy,
     .get_switch_stats = (void *)0,
     .get_switch_stats_ext = (void *)0,
     .clear_switch_stats = (void *)0,
@@ -227,7 +251,7 @@ sai_status_t sai_api_query(
 
         switch(api) {
         case SAI_API_SWITCH:
-            *api_method_table = (void *)&sai_switch_api;
+            *api_method_table = (void *)&sai_switch_api_impl;
             break;
         
         case SAI_API_DASH:

@@ -1,6 +1,9 @@
 SHELL = /bin/bash
 
+# "All" type targets for convenience
 all:fix-perms p4 sai saithrift-server test
+
+run-all-tests:run-test deploy-ixiac run-saithrift-client-tests
 
 .PHONY:clean
 clean: fix-perms kill-all p4-clean sai-clean test-clean network-clean saithrift-server-clean
@@ -236,7 +239,8 @@ sai-test:SAI/SAI SAI/lib/libsai.so
 	    make
 
 timeout?=5
-run-all-tests:run-test run-ixiac-test run-saithrift-client-tests
+# No longer call run-ixiac-test from host; instead it's another pytest
+# run-all-tests:run-test run-ixiac-test run-saithrift-client-tests
 
 .PHONY:run-test
 run-test:run-sai-test
@@ -270,7 +274,7 @@ init-switch:
 	done; \
 	docker exec -w /tests/init_switch simple_switch-$(USER) ./init_switch
 
-run-saithrift-client-tests: run-saithrift-pytests
+run-saithrift-client-tests: run-saithrift-pytests run-saithrift-ptftests
 
 ###############################
 # DOCKER BUILD/PUBLISH TARGETS
@@ -337,6 +341,9 @@ run-saithrift-client-bash:
 
 run-saithrift-pytests:
 	$(DOCKER_RUN_SAITHRIFT_BLDR_CLIENT) /saithrift-host/run-saithrift-pytests.sh
+
+run-saithrift-ptftests:
+	$(DOCKER_RUN_SAITHRIFT_BLDR_CLIENT) /saithrift-host/run-saithrift-ptftests.sh
 
 docker-publish-saithrift-client:
 	echo "TO DO when we have a proper repository"
@@ -435,7 +442,7 @@ network-clean:
 ###############################
 
 run-ixiac-test: ixiac-prereq init-switch
-	python3 -m pytest ../test/test-cases/bmv2_model/ -s
+	# python3 -m pytest ../test/test-cases/bmv2_model/ -s
 
 ixiac-prereq: install-python-modules deploy-ixiac
 

@@ -1,5 +1,6 @@
 *.bkp
 *.log
+*.pcap
 __pycache__/
 .pytest_cache/
 dash-pipeline/bmv2/dash_pipeline.bmv2/

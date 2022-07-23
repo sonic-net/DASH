@@ -23,6 +23,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
   - [I feel lucky!](#i-feel-lucky)
   - [Build Artifacts](#build-artifacts)
   - [Run bmv2 software switch](#run-bmv2-software-switch)
+  - [Run saithrift server](#run-saithrift-server)
   - [Run tests](#run-tests)
   - [Cleanup](#cleanup)
 - [Installing Prequisites](#installing-prequisites)
@@ -62,7 +63,7 @@ See [Installing Prequisites](#installing-prequisites) for details.
 * git - tested with version 2.25.1
 * docker
 * [docker-compose](#install-docker-compose) (**1.29.2 or later**)
-* python3, pip3
+* **TODO** (Might not be needded any more) python3, pip3
 
 ## Clone this repo
 ```
@@ -84,7 +85,7 @@ make clean && make all run-switch
 ```
 In second terminal (console will print saithrift server logs):
 ```
-make clean && make all network run-switch
+make run-saithrift-server
 ```
 In third terminal (console will print test results):
 ```
@@ -101,21 +102,31 @@ make all
 ```
 
 ## Run bmv2 software switch
-This will also automatically ceate `veth` pairs as needed.
+This will also automatically create `veth` pairs as needed.
 ```
 make run-switch     # willrun in foreground with logging
 ```
-
+## Run saithrift server
+```
+make run-saithrift-server
+```
+This spins up another container which listens on port `9092` for saithrift messages, then translates these into P4Runtime messages and sends to the bmv2 switch on its port `9559`/
 ## Run tests
 Use a different terminal:
 ```
-make run-test          # Simple SAI table accessor, no traffic
+make run-test          # Simple SAI table accessors, no traffic
 ```
 Follow instructions for [Install docker-compose](#install-docker-compose), then:
 ```
-make run-ixiac-test    # Uses SW traffic-generator
+make run-saithrift-pytests    # Runs Pytests tests which exercise sai-thrift and sends/receives packets
+make run-saithrift-ptftests   # Runs PTF tests which exercise sai-thrift and sends/receives packets
 ```
-The setup for ixia-c traffic tests is as follows. More info is available [here](README-dash-workflows#about-snappi-and-ixia-c-traffic-generator).
+
+The tests may use a combination of SW packet generators:
+* Scapy - well-known packet-at-a-time SW traffic generator/capture
+* ixia-c - performant flow-based packet genrator/capture
+* 
+The setup for ixia-c -based traffic tests is as follows. More info is available [here](README-dash-workflows#about-snappi-and-ixia-c-traffic-generator).
 
 ![ixia-c setup](../test/third-party/traffic_gen/deployment/ixia-c.drawio.svg)
 
@@ -125,8 +136,10 @@ This is a summary of most-often used commands, see [README-dash-workflows.md](RE
 
 * `CTRL-c` - kill the switch container from within the iteractive terminal
 * `make kill-switch` - kills the switch container from another terminal
-* `make network-clean` - delete veth pairs
+* `make kill-saithrift-server` - kills the switch container from another terminal
 * `make undeploy-ixiac` - kill ixia-c containers
+* `make kill-all` - kill all the running containers above
+* `make network-clean` - delete veth pairs
 * `make p4-clean` - delete P4 artifacts
 * `make sai-clean` - delete SAI artifacts. Do this before committing code, see [Here](README-dash-workflows.md#typical-workflow-committing-new-code---ignoring-sai-submodule) 
 * `make clean` - does all of the above
@@ -145,6 +158,8 @@ See:
 * https://docs.docker.com/desktop/linux/install/
 
 ## Install Python 3
+>**TODO:** this might be obsolete since all tools run in containers now. Try skipping to see if its not needed.
+
 This is probably already installed in your Linux OS, but if not:
 
 See:
@@ -155,6 +170,8 @@ sudo apt install -y python3
 ```
   
 ## Install pip3
+>**TODO:** this might be obsolete since all tools run in containers now. Try skipping to see if its not needed.
+
 See:
 * https://pip.pypa.io/en/latest/installation/
 

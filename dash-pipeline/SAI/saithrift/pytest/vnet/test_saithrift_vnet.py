@@ -1,6 +1,6 @@
 import pytest
 import snappi
-import scapy
+from scapy.all import *
 
 from sai_thrift.sai_headers import *
 from sai_thrift.sai_adapter import *
@@ -36,7 +36,19 @@ def test_sai_thrift_create_outbound_eni_to_vni_entry(saithrift_client):
                                                                 vni=vni)
         assert(status == SAI_STATUS_SUCCESS)     
 
-        # TODO packet testing using scapy or snappi                   
+        # TODO form a packet related to dataplane config
+
+        # TODO this is using raw scapy; prefer to use snappi or a wrapper for scapy or snappi
+        udp_pkt = Ether()/IP()/UDP()
+        # TODO expected packet might be different
+        udp_pkt_exp = udp_pkt
+        print("\nSending packet...", udp_pkt.__repr__())
+        sendp(udp_pkt, iface='veth0')
+
+        # TODO need simple pkt verify for Pytest similar to PTF helper
+        print("\nTODO: Verifying packet...", udp_pkt_exp.__repr__())
+        # verify_packets(self, udp_pkt_exp, [0])
+        print ("test_sai_thrift_create_outbound_eni_to_vni_entry OK")
 
         # Delete in reverse order
 

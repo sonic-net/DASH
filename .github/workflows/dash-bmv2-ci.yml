@@ -46,25 +46,29 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Pull docker p4c image
-      run: make docker-pull-dash-p4c
+      run:  make docker-pull-dash-p4c
     - name: Build P4 software switch (bmv2) and P4Info
-      run: DOCKER_FLAGS=$docker_fg_flags make p4
+      run:  DOCKER_FLAGS=$docker_fg_flags make p4
     - name: Install SAI submodule
-      run: git submodule update --init
+      run:  git submodule update --init
     - name: Pull docker saithrift-bldr image
-      run: make docker-pull-saithrift-bldr
+      run:  make docker-pull-saithrift-bldr
     - name: Generate SAI API
-      run: DOCKER_FLAGS=$docker_fg_flags make sai
+      run:  DOCKER_FLAGS=$docker_fg_flags make sai
     - name: Pull docker bmv2-bldr image
-      run: make docker-pull-bmv2-bldr
+      run:  make docker-pull-bmv2-bldr
     - name: Build libsai c++ tests
-      run: DOCKER_FLAGS=$docker_fg_flags make test
+      run:  DOCKER_FLAGS=$docker_fg_flags make test
     - name: Prepare network
-      run: DOCKER_FLAGS=$docker_fg_flags make network
+      run:  DOCKER_FLAGS=$docker_fg_flags make network
     - name: Run P4 software switch (bmv2) with P4Runtime
-      run: DOCKER_FLAGS=$docker_bg_flags make run-switch
-    - name: Test SAI library
-      run: DOCKER_FLAGS=$docker_fg_flags make run-test
-    - name: Ixia-c Traffic Generator test
-      run:  make run-ixiac-test
+      run:  DOCKER_FLAGS=$docker_bg_flags make run-switch
+    - name: Test SAI library over P4RT to switch
+      run:  DOCKER_FLAGS=$docker_fg_flags make run-test
+    - name: Run saithrift server
+      run:  DOCKER_FLAGS=$docker_bg_flags make run-saithrift-server
+    - name: Run PTF Tests
+      run:  DOCKER_FLAGS=$docker_fg_flags make run-saithrift-ptftests
+    - name: Run Pytests
+      run:  DOCKER_FLAGS=$docker_fg_flags make run-saithrift-pytests
       
