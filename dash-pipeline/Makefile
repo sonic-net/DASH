@@ -339,9 +339,10 @@ DOCKER_RUN_SAITHRIFT_BLDR_CLIENT=\
 run-saithrift-client-bash:
 	$(DOCKER_RUN_SAITHRIFT_BLDR_CLIENT) /bin/bash
 
-run-saithrift-pytests:
+run-saithrift-pytests:deploy-ixiac
 	$(DOCKER_RUN_SAITHRIFT_BLDR_CLIENT) /saithrift-host/run-saithrift-pytests.sh
 
+# Note - if add ixia-c usage to PTF tests, add dependency deploy-ixiac
 run-saithrift-ptftests:
 	$(DOCKER_RUN_SAITHRIFT_BLDR_CLIENT) /saithrift-host/run-saithrift-ptftests.sh
 
