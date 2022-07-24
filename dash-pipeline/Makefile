@@ -228,18 +228,18 @@ saithrift-server-clean:
 # SAI TEST TARGETS
 ###############################
 
-.PHONY:test sai-test
-test:sai-test
+.PHONY:test libsai-test
+test:libsai-test
 
 test-clean:
-	make -C tests clean
+	make -C tests/libsai clean
 
 
-.PHONY:sai-test
-sai-test:SAI/SAI SAI/lib/libsai.so
+.PHONY:libsai-test
+libsai-test:SAI/SAI SAI/lib/libsai.so
 	$(DOCKER_RUN) \
 	    --name dash-build-test-$(USER) \
-		-w /tests  $(DOCKER_BMV2_BLDR_IMG) \
+		-w /tests/libsai  $(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
 timeout?=5
@@ -247,8 +247,8 @@ timeout?=5
 # run-all-tests:run-test run-ixiac-test run-saithrift-client-tests
 
 .PHONY:run-test
-run-test:run-sai-test
-run-sai-test:
+run-test:run-libsai-test
+run-libsai-test:
 	# Ensure P4Runtime server is listening
 	t=$(timeout); \
 	while [ $${t} -ge 1 ]; do \
@@ -259,10 +259,10 @@ run-sai-test:
 			t=`expr $$t - 1`; \
 		fi; \
 	done; \
-	docker exec -w /tests/vnet_out simple_switch-$(USER) ./vnet_out
+	docker exec -w /tests/libsai/vnet_out simple_switch-$(USER) ./vnet_out
 
 # Make sure we have executable
-tests/init_switch/init_switch:sai-test
+tests/init_switch/init_switch:libsai-test
 
 .PHONY:init-switch
 init-switch:
