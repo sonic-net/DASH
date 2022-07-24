@@ -329,7 +329,7 @@ docker-saithrift-client-bldr:
 	    --build-arg guid=$(shell id -g) \
 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
 	    --build-arg available_processors=$(shell nproc) \
-		SAI
+		./tests
 
 docker-pull-saithrift-client-bldr:
 	docker pull $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG)
