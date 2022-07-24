@@ -71,10 +71,10 @@ jobs:
       run:  DOCKER_FLAGS=$docker_fg_flags make run-test
     - name: Run saithrift server
       run:  DOCKER_FLAGS=$docker_bg_flags make run-saithrift-server
-    - name: Deploy ixia-c Traffic Generator
-      run:  DOCKER_FLAGS=$docker_fg_flags make deploy-ixiac
     - name: Run PTF Tests
       run:  DOCKER_FLAGS=$docker_fg_flags make run-saithrift-ptftests
+    - name: Deploy ixia-c Traffic Generator
+      run:  DOCKER_FLAGS=$docker_fg_flags make deploy-ixiac
     - name: Run Pytests
       run:  DOCKER_FLAGS=$docker_fg_flags make run-saithrift-pytests
       
