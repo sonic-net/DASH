@@ -278,7 +278,7 @@ init-switch:
 	done; \
 	docker exec -w /tests/init_switch simple_switch-$(USER) ./init_switch
 
-run-saithrift-client-tests: run-saithrift-pytests run-saithrift-ptftests
+run-saithrift-client-tests: run-saithrift-ptftests run-saithrift-pytests
 
 ###############################
 # DOCKER BUILD/PUBLISH TARGETS
@@ -376,7 +376,7 @@ run-saithrift-ptftests:
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
 	-w /tests/ \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
-	./saithrift/run-saithrift-pytests.sh
+	./saithrift/run-saithrift-ptftests.sh
 
 # Run "dev" PTF tests mounted from host
 # Note - if add ixia-c usage to PTF tests, add dependency deploy-ixiac
@@ -384,7 +384,7 @@ run-saithrift-ptftests-dev:
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
 	-w /tests-dev/ \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
-	./saithrift/run-saithrift-pytests.sh
+	./saithrift/run-saithrift-ptftests.sh
 
 run-saithrift-client-bash:
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
