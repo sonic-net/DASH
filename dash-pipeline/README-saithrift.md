@@ -1,5 +1,11 @@
 - [DASH saithrift client and server](#dash-saithrift-client-and-server)
   - [Overview](#overview)
+  - [TODO](#todo)
+- [Running DASH saithrift tests](#running-dash-saithrift-tests)
+  - [Production - Launch container, run tests in one shot](#production---launch-container-run-tests-in-one-shot)
+  - [Development - Launch container, run tests in one shot](#development---launch-container-run-tests-in-one-shot)
+- [Developer: Run tests selectively from `bash` inside saithrift-client container](#developer-run-tests-selectively-from-bash-inside-saithrift-client-container)
+  - [Select Directory - Container pre-built directory, or mounted from host](#select-directory---container-pre-built-directory-or-mounted-from-host)
 - [Tips and techniques for writing tests](#tips-and-techniques-for-writing-tests)
   - [Workspace File Layout](#workspace-file-layout)
   - [saithrift Python client modules](#saithrift-python-client-modules)
@@ -9,9 +15,45 @@
 ## Overview
 
 **TODO**
+## TODO
+* Select saithrift server IP address to allow running client remotely from target.
+# Running DASH saithrift tests
+## Production - Launch container, run tests in one shot
+This will run all the tests built into the `dash-saithrift-client` docker image. This assumes you've already done `make docker-saithrift-client` which will bundle the current state of the `dash-pipeline/tests` directory into the image.
+```
+make run-saithrift-client-tests       # run all saithrift tests
+make run-saithrift-client-pytests     # run Pytests
+make run-saithrift-client-ptftests    # run PTF tests
+```
+## Development - Launch container, run tests in one shot
+You can run tests based on the current state of the `dash-pipeline/tests/pytests` directory without rebuilding the `saithrift-client` docker image. Instead of running tests built into the container, a host volume is mounted (`dash-pipeline/tests` is mounted to container `/tests-dev`) and tests are run from there. This allows rapid incremental test-case development.
+```
+make run-saithrift-client-dev-tests
+```
+
+**TODO:** - pass params to the container to select tests etc.
+# Developer: Run tests selectively from `bash` inside saithrift-client container
+Enter the container, this will place you in the `/test-dev/` directory of the container which corresponds to the contents of the `DASH/dash-pipline/tests` directory on the host. In this way you can interactively run test-cases while you're editing them.
+```
+make run-saithrift-client-bash 
+root@chris-z4:/tests-dev# 
+```
+The running container is also mounted via `-v $(PWD)/test:/test-dev`  which mounts the current developer workspace into the running container. You can thereby create and edit new tests "live" from a text editor and see the effect inside the container in real-time. Note, the container image also contains the `/tests` directory which was copied into the Docker image when `make docker-saithrift-client` was last run. This means you have a "production" copy of tests as well as live "development" host volume simultaneously in the container.
+
+## Select Directory - Container pre-built directory, or mounted from host
+
+* `cd /test/` - Enter directory which was prebuilt into container image; tests are not modifiable "live" from the host. This is good for canned tests.
+* `cd /test-dev/` - Enter directory which is mounted to `dash-pipeline/tests` from the host allowing live editing in the host and running in the container. This is a convenient developer workflow.
+
+To get the desired subdirectory for Pytests or PTF test, choose the appropriate path, e.g.:
+* `cd /tests/saithrift/pytest`
+* `cd /tests-dev/saithrift/ptf`
+
+See the relevant documentation for running PTF or Pytests using `bash` commands.
+
 
 # Tips and techniques for writing tests
-The following information should apply equally well to writing any tests which utilize saithrift as the client library: PTF, pytests, etc. Please refer to other READMEs for information specific to various frameworks.
+The following information should apply equally well to writing any tests which utilize saithrift as the client library: PTF, Pytests, etc. Please refer to other READMEs for information specific to various frameworks.
 ## Workspace File Layout
 Below is depicted a selected subset of the DASH repo pertinent to understanding source and build artifact locations needed for saithrift test development.
 

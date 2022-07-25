@@ -1,26 +1,7 @@
-# DASH saithrift pytests
-## Production - Launch container, run tests in one shot
-This will run all the tests built into the `dash-saithrift-client` docker image.
-```
-make run-saithrift-client-tests
-```
 
-**TODO:** - pass params to the container to select tests etc.
-# Developer: Run Tests Inside saithrift-client container
-Enter the container, this will place you in the `/saithrift` directory of the continer which corresponds to the contents of the `DASH/dash-pipline/SAI/saithrift` directory when the container *image* was built.
-```
-make run-saithrift-client-bash 
-root@chris-z4:/saithrift-host# 
-```
-The runing container is also mounted via `-v $(PWD)/SAI/saithrift:/saithrift-host`  which mounts the current developer workspace into the running container. You can thereby create and edit new tests "live" from a text editor and see the effect inside the container in real-time.
-
-## Select Directory - Container pre-built directory, or mounted from host
-
-* `cd /saithrift/pytest` - Enter directory which was prebuilt into container image; tests are not modifiable "live" from the host. This is good for canned tests.
-* `cd /saithrift/pytest` - Enter directory which is mounted to `.../saithrift` from the host allowing live editing in the host and running in the container. This is a convenient developer workflow.
-
-# Markers
-## View markers for tests
+# Pytests
+## Markers
+### View markers for tests
 Markers can be used to select different tests, e.g. only bmv2 tests, only vnet tests, etc.
 Custom markers are defined in `pytest.ini` and shown at the top of the list below:
 
@@ -35,20 +16,20 @@ python -m pytest --markers
 
 <...SKIP built-in markers...>
 ```
-## Using Markers
-### Run all pytests
+### Using Markers
+#### Run all pytests
 ```
 python -m pytest -s
 ### Run vnet pytests
 ```
 python -m pytest -s
 
-### Run select pytests
+#### Run select pytests
 In this example we'll run *only* tests marked with `vnet`*
 ```
 python -m pytest -m vnet
 ```
-### Run pytests *except* selected
+#### Run pytests *except* selected
 In this example we'll run all tests *except* tests marked with `vnet`*
 ```
 python -m pytest -m "not vnet"
