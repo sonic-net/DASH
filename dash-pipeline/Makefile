@@ -4,6 +4,8 @@ SHELL = /bin/bash
 all:fix-perms p4 sai saithrift-server docker-saithrift-client test
 
 run-all-tests:run-test deploy-ixiac run-saithrift-client-tests
+run-saithrift-client-tests: run-saithrift-ptftests run-saithrift-pytests
+run-saithrift-client-dev-tests: run-saithrift-dev-ptftests run-saithrift-dev-pytests
 
 .PHONY:clean
 clean: fix-perms kill-all p4-clean sai-clean test-clean network-clean saithrift-server-clean
@@ -243,8 +245,6 @@ libsai-test:SAI/SAI SAI/lib/libsai.so
 	    make
 
 timeout?=5
-# No longer call run-ixiac-test from host; instead it's another pytest
-# run-all-tests:run-test run-ixiac-test run-saithrift-client-tests
 
 .PHONY:run-test
 run-test:run-libsai-test
@@ -277,8 +277,6 @@ init-switch:
 		fi; \
 	done; \
 	docker exec -w /tests/init_switch simple_switch-$(USER) ./init_switch
-
-run-saithrift-client-tests: run-saithrift-ptftests run-saithrift-pytests
 
 ###############################
 # DOCKER BUILD/PUBLISH TARGETS
@@ -363,7 +361,7 @@ run-saithrift-pytests:deploy-ixiac
 	./saithrift/run-saithrift-pytests.sh
 
 # Run "dev" tests mounted from host
-run-saithrift-pytests-dev:deploy-ixiac
+run-saithrift-dev-pytests:deploy-ixiac
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
 	-v $(PWD)/tests/:/tests-dev/ \
 	-w /tests-dev/ \
@@ -380,14 +378,16 @@ run-saithrift-ptftests:
 
 # Run "dev" PTF tests mounted from host
 # Note - if add ixia-c usage to PTF tests, add dependency deploy-ixiac
-run-saithrift-ptftests-dev:
+run-saithrift-dev-ptftests:
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
+	-v $(PWD)/tests/:/tests-dev/ \
 	-w /tests-dev/ \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
 	./saithrift/run-saithrift-ptftests.sh
 
 run-saithrift-client-bash:
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
+	-v $(PWD)/tests/:/tests-dev/ \
 	-w /tests-dev/ \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
 	/bin/bash

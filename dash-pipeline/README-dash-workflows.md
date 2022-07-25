@@ -19,11 +19,12 @@ See also:
     - [Use wireshark to decode P4Runtime messages in the SAI-P4RT adaptor](#use-wireshark-to-decode-p4runtime-messages-in-the-sai-p4rt-adaptor)
   - [Run saithrift-server](#run-saithrift-server)
   - [Build saithrift-client docker image](#build-saithrift-client-docker-image)
+  - [Run All Tests](#run-all-tests)
   - [Run saithrift-client tests](#run-saithrift-client-tests)
-  - [Run simple SAI library test](#run-simple-sai-library-test)
-  - [Run ixia-c traffic-generator test](#run-ixia-c-traffic-generator-test)
-    - [ixia-c components and setup/teardown](#ixia-c-components-and-setupteardown)
-    - [About snappi and ixia-c traffic-generator](#about-snappi-and-ixia-c-traffic-generator)
+  - [Run saithrift-client PTF tests](#run-saithrift-client-ptf-tests)
+  - [Run saithrift-client Pytests](#run-saithrift-client-pytests)
+  - [Run C++ SAI library tests](#run-c-sai-library-tests)
+  - [About snappi and ixia-c traffic-generator](#about-snappi-and-ixia-c-traffic-generator)
       - [Opensource Sites](#opensource-sites)
       - [DASH-specific info](#dash-specific-info)
   - [About Git Submodules](#about-git-submodules)
@@ -102,7 +103,7 @@ make sai-clean
 To ensure the baseline code is restored prior to each run, the modified directories under SAI are deleted, then restored via `git checkout -- <path, path, ...>` . This retrieves the subtrees from the SAI submodule, which is stored intact in the local project's Git repo (e.g. under `DASH/.git/modules/dash-pipeline/SAI/SAI`)
 
 ## Build saithrift-server
-This builds a docker image which contains a saithrift-server daemon, which is linked to the `libsai` library and also includes the SAI-to-P4Runtime adaptor.
+This builds a saithrift-server daemon, which is linked to the `libsai` library and also includes the SAI-to-P4Runtime adaptor. It also builds Python thrift libraries and SAI-thrift libraries.
 ```
 make saithrift-server
 ```
@@ -166,46 +167,46 @@ make kill saithrift-server
 
 ## Build saithrift-client docker image
 ```
-run-saithrift-client-tests
+make docker-saithrift-client
 ```
 This will build a docker image which has all libraries needed to talk to the saithrift-server daemon, including:
 * saithrift client libraries (Python)
 * PTF framework from [OCP SAI repo](https://github.com/opencomputeproject/SAI.git), including all test cases
 * The [PTF repo](https://github.com/p4lang/ptf) imported from p4lang
 * Scapy etc.
+
+It also contains all the artifacts under `tests/` which includes PTF and Pytest test-cases. Thus, it comprises a self-contained test resource with tools, libraries and test scripts.
+## Run All Tests
+```
+make run-all-tests
+```
+This will run all the tests cases for libsai (C++ programs) as well as saithrift (Pytest and PTF). You must have the bmv2 switch and saithrift-server running.
 ## Run saithrift-client tests
-To run all tests which use the thrift-sai interface, execute the following. You must have the bmv2 switch and saithrift-server running.
+To run *all* tests which use the saithrift interface, execute the following. You must have the bmv2 switch and saithrift-server running.
 ```
 make run-saithrift-client-tests
 ```
-This will launch a saithrift-client docker container and execute tests under `SAI/saithrift`, including:
-* Pytests under `SAI/saithrift/pytest` (WIP)
-* PTF Tests under `SAI/saithrift/PTF` (TODO)
-## Run simple SAI library test
+This will launch a saithrift-client docker container and execute tests under `tests/saithrift`, including:
+* Pytests under `tests/saithrift/pytest`
+* PTF Tests under `tests/saithrift/PTF`
+## Run saithrift-client PTF tests
+To run all PTF tests which use the saithrift interface, execute the following. You must have the bmv2 switch and saithrift-server running.
+```
+make run-saithrift-client-ptftests
+```
+This will launch a saithrift-client docker container and execute tests under `tests/saithrift/ptf`.
+## Run saithrift-client Pytests
+To run all Pytests which use the saithrift interface, execute the following. You must have the bmv2 switch and saithrift-server running.
+```
+make run-saithrift-client-pytests
+```
+This will launch a saithrift-client docker container and execute tests under `tests/saithrift/pytests`.
+## Run C++ SAI library tests
 From a different terminal, run SAI client tests. This exercises the `libsai.so` shared library including P4Runtime client adaptor, which communicates to the running `simple_switch_grpc` process over a socket.
 ```
-make run-test
+make run-libsai-test
 ```
-
-## Run ixia-c traffic-generator test
->**TODO:** Replace with suitable Pytests or PTF tests which use saithrift to configure the switch.
-
-Remember to [Install docker-compose](#install-docker-compose).
-
-From a different terminal, run [ixia-c](https://github.com/open-traffic-generator/ixia-c) traffic tests. The first time this runs, it will pull Python packages for the [snappi](https://github.com/open-traffic-generator/snappi) client as well as Docker images for the [ixia-c](https://github.com/open-traffic-generator/ixia-c) controller and traffic engines.
-
-```
-make run-ixiac-test
-```
-### ixia-c components and setup/teardown
-The first time you run ixia-c traffic tests, the `ixiac-prereq` make target will run two dependent targets:
-* `install-python-modules` - downloads and installs snappi Python client libraries
-* `deploy-ixiac` - downloads two docker images (ixia-c controller, and ixia-c traffic engine or TE), then spins up one controller container and two traffic engines.
-
-ixia-c always requires a dedicated CPU core for the receiver, capable of full DPDK performance, but can use dedicated or shared CPU cores for the transmitter and controller, at reduced performance. In this project, two cores total are required: one for the ixia-c receiver, and one shared core which handles the TE transmitters, controller, and all other processes including the P4 BMV2 switch, P4Runtime server, test clients, etc. This accommodates smaller cloud instances like the "free" Azure CI runners provided by Github [described here](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources)
-
-
-### About snappi and ixia-c traffic-generator
+## About snappi and ixia-c traffic-generator
 #### Opensource Sites
 * Vendor-neutral [Open Traffic Generator](https://github.com/open-traffic-generator) model and API
 * [Ixia-c](https://github.com/open-traffic-generator/ixia-c), a powerful traffic generator based on Open Traffic Generator API

@@ -1,5 +1,6 @@
 # DASH saithrift pytests
 ## Production - Launch container, run tests in one shot
+This will run all the tests built into the `dash-saithrift-client` docker image.
 ```
 make run-saithrift-client-tests
 ```
