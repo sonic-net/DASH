@@ -3,8 +3,7 @@
 See also:
 * [README-dash-workflows.md](README-dash-workflows.md) for build workflows and Make targets.
 * [README-dash-ci](README-dash-ci.md) for CI pipelines.
-* [README-dash-docker](README-dash-docke* [README-pytests](README-pytests.md) for Pytest details
-r.md) for Docker usage.
+* [README-dash-docker](README-dash-docker.md) for Docker usage.
 * [README-saithrift](README-saithrift.md) for explanation of the saithrift client-server framework and workflows
 * [README-pytests](README-pytests.md) for Pytest details
 * [README-ptftests](README-ptftests.md) for PTF details
