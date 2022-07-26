@@ -1,4 +1,20 @@
 
+* [README-dash-workflows.md](README-dash-workflows.md) for build workflows and Make targets.
+* [README-saithrift](README-saithrift.md) for saithrift client/server and test workflows.
+* [README-ptftests](README-ptftests.md) for saithrift PTF test-case development and usage.
+
+**Table of Contents**
+- [Pytests](#pytests)
+	- [Markers](#markers)
+		- [View markers for tests](#view-markers-for-tests)
+		- [Using Markers](#using-markers)
+			- [Run all pytests](#run-all-pytests)
+			- [Run select pytests](#run-select-pytests)
+			- [Run pytests *except* selected](#run-pytests-except-selected)
+		- [Run pytests - complex selection](#run-pytests---complex-selection)
+- [Debugging](#debugging)
+	- [View thrift protocol using tcpdump](#view-thrift-protocol-using-tcpdump)
+	- [View thrift protocol using Wireshark](#view-thrift-protocol-using-wireshark)
 # Pytests
 ## Markers
 ### View markers for tests

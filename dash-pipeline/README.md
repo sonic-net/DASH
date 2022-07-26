@@ -4,9 +4,9 @@ See also:
 * [README-dash-workflows.md](README-dash-workflows.md) for build workflows and Make targets.
 * [README-dash-ci](README-dash-ci.md) for CI pipelines.
 * [README-dash-docker](README-dash-docker.md) for Docker usage.
-* [README-saithrift](README-saithrift.md) for explanation of the saithrift client-server framework and workflows
-* [README-pytests](README-pytests.md) for Pytest details
-* [README-ptftests](README-ptftests.md) for PTF details
+* [README-saithrift](README-saithrift.md) for saithrift client/server and test workflows.
+* [README-ptftests](README-ptftests.md) for saithrift PTF test-case development and usage.
+* [README-pytests](README-pytests.md) for saithrift Pytest test-case development and usage.
 # DASH Pipeline
 This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://github.com/p4lang/behavioral-model) from [p4lang](https://github.com/p4lang). It includes the P4 program which models the DASH overlay dataplane; Dockerfiles; build and test infrastructure; and CI (Continuous Integration) spec files.
 
@@ -96,34 +96,6 @@ make run-all-tests clean
 ```
 The final `clean` above will kill the switch, delete artifacts and veth pairs.
 
-Below we break down the steps in more detail.
-
-## Build Artifacts
-```
-make clean # optional, as needed
-make all
-```
-
-## Run bmv2 software switch
-This will also automatically create `veth` pairs as needed.
-```
-make run-switch     # willrun in foreground with logging
-```
-## Run saithrift server
-```
-make run-saithrift-server
-```
-This spins up another container which listens on port `9092` for saithrift messages, then translates these into P4Runtime messages and sends to the bmv2 switch on its port `9559`/
-## Run tests
-Use a different terminal:
-```
-make run-test          # Simple SAI table accessors, no traffic
-```
-Follow instructions for [Install docker-compose](#install-docker-compose), then:
-```
-make run-saithrift-pytests    # Runs Pytests tests which exercise sai-thrift and sends/receives packets
-make run-saithrift-ptftests   # Runs PTF tests which exercise sai-thrift and sends/receives packets
-```
 
 The tests may use a combination of SW packet generators:
 * Scapy - well-known packet-at-a-time SW traffic generator/capture
@@ -133,22 +105,17 @@ The setup for ixia-c -based traffic tests is as follows. More info is available 
 
 ![ixia-c setup](../test/third-party/traffic_gen/deployment/ixia-c.drawio.svg)
 
-## Cleanup
 
+## Cleanup
 This is a summary of most-often used commands, see [README-dash-workflows.md](README-dash-workflows.md) for more details.
 
 * `CTRL-c` - kill the switch container from within the iteractive terminal
-* `make kill-switch` - kills the switch container from another terminal
-* `make kill-saithrift-server` - kills the switch container from another terminal
-* `make undeploy-ixiac` - kill ixia-c containers
-* `make kill-all` - kill all the running containers above
-* `make network-clean` - delete veth pairs
-* `make p4-clean` - delete P4 artifacts
-* `make sai-clean` - delete SAI artifacts. Do this before committing code, see [Here](README-dash-workflows.md#typical-workflow-committing-new-code---ignoring-sai-submodule) 
-* `make clean` - does all of the above
+* `make kill-all` - kill all the running containers
+* `make clean` - clean up everything, kill containers
 
+## More Make Targets
+See [README-dash-workflows.md](README-dash-workflows.md) for build workflows and Make targets. There are many fine-grained Make targets to control your development workflow.
 # Installing Prequisites
-
 ## Install git
 ```
 sudo apt install -y git

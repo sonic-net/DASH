@@ -3,7 +3,7 @@ SHELL = /bin/bash
 # "All" type targets for convenience
 all:fix-perms p4 sai saithrift-server docker-saithrift-client test
 
-run-all-tests:run-test deploy-ixiac run-saithrift-client-tests
+run-all-tests:run-libsai-test deploy-ixiac run-saithrift-client-tests
 run-saithrift-client-tests: run-saithrift-ptftests run-saithrift-pytests
 run-saithrift-client-dev-tests: run-saithrift-dev-ptftests run-saithrift-dev-pytests
 
@@ -246,8 +246,7 @@ libsai-test:SAI/SAI SAI/lib/libsai.so
 
 timeout?=5
 
-.PHONY:run-test
-run-test:run-libsai-test
+.PHONY:run-libsai-test
 run-libsai-test:
 	# Ensure P4Runtime server is listening
 	t=$(timeout); \

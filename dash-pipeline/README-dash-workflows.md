@@ -2,17 +2,28 @@ See also:
 * [README.md](README.md) Top-level README for dash-pipeline
 * [README-dash-ci](README-dash-ci.md) for CI pipelines.
 * [README-dash-docker](README-dash-docker.md) for Docker usage.
+* [README-saithrift](README-saithrift.md) for saithrift client/server and test workflows.
+* [README-ptftests](README-ptftests.md) for saithrift PTF test-case development and usage.
+* [README-pytests](README-pytests.md) for saithrift Pytest test-case development and usage.
 
 **Table of Contents**
+- [Make Target Summary](#make-target-summary)
+  - [Make "ALL" Targets](#make-all-targets)
+  - [Build Artifacts](#build-artifacts)
+  - [Launch Daemons/Containers](#launch-daemonscontainers)
+  - [Run Tests](#run-tests)
 - [Detailed DASH Behavioral Model Build Workflow](#detailed-dash-behavioral-model-build-workflow)
   - [TODO](#todo)
   - [Docker Image(s)](#docker-images)
   - [Build Workflow Diagram](#build-workflow-diagram)
+  - [Make All](#make-all)
+  - [Cleanup](#cleanup)
+  - [Stop Containers](#stop-containers)
   - [Compile P4 Code](#compile-p4-code)
   - [Build libsai.so adaptor library](#build-libsaiso-adaptor-library)
     - [Restore SAI Submodule](#restore-sai-submodule)
   - [Build saithrift-server](#build-saithrift-server)
-  - [Build SAI c++ client test program(s)](#build-sai-c-client-test-programs)
+  - [Build libsai C++ client test program(s)](#build-libsai-c-client-test-programs)
   - [Create veth pairs for bmv2](#create-veth-pairs-for-bmv2)
   - [Run software switch](#run-software-switch)
   - [Initialize software switch](#initialize-software-switch)
@@ -21,10 +32,11 @@ See also:
   - [Build saithrift-client docker image](#build-saithrift-client-docker-image)
   - [Run All Tests](#run-all-tests)
   - [Run saithrift-client tests](#run-saithrift-client-tests)
-  - [Run saithrift-client PTF tests](#run-saithrift-client-ptf-tests)
-  - [Run saithrift-client Pytests](#run-saithrift-client-pytests)
-  - [Run C++ SAI library tests](#run-c-sai-library-tests)
-  - [About snappi and ixia-c traffic-generator](#about-snappi-and-ixia-c-traffic-generator)
+    - [Run saithrift-client PTF tests](#run-saithrift-client-ptf-tests)
+    - [Run saithrift-client Pytests](#run-saithrift-client-pytests)
+  - [Run libsai C++ tests](#run-libsai-c-tests)
+  - [Start/Stop ixia-c Traffic Generator](#startstop-ixia-c-traffic-generator)
+    - [About snappi and ixia-c traffic-generator](#about-snappi-and-ixia-c-traffic-generator)
       - [Opensource Sites](#opensource-sites)
       - [DASH-specific info](#dash-specific-info)
   - [About Git Submodules](#about-git-submodules)
@@ -37,6 +49,44 @@ See also:
   - [Docker Image Versioning](#docker-image-versioning)
     - [Project-Specific Images](#project-specific-images)
     - [Third-party Docker Images](#third-party-docker-images)
+# Make Target Summary
+The tables below summarize the most important `make` targets for easy reference. You can click on a link to jump to further explanations. Not all make targets are shown. See the [Makefile](Makefile) to learn more.
+
+Dockerfile build targets are separately described in [README-dash-docker](README-dash-docker.md) since they are mainly for infrastructure and generally not part of day-to-day code and test-case development. The one exception is the [docker-saithrift-client](#build-saithrift-client-docker-image) target. 
+## Make "ALL" Targets
+| Target(s)              | Description                                                                  |
+| ---------------------- | --------------------------------------------------|
+| [all](#make-all)       | Builds all artifacts except Docker "builder" images.                     |
+| [clean](#cleanup)      | Deletes built artifacts and restores distro directories to clean state                    |
+| [kill-all](#stop-containers)             | Stops all running containers                      |
+| [run-all-tests](#run-all-tests)          | Run all tests under `dash-pipeline/tests`         |
+
+## Build Artifacts 
+| Target(s)              | Description                                                                  |
+| ---------------------- | --------------------------------------------------|
+| [p4](#compile-p4-code) <br>[p4-clean](#compile-p4-code) | Compiles P4 code and produces both bmv2 and P4Info `.json` files.<br>Delete p4 artifacts |
+| [sai](#build-libsaiso-adaptor-library)<br>[sai-clean](#build-libsaiso-adaptor-library)| Auto-generate sai headers, sai adaptor code and compile into `libsai.so` library<br>Cleans up artifacts and restores SAI submodule |
+| [test](build-libsai-c-client-test-programs) | Compile C++ unit tests under [tests/libsai](tests/libsai)
+| [saithrift-server](#build-saithrift-server) | Auto-generate the saithrift client-server framework and libraries |
+| [docker-saithrift-client](#build-saithrift-client-docker-image) | Build a docker image containing tools, libraries and saithrift test-cases for PTF and Pytest
+
+## Launch Daemons/Containers
+| Target(s)              | Description                                                                  |
+| ---------------------- | --------------------------------------------------|
+| [run-switch](#run-software-switch)<br>[kill-switch](#run-software-switch) | Run a docker container with bmv2 dataplane & P4Runtime server<br>Stop the bmv2 container
+| [run-saithrift-server](#run-saithrift-server)<br>[kill-saithrift-server](#run-saithrift-server) | Run a saithrift server which translates SAI over thrift into into P4Runtime<br>Stop the saithrift server container|
+| [deploy-ixiac](#startstop-ixia-c-traffic-generator)<br>[undeploy-ixiac](#startstop-ixia-c-traffic-generator)  | Start ixia-c containers (done automatically when running tests)<br>Stop ixia-c containers (called by `kill-all`)
+
+## Run Tests
+| Target(s)              | Description                                                                  |
+| ---------------------- | --------------------------------------------------|
+| [run-libsai-test](run-libsai-c-tests)     | Run tests under [tests/libsai](tests/libsai)       |
+| [run-saithrift-ptftests](#run-saithrift-client-ptf-tests) | Run PTF tests under [tests/saithrift/ptf](tests/libsai/ptf) using tests built into [docker-saithrift-client](#build-saithrift-client-docker-image) image
+| [run-saithrift-pytests](#run-saithrift-client-pytests) | Run Pytests under [tests/saithrift/pytest](tests/libsai/pytest) using tests built into [docker-saithrift-client](#build-saithrift-client-docker-image) image
+|[run-saithrift-client-tests](#run-saithrift-client-tests) | Run all saithrift tests |
+| [run-saithrift-ptftests](#run-saithrift-client-ptf-tests) <br> [run-saithrift-dev-pytests](#run-saithrift-client-dev-pytests) <br> [run-saithrift-client-dev-tests](#run-saithrift-client-dev-tests) | Like the three targets above. above, but run tests from host directory `tests/saithrift` instead of tests built into the `saithrift-client` container for faster test-case development code/test cycles.
+
+
 # Detailed DASH Behavioral Model Build Workflow
 
 This explains the various build steps in more details. The CI pipeline does most of these steps as well. All filenames and directories mentioned in the sections below are relative to the `dash-pipeline` directory (containing this README) unless otherwise specified. 
@@ -46,7 +96,7 @@ The workflows described here are primarily driven by a [Makefile](Makefile) and 
 * Automated script-based execution in a development or production environment, e.g. regression testing
 * Cloud-based CI (Continuous Integration) build and test, every time code is pushed to GitHub or a Pull Request is submitted to the upstream repository.
 
-See the diagram below. You can read the [dockerfiles](dockerfiles) and all `Makefiles` in various directories to get a deeper understanding of the build process.
+See the [Diagram](#build-workflow-diagram) below. You can read the [dockerfiles](dockerfiles) and all `Makefiles` in various directories to get a deeper understanding of the build process. You generally use the targets from the main [Makefile](Makefile) and not any subordinate ones.
 ## TODO
 * Document specific task workflows and required build steps and dependencies, e.g.:
   * P4 code development
@@ -64,7 +114,30 @@ See the diagram below. You can read the [Dockerfile](Dockerfile) and all `Makefi
 ## Build Workflow Diagram
 
 ![dash-p4-bmv2-thrift-workflow](images/dash-p4-bmv2-thrift-workflow.svg)
-
+## Make All
+This make target will build all the artifacts from source:
+* Compile P4 code
+* Auto-generate DASH SAI API header files based on P4Info from previous step
+* Compile `libsai` for dash including SAI-to-P4RUntime adaptor
+* Compile functional tests written in C++ to verify sai (under `dash-pipeline/tests/libsai`)
+* Auto-generate the saithrift server and client framework (server daemon + client libraries) based on the DASH SAI headers
+* Build a saithrift-client Docker image containing all needed tools and test suites
+```
+make all
+```
+## Cleanup
+This will delete all built artifacts, restore the SAI submodule and kill all running containers.
+```
+make clean
+```
+## Stop Containers
+This will kill one or all containers:
+```
+make kill-switch             # stop the P4 bmv2 switch
+make kill-saithrift-server   # stop the RPC server
+make undeploy-ixiac          # stop the ixia-c containers
+make kill-all                # all of the above
+```
 ## Compile P4 Code
 ```
 make p4-clean # optional
@@ -80,11 +153,13 @@ The primary outputs of interest are:
 This library is the crucial item to allow integration with a Network Operating System (NOS) like SONiC. It wraps an implementation specific "SDK" with standard Switch Abstraction Interface (SAI) APIs. In this case, an adaptor translates SAI API table/attribute CRUD operations into equivalent P4Runtime RPC calls, which is the native RPC API for bmv2.
 
 ```
-make sai-clean  # optional
-make sai
+make sai-headers     # Auto-generate headers & adaptor code
+make libsai          # Compile into libsai.so
+make sai             # Combines steps above
+make sai-clean       # Clean up artifacts and Git Submodule
 ```
 
-This target generates SAI headers from the P4Info which was described above. It uses [Jinja2](https://jinja.palletsprojects.com/en/3.1.x/) which renders [SAI/templates](SAI/templates) into c++ source code for the SAI headers corresponding to the DASH API as defined in the P4 code. It then compiles this code into a shared library `libsai.so` which will later be used to link to a test server (Thrift) or `syncd` daemon for production.
+These targets generates SAI headers from the P4Info which was described above. It uses [Jinja2](https://jinja.palletsprojects.com/en/3.1.x/) which renders [SAI/templates](SAI/templates) into c++ source code for the SAI headers corresponding to the DASH API as defined in the P4 code. It then compiles this code into a shared library `libsai.so` which will later be used to link to a test server (Thrift) or `syncd` daemon for production.
 
 This consists of two main steps
 * Generate the SAI headers and implementation code via [SAI/generate_dash_api.sh](SAI/generate_dash_api.sh) script, which is merely a wrapper which calls the real workhorse: [SAI/sai_api_gen.py](SAI/sai_api_gen.py). This uses templates stored in [SAI/templates](SAI/templates).
@@ -92,7 +167,7 @@ This consists of two main steps
   Headers are emitted into the imported `SAI` submodule (under `SAI/SAI`) under its `inc`, `meta` and `experimental` directories.
 
   Implementation code for each SAI accessor are emitted into the `SAI/lib` directory.
-* Compile the implementation source code into `libsai.so`, providing the definitive DASH dataplane API. Note this `libsai` makes calls to bmv2's emdedded P4Runtime Server and must be linked with numerous libraries, see `tests/vnet_out/Makefile` to gain insights.
+* Compile the implementation source code into `libsai.so`, providing the definitive DASH dataplane API. Note this `libsai` makes calls to bmv2's emdedded P4Runtime Server and must be linked with numerous libraries, see for example `tests/vnet_out/Makefile` to gain insights.
 
 ### Restore SAI Submodule
 As mentioned above, the `make sai` target generates code into the `SAI` submodule (e.g. at `./SAI/SAI`). This "dirties" what is otherwise a cloned Git repo from `opencomputeproject/SAI`.
@@ -103,11 +178,11 @@ make sai-clean
 To ensure the baseline code is restored prior to each run, the modified directories under SAI are deleted, then restored via `git checkout -- <path, path, ...>` . This retrieves the subtrees from the SAI submodule, which is stored intact in the local project's Git repo (e.g. under `DASH/.git/modules/dash-pipeline/SAI/SAI`)
 
 ## Build saithrift-server
-This builds a saithrift-server daemon, which is linked to the `libsai` library and also includes the SAI-to-P4Runtime adaptor. It also builds Python thrift libraries and SAI-thrift libraries.
+This builds a saithrift-server daemon, which is linked to the `libsai` library and also includes the SAI-to-P4Runtime adaptor. It also builds Python thrift libraries and saithrift libraries.
 ```
 make saithrift-server
 ```
-## Build SAI c++ client test program(s)
+## Build libsai C++ client test program(s)
 This compiles simple libsai client program(s) to verify the libsai-to-p4runtime-to-bmv2 stack. It performs table access(es).
 
 ```
@@ -182,31 +257,46 @@ make run-all-tests
 ```
 This will run all the tests cases for libsai (C++ programs) as well as saithrift (Pytest and PTF). You must have the bmv2 switch and saithrift-server running.
 ## Run saithrift-client tests
-To run *all* tests which use the saithrift interface, execute the following. You must have the bmv2 switch and saithrift-server running.
+To run all "Production" tests which use the saithrift interface, execute the following. The tests are assumed to be built into the `saithrift-client` docker image. See [Running DASH saithrift tests](README-saithrift.md#running-dash-saithrift-tests). You must have the bmv2 switch and saithrift-server running.
 ```
 make run-saithrift-client-tests
 ```
 This will launch a saithrift-client docker container and execute tests under `tests/saithrift`, including:
 * Pytests under `tests/saithrift/pytest`
 * PTF Tests under `tests/saithrift/PTF`
-## Run saithrift-client PTF tests
+### Run saithrift-client PTF tests
 To run all PTF tests which use the saithrift interface, execute the following. You must have the bmv2 switch and saithrift-server running.
 ```
 make run-saithrift-client-ptftests
 ```
 This will launch a saithrift-client docker container and execute tests under `tests/saithrift/ptf`.
-## Run saithrift-client Pytests
+### Run saithrift-client Pytests
 To run all Pytests which use the saithrift interface, execute the following. You must have the bmv2 switch and saithrift-server running.
 ```
 make run-saithrift-client-pytests
 ```
 This will launch a saithrift-client docker container and execute tests under `tests/saithrift/pytests`.
-## Run C++ SAI library tests
-From a different terminal, run SAI client tests. This exercises the `libsai.so` shared library including P4Runtime client adaptor, which communicates to the running `simple_switch_grpc` process over a socket.
+
+You can also run "dev" versions of tests using the following make targets. These use test scripts mounted from the host's filesytem, allowing a faster development workflow. No dockers need to be rebuilt to try out test cases iteratively. Use the following variants of the make targets. See [Development - Launch container, run tests in one shot](#development---launch-container-run-tests-in-one-shot)
+```
+make run-saithrift-client-dev-pytests     # run Pytests from host mount
+make run-saithrift-client-dev-ptftests    # run PTF tests from host mount
+make run-saithrift-client-dev-tests       # run both suites above
+```
+
+## Run libsai C++ tests
+This exercises the `libsai.so` shared library with c++ programs. This tests the SAI API handlers and P4Runtime client adaptor, which communicates to the running `simple_switch_grpc` process over a socket.
 ```
 make run-libsai-test
 ```
-## About snappi and ixia-c traffic-generator
+
+## Start/Stop ixia-c Traffic Generator
+This will start/stop the ixia-c traffic generator, whcih consists of one container for the Controller and one container per Traffic Enginer (1 per port = 2 for DASH).
+```
+make deploy-ixiac    # Start the containers
+make undeploy-ixiac  # Stop the containers
+```
+### About snappi and ixia-c traffic-generator
 #### Opensource Sites
 * Vendor-neutral [Open Traffic Generator](https://github.com/open-traffic-generator) model and API
 * [Ixia-c](https://github.com/open-traffic-generator/ixia-c), a powerful traffic generator based on Open Traffic Generator API
@@ -264,7 +354,7 @@ The sections below discuss version control of critical components.
 ## DASH Repo Versioning
 The DASH GitHub repo, i.e. [https://github.com/Azure/DASH](https://github.com/Azure/DASH) is controlled by Git source-code control, tracked by commit SHA, tag, branch, etc. This is the main project and its components should also be controlled.
 ## Submodules
-As discussed in [About Git Submodules](#about-git-submodules), submodules are controlled by the SHA commit of the submodule, which is "committed" to the top level project (see [About Git Submodules](#about-git-submodules)). The versions are always known and explicitly specified.
+As discussed in [About Git Submodules](#about-git-submodules), submodules are controlled by the SHA commit of the submodule, which is "committed" to the top level project (see [About Git Submodules](#about-git-submodules). The versions are always known and explicitly specified.
 ## Docker Image Versioning
 Docker image(s) are identified by their `repo/image_name:tag`, e.g. `p4lang/dp4c:latest`.
 ### Project-Specific Images
