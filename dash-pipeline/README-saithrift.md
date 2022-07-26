@@ -7,7 +7,7 @@ See also:
 **Table of Contents**
 - [DASH saithrift client and server](#dash-saithrift-client-and-server)
   - [Overview](#overview)
-  - [TODO](#todo)
+- [TODO](#todo)
 - [Running DASH saithrift tests](#running-dash-saithrift-tests)
   - [Running/Stopping the saithrift server](#runningstopping-the-saithrift-server)
   - [Production - Launch container, run tests in one shot](#production---launch-container-run-tests-in-one-shot)
@@ -29,7 +29,7 @@ See also:
 The DASH saithrift API is used to configure and query a device under test (DUT) as described in [dash-test-workflow-saithrift.md](../test/docs/dash-test-workflow-saithrift.md) and [dash-test-workflow-saithrift.md](../test/docs/dash-test-workflow-p4-saithrift.md).
 
 This document describes how to run the saithrift server and client to run test suites. It also gives some advice for writing tests, debugging, etc.
-## TODO
+# TODO
 * Select saithrift server IP address to allow running client remotely from target.
 # Running DASH saithrift tests
 ## Running/Stopping the saithrift server
@@ -47,7 +47,7 @@ make run-saithrift-client-ptftests    # run PTF tests from container's scripts
 make run-saithrift-client-tests       # run both suites above
 ```
 ## Development - Launch container, run tests in one shot
-You can run tests based on the current state of the `dash-pipeline/tests/pytests` directory without rebuilding the `saithrift-client` docker image. Instead of running tests built into the container and stored under `/tests`, a host volume `dash-pipeline/tests` is mounted to container `/tests-dev`) and tests are run from there. This allows rapid incremental test-case development. 
+You can run tests based on the current state of the `dash-pipeline/tests/` directory without rebuilding the `saithrift-client` docker image. Instead of running tests built into the container and stored under `/tests`, a host volume `dash-pipeline/tests` is mounted to container `/tests-dev`) and tests are run from there. This allows rapid incremental test-case development. When doing so, the container's `/test` directory remains in-place with tests which were copied into the container at image build-time.
 
 You can keep all containers running (switch, saithrift-server, ixia-c) and interactively write and execute test-cases without stopping the daemons. As stated, the saithrift-client container will start and stop each time you run the tests but the switch and saithrift-server will continue to run.
 ```
@@ -58,7 +58,7 @@ make run-saithrift-client-dev-tests       # run both suites above
 
 **TODO:** - pass params to the container to select tests etc.
 # Developer: Run tests selectively from `bash` inside saithrift-client container
-Enter the container, this will place you in the `/test-dev/` directory of the container which corresponds to the contents of the `DASH/dash-pipline/tests` directory on the host. In this way you can interactively run test-cases while you're editing them.
+Enter the container, this will place you in the `/test-dev/` directory of the container which corresponds to the contents of the `DASH/dash-pipline/tests` directory on the host. In this way you can interactively run test-cases while you're editing them. When doing so, the container's `/test` directory remains in-place with tests which were copied into the container at image build-time.
 ```
 make run-saithrift-client-bash 
 root@chris-z4:/tests-dev# 
@@ -68,7 +68,7 @@ The running container is also mounted via `-v $(PWD)/test:/test-dev`  which moun
 ## Select Directory - Container pre-built directory, or mounted from host
 
 * `cd /test/` - Enter directory which was prebuilt into container image; tests are not modifiable "live" from the host. This is good for canned tests.
-* `cd /test-dev/` - Enter directory which is mounted to `dash-pipeline/tests` from the host allowing live editing in the host and running in the container. This is a convenient developer workflow.
+* `cd /test-dev/` - Enter directory which is mounted to `dash-pipeline/tests` from the host, allowing live editing in the host and running in the container. This is a convenient developer workflow.
 
 To get the desired subdirectory for Pytests or PTF test, choose the appropriate path, e.g.:
 * `cd /tests/saithrift/pytest`
@@ -85,10 +85,10 @@ make run-saithrift-client-tests       # Console 3
 make run-saithrift-client-dev-tests   # Alternative to above
 ```
 
-It's strongly recommended to perform proper cleanup after every test and catch exceptions where possible, to ensure a complete cleanup, despite failures along the way.
+It's strongly recommended to perform proper DUT config cleanup in the code for every testcase and catch exceptions where possible, to ensure a complete cleanup, despite failures along the way.
 # Remote client execution
 Since the `saithrift-client` docker image is entirely self-contained with tools, libraries and production tests cases, it can be run as a docker container on a remote server and used to run tests on a SW or HW Device Under Test (DUT).
->**TODO** Need to pass server address params to PTF and Pytests. PTF has this built-in, Pytest fixtures need to be setup and documented. Need to test and document.
+>**TODO** This hasn't been verified yet. Need to pass server address params to PTF and Pytests. PTF has this built-in, Pytest fixtures need to be setup and documented. Need to test and document.
 # Tips and techniques for writing tests
 The following information should apply equally well to writing any tests which utilize saithrift as the client library: PTF, Pytests, etc. Please refer to other READMEs for information specific to various frameworks.
 ## Workspace File Layout
@@ -113,9 +113,9 @@ DASH
       ptf                 - DASH tests using PTF with saithrift
 ```
 ## saithrift Python client modules
-Here are the detailed contents of `DASH/dash-pipeline/SAI/rpc/usr/local/lib/python3.8/site-packages/sai_thrift`. You need to utilize the APIs and constants to write saithrift tests in PTF or Pytest.
+Here are the detailed contents of `DASH/dash-pipeline/SAI/rpc/usr/local/lib/python3.8/site-packages/sai_thrift`. You need to utilize the APIs and constants inside these modules, to write saithrift tests in PTF or Pytest.
 
-When writing tests using particular SAI tables or attributes, use you editor to search the Python modules below to find functions, structures, attributes etc.
+When writing tests using particular SAI tables or attributes, use your editor to search the Python modules below to find functions, structures, attributes etc. See [Walk-through example of finding saithrift module entities](#walk-through-example-of-finding-saithrift-module-entities) in the next section.
 
 >**Note:** These artifacts are generated via the `make sai-thrift-server` target, they are not stored in the DASH repo.
 ```
@@ -159,6 +159,8 @@ We want to determine the function signature to create the SAI object `direction_
 
 First, search for the data type itself inside `ttypes.py` to find:
 ```
+# From ttypes.py:
+
 class sai_thrift_direction_lookup_entry_t(object):
     """
     Attributes:
@@ -174,6 +176,8 @@ Note the actual type is `sai_thrift_direction_lookup_entry_t` and it has two par
 
 Looking further down into the `write()` method (which serializes into thrift) we get hints about the datatypes of these two parameters. We can see `switch_id` is 64 bits and `vni` is 32 bits:
 ```
+# From ttypes.py:
+
       if self.switch_id is not None:
           oprot.writeFieldBegin('switch_id', TType.I64, 1)
           oprot.writeI64(self.switch_id)
@@ -195,6 +199,8 @@ Now that we have a local object, we need to find the RPC call to remotely create
 Search `adaptor.py` for the string `direction_lookup_entry_t` and you'll find numerous instances. In particular you'll find the four accessors to `create()`, `remove()`, `set()` and `get()` these objects, as well as `bulk_create()` and `bulk_remove()` versions thereof. In our case, we want to `create()`. The method signature is:
 
 ```
+# From adaptor.py:
+
 def sai_thrift_create_direction_lookup_entry(client,
                                              direction_lookup_entry,
                                              action=None):
@@ -217,6 +223,8 @@ The `action` is a SAI attribute enum which we can glean from the SAI header file
 
 We can examine `SAI/experimental/saiexperimentaldash.h` (which was autogenerated from our P4 code) to find:
 ```
+// From saiexperimentaldash.h:
+
 typedef enum _sai_direction_lookup_entry_action_t
 {
     SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION,
@@ -228,7 +236,10 @@ typedef enum _sai_direction_lookup_entry_action_t
 ```
 
 Let's find the Python counterparts. Search for `SAI_DIRECTION_LOOKUP_ENTRY_ACTION` inside `saiheaders.py` to find the following, which are clearly the identical constant names from our sai headers.
+
 ```
+# From saiheaders.py:
+
 SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION = 0# /usr/include/sai/saiexperimentaldash.h: 45
 
 SAI_DIRECTION_LOOKUP_ENTRY_ACTION_DENY = (SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION + 1)# /usr/include/sai/saiexperimentaldash.h: 45
@@ -244,6 +255,8 @@ We now have all the information needed to execute the RPC call:
 
 We can also find valid values for `status` inside `sai_headers.py`. Search for `SAI_STATUS` to find entries such as:
 ```
+# From saiheaders.py:
+
 # /usr/include/sai/saistatus.h: 50
 try:
     SAI_STATUS_SUCCESS = 0

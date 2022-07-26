@@ -15,7 +15,7 @@ This project contains [Git Actions](https://docs.github.com/en/actions) to perfo
 
 There are several such `.yml` files and each one has specific trigger criteria and job specifications. These job specifications call out a sequence of steps, which in our case are `Makefile` build and/or test targets, similar to those you'd do "manually" as a developer.
 
-The main CI job called `DASH-BMV2-CI ` is to rebuild the entire dash-pipeline and run all the tests whenever any of the dependencies change: P4 code, Makefiles, scripts and tests, etc. This cna be used to ensure new features and build recipes work, test-cases pass and regressions didn't creep in.
+The main CI job called `DASH-BMV2-CI ` is to rebuild the entire dash-pipeline and run all the tests whenever any of the dependencies change: P4 code, Makefiles, scripts and tests, etc. This can be used to ensure new features and build recipes work, test-cases pass and regressions didn't creep in.
 
 There are also numerous `DASH-DOCKER-xxx` jobs which rebuild the various "builder" docker images. These are not invoked as often and are used to verify the infrastructure itself.
 # CI Badges

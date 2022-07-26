@@ -68,7 +68,7 @@ jobs:
     - name: Run P4 software switch (bmv2) with P4Runtime
       run:  DOCKER_FLAGS=$docker_bg_flags make run-switch
     - name: Test SAI library over P4RT to switch
-      run:  DOCKER_FLAGS=$docker_fg_flags make run-test
+      run:  DOCKER_FLAGS=$docker_fg_flags make run-libsai-test
     - name: Run saithrift server
       run:  DOCKER_FLAGS=$docker_bg_flags make run-saithrift-server
     - name: Run PTF Tests
