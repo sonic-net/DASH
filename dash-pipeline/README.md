@@ -62,7 +62,6 @@ See [Installing Prequisites](#installing-prequisites) for details.
 * git - tested with version 2.25.1
 * docker
 * [docker-compose](#install-docker-compose) (**1.29.2 or later**)
-* **TODO** (Might not be needded any more) python3, pip3
 
 ## Clone this repo
 ```
@@ -130,35 +129,12 @@ See [README-dash-workflows.md](README-dash-workflows.md) for build workflows and
 ```
 sudo apt install -y git
 ```
-
 ## Install docker
 Need for basically everything to build/test dash-pipeline.
 
 See:
 * https://docs.docker.com/desktop/linux/install/
 
-## Install Python 3
->**TODO:** this might be obsolete since all tools run in containers now. Try skipping to see if its not needed.
-
-This is probably already installed in your Linux OS, but if not:
-
-See:
-* https://docs.python-guide.org/starting/install3/linux/
-
-```
-sudo apt install -y python3
-```
-  
-## Install pip3
->**TODO:** this might be obsolete since all tools run in containers now. Try skipping to see if its not needed.
-
-See:
-* https://pip.pypa.io/en/latest/installation/
-
-You can probably use the following command for most cases:
-```
-sudo apt install -y python3-pip
-```
 ## Install docker-compose
 >**NOTE** Use docker-compose 1.29.2 or later! The `.yml` file format changed. Using an older version might result in an error such as: <br/> `ERROR: Invalid interpolation format for "controller" option in service "services": "ixiacom/ixia-c-controller:${CONTROLLER_VERSION:-latest}"`
 
