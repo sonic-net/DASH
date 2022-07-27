@@ -22,13 +22,9 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 - [Quick-start](#quick-start)
   - [Prerequisites](#prerequisites)
   - [Clone this repo](#clone-this-repo)
-  - [Get the right branch](#get-the-right-branch)
   - [I feel lucky!](#i-feel-lucky)
-  - [Build Artifacts](#build-artifacts)
-  - [Run bmv2 software switch](#run-bmv2-software-switch)
-  - [Run saithrift server](#run-saithrift-server)
-  - [Run tests](#run-tests)
   - [Cleanup](#cleanup)
+  - [More Make Targets](#more-make-targets)
 - [Installing Prequisites](#installing-prequisites)
   - [Install git](#install-git)
   - [Install docker](#install-docker)
@@ -71,28 +67,42 @@ See [Installing Prequisites](#installing-prequisites) for details.
 ## Clone this repo
 ```
 git clone <repo URL>
-git submodule update --init # NOTE --recursive not needed (yet)
+cd DASH
 ```
-## Get the right branch
-
-**Optional** - if you require a particular dev branch.
+**Optional** - if you require a particular dev branch:
 ```
 git checkout <branch>
 ```
+Init (clone) the SAI submodule:
+```
+git submodule update --init # NOTE --recursive not needed (yet)
+```
 ## I feel lucky!
-Eager to see it work? Try this:
+Eager to see it work? First [clone this repo](#clone-this-repo), then do the following:
 
 In first terminal (console will print bmv2 logs):
 ```
+cd dash-pipeline
 make clean && make all run-switch
 ```
+The above procedure takes awhile since it has to pull docker images (once) and build some code.
+
 In second terminal (console will print saithrift server logs):
 ```
 make run-saithrift-server
 ```
 In third terminal (console will print test results):
 ```
-make run-all-tests clean
+make run-all-tests
+```
+When you're done, do:
+```
+make kill-all      # just to stop the daemons
+                   # you can redo "run" commands w/o rebuilding
+```
+*OR*
+```
+make clean         # stop daemons and clean everything up
 ```
 The final `clean` above will kill the switch, delete artifacts and veth pairs.
 
@@ -100,7 +110,7 @@ The final `clean` above will kill the switch, delete artifacts and veth pairs.
 The tests may use a combination of SW packet generators:
 * Scapy - well-known packet-at-a-time SW traffic generator/capture
 * ixia-c - performant flow-based packet genrator/capture
-* 
+  
 The setup for ixia-c -based traffic tests is as follows. More info is available [here](README-dash-workflows#about-snappi-and-ixia-c-traffic-generator).
 
 ![ixia-c setup](../test/third-party/traffic_gen/deployment/ixia-c.drawio.svg)
