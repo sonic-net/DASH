@@ -15,7 +15,6 @@ See also:
 - [Developer: Run tests selectively from `bash` inside saithrift-client container](#developer-run-tests-selectively-from-bash-inside-saithrift-client-container)
   - [Select Directory - Container pre-built directory, or mounted from host](#select-directory---container-pre-built-directory-or-mounted-from-host)
 - [Test aftermath and clearing the switch config](#test-aftermath-and-clearing-the-switch-config)
-- [Remote client execution](#remote-client-execution)
 - [Tips and techniques for writing tests](#tips-and-techniques-for-writing-tests)
   - [Workspace File Layout](#workspace-file-layout)
   - [saithrift Python client modules](#saithrift-python-client-modules)
@@ -40,7 +39,7 @@ make kill-saithrift-server
 ## Production - Launch container, run tests in one shot
 This will run all the tests built into the `dash-saithrift-client` docker image. This assumes you've already done `make docker-saithrift-client` which will bundle the current state of the `dash-pipeline/tests` directory into the image.
 
-Calling these make targets spins up a saithrift-client container on-the-fly, runs tests and kills the container. It's very lightweight.
+Calling these make targets spins up a `saithrift-client` container on-the-fly, runs tests and kills the container. It's very lightweight.
 ```
 make run-saithrift-client-pytests     # run Pytests from container's scripts
 make run-saithrift-client-ptftests    # run PTF tests from container's scripts
@@ -74,7 +73,23 @@ To get the desired subdirectory for Pytests or PTF test, choose the appropriate 
 * `cd /tests/saithrift/pytest`
 * `cd /tests-dev/saithrift/ptf`
 
-See the relevant documentation for running PTF or Pytests using `bash` commands.
+You can run all tests inside each respective directory by entering the directory and running the `run-saithrift-xxx` bash scripts, e.g.:
+```
+DASH/DASH/dash-pipeline$ make run-saithrift-client-bash
+...
+root@chris-z4:/tests-dev/saithrift# cd ptf/
+root@chris-z4:/tests-dev/saithrift/ptf# ./run-saithrift-ptftests.sh 
+```
+*OR*
+```
+DASH/DASH/dash-pipeline$ make run-saithrift-client-bash
+...
+root@chris-z4:/tests-dev/saithrift# cd pytest/
+root@chris-z4:/tests-dev/saithrift/pytest# ./run-saithrift-ptests.sh 
+```
+
+
+See the relevant documentation for running select PTF or Pytests using `bash` commands. You can pass parameters via the command-line, to control which test groups are run using filenames, directories, or filtering on groups (PTF); or marks or match expressions (pytest).
 # Test aftermath and clearing the switch config
 Sometimes tests leave entries programmed into the switch, when they should have cleaned everything up. This can be caused by exceptions/assertions which fail and either inadvertently, or unavoidably, leave entries in tables. This might make a subsequent run of the same (or a different) test suite fail. In these cases, it might be best to execute the following sequence to restart the switch and saithrift server, then rerun test cases.
 :
@@ -86,9 +101,7 @@ make run-saithrift-client-dev-tests   # Alternative to above
 ```
 
 It's strongly recommended to perform proper DUT config cleanup in the code for every testcase and catch exceptions where possible, to ensure a complete cleanup, despite failures along the way.
-# Remote client execution
-Since the `saithrift-client` docker image is entirely self-contained with tools, libraries and production tests cases, it can be run as a docker container on a remote server and used to run tests on a SW or HW Device Under Test (DUT).
->**TODO** This hasn't been verified yet. Need to pass server address params to PTF and Pytests. PTF has this built-in, Pytest fixtures need to be setup and documented. Need to test and document.
+
 # Tips and techniques for writing tests
 The following information should apply equally well to writing any tests which utilize saithrift as the client library: PTF, Pytests, etc. Please refer to other READMEs for information specific to various frameworks.
 ## Workspace File Layout

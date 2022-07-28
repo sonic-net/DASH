@@ -34,6 +34,7 @@ See also:
   - [Run saithrift-client tests](#run-saithrift-client-tests)
     - [Run saithrift-client PTF tests](#run-saithrift-client-ptf-tests)
     - [Run saithrift-client Pytests](#run-saithrift-client-pytests)
+    - [Run saithrift-client "Dev" Pytests](#run-saithrift-client-dev-pytests)
   - [Run libsai C++ tests](#run-libsai-c-tests)
   - [Start/Stop ixia-c Traffic Generator](#startstop-ixia-c-traffic-generator)
     - [About snappi and ixia-c traffic-generator](#about-snappi-and-ixia-c-traffic-generator)
@@ -84,7 +85,7 @@ Dockerfile build targets are separately described in [README-dash-docker](README
 | [run-saithrift-ptftests](#run-saithrift-client-ptf-tests) | Run PTF tests under [tests/saithrift/ptf](tests/libsai/ptf) using tests built into [docker-saithrift-client](#build-saithrift-client-docker-image) image
 | [run-saithrift-pytests](#run-saithrift-client-pytests) | Run Pytests under [tests/saithrift/pytest](tests/libsai/pytest) using tests built into [docker-saithrift-client](#build-saithrift-client-docker-image) image
 |[run-saithrift-client-tests](#run-saithrift-client-tests) | Run all saithrift tests |
-| [run-saithrift-ptftests](#run-saithrift-client-ptf-tests) <br> [run-saithrift-dev-pytests](#run-saithrift-client-dev-pytests) <br> [run-saithrift-client-dev-tests](#run-saithrift-client-dev-tests) | Like the three targets above. above, but run tests from host directory `tests/saithrift` instead of tests built into the `saithrift-client` container for faster test-case development code/test cycles.
+| [run-saithrift-dev-ptftests](#run-saithrift-client-ptf-tests) <br> [run-saithrift-dev-pytests](#run-saithrift-client-dev-pytests) <br> [run-saithrift-client-dev-tests](#run-saithrift-client-dev-tests) | Like the three targets above. above, but run tests from host directory `tests/saithrift` instead of tests built into the `saithrift-client` container for faster test-case development code/test cycles.
 
 
 # Detailed DASH Behavioral Model Build Workflow
@@ -276,8 +277,8 @@ To run all Pytests which use the saithrift interface, execute the following. You
 make run-saithrift-client-pytests
 ```
 This will launch a saithrift-client docker container and execute tests under `tests/saithrift/pytests`.
-
-You can also run "dev" versions of tests using the following make targets. These use test scripts mounted from the host's filesytem, allowing a faster development workflow. No dockers need to be rebuilt to try out test cases iteratively. Use the following variants of the make targets. See [Development - Launch container, run tests in one shot](#development---launch-container-run-tests-in-one-shot)
+### Run saithrift-client "Dev" Pytests
+You can also run "dev" versions of tests using the following make targets. These use test scripts mounted from the host's filesystem, allowing a faster development workflow. No dockers need to be rebuilt to try out test cases iteratively. Use the following variants of the make targets. See [Development - Launch container, run tests in one shot](#development---launch-container-run-tests-in-one-shot)
 ```
 make run-saithrift-client-dev-pytests     # run Pytests from host mount
 make run-saithrift-client-dev-ptftests    # run PTF tests from host mount

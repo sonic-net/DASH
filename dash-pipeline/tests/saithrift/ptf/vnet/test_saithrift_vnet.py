@@ -52,7 +52,7 @@ class TestSaiThrift_create_outbound_eni_to_vni_entry(ThriftInterfaceDataPlane):
         print("\nSending packet...", self.udp_pkt.__repr__())
         send_packet(self, 0, self.udp_pkt)
         print("\nVerifying packet...", self.udp_pkt_exp.__repr__())
-        verify_packets(self, self.udp_pkt_exp, [0])
+        verify_packet(self, self.udp_pkt_exp, 0)
         print ("test_sai_thrift_create_outbound_eni_to_vni_entry OK")
 
     def tearDown(self):

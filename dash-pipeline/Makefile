@@ -355,39 +355,39 @@ DOCKER_RUN_SAITHRIFT_CLIENT=\
 # Run "production" Pytests bundled inside docker
 run-saithrift-pytests:deploy-ixiac
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
-	-w /tests/ \
+	-w /tests/saithrift/pytest \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
-	./saithrift/run-saithrift-pytests.sh
+	./run-saithrift-pytests.sh
 
 # Run "dev" tests mounted from host
 run-saithrift-dev-pytests:deploy-ixiac
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
 	-v $(PWD)/tests/:/tests-dev/ \
-	-w /tests-dev/ \
+	-w /tests-dev/saithrift/pytest \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
-	./saithrift/run-saithrift-pytests.sh
+	./run-saithrift-pytests.sh
 
 # Run "production" PTF tests bundled inside docker
 # Note - if add ixia-c usage to PTF tests, add dependency deploy-ixiac
 run-saithrift-ptftests:
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
-	-w /tests/ \
+	-w /tests/saithrift/ptf \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
-	./saithrift/run-saithrift-ptftests.sh
+	./run-saithrift-ptftests.sh
 
 # Run "dev" PTF tests mounted from host
 # Note - if add ixia-c usage to PTF tests, add dependency deploy-ixiac
 run-saithrift-dev-ptftests:
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
 	-v $(PWD)/tests/:/tests-dev/ \
-	-w /tests-dev/ \
+	-w /tests-dev/saithrift/ptf \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
-	./saithrift/run-saithrift-ptftests.sh
+	./run-saithrift-ptftests.sh
 
 run-saithrift-client-bash:
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
 	-v $(PWD)/tests/:/tests-dev/ \
-	-w /tests-dev/ \
+	-w /tests-dev/saithrift \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
 	/bin/bash
 
