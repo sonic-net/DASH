@@ -41,7 +41,9 @@ struct metadata_t {
     bit<16> inbound_vm_id;
     bit<8> appliance_id;
     bit<1> is_dst_ip_v6;
+    bit<1> is_lkup_dst_ip_v6;
     IPv4ORv6Address dst_ip_addr;
+    IPv4ORv6Address lkup_dst_ip_addr;
     conntrack_data_t conntrack_data;
 }
 

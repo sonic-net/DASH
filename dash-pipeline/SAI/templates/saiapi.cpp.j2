@@ -103,8 +103,7 @@ sai_status_t sai_create_{{ table.name }}(
 
     for (uint32_t i = 0; i < attr_count; i++) {
         switch(attr_list[i].id) {
-            {% for action in table.actions %}
-            {% for param in action.params %}
+            {% for param in table.actionParams %}
             case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}: {
                 auto param = action->add_params();
                 param->set_param_id({{param.id}});
@@ -112,7 +111,6 @@ sai_status_t sai_create_{{ table.name }}(
                 matchedParams++;
                 break;
             }
-            {% endfor %}
             {% endfor %}
         }
     }
@@ -222,8 +220,7 @@ sai_status_t sai_create_{{ table.name }}(
 
     for (uint32_t i = 0; i < attr_count; i++) {
         switch(attr_list[i].id) {
-            {% for action in table.actions %}
-            {% for param in action.params %}
+            {% for param in table.actionParams %}
             case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}: {
                 auto param = action->add_params();
                 param->set_param_id({{param.id}});
@@ -231,7 +228,6 @@ sai_status_t sai_create_{{ table.name }}(
                 matchedParams++;
                 break;
             }
-            {% endfor %}
             {% endfor %}
         }
     }
