@@ -219,8 +219,6 @@ def generate_sai_apis(program, ignore_tables):
 
         if len(sai_table_data['keys']) == 1 and sai_table_data['keys'][0]['sai_key_name'].endswith(table_name.split('.')[-1] + '_id'):
             sai_table_data['is_object'] = 'true'
-            # Object ID itself is a key
-            sai_table_data['keys'] = []
         elif len(sai_table_data['keys']) > 5:
             sai_table_data['is_object'] = 'true'
         else:

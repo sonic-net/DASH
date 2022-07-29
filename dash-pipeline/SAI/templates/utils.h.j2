@@ -220,6 +220,8 @@ void ipaddrrangelistSetVal(const sai_attribute_value_t &value, T &t, int bits = 
 
 grpc::StatusCode MutateTableEntry(p4::v1::TableEntry *entry, p4::v1::Update_Type updateType);
 
+sai_object_id_t NextObjIndex();
+
 bool InsertInTable(p4::v1::TableEntry *entry, sai_object_id_t *objId);
 
 bool RemoveFromTable(sai_object_id_t id);
