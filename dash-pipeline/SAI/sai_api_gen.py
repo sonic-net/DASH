@@ -14,6 +14,7 @@ NAME_TAG = 'name'
 TABLES_TAG = 'tables'
 BITWIDTH_TAG = 'bitwidth'
 ACTIONS_TAG = 'actions'
+ACTION_PARAMS_TAG = 'actionParams'
 PREAMBLE_TAG = 'preamble'
 OTHER_MATCH_TYPE_TAG = 'otherMatchType'
 MATCH_TYPE_TAG = 'matchType'
@@ -22,6 +23,7 @@ ACTION_REFS_TAG = 'actionRefs'
 MATCH_FIELDS_TAG = 'matchFields'
 NOACTION = 'NoAction'
 STAGES_TAG = 'stages'
+PARAM_ACTIONS = 'paramActions'
 
 def get_sai_key_type(key_size, key_header, key_field):
     if key_size == 1:
@@ -97,7 +99,7 @@ def get_sai_key_data(key):
     sai_key_data['sai_key_name'] = sai_key_name
 
     key_size = key[BITWIDTH_TAG]
-    
+
     if OTHER_MATCH_TYPE_TAG in key:
         sai_key_data['match_type'] =  key[OTHER_MATCH_TYPE_TAG].lower()
     elif MATCH_TYPE_TAG in key:
@@ -145,6 +147,21 @@ def table_with_counters(program, table_id):
             return 'true'
     return 'false'
 
+def fill_action_params(table_params, param_names, action):
+    for param in action[PARAMS_TAG]:
+        # skip v4/v6 selector
+        if 'v4_or_v6' in param[NAME_TAG]:
+           continue
+        if param[NAME_TAG] not in param_names:
+            param_names.append(param[NAME_TAG])
+            param[PARAM_ACTIONS] = [action[NAME_TAG]]
+            table_params.append(param)
+        else:
+            # ensure that same param passed to multiple actions of the
+            # same P4 table does not generate more than 1 SAI attribute
+            for tbl_param in table_params:
+                if tbl_param[NAME_TAG] == param[NAME_TAG]:
+                    tbl_param[PARAM_ACTIONS].append(action[NAME_TAG])
 
 def generate_sai_apis(program, ignore_tables):
     sai_apis = []
@@ -155,6 +172,7 @@ def generate_sai_apis(program, ignore_tables):
         sai_table_data['keys'] = []
         sai_table_data[ACTIONS_TAG] = []
         sai_table_data[STAGES_TAG] = []
+        sai_table_data[ACTION_PARAMS_TAG] = []
 
         table_control, table_name = table[PREAMBLE_TAG][NAME_TAG].split('.', 1)
         if table_name in ignore_tables:
@@ -189,9 +207,11 @@ def generate_sai_apis(program, ignore_tables):
                 continue
             sai_table_data['keys'].append(get_sai_key_data(key))
 
+        param_names = []
         for action in table[ACTION_REFS_TAG]:
             action_id = action["id"]
             if all_actions[action_id][NAME_TAG] != NOACTION:
+                fill_action_params(sai_table_data[ACTION_PARAMS_TAG], param_names, all_actions[action_id])
                 sai_table_data[ACTIONS_TAG].append(all_actions[action_id])
 
         if len(sai_table_data['keys']) == 1 and sai_table_data['keys'][0]['sai_key_name'].endswith(table_name.split('.')[-1] + '_id'):
@@ -269,10 +289,14 @@ def write_sai_files(sai_api):
     new_lines = []
     for line in lines:
         if 'Add new experimental APIs above this line' in line:
-            new_lines.append('    SAI_API_' + sai_api['app_name'].upper() + ',\n\n')
+            new_line = '    SAI_API_' + sai_api['app_name'].upper() + ',\n'
+            if new_line not in lines:
+                new_lines.append(new_line + '\n')
         if 'new experimental object type includes' in line:
             new_lines.append(line)
-            new_lines.append('#include "saiexperimental' + sai_api['app_name'].replace('_', '') + '.h"\n')
+            new_line = '#include "saiexperimental' + sai_api['app_name'].replace('_', '') + '.h"\n'
+            if new_line not in lines:
+                new_lines.append(new_line)
             continue
 
         new_lines.append(line)
@@ -288,7 +312,9 @@ def write_sai_files(sai_api):
     for line in lines:
         if 'Add new experimental object types above this line' in line:
             for table in sai_api[TABLES_TAG]:
-                new_lines.append('    SAI_OBJECT_TYPE_' + table[NAME_TAG].upper() + ',\n\n')
+                new_line = '    SAI_OBJECT_TYPE_' + table[NAME_TAG].upper() + ',\n'
+                if new_line not in lines:
+                    new_lines.append(new_line + '\n')
 
         new_lines.append(line)
 
@@ -304,11 +330,15 @@ def write_sai_files(sai_api):
         if 'Add new experimental entries above this line' in line:
             for table in sai_api[TABLES_TAG]:
                 if table['is_object'] == 'false':
-                    new_lines.append('    /** @validonly object_type == SAI_OBJECT_TYPE_' + table[NAME_TAG].upper() + ' */\n')
-                    new_lines.append('    sai_' + table[NAME_TAG] + '_t ' + table[NAME_TAG] + ';\n\n')
+                    new_line = '    sai_' + table[NAME_TAG] + '_t ' + table[NAME_TAG] + ';\n'
+                    if new_line not in lines:
+                        new_lines.append('    /** @validonly object_type == SAI_OBJECT_TYPE_' + table[NAME_TAG].upper() + ' */\n')
+                        new_lines.append(new_line + '\n')
         if 'new experimental object type includes' in line:
             new_lines.append(line)
-            new_lines.append('#include "../experimental/saiexperimental' + sai_api['app_name'].replace('_', '') + '.h"\n')
+            new_line = '#include "../experimental/saiexperimental' + sai_api['app_name'].replace('_', '') + '.h"\n'
+            if new_line not in lines:
+                new_lines.append(new_line)
             continue
 
         new_lines.append(line)
