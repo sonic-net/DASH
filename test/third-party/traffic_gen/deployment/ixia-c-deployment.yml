@@ -1,11 +1,13 @@
 services:
   controller:
     image: ixiacom/ixia-c-controller:${CONTROLLER_VERSION:-latest}
+    container_name: ixia-c-controller-${USER}
     command: --accept-eula
     network_mode: "host"
     restart: always
   traffic_engine_1:
     image: ixiacom/ixia-c-traffic-engine:${TRAFFIC_ENGINE_VERSION:-latest}
+    container_name: ixia-c-traffic-engine1-${USER}
     network_mode: "host"
     restart: always
     privileged: true
@@ -16,6 +18,7 @@ services:
     - OPT_NO_HUGEPAGES=Yes
   traffic_engine_2:
     image: ixiacom/ixia-c-traffic-engine:${TRAFFIC_ENGINE_VERSION:-latest}
+    container_name: ixia-c-traffic-engine2-${USER}
     network_mode: "host"
     restart: always
     privileged: true

@@ -1,0 +1,50 @@
+name: DASH-docker-saithrift-client-bldr-image
+
+on:
+  push:
+    branches: [ "**" ]
+    paths:
+      - '.github/workflows/dash-saithrift-client-bldr-docker.yml'
+      - '.github/workflows/dash-saithrift-client-bldr-docker.yml'
+      - 'dash-pipeline/Makefile'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-bldr'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client-bldr'
+      - 'dash-pipeline/.dockerignore'
+      - 'dash-pipeline/dockerfiles/.dockerignore'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '.github/workflows/dash-saithrift-client-bldr-docker.yml'
+      - 'dash-pipeline/Makefile'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-bldr'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client-bldr'
+      - 'dash-pipeline/.dockerignore'
+      - 'dash-pipeline/dockerfiles/.dockerignore'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build dash-saithrift-client-bldr-image
+    runs-on: ubuntu-20.04
+    env:
+      docker_fg_flags: -u root --privileged
+      docker_bg_flags: -d -u root --privileged
+    defaults:
+      run:
+        working-directory: ./dash-pipeline
+    steps:
+    - uses: actions/checkout@v3
+    - name: Pull docker p4c image
+      run:  make docker-pull-dash-p4c
+    - name: Build P4 software switch (bmv2) and P4Info
+      run:  DOCKER_FLAGS=$docker_fg_flags make p4
+    - name: Install SAI submodule
+      run:  git submodule update --init
+    - name: Build docker saithrift-bldr image
+      run:  make docker-saithrift-bldr
+    - name: Generate SAI API
+      run:  DOCKER_FLAGS=$docker_fg_flags make sai
+    - name: Generate SAI-Thrift client and server code and libs
+      run:  DOCKER_FLAGS=$docker_fg_flags make saithrift-server
+    - name: Build saithrift client docker image 
+      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saithrift-client-bldr

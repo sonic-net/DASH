@@ -1,1 +1,5 @@
-*
+*.bkp
+*.log
+*.pcap
+__pycache__/
+.pytest_cache/

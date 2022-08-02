@@ -174,7 +174,14 @@ control dash_ingress(inout headers_t hdr,
     }
 
     apply {
+
+        /* Send packet on same port it arrived (echo) by default */
+        standard_metadata.egress_spec = standard_metadata.ingress_port;
+
         vip.apply();
+        // TODO [cs] shouldn't this also be called at end of ingress?
+        // Shouldn't it call mark_to_drop(standard_metadata);
+
         if (meta.dropped) {
             return;
         }

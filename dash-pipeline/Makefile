@@ -1,18 +1,30 @@
 SHELL = /bin/bash
 
-all:fix-perms p4 sai test
+# "All" type targets for convenience
+all:fix-perms p4 sai saithrift-server docker-saithrift-client test
 
-PWD := $(shell pwd)
+run-all-tests:run-libsai-test deploy-ixiac run-saithrift-client-tests
+run-saithrift-client-tests: run-saithrift-ptftests run-saithrift-pytests
+run-saithrift-client-dev-tests: run-saithrift-dev-ptftests run-saithrift-dev-pytests
+
+.PHONY:clean
+clean: fix-perms kill-all p4-clean sai-clean test-clean network-clean saithrift-server-clean
+	rm -rf bmv2/dash_pipeline.bmv2
+
+kill-all: kill-saithrift-server kill-switch undeploy-ixiac
+
 
 .PHONY: fix-perms
 fix-perms:
 	@echo "### Applying Fix permissions workaround..."
 	sudo chmod -R o+rw SAI/ bmv2/ tests/
 
+PWD := $(shell pwd)
+
 # Default Docker images, override from env var
-# https://hub.docker.com/r/p4lang/p4c
-# p4lang version 971MB - works:
-#DOCKER_P4C_BMV2_IMG ?=p4lang/p4c:stable
+
+# Needed Libraries only
+DOCKER_GRPC_IMG ?=chrissommers/dash-grpc:1.43.2
 
 # Slimmed-down version bmv2 backend only 632MB - works:
 DOCKER_P4C_BMV2_IMG ?=chrissommers/dash-p4c-bmv2:220701
@@ -23,11 +35,15 @@ DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2-bldr:220630
 # Runs bmv2 process - consider slimmer if don't need sai/p4rt clients inside
 DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 
-# Compiles sai headers, libsai, saithrift client-server
-DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220625
+# Compiles sai headers, libsai, saithrift server & client/server libs
+DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220719
 
-# Compiles sai headers, libsai, saithrift client-server
-DOCKER_GRPC_IMG ?=chrissommers/dash-grpc:1.43.2
+# Base image with test frameworks, DASH client libs not installed
+DOCKER_SAITHRIFT_CLIENT_BLDR_IMG ?=chrissommers/dash-saithrift-client-bldr:220723
+
+# Client image built locally with saithrift client libs + PTF & Pytest frameworks
+# TODO: consider some other tagging scheme
+DOCKER_SAITHRIFT_CLIENT_IMG ?= local/dash-saithrift-client:latest
 
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
@@ -41,15 +57,14 @@ DOCKER_RUN := docker run \
 	--rm \
 	$(DOCKER_FLAGS)
 
-SAI/SAI:
+SAI/SAI: sai-submodule
+
+sai-submodule:
 	@echo "Initializing SAI submodule..."
 	git submodule update --init
+	@echo "Initializing SAI submodule..."
+	cd SAI/SAI/test && git submodule update --init ptf
 
-
-.PHONY:clean
-clean: fix-perms kill-switch p4-clean sai-clean test-clean network-clean undeploy-ixiac
-	rm -rf bmv2/dash_pipeline.bmv2
-	make -C tests/vnet_out clean
 
 ######################################
 # P4 Source code compile TARGETS
@@ -61,7 +76,7 @@ p4: fix-perms bmv2/dash_pipeline.bmv2/dash_pipeline.json
 
 .PHONY:p4-clean
 p4-clean:
-	-rm -rf $(P4_ARTIFACTS)
+	-rm -rf bmv2/dash_pipeline.bmv2
 
 P4_SRC=$(wildcard bmv2/*.p4)
 P4_MAIN=bmv2/dash_pipeline.p4
@@ -87,26 +102,56 @@ $(P4_ARTIFACTS): $(P4_SRC)
 ######################################
 
 
+# Note we have to mount main DASH dir to allow container to "see" the parent Git repo for the SAI submodule
+DOCKER_RUN_SAITHRIFT_BLDR =\
+	docker run \
+	$(DOCKER_FLAGS) \
+	--rm \
+	--name dash-saithrift-bldr-$(USER) \
+	-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/saithrift \
+	$(DOCKER_SAITHRIFT_BLDR_IMG) \
+
 # TODO - create separate rules for headers, libsai.so
 .PHONY:sai
 
-sai:fix-perms sai-headers libsai
+sai: fix-perms sai-clean sai-headers sai-meta libsai
 
 sai-headers: fix-perms p4 | SAI/SAI 
 	@echo "Generate SAI library headers and implementation..."
+	mkdir -p SAI/lib
 	$(DOCKER_RUN) \
+		$(DOCKER_FLAGS) \
 		--name build_sai-$(USER) \
 		-w /SAI $(DOCKER_SAITHRIFT_BLDR_IMG) \
 	    ./generate_dash_api.sh
+	# Fixup perms from generate_dash_api using sudo to call python,so subsequent scripts can access
+	sudo chmod -R a+rw $(PWD)/SAI/SAI
+
+sai-meta: fix-perms 
+	@echo "Generate SAI metadata..."
+	# hack - remove scripts which cause Git ownership failures in CI pipelines
+	# We don't need them, they're to check that SAI headers didn't experience enum changes etc.
+	sed -ie '/checkenumlock.sh/d' SAI/SAI/meta/Makefile
+	sed -ie '/checkancestry.sh/d' SAI/SAI/meta/Makefile
+	docker run \
+		$(DOCKER_FLAGS) \
+		--rm \
+		--name dash-saithrift-bldr-$(USER) \
+		-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/SAI/meta \
+		$(DOCKER_SAITHRIFT_BLDR_IMG) \
+	    make
 
 # TODO - add SAI header dependencies
 libsai: fix-perms 
 	@echo "build libsai.so..."
-	$(DOCKER_RUN) -w /SAI/lib \
-	$(DOCKER_BMV2_BLDR_IMG) \
+	$(DOCKER_RUN) \
+		$(DOCKER_FLAGS) \
+		-w /SAI/lib \
+		--name build_libsai-$(USER) \
+		$(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
-libsai-clean:fix-perms 
+libsai-clean: fix-perms 
 	-rm -rf SAI/lib/libsai.so
 
 .PHONY:sai-clean
@@ -114,6 +159,12 @@ sai-clean: fix-perms SAI/SAI libsai-clean
 	@echo "Restoring SAI subdirectories to baseline..."
 	rm -rf SAI/SAI/inc SAI/SAI/experimental SAI/SAI/meta
 	cd SAI/SAI && git checkout -- inc experimental meta
+
+
+# Run to recreate same environment as building saithrift client & server
+run-saithrift-bldr-bash:
+	$(DOCKER_RUN_SAITHRIFT_BLDR) \
+	    /bin/bash
 
 ######################################
 # P4 Behavioral-model (switch) TARGETS
@@ -138,61 +189,65 @@ kill-switch:
 	-docker kill simple_switch-$(USER)
 
 
-#################################
-# SAI-THRIFT SERVER TARGETS - WIP
-#################################
+###############################
+# SAI-THRIFT SERVER TARGETS
+###############################
 
-# Note we have to mount main DASH dir to allow container to "see" the parent Git repo for the SAI submodule
-# DOCKER_RUN_SAITHRIFT =\
-# 	docker run \
-# 	--rm \
-# 	--name dash-saithrift-bldr-$(USER) \
-# 	-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/saithrift \
-# 	$(DOCKER_SAITHRIFT_BLDR_IMG) \
+saithrift-server:fix-perms
+	$(DOCKER_RUN_SAITHRIFT_BLDR) \
+	    make $@
 
-# sai-thrift-server:fix-perms 
-# 	$(DOCKER_RUN_SAITHRIFT) \
-# 	    make $@
+DOCKER_RUN_SAITHRIFT_SRVR =\
+	docker run \
+	--rm \
+	$(DOCKER_FLAGS) \
+	--net=host \
+	--name dash-saithrift-server-$(USER) \
+	-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline.json:/etc/dash/dash_pipeline.json \
+	-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
+	-v $(PWD)/SAI:/SAI \
+	-v $(PWD)/SAI/SAI/meta:/meta \
+	-w /SAI/rpc/usr/sbin \
+	-e LD_LIBRARY_PATH=/SAI/lib:/usr/local/lib \
+	$(DOCKER_SAITHRIFT_BLDR_IMG)
 
-# sai-thrift-server-bash:
-# 	docker run \
-# 	--rm \
-# 	-it \
-# 	--name dash-saithrift-bldr-$(USER) \
-# 	-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/saithrift \
-# 	$(DOCKER_SAITHRIFT_BLDR_IMG) \
-# 	/bin/bash
+run-saithrift-server:
+	$(DOCKER_RUN_SAITHRIFT_SRVR) \
+	./saiserver
 
-# sai-thrift-server-clean:
-# 	$(DOCKER_RUN_SAITHRIFT) \
-# 	    make $@
+kill-saithrift-server:
+	-docker kill dash-saithrift-server-$(USER)
 
+run-saithrift-server-bash:
+	$(DOCKER_RUN_SAITHRIFT_SRVR) \
+	/bin/bash
 
+saithrift-server-clean:
+	$(DOCKER_RUN_SAITHRIFT_BLDR) \
+	    make $@
 
 ###############################
 # SAI TEST TARGETS
 ###############################
 
-.PHONY:test sai-test
-test:sai-test
+.PHONY:test libsai-test
+test:libsai-test
 
 test-clean:
-	make -C tests clean
+	make -C tests/libsai clean
 
 
-.PHONY:sai-test
-sai-test: fix-perms SAI/SAI SAI/lib/libsai.so
+.PHONY:libsai-test
+libsai-test:SAI/SAI SAI/lib/libsai.so
 	$(DOCKER_RUN) \
 	    --name dash-build-test-$(USER) \
-		-w /tests  $(DOCKER_BMV2_BLDR_IMG) \
+		-w /tests/libsai  $(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
 timeout?=5
-run-all-tests:run-test run-ixiac-test
 
-.PHONY:run-test
-run-test:run-sai-test
-run-sai-test:
+.PHONY:run-libsai-test
+run-libsai-test:
 	# Ensure P4Runtime server is listening
 	t=$(timeout); \
 	while [ $${t} -ge 1 ]; do \
@@ -203,10 +258,10 @@ run-sai-test:
 			t=`expr $$t - 1`; \
 		fi; \
 	done; \
-	docker exec -w /tests/vnet_out simple_switch-$(USER) ./vnet_out
+	docker exec -w /tests/libsai/vnet_out simple_switch-$(USER) ./vnet_out
 
 # Make sure we have executable
-tests/init_switch/init_switch:sai-test
+tests/init_switch/init_switch:libsai-test
 
 .PHONY:init-switch
 init-switch:
@@ -245,7 +300,7 @@ docker-pull-bmv2-bldr:
 ###############################
 docker-saithrift-bldr:
 	docker build \
-		-f dockerfiles/Dockerfile.saithrift \
+		-f dockerfiles/Dockerfile.saithrift-bldr \
 	    -t $(DOCKER_SAITHRIFT_BLDR_IMG) \
 	    --build-arg user=$(USER) \
 	    --build-arg uid=$(shell id -u) \
@@ -253,11 +308,88 @@ docker-saithrift-bldr:
 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
 	    --build-arg available_processors=$(shell nproc) \
 		dockerfiles
+
 docker-publish-saithrift-bldr:
 	echo "TO DO when we have a proper repository"
 
 docker-pull-saithrift-bldr:
 	docker pull $(DOCKER_SAITHRIFT_BLDR_IMG)
+
+###############################
+# Builder, has base packages to make client docker
+docker-saithrift-client-bldr:
+	docker build \
+		-f dockerfiles/Dockerfile.saithrift-client-bldr \
+	    -t $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG) \
+	    --build-arg user=$(USER) \
+	    --build-arg uid=$(shell id -u) \
+	    --build-arg guid=$(shell id -g) \
+	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+	    --build-arg available_processors=$(shell nproc) \
+		./tests
+
+docker-pull-saithrift-client-bldr:
+	docker pull $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG)
+
+docker-publish-saithrift-client-bldr:
+	echo "TO DO when we have a proper repository"
+
+###############################
+		
+# Client image, rebuild any time SAI interface changes
+# TODO - add sai header (inc/ and experimental) dependencies
+docker-saithrift-client:
+	docker build \
+		-f dockerfiles/Dockerfile.saithrift-client \
+	    -t $(DOCKER_SAITHRIFT_CLIENT_IMG) \
+		.
+
+DOCKER_RUN_SAITHRIFT_CLIENT=\
+	docker run \
+	-u root \
+	--network=host \
+	--rm \
+	-w /tests/ \
+	$(DOCKER_FLAGS) \
+
+# Run "production" Pytests bundled inside docker
+run-saithrift-pytests:deploy-ixiac
+	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
+	-w /tests/saithrift/pytest \
+	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
+	./run-saithrift-pytests.sh
+
+# Run "dev" tests mounted from host
+run-saithrift-dev-pytests:deploy-ixiac
+	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
+	-v $(PWD)/tests/:/tests-dev/ \
+	-w /tests-dev/saithrift/pytest \
+	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
+	./run-saithrift-pytests.sh
+
+# Run "production" PTF tests bundled inside docker
+# Note - if add ixia-c usage to PTF tests, add dependency deploy-ixiac
+run-saithrift-ptftests:
+	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
+	-w /tests/saithrift/ptf \
+	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
+	./run-saithrift-ptftests.sh
+
+# Run "dev" PTF tests mounted from host
+# Note - if add ixia-c usage to PTF tests, add dependency deploy-ixiac
+run-saithrift-dev-ptftests:
+	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
+	-v $(PWD)/tests/:/tests-dev/ \
+	-w /tests-dev/saithrift/ptf \
+	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
+	./run-saithrift-ptftests.sh
+
+run-saithrift-client-bash:
+	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
+	-v $(PWD)/tests/:/tests-dev/ \
+	-w /tests-dev/saithrift \
+	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
+	/bin/bash
 
 ###############################
 
@@ -350,7 +482,7 @@ network-clean:
 ###############################
 
 run-ixiac-test: ixiac-prereq init-switch
-	python3 -m pytest ../test/test-cases/bmv2_model/ -s
+	# python3 -m pytest ../test/test-cases/bmv2_model/ -s
 
 ixiac-prereq: install-python-modules deploy-ixiac
 
