@@ -282,7 +282,7 @@ sai_status_t sai_remove_{{ table.name }}(
     {% endfor %}
 
     retCode = MutateTableEntry(matchActionEntry, p4::v1::Update_Type_DELETE);
-    if (grpc::StatusCode::OK != retCode) {
+    if (grpc::StatusCode::OK == retCode) {
         delete matchActionEntry;
         return 0;
     }
@@ -310,7 +310,8 @@ sai_status_t sai_get_{{ table.name }}_attribute(
 {% endif %}
 {% endfor %}
 
-static sai_{{ app_name }}_api_t sai_{{app_name }}_api_impl = {
+/* TODO [cs] Generate .h file for _impl to use within sai_api_query() */
+sai_{{ app_name }}_api_t sai_{{app_name }}_api_impl = {
 {% for table in tables %}
     .create_{{ table.name }} =  sai_create_{{ table.name }},
     .remove_{{ table.name }} = sai_remove_{{ table.name }},

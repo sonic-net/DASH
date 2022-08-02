@@ -1,9 +1,9 @@
 # This Dockerfile builds an image used to compile P4 programs for the bmv2 backend only
 # It's based on public p4lang/p4c docker but strips out uneeded backends.
 # See https://docs.docker.com/develop/develop-images/multistage-build/
-# FROM p4lang/p4c:stable as builder
+# FROM p4lang/p4c:stable as p4lang-p4c
 # :stable on 2022-07-03:
-FROM p4lang/p4c@sha256:e4e8aa3f38e84cc51acb7df60257309a6ddfd77a2d0a05e0db445750f209be93 as builder
+FROM p4lang/p4c@sha256:e4e8aa3f38e84cc51acb7df60257309a6ddfd77a2d0a05e0db445750f209be93 as p4lang-p4c
 LABEL maintainer="SONIC-DASH Community"
 LABEL description="DASH p4c-bmv2 compiler, minimal"
 
@@ -24,9 +24,9 @@ FROM amd64/ubuntu:20.04
 # Need python for "p4c" wrapper &  gcc for the C preprocessor
 RUN apt update && apt install -y python3 gcc
 
-COPY --from=builder /usr/local/lib/* /usr/local/lib/
+COPY --from=p4lang-p4c /usr/local/lib/* /usr/local/lib/
 
-COPY --from=builder \
+COPY --from=p4lang-p4c \
         /usr/lib/x86_64-linux-gnu/libboost_*so* \
         /usr/lib/x86_64-linux-gnu/libgc*so* \
         /usr/lib/x86_64-linux-gnu/libisl*so* \
@@ -34,13 +34,13 @@ COPY --from=builder \
         /usr/lib/x86_64-linux-gnu/libmpfr*so* \
         /usr/lib/x86_64-linux-gnu/
 
-COPY --from=builder /usr/lib/gcc/x86_64-linux-gnu /usr/lib/gcc/x86_64-linux-gnu/
-COPY --from=builder /usr/bin/cpp /usr/bin/
-COPY --from=builder /usr/local/share/p4c/ /usr/local/share/p4c/
+COPY --from=p4lang-p4c /usr/lib/gcc/x86_64-linux-gnu /usr/lib/gcc/x86_64-linux-gnu/
+COPY --from=p4lang-p4c /usr/bin/cpp /usr/bin/
+COPY --from=p4lang-p4c /usr/local/share/p4c/ /usr/local/share/p4c/
 
 WORKDIR /usr/local/bin
 
-COPY --from=builder \
+COPY --from=p4lang-p4c \
         /usr/local/bin/p4c \
         /usr/local/bin/p4c-bm2-ss \
         /usr/local/bin/
@@ -49,7 +49,7 @@ CMD bash
 
 # # Alternate approach - selective remove backends etc.
 # # ~ 726 MB vs 971MG for p4lang/p4c:stable
-# FROM p4lang/p4c:stable as builder
+# FROM p4lang/p4c:stable as p4lang-p4c
 # LABEL maintainer="SONIC-DASH Community"
 # LABEL description="DASH p4c-bmv2 compiler, minimal"
 
@@ -114,9 +114,9 @@ CMD bash
 #     yanglint \
 #     yangre 
 
-# # Copy everything from builder as one layer to avoid the deleted files above
+# # Copy everything from p4lang-p4c as one layer to avoid the deleted files above
 # FROM scratch
-# COPY --from=builder / /
+# COPY --from=p4lang-p4c / /
 
 
 # CMD bash
