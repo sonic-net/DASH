@@ -369,6 +369,8 @@ corresponding flow is created in the flow table.
 
 > [!NOTE] L3 works in same way except port re-write
 
+### To be added:  VNET Peering and VNET Global Peering
+
 ## References
 
 - [Disaggregated API for SONiC Hosts (DASH) high level
