@@ -83,18 +83,50 @@ control dash_ingress(inout headers_t hdr,
         }
     }
 
+#define ACL_GROUPS_PARAM(prefix) \
+    bit<16> ## prefix ##_stage1_dash_acl_group_id, \
+    bit<16> ## prefix ##_stage2_dash_acl_group_id, \
+    bit<16> ## prefix ##_stage3_dash_acl_group_id, \
+    bit<16> ## prefix ##_stage4_dash_acl_group_id, \
+    bit<16> ## prefix ##_stage5_dash_acl_group_id
+
+#define ACL_GROUPS_COPY_TO_META(prefix) \
+   meta.stage1_dash_acl_group_id = ## prefix ##_stage1_dash_acl_group_id; \
+   meta.stage2_dash_acl_group_id = ## prefix ##_stage2_dash_acl_group_id; \
+   meta.stage3_dash_acl_group_id = ## prefix ##_stage3_dash_acl_group_id; \
+   meta.stage4_dash_acl_group_id = ## prefix ##_stage4_dash_acl_group_id; \
+   meta.stage5_dash_acl_group_id = ## prefix ##_stage5_dash_acl_group_id;
+
     action set_eni_attrs(bit<32> cps,
                          bit<32> pps,
                          bit<32> flows,
                          bit<1> admin_state,
                          IPv4Address vm_underlay_dip,
-                         bit<24> vm_vni) {
+                         bit<24> vm_vni,
+                         ACL_GROUPS_PARAM(inbound_v4),
+                         ACL_GROUPS_PARAM(inbound_v6),
+                         ACL_GROUPS_PARAM(outbound_v4),
+                         ACL_GROUPS_PARAM(outbound_v6)) {
         meta.eni_data.cps            = cps;
         meta.eni_data.pps            = pps;
         meta.eni_data.flows          = flows;
         meta.eni_data.admin_state    = admin_state;
         meta.encap_data.underlay_dip = vm_underlay_dip;
         meta.encap_data.vni          = vm_vni;
+
+        if (meta.is_dst_ip_v6 == 1) {
+            if (meta.direction == direction_t.OUTBOUND) {
+                ACL_GROUPS_COPY_TO_META(outbound_v6);
+            } else {
+                ACL_GROUPS_COPY_TO_META(inbound_v6);
+            }
+        } else {
+            if (meta.direction == direction_t.OUTBOUND) {
+                ACL_GROUPS_COPY_TO_META(outbound_v4);
+            } else {
+                ACL_GROUPS_COPY_TO_META(inbound_v4);
+            }
+        }
     }
 
     @name("eni|dash")
@@ -173,6 +205,28 @@ control dash_ingress(inout headers_t hdr,
         }
     }
 
+    action set_acl_group_attrs(bit<32> ip_addr_family) {
+        if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
+            if (meta.is_dst_ip_v6 == 1) {
+                meta.dropped = true;
+            }
+        } else {
+            if (meta.is_dst_ip_v6 == 0) {
+                meta.dropped = true;
+            }
+        }
+    }
+
+    @name("dash_acl_group|dash_acl")
+    table acl_group {
+        key = {
+            meta.stage1_dash_acl_group_id : exact @name("meta.stage1_dash_acl_group_id:dash_acl_group_id");
+        }
+        actions = {
+            set_acl_group_attrs();
+        }
+    }
+
     apply {
 
         /* Send packet on same port it arrived (echo) by default */
@@ -226,6 +280,7 @@ control dash_ingress(inout headers_t hdr,
             deny();
             return;
         }
+        acl_group.apply();
 
         if (meta.direction == direction_t.OUTBOUND) {
             outbound.apply(hdr, meta, standard_metadata);
