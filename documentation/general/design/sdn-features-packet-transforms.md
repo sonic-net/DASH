@@ -370,8 +370,8 @@ thinking about how to add Metering- and reconcile this in the P4 model.
 | ------------- |:-------------:| -----:|
 | TotalPacket      | Total packets to/from a VM. Exposed to customer; 2 counters, 1 per direction | ENI |
 | TotalBytes      | Total bytes to/from a VM. Exposed to customer; 2 counters, 1 per direction     |   ENI |
-| TotalUnicastPacketForwarded | evident      |    ENI |
-| TotalMulticastPacketsForwarded | evident      |    ENI |
+| TotalUnicastPacketForwarded |       |    ENI |
+| TotalMulticastPacketsForwarded |       |    ENI |
 | TcpConnectionsResetHalfTTL | TCP connections that had a TCP reset and its TTL cut down to 5 seconds      |    ENI |
 | NonSynStateful | Non-SYN TCP packets that are natted and not dropped by setting (SLB scenario)      |    ENI |
 | NumberOfFlowResimulated DuringPortTimer | Number of connections updated in an internal port-level update      |    ENI |
