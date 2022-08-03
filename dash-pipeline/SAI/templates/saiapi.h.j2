@@ -151,18 +151,14 @@ typedef enum _sai_{{ table.name }}_attr_t
 
 {% endfor %}
 {% endif %}
-{% for action in table.actions %}
-{% for param in action.params %}
+{% for param in table.actionParams %}
     /**
-     * @brief Action {{ action.name }} parameter {{ param.name | upper }}
+     * @brief Action {% for action in param.paramActions %}{{ action }}{{ ", " if not loop.last else "" }}{% endfor %} parameter {{ param.name | upper }}
      *
      * @type {{ param.type }}
      * @flags CREATE_AND_SET
 {% if param.type == 'sai_uint16_t' %}
      * @isvlan false
-{% endif %}
-{% if table.actions | length > 1 %}
-     * @condition SAI_{{ table.name | upper }}_ATTR_ACTION == SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}
 {% endif %}
 {% if param.type == 'sai_ip_address_t' %}
      * @default 0.0.0.0
@@ -177,6 +173,12 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% else %}
      * @default 0
 {% endif %}
+{% if table.actions | length > 1 %}
+{% if param.paramActions | length > 0 %}
+     * @validonly {% for action in param.paramActions %}SAI_{{ table.name | upper }}_ATTR_ACTION == SAI_{{ table.name | upper }}_ACTION_{{ action | upper }}{{ " or " if not loop.last else "" }}{% endfor %}
+
+{% endif %}
+{% endif %}
      */
 {% if not ns.firstattr %}
     SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }} = SAI_{{ table.name | upper }}_ATTR_START,
@@ -185,7 +187,6 @@ typedef enum _sai_{{ table.name }}_attr_t
     SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }},
 {% endif %}
 
-{% endfor %}
 {% endfor %}
 {% if table.stages | length > 0 %}
     /**

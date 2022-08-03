@@ -6,7 +6,7 @@ See also:
 
 **Table of Contents**
 - [DASH Docker Images](#dash-docker-images)
-  - [Disclaimer Specific Docker Image Details](#disclaimer-specific-docker-image-details)
+  - [Disclaimer - Specific Docker Image Details](#disclaimer---specific-docker-image-details)
   - [Overview](#overview)
   - [Use of existing Public Docker images](#use-of-existing-public-docker-images)
   - [Running Containers during Make](#running-containers-during-make)
@@ -20,7 +20,7 @@ See also:
   - [Optional - expert - `exec` a container shell](#optional---expert---exec-a-container-shell)
 # DASH Docker Images
 
-## Disclaimer Specific Docker Image Details
+## Disclaimer - Specific Docker Image Details
 Below we'll lay out general principles; we avoid describing specific docker images used in DASH, to prevent documentation drift. Look at [Makefile](Makefile) and in the [dockerfiles](dockerfiles) directory for current details.
 
 ## Overview

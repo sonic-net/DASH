@@ -4,6 +4,9 @@ See also:
 * [README-dash-workflows.md](README-dash-workflows.md) for build workflows and Make targets.
 * [README-dash-ci](README-dash-ci.md) for CI pipelines.
 * [README-dash-docker](README-dash-docker.md) for Docker usage.
+* [README-saithrift](README-saithrift.md) for saithrift client/server and test workflows.
+* [README-ptftests](README-ptftests.md) for saithrift PTF test-case development and usage.
+* [README-pytests](README-pytests.md) for saithrift Pytest test-case development and usage.
 # DASH Pipeline
 This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://github.com/p4lang/behavioral-model) from [p4lang](https://github.com/p4lang). It includes the P4 program which models the DASH overlay dataplane; Dockerfiles; build and test infrastructure; and CI (Continuous Integration) spec files.
 
@@ -19,12 +22,9 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 - [Quick-start](#quick-start)
   - [Prerequisites](#prerequisites)
   - [Clone this repo](#clone-this-repo)
-  - [Get the right branch](#get-the-right-branch)
   - [I feel lucky!](#i-feel-lucky)
-  - [Build Artifacts](#build-artifacts)
-  - [Run bmv2 software switch](#run-bmv2-software-switch)
-  - [Run tests](#run-tests)
   - [Cleanup](#cleanup)
+  - [More Make Targets](#more-make-targets)
 - [Installing Prequisites](#installing-prequisites)
   - [Install git](#install-git)
   - [Install docker](#install-docker)
@@ -35,20 +35,20 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 # Known Issues
 * P4 code doesn't loop packets back to same port.
 * P4 code mark-to-drop not set when meta.drop is set.
+* Permission and ownership issues in Docker images, permanent fix is needed.
 # TODOs
 ## Loose Ends
 Small items to complete given the exsting features and state, e.g. excluing major roadmap items.
-* n/a
+* Update SAI submodule to upstream when PRs are merged (currently using dev branches for URLs)
+* Produce "dev" and "distro" versions of docker images. Dev images mount to host FS and use artifacts built on the host. Distro images are entirely self-contained including all artifacts.
 ## Desired Optimizations
 * Build a Docker image automatically when its Dockerfile changes, publish and pull from permanent repo
 * Use Azure Container Registry (ACR) for Docker images instead of temporary Dockerhub registry
 * Use dedicated higher-performance runners instead of [free Azure 2-core GitHub runner instances](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources)
-* Explore use of [virtualenv](https://virtualenv.pypa.io/en/latest/) to avoid contaiminating the local environment with this project's particular Python requirements.
 
 ## Roadmap
 These are significant feature or functionality work items.
 * Use modified bmv2 which adds stateful processing. Current version is vanilla bmv2. This will require building it instead of using a prebuilt bmv2 docker image, see [Build Docker dev container](#build-docker-dev-container). [**WIP**]
-* Integrate SAI-thrift server from [OCP/SAI](https://github.com/opencomputeproject/SAI) [**WIP**]
 * Add DASH sevice test cases including SAI-thrift pipeline configuration and traffic tests
 
 # Quick-start
@@ -62,102 +62,79 @@ See [Installing Prequisites](#installing-prequisites) for details.
 * git - tested with version 2.25.1
 * docker
 * [docker-compose](#install-docker-compose) (**1.29.2 or later**)
-* python3, pip3
 
 ## Clone this repo
 ```
 git clone <repo URL>
-git submodule update --init # NOTE --recursive not needed (yet)
+cd DASH
 ```
-## Get the right branch
-
-**Optional** - if you require a particular dev branch.
+**Optional** - if you require a particular dev branch:
 ```
 git checkout <branch>
 ```
+Init (clone) the SAI submodule:
+```
+git submodule update --init # NOTE --recursive not needed (yet)
+```
 ## I feel lucky!
-Eager to see it work? Try this:
+Eager to see it work? First [clone this repo](#clone-this-repo), then do the following:
 
-In one terminal:
+In first terminal (console will print bmv2 logs):
 ```
-make clean && make all network run-switch
+cd dash-pipeline
+make clean && make all run-switch
 ```
-In another terminal:
+The above procedure takes awhile since it has to pull docker images (once) and build some code.
+
+In second terminal (console will print saithrift server logs):
 ```
-make run-all-tests clean
+make run-saithrift-server
+```
+In third terminal (console will print test results):
+```
+make run-all-tests
+```
+When you're done, do:
+```
+make kill-all      # just to stop the daemons
+                   # you can redo "run" commands w/o rebuilding
+```
+*OR*
+```
+make clean         # stop daemons and clean everything up
 ```
 The final `clean` above will kill the switch, delete artifacts and veth pairs.
 
-Below we break down the steps in more detail.
 
-## Build Artifacts
-```
-make clean # optional, as needed
-make all
-```
-
-## Run bmv2 software switch
-This will also automatically ceate `veth` pairs as needed.
-```
-make run-switch     # willrun in foreground with logging
-```
-
-## Run tests
-Use a different terminal:
-```
-make run-test          # Simple SAI table accessor, no traffic
-```
-Follow instructions for [Install docker-compose](#install-docker-compose), then:
-```
-make run-ixiac-test    # Uses SW traffic-generator
-```
-The setup for ixia-c traffic tests is as follows. More info is available [here](README-dash-workflows#about-snappi-and-ixia-c-traffic-generator).
+The tests may use a combination of SW packet generators:
+* Scapy - well-known packet-at-a-time SW traffic generator/capture
+* ixia-c - performant flow-based packet genrator/capture
+  
+The setup for ixia-c -based traffic tests is as follows. More info is available [here](README-dash-workflows#about-snappi-and-ixia-c-traffic-generator).
 
 ![ixia-c setup](../test/third-party/traffic_gen/deployment/ixia-c.drawio.svg)
 
-## Cleanup
 
+## Cleanup
 This is a summary of most-often used commands, see [README-dash-workflows.md](README-dash-workflows.md) for more details.
 
 * `CTRL-c` - kill the switch container from within the iteractive terminal
-* `make kill-switch` - kills the switch container from another terminal
-* `make network-clean` - delete veth pairs
-* `make undeploy-ixiac` - kill ixia-c containers
-* `make p4-clean` - delete P4 artifacts
-* `make sai-clean` - delete SAI artifacts. Do this before committing code, see [Here](README-dash-workflows.md#typical-workflow-committing-new-code---ignoring-sai-submodule) 
-* `make clean` - does all of the above
+* `make kill-all` - kill all the running containers
+* `make clean` - clean up everything, kill containers
 
+## More Make Targets
+See [README-dash-workflows.md](README-dash-workflows.md) for build workflows and Make targets. There are many fine-grained Make targets to control your development workflow.
 # Installing Prequisites
-
 ## Install git
 ```
 sudo apt install -y git
 ```
-
 ## Install docker
 Need for basically everything to build/test dash-pipeline.
 
 See:
 * https://docs.docker.com/desktop/linux/install/
 
-## Install Python 3
-This is probably already installed in your Linux OS, but if not:
-
-See:
-* https://docs.python-guide.org/starting/install3/linux/
-
-```
-sudo apt install -y python3
-```
-  
-## Install pip3
-See:
-* https://pip.pypa.io/en/latest/installation/
-
-You can probably use the following command for most cases:
-```
-sudo apt install -y python3-pip
-```
 ## Install docker-compose
 >**NOTE** Use docker-compose 1.29.2 or later! The `.yml` file format changed. Using an older version might result in an error such as: <br/> `ERROR: Invalid interpolation format for "controller" option in service "services": "ixiacom/ixia-c-controller:${CONTROLLER_VERSION:-latest}"`
 
@@ -168,10 +145,11 @@ See also:
 * https://www.cyberithub.com/how-to-install-docker-compose-on-ubuntu-20-04-lts-step-by-step/
   
 
-Installation of `docker-compose` has to be done just once. You can use another technique based on your platform and preferences. The following will download and install a linux executable under `/usr/local/bin`. You should have a PATH to this directory. You can edit the below command to locate it somewhere else as desired, just change the path as needed.
+Installation of `docker-compose` has to be done just once. You can use another technique based on your platform and preferences. The following will download and install a linux executable under `/usr/local/bin`. You should have a PATH to this directory. **You can edit the commands below to locate it somewhere else as desired; just change the path as needed.**
 
 
 ```
+sudo mkdir -p /usr/local/bin
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 ```

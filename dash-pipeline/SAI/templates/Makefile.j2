@@ -1,16 +1,45 @@
-libsai.so: {% for api in api_names %}sai{{ api }}.cpp {% endfor %}
+# DASH libsai.so Makefile
+# THIS MAKEFILE IS AUTO-GENERATED FROM templates/Makefile.j2
+# DO NOT MODIFY
+
+SAI_DIR=../SAI/meta/
+
+SAI_SRCS=saimetadatautils.c \
+		saimetadata.c \
+		saiserialize.c
+
+SAI_SRC_PATHS=$(addprefix $(SAI_DIR),$(SAI_SRCS))
+SAI_OBJS=$(SAI_SRCS:.c=.o)
+
+#GXX_FLAGS=-D_GLIBCXX_USE_CXX11_ABI=0
+
+libsai.so: utils.cpp \
+		{% for api in api_names %}sai{{ api }}.cpp {% endfor %} 
+	gcc \
+		-fPIC \
+	    -c \
+	    -I ../SAI/meta/ \
+	    -I ../SAI/inc/ \
+	    -I ../SAI/experimental/ \
+		$(GXX_FLAGS) \
+		$(SAI_SRC_PATHS)
+
 	g++ \
 		-fpermissive \
 	    -c \
+	    -I ../SAI/meta/ \
 	    -I ../SAI/inc/ \
 	    -I ../SAI/experimental/ \
 	    -fPIC \
 	    -g \
+		$(GXX_FLAGS) \
 	    utils.cpp \
 	    {% for api in api_names %}sai{{ api }}.cpp {% endfor %}
+
 	g++ \
 	    -shared \
 	    -g \
 	    -o libsai.so \
 	    utils.o \
+		$(SAI_OBJS) \
 	    {% for api in api_names %}sai{{ api }}.o {% endfor %}
