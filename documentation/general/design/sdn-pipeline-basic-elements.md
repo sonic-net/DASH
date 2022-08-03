@@ -369,7 +369,7 @@ corresponding flow is created in the flow table.
 
 > [!NOTE] L3 works in same way except port re-write
 
-### To be added:  VNET Peerng and VNET Global Peering
+### To be added:  VNET Peering and VNET Global Peering
 
 ## References
 
