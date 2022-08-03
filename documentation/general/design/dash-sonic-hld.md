@@ -134,7 +134,7 @@ After the ACL stage, it does LPM routing based on the inner dst-ip and applies t
 	
    ![dash-inbound](./images/dash-hld-inbound-packet-processing-pipeline.svg)
 
-Based on the incoming packet's VNI, if it does not match against any reserved VNI, the pipeline shall set the direction as RX(Inbound) and using the inner dst-mac, maps to the corresponding ENI. In the inbound flow, Priority based "Routing Rule" lookup happens based on VNI and SRC PA prefix and maps to VNET. Using the VNET mapping tables, source PA address is validated against the list of mappings. If the check passes, decap action is performed, else dropped. After LPM is the three stage ACL, processed in order. ACLs can have multiple src/dst IP ranges or port ranges as match criteria.
+Based on the incoming packet's VNI, if it does not match against any reserved VNI, the pipeline shall set the direction as RX(Inbound) and using the inner dst-mac, maps to the corresponding ENI. In the inbound flow, Priority based "Routing Rule" lookup happens based on VNI and/or SRC PA prefix and maps to a VNET. In other words, the VNET is derived from a VNI key or a combination of VNI key and SRC PA based on the routing rule entry. It is possible that in some cases, two VNETs in different region can have the same VNI key and hence Inbound routing rule shall have both SRC PA prefix and VNI key to uniquely determine the VNET. Using the derived VNET's mapping tables, source PA address is validated against the list of mappings. If the check passes, decap action is performed, else dropped. Note that, PA validation is conditional and routing rule shall specify (say, by a flag) whether to perform PA validation or not as there are some cases like SLB traffic for which PA validation is not required. After LPM is the three stage ACL, processed in order. ACLs can have multiple src/dst IP ranges or port ranges as match criteria.
 	
 It is worth noting that CA-PA mapping table shall be used for both encap and decap process
 	
@@ -340,7 +340,7 @@ action_type              = routing_type              ; reference to routing type
 underlay_ip              = ip_address                ; PA address for the CA
 mac_address              = MAC address as string     ; Inner dst mac
 metering_bucket          = bucket_id                 ; metering and counter
-use_dst_vni              = bool                      ; if true, use the destination VNET VNI for encap. If false or not specified, use source VNI
+use_dst_vni              = bool                      ; if true, use the destination VNET VNI for encap. If false or not specified, use source VNET's VNI
 ```
 
 ## 3.3 Module Interaction
