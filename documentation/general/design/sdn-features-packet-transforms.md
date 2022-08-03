@@ -326,7 +326,7 @@ Action| VNI |
 
 ## Telemetry
 
-## Counters
+## Counters - need to ensure the proposed counters are supportable in the P4 behavioral model (DASH pipeline)
 
 Counters are objects for counting data per ENI. The following are their main
 characteristics:
