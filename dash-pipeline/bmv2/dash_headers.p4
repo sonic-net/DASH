@@ -31,6 +31,10 @@ header ipv4_t {
 
 const bit<16> IPV4_HDR_SIZE=160/8;
 
+header ipv4options_t {
+    varbit<320> options;
+}
+
 header udp_t {
     bit<16>  src_port;
     bit<16>  dst_port;
@@ -81,6 +85,7 @@ const bit<16> IPV6_HDR_SIZE=320/8;
 struct headers_t {
     ethernet_t ethernet;
     ipv4_t     ipv4;
+    ipv4options_t ipv4options;
     ipv6_t     ipv6;
     udp_t      udp;
     tcp_t      tcp;
