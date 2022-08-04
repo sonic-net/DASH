@@ -17,18 +17,18 @@ match_kind {
 #define LIST_MATCH list
 #define RANGE_LIST_MATCH range_list
 #else
-#define LIST_MATCH exact
-#define RANGE_LIST_MATCH exact
+#define LIST_MATCH optional
+#define RANGE_LIST_MATCH optional
 #endif
 
 #define str(name) #name
 
 #define ACL_STAGE(table_name) \
     direct_counter(CounterType.packets_and_bytes) ## table_name ##_counter; \
-    @name(str(table_name##:dash_acl|dash_acl)) \
+    @name(str(table_name##:dash_acl_rule|dash_acl)) \
     table table_name { \
         key = { \
-            meta.eni_id : exact @name("meta.eni_id:eni_id"); \
+            meta. ## table_name ##_dash_acl_group_id : exact @name("meta.dash_acl_group_id:dash_acl_group_id"); \
             hdr.ipv4.dst_addr : LIST_MATCH @name("hdr.ipv4.dst_addr:dip"); \
             hdr.ipv4.src_addr : LIST_MATCH @name("hdr.ipv4.src_addr:sip"); \
             hdr.ipv4.protocol : LIST_MATCH @name("hdr.ipv4.src_addr:protocol"); \
@@ -51,7 +51,7 @@ match_kind {
             deny: {return;} \
         }
 
-/* 
+/*
  * This control results in a new set of tables every time
  * it is applied, i. e. inbound ACL tables are different
  * from outbound, and API will be generated for each of them
