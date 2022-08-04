@@ -47,19 +47,6 @@ typedef enum _sai_{{ table.name }}_action_t
 } sai_{{ table.name }}_action_t;
 
 {% endif %}
-{% if table.stages | length > 0 %}
-/**
- * @brief Attribute data for #SAI_{{ table.name | upper }}_ATTR_STAGE
- */
-typedef enum _sai_{{ table.name }}_stage_t
-{
-{% for stage in table.stages %}
-    SAI_{{ table.name | upper }}_STAGE_{{ stage | upper }},
-
-{% endfor %}
-} sai_{{ table.name }}_stage_t;
-
-{% endif %}
 {% endfor %}
 {% for table in sai_api.tables %}
 {% if table.is_object == 'false' %}
@@ -89,6 +76,8 @@ typedef struct _sai_{{ table.name }}_t
     {{ key.sai_list_type }} {{ key.sai_key_name | lower }};
 {% elif key.match_type == 'range_list' %}
     {{ key.sai_range_list_type }} {{ key.sai_key_name | lower }};
+{% elif key.match_type == 'optional' %}
+    {{ key.sai_key_type }} {{ key.sai_key_name | lower }};
 {% else %}
     {{ key.sai_key_type }} {{ key.sai_key_name | lower }};
 {% endif %}
@@ -162,12 +151,14 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% endif %}
 {% if param.type == 'sai_ip_address_t' %}
      * @default 0.0.0.0
+{% elif param.type == 'sai_ip_addr_family_t' %}
+     * @default SAI_IP_ADDR_FAMILY_IPV4
 {% elif param.type == 'sai_mac_t' %}
      * @default 0:0:0:0:0:0
 {% elif param.type == 'bool' %}
      * @default false
 {% elif param.type == 'sai_object_id_t' %}
-     * @objects SAI_OBJECT_TYPE_{{ param.name | replace('_id', '') | upper }}
+     * @objects SAI_OBJECT_TYPE_{{ param.objectName | upper }}
      * @allownull true
      * @default SAI_NULL_OBJECT_ID
 {% else %}
@@ -188,17 +179,6 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% endif %}
 
 {% endfor %}
-{% if table.stages | length > 0 %}
-    /**
-     * @brief Stage
-     *
-     * @type sai_{{ table.name }}_stage_t
-     * @flags CREATE_AND_SET
-     * @default SAI_{{ table.name | upper }}_STAGE_{{ table.stages[0] | upper }}
-     */
-    SAI_{{ table.name | upper }}_ATTR_STAGE,
-
-{% endif %}
 {% if table.with_counters == 'true' %}
     /**
      * @brief Attach a counter

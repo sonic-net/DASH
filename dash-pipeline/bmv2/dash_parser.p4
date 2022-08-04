@@ -5,7 +5,8 @@
 
 error {
     IPv4IncorrectVersion,
-    IPv4OptionsNotSupported
+    IPv4OptionsNotSupported,
+    InvalidIPv4Header
 }
 
 #define UDP_PORT_VXLAN 4789
@@ -31,7 +32,20 @@ parser dash_parser(packet_in packet,
     state parse_ipv4 {
         packet.extract(hd.ipv4);
         verify(hd.ipv4.version == 4w4, error.IPv4IncorrectVersion);
-        verify(hd.ipv4.ihl == 4w5, error.IPv4OptionsNotSupported);
+        verify(hd.ipv4.ihl >= 5, error.InvalidIPv4Header);
+        transition select (hd.ipv4.ihl) {
+                5: dispatch_on_protocol;
+                default: parse_ipv4options;
+        }
+    }
+
+    state parse_ipv4options {
+        packet.extract(hd.ipv4options,
+                    (bit<32>)(((bit<16>)hd.ipv4.ihl - 5) * 32));
+        transition dispatch_on_protocol;
+    }
+
+    state dispatch_on_protocol {
         transition select(hd.ipv4.protocol) {
             UDP_PROTO: parse_udp;
             TCP_PROTO: parse_tcp;
@@ -112,6 +126,7 @@ control dash_deparser(packet_out packet,
     apply {
 	packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
+        packet.emit(hdr.ipv4options);
         packet.emit(hdr.ipv6);
         packet.emit(hdr.udp);
         packet.emit(hdr.tcp);

@@ -140,6 +140,7 @@ sai-meta: fix-perms
 		-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/SAI/meta \
 		$(DOCKER_SAITHRIFT_BLDR_IMG) \
 	    make
+	sudo chmod -R o+rw SAI/
 
 # TODO - add SAI header dependencies
 libsai: fix-perms 
