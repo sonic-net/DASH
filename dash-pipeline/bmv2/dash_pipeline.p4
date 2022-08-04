@@ -66,13 +66,12 @@ control dash_ingress(inout headers_t hdr,
     }
 
     action set_appliance(EthernetAddress neighbor_mac,
-                         EthernetAddress mac,
-                         IPv4Address ip) {
+                         EthernetAddress mac) {
         meta.encap_data.underlay_dmac = neighbor_mac;
         meta.encap_data.underlay_smac = mac;
-        meta.encap_data.underlay_sip = ip;
     }
 
+    /* This table API should be implemented manually using underlay SAI */
     table appliance {
         key = {
             meta.appliance_id : ternary @name("meta.appliance_id:appliance_id");
@@ -232,7 +231,11 @@ control dash_ingress(inout headers_t hdr,
         /* Send packet on same port it arrived (echo) by default */
         standard_metadata.egress_spec = standard_metadata.ingress_port;
 
-        vip.apply();
+        if (vip.apply().hit) {
+            /* Use the same VIP that was in packet's destination if it's
+               present in the VIP table */
+            meta.encap_data.underlay_sip = hdr.ipv4.dst_addr;
+        }
         // TODO [cs] shouldn't this also be called at end of ingress?
         // Shouldn't it call mark_to_drop(standard_metadata);
 
