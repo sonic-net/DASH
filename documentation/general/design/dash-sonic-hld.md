@@ -27,13 +27,14 @@
 
 ###### Revision
 
-| Rev |     Date    |       Author       | Change Description                |
-|:---:|:-----------:|:------------------:|-----------------------------------|
-| 0.1 | 02/01/2022  |     Prince Sunny   | Initial version                   |
-| 0.2 | 03/09/2022  |     Prince Sunny   | Packet Flows/DB Objects           |
-| 0.3 | 05/24/2022  |      Oleksandr     | Memory Footprints                 |
-| 0.4 | 06/01/2022  |     Prince Sunny   | Design Considerations             |
-| 0.5 | 06/13/2022  |     Chris Sommers  | Schema Relationships              |
+| Rev |     Date    |       Author          | Change Description                  |
+|:---:|:-----------:|:---------------------:|:------------------------------------|
+| 0.1 | 02/01/2022  |     Prince Sunny      | Initial version                     |
+| 0.2 | 03/09/2022  |     Prince Sunny      | Packet Flows/DB Objects             |
+| 0.3 | 05/24/2022  |      Oleksandr        | Memory Footprints                   |
+| 0.4 | 06/01/2022  |     Prince Sunny      | Design Considerations               |
+| 0.5 | 06/13/2022  |     Chris Sommers     | Schema Relationships                |
+| 0.6 | 08/05/2022  |  Mukesh M Velayudhan  | Outbound VNI derivation in pipeline |
 
 # About this Manual
 This document provides more detailed design of DASH APIs, DASH orchestration agent, Config and APP DB Schemas and other SONiC buildimage changes required to bring up SONiC image on an appliance card. General DASH HLD can be found at [dash_hld](./dash-high-level-design.md).
@@ -128,7 +129,11 @@ Based on the incoming packet's VNI matched against the reserved VNI assigned for
 
 In the outbound flow, the appliance shall assume it is the first appliance to apply policy. It applies the outbound ACLs in three stages (VNIC, Subnet and VNET), processed in order, with the outcome being the most restrictive of the three ACLs combined. 
 
-After the ACL stage, it does LPM routing based on the inner dst-ip and applies the respective action (encap, subsequent CA-PA mapping). Finally, update the connection tracking table for both inbound and outbound. 
+After the ACL stage, it does LPM routing based on the inner dst-ip and applies the respective action (encap, subsequent CA-PA mapping). Finally, update the connection tracking table for both inbound and outbound.
+
+The figure below shows how the VNI to be encapsulated in the outgoing packet is derived based on the ENI, outboud routing and outbound CA-PA mapping table lookup in the Dash outbound packet processing pipeline.
+
+  ![dash-outbound-vni](./images/dash-hld-outbound-vni.svg)
 	
 ## 2.2 Inbound packet processing pipeline
 	
