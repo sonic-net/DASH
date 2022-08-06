@@ -80,9 +80,13 @@ Sent 1 packets.
 ```
 
 ## Developing P4 Code + libsai config (C++)
-To test the autogeneration of `libsai` and configuration of the dataplane, you can execute `make sai` and `make libsai-test`. You can add tests under `dash-pipeline/tests/libsai`. It takes slightly over half a minute to generate `libsai`. The c++ tests are limited to CRUD operations on the SAI interface and run as one-shot programs without any traffic generation. (Use [saithrift tests](#developing-end-to-end-tests-with-saithrift) for end-to-end testing of config and traffic.)
+To test the autogeneration of `libsai` and configuration of the dataplane, you can execute `make sai` and `make libsai-test`. You can add tests under `dash-pipeline/tests/libsai`. It takes slightly over half a minute to generate `libsai`. The C++ tests are limited to CRUD operations on the SAI interface and run as one-shot programs without any traffic generation.
 
-Here's the minimal set of commands to [re-]compile p4, generate libsai and c++ tests, and run tests:
+That being said, you can use the same techniques described in [Sending packets "manually" into the switch](#sending-packets-manually-into-the-switch). Conceivably you could write C++ tests to configure the switch to a known state; send packets; then verify them manually. However, test-cases written this way are not very useful, perhaps only  as ad hoc throwaway tests.
+
+>Use [saithrift tests](#developing-end-to-end-tests-with-saithrift) for end-to-end testing of config and traffic. Tests using the saithrift client/server are very easy to write and translate well into CI automated regression testing.
+
+Here's the minimal set of commands to [re-]compile p4, generate libsai and C++ tests, and run tests:
 ```
 [make clean]
 make p4 sai libsai-test run-switch
@@ -106,7 +110,7 @@ make run-all-tests                    # console 3
 
 ![dev-workflows](images/dev-workflow-p4-saithrift.svg)
 ## Incremental test-case development
-Once you have stable P4 code, `libsai` and a saithrift client/server framework, you can start the switch and sai-thrift server, then develop test-cases interactively. The figure above illustrates this process in the lower-right corner. You can edit and save saithrift tests (PTF or Pytest) and run selected, or all tests, interactively from inside the saithrift-client container. See [Developer: Run tests selectively from `bash` inside saithrift-client container](README-saithrift.md#developer-run-tests-selectively-from-bash-inside-saithrift-client-container) for details.
+Once you have stable P4 code, `libsai` and a saithrift client/server framework, you can start the switch and sai-thrift server, then develop test-cases interactively. The figure above illustrates this process in the lower-right corner. You can edit and save saithrift tests (PTF or Pytest)in your host PC's workspace; save the files; then run selected, or all tests, interactively from inside the saithrift-client container. See [Developer: Run tests selectively from `bash` inside saithrift-client container](README-saithrift.md#developer-run-tests-selectively-from-bash-inside-saithrift-client-container) for details.
 
 # Make Target Summary
 The tables below summarize the most important `make` targets for easy reference. You can click on a link to jump to further explanations. Not all make targets are shown. See the [Makefile](Makefile) to learn more.
@@ -213,7 +217,7 @@ make sai             # Combines steps above
 make sai-clean       # Clean up artifacts and Git Submodule
 ```
 
-These targets generates SAI headers from the P4Info which was described above. It uses [Jinja2](https://jinja.palletsprojects.com/en/3.1.x/) which renders [SAI/templates](SAI/templates) into c++ source code for the SAI headers corresponding to the DASH API as defined in the P4 code. It then compiles this code into a shared library `libsai.so` which will later be used to link to a test server (Thrift) or `syncd` daemon for production.
+These targets generates SAI headers from the P4Info which was described above. It uses [Jinja2](https://jinja.palletsprojects.com/en/3.1.x/) which renders [SAI/templates](SAI/templates) into C++ source code for the SAI headers corresponding to the DASH API as defined in the P4 code. It then compiles this code into a shared library `libsai.so` which will later be used to link to a test server (Thrift) or `syncd` daemon for production.
 
 This consists of two main steps
 * Generate the SAI headers and implementation code via [SAI/generate_dash_api.sh](SAI/generate_dash_api.sh) script, which is merely a wrapper which calls the real workhorse: [SAI/sai_api_gen.py](SAI/sai_api_gen.py). This uses templates stored in [SAI/templates](SAI/templates).
@@ -339,7 +343,7 @@ make run-saithrift-client-dev-tests       # run both suites above
 ```
 
 ## Run libsai C++ tests
-This exercises the `libsai.so` shared library with c++ programs. This tests the SAI API handlers and P4Runtime client adaptor, which communicates to the running `simple_switch_grpc` process over a socket.
+This exercises the `libsai.so` shared library with C++ programs. This tests the SAI API handlers and P4Runtime client adaptor, which communicates to the running `simple_switch_grpc` process over a socket.
 ```
 make run-libsai-test
 ```
