@@ -94,7 +94,7 @@ make run-all-tests                    # console 3
 
 ![dev-workflows](images/dev-workflow-p4-saithrift.svg)
 ## Incremental test-case development
-Once you have stable P4 code, `libsai` and a saithrift client/server framework, you can start the switch and sai-thrift server, then develop test-cases interactively. The figure above illustrates in the lower-right corner. You can edit and save saithrift tests (PTF or Pytest) and run select or all tests interactively from inside the saithroft-client container. See [Developer: Run tests selectively from `bash` inside saithrift-client container](README-saithrift.md#developer-run-tests-selectively-from-bash-inside-saithrift-client-container) for details.
+Once you have stable P4 code, `libsai` and a saithrift client/server framework, you can start the switch and sai-thrift server, then develop test-cases interactively. The figure above illustrates this process in the lower-right corner. You can edit and save saithrift tests (PTF or Pytest) and run selected, or all tests, interactively from inside the saithrift-client container. See [Developer: Run tests selectively from `bash` inside saithrift-client container](README-saithrift.md#developer-run-tests-selectively-from-bash-inside-saithrift-client-container) for details.
 
 # Make Target Summary
 The tables below summarize the most important `make` targets for easy reference. You can click on a link to jump to further explanations. Not all make targets are shown. See the [Makefile](Makefile) to learn more.
