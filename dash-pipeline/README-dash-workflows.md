@@ -1,3 +1,7 @@
+**>> I Don't have time to RTFM!***  Jump to [Concise Developer Workflows](#concise-developer-workflows)
+
+*(Read the Fancy Manual)
+
 See also:
 * [README.md](README.md) Top-level README for dash-pipeline
 * [README-dash-ci](README-dash-ci.md) for CI pipelines.
@@ -7,6 +11,10 @@ See also:
 * [README-pytests](README-pytests.md) for saithrift Pytest test-case development and usage.
 
 **Table of Contents**
+- [Concise Developer Workflows](#concise-developer-workflows)
+  - [Developing P4 Code - Zero config](#developing-p4-code---zero-config)
+  - [Developing P4 Code + libsai config (C++)](#developing-p4-code--libsai-config-c)
+  - [Developing End-to-End tests](#developing-end-to-end-tests)
 - [Make Target Summary](#make-target-summary)
   - [Make "ALL" Targets](#make-all-targets)
   - [Build Artifacts](#build-artifacts)
@@ -50,6 +58,41 @@ See also:
   - [Docker Image Versioning](#docker-image-versioning)
     - [Project-Specific Images](#project-specific-images)
     - [Third-party Docker Images](#third-party-docker-images)
+# Concise Developer Workflows
+This section gives you a quick idea of how to work on various tasks efficiently. Don't just run `make all` unless you have to!
+
+## Developing P4 Code - Zero config
+Developing P4 code only requires  use of `make p4` to verify the code compiles. This is fairly quick. You can run the code in the bmv2 software switch via `make run-switch`. You can send packets into the switch using a SW packet generator. This simplified setup doesn't support any switch configuration, so the testablity is minimal. For example, you can send in packets and observe the switch console logging to verify packet parsing/deparsing.
+
+![dev-workflows](images/dev-workflow-p4.svg)
+
+## Developing P4 Code + libsai config (C++)
+To test the autogeneration of `libsai` and configuration of the dataplane, you can execute `make sai` and `make libsai-test`. You can add tests under `dash-pipeline/tests/libsai`. It takes slightly over half a minute to generate `libsai`. The c++ tests are limited to CRUD operations on the SAI interface and run as one-shot programs without any traffic generation. (Use [saithrift tests](#developing-end-to-end-tests) for end-to-end testing of config and traffic.)
+
+Here's the minimal set of commands to [re-]compile p4, generate libsai and c++ tests, and run tests:
+```
+[make clean]
+make p4 sai libsai-test run-switch
+```
+In a second console, run tests and optionally stop the switch:
+```
+make run-libsai-test [&& make kill-switch]
+```
+
+![dev-workflows](images/dev-workflow-p4-libsai.svg)
+
+## Developing End-to-End Tests with saithrift
+End-to-end tests require `make all` in order to build all the local artifacts and saithrift-client docker image.
+
+A concise set of commands to run, in three separate terminals:
+```
+[make clean &&] make all run-switch   # console 1
+make run-saithrift-server
+make run-all-tests
+```
+
+
+![dev-workflows](images/dev-workflow-p4-saithrift.svg)
 # Make Target Summary
 The tables below summarize the most important `make` targets for easy reference. You can click on a link to jump to further explanations. Not all make targets are shown. See the [Makefile](Makefile) to learn more.
 
