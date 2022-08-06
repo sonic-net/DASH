@@ -1,4 +1,4 @@
-**>> I Don't have time to RTFM!***  Jump to [Concise Developer Workflows](#concise-developer-workflows)
+**>> I Don't have time to RTFM!***   [Jump to Concise Developer Workflows](#concise-developer-workflows)
 
 *(Read the Fancy Manual)
 
@@ -15,6 +15,7 @@ See also:
   - [Developing P4 Code - Zero config](#developing-p4-code---zero-config)
   - [Developing P4 Code + libsai config (C++)](#developing-p4-code--libsai-config-c)
   - [Developing End-to-End Tests with saithrift](#developing-end-to-end-tests-with-saithrift)
+  - [Incremental test-case development](#incremental-test-case-development)
 - [Make Target Summary](#make-target-summary)
   - [Make "ALL" Targets](#make-all-targets)
   - [Build Artifacts](#build-artifacts)
@@ -67,7 +68,7 @@ Developing P4 code only requires  use of `make p4` to verify the code compiles. 
 ![dev-workflows](images/dev-workflow-p4.svg)
 
 ## Developing P4 Code + libsai config (C++)
-To test the autogeneration of `libsai` and configuration of the dataplane, you can execute `make sai` and `make libsai-test`. You can add tests under `dash-pipeline/tests/libsai`. It takes slightly over half a minute to generate `libsai`. The c++ tests are limited to CRUD operations on the SAI interface and run as one-shot programs without any traffic generation. (Use [saithrift tests](#developing-end-to-end-tests) for end-to-end testing of config and traffic.)
+To test the autogeneration of `libsai` and configuration of the dataplane, you can execute `make sai` and `make libsai-test`. You can add tests under `dash-pipeline/tests/libsai`. It takes slightly over half a minute to generate `libsai`. The c++ tests are limited to CRUD operations on the SAI interface and run as one-shot programs without any traffic generation. (Use [saithrift tests](#developing-end-to-end-tests-with-saithrift) for end-to-end testing of config and traffic.)
 
 Here's the minimal set of commands to [re-]compile p4, generate libsai and c++ tests, and run tests:
 ```
@@ -91,8 +92,10 @@ make run-saithrift-server             # console 2
 make run-all-tests                    # console 3
 ```
 
-
 ![dev-workflows](images/dev-workflow-p4-saithrift.svg)
+## Incremental test-case development
+Once you have stable P4 code, `libsai` and a saithrift client/server framework, you can start the switch and sai-thrift server, then develop test-cases interactively. The figure above illustrates in the lower-right corner. You can edit and save saithrift tests (PTF or Pytest) and run select or all tests interactively from inside the saithroft-client container. See [Developer: Run tests selectively from `bash` inside saithrift-client container](README-saithrift.md#developer-run-tests-selectively-from-bash-inside-saithrift-client-container) for details.
+
 # Make Target Summary
 The tables below summarize the most important `make` targets for easy reference. You can click on a link to jump to further explanations. Not all make targets are shown. See the [Makefile](Makefile) to learn more.
 

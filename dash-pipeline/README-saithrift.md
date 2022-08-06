@@ -25,7 +25,7 @@ See also:
   - [Run Interactive saithrift-server container](#run-interactive-saithrift-server-container)
 # DASH saithrift client and server
 ## Overview
-The DASH saithrift API is used to configure and query a device under test (DUT) as described in [dash-test-workflow-saithrift.md](../test/docs/dash-test-workflow-saithrift.md) and [dash-test-workflow-saithrift.md](../test/docs/dash-test-workflow-p4-saithrift.md).
+The DASH saithrift API is used to configure and query a device under test (DUT) as described in [dash-test-workflow-saithrift](../test/docs/dash-test-workflow-saithrift.md) and [dash-test-workflow-saithrift-p4](../test/docs/dash-test-workflow-p4-saithrift.md).
 
 This document describes how to run the saithrift server and client to run test suites. It also gives some advice for writing tests, debugging, etc.
 # TODO
