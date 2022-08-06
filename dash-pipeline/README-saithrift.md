@@ -114,7 +114,6 @@ DASH
     SAI                   - top-level dir for SAI-related artifacts
                             This is the dash-pipeline SAI directory, not the SAI repo!
     rpc                   - output dir for saithrift code generator (1)
-                            c
       SAI                 - Git submodule root, imported into DASH repo
         extensions        - DASH extension headers - mix of repo files + code from "make sai"
         inc               - upstream sai headers
