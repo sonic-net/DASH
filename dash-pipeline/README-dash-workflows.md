@@ -13,6 +13,7 @@ See also:
 **Table of Contents**
 - [Concise Developer Workflows](#concise-developer-workflows)
   - [Developing P4 Code - Zero config](#developing-p4-code---zero-config)
+    - [Sending packets "manually" into the switch](#sending-packets-manually-into-the-switch)
   - [Developing P4 Code + libsai config (C++)](#developing-p4-code--libsai-config-c)
   - [Developing End-to-End Tests with saithrift](#developing-end-to-end-tests-with-saithrift)
   - [Incremental test-case development](#incremental-test-case-development)
@@ -22,7 +23,6 @@ See also:
   - [Launch Daemons/Containers](#launch-daemonscontainers)
   - [Run Tests](#run-tests)
 - [Detailed DASH Behavioral Model Build Workflow](#detailed-dash-behavioral-model-build-workflow)
-  - [TODO](#todo)
   - [Docker Image(s)](#docker-images)
   - [Build Workflow Diagram](#build-workflow-diagram)
   - [Make All](#make-all)
@@ -60,12 +60,24 @@ See also:
     - [Project-Specific Images](#project-specific-images)
     - [Third-party Docker Images](#third-party-docker-images)
 # Concise Developer Workflows
-This section gives you a quick idea of how to work on various tasks efficiently. Don't just run `make all` unless you have to!
+This section gives you a quick idea of how to work on various tasks efficiently. Don't  run `make all` unless you have to!
 
 ## Developing P4 Code - Zero config
-Developing P4 code only requires  use of `make p4` to verify the code compiles. This is fairly quick. You can run the code in the bmv2 software switch via `make run-switch`. You can send packets into the switch using a SW packet generator. This simplified setup doesn't support any switch configuration, so the testablity is minimal. For example, you can send in packets and observe the switch console logging to verify packet parsing/deparsing.
+Developing P4 code only requires  use of `make p4` to verify the code compiles. This is fairly quick. You can run the code in the bmv2 software switch via `make run-switch`. This simplified setup doesn't support any switch configuration, so the testability is minimal. For example, you can send in packets and observe the switch console logging to verify packet parsing/deparsing. See [Sending packets "manually" into the switch](#sending-packets-manually-into-the-switch)
 
 ![dev-workflows](images/dev-workflow-p4.svg)
+### Sending packets "manually" into the switch
+Assuming you've done `make all` at least once, you will have a handy saithrift-client docker image which contains scapy, snappi libraries to run ixia-c SW traffic generator, etc. See the "optional" box in the figure above. For example, you can enter the container and run ad-hoc scapy commands, see below:
+```
+$ make run-saithrift-client-bash
+...   
+root@chris-z4:/tests-dev/saithrift# scapy
+>>> p=Ether()/IP()/UDP()
+>>> sendp(p, iface='veth1')
+.
+Sent 1 packets.
+>>> 
+```
 
 ## Developing P4 Code + libsai config (C++)
 To test the autogeneration of `libsai` and configuration of the dataplane, you can execute `make sai` and `make libsai-test`. You can add tests under `dash-pipeline/tests/libsai`. It takes slightly over half a minute to generate `libsai`. The c++ tests are limited to CRUD operations on the SAI interface and run as one-shot programs without any traffic generation. (Use [saithrift tests](#developing-end-to-end-tests-with-saithrift) for end-to-end testing of config and traffic.)
@@ -144,13 +156,8 @@ The workflows described here are primarily driven by a [Makefile](Makefile) and 
 * Cloud-based CI (Continuous Integration) build and test, every time code is pushed to GitHub or a Pull Request is submitted to the upstream repository.
 
 See the [Diagram](#build-workflow-diagram) below. You can read the [dockerfiles](dockerfiles) and all `Makefiles` in various directories to get a deeper understanding of the build process. You generally use the targets from the main [Makefile](Makefile) and not any subordinate ones.
-## TODO
-* Document specific task workflows and required build steps and dependencies, e.g.:
-  * P4 code development
-  * SAI adaptor development
-  * Test-case development
-  * Docker development
-* Assign more uniform `make` target names.
+
+
 ## Docker Image(s)
 >**NOTE** P4 code or test-case developers generally **don't** need to build `p4c`, `saithrift-bldr,` or `bmv2` docker images; they are pulled automatically, on-demand, from a registry. They contain static tooling. Developers who create and maintain the Docker images **do** need to build and push new images.
 
