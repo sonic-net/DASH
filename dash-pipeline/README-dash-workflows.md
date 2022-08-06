@@ -14,7 +14,7 @@ See also:
 - [Concise Developer Workflows](#concise-developer-workflows)
   - [Developing P4 Code - Zero config](#developing-p4-code---zero-config)
   - [Developing P4 Code + libsai config (C++)](#developing-p4-code--libsai-config-c)
-  - [Developing End-to-End tests](#developing-end-to-end-tests)
+  - [Developing End-to-End Tests with saithrift](#developing-end-to-end-tests-with-saithrift)
 - [Make Target Summary](#make-target-summary)
   - [Make "ALL" Targets](#make-all-targets)
   - [Build Artifacts](#build-artifacts)
@@ -87,8 +87,8 @@ End-to-end tests require `make all` in order to build all the local artifacts an
 A concise set of commands to run, in three separate terminals:
 ```
 [make clean &&] make all run-switch   # console 1
-make run-saithrift-server
-make run-all-tests
+make run-saithrift-server             # console 2
+make run-all-tests                    # console 3
 ```
 
 
