@@ -67,9 +67,12 @@ Developing P4 code only requires  use of `make p4` to verify the code compiles. 
 
 ![dev-workflows](images/dev-workflow-p4.svg)
 ### Sending packets "manually" into the switch
-Assuming you've done `make all` at least once, you will have a handy saithrift-client docker image which contains scapy, snappi libraries to run ixia-c SW traffic generator, etc. See the "optional" box in the figure above. For example, you can enter the container and run ad-hoc scapy commands, see below:
+Assuming you've done `make all` at least once, you will have a handy saithrift-client docker image which contains scapy, snappi libraries to run ixia-c SW traffic generator, etc. See the "optional" box in the figure above.
+You also have to build `sai` in order for the bmv2 "forwarding pipeline config" to get loaded, which you can force via `make init-switch`. For example, you can enter the container and run ad-hoc scapy commands, see below:
 ```
-$ make run-saithrift-client-bash
+make run-switch                   # console 1
+make init-switch                  # console 2
+make run-saithrift-client-bash    # console 2
 ...   
 root@chris-z4:/tests-dev/saithrift# scapy
 >>> p=Ether()/IP()/UDP()
