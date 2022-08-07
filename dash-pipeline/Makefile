@@ -276,7 +276,7 @@ init-switch:
 			t=`expr $$t - 1`; \
 		fi; \
 	done; \
-	docker exec -w /tests/init_switch simple_switch-$(USER) ./init_switch
+	docker exec -w /tests/libsai/init_switch simple_switch-$(USER) ./init_switch
 
 ###############################
 # DOCKER BUILD/PUBLISH TARGETS

@@ -67,6 +67,8 @@ jobs:
       run:  DOCKER_FLAGS=$docker_fg_flags make network
     - name: Run P4 software switch (bmv2) with P4Runtime
       run:  DOCKER_FLAGS=$docker_bg_flags make run-switch
+    - name: Force bmv2 to load forwarding pipeline config via dummy libsai call
+      run:  DOCKER_FLAGS=$docker_fg_flags make init-switch
     - name: Test SAI library over P4RT to switch
       run:  DOCKER_FLAGS=$docker_fg_flags make run-libsai-test
     - name: Run saithrift server
