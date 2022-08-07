@@ -168,10 +168,16 @@ bool InsertInTable(p4::v1::TableEntry *entry, sai_object_id_t *objId) {
     }
 
     tableLock.lock();
-    *objId = nextId++;
+    if (*objId == 0) {
+        *objId = nextId++;
+    }
     tableEntryMap[*objId] = entry;
     tableLock.unlock();
     return true;
+}
+
+sai_object_id_t NextObjIndex() {
+    return ++nextId;
 }
 
 bool RemoveFromTable(sai_object_id_t id) {
@@ -258,6 +264,10 @@ sai_status_t sai_api_query(
             *api_method_table = (void *)&sai_dash_api_impl;
             break;
         
+        case SAI_API_DASH_ACL:
+            *api_method_table = (void *)&sai_dash_acl_api_impl;
+            break;
+
         case SAI_API_DASH_VNET:
             *api_method_table = (void *)&sai_dash_vnet_api_impl;
             break;
