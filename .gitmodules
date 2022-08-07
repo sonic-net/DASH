@@ -1,4 +1,4 @@
 [submodule "SAI"]
 	path = dash-pipeline/SAI/SAI
-	url = https://github.com/chrispsommers/SAI.git
-	branch = saithriftv2-check-null-sai-apis
+	url = https://github.com/opencomputeproject/SAI.git
+	branch = master
