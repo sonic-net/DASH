@@ -55,10 +55,6 @@ jobs:
       run:  make docker-pull-saithrift-bldr
     - name: Generate SAI API
       run:  DOCKER_FLAGS=$docker_fg_flags make sai
-    - name: Generate saithrift-server
-      run:  DOCKER_FLAGS=$docker_fg_flags make saithrift-server
-    - name: Generate saithrift-client local docker
-      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saithrift-client
     - name: Pull docker bmv2-bldr image
       run:  make docker-pull-bmv2-bldr
     - name: Build libsai c++ tests
@@ -71,6 +67,10 @@ jobs:
       run:  DOCKER_FLAGS=$docker_fg_flags make init-switch
     - name: Test SAI library over P4RT to switch
       run:  DOCKER_FLAGS=$docker_fg_flags make run-libsai-test
+    - name: Generate saithrift-server
+      run:  DOCKER_FLAGS=$docker_fg_flags make saithrift-server
+    - name: Generate saithrift-client local docker
+      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saithrift-client
     - name: Run saithrift server
       run:  DOCKER_FLAGS=$docker_bg_flags make run-saithrift-server
     - name: Run PTF Tests
