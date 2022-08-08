@@ -39,12 +39,23 @@ sai_status_t sai_create_{{ table.name }}(
     auto action = entry->mutable_action();
     auto expectedParams = 0;
     auto matchedParams = 0;
-
-    // Search the action 
+    sai_object_id_t objId = 0;
+    // Search the action
     pi_p4_id_t actionId;
 
     matchActionEntry->set_table_id(tableId);
 
+    {% if table['keys'] | length== 1 %}
+    // SAI object table with single P4 key - object ID itself is the P4 table key
+    // Generate a SAI object ID and fill it as the P4 table key
+    auto mf = matchActionEntry->add_match();
+    mf->set_field_id({{table['keys'][0].id}});
+    objId = NextObjIndex();
+    auto mf_exact = mf->mutable_exact();
+    {{table['keys'][0].sai_key_field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
+    {% else %}
+    // SAI object table with multiple P4 table keys
+    // Copy P4 table keys from appropriate SAI attributes
     for (uint32_t i = 0; i < attr_count; i++) {
         switch(attr_list[i].id) {
             {% for key in table['keys'] %}
@@ -74,6 +85,7 @@ sai_status_t sai_create_{{ table.name }}(
             {% endfor %}
         }
     }
+    {% endif %}
 
 
     // If there is only one action, simply set it.
@@ -121,7 +133,6 @@ sai_status_t sai_create_{{ table.name }}(
         goto ErrRet;
     }
     // TODO: ternaly needs to set priority
-    uint64_t objId;
     if (true == InsertInTable(matchActionEntry, &objId)) {
         *{{ table.name }}_id = objId;
         return 0;
