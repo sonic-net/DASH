@@ -12,11 +12,11 @@ See also:
 
 **Table of Contents**
 - [Concise Developer Workflows](#concise-developer-workflows)
-  - [Developing P4 Code - Zero config](#developing-p4-code---zero-config)
+  - [Use Case I - Developing P4 Code - Zero config](#use-case-i---developing-p4-code---zero-config)
     - [Sending packets "manually" into the switch](#sending-packets-manually-into-the-switch)
-  - [Developing P4 Code + libsai config (C++)](#developing-p4-code--libsai-config-c)
-  - [Developing End-to-End Tests with saithrift](#developing-end-to-end-tests-with-saithrift)
-  - [Incremental test-case development](#incremental-test-case-development)
+  - [Use-Case II - Developing P4 Code + libsai config (C++)](#use-case-ii---developing-p4-code--libsai-config-c)
+  - [Use-Case III - Developing End-to-End Tests with saithrift](#use-case-iii---developing-end-to-end-tests-with-saithrift)
+  - [Use-Case IV - Incremental Test-Case Development](#use-case-iv---incremental-test-case-development)
 - [Make Target Summary](#make-target-summary)
   - [Make "ALL" Targets](#make-all-targets)
   - [Build Artifacts](#build-artifacts)
@@ -62,7 +62,9 @@ See also:
 # Concise Developer Workflows
 This section gives you a quick idea of how to work on various tasks efficiently. Don't  run `make all` unless you have to!
 
-## Developing P4 Code - Zero config
+>Do you have another use-case in mind? Help document it with a Pull-Request, or ask the community.
+
+## Use Case I - Developing P4 Code - Zero config
 Developing P4 code only requires  use of `make p4` to verify the code compiles. This is fairly quick. You can run the code in the bmv2 software switch via `make run-switch`. This simplified setup doesn't support any switch configuration, so the testability is minimal. For example, you can send in packets and observe the switch console logging to verify packet parsing/deparsing. See [Sending packets "manually" into the switch](#sending-packets-manually-into-the-switch)
 
 ![dev-workflows](images/dev-workflow-p4.svg)
@@ -82,7 +84,7 @@ Sent 1 packets.
 >>> 
 ```
 
-## Developing P4 Code + libsai config (C++)
+## Use-Case II - Developing P4 Code + libsai config (C++)
 To test the autogeneration of `libsai` and configuration of the dataplane, you can execute `make sai` and `make libsai-test`. You can add tests under `dash-pipeline/tests/libsai`. It takes slightly over half a minute to generate `libsai`. The C++ tests are limited to CRUD operations on the SAI interface and run as one-shot programs without any traffic generation.
 
 That being said, you can use the same techniques described in [Sending packets "manually" into the switch](#sending-packets-manually-into-the-switch). Conceivably you could write C++ tests to configure the switch to a known state; send packets; then verify them manually. However, test-cases written this way are not very useful, perhaps only  as ad hoc throwaway tests.
@@ -101,7 +103,7 @@ make run-libsai-test [&& make kill-switch]
 
 ![dev-workflows](images/dev-workflow-p4-libsai.svg)
 
-## Developing End-to-End Tests with saithrift
+## Use-Case III - Developing End-to-End Tests with saithrift
 End-to-end tests require `make all` in order to build all the local artifacts and saithrift-client docker image.
 
 A concise set of commands to run, in three separate terminals:
@@ -112,8 +114,10 @@ make run-all-tests                    # console 3
 ```
 
 ![dev-workflows](images/dev-workflow-p4-saithrift.svg)
-## Incremental test-case development
-Once you have stable P4 code, `libsai` and a saithrift client/server framework, you can start the switch and sai-thrift server, then develop test-cases interactively. The figure above illustrates this process in the lower-right corner. You can edit and save saithrift tests (PTF or Pytest)in your host PC's workspace; save the files; then run selected, or all tests, interactively from inside the saithrift-client container. See [Developer: Run tests selectively from `bash` inside saithrift-client container](README-saithrift.md#developer-run-tests-selectively-from-bash-inside-saithrift-client-container) for details.
+## Use-Case IV - Incremental Test-Case Development
+This builds upon the previous use-case.
+
+Once you have stable P4 code, `libsai` and a saithrift client/server framework, you can start the switch and sai-thrift server, then develop test-cases interactively. The figure above illustrates this process in the lower-right corner. You can edit and save saithrift tests (PTF or Pytest) in your host PC's workspace; save the files; then run selected, or all tests, interactively from inside the saithrift-client container. See [Developer: Run tests selectively from `bash` inside saithrift-client container](README-saithrift.md#developer-run-tests-selectively-from-bash-inside-saithrift-client-container) for details.
 
 # Make Target Summary
 The tables below summarize the most important `make` targets for easy reference. You can click on a link to jump to further explanations. Not all make targets are shown. See the [Makefile](Makefile) to learn more.
