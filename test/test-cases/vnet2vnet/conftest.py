@@ -15,6 +15,8 @@ from ixnetwork_restpy.testplatform.testplatform import TestPlatform
 targets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "targets"))
 sys.path.insert(0, targets_dir)
 
+test_cases_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, test_cases_dir)
 
 @pytest.fixture(scope="session")
 def tbinfo(request):
@@ -64,7 +66,7 @@ def create_ixload_session_url(tbinfo):
         test_settings.gatewayPort = "8080"
         test_settings.httpRedirect = True
         test_settings.apiVersion = "v0"
-        test_settings.ixLoadVersion = "9.20.0.279"
+        test_settings.ixLoadVersion = "9.20.115.79"
 
         # aggregated 2ips
         slot1 = tg['tgen'][0]['interfaces'][0][1]
