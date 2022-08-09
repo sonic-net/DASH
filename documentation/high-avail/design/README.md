@@ -4,7 +4,7 @@
 
 # DASH High-Availability Design Documents
 
-This folder contains DASH High Avalability and Scale design and architecture documents.
+This folder contains DASH High Availability and Scale design and architecture documents.
 
 # Contents
 

@@ -35,10 +35,12 @@ run-switch:
 chris@chris-z4:~/chris-DASH/DASH/dash-pipeline$ make run-all-tests
 ```
 # Ensure P4Runtime server is listening
+```
 ...
 docker exec -w /tests/vnet_out simple_switch-chris ./vnet_out
 ./vnet_out: symbol lookup error: /SAI/lib/libsai.so: undefined symbol: _ZTVN2p42v19P4Runtime4Stub5asyncE
 make: *** [Makefile:171: run-sai-test] Error 127
+```
 
 Find which lib has missing symbol in "good" (fat) bmv2 image:
 ```

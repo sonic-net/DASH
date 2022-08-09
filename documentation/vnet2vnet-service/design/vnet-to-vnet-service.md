@@ -85,7 +85,7 @@ several steps, as explained below.
   **incoming packet's VNI** that is matched against the **reserved VNI**
   assigned to the **VM->Appliance**.
 - Using the inner `src-mac`, **maps to the corresponding ENI**.
-- The incoming packet will always be **VXLAN encapped** and the outer `dst-ip`
+- The incoming packet will always be **VXLAN encapsulated** and the outer `dst-ip`
   is the **appliance VIP**.
 - The pipeline parses the VNI, and for **VM traffic**, the VNI shall be a
   **special reserved VNI**-
@@ -109,7 +109,7 @@ In the outbound flow, the criteria listed below are applied.
 
 ![dash-outbound](../../general/design/images/dash-hld-inbound-packet-processing-pipeline.svg)
 
-<figcaption><i>Figure 3 - Intbound packet processing pipeline</i></figcaption><br/><br/>
+<figcaption><i>Figure 3 - Inbound packet processing pipeline</i></figcaption><br/><br/>
 
 - The pipeline sets the direction as RX(**inbound**) based on the **incoming
   packet's VNI**, if it does not match against any reserved VNI.
