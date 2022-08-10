@@ -84,7 +84,7 @@
     - ensure networking is ok
     - this is needed also for the permissions to be update, otherwise next step will fail
 
-- clone the `DASH` repo into your working directory:
+- clone the `DASH` repository into your working directory:
     ```
     git clone https://github.com/Azure/DASH
     ```

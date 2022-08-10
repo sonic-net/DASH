@@ -19,7 +19,7 @@ The main CI job called `DASH-BMV2-CI ` is to rebuild the entire dash-pipeline an
 
 There are also numerous `DASH-DOCKER-xxx` jobs which rebuild the various "builder" docker images. These are not invoked as often and are used to verify the infrastructure itself.
 # CI Badges
-* The CI badges will be updated according to the CI build status and appear on the front page of the repo (it's actually on the top-level README). You can click on this icon to drill down into the Git Actions history and view pass/fail details. Typical icons appear below:
+* The CI badges will be updated according to the CI build status and appear on the front page of the repository (it's actually on the top-level README). You can click on this icon to drill down into the Git Actions history and view pass/fail details. Typical icons appear below:
 
   ![CI-badge-passing.svg](../assets/CI-badge-passing.svg)  ![CI-badge-failing.svg](../assets/CI-badge-failing.svg)  
 
@@ -46,6 +46,6 @@ Let's drill down into the Build P4 step which failed. We see a a bad statement. 
 
 ![CI-build-log-fail-p4-drilldown.png](../assets/CI-build-log-fail-p4-drilldown.png)  
 
-The main README for this repo shows the CI failing badge:
+The main README for this repository shows the CI failing badge:
 
 ![CI-fail-README-badge](../assets/CI-fail-README-badge.png)
