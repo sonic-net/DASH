@@ -7,6 +7,6 @@ def generate():
         "vpc",
         "privatelink",
         "privatelinknsg"
-    ],
+    ]
 
     return {"vpc-mappings-routing-types": vpcmappingtypes}
