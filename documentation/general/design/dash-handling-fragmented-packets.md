@@ -49,7 +49,7 @@ shows the IP header format. For more information, see [RFC
 |                    Options                    |    Padding    |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
-<figcaption><b><i>IP header fornat</i></b></figcaption><br/><br/>
+<figcaption><b><i>IP header format</i></b></figcaption><br/><br/>
 
 The options may appear or not in datagrams.  They must be implemented by all IP
 modules (host and gateways).  What is optional is their transmission in any
@@ -83,7 +83,7 @@ guaranteed. The figure below shows the UDP header format. For more information, 
 |          data octets ...
 +---------------- ...
 ```
-<figcaption><b><i>UDP header fornat</i></b></figcaption> <br/>
+<figcaption><b><i>UDP header format</i></b></figcaption> <br/>
 
 #### TCP header format
 
@@ -115,7 +115,7 @@ The figure below shows the TCP header format. For more information, see [RFC 793
 |                             data                              |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
-<figcaption><b><i>TCP header fornat</i></b></figcaption> <br/>
+<figcaption><b><i>TCP header format</i></b></figcaption> <br/>
 
 ### Fragmentation contextual information
 
@@ -138,7 +138,7 @@ flow table resources which are finite and in practice consume a large amount of 
 UDP flows** as the packets are generated over a small period of time and should
 arrive fairly close together. Stale temporal flows should be removed quickly as the
 flow table is a finite resource that can be depleted. This 
-is especialy true when connections or UDP flows are arriving in the range of millions/sec. A
+is especially true when connections or UDP flows are arriving in the range of millions/sec. A
 background or garbage collection task could be used for this purpose coupled with other
 table management functions. The stale time-out period should be programmable per ENI.
 
@@ -193,7 +193,7 @@ arrives before the first fragment, the packet will be dropped and no temporal fl
 
     - Fortunately, as everything coming/going between VMs is **encapsulated
       within VXLAN** or methods, **out of order packets are unlikely (and again, they need to be dropped)** as
-      switches/routers do not mis-order frames of a single L4 flow.
+      switches/routers do not misorder frames of a single L4 flow.
     - The encapsulated packet will look like a **single L4 flow** to a
       router/switch. 
     - > **Also, to be clear, Azure does not support out-of-order packets. They

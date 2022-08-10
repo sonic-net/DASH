@@ -13,7 +13,7 @@ See also:
   - [Production - Launch container, run tests in one shot](#production---launch-container-run-tests-in-one-shot)
   - [Development - Launch container, run tests in one shot](#development---launch-container-run-tests-in-one-shot)
 - [Developer: Run tests selectively from `bash` inside saithrift-client container](#developer-run-tests-selectively-from-bash-inside-saithrift-client-container)
-  - [Select Directory - Container pre-built directory, or mounted from host](#select-directory---container-pre-built-directory-or-mounted-from-host)
+  - [Select Directory - Container prebuilt directory, or mounted from host](#select-directory---container-prebuilt-directory-or-mounted-from-host)
 - [Test aftermath and clearing the switch config](#test-aftermath-and-clearing-the-switch-config)
 - [Tips and techniques for writing tests](#tips-and-techniques-for-writing-tests)
   - [Workspace File Layout](#workspace-file-layout)
@@ -64,7 +64,7 @@ root@chris-z4:/tests-dev#
 ```
 The running container is also mounted via `-v $(PWD)/test:/test-dev`  which mounts the current developer workspace into the running container. You can thereby create and edit new tests "live" from a text editor and see the effect inside the container in real-time. Note, the container image also contains the `/tests` directory which was copied into the Docker image when `make docker-saithrift-client` was last run. This means you have a "production" copy of tests as well as live "development" host volume simultaneously in the container.
 
-## Select Directory - Container pre-built directory, or mounted from host
+## Select Directory - Container prebuilt directory, or mounted from host
 
 * `cd /test/` - Enter directory which was prebuilt into container image; tests are not modifiable "live" from the host. This is good for canned tests.
 * `cd /test-dev/` - Enter directory which is mounted to `dash-pipeline/tests` from the host, allowing live editing in the host and running in the container. This is a convenient developer workflow.
@@ -100,12 +100,12 @@ make run-saithrift-client-tests       # Console 3
 make run-saithrift-client-dev-tests   # Alternative to above
 ```
 
-It's strongly recommended to perform proper DUT config cleanup in the code for every testcase and catch exceptions where possible, to ensure a complete cleanup, despite failures along the way.
+It's strongly recommended to perform proper DUT config cleanup in the code for every test case and catch exceptions where possible, to ensure a complete cleanup, despite failures along the way.
 
 # Tips and techniques for writing tests
 The following information should apply equally well to writing any tests which utilize saithrift as the client library: PTF, Pytests, etc. Please refer to other READMEs for information specific to various frameworks.
 ## Workspace File Layout
-Below is depicted a selected subset of the DASH repo pertinent to understanding source and build artifact locations needed for saithrift test development.
+Below is depicted a selected subset of the DASH repository pertinent to understanding source and build artifact locations needed for saithrift test development.
 
 Note that the `SAI/SAI` directory is a Git submodule and its contents are modified during `make sai` and `make saithrift-server`.
 ```
@@ -116,7 +116,7 @@ DASH
     rpc                   - output dir for saithrift code generator
                             contains client & server libraries & executable, see below
       SAI                 - Git submodule root, imported into DASH repo
-        extensions        - DASH extension headers - mix of repo files + generated via "make sai"
+        extensions        - DASH extension headers - mix of repository files + generated via "make sai"
         inc               - upstream sai headers
         meta              - generated SAI metadata, scripts, etc.
         test
@@ -140,7 +140,7 @@ ttypes.py        - SAI data types
 ```
 
 ## Walk-through example of finding saithrift module entities
-See the following code snippet from a PTF test. A Pytest would look nearly identical. We'll brielfy describe how you can find things in the Python saithrift library modules. Recall we'll be hunting inside `DASH/dash-pipeline/SAI/rpc/usr/local/lib/python3.8/site-packages/sai_thrift` as explained above.
+See the following code snippet from a PTF test. A Pytest would look nearly identical. We'll briefly describe how you can find things in the Python saithrift library modules. Recall we'll be hunting inside `DASH/dash-pipeline/SAI/rpc/usr/local/lib/python3.8/site-packages/sai_thrift` as explained above.
 ```
   self.switch_id = 0
   self.eth_addr = '\xaa\xcc\xcc\xcc\xcc\xcc'
@@ -187,7 +187,7 @@ class sai_thrift_direction_lookup_entry_t(object):
 ```
 Note the actual type is `sai_thrift_direction_lookup_entry_t` and it has two parameters to create it: `switch_id` and `vni`.
 
-Looking further down into the `write()` method (which serializes into thrift) we get hints about the datatypes of these two parameters. We can see `switch_id` is 64 bits and `vni` is 32 bits:
+Looking further down into the `write()` method (which serializes into thrift) we get hints about the data types of these two parameters. We can see `switch_id` is 64 bits and `vni` is 32 bits:
 ```
 # From ttypes.py:
 
@@ -202,7 +202,7 @@ Looking further down into the `write()` method (which serializes into thrift) we
 ```
 **Call the sai_thrift_direction_lookup_entry_t constructor:**
 
-Finally, we see the code in our test case is as below, using the name of the Python class `sai_thrift_direction_lookup_entry_t` and the attributes from the `__init__()` method to form the contructor call:
+Finally, we see the code in our test case is as below, using the name of the Python class `sai_thrift_direction_lookup_entry_t` and the attributes from the `__init__()` method to form the constructor call:
 ```
   self.dle = sai_thrift_direction_lookup_entry_t(switch_id=self.switch_id, vni=self.vni)
 ```
@@ -279,7 +279,7 @@ except:
 
 Viola! You're ready to become a saithrift power-user. Rock on bruh!
 # Debugging saithrift Server with GDB
-`gdb` is built into the saithrift server image for easy debugging. Server code is compiled with the `-g` flag to include debug symbols. The saithrift server source code is available from withint the running Docker container via volume mounts. Below is shown some a typical workflow:
+`gdb` is built into the saithrift server image for easy debugging. Server code is compiled with the `-g` flag to include debug symbols. The saithrift server source code is available from within the running Docker container via volume mounts. Below is shown some a typical workflow:
 
 ## Run Interactive saithrift-server container
 This starts the container and opens a bash session instead of running the server like normal. The working directory `/SAI/rpc/usr/sbin` contains the saiserver.
@@ -336,7 +336,7 @@ Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
 [New Thread 0x7f2b4bfff700 (LWP 17)]
 GRPC call SetForwardingPipelineConfig 0.0.0.0:9559 => /etc/dash/dash_pipeline.json, /etc/dash/dash_pipeline_p4rt.txt
 ```
-First breakoint is reached, it's a startup behavior. Enter `c` to resume:
+First breakpoint is reached, it's a startup behavior. Enter `c` to resume:
 ```
 Thread 1 "saiserver" hit Breakpoint 1, sai_api_query (api=SAI_API_UNSPECIFIED, api_method_table=0x558bad22dd30 <test_services>) at utils.cpp:217
 217	        _Out_ void **api_method_table) {

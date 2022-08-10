@@ -15,20 +15,20 @@ This document describes the DASH test workflow with SAI-thrift. In particular, i
 
 ### Summary
 
-- DASH dataplane behavior is specified by a "DASH" P4 behavior model.
+- DASH data plane behavior is specified by a "DASH" P4 behavior model.
 - The P4 program can generate SAI overlay headers. Combined with a subset of standard SAI underlay headers, we have a complete "DASH API".
 - Vendors implement a `libsai` for their device.
 - The **saithrift** tool transforms the  SAI headers into a **Thrift client** library and a **Thrift server** skeleton.
   - The client `python` library is used by the test script to "talk" to the DUT to configure it.
-  - The server skeleton must be linked to the vendor `libsai` to yield a complete server. When executed on the DUT, a client (the test script) can configure the DASH dataplane via SAI API calls transported over the **Thrift API**.
+  - The server skeleton must be linked to the vendor `libsai` to yield a complete server. When executed on the DUT, a client (the test script) can configure the DASH data plane via SAI API calls transported over the **Thrift API**.
 - Test runs may be triggered manually, i.e. by a SW developer or test engineer; or triggered automatically by a GitHub Action (e.g. upon a Commit or Pull Request). Cloud-hosted community CI/CD tests are limited to pure software tests.
 - Data-driven test cases stored in an abstract format are stored in a catalog of test suites, and read by the executable test scripts.
 - Test scripts consume the test case data and execute code to program the DUT and configure the Traffic Generator to send and receive traffic.
-- Test scripts read the results from theTgen (and possibly DUT state queries), analyze against expected results and report test outcomes.
+- Test scripts read the results from the Tgen (and possibly DUT state queries), analyze against expected results and report test outcomes.
 
 ## Workflow overview 
 
-In the diagram below, fixed resources such as abstract test-cases, P4 code, SAI headers, etc. reside in GitHub repos as indicated. These artifacts are transformed roughly from left to right into into various artifacts required to run tests. This is a high-level conceptual diagram which omits many details, such as shell scripts, Makefiles, GitHub automation scripts, etc. In addition, some of the workflow steps take place in different environments or repos, at different points in time.
+In the diagram below, fixed resources such as abstract test-cases, P4 code, SAI headers, etc. reside in GitHub repositories as indicated. These artifacts are transformed roughly from left to right into into various artifacts required to run tests. This is a high-level conceptual diagram which omits many details, such as shell scripts, Makefiles, GitHub automation scripts, etc. In addition, some of the workflow steps take place in different environments or repos, at different points in time.
 
 Most importantly, the execution of test scripts inside the red circle represent the *main event* and thus all the other steps are dependencies which must be satisfied, including installation of software/firmware onto the **Device Under Test** (DUT).
 
@@ -54,15 +54,15 @@ The descriptions below are listed in rough order of dependency, culminating in t
 
 > **TODO** This could be covered in the [README](../../dash-pipeline/README.md) file of the directory `../../dash-pipeline`.
 
-A P4 program, [dash_pipeline.p4](../../dash-pipeline/dash_pipeline.p4), describes the behavior of the DASH dataplane according to the well-known [P4 programming language](https://github.com/p4lang/p4-spec) and associated architectural models. The details are not covered here. Suffice to say the P4 program comprises a *single source of truth* for the dataplane behavior.
+A P4 program, [dash_pipeline.p4](../../dash-pipeline/dash_pipeline.p4), describes the behavior of the DASH data plane according to the well-known [P4 programming language](https://github.com/p4lang/p4-spec) and associated architectural models. The details are not covered here. Suffice to say the P4 program comprises a *single source of truth* for the data plane behavior.
 
-Besides describing the dataplane behavior, the P4 source code can be parsed by the community [p4c](https://github.com/p4lang/p4c) compiler and, via a suitable backend (**TODO** - provide link when it becomes part of this repo) it emits [SAI](https://www.opencompute.org/projects/sai) header files describing the abstract dataplane API to the [underlay](../../SAI/underlay) portion of the dataplane. The [overlay](../../SAI/overlay) portion of the DASH dataplane is a subset of the standard SAI header files, e.g. as typically used by [SONiC](https://azure.github.io/SONiC/).
+Besides describing the data plane behavior, the P4 source code can be parsed by the community [p4c](https://github.com/p4lang/p4c) compiler and, via a suitable backend (**TODO** - provide link when it becomes part of this repo) it emits [SAI](https://www.opencompute.org/projects/sai) header files describing the abstract data plane API to the [underlay](../../SAI/underlay) portion of the data plane. The [overlay](../../SAI/overlay) portion of the DASH data plane is a subset of the standard SAI header files, e.g. as typically used by [SONiC](https://azure.github.io/SONiC/).
 
-Treating the P4 program as the starting point ensures an unambiguous contract for dataplane behavior. By generating SAI header files directly from the P4 code, we can be assured the programming interface is tightly bound, and agrees to the behavioral model.
+Treating the P4 program as the starting point ensures an unambiguous contract for data plane behavior. By generating SAI header files directly from the P4 code, we can be assured the programming interface is tightly bound, and agrees to the behavioral model.
 
 ### DASH SAI API
 
-The combination of the underlay and the overlay SAI header files comprise the canonical "DASH API": an abstract dataplane API which exposes [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations upon canonical tables, which represent the configuration (and in some cases, the state) of the dataplane.
+The combination of the underlay and the overlay SAI header files comprise the canonical "DASH API": an abstract data plane API which exposes [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations upon canonical tables, which represent the configuration (and in some cases, the state) of the data plane.
 
 DASH tests use this API to configure and/or read the state of the DUT; therefore, test cases and test scripts will utilize this API.
 
@@ -75,7 +75,7 @@ SAI is defined as a c-language binding (`.h` header files), it is just a "contra
 * The saithrift toolchain yields Python client libraries which are imported and used by a test program to make remote SAI calls, and a server skeleton with RPC callback methods. These callbacks implement all the SAI RPC function signatures (CRUD operations upon all the conceptual SAI tables). These callbacks in turn make function calls into the vendor-supplied SAI library entrypoints, which must be implemented for each target (DUT).
 * Each DASH device vendor must implement a `libsai` shared library, i.e., a compiled `.so` module which can be linked to the server skeleton to produce a running SAI server image. The library has function calls supporting CRUD operations upon each DASH SAI header definition and attribute. The vendor `libsai` function entrypoints translate the abstract SAI CRUD operations into the underlying platform operations, e.g., typically via the vendor's Software Development Kit (SDK) libraries or equivalent. 
 * The vendor-supplied `libsai` is compiled with the saithrift server skeleton to produce an executable binary file which is a server daemon. When run, this daemon exposes a socket-based API endpoint. This endpoint is the SAI-thrift API server.
-Test programs can perform SAI RPC calls agains the saithrift endpoint. In the previous figure, the PyTest test scripts make SAI calls to configure and query the DUT dataplane.
+Test programs can perform SAI RPC calls against the saithrift endpoint. In the previous figure, the PyTest test scripts make SAI calls to configure and query the DUT data plane.
 
 > **TODO** Consider publishing versioned/tagged saithrift clients as [PyPi modules](https://pypi.org) and saithrift servers as Docker Images on [Dockerhub](https://hub.docker.com/) to eliminate the need for constant rebuilding. Once SAI header files have stablilized this should be feasible.
 

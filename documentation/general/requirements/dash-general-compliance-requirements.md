@@ -16,7 +16,7 @@ Continuous integration verifies the correctness of each committed configuration.
 * Execute compiled artifacts inside CI test runner environments.
 * Execute toolchains which produce downstream artifacts which are checked into the repo. An example would be generating DASH overlay `.h` header files from P4 behavior model code.
 * Exercise all SAI units tests against a dummy `libsai` implementation to confirm API basic conformance.
-* Execute DASH software dataplanes via P4 behavioral models: run test suites which configure the sotware Device under Test (DUT) and send traffic to/from the dataplane with software traffic testers. See [DASH Testing Using P4 Simulators and SAI Thrift](../test/docs/dash-test-workflow-p4-saithrift.md) for an example workflow.
+* Execute DASH software data planes via P4 behavioral models: run test suites which configure the software Device under Test (DUT) and send traffic to/from the data plane with software traffic testers. See [DASH Testing Using P4 Simulators and SAI Thrift](../test/docs/dash-test-workflow-p4-saithrift.md) for an example workflow.
 
 
 # Reference Architectures

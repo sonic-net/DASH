@@ -4,7 +4,7 @@
 
 [[ << DASH main README ]](../../README.md)
 
-# DASH Test Reference ARchitectures
+# DASH Test Reference Architectures
 This document provides a set of reference architectures and vocabulary used for testing devices and systems.
 
 

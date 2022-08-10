@@ -4,7 +4,7 @@
 
 # DASH High-Availability presentations
 
-This folder contains DASH High Avalability and Scale presentations
+This folder contains DASH High Availability and Scale presentations
 
 # Contents
 

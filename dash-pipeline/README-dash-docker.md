@@ -13,7 +13,7 @@ See also:
   - [Volume Mounts](#volume-mounts)
   - [Building Docker Images](#building-docker-images)
     - [Best Practices](#best-practices)
-  - [Optional - Manually Pull pre-built Docker image(s)](#optional---manually-pull-pre-built-docker-images)
+  - [Optional - Manually Pull prebuilt Docker image(s)](#optional---manually-pull-prebuilt-docker-images)
   - [Optional - Override default Docker image version(s)](#optional---override-default-docker-image-versions)
   - [Optional - Docker image developers - build a new Docker image](#optional---docker-image-developers---build-a-new-docker-image)
   - [Optional - Expert/Admin - Publish Docker Image](#optional---expertadmin---publish-docker-image)
@@ -26,7 +26,7 @@ Below we'll lay out general principles; we avoid describing specific docker imag
 ## Overview
 One or more docker images are used extensively to run the build and test workflows:
 * Compile DASH behavioral model artifacts, such as P4 code, the SAI adaptor layer, etc.
-* Run switch model processses, such as the bmv2 simple switch
+* Run switch model processes, such as the bmv2 simple switch
 * Run SW traffic generators for testing.
 
 Docker images are read-only artifacts which are used to run a "container." These images contain all the resources required to perform the build or test task. Resources may include:
@@ -34,9 +34,9 @@ Docker images are read-only artifacts which are used to run a "container." These
 *  Additional packages such as python3, p4c compiler, etc.
 *  Libraries such as gRPC, built from source then whittled down to essential libraries
 
-For normal day-to-day operations, the pre-built Docker images are pulled from a publicly available Docker registry. This is automatically done when a `docker run` command is executed, e.g. by a `Makefile`.
+For normal day-to-day operations, the prebuilt Docker images are pulled from a publicly available Docker registry. This is automatically done when a `docker run` command is executed, e.g. by a `Makefile`.
 
-Occassionally, a Docker image must be modified, or a new one created, to serve the project's needs. This will require publishing (`docker push`), which is a privileged opertion requiring administrative access to the Docker registry.
+Occasionally, a Docker image must be modified, or a new one created, to serve the project's needs. This will require publishing (`docker push`), which is a privileged operation requiring administrative access to the Docker registry.
 
 All Docker images used by this project should be tagged with *dependable* labels to support [Configuration Management](README-dash-workflows#configuration-management). When using 3rd-party containers, use of `:latest` or even `:stable` is discouraged, since the contents can change without notice following an update of a 3rd-party project. Use of `@sha256:xxxxx` specifies a known image version and is the most reliable. See [Why you should pin your docker images with SHA instead of tags](https://rockbag.medium.com/why-you-should-pin-your-docker-images-with-sha-instead-of-tags-fd132443b8a6)
 
@@ -66,12 +66,12 @@ docker-dash-grpc               docker-publish-bmv2-bldr       docker-publish-das
 ### Best Practices
 We strive to follow best practices in our Dockerfiles, such as:
 * Using [Multi-stage builds](https://docs.docker.com/develop/develop-images/multistage-build/) to attain a cleaner, leaner image
-* Deleting uneeded source files after package installs, preferrably in the same layer (`RUN` command).
+* Deleting unneeded source files after package installs, preferably in the same layer (`RUN` command).
 * Reducing layer count by chaining multiple shell commands (e.g. `RUN cmd-1 && \ cmd-2 && \ ... cmd-N`)
 * Omitting dev tools such as `vim` - they can be added ad-hoc by developers on the fly
 * Pinning base images with SHA versions instead of generic labels like `:latest` or even `:stable` which can change without notice.
 
-## Optional - Manually Pull pre-built Docker image(s)
+## Optional - Manually Pull prebuilt Docker image(s)
 This is optional, the Docker images will be pulled automatically the first time you run a `make` command which uses that image You can also do this to restore an image. These commands are used in the CI scripts to explicitly pull images before running them, to provide more granular visibility into CI steps and their success or failure.
 
 ```
@@ -97,7 +97,7 @@ make docker-XXX  ### where XXX = image name, e.g. bmv2-bldr
 This step publishes the local Docker image to the registry and requires credentials. It should be done selectively by Docker image maintainers. For now there are no `make` targets to do this.
 
 ## Optional - expert - `exec` a container shell
-This step runs a new container and executes `bash` shell, giving you a terminal in the container. It's primarily useful to examine the container contents or perform debuggin.
+This step runs a new container and executes `bash` shell, giving you a terminal in the container. It's primarily useful to examine the container contents or perform debugging.
 ```
 docker run -it --rm [--network=host] [--priviliged] <image-name> bash
 ```

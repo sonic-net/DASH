@@ -27,7 +27,7 @@ The data channel is used to exchange the flow update messages.
 
 The channels are shown in this functional model of the HA synchronization mechanisms:
 
-![ha-functional-dagram.svg](images/ha-functional-diag.svg)
+![ha-functional-diagram.svg](images/ha-functional-diag.svg)
 
 
 ## Modes
@@ -122,7 +122,7 @@ but we can tolerate thousands of zombie entries because the flow table capacity 
    - When the perfect sync completes, the local card advertises its VIP.  Packets start to flow to this card shortly afterward.
    - Packets arriving on the local card can turn passive flow entries into an active flow entries.
    - Ideally the flow table scan of passive entries does not begin until the perfect sync completes
-     - You dont want to start aging entries that were passive on the peer until traffic can flow to the local card;
+     - You don't want to start aging entries that were passive on the peer until traffic can flow to the local card;
      you want to give them time to become active here.
      - We could also produce this behavior by setting an initial HA timeout that is extra-long for flows created during the perfect sync.
 

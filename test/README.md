@@ -7,6 +7,7 @@ You can start with the [High-Level Description (HLD) Test Specification](docs/da
 
 ## Organization
 Please see the structure below:
+* [confgen/](confgen) - Dash config generator for Hero test
 * [docs/](docs/README.md) - Test documentation
 * [environments/](environments) - container definition for running the test cases
 * [images/](images) - graphic assets
