@@ -2,9 +2,9 @@
 
 [ [ << Back to DASH top-level Documents](../../README.md#contents) ]
 
-# DASH Dataplane Design Documents
+# DASH Data plane Design Documents
 
-This folder contains DASH dataplane design and architecture documents.
+This folder contains DASH data plane design and architecture documents.
 
 # Contents
 

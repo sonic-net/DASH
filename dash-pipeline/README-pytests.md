@@ -130,4 +130,4 @@ listening on lo, link-type EN10MB (Ethernet), capture size 262144 bytes
 
 * Launch Wireshark
 * Enter the following filter: `tcp.dstport==9092`
-* You can see rcp calls bein made in the packet data view, the ASCII string names of methods are displayed
+* You can see RPC calls being made in the packet data view, the ASCII string names of methods are displayed
