@@ -1,6 +1,6 @@
 # SONiC-DASH HLD
 ## High Level Design Document
-### Rev 0.5
+### Rev 0.7
 
 # Table of Contents
 
@@ -35,6 +35,7 @@
 | 0.4 | 06/01/2022  |     Prince Sunny      | Design Considerations               |
 | 0.5 | 06/13/2022  |     Chris Sommers     | Schema Relationships                |
 | 0.6 | 08/05/2022  |  Mukesh M Velayudhan  | Outbound VNI derivation in pipeline |
+| 0.7 | 08/09/2022  |     Prince Sunny      | Add Inbound Routing rules           |
 
 # About this Manual
 This document provides more detailed design of DASH APIs, DASH orchestration agent, Config and APP DB Schemas and other SONiC buildimage changes required to bring up SONiC image on an appliance card. General DASH HLD can be found at [dash_hld](./dash-high-level-design.md).
@@ -301,7 +302,7 @@ sip                      = source ip address, to be used in encap
 vm_vni                   = VM VNI that is used for setting direction. Also used for inbound encap to VM
 ```
 
-### 3.2.7 ROUTE TABLE
+### 3.2.7 ROUTE LPM TABLE - OUTBOUND
 
 ``` 
 DASH_ROUTE_TABLE:{{eni}}:{{prefix}} 
@@ -316,7 +317,7 @@ DASH_ROUTE_TABLE:{{eni}}:{{prefix}}
 ```
   
 ```
-key                      = DASH_ROUTE_TABLE:eni:prefix ; ENI route table with CA prefix
+key                      = DASH_ROUTE_TABLE:eni:prefix ; ENI route table with CA prefix for packet Outbound
 ; field                  = value 
 action_type              = routing_type              ; reference to routing type
 vnet                     = vnet name                 ; destination vnet name if routing_type is {vnet, vnet_direct}
@@ -325,6 +326,29 @@ overlay_ip               = ip_address                ; overlay_ip to override if
 underlay_ip              = ip_address                ; underlay_ip to override if routing_type is {servicetunnel}, use dst ip from packet if not specified
 overlay_sip              = ip_address                ; overlay_sip if routing_type is {servicetunnel}  
 underlay_sip             = ip_address                ; overlay_sip if routing_type is {servicetunnel}
+metering_bucket          = bucket_id                 ; metering and counter
+```
+
+### 3.2.8 ROUTE RULE TABLE - INBOUND
+
+``` 
+DASH_ROUTE_RULE_TABLE:{{eni}}:{{vni}}:{{prefix}} 
+    "action_type": {{routing_type}} 
+    "priority": {{priority}}
+    "protocol": {{protocol_value}} (OPTIONAL)
+    "vnet":{{vnet_name}} (OPTIONAL)
+    "pa_validation": {{bool}} (OPTIONAL)
+    "metering_bucket": {{bucket_id}} (OPTIONAL) 
+```
+  
+```
+key                      = DASH_ROUTE_RULE_TABLE:eni:vni:prefix ; ENI Inbound route table with VNI and optional SRC PA prefix
+; field                  = value 
+action_type              = routing_type              ; reference to routing type, action can be decap or drop
+priority                 = INT32 value               ; priority of the rule, lower the value, higher the priority
+protocol                 = INT32 value               ; protocol value of incoming packet to match; 0 (any)
+vnet                     = vnet name                 ; mapped VNET for the key vni/pa
+pa_validation            = true/false                ; perform PA validation in the mapping table belonging to vnet_name. Default is set to true 
 metering_bucket          = bucket_id                 ; metering and counter
 ```
 
