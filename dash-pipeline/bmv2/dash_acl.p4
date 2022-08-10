@@ -46,10 +46,12 @@ match_kind {
     }
 
 #define ACL_STAGE_APPLY(table_name) \
+        if ( meta. ## table_name ##_dash_acl_group_id  != 0) { \
         switch (table_name.apply().action_run) { \
             permit: {return;} \
             deny: {return;} \
-        }
+        } \
+        } \
 
 /*
  * This control results in a new set of tables every time

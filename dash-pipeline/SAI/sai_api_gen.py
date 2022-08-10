@@ -165,6 +165,15 @@ def fill_action_params(table_params, param_names, action):
                 if tbl_param[NAME_TAG] == param[NAME_TAG]:
                     tbl_param[PARAM_ACTIONS].append(action[NAME_TAG])
 
+    for param in action[PARAMS_TAG]:
+        # mark presence of v4/v6 selector in the parent param
+        if 'v4_or_v6' in param[NAME_TAG]:
+            v4_or_v6_param_name = param[NAME_TAG]
+            for param2 in  action[PARAMS_TAG]:
+                if "is_" + param2[NAME_TAG] + "_v4_or_v6" == param[NAME_TAG]:
+                    param2["v4_or_v6_id"] = param['id']
+                    break
+
 def generate_sai_apis(program, ignore_tables):
     sai_apis = []
     table_names = []
@@ -212,6 +221,15 @@ def generate_sai_apis(program, ignore_tables):
             if 'v4_or_v6' in key[NAME_TAG]:
                 continue
             sai_table_data['keys'].append(get_sai_key_data(key))
+
+        for key in table[MATCH_FIELDS_TAG]:
+            # mark presence of v4/v6 selector in the parent key field
+            if 'v4_or_v6' in key[NAME_TAG]:
+                _, v4_or_v6_key_name = key[NAME_TAG].split(':')
+                for key2 in sai_table_data['keys']:
+                    if "is_" + key2['sai_key_name'] + "_v4_or_v6" == v4_or_v6_key_name:
+                        key2["v4_or_v6_id"] = key['id']
+                        break
 
         param_names = []
         for action in table[ACTION_REFS_TAG]:
