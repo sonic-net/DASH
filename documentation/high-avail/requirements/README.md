@@ -5,7 +5,7 @@
 # DASH High-AvailabilityRequirements Documents
 
 
-This folder contains DASH High Avalability and Scale compliance requirement documents.
+This folder contains DASH High Availability and Scale compliance requirement documents.
 
 # Contents
 

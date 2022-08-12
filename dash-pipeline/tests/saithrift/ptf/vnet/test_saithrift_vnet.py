@@ -5,7 +5,7 @@ import scapy
 from sai_thrift.sai_headers import *
 from sai_base_test import *
 # TODO - when switch APIs implemented:
-# class TestSaiThrift_create_outbound_eni_to_vni_entry(SaiHelper):
+# class TestSaiThrift_create_eni(SaiHelper):
 
 class TestSaiThrift_create_eni(ThriftInterfaceDataPlane):
     """ Test saithrift vnet outbound"""
@@ -30,6 +30,9 @@ class TestSaiThrift_create_eni(ThriftInterfaceDataPlane):
                                                                      ip_addr_family=SAI_IP_ADDR_FAMILY_IPV4)
             assert (self.in_acl_group_id != SAI_NULL_OBJECT_ID)
 
+            self.vnet = sai_thrift_create_vnet(self.client, vni=self.vni)
+            assert (self.vnet != SAI_NULL_OBJECT_ID)
+
             vm_underlay_dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
                                                       addr=sai_thrift_ip_addr_t(ip4="172.16.3.1"))
             self.eni = sai_thrift_create_eni(self.client, cps=10000,
@@ -37,6 +40,7 @@ class TestSaiThrift_create_eni(ThriftInterfaceDataPlane):
                                              admin_state=True,
                                              vm_underlay_dip=vm_underlay_dip,
                                              vm_vni=9,
+                                             vnet_id=self.vnet,
                                              inbound_v4_stage1_dash_acl_group_id = self.in_acl_group_id,
                                              inbound_v4_stage2_dash_acl_group_id = self.in_acl_group_id,
                                              inbound_v4_stage3_dash_acl_group_id = self.in_acl_group_id,
@@ -64,21 +68,15 @@ class TestSaiThrift_create_eni(ThriftInterfaceDataPlane):
                                                         eni_id=self.eni)
             assert(status == SAI_STATUS_SUCCESS)
 
-            self.e2v = sai_thrift_outbound_eni_to_vni_entry_t(switch_id=self.switch_id, eni_id=self.eni)
-            status = sai_thrift_create_outbound_eni_to_vni_entry(self.client,
-                                                                    outbound_eni_to_vni_entry=self.e2v,
-                                                                    vni=self.vni)
-            assert(status == SAI_STATUS_SUCCESS)     
-
         except AssertionError as ae:
             # Delete entries which might be lingering from previous failures etc.; ignore failures here
             print ("Cleaning up after failure...")
-            if hasattr(self, "e2v"):
-                sai_thrift_remove_outbound_eni_to_vni_entry(self.client, self.e2v)
             if hasattr(self, "eam"):
                 sai_thrift_remove_eni_ether_address_map_entry(self.client, self.eam)
             if hasattr(self, "eni"):
                 sai_thrift_remove_eni(self.client, self.eni)
+            if hasattr(self, "vnet"):
+                sai_thrift_remove_vnet(self.client, self.vnet)
             if hasattr(self, "out_acl_group_id") and self.out_acl_group_id != SAI_NULL_OBJECT_ID:
                 sai_thrift_remove_dash_acl_group(self.client, self.out_acl_group_id)
             if hasattr(self, "in_acl_group_id") and self.in_acl_group_id != SAI_NULL_OBJECT_ID:
@@ -97,19 +95,19 @@ class TestSaiThrift_create_eni(ThriftInterfaceDataPlane):
         send_packet(self, 0, self.udp_pkt)
         print("\nVerifying packet...", self.udp_pkt_exp.__repr__())
         verify_packet(self, self.udp_pkt_exp, 0)
-        print ("test_sai_thrift_create_outbound_eni_to_vni_entry OK")
+        print ("test_sai_thrift_create_eni OK")
 
     def tearDown(self):
 
         # Delete in reverse order
-        status = sai_thrift_remove_outbound_eni_to_vni_entry(self.client, self.e2v)
-        assert(status == SAI_STATUS_SUCCESS)                        
-
         status = sai_thrift_remove_eni_ether_address_map_entry(self.client, self.eam)
         assert(status == SAI_STATUS_SUCCESS)                        
 
         status = sai_thrift_remove_eni(self.client, self.eni)
         assert(status == SAI_STATUS_SUCCESS)
+
+        status = sai_thrift_remove_vnet(self.client, self.vnet)
+        assert(status == SAI_STATUS_SUCCESS)                        
 
         status = sai_thrift_remove_dash_acl_group(self.client, self.out_acl_group_id)
         assert(status == SAI_STATUS_SUCCESS)

@@ -59,4 +59,4 @@ CREDENTIALS = {
 }
 ```
 
-[^1]: to prevent the risk of comiting your login info `credentials.py` was added to `.gitignore` file
+[^1]: to prevent the risk of committing your login info `credentials.py` was added to `.gitignore` file
