@@ -114,11 +114,11 @@ In the outbound flow, the criteria listed below are applied.
 - The pipeline sets the direction as RX(**inbound**) based on the **incoming
   packet's VNI**, if it does not match against any reserved VNI.
 - Using the inner `dst-mac`, **maps to the corresponding ENI**. 
-- In the inbound flow, Routing (LPM) lookup happens based on VNI and SRC PA
-  prefix and maps to VNET. 
-- Using the VNET mapping tables, source PA address is validated against the list
+- In the inbound flow, Priority-based "Routing Rule" lookup happens based on VNI and optionally SRC PA
+  prefix and maps to VNET. (In other words, the VNET is derived from a VNI key or a combination of VNI key and SRC PA based on the routing rule entry.
+- Using the derived VNET mapping tables, the source PA address is validated against the list
   of mappings. If the check passes, **decap** action is performed, else dropped. 
-- After LPM, the three ACL stages are processed in order. ACLs can have multiple
+- After the route lookup above, the three ACL stages are processed in order. ACLs can have multiple
   `src/dst` IP ranges or port ranges as match criteria.
 
 > [!NOTE] CA-PA mapping table are used for both encap and decap processing.
