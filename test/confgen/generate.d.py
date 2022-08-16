@@ -1,29 +1,43 @@
-import io
-import orjson
-import dashgen
+#!/usr/bin/python3
 
+import dashgen
+from dashgen.confbase import *
+from dashgen.confutils import *
 
 print('generating config')
-enis = dashgen.enis.generate()
-aclgroups = dashgen.aclgroups.generate()
-vpc = dashgen.vpc.generate()
-vpcmappingtypes = dashgen.vpcmappingtypes.generate()
-vpcmappings = dashgen.vpcmappings.generate()
-routingappliances = dashgen.routingappliances.generate()
-routetables = dashgen.routetables.generate()
-prefixtags = dashgen.prefixtags.generate()
-config = {}
-config.update(enis)
-config.update(aclgroups)
-config.update(vpc)
-config.update(vpcmappingtypes)
-config.update(vpcmappings)
-config.update(routingappliances)
-config.update(routetables)
-config.update(prefixtags)
 
-print('writing the config to file')
-with io.open(r'dash_conf.json', 'wb') as jsonfile:
-    jsonfile.write(orjson.dumps(config, option=orjson.OPT_INDENT_2))
+parser = commonArgParser()
+args = parser.parse_args()
 
-print('done')
+
+class DashConfig(ConfBase):
+
+    def __init__(self, params={}):
+        super().__init__('dash-config', params)
+
+    def generate(self):
+        # Pass top-level params to sub-generrators.
+        self.configs = [
+            dashgen.enis.Enis(self.params_dict),
+            dashgen.aclgroups.AclGroups(self.params_dict),
+            dashgen.vpcs.Vpcs(self.params_dict),
+            dashgen.vpcmappingtypes.VpcMappingTypes(self.params_dict),
+            dashgen.vpcmappings.VpcMappings(self.params_dict),
+            dashgen.routingappliances.RoutingAppliances(self.params_dict),
+            dashgen.routetables.RouteTables(self.params_dict),
+            dashgen.prefixtags.PrefixTags(self.params_dict),
+        ]
+
+    def toDict(self):
+        return {x.dictName(): x.items() for x in self.configs}
+
+    def items(self):
+        return (c.items() for c in self.configs)
+
+
+if __name__ == "__main__":
+    conf = DashConfig()
+    common_parse_args(conf)
+    conf.generate()
+    common_output(conf)
+    print('done')
