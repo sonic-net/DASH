@@ -8,7 +8,7 @@ See also:
 * [README-ptftests](README-ptftests.md) for saithrift PTF test-case development and usage.
 * [README-pytests](README-pytests.md) for saithrift Pytest test-case development and usage.
 # DASH Pipeline
-This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://github.com/p4lang/behavioral-model) from [p4lang](https://github.com/p4lang). It includes the P4 program which models the DASH overlay dataplane; Dockerfiles; build and test infrastructure; and CI (Continuous Integration) spec files.
+This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://github.com/p4lang/behavioral-model) from [p4lang](https://github.com/p4lang). It includes the P4 program which models the DASH overlay data plane; Dockerfiles; build and test infrastructure; and CI (Continuous Integration) spec files.
 
 >**IMPORTANT:** Developers, read [Typical Workflow: Committing new code - ignoring SAI submodule](README-dash-workflows.md#typical-workflow-committing-new-code---ignoring-sai-submodule) before committing code.
 
@@ -25,7 +25,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
   - [I feel lucky!](#i-feel-lucky)
   - [Cleanup](#cleanup)
   - [More Make Targets](#more-make-targets)
-- [Installing Prequisites](#installing-prequisites)
+- [Installing Prerequisites](#installing-prerequisites)
   - [Install git](#install-git)
   - [Install docker](#install-docker)
   - [Install Python 3](#install-python-3)
@@ -38,7 +38,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 * Permission and ownership issues in Docker images, permanent fix is needed.
 # TODOs
 ## Loose Ends
-Small items to complete given the exsting features and state, e.g. excluing major roadmap items.
+Small items to complete given the existing features and state, e.g. excluding major roadmap items.
 * Update SAI submodule to upstream when PRs are merged (currently using dev branches for URLs)
 * Produce "dev" and "distro" versions of docker images. Dev images mount to host FS and use artifacts built on the host. Distro images are entirely self-contained including all artifacts.
 ## Desired Optimizations
@@ -49,13 +49,13 @@ Small items to complete given the exsting features and state, e.g. excluing majo
 ## Roadmap
 These are significant feature or functionality work items.
 * Use modified bmv2 which adds stateful processing. Current version is vanilla bmv2. This will require building it instead of using a prebuilt bmv2 docker image, see [Build Docker dev container](#build-docker-dev-container). [**WIP**]
-* Add DASH sevice test cases including SAI-thrift pipeline configuration and traffic tests
+* Add DASH service test cases including SAI-thrift pipeline configuration and traffic tests
 
 # Quick-start
 
 ## Prerequisites
 
-See [Installing Prequisites](#installing-prequisites) for details.
+See [Installing Prerequisites](#installing-prerequisites) for details.
 
 * Ubuntu 20.04, bare-metal or VM
 * 2 CPU cores minimum, 7GB RAM, 14Gb HD; same as [free Azure 2-core GitHub runner instances](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources), we'll try to live within these limits
@@ -65,7 +65,7 @@ See [Installing Prequisites](#installing-prequisites) for details.
 
 ## Clone this repo
 ```
-git clone <repo URL>
+git clone <repository URL>
 cd DASH
 ```
 **Optional** - if you require a particular dev branch:
@@ -108,7 +108,7 @@ The final `clean` above will kill the switch, delete artifacts and veth pairs.
 
 The tests may use a combination of SW packet generators:
 * Scapy - well-known packet-at-a-time SW traffic generator/capture
-* ixia-c - performant flow-based packet genrator/capture
+* ixia-c - performant flow-based packet generator/capture
   
 The setup for ixia-c -based traffic tests is as follows. More info is available [here](README-dash-workflows#about-snappi-and-ixia-c-traffic-generator).
 
@@ -118,13 +118,13 @@ The setup for ixia-c -based traffic tests is as follows. More info is available 
 ## Cleanup
 This is a summary of most-often used commands, see [README-dash-workflows.md](README-dash-workflows.md) for more details.
 
-* `CTRL-c` - kill the switch container from within the iteractive terminal
+* `CTRL-c` - kill the switch container from within the interactive terminal
 * `make kill-all` - kill all the running containers
 * `make clean` - clean up everything, kill containers
 
 ## More Make Targets
 See [README-dash-workflows.md](README-dash-workflows.md) for build workflows and Make targets. There are many fine-grained Make targets to control your development workflow.
-# Installing Prequisites
+# Installing Prerequisites
 ## Install git
 ```
 sudo apt install -y git

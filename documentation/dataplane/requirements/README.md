@@ -2,9 +2,9 @@
 
 [ [ << Back to DASH top-level Documents](../../README.md#contents) ]
 
-# DASH Dataplane Requirements Documents
+# DASH Data plane Requirements Documents
 
-This folder contains DASH dataplane compliance requirements documents.
+This folder contains DASH data plane compliance requirements documents.
 
 # Contents
 
