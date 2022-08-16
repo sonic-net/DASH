@@ -7,35 +7,35 @@
 # High-Level Design Document for SONiC-DASH Testing
 This document provides the high-level design for the testing of devices which conform to the SONiC-DASH requirements.
 
-> **TODO** Consider [SONiC Management Testbed](https://github.com/Azure/sonic-mgmt/blob/master/docs/testbed/README.testbed.Overview.md) as the standardized test environment for consistency with standard SONiC testing. The reference architectures depiected below were crafted to expedite early dataplane testing in the simplest possible fashion.
+> **TODO** Consider [SONiC Management Testbed](https://github.com/Azure/sonic-mgmt/blob/master/docs/testbed/README.testbed.Overview.md) as the standardized test environment for consistency with standard SONiC testing. The reference architectures depiected below were crafted to expedite early data plane testing in the simplest possible fashion.
 
-> **TODO** Articulate the testing of both dataplane and control plane features. The descriptions below focus on dataplane testing as the critical path towards DASH conformance and performance.
+> **TODO** Articulate the testing of both data plane and control plane features. The descriptions below focus on data plane testing as the critical path towards DASH conformance and performance.
 
 # Reference Testbed Architectures
 Tests shall utilize standardized reference architectures. See [dash-test-ref-arch.md](dash-test-ref-arch.md)
 # Standardized DUT Configuration APIs
 All DUTs will provide the following socket-based interfaces for configuring and controlling the devices. These are device service endpoints which are accessed via software clients running in the Controller.
 
-Vendors *should* provide a convenient, automatable means to select between a production mode using [gNMI](https://https://github.com/openconfig/gnmi), or a dataplane evaluation image using [saithrift](https://github.com/opencomputeproject/SAI/tree/master/test/saithrift). Vendor/SKU-specific mechanisms should be included in the `/targets` directory and accessible via the automation software at test run time. As an alternative, DUTS can be supplied with fixed images to operate in one mode or the other, as long as a means to switch between these images (mode switch, image reload, etc.) is provided.
+Vendors *should* provide a convenient, automatable means to select between a production mode using [gNMI](https://https://github.com/openconfig/gnmi), or a data plane evaluation image using [saithrift](https://github.com/opencomputeproject/SAI/tree/master/test/saithrift). Vendor/SKU-specific mechanisms should be included in the `/targets` directory and accessible via the automation software at test run time. As an alternative, DUTS can be supplied with fixed images to operate in one mode or the other, as long as a means to switch between these images (mode switch, image reload, etc.) is provided.
 
-> **NOTE**: At this time, the SONiC DASH project is nascent and the early emphasis will be on performance and conformance of the underlying dataplane. Therefore, the DASH-SAI interface will be the early focus in order to eliminate the complications of debugging problems involving the entire SONiC stack. The [saithrift](https://github.com/opencomputeproject/SAI/tree/master/test/saithrift) server approach will be used for initial "lab" testing. By definition, it is not a production interface. Later on, the gNMI interface will be used for production and dataplane testing. This repo will focus on gNMI tests which are particular to DASH and not covered by "standard" SONiC test cases. Standard SONiC test cases can exercise the common parts of the stack and feature set.
+> **NOTE**: At this time, the SONiC DASH project is nascent and the early emphasis will be on performance and conformance of the underlying data plane. Therefore, the DASH-SAI interface will be the early focus in order to eliminate the complications of debugging problems involving the entire SONiC stack. The [saithrift](https://github.com/opencomputeproject/SAI/tree/master/test/saithrift) server approach will be used for initial "lab" testing. By definition, it is not a production interface. Later on, the gNMI interface will be used for production and data plane testing. This repository will focus on gNMI tests which are particular to DASH and not covered by "standard" SONiC test cases. Standard SONiC test cases can exercise the common parts of the stack and feature set.
 
 ## gNMI Northbound API
 This is the canonical SONiC appliance management interface and it conforms to the standard SONiC Management requirements, see [SONiC Management Framework](https://github.com/Azure/SONiC/blob/master/doc/mgmt/Management%20Framework.md#3123-gnmi). This uses [gNMI](https://https://github.com/openconfig/gnmi) with [OpenConfig](https://github.com/openconfig) data models. All SONiC-DASH devices are expected to eventually conform to and be tested over this interface. See Figure 7. (Note, this diagram was adapted from the standard [SONiC Architecture](https://github.com/Azure/SONiC/wiki/Architecture) documents and may contain elements not-applicable to SONIC-DASH DUTs).
 
-"Production" test cases will be written against the gNMI interface and organized accordingly. These exercise much of the core SONiC stack as well as the DUT dataplane.
+"Production" test cases will be written against the gNMI interface and organized accordingly. These exercise much of the core SONiC stack as well as the DUT data plane.
 
 **Figure 7. gNMI Northbound Interface**
 ![SONiC Architecture](../images/dash-gnmi-api.svg)
 
-## saithrift Dataplane API
+## saithrift Data plane API
 The Switch Abstraction Interface (SAI) is an internal "c" library interface in the SONiC stack, see [SONiC System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture) and [SAI](https://github.com/opencomputeproject/SAI). It represents the binding between vendor-specific shared ASIC driver library `libsai` and the `syncd` daemon's driver-calling layers. It is not normally exposed as an API endpoint. Rather, it is invoked as a consequence of interactions within the entire SONiC stack.
 
 To simplify unit and functional testing, a Thrift server called [saithrift](https://github.com/opencomputeproject/SAI/tree/master/test/saithrift) can be compiled and bound to the SAI interface, providing a much-simplified path to the vendor ASIC library using SAI constructs expressed as Thrift RPC messages. This server replaces the normal collection of SONiC daemons and containers with a nearly direct path to vendor ASIC libraries via the SAI wrappers. See Figure 8. (Note, this diagram was adapted from the standard [SONiC Architecture](https://github.com/Azure/SONiC/wiki/Architecture) documents and may contain elements not-applicable to SONIC-DASH DUTs).
 
-"Dataplane Evaluation" test cases will be written using the saithrift interface and organized accordingly. These primarily exercise conformance of the "DASH SAI" dataplane API and performance of the dataplane implementation, but do not exercise the SONiC core stack.
+"Data plane Evaluation" test cases will be written using the saithrift interface and organized accordingly. These primarily exercise conformance of the "DASH SAI" data plane API and performance of the data plane implementation, but do not exercise the SONiC core stack.
 
-**Figure 8. SAI-Thrift Dataplane Test Interface**
+**Figure 8. SAI-Thrift Data plane Test Interface**
 ![SONiC Architecture](../images/dash-thrift-sai-api.svg)
 
 ## Non-standardized DUT Configuration Methodology
@@ -97,7 +97,7 @@ In other cases, procedural code which generates test vectors and performs test e
 
 ### Data-Driven Device Dependencies
 Test-cases should be reusable between various targets.
-Practially speaking, however, devices will have varying numbers of traffic ports; speed and breakout capabilties; connector/physical layer attributes; dataplane feature sets and scaling; etc. These device-dependent attributes shall be captured in configuration files and organized per-vendor and per-SKU under the [targets/](../targets/README.md) directory. Tests should consume this metadata and adapt accordingly, again using a data-driven, test-engine approach.
+Practically speaking, however, devices will have varying numbers of traffic ports; speed and breakout capabilities; connector/physical layer attributes; data plane feature sets and scaling; etc. These device-dependent attributes shall be captured in configuration files and organized per-vendor and per-SKU under the [targets/](../targets/README.md) directory. Tests should consume this metadata and adapt accordingly, again using a data-driven, test-engine approach.
 
 ### Community and Proprietary Test Cases
 While it is the intent to build a community wherein participants contribute public test cases, it is also anticipated and natural that members will retain proprietary test cases as well, for commercial reasons. It is hoped that the community test framework and library of test cases can still form the core of vendor testbeds. This will avoid "reinventing the wheel," reduce the friction of adapting and contributing vendor-developed test cases to the community and vice versa, and maximize the utility and hardening of this repository for the common good. One possiblity is to use [Git Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) to import this test repository into in-house repositories, which can be extended locally with private enhancements and additions.
@@ -105,15 +105,15 @@ While it is the intent to build a community wherein participants contribute publ
 ## P4 Model-Based Testing
 The [DASH P4 behavioral models](../../dash-pipeline/README.md) describe the DASH pipeline in an abstract, machine-readable and unambiguous fashion. There are multiple potential applications:
 
-* It is a clear contract and specification for the dataplane, supplementing or replacing traditional diagrams, text documents etc.
-* The P4 code can be used to generate dataplane programming APIs
+* It is a clear contract and specification for the data plane, supplementing or replacing traditional diagrams, text documents etc.
+* The P4 code can be used to generate data plane programming APIs
 * P4 software-based reference target running on a CPU
 * P4 code-derived test cases
 
-### P4 As Dataplane Definition
-The P4 code is the definitive specification of the dataplane behavior. Additional documents and diagrams can provide more clarity and context, but the machine-readable code is the single source of truth.
+### P4 As Data plane Definition
+The P4 code is the definitive specification of the data plane behavior. Additional documents and diagrams can provide more clarity and context, but the machine-readable code is the single source of truth.
 ### P4-Generated APIs
-The P4 code can be used to generate dataplane programming APIs. P4 compilers emit P4Info which is traditionally used to drive a [P4Runtime API](https://github.com/p4lang/p4runtime). The P4Info is consumed by a client program (e.g. SDN controller) and can be used to introspect P4 program entities (e.g. tables), format messages, etc.
+The P4 code can be used to generate data plane programming APIs. P4 compilers emit P4Info which is traditionally used to drive a [P4Runtime API](https://github.com/p4lang/p4runtime). The P4Info is consumed by a client program (e.g. SDN controller) and can be used to introspect P4 program entities (e.g. tables), format messages, etc.
 
 For DASH-SONiC, the P4Info is used to auto-generate appropriate DASH-SAI APIs (`.h` or header files). This provides a tight coupling between the canonical P4 pipeline code, and the corresponding DASH-SAI APIs. This by implication defines the saithrift APIs since these are merely RPC versions of the SAI `c` language APIs. The tooling to perform this is in progress and will be published at a later date.
 
@@ -143,7 +143,7 @@ Pytest              | An open-source Python test framework, see https://docs.pyt
 RPC                 | Remote Procedure Call, e.g. a service or function invoked over a network socket. Examples of RPC protocols: gRPC, gNMI, Thrift
 SAI                 | Switch Abstraction Interface, see https://github.com/opencomputeproject/SAI
 SKU                 | Stocking Control Unit, a fancy name for part number; pronounced "skew."
-SmartNIC            | An intelligent Network Interface Card (Adaptor) which executes the dataplane features
+SmartNIC            | An intelligent Network Interface Card (Adaptor) which executes the data plane features
 snappi              | A family of client wrappers to simplify usage of OTG-compliant traffic generators, see https://github.com/open-traffic-generator/snappi
 SUT or S.U.T.       | System Under Test
 SW                  | Software

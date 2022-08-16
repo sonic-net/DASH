@@ -3,8 +3,8 @@ Combined with the worst case scenario cases (TBD) we will be able to determine t
 
 ![vxlan_1vpc_1ip](../../images/test_vxlan_1vpc_1ip.svg)
 
-1. Configure VxLAN with 1 VPC and 1 VNI.
-2. Configure BGP to achieve conectivity between the loopback interfaces.
+1. Configure VXLAN with 1 VPC and 1 VNI.
+2. Configure BGP to achieve connectivity between the loopback interfaces.
 3. Configure VMs behind VTEPs.
 4. Verify that the control plane is up.
 5. Find the Max PPS supported using stateless UDP bidirectional traffic

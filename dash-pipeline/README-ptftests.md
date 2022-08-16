@@ -5,7 +5,7 @@
 
 # PTF - Packet Test Framework
 ## PTF Overview
-The Packet Test Framework (PTF) is a popular tool and is based on Pyunit, Scapy and some utilities to make testing dataplanes and switching devices easy and convenient.
+The Packet Test Framework (PTF) is a popular tool and is based on Pyunit, Scapy and some utilities to make testing data planes and switching devices easy and convenient.
 - [PTF - Packet Test Framework](#ptf---packet-test-framework)
   - [PTF Overview](#ptf-overview)
   - [Learn By Example](#learn-by-example)
@@ -32,13 +32,13 @@ sudo ptf --test-dir ./ptf --pypath /SAI/ptf \
 ```
 Note that the container is launched with `/SAI/ptf` in the container mounted to the corresponding 
 ## Locating PTF Packet Utilities
-The following directory contains source code for packet test utillities:
+The following directory contains source code for packet test utilities:
 ```
 DASH/dash-pipeline/SAI/SAI/test/ptf/src/ptf
 ```
 Note this directory won't be expanded into your workspace when you first clone DASH. You have to expand the GitSubmodules under SAI/SAI and SAI/SAI/test/ptf. This is done  part of the first DASH build (`git submodule update --init` and `make all`) as explained in other README's.
 
-To clarify: the directory structure below is created after the `SAI/SAI` repo is cloned; then subsequently the `SAI/SAI/test/ptf` repo is cloned inside that repo.
+To clarify: the directory structure below is created after the `SAI/SAI` repository is cloned; then subsequently the `SAI/SAI/test/ptf` repository is cloned inside that repo.
 
 You can also consult the source of PTF: https://github.com/p4lang/ptf. Note that SAI imports a specific commit SHA of PTF via the submodule so it's best to consult the code which is actually pulled into DASH. The way to check the version is to enter the PTF submodule directory and look at git branch:
 ```
@@ -60,7 +60,7 @@ def verify_packets(test, pkt, ports=[], device_number=0, timeout=None):
 
     The parameter timeout will be passed as is for each individual verify calls.
 
-    This covers the common and simplest cases for checking dataplane outputs.
+    This covers the common and simplest cases for checking data plane outputs.
     For more complex usage, like multiple different packets being output, or
     multiple packets on the same port, use the primitive verify_packet,
     verify_no_packet, and verify_no_other_packets functions directly.

@@ -101,7 +101,7 @@ Contributors with write access permission or higher have rights to directly edit
 > Direct edits (without proper PR and review) to "released" artifacts short-circuits the normal community process and can result in breaking changes and significant disruption, resulting in potential impact to downstream consumers.
 
 ## Avoid Directly Committing New Artifacts
-As a corrollary to the hazards of directly editing documents, contributors with write access permission or higher have rights to directly commit new documents. This should be avoided. Skipping the normal PR and review process prevents reviewers from making inline comments against "Files Changed" etc. Only summary comments of the commit itself are possible, which is less useful.
+As a corollary to the hazards of directly editing documents, contributors with write access permission or higher have rights to directly commit new documents. This should be avoided. Skipping the normal PR and review process prevents reviewers from making inline comments against "Files Changed" etc. Only summary comments of the commit itself are possible, which is less useful.
 
 > [!WARNING]
 > Direct commits (without proper PR and review) of new artifacts short-circuits the normal community process and should be avoided. 
@@ -191,7 +191,7 @@ In order for **repository members to see a project listed in a repository**, the
 When working on a project, you’ll want to exclude specific files or directories
 from being pushed to the remote repository. This is where `.gitignore` file
 comes into the picture. This file specifies what untracked files Git must ignore
-so tey are not pushed to the remote repository.
+so they are not pushed to the remote repository.
 For more information, see [Ignoring Files and Directories in Git
 (.gitignore)](https://linuxize.com/post/gitignore-ignoring-files-in-git/). 
 See also [A collection of .gitignore templates](https://github.com/github/gitignore). 

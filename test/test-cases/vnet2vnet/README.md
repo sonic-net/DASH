@@ -1,6 +1,6 @@
 # VNET to VNET 
 
-The SoNiC-DASH testbed provides a common test platform to examine an extensive collection of test cases and allow ease of duplication and modification.  The directory structure is arranged for configuring a variety of test SKUs and to reduce testing design time.
+The SONiC-DASH testbed provides a common test platform to examine an extensive collection of test cases and allow ease of duplication and modification.  The directory structure is arranged for configuring a variety of test SKUs and to reduce testing design time.
 
 The files found within this directory serve the following purpose:
 1. Define a guide for expanding DASH test scenarios.

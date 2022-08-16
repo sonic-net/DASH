@@ -67,7 +67,7 @@ typedef struct _sai_{{ table.name }}_t
      * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.sai_key_name }}
 {% if key.sai_key_type == 'sai_object_id_t' %}
      *
-     * @objects SAI_OBJECT_TYPE_{{ key.sai_key_name | replace('_id', '') | upper }}
+     * @objects SAI_OBJECT_TYPE_{{ key.objectName | upper }}
 {% endif %}
      */
 {% if key.match_type == 'lpm' %}

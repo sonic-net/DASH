@@ -4,6 +4,7 @@ on:
   push:
     branches: [ "**" ]
     paths:
+      - '.gitmodules'
       - '.github/workflows/dash-bmv2-ci.yml'
       - 'test/**.py'
       - 'test/**requirements.txt'
@@ -19,6 +20,7 @@ on:
   pull_request:
     branches: [ "main" ]
     paths:
+      - '.gitmodules'
       - '.github/workflows/dash-bmv2-ci.yml'
       - 'test/**.py'
       - 'test/**requirements.txt'

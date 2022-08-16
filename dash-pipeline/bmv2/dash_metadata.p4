@@ -36,6 +36,8 @@ struct metadata_t {
     direction_t direction;
     encap_data_t encap_data;
     EthernetAddress eni_addr;
+    bit<16> vnet_id;
+    bit<16> dst_vnet_id;
     bit<16> eni_id;
     eni_data_t eni_data;
     bit<16> inbound_vm_id;
