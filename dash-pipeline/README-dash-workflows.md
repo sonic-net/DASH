@@ -1,3 +1,7 @@
+**>> I Don't have time to RTFM!***   [Jump to Concise Developer Workflows](#concise-developer-workflows)
+
+*(Read the Fancy Manual)
+
 See also:
 * [README.md](README.md) Top-level README for dash-pipeline
 * [README-dash-ci](README-dash-ci.md) for CI pipelines.
@@ -7,13 +11,18 @@ See also:
 * [README-pytests](README-pytests.md) for saithrift Pytest test-case development and usage.
 
 **Table of Contents**
+- [Concise Developer Workflows](#concise-developer-workflows)
+  - [Use Case I - Developing P4 Code - Zero config](#use-case-i---developing-p4-code---zero-config)
+    - [Sending packets "manually" into the switch](#sending-packets-manually-into-the-switch)
+  - [Use-Case II - Developing P4 Code + libsai config (C++)](#use-case-ii---developing-p4-code--libsai-config-c)
+  - [Use-Case III - Developing End-to-End Tests with saithrift](#use-case-iii---developing-end-to-end-tests-with-saithrift)
+  - [Use-Case IV - Incremental Test-Case Development](#use-case-iv---incremental-test-case-development)
 - [Make Target Summary](#make-target-summary)
   - [Make "ALL" Targets](#make-all-targets)
   - [Build Artifacts](#build-artifacts)
   - [Launch Daemons/Containers](#launch-daemonscontainers)
   - [Run Tests](#run-tests)
 - [Detailed DASH Behavioral Model Build Workflow](#detailed-dash-behavioral-model-build-workflow)
-  - [TODO](#todo)
   - [Docker Image(s)](#docker-images)
   - [Build Workflow Diagram](#build-workflow-diagram)
   - [Make All](#make-all)
@@ -50,6 +59,66 @@ See also:
   - [Docker Image Versioning](#docker-image-versioning)
     - [Project-Specific Images](#project-specific-images)
     - [Third-party Docker Images](#third-party-docker-images)
+# Concise Developer Workflows
+This section gives you a quick idea of how to work on various tasks efficiently. Don't  run `make all` unless you have to!
+
+>Do you have another use-case in mind? Help document it with a Pull-Request, or ask the community.
+
+## Use Case I - Developing P4 Code - Zero config
+Developing P4 code only requires  use of `make p4` to verify the code compiles. This is fairly quick. You can run the code in the bmv2 software switch via `make run-switch`. This simplified setup doesn't support any switch configuration, so the testability is minimal. For example, you can send in packets and observe the switch console logging to verify packet parsing/deparsing. See [Sending packets "manually" into the switch](#sending-packets-manually-into-the-switch)
+
+![dev-workflows](images/dev-workflow-p4.svg)
+### Sending packets "manually" into the switch
+Assuming you've done `make all` at least once, you will have a handy saithrift-client docker image which contains scapy, snappi libraries to run ixia-c SW traffic generator, etc. See the "optional" box in the figure above.
+You also have to build `sai` in order for the bmv2 "forwarding pipeline config" to get loaded, which you can force via `make init-switch`. For example, you can enter the container and run ad-hoc scapy commands, see below:
+```
+make run-switch                   # console 1
+make init-switch                  # console 2
+make run-saithrift-client-bash    # console 2
+...   
+root@chris-z4:/tests-dev/saithrift# scapy
+>>> p=Ether()/IP()/UDP()
+>>> sendp(p, iface='veth1')
+.
+Sent 1 packets.
+>>> 
+```
+
+## Use-Case II - Developing P4 Code + libsai config (C++)
+To test the autogeneration of `libsai` and configuration of the dataplane, you can execute `make sai` and `make libsai-test`. You can add tests under `dash-pipeline/tests/libsai`. It takes slightly over half a minute to generate `libsai`. The C++ tests are limited to CRUD operations on the SAI interface and run as one-shot programs without any traffic generation.
+
+That being said, you can use the same techniques described in [Sending packets "manually" into the switch](#sending-packets-manually-into-the-switch). Conceivably you could write C++ tests to configure the switch to a known state; send packets; then verify them manually. However, test-cases written this way are not very useful, perhaps only  as ad hoc throwaway tests.
+
+>Use [saithrift tests](#developing-end-to-end-tests-with-saithrift) for end-to-end testing of config and traffic. Tests using the saithrift client/server are very easy to write and translate well into CI automated regression testing.
+
+Here's the minimal set of commands to [re-]compile p4, generate libsai and C++ tests, and run tests:
+```
+[make clean]
+make p4 sai libsai-test run-switch
+```
+In a second console, run tests and optionally stop the switch:
+```
+make run-libsai-test [&& make kill-switch]
+```
+
+![dev-workflows](images/dev-workflow-p4-libsai.svg)
+
+## Use-Case III - Developing End-to-End Tests with saithrift
+End-to-end tests require `make all` in order to build all the local artifacts and saithrift-client docker image.
+
+A concise set of commands to run, in three separate terminals:
+```
+[make clean &&] make all run-switch   # console 1
+make run-saithrift-server             # console 2
+make run-all-tests                    # console 3
+```
+
+![dev-workflows](images/dev-workflow-p4-saithrift.svg)
+## Use-Case IV - Incremental Test-Case Development
+This builds upon the previous use-case.
+
+Once you have stable P4 code, `libsai` and a saithrift client/server framework, you can start the switch and sai-thrift server, then develop test-cases interactively. The figure above illustrates this process in the lower-right corner. You can edit and save saithrift tests (PTF or Pytest) in your host PC's workspace; save the files; then run selected, or all tests, interactively from inside the saithrift-client container. See [Developer: Run tests selectively from `bash` inside saithrift-client container](README-saithrift.md#developer-run-tests-selectively-from-bash-inside-saithrift-client-container) for details.
+
 # Make Target Summary
 The tables below summarize the most important `make` targets for easy reference. You can click on a link to jump to further explanations. Not all make targets are shown. See the [Makefile](Makefile) to learn more.
 
@@ -98,13 +167,8 @@ The workflows described here are primarily driven by a [Makefile](Makefile) and 
 * Cloud-based CI (Continuous Integration) build and test, every time code is pushed to GitHub or a Pull Request is submitted to the upstream repository.
 
 See the [Diagram](#build-workflow-diagram) below. You can read the [dockerfiles](dockerfiles) and all `Makefiles` in various directories to get a deeper understanding of the build process. You generally use the targets from the main [Makefile](Makefile) and not any subordinate ones.
-## TODO
-* Document specific task workflows and required build steps and dependencies, e.g.:
-  * P4 code development
-  * SAI adaptor development
-  * Test-case development
-  * Docker development
-* Assign more uniform `make` target names.
+
+
 ## Docker Image(s)
 >**NOTE** P4 code or test-case developers generally **don't** need to build `p4c`, `saithrift-bldr,` or `bmv2` docker images; they are pulled automatically, on-demand, from a registry. They contain static tooling. Developers who create and maintain the Docker images **do** need to build and push new images.
 
@@ -160,7 +224,7 @@ make sai             # Combines steps above
 make sai-clean       # Clean up artifacts and Git Submodule
 ```
 
-These targets generates SAI headers from the P4Info which was described above. It uses [Jinja2](https://jinja.palletsprojects.com/en/3.1.x/) which renders [SAI/templates](SAI/templates) into c++ source code for the SAI headers corresponding to the DASH API as defined in the P4 code. It then compiles this code into a shared library `libsai.so` which will later be used to link to a test server (Thrift) or `syncd` daemon for production.
+These targets generates SAI headers from the P4Info which was described above. It uses [Jinja2](https://jinja.palletsprojects.com/en/3.1.x/) which renders [SAI/templates](SAI/templates) into C++ source code for the SAI headers corresponding to the DASH API as defined in the P4 code. It then compiles this code into a shared library `libsai.so` which will later be used to link to a test server (Thrift) or `syncd` daemon for production.
 
 This consists of two main steps
 * Generate the SAI headers and implementation code via [SAI/generate_dash_api.sh](SAI/generate_dash_api.sh) script, which is merely a wrapper which calls the real workhorse: [SAI/sai_api_gen.py](SAI/sai_api_gen.py). This uses templates stored in [SAI/templates](SAI/templates).
@@ -286,7 +350,7 @@ make run-saithrift-client-dev-tests       # run both suites above
 ```
 
 ## Run libsai C++ tests
-This exercises the `libsai.so` shared library with c++ programs. This tests the SAI API handlers and P4Runtime client adaptor, which communicates to the running `simple_switch_grpc` process over a socket.
+This exercises the `libsai.so` shared library with C++ programs. This tests the SAI API handlers and P4Runtime client adaptor, which communicates to the running `simple_switch_grpc` process over a socket.
 ```
 make run-libsai-test
 ```

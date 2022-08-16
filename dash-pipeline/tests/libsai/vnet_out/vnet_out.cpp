@@ -20,12 +20,18 @@ extern sai_status_t sai_create_eni_ether_address_map_entry(
 extern sai_status_t sai_remove_eni_ether_address_map_entry(
         _In_ const sai_eni_ether_address_map_entry_t *outbound_eni_lookup_from_vm_entry);
 
-extern sai_status_t sai_create_outbound_eni_to_vni_entry(
-        _In_ const sai_outbound_eni_to_vni_entry_t *outbound_eni_to_vni_entry,
+extern sai_status_t sai_create_vnet(
+        _Out_ sai_object_id_t *vnet_id,
+        _In_ sai_object_id_t switch_id,
         _In_ uint32_t attr_count,
         _In_ const sai_attribute_t *attr_list);
-extern sai_status_t sai_remove_outbound_eni_to_vni_entry(
-        _In_ const sai_outbound_eni_to_vni_entry_t *outbound_eni_to_vni_entry);
+extern sai_status_t sai_remove_vnet(_In_ sai_object_id_t vnet_id);
+
+extern sai_status_t sai_create_eni(
+        _Out_ sai_object_id_t *eni_id,
+        _In_ sai_object_id_t switch_id,
+        _In_ uint32_t attr_count,
+        _In_ const sai_attribute_t *attr_list);
 
 extern sai_status_t sai_create_eni(
         _Out_ sai_object_id_t *eni_id,
@@ -53,6 +59,7 @@ int main(int argc, char **argv)
     sai_object_id_t in_acl_group_id;
     sai_object_id_t out_acl_group_id;
     sai_object_id_t eni_id;
+    sai_object_id_t vnet_id;
 
     sai_direction_lookup_entry_t dle = {};
     dle.switch_id = switch_id;
@@ -92,6 +99,19 @@ int main(int argc, char **argv)
 
     attrs.clear();
 
+    attr.id = SAI_VNET_ATTR_VNI;
+    attr.value.u32 = 9;
+    attrs.push_back(attr);
+    
+    status = sai_create_vnet(&vnet_id, switch_id, attrs.size(), attrs.data());
+    if (status != SAI_STATUS_SUCCESS)
+    {
+        std::cout << "Failed to create VNET table entry" << std::endl;
+        return 1;
+    }
+
+    attrs.clear();
+
     attr.id = SAI_ENI_ATTR_CPS;
     attr.value.u32 = 10000;
     attrs.push_back(attr);
@@ -117,6 +137,10 @@ int main(int argc, char **argv)
 
     attr.id = SAI_ENI_ATTR_VM_VNI;
     attr.value.u32 = 9;
+    attrs.push_back(attr);
+
+    attr.id = SAI_ENI_ATTR_VNET_ID;
+    attr.value.u32 = vnet_id;
     attrs.push_back(attr);
 
     std::unordered_map<uint32_t, uint16_t> acl_group_ids = {
@@ -147,7 +171,6 @@ int main(int argc, char **argv)
         attrs.push_back(attr);
     }
 
-    /* status = sai_dash_api_impl.create_eni(&eni_id, switch_id, attrs.size(), attrs.data()); */
     status = sai_create_eni(&eni_id, switch_id, attrs.size(), attrs.data());
     if (status != SAI_STATUS_SUCCESS)
     {
@@ -177,33 +200,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    attrs.clear();
-
-    sai_outbound_eni_to_vni_entry_t e2v = {};
-    e2v.switch_id = switch_id;
-    e2v.eni_id = eni_id;
-
-    attr.id = SAI_OUTBOUND_ENI_TO_VNI_ENTRY_ATTR_VNI;
-    attr.value.u32 = 9;
-    attrs.push_back(attr);
-
-    /* status = sai_dash_api_impl.create_outbound_eni_to_vni_entry(&e2v, attrs.size(), attrs.data()); */
-    status = sai_create_outbound_eni_to_vni_entry(&e2v, attrs.size(), attrs.data());
-    if (status != SAI_STATUS_SUCCESS)
-    {
-        std::cout << "Failed to create ENI To VNI" << std::endl;
-        return 1;
-    }
-    attrs.clear();
-
     // Delete everything in reverse order
-    status = sai_remove_outbound_eni_to_vni_entry(&e2v);
-    if (status != SAI_STATUS_SUCCESS)
-    {
-        std::cout << "Failed to remove ENI To VNI" << std::endl;
-        return 1;
-    }
-
     status = sai_remove_eni_ether_address_map_entry(&eam);
     if (status != SAI_STATUS_SUCCESS)
     {
@@ -215,6 +212,13 @@ int main(int argc, char **argv)
     if (status != SAI_STATUS_SUCCESS)
     {
         std::cout << "Failed to remove ENI object " << eni_id << std::endl;
+        return 1;
+    }
+
+    status = sai_remove_vnet(vnet_id);
+    if (status != SAI_STATUS_SUCCESS)
+    {
+        std::cout << "Failed to remove VNET table entry" << std::endl;
         return 1;
     }
 

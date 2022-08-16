@@ -102,6 +102,7 @@ control dash_ingress(inout headers_t hdr,
                          bit<1> admin_state,
                          IPv4Address vm_underlay_dip,
                          bit<24> vm_vni,
+                         bit<16> vnet_id,
                          ACL_GROUPS_PARAM(inbound_v4),
                          ACL_GROUPS_PARAM(inbound_v6),
                          ACL_GROUPS_PARAM(outbound_v4),
@@ -111,7 +112,10 @@ control dash_ingress(inout headers_t hdr,
         meta.eni_data.flows          = flows;
         meta.eni_data.admin_state    = admin_state;
         meta.encap_data.underlay_dip = vm_underlay_dip;
+        /* vm_vni is the encap VNI used for tunnel between inbound DPU -> VM
+         * and not a VNET identifier */
         meta.encap_data.vni          = vm_vni;
+        meta.vnet_id                 = vnet_id;
 
         if (meta.is_dst_ip_v6 == 1) {
             if (meta.direction == direction_t.OUTBOUND) {
