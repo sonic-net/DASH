@@ -20,6 +20,9 @@ The [Azure/DASH project](https://github.com/Azure/DASH) can be used as a resouce
 # Quick-Start
 This will show you how to import the [Azure/DASH project](https://github.com/Azure/DASH) project into your own Git project.
 
+A minimal sample project created using this recipe can be found here: https://github.com/chrispsommers/dashsubmodule
+
+
 1. Start with a Git project, either a new or existing one of your choosing. You might want to make a scratch project just to try this out.
 2. Copy the [Makefile.3rdpty](Makefile.3rdpty) into your project. You can put it into its own subdirectory and/or or rename it to suit. If you rename it, please interpret the subsequent instructions accordingly.
 3. Choose a subdirectory in which to import the DASH project as a submodule. The sample [Makefile.3rdpty](Makefile.3rdpty) assumes a directory  `./DASH` relative to the Makefile location. Edit the following line in the makefile to change this (or, set the environment variable `DASHDIR` before calling `make`):
