@@ -9,7 +9,7 @@ run-saithrift-client-dev-tests: run-saithrift-dev-ptftests run-saithrift-dev-pyt
 
 .PHONY:clean
 clean: fix-perms kill-all p4-clean sai-clean test-clean network-clean saithrift-server-clean
-	rm -rf bmv2/dash_pipeline.bmv2
+	rm -rf $(P4_OUTDIR)
 
 kill-all: kill-saithrift-server kill-switch undeploy-ixiac
 
@@ -17,9 +17,14 @@ kill-all: kill-saithrift-server kill-switch undeploy-ixiac
 .PHONY: fix-perms
 fix-perms:
 	@echo "### Applying Fix permissions workaround..."
-	sudo chmod -R o+rw SAI/ bmv2/ tests/
+	#sudo chmod -R o+rw SAI/ bmv2/ tests/
 
 PWD := $(shell pwd)
+DASHUSER ?=dashuser
+DASHGROUP ?=dashusers
+DASHUID ?=4321
+DASHGUID?=4321
+DASHHOST?=dash
 
 # Default Docker images, override from env var
 
@@ -27,7 +32,7 @@ PWD := $(shell pwd)
 DOCKER_GRPC_IMG ?=chrissommers/dash-grpc:1.43.2
 
 # Slimmed-down version bmv2 backend only 632MB - works:
-DOCKER_P4C_BMV2_IMG ?=chrissommers/dash-p4c-bmv2:220701
+DOCKER_P4C_BMV2_IMG ?=chrissommers/dash-p4c-bmv2:220819
 
 # Builds sai-P4rt clients to run inside bmvs process
 DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2-bldr:220630
@@ -70,24 +75,26 @@ sai-submodule:
 # P4 Source code compile TARGETS
 ######################################
 
-P4_ARTIFACTS=bmv2/dash_pipeline.bmv2/dash_pipeline.json bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt
-
-p4: fix-perms bmv2/dash_pipeline.bmv2/dash_pipeline.json
-
-.PHONY:p4-clean
-p4-clean:
-	-rm -rf bmv2/dash_pipeline.bmv2
-
 P4_SRC=$(wildcard bmv2/*.p4)
 P4_MAIN=bmv2/dash_pipeline.p4
 P4_OUTDIR=bmv2/dash_pipeline.bmv2
+
+P4_ARTIFACTS=$(P4_OUTDIR)/dash_pipeline.json $(P4_OUTDIR)/dash_pipeline_p4rt.txt
+
+p4: fix-perms $(P4_OUTDIR)/dash_pipeline.json
+
+.PHONY:p4-clean
+p4-clean:
+	-rm -rf $(P4_OUTDIR)
 # Compile P4 into bmv2 .json fle and P4info for SAI header autogeneration
 $(P4_ARTIFACTS): $(P4_SRC)
 	@echo "Compile P4 program $(P4_MAIN) ..."
 	mkdir -p $(P4_OUTDIR) && \
+	chmod o+w $(P4_OUTDIR) && \
 	docker run \
 	--rm \
 	--name dash-p4c-$(USER) \
+	-u $(DASHUSER) \
 	$(DOCKER_FLAGS) \
 	-v $(PWD)/bmv2:/bmv2 \
 	-w / \
@@ -118,14 +125,14 @@ sai: fix-perms sai-clean sai-headers sai-meta libsai
 
 sai-headers: fix-perms p4 | SAI/SAI 
 	@echo "Generate SAI library headers and implementation..."
-	mkdir -p SAI/lib
+	mkdir -p SAI/lib && chmod -R o+w SAI && \
 	$(DOCKER_RUN) \
 		$(DOCKER_FLAGS) \
 		--name build_sai-$(USER) \
 		-w /SAI $(DOCKER_SAITHRIFT_BLDR_IMG) \
 	    ./generate_dash_api.sh
 	# Fixup perms from generate_dash_api using sudo to call python,so subsequent scripts can access
-	sudo chmod -R a+rw $(PWD)/SAI/SAI
+	#sudo chmod -R a+rw $(PWD)/SAI/SAI
 
 sai-meta: fix-perms 
 	@echo "Generate SAI metadata..."
@@ -140,7 +147,7 @@ sai-meta: fix-perms
 		-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/SAI/meta \
 		$(DOCKER_SAITHRIFT_BLDR_IMG) \
 	    make
-	sudo chmod -R o+rw SAI/
+	#sudo chmod -R o+rw SAI/
 
 # TODO - add SAI header dependencies
 libsai: fix-perms 
@@ -153,7 +160,7 @@ libsai: fix-perms
 	    make
 
 libsai-clean: fix-perms 
-	-rm -rf SAI/lib/libsai.so
+	-rm -rf SAI/lib/*
 
 .PHONY:sai-clean
 sai-clean: fix-perms SAI/SAI libsai-clean
@@ -176,8 +183,8 @@ run-switch: network
 	$(DOCKER_RUN) \
 		--name simple_switch-$(USER) \
 		-u root \
-		-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline.json:/etc/dash/dash_pipeline.json \
-		-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
+		-v $(PWD)/$(P4_OUTDIR)/dash_pipeline.json:/etc/dash/dash_pipeline.json \
+		-v $(PWD)/$(P4_OUTDIR)/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
 		$(DOCKER_BMV2_RUN_IMG) \
 		env LD_LIBRARY_PATH=/usr/local/lib \
 		simple_switch_grpc \
@@ -204,8 +211,8 @@ DOCKER_RUN_SAITHRIFT_SRVR =\
 	$(DOCKER_FLAGS) \
 	--net=host \
 	--name dash-saithrift-server-$(USER) \
-	-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline.json:/etc/dash/dash_pipeline.json \
-	-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
+	-v $(PWD)/$(P4_OUTDIR)/dash_pipeline.json:/etc/dash/dash_pipeline.json \
+	-v $(PWD)/$(P4_OUTDIR)/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
 	-v $(PWD)/SAI:/SAI \
 	-v $(PWD)/SAI/SAI/meta:/meta \
 	-w /SAI/rpc/usr/sbin \
@@ -394,13 +401,25 @@ run-saithrift-client-bash:
 
 ###############################
 
+# docker-dash-p4c:
+# 	docker build \
+# 		-f dockerfiles/Dockerfile.p4c-bmv2 \
+# 	    -t $(DOCKER_P4C_BMV2_IMG) \
+# 	    --build-arg user=$(USER) \
+# 	    --build-arg uid=$(shell id -u) \
+# 	    --build-arg guid=$(shell id -g) \
+# 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+# 	    --build-arg available_processors=$(shell nproc) \
+# 		dockerfiles
+
 docker-dash-p4c:
 	docker build \
 		-f dockerfiles/Dockerfile.p4c-bmv2 \
 	    -t $(DOCKER_P4C_BMV2_IMG) \
-	    --build-arg user=$(USER) \
-	    --build-arg uid=$(shell id -u) \
-	    --build-arg guid=$(shell id -g) \
+	    --build-arg user=$(DASHUSER) \
+	    --build-arg group=$(DASHGROUP) \
+	    --build-arg uid=$(DASHUID) \
+	    --build-arg guid=$(DASHGUID) \
 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
 	    --build-arg available_processors=$(shell nproc) \
 		dockerfiles
