@@ -118,10 +118,7 @@ control outbound(inout headers_t hdr,
         meta.is_lkup_dst_ip_v6 = meta.is_dst_ip_v6;
 
         switch (routing.apply().action_run) {
-            // TODO: p4c: adding fall-through action for the switch statement
-            // causes the pipeline to skip the outbound routing and the ca_to_pa lookup
-            // https://github.com/p4lang/p4c/issues/3488
-            // route_vnet_direct:
+            route_vnet_direct:
             route_vnet: {
                 ca_to_pa.apply();
                 vnet.apply();
