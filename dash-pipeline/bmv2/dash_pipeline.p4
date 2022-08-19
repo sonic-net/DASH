@@ -161,14 +161,15 @@ control dash_ingress(inout headers_t hdr,
         meta.dropped = false;
     }
 
-    action vxlan_decap_pa_validate() {}
+    action vxlan_decap_pa_validate(bit<16> src_vnet_id) {
+        meta.vnet_id = src_vnet_id;
+    }
 
     @name("pa_validation|dash_vnet")
     table pa_validation {
         key = {
-            meta.eni_id: exact @name("meta.eni_id:eni_id");
+            meta.vnet_id: exact @name("meta.vnet_id:vnet_id");
             hdr.ipv4.src_addr : exact @name("hdr.ipv4.src_addr:sip");
-            hdr.vxlan.vni : exact @name("hdr.vxlan.vni:VNI");
         }
 
         actions = {
@@ -182,7 +183,9 @@ control dash_ingress(inout headers_t hdr,
     @name("inbound_routing|dash_vnet")
     table inbound_routing {
         key = {
+            meta.eni_id: exact @name("meta.eni_id:eni_id");
             hdr.vxlan.vni : exact @name("hdr.vxlan.vni:VNI");
+            hdr.ipv4.src_addr : ternary @name("hdr.ipv4.src_addr:sip");
         }
         actions = {
             vxlan_decap(hdr);
