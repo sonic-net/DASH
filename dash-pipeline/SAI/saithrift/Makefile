@@ -27,7 +27,7 @@ SAIRPC_EXTRA_LIBS="\
 		-lssl \
 		-laddress_sorting"
 
-# Below based on: https://github.com/opencomputeproject/SAI/blob/088627dd90c3420daf96d294c661b4a152afb01e/ptf/SAI_PTF_user-guide.md
+# Below based on: https://github.com/opencomputeproject/SAI/blob/master/ptf/SAI_PTF_user-guide.md
 # Dependencies are assumed to be installed, e.g. in the docker container
 saithrift-server:
 	# Copy headers to /usr/include/sai

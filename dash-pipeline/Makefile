@@ -1,23 +1,17 @@
 SHELL = /bin/bash
 
 # "All" type targets for convenience
-all:fix-perms p4 sai saithrift-server docker-saithrift-client test
+all:p4 sai saithrift-server docker-saithrift-client test
 
 run-all-tests:run-libsai-test deploy-ixiac run-saithrift-client-tests
 run-saithrift-client-tests: run-saithrift-ptftests run-saithrift-pytests
 run-saithrift-client-dev-tests: run-saithrift-dev-ptftests run-saithrift-dev-pytests
 
 .PHONY:clean
-clean: fix-perms kill-all p4-clean sai-clean test-clean network-clean saithrift-server-clean
+clean: kill-all p4-clean sai-clean test-clean network-clean saithrift-server-clean
 	rm -rf $(P4_OUTDIR)
 
 kill-all: kill-saithrift-server kill-switch undeploy-ixiac
-
-
-.PHONY: fix-perms
-fix-perms:
-	@echo "### Applying Fix permissions workaround..."
-	#sudo chmod -R o+rw SAI/ bmv2/ tests/
 
 PWD := $(shell pwd)
 DASH_USER ?=dashuser
@@ -81,7 +75,7 @@ P4_OUTDIR=bmv2/dash_pipeline.bmv2
 
 P4_ARTIFACTS=$(P4_OUTDIR)/dash_pipeline.json $(P4_OUTDIR)/dash_pipeline_p4rt.txt
 
-p4: fix-perms $(P4_OUTDIR)/dash_pipeline.json
+p4: $(P4_OUTDIR)/dash_pipeline.json
 
 .PHONY:p4-clean
 p4-clean:
@@ -121,9 +115,9 @@ DOCKER_RUN_SAITHRIFT_BLDR =\
 # TODO - create separate rules for headers, libsai.so
 .PHONY:sai
 
-sai: fix-perms sai-clean sai-headers sai-meta libsai
+sai: sai-clean sai-headers sai-meta libsai
 
-sai-headers: fix-perms p4 | SAI/SAI 
+sai-headers: p4 | SAI/SAI 
 	@echo "Generate SAI library headers and implementation..."
 	mkdir -p SAI/lib && chmod -R o+w SAI && \
 	$(DOCKER_RUN) \
@@ -131,10 +125,8 @@ sai-headers: fix-perms p4 | SAI/SAI
 		--name build_sai-$(USER) \
 		-w /SAI $(DOCKER_SAITHRIFT_BLDR_IMG) \
 	    ./generate_dash_api.sh
-	# Fixup perms from generate_dash_api using sudo to call python,so subsequent scripts can access
-	#sudo chmod -R a+rw $(PWD)/SAI/SAI
 
-sai-meta: fix-perms 
+sai-meta: 
 	@echo "Generate SAI metadata..."
 	# hack - remove scripts which cause Git ownership failures in CI pipelines
 	# We don't need them, they're to check that SAI headers didn't experience enum changes etc.
@@ -147,10 +139,9 @@ sai-meta: fix-perms
 		-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/SAI/meta \
 		$(DOCKER_SAITHRIFT_BLDR_IMG) \
 	    make
-	#sudo chmod -R o+rw SAI/
 
 # TODO - add SAI header dependencies
-libsai: fix-perms 
+libsai: 
 	@echo "build libsai.so..."
 	$(DOCKER_RUN) \
 		$(DOCKER_FLAGS) \
@@ -159,11 +150,11 @@ libsai: fix-perms
 		$(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
-libsai-clean: fix-perms 
+libsai-clean: 
 	-rm -rf SAI/lib/*
 
 .PHONY:sai-clean
-sai-clean: fix-perms SAI/SAI libsai-clean saithrift-server-clean
+sai-clean: SAI/SAI libsai-clean saithrift-server-clean
 	@echo "Restoring SAI subdirectories to baseline..."
 	rm -rf SAI/SAI/inc SAI/SAI/experimental SAI/SAI/meta
 	cd SAI/SAI && git checkout -- inc experimental meta
@@ -201,7 +192,7 @@ kill-switch:
 # SAI-THRIFT SERVER TARGETS
 ###############################
 
-saithrift-server:fix-perms
+saithrift-server:
 	$(DOCKER_RUN_SAITHRIFT_BLDR) \
 	    make $@
 
