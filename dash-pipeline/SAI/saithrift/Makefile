@@ -41,6 +41,7 @@ saithrift-server:
 	sudo cp $(LIB)/libsai.so /usr/lib
 
 	@echo "Build SAI thrift server and libraries..."
+	mkdir -p $(RPC_INST_DIR) && chmod a+w $(RPC_INST_DIR)
 
 	cd $(SAI) && export SAITHRIFTV2=y && \
 		export GEN_SAIRPC_OPTS="-ve" && \
@@ -57,6 +58,7 @@ saithrift-server:
 
 	# Copy thrift libs from builder image onto host
 	cp /usr/lib/libthrift*so* /usr/lib/thrift-0.11.0.tar.gz $(RPC_INST_DIR)
+	chmod -R a+w $(META)/generated $(META)/html $(META)/xml $(RPC_INST_DIR)
 
 saithrift-server-clean:
 	cd $(SAI) && export SAITHRIFTV2=y  && make clean

@@ -20,11 +20,11 @@ fix-perms:
 	#sudo chmod -R o+rw SAI/ bmv2/ tests/
 
 PWD := $(shell pwd)
-DASHUSER ?=dashuser
-DASHGROUP ?=dashusers
-DASHUID ?=4321
-DASHGUID?=4321
-DASHHOST?=dash
+DASH_USER ?=dashuser
+DASH_GROUP ?=dashusers
+DASH_UID ?=4321
+DASH_GUID?=4321
+DASH_HOST?=dash
 
 # Default Docker images, override from env var
 
@@ -32,19 +32,19 @@ DASHHOST?=dash
 DOCKER_GRPC_IMG ?=chrissommers/dash-grpc:1.43.2
 
 # Slimmed-down version bmv2 backend only 632MB - works:
-DOCKER_P4C_BMV2_IMG ?=chrissommers/dash-p4c-bmv2:220819
+DOCKER_P4C_BMV2_IMG ?=chrissommers/dash-p4c-bmv2:220819a
 
-# Builds sai-P4rt clients to run inside bmvs process
-DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2-bldr:220630
+# Builds SAI-P4RT clients to run inside bmv2 process
+DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2-bldr:220819
 
 # Runs bmv2 process - consider slimmer if don't need sai/p4rt clients inside
 DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 
 # Compiles sai headers, libsai, saithrift server & client/server libs
-DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220719
+DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220819
 
 # Base image with test frameworks, DASH client libs not installed
-DOCKER_SAITHRIFT_CLIENT_BLDR_IMG ?=chrissommers/dash-saithrift-client-bldr:220723
+DOCKER_SAITHRIFT_CLIENT_BLDR_IMG ?=chrissommers/dash-saithrift-client-bldr:220819
 
 # Client image built locally with saithrift client libs + PTF & Pytest frameworks
 # TODO: consider some other tagging scheme
@@ -94,7 +94,7 @@ $(P4_ARTIFACTS): $(P4_SRC)
 	docker run \
 	--rm \
 	--name dash-p4c-$(USER) \
-	-u $(DASHUSER) \
+	-u $(DASH_USER) \
 	$(DOCKER_FLAGS) \
 	-v $(PWD)/bmv2:/bmv2 \
 	-w / \
@@ -163,7 +163,7 @@ libsai-clean: fix-perms
 	-rm -rf SAI/lib/*
 
 .PHONY:sai-clean
-sai-clean: fix-perms SAI/SAI libsai-clean
+sai-clean: fix-perms SAI/SAI libsai-clean saithrift-server-clean
 	@echo "Restoring SAI subdirectories to baseline..."
 	rm -rf SAI/SAI/inc SAI/SAI/experimental SAI/SAI/meta
 	cd SAI/SAI && git checkout -- inc experimental meta
@@ -233,6 +233,7 @@ run-saithrift-server-bash:
 saithrift-server-clean:
 	$(DOCKER_RUN_SAITHRIFT_BLDR) \
 	    make $@
+	rm -rf SAI/rpc
 
 ###############################
 # SAI TEST TARGETS
@@ -293,10 +294,11 @@ docker-bmv2-bldr:
 	docker build \
 		-f dockerfiles/Dockerfile.bmv2-bldr \
 	    -t $(DOCKER_BMV2_BLDR_IMG) \
-	    --build-arg user=$(USER) \
-	    --build-arg uid=$(shell id -u) \
-	    --build-arg guid=$(shell id -g) \
-	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+	    --build-arg user=$(DASH_USER) \
+	    --build-arg group=$(DASH_GROUP) \
+	    --build-arg uid=$(DASH_UID) \
+	    --build-arg guid=$(DASH_GUID) \
+	    --build-arg hostname=$(DASH_HOST) \
 	    --build-arg available_processors=$(shell nproc) \
 	    dockerfiles
 
@@ -310,10 +312,11 @@ docker-saithrift-bldr:
 	docker build \
 		-f dockerfiles/Dockerfile.saithrift-bldr \
 	    -t $(DOCKER_SAITHRIFT_BLDR_IMG) \
-	    --build-arg user=$(USER) \
-	    --build-arg uid=$(shell id -u) \
-	    --build-arg guid=$(shell id -g) \
-	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+	    --build-arg user=$(DASH_USER) \
+	    --build-arg group=$(DASH_GROUP) \
+	    --build-arg uid=$(DASH_UID) \
+	    --build-arg guid=$(DASH_GUID) \
+	    --build-arg hostname=$(DASH_HOST) \
 	    --build-arg available_processors=$(shell nproc) \
 		dockerfiles
 
@@ -329,10 +332,11 @@ docker-saithrift-client-bldr:
 	docker build \
 		-f dockerfiles/Dockerfile.saithrift-client-bldr \
 	    -t $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG) \
-	    --build-arg user=$(USER) \
-	    --build-arg uid=$(shell id -u) \
-	    --build-arg guid=$(shell id -g) \
-	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+	    --build-arg user=$(DASH_USER) \
+	    --build-arg group=$(DASH_GROUP) \
+	    --build-arg uid=$(DASH_UID) \
+	    --build-arg guid=$(DASH_GUID) \
+	    --build-arg hostname=$(DASH_HOST) \
 	    --build-arg available_processors=$(shell nproc) \
 		./tests
 
@@ -416,11 +420,11 @@ docker-dash-p4c:
 	docker build \
 		-f dockerfiles/Dockerfile.p4c-bmv2 \
 	    -t $(DOCKER_P4C_BMV2_IMG) \
-	    --build-arg user=$(DASHUSER) \
-	    --build-arg group=$(DASHGROUP) \
-	    --build-arg uid=$(DASHUID) \
-	    --build-arg guid=$(DASHGUID) \
-	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+	    --build-arg user=$(DASH_USER) \
+	    --build-arg group=$(DASH_GROUP) \
+	    --build-arg uid=$(DASH_UID) \
+	    --build-arg guid=$(DASH_GUID) \
+	    --build-arg hostname=$(DASH_HOST) \
 	    --build-arg available_processors=$(shell nproc) \
 		dockerfiles
 
@@ -435,10 +439,11 @@ docker-dash-grpc:
 	docker build \
 		-f dockerfiles/Dockerfile.grpc1.43.2 \
 	    -t $(DOCKER_GRPC_IMG) \
-	    --build-arg user=$(USER) \
-	    --build-arg uid=$(shell id -u) \
-	    --build-arg guid=$(shell id -g) \
-	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+	    --build-arg user=$(DASH_USER) \
+	    --build-arg group=$(DASH_GROUP) \
+	    --build-arg uid=$(DASH_UID) \
+	    --build-arg guid=$(DASH_GUID) \
+	    --build-arg hostname=$(DASH_HOST) \
 	    --build-arg available_processors=$(shell nproc) \
 		dockerfiles
 
