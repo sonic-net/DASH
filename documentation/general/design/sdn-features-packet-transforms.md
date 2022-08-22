@@ -27,34 +27,35 @@
       processing](#outbound-lpm-route-rules-processing)
     - [Inbound (priority) route rules
       processing](#inbound-priority-route-rules-processing)
-- [First Target Scenario:  SKU for Networked Virtual Appliance (NVA)](#first-target-scenario--sku-for-networked-virtual-appliance-nva)
-- [Scale per DPU (Card)](#scale-per-dpu-card)
-- [Scenario Milestone and Scoping](#scenario-milestone-and-scoping)
-- [Virtual Port (aka Elastic Network Interface / ENI) and Packet Direction](#virtual-port-aka-elastic-network-interface--eni-and-packet-direction)
-- [Routing (Routes and Route-Action)](#routing-routes-and-route-action)
-  - [Outbound routing](#outbound-routing)
-  - [Inbound routing](#inbound-routing)
-  - [Route rules processing](#route-rules-processing)
-    - [Outbound (LPM) route rules processing](#outbound-lpm-route-rules-processing)
-    - [Inbound (priority) route rules processing](#inbound-priority-route-rules-processing)
-- [Packet Flow](#packet-flow)
-- [Packet transforms](#packet-transforms)
-- [Packet Transform Examples](#packet-transform-examples)
-  - [VNET to VNET Traffic](#vnet-to-vnet-traffic)
-  - [VNET to Internet - TBD](#vnet-to-internet---tbd)
-  - [VNET to Service Endpoints - TBD](#vnet-to-service-endpoints---tbd)
-  - [VNET to Private Link  - TBD](#vnet-to-private-link----tbd)
-- [Metering](#metering)
-- [VNET Encryption](#vnet-encryption)
-- [Telemetry](#telemetry)
-- [Counters](#counters)
-- [BGP](#bgp)
-- [Watchdogs](#watchdogs)
-- [Servicing](#servicing)
-- [Debugging](#debugging)
-- [Flow Replication](#flow-replication)
-- [Unit Testing and development](#unit-testing-and-development)
-- [Internal Partner dependencies](#internal-partner-dependencies)
+- [SDN Features, Packet Transforms and Scale](#sdn-features-packet-transforms-and-scale)
+  - [First Target Scenario:  SKU for Networked Virtual Appliance (NVA)](#first-target-scenario--sku-for-networked-virtual-appliance-nva)
+  - [Scale per DPU (Card)](#scale-per-dpu-card)
+  - [Scenario Milestone and Scoping](#scenario-milestone-and-scoping)
+  - [Virtual Port (aka Elastic Network Interface / ENI) and Packet Direction](#virtual-port-aka-elastic-network-interface--eni-and-packet-direction)
+  - [Routing (Routes and Route-Action)](#routing-routes-and-route-action)
+    - [Outbound routing](#outbound-routing)
+    - [Inbound routing](#inbound-routing)
+    - [Route rules processing](#route-rules-processing)
+      - [Outbound (LPM) route rules processing](#outbound-lpm-route-rules-processing)
+      - [Inbound (priority) route rules processing](#inbound-priority-route-rules-processing)
+  - [Packet Flow](#packet-flow)
+  - [Packet transforms](#packet-transforms)
+  - [Packet Transform Examples](#packet-transform-examples)
+    - [VNET to VNET Traffic](#vnet-to-vnet-traffic)
+    - [VNET to Internet - TBD](#vnet-to-internet---tbd)
+    - [VNET to Service Endpoints - TBD](#vnet-to-service-endpoints---tbd)
+    - [VNET to Private Link  - TBD](#vnet-to-private-link----tbd)
+  - [Metering](#metering)
+  - [VNET Encryption](#vnet-encryption)
+  - [Telemetry](#telemetry)
+  - [Counters](#counters)
+  - [BGP](#bgp)
+  - [Watchdogs](#watchdogs)
+  - [Servicing](#servicing)
+  - [Debugging](#debugging)
+  - [Flow Replication](#flow-replication)
+  - [Unit Testing and development](#unit-testing-and-development)
+  - [Internal Partner dependencies](#internal-partner-dependencies)
 
 ## First Target Scenario:  SKU for Networked Virtual Appliance (NVA)
 
@@ -82,19 +83,19 @@ applies to both IPV4 and IPV6 underlay and overlay*
 | Routes | 100k per v-port (max)  | |
 | ACLs | 100k IP-Prefixes, 10k Src/Dst ports per v-port (max)  | |
 | NAT | tbd  | |
-| V-Port (aka ENI or Source VM) | 32 Primary, 32 Secondary assuming 2x OverSub, 32GB RAM, No ISSU, 10k (theorhetical max)  | Each ENI 1M total active connections and 2M flows |
+| V-Port (aka ENI or Source VM) | 32 Primary, 32 Secondary assuming 2x OverSub, 32GB RAM, No ISSU, 10k (theoretical max)  | Each ENI 1M total active connections and 2M flows |
 | Mappings (VMS deployed) | 10 million total mapping per DPU; mappings are the objects that help us bridge the customer's virtual space (private ip address assigned to each VM) with Azure's physical space (physical/routable addresses where the VMs are hosted)  | |
 |  | For each VPC, we have a list of mappings of the form: PrivateAddress -> (Physical Address v4, Physical Address V6, Mac Address, etc...) | VPC can have up to 1M mappings |
 
 ## Scenario Milestone and Scoping
 
-| Scenario | Feature | Perfomance Metrics | Timeline |
+| Scenario | Feature | Performance Metrics | Timeline |
 |:---------|:---------|:-----|-----|
 | 1 | <ul> <li>VNET <-> VNET </li> <ul><li>Route Support </li> <li>LPM Support </li> <li>ACL Support</li></ul></ul>|CPS<br/>Flow<br/>PPS</br>Rule Scale<img width=400/></br> |
 | 2  | <ul> <li>Load Balancer Inbound</li><li>VIP Inbound</li></ul>  |  | |
 | 3 | Private Link Outbound (transposition), encapsulate and change packet IPv4 to IPv6 (4 bits embedded)  |  | |
 | 4 | L3 / L4 Source NAT (correlated w/#2) outbound perspective (Cx address) to Internet; changing Cx source IP to Public IP (1:1 mapping)  |  | |
-| 5 | Private Link Service Link Service (dest side of Private Link) IPv6 to IPv4; DNAT’ing     |  | |
+| 5 | Private Link Service Link Service (dest side of Private Link) IPv6 to IPv4; DNATing     |  | |
 | 6 | Flow replication; supporting High Availability (HA); flow efficiently replicates to secondary card; Active/Passive (depending upon ENI policy) or can even have Active/Active; OR provision the same ENI over multiple devices w/o multiple SDN appliances – Primaries for a certain set of VMS can be on both     |  | Not a must have for Private Preview <img width=400/>|
 
 ## Virtual Port (aka Elastic Network Interface / ENI) and Packet Direction
@@ -119,7 +120,7 @@ the ENI.
 The SDN controller will create these virtual ports / ENIs on an SDN appliance
 and associate corresponding SDN policies such as – Route, ACL, NAT etc. to these
 virtual ports.  In other words, our software will communicate with the cards,
-hold card inventory and SDN placement, call API’s that are exposed through the
+hold card inventory and SDN placement, call APIs that are exposed through the
 card:  create policies, setup ENI, routes, ACLs, NAT, and different rules.
 
 The following applies:
@@ -139,10 +140,10 @@ For more information, see **[SDN pipeline basic elements](sdn-pipeline-basic-ele
 Routing must be based on the **Longest Prefix Match** (LPM) and must support all
 **underlay and overlay** combinations described below:
 
-- inner IPv4 packet encapped in outer IPv4 packet 
-- inner IPv4 packet encapped in outer IPv6 packet 
-- inner IPv6 packet encapped in outer IPv4 packet 
-- inner IPv6 packet encapped in outer IPv6 packet 
+- inner IPv4 packet encapsulated in outer IPv4 packet 
+- inner IPv4 packet encapsulated in outer IPv6 packet 
+- inner IPv6 packet encapsulated in outer IPv4 packet 
+- inner IPv6 packet encapsulated in outer IPv6 packet 
 
 The routing pipeline must support the routing models shown below.
 
@@ -364,6 +365,77 @@ accepts, list of flows etc are per ENI.
 
 We need more information around Counters, Statistics, and we need to start
 thinking about how to add Metering- and reconcile this in the P4 model.  
+
+| Counter Name       | Description           | ENI or Global  |
+| ------------- |:-------------:| -----:|
+| TotalPacket      | Total packets to/from a VM. Exposed to customer; 2 counters, 1 per direction | ENI |
+| TotalBytes      | Total bytes to/from a VM. Exposed to customer; 2 counters, 1 per direction     |   ENI |
+| TotalUnicastPacketForwarded |       |    ENI |
+| TotalMulticastPacketsForwarded |       |    ENI |
+| TcpConnectionsResetHalfTTL | TCP connections that had a TCP reset and its TTL cut down to 5 seconds      |    ENI |
+| NonSynStateful | Non-SYN TCP packets that are natted and not dropped by setting (SLB scenario)      |    ENI |
+| NumberOfFlowResimulated DuringPortTimer | Number of connections updated in an internal port-level update      |    ENI |
+| RedirectRuleResimulatedUf | Number of times a redirect packet impacted a connection      |    ENI |
+| DropPacket | Number of packets dropped on a port      |    ENI |
+| DropBroadcastPacket | Number of broadcast packets dropped by guard      |    ENI |
+| DropInvalidPacket | Number of packets dropped due to being unable to extract valid information from it      |    ENI |
+| DropIPv4SpoofingPacket | Number of packets not using the programmed source address       |    ENI |
+| DropIPv6SpoofingPacket | Number of packets not using the programmed source address       |    ENI |
+| DropBlockedPacket | Number of packets dropped due to the port in a blocked state      |    ENI |
+| TcpConnectionsResetByInjected Reset | Number of TCP connections reset with an injected reset      |    ENI |
+| DroppedRedirectPackets | Number of redirect packets saw and dropped(All redirect packets are dropped by design)      |    ENI |
+| DroppedPADiscoveryPackets | Number of "PA Discovery" packets dropped intentionally as part of VNET encryption      |    ENI |
+| DroppedResourcesMemory | Number of packets dropped due to unable to allocate memory      |    ENI |
+| DroppedPARouteRule | Number of packets dropped due to PA route rule failure to determine outer mac address to use      |    ENI |
+| DroppedFragPacket | Number of fragments dropped due to fragmention cache collision or unable to apply transposition      |    ENI |
+| DroppedResourcesPacket | Number of packets dropped due to a lack of some object or memory      |    ENI |
+| DroppedAclPacket | Packets dropped due to matching a block rule      |    ENI |
+| DroppedMalformedPacket | Number of packets dropped due to determining them to be malformed      |    ENI |
+| DroppedForwardingPacket | Number of packets unable to be forwarded to it's next destination      |    ENI |
+| DroppedNoRuleMatchPacket | Number of packets dropped because the networking device did not find the matching action      |    ENI |
+| DroppedMonitoringPingPacket | Number of pingmesh packets dropped by design      |    ENI |
+| DroppedResourcesUnifiedFlow MaxFlowsLimit | Number of packets dropped due to reaching the UF limit and being unable to create any more      |    ENI |
+| TcpSynPacket | Number of TCP Syn packets seen      |    ENI |
+| TcpSynAckPacket | Number of TCP SynAck packets seen      |    ENI |
+| FINPackets | Number of FIN packets seen      |    ENI |
+| RSTPackets | Number of RST packets seen      |    ENI |
+| TransientFlowTimeouts | Number of connections deleted after resimulation      |    ENI |
+| TcpConnectionsVerified | Number of TCP connections that completed their syn handshake      |    ENI |
+| TcpConnectionsTimedOut | Number of TCP connections that timed out their full TTL(Syn handshake finished, but Fin handshake didn't start)      |    ENI |
+| TcpConnectionsReset | Number of TCP connections that received a reset      |    ENI |
+| TcpConnectionsResetBySyn | Number of TCP connections that got destroyed and recreated by a SYN on the same tuples      |    ENI |
+| TcpConnectionsClosedByFin |       |    ENI |
+| TcpHalfOpenTimeouts |       |    ENI |
+| TcpConnectionsTimeWait | Number of TCP connections that timed out in the time wait state      |    ENI |
+| CurrentTotalFlowEntry | Current number of unified flows (aka connections)      |    ENI |
+| CurrentTotalFlow | Current number of main unified flows(Side of the connection that initiated the connection)      |    ENI |
+| CurrentHalfOpenFlow | Current number of Ufs in a half open state      |    ENI |
+| CurrentTcpFlow | Current number of Ufs that are for a TCP connection      |    ENI |
+| CurrentUdpFlow | Current number of Ufs for UDP      |    ENI |
+| CurrentOtherFlow | Current number of Ufs for something other than TCP or UDP      |    ENI |
+| MaxTotalFlowEntry | Maximum number of Ufs since the initialization of the port      |    ENI & Global|
+| MaxHalfOpenFlow | Maximum number of Ufs in a half-open state since the initialization of the port      |    ENI |
+| MaxTcpFlow | follow above      |    ENI |
+| MaxUdpFlow | follow above      |    ENI |
+| MaxOtherFlow | follow above      |    ENI |
+| CreatedTotalFlowEntry | Total number of Ufs created      |    ENI |
+| CreatedHalfOpenFlow | Total number of flows in a half open state      |    ENI |
+| CreatedTcpFlow | follow above      |    ENI |
+| CreatedUdpFlow | follow above      |    ENI |
+| CreatedOtherFlow | follow above      |    ENI |
+| MatchedTotalFlowEntry | Total number of times a UF was matched and used      |    ENI |
+| MatchedHalfOpenFlow | follow above      |    ENI |
+| MatchedTcpFlow | follow above      |    ENI |
+| MatchedUdpFlow | follow above      |    ENI |
+| MatchedOtherFlow | follow above      |    ENI |
+| CreationRateMaxTotalFlowEntry | Maximum creation rate for Unified flows in a second      |    ENI |
+| CreationRateMaxHalfOpenFlow | follow above      |    ENI |
+| CreationRateMaxTcpFlow | follow above      |    ENI |
+| CreationRateMaxUdpFlow | follow above      |    ENI |
+| CreationRateMaxOtherFlow | follow above      |    ENI |
+| No ENI Match | evident      |    ENI |
+| CPS Counters |       |    ENI & Global |
+
 
 **Questions**  
 

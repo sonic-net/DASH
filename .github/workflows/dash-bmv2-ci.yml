@@ -1,0 +1,84 @@
+name: DASH-BMV2-CI
+
+on:
+  push:
+    branches: [ "**" ]
+    paths:
+      - '.gitmodules'
+      - '.github/workflows/dash-bmv2-ci.yml'
+      - 'test/**.py'
+      - 'test/**requirements.txt'
+      - 'test/**.sh'
+      - 'test/**.yml'
+      - 'dash-pipeline/**'
+      - '!dash-pipeline/docker files/Dockerfile.*'
+      - '!dash-pipeline/.dockerignore'
+      - '!dash-pipeline/**.md'
+      - '!dash-pipeline/**.svg'
+      - '!dash-pipeline/**.png'
+      - '!dash-pipeline/**.txt'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '.gitmodules'
+      - '.github/workflows/dash-bmv2-ci.yml'
+      - 'test/**.py'
+      - 'test/**requirements.txt'
+      - 'test/**.sh'
+      - 'test/**.yml'
+      - 'dash-pipeline/**'
+      - '!dash-pipeline/docker files/Dockerfile.*'
+      - '!dash-pipeline/.dockerignore'
+      - '!dash-pipeline/**.md'
+      - '!dash-pipeline/**.svg'
+      - '!dash-pipeline/**.png'
+      - '!dash-pipeline/**.txt'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and Test DASH Pipeline
+    runs-on: ubuntu-20.04
+    env:
+      docker_fg_flags: -u root --privileged
+      docker_bg_flags: -d -u root --privileged
+    defaults:
+      run:
+        working-directory: ./dash-pipeline
+    steps:
+    - uses: actions/checkout@v3
+    - name: Pull docker p4c image
+      run:  make docker-pull-dash-p4c
+    - name: Build P4 software switch (bmv2) and P4Info
+      run:  DOCKER_FLAGS=$docker_fg_flags make p4
+    - name: Install SAI submodule
+      run:  git submodule update --init
+    - name: Pull docker saithrift-bldr image
+      run:  make docker-pull-saithrift-bldr
+    - name: Generate SAI API
+      run:  DOCKER_FLAGS=$docker_fg_flags make sai
+    - name: Pull docker bmv2-bldr image
+      run:  make docker-pull-bmv2-bldr
+    - name: Build libsai c++ tests
+      run:  DOCKER_FLAGS=$docker_fg_flags make test
+    - name: Prepare network
+      run:  DOCKER_FLAGS=$docker_fg_flags make network
+    - name: Run P4 software switch (bmv2) with P4Runtime
+      run:  DOCKER_FLAGS=$docker_bg_flags make run-switch
+    - name: Force bmv2 to load forwarding pipeline config via dummy libsai call
+      run:  DOCKER_FLAGS=$docker_fg_flags make init-switch
+    - name: Test SAI library over P4RT to switch
+      run:  DOCKER_FLAGS=$docker_fg_flags make run-libsai-test
+    - name: Generate saithrift-server
+      run:  DOCKER_FLAGS=$docker_fg_flags make saithrift-server
+    - name: Generate saithrift-client local docker
+      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saithrift-client
+    - name: Run saithrift server
+      run:  DOCKER_FLAGS=$docker_bg_flags make run-saithrift-server
+    - name: Run PTF Tests
+      run:  DOCKER_FLAGS=$docker_fg_flags make run-saithrift-ptftests
+    - name: Deploy ixia-c Traffic Generator
+      run:  DOCKER_FLAGS=$docker_fg_flags make deploy-ixiac
+    - name: Run Pytests
+      run:  DOCKER_FLAGS=$docker_fg_flags make run-saithrift-pytests
+      

@@ -8,41 +8,42 @@ Last update: 06/22/2022
 
 # Disaggregated API for SONiC Hosts (DASH) high level design 
 
-- [Introduction](#introduction)
-  - [Why DASH?](#why-dash)
-  - [Objectives](#objectives)
-- [Compliance and requirements](#compliance-and-requirements)
-- [Scenarios](#scenarios)
-- [Azure provisioning example](#azure-provisioning-example)
-- [DASH project](#dash-project)
-- [Logical architecture (software stack)](#logical-architecture-software-stack)
-    - [SDN controller](#sdn-controller)
-      - [SDN and DPU High-Availability (HA)](#sdn-and-dpu-high-availability-ha)
-  - [gNMI container](#gnmi-container)
-    - [Multiple DPUs device](#multiple-dpus-device)
-  - [SONiC app containers](#sonic-app-containers)
-  - [Switch State Service (SWSS)](#switch-state-service-swss)
-  - [Switch Abstraction Interface (SAI) DASH extension](#switch-abstraction-interface-sai-dash-extension)
-  - [ASIC Drivers](#asic-drivers)
-  - [DASH capable ASICs](#dash-capable-asics)
-- [SONiC integration](#sonic-integration)
-  - [DASH single DPU on NIC](#dash-single-dpu-on-nic)
-  - [DASH appliance](#dash-appliance)
-    - [High Level Architecture](#high-level-architecture)
-    - [Low level architecture](#low-level-architecture)
-  - [DASH smart switch](#dash-smart-switch)
-    - [High level architecture](#high-level-architecture-1)
-    - [Low level architecture](#low-level-architecture-1)
-- [Example of network representation](#example-of-network-representation)
-  - [Deployment](#deployment)
-- [Behavioral model](#behavioral-model)
-- [SONiC Integration testing](#sonic-integration-testing)
-- [DASH services conformance and performance testing](#dash-services-conformance-and-performance-testing)
-- [Appendix](#appendix)
-  - [A day in the life of a DASH packet](#a-day-in-the-life-of-a-dash-packet)
-  - [A day in the life of a DASH SDN controller](#a-day-in-the-life-of-a-dash-sdn-controller)
-  - [A day in the life of a gNMI container](#a-day-in-the-life-of-a-gnmi-container)
-- [References](#references)
+- [Disaggregated API for SONiC Hosts (DASH) high level design](#disaggregated-api-for-sonic-hosts-dash-high-level-design)
+  - [Introduction](#introduction)
+    - [Why DASH?](#why-dash)
+    - [Objectives](#objectives)
+  - [Compliance and requirements](#compliance-and-requirements)
+  - [Scenarios](#scenarios)
+  - [Azure provisioning example](#azure-provisioning-example)
+  - [DASH project](#dash-project)
+  - [Logical architecture (software stack)](#logical-architecture-software-stack)
+      - [SDN controller](#sdn-controller)
+        - [SDN and DPU High-Availability (HA)](#sdn-and-dpu-high-availability-ha)
+    - [gNMI container](#gnmi-container)
+      - [Multiple DPUs device](#multiple-dpus-device)
+    - [SONiC app containers](#sonic-app-containers)
+    - [Switch State Service (SWSS)](#switch-state-service-swss)
+    - [Switch Abstraction Interface (SAI) DASH extension](#switch-abstraction-interface-sai-dash-extension)
+    - [ASIC Drivers](#asic-drivers)
+    - [DASH capable ASICs](#dash-capable-asics)
+  - [SONiC integration](#sonic-integration)
+    - [DASH single DPU on NIC](#dash-single-dpu-on-nic)
+    - [DASH appliance](#dash-appliance)
+      - [High Level Architecture](#high-level-architecture)
+      - [Low level architecture](#low-level-architecture)
+    - [DASH smart switch](#dash-smart-switch)
+      - [High level architecture](#high-level-architecture-1)
+      - [Low level architecture](#low-level-architecture-1)
+  - [Example of network representation](#example-of-network-representation)
+    - [Deployment](#deployment)
+  - [Behavioral model](#behavioral-model)
+  - [SONiC Integration testing](#sonic-integration-testing)
+  - [DASH services conformance and performance testing](#dash-services-conformance-and-performance-testing)
+  - [Appendix](#appendix)
+    - [A day in the life of a DASH packet](#a-day-in-the-life-of-a-dash-packet)
+    - [A day in the life of a DASH SDN controller](#a-day-in-the-life-of-a-dash-sdn-controller)
+    - [A day in the life of a gNMI container](#a-day-in-the-life-of-a-gnmi-container)
+  - [References](#references)
 
 ## Introduction
 
@@ -133,7 +134,7 @@ further extend DASH to meet their specific needs.
 This scenario is the starting point to design, implement and test the core DASH
 mechanisms. In particular it allows the following features: VM to VM
 communication in VNET, route support, LPM support, ACL support. This is to
-verify the following performance propereies: CPS, flow, PPS, and rule scale. 
+verify the following performance properties: CPS, flow, PPS, and rule scale. 
 1. [VNET
    Peering](https://github.com/Azure/DASH/tree/main/documentation/vnet-peering-service).
    Virtual network peering connects two virtual networks
@@ -215,7 +216,7 @@ section.
   describe the behaviors per scenario and document them in a repeatable format.
   From there we will be able to auto-generate the APIs. The implementation
   itself is not required to be P4. For more information, see the [Behavioral
-  model](https://github.com/Azure/DASH/tree/main/sirius-pipeline/bmv2) section.
+  model](https://github.com/Azure/DASH/tree/main/dash-pipeline/bmv2) section.
 - **DASH programmable hardware**. With the help of network hardware technology
 providers, we are collaborating to create an open forum capitalizing on the use
 of programmable hardware including **SmartNICs**, **SmartSwitches**, and
@@ -254,7 +255,7 @@ services**, while the traditional SONiC application containers are used to
 manage the underlay (L3 routing) and hardware platform. Both the DASH container
 and the traditional SONiC application containers sit atop the Switch State
 services (SWSS) layer, and manipulate the Redis application-layer DBs; these in
-turn are translated into SAI dataplane obects via the normal SONiC orchestration
+turn are translated into SAI data plane objects via the normal SONiC orchestration
 daemons inside SWSS.
 
 The SDN controller controls the overlay built on top of the physical layer
@@ -295,7 +296,7 @@ In summary:
 - The **SONiC orchagent** inside the Switch State Service (SWSS) Container will
   be enhanced to transform and translate these objects into **ASIC_DB objects**,
   including the new **DASH-specific SAI objects**.  
-- An **enhanced syncd** will then configure the dataplane using the **technology
+- An **enhanced syncd** will then configure the data plane using the **technology
   supplier-specific SAI library**.
 
 A **gNMI schema** will manage the following DASH components:
@@ -363,13 +364,13 @@ metadata header files. The **underlay** and **overlay** schema have different or
   **hand-generated** and **maintained**. DASH uses a subset of these to manage "**underlay**"
   functions, e.g. device management, Layer 3 routing and so forth. For more information, see [SWSS Lite (Underlay)](dash-sonic-hld.md#333-swss-lite-underlay). 
 - DASH SAI **overlay** objects. They are derived from a [P4 Behavioral
-  Model](https://github.com/Azure/DASH/tree/main/sirius-pipeline). A script
+  Model](https://github.com/Azure/DASH/tree/main/dash-pipeline). A script
   reads the P4 model and generates SAI header files. For more information, see [DASHOrch (Overlay)](dash-sonic-hld.md#332-dashorch-overlay).
 
 For more information see the [SAI README](../../../SAI/README.md) file.
 
 > [!NOTE]
-> DASH uses an **enhanced syncd** to configure the dataplane using the technology supplier-specific SAI library.
+> DASH uses an **enhanced syncd** to configure the data plane using the technology supplier-specific SAI library.
 
 ### ASIC Drivers
 
@@ -395,7 +396,7 @@ optimal for performance reasons in our project.
 
 ### DASH capable ASICs
 
-These comprise the main dataplane engines and are the core of what are variously
+These comprise the main data plane engines and are the core of what are variously
 called SmartNICs, DPUs, IPUs, NPUS, etc. The actual cores may be ASICs, SoCs,
 FPGAs, or some other high-density, performant hardware.
 
@@ -412,7 +413,7 @@ The SONiC DASH integration introduces the following DASH modifications:
    container) to create the functional component for DASH. Microsoft will
    deliver the **gNMI container** as code to SONiC to allow any SONiC switch to
    talk with and integrate DPU technology. The *DASH container* software
-   integrates with the SONiC system containers seemlessly. Microsoft will ensure
+   integrates with the SONiC system containers seamlessly. Microsoft will ensure
    a high quality integration with the switch. 
 
 2. In the **sync-d container**, the **sai api DASH** (as opposed to *sai api* in
@@ -429,7 +430,7 @@ The functionality of the new *dash container* in the user space is to receive
 content from the Software Defined Networking (SDN) controller to control setup
 for the overlay configurations. DASH receives the objects, translates them with
 a **gNMI agent**, provides them to the *SONiC OrchAgent* for further translation
-onto the dataplane via the **SAI database**.
+onto the data plane via the **SAI database**.
 
 In particular, notice the following:
 
@@ -535,7 +536,7 @@ per scenario and document them in a repeatable format. The behavioral model is
 compiled as software to behave exactly as hardware.  From there we will be able
 to auto-generate the APIs. The *implementation* itself does not have to be P4.
 
-For more information see the [pipeline README](../../../sirius-pipeline/README.md) file.
+For more information see the [pipeline README](../../../dash-pipeline/README.md) file.
 
 ## SONiC Integration testing
 
@@ -570,7 +571,7 @@ testing](https://github.com/Azure/DASH/tree/main/test).
   DASH test workflow with SAI-thrift.
 - [DASH P4 SAI-Thrift Test
   Workflow](https://github.com/Azure/DASH/blob/main/test/docs/dash-test-workflow-p4-saithrift.md).
-  Use of P4-based simulators or SW dataplanes to verify DASH behavior, using
+  Use of P4-based simulators or SW data planes to verify DASH behavior, using
   saithrift API.
 
 ## Appendix
@@ -593,7 +594,7 @@ testing](https://github.com/Azure/DASH/tree/main/test).
 - [FAQ](https://github.com/Azure/DASH/wiki/FAQ)
 - [Glossary](https://github.com/Azure/DASH/wiki/Glossary)
 - [SAI headers](https://github.com/Azure/DASH/tree/main/SAI)
-- [Sirius pipeline](https://github.com/Azure/DASH/tree/main/sirius-pipeline)
+- [DASH pipeline](https://github.com/Azure/DASH/tree/main/dash-pipeline)
 - [DASH conformance and performance testing](https://github.com/Azure/DASH/tree/main/test)
 - [SONiC DASH HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-sonic-hld.md)
 - [SONiC System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture)

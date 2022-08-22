@@ -66,13 +66,12 @@ control dash_ingress(inout headers_t hdr,
     }
 
     action set_appliance(EthernetAddress neighbor_mac,
-                         EthernetAddress mac,
-                         IPv4Address ip) {
+                         EthernetAddress mac) {
         meta.encap_data.underlay_dmac = neighbor_mac;
         meta.encap_data.underlay_smac = mac;
-        meta.encap_data.underlay_sip = ip;
     }
 
+    /* This table API should be implemented manually using underlay SAI */
     table appliance {
         key = {
             meta.appliance_id : ternary @name("meta.appliance_id:appliance_id");
@@ -83,14 +82,54 @@ control dash_ingress(inout headers_t hdr,
         }
     }
 
+#define ACL_GROUPS_PARAM(prefix) \
+    bit<16> ## prefix ##_stage1_dash_acl_group_id, \
+    bit<16> ## prefix ##_stage2_dash_acl_group_id, \
+    bit<16> ## prefix ##_stage3_dash_acl_group_id, \
+    bit<16> ## prefix ##_stage4_dash_acl_group_id, \
+    bit<16> ## prefix ##_stage5_dash_acl_group_id
+
+#define ACL_GROUPS_COPY_TO_META(prefix) \
+   meta.stage1_dash_acl_group_id = ## prefix ##_stage1_dash_acl_group_id; \
+   meta.stage2_dash_acl_group_id = ## prefix ##_stage2_dash_acl_group_id; \
+   meta.stage3_dash_acl_group_id = ## prefix ##_stage3_dash_acl_group_id; \
+   meta.stage4_dash_acl_group_id = ## prefix ##_stage4_dash_acl_group_id; \
+   meta.stage5_dash_acl_group_id = ## prefix ##_stage5_dash_acl_group_id;
+
     action set_eni_attrs(bit<32> cps,
                          bit<32> pps,
                          bit<32> flows,
-                         bit<1> admin_state) {
-        meta.eni_data.cps         = cps;
-        meta.eni_data.pps         = pps;
-        meta.eni_data.flows       = flows;
-        meta.eni_data.admin_state = admin_state;
+                         bit<1> admin_state,
+                         IPv4Address vm_underlay_dip,
+                         bit<24> vm_vni,
+                         bit<16> vnet_id,
+                         ACL_GROUPS_PARAM(inbound_v4),
+                         ACL_GROUPS_PARAM(inbound_v6),
+                         ACL_GROUPS_PARAM(outbound_v4),
+                         ACL_GROUPS_PARAM(outbound_v6)) {
+        meta.eni_data.cps            = cps;
+        meta.eni_data.pps            = pps;
+        meta.eni_data.flows          = flows;
+        meta.eni_data.admin_state    = admin_state;
+        meta.encap_data.underlay_dip = vm_underlay_dip;
+        /* vm_vni is the encap VNI used for tunnel between inbound DPU -> VM
+         * and not a VNET identifier */
+        meta.encap_data.vni          = vm_vni;
+        meta.vnet_id                 = vnet_id;
+
+        if (meta.is_dst_ip_v6 == 1) {
+            if (meta.direction == direction_t.OUTBOUND) {
+                ACL_GROUPS_COPY_TO_META(outbound_v6);
+            } else {
+                ACL_GROUPS_COPY_TO_META(inbound_v6);
+            }
+        } else {
+            if (meta.direction == direction_t.OUTBOUND) {
+                ACL_GROUPS_COPY_TO_META(outbound_v4);
+            } else {
+                ACL_GROUPS_COPY_TO_META(inbound_v4);
+            }
+        }
     }
 
     @name("eni|dash")
@@ -122,14 +161,15 @@ control dash_ingress(inout headers_t hdr,
         meta.dropped = false;
     }
 
-    action vxlan_decap_pa_validate() {}
+    action vxlan_decap_pa_validate(bit<16> src_vnet_id) {
+        meta.vnet_id = src_vnet_id;
+    }
 
     @name("pa_validation|dash_vnet")
     table pa_validation {
         key = {
-            meta.eni_id: exact @name("meta.eni_id:eni_id");
+            meta.vnet_id: exact @name("meta.vnet_id:vnet_id");
             hdr.ipv4.src_addr : exact @name("hdr.ipv4.src_addr:sip");
-            hdr.vxlan.vni : exact @name("hdr.vxlan.vni:VNI");
         }
 
         actions = {
@@ -143,7 +183,9 @@ control dash_ingress(inout headers_t hdr,
     @name("inbound_routing|dash_vnet")
     table inbound_routing {
         key = {
+            meta.eni_id: exact @name("meta.eni_id:eni_id");
             hdr.vxlan.vni : exact @name("hdr.vxlan.vni:VNI");
+            hdr.ipv4.src_addr : ternary @name("hdr.ipv4.src_addr:sip");
         }
         actions = {
             vxlan_decap(hdr);
@@ -169,12 +211,46 @@ control dash_ingress(inout headers_t hdr,
         }
     }
 
+    action set_acl_group_attrs(bit<32> ip_addr_family) {
+        if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
+            if (meta.is_dst_ip_v6 == 1) {
+                meta.dropped = true;
+            }
+        } else {
+            if (meta.is_dst_ip_v6 == 0) {
+                meta.dropped = true;
+            }
+        }
+    }
+
+    @name("dash_acl_group|dash_acl")
+    table acl_group {
+        key = {
+            meta.stage1_dash_acl_group_id : exact @name("meta.stage1_dash_acl_group_id:dash_acl_group_id");
+        }
+        actions = {
+            set_acl_group_attrs();
+        }
+    }
+
     apply {
-        vip.apply();
+
+        /* Send packet on same port it arrived (echo) by default */
+        standard_metadata.egress_spec = standard_metadata.ingress_port;
+
+        if (vip.apply().hit) {
+            /* Use the same VIP that was in packet's destination if it's
+               present in the VIP table */
+            meta.encap_data.underlay_sip = hdr.ipv4.dst_addr;
+        }
+        // TODO [cs] shouldn't this also be called at end of ingress?
+        // Shouldn't it call mark_to_drop(standard_metadata);
+
         if (meta.dropped) {
             return;
         }
 
+        /* If Outer VNI matches with a reserved VNI, then the direction is Outbound - */
         meta.direction = direction_t.INBOUND;
         direction_lookup.apply();
 
@@ -214,6 +290,7 @@ control dash_ingress(inout headers_t hdr,
             deny();
             return;
         }
+        acl_group.apply();
 
         if (meta.direction == direction_t.OUTBOUND) {
             outbound.apply(hdr, meta, standard_metadata);
@@ -223,8 +300,12 @@ control dash_ingress(inout headers_t hdr,
 
         eni_meter.apply();
 
-        /* Send packet to port 1 by default if we reached the end of pipeline */
-        standard_metadata.egress_spec = 1;
+        if (meta.dropped) {
+            drop_action();
+        } else {
+            /* Send packet to port 1 by default if we reached the end of pipeline */
+            standard_metadata.egress_spec = 1;
+        }
     }
 }
 

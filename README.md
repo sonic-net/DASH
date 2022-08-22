@@ -1,3 +1,5 @@
+[![DASH-bmv2-CI](https://github.com/Azure/DASH/workflows/DASH-BMV2-CI/badge.svg?branch=main)](https://github.com/Azure/DASH/actions/workflows/dash-bmv2-ci.yml)
+
 # SONiC-DASH - Disaggregated API for SONiC Hosts - DRAFT/Work in Progress
 
 ## SONiC-DASH is a new open source project that will "deliver enterprise network performance to critical cloud applications".  The project extends functionality to stateful workloads.  
@@ -34,7 +36,7 @@ the rights to use your contribution. For details, visit https://cla.opensource.m
 
 When you submit a pull request, a CLA bot will automatically determine whether you need to provide
 a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+provided by the bot. You will only need to do this once across all repositories using our CLA.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or

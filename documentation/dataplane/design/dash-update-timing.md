@@ -10,7 +10,7 @@ This amounts for majority of routes per ENI, 10K for IPv4, + 10K for IPv6.  Thee
 The entire goal state will initially be fully plumbed once when the ENI lands.  For example, it's possible that every 10 seconds we will change (let's say) 100 mappings per VNET.  It depends upon whether the VNET is very large.  
 We need to support both (removing single route, but also replacing entire route set).
 
-**Mappings:**  Mapping updates (a single mapping) can be a more frequent occurance.  A customer can start/stop the VM, add remove Private Links, VMs can service heal, and the like...
+**Mappings:**  Mapping updates (a single mapping) can be a more frequent occurrence.  A customer can start/stop the VM, add remove Private Links, VMs can service heal, and the like...
 Mappings can be either, meaning an entire mapping set per VNET, or per each mapping.  
 
 **ACLs:** ACLs - entire policy per group; need to be applied in atomic way.  The ACL group is sent/updated together, and needs to be replaces in atomic way.

@@ -39,12 +39,23 @@ sai_status_t sai_create_{{ table.name }}(
     auto action = entry->mutable_action();
     auto expectedParams = 0;
     auto matchedParams = 0;
-
-    // Search the action 
+    sai_object_id_t objId = 0;
+    // Search the action
     pi_p4_id_t actionId;
 
     matchActionEntry->set_table_id(tableId);
 
+    {% if table['keys'] | length== 1 %}
+    // SAI object table with single P4 key - object ID itself is the P4 table key
+    // Generate a SAI object ID and fill it as the P4 table key
+    auto mf = matchActionEntry->add_match();
+    mf->set_field_id({{table['keys'][0].id}});
+    objId = NextObjIndex();
+    auto mf_exact = mf->mutable_exact();
+    {{table['keys'][0].sai_key_field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
+    {% else %}
+    // SAI object table with multiple P4 table keys
+    // Copy P4 table keys from appropriate SAI attributes
     for (uint32_t i = 0; i < attr_count; i++) {
         switch(attr_list[i].id) {
             {% for key in table['keys'] %}
@@ -74,6 +85,7 @@ sai_status_t sai_create_{{ table.name }}(
             {% endfor %}
         }
     }
+    {% endif %}
 
 
     // If there is only one action, simply set it.
@@ -103,8 +115,7 @@ sai_status_t sai_create_{{ table.name }}(
 
     for (uint32_t i = 0; i < attr_count; i++) {
         switch(attr_list[i].id) {
-            {% for action in table.actions %}
-            {% for param in action.params %}
+            {% for param in table.actionParams %}
             case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}: {
                 auto param = action->add_params();
                 param->set_param_id({{param.id}});
@@ -112,7 +123,6 @@ sai_status_t sai_create_{{ table.name }}(
                 matchedParams++;
                 break;
             }
-            {% endfor %}
             {% endfor %}
         }
     }
@@ -123,7 +133,6 @@ sai_status_t sai_create_{{ table.name }}(
         goto ErrRet;
     }
     // TODO: ternaly needs to set priority
-    uint64_t objId;
     if (true == InsertInTable(matchActionEntry, &objId)) {
         *{{ table.name }}_id = objId;
         return 0;
@@ -222,8 +231,7 @@ sai_status_t sai_create_{{ table.name }}(
 
     for (uint32_t i = 0; i < attr_count; i++) {
         switch(attr_list[i].id) {
-            {% for action in table.actions %}
-            {% for param in action.params %}
+            {% for param in table.actionParams %}
             case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}: {
                 auto param = action->add_params();
                 param->set_param_id({{param.id}});
@@ -231,7 +239,6 @@ sai_status_t sai_create_{{ table.name }}(
                 matchedParams++;
                 break;
             }
-            {% endfor %}
             {% endfor %}
         }
     }
@@ -286,7 +293,7 @@ sai_status_t sai_remove_{{ table.name }}(
     {% endfor %}
 
     retCode = MutateTableEntry(matchActionEntry, p4::v1::Update_Type_DELETE);
-    if (grpc::StatusCode::OK != retCode) {
+    if (grpc::StatusCode::OK == retCode) {
         delete matchActionEntry;
         return 0;
     }
@@ -314,7 +321,8 @@ sai_status_t sai_get_{{ table.name }}_attribute(
 {% endif %}
 {% endfor %}
 
-static sai_{{ app_name }}_api_t sai_{{app_name }}_api_impl = {
+/* TODO [cs] Generate .h file for _impl to use within sai_api_query() */
+sai_{{ app_name }}_api_t sai_{{app_name }}_api_impl = {
 {% for table in tables %}
     .create_{{ table.name }} =  sai_create_{{ table.name }},
     .remove_{{ table.name }} = sai_remove_{{ table.name }},
