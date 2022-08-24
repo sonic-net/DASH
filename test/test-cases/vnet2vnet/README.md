@@ -12,7 +12,7 @@ The files found within this directory serve the following purpose:
 | Test case                                      | Description                                               |
 | ---------------------------------------------- | --------------------------------------------------------- |
 | [vxlan_1eni_1ip](one-ip)           | minimum possible config                                    |
-| [vxlan_8eni_48k_ips](48k-ips)      | medium sized config                                       |
+| [vxlan_8eni_48k_IPs](48k-IPs)      | medium sized config                                       |
 
 
 
@@ -79,7 +79,7 @@ connection rate value will be observed while maintaining 6M concurrent sessions
   - mix of tcp and UDP in same test
   - full hero test
   - IPv6 version of the tests
-  - IPv4 with IPv6 mix, 25% IPv4, 25% IPv6, 25% IPv4oIPv6, 25% IPv6oIPv4
+  - IPv4 with IPv6 mix, 25% IPv4, 25% IPv6, 25% IPv4 over IPv6, 25% IPv6 over IPv4
   - ...
 # VNET to VNET 
 
