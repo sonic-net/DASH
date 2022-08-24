@@ -3,7 +3,7 @@ Combined with the worst case scenario cases (TBD) we will be able to determine t
 
 ![vxlan_1vpc_1ip](../../../images/test_vxlan_1vpc_1ip.svg)
 
-1. Configure VxLAN with 1 VPC and 1 VNI.
+1. Configure VXLAN with 1 VPC and 1 VNI.
 2. Configure BGP to achieve connectivity between the loopback interfaces.
 3. Configure VMs behind VTEPs.
 4. Verify that the control plane is up.
