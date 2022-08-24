@@ -1,5 +1,5 @@
 [![DASH-bmv2-CI](https://github.com/Azure/DASH/workflows/DASH-BMV2-CI/badge.svg?branch=main)](https://github.com/Azure/DASH/actions/workflows/dash-bmv2-ci.yml)
-[![Spellcheck](https://github.com/Azure/DASH/actions/workflows/dash-md-spellcheck.yml/badge.svg)](https://github.com/mgheorghe/DASH/actions/workflows/dash-md-spellcheck.yml) 
+[![Spellcheck](https://github.com/Azure/DASH/actions/workflows/dash-md-spellcheck.yml/badge.svg)](https://github.com/Azure/DASH/actions/workflows/dash-md-spellcheck.yml) 
 
 # SONiC-DASH - Disaggregated API for SONiC Hosts - DRAFT/Work in Progress
 
