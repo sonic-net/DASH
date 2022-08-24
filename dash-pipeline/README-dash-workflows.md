@@ -85,7 +85,7 @@ Sent 1 packets.
 ```
 
 ## Use-Case II - Developing P4 Code + libsai config (C++)
-To test the autogeneration of `libsai` and configuration of the dataplane, you can execute `make sai` and `make libsai-test`. You can add tests under `dash-pipeline/tests/libsai`. It takes slightly over half a minute to generate `libsai`. The C++ tests are limited to CRUD operations on the SAI interface and run as one-shot programs without any traffic generation.
+To test the autogeneration of `libsai` and configuration of the data plane, you can execute `make sai` and `make libsai-test`. You can add tests under `dash-pipeline/tests/libsai`. It takes slightly over half a minute to generate `libsai`. The C++ tests are limited to CRUD operations on the SAI interface and run as one-shot programs without any traffic generation.
 
 That being said, you can use the same techniques described in [Sending packets "manually" into the switch](#sending-packets-manually-into-the-switch). Conceivably you could write C++ tests to configure the switch to a known state; send packets; then verify them manually. However, test-cases written this way are not very useful, perhaps only  as ad hoc throwaway tests.
 
