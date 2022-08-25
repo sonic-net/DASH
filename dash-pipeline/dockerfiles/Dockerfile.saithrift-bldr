@@ -1,0 +1,94 @@
+
+FROM chrissommers/dash-grpc:1.43.2 as grpc
+FROM chrissommers/dash-bmv2-bldr:220630 as bmv2
+# amd64/ubuntu:20.04 on 2022-07-03
+FROM amd64/ubuntu@sha256:b2339eee806d44d6a8adc0a790f824fb71f03366dd754d400316ae5a7e3ece3e as builder
+LABEL maintainer="SONiC-DASH Community "
+LABEL description="This Docker image contains the toolchain to build \
+the saithrift client & server + sai-P4Runtime adaptor layer, for DASH."
+
+
+# Configure make to run as many parallel jobs as cores available
+ARG available_processors
+ARG MAKEFLAGS=-j$available_processors
+
+# Set TZ to avoid interactive installer
+ENV TZ=America/Los_Angeles
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ENV GIT_SSL_NO_VERIFY=true
+
+ENV SAI_PTF_DEPS    sudo git python wget doxygen graphviz aspell-en \
+                    libgetopt-long-descriptive-perl libconst-fast-perl \
+                    libtemplate-perl libnamespace-autoclean-perl libmoose-perl libmoosex-aliases-perl
+
+ENV DASH_SAIGEN_DEPS python3 python3-pip
+
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends $SAI_PTF_DEPS $DASH_SAIGEN_DEPS && \
+    pip3 install ctypesgen jinja2
+
+ENV SAI_THRIFT_DEPS automake bison flex g++ git libboost-all-dev libevent-dev libssl-dev libtool make pkg-config
+
+RUN wget http://archive.apache.org/dist/thrift/0.11.0/thrift-0.11.0.tar.gz && \
+    tar -xf thrift-0.11.0.tar.gz && \
+    apt-get install -y $SAI_THRIFT_DEPS && \
+    cd thrift-0.11.0 && \
+    ./bootstrap.sh && \
+    ./configure --prefix=/usr --with-cpp --with-python \
+        --with-qt4=no --with-qt5=no --with-csharp=no --with-java=no --with-erlang=no \
+        --with-nodejs=no --with-lua=no --with-per=no --with-php=no --with-dart=no \
+        --with-ruby=no --with-haskell=no --with-go=no --with-rs=no --with-haxe=no \
+        --with-dotnetcore=no --with-d=no && \
+    make && \
+    make install && \
+    cd lib/py && \
+    python setup.py sdist && \
+    sudo cp dist/* /usr/lib && \
+    cd / && \
+    rm -rf thrift-0.11.0 thrift-0.11.0.tar.gz
+
+# TODO - merge into first RUN layer (or delete?) this is for dev only
+RUN sudo apt install -y gdb
+
+# Used to make saithrift server
+COPY --from=grpc /usr/local/lib/lib*grpc*.so* \
+        /usr/local/lib/libabsl*.so* \
+        /usr/local/lib/libgpr*.so* \
+        /usr/local/lib/libupb*.so* \
+        /usr/local/lib/libre2*.so* \
+        /usr/local/lib/libaddress_sorting*.so* \
+        /usr/local/lib/libssl*.so* \
+        /usr/local/lib/libcrypto*.so* \
+        /usr/local/lib/
+
+COPY --from=grpc  /usr/local/lib/libssl*.so* \
+        /usr/local/lib/libcrypto*.so* \
+        /lib/x86_64-linux-gnu/
+
+# Used to make saithrift server
+COPY --from=bmv2 /usr/local/lib/libpiprotogrpc.so* \
+        /usr/local/lib/libprotobuf.so* \
+        /usr/local/lib/libpiprotobuf.so* \
+        /usr/local/lib/libpiall.so* \
+        /usr/local/lib/libpi_dummy.so* \
+        /usr/local/lib/
+
+WORKDIR /
+
+ARG user
+ARG uid
+ARG guid
+ARG hostname
+
+ENV BUILD_HOSTNAME $hostname
+ENV USER $user
+
+RUN groupadd -f -r -g $guid g$user
+
+RUN useradd $user -l -u $uid -g $guid -d /var/$user -m -s /bin/bash
+
+RUN echo "$user ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers
+
+USER $user
+
+CMD ["/bin/bash"]

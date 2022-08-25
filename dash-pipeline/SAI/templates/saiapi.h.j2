@@ -47,19 +47,6 @@ typedef enum _sai_{{ table.name }}_action_t
 } sai_{{ table.name }}_action_t;
 
 {% endif %}
-{% if table.stages | length > 0 %}
-/**
- * @brief Attribute data for #SAI_{{ table.name | upper }}_ATTR_STAGE
- */
-typedef enum _sai_{{ table.name }}_stage_t
-{
-{% for stage in table.stages %}
-    SAI_{{ table.name | upper }}_STAGE_{{ stage | upper }},
-
-{% endfor %}
-} sai_{{ table.name }}_stage_t;
-
-{% endif %}
 {% endfor %}
 {% for table in sai_api.tables %}
 {% if table.is_object == 'false' %}
@@ -80,7 +67,7 @@ typedef struct _sai_{{ table.name }}_t
      * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.sai_key_name }}
 {% if key.sai_key_type == 'sai_object_id_t' %}
      *
-     * @objects SAI_OBJECT_TYPE_{{ key.sai_key_name | replace('_id', '') | upper }}
+     * @objects SAI_OBJECT_TYPE_{{ key.objectName | upper }}
 {% endif %}
      */
 {% if key.match_type == 'lpm' %}
@@ -89,11 +76,29 @@ typedef struct _sai_{{ table.name }}_t
     {{ key.sai_list_type }} {{ key.sai_key_name | lower }};
 {% elif key.match_type == 'range_list' %}
     {{ key.sai_range_list_type }} {{ key.sai_key_name | lower }};
+{% elif key.match_type == 'optional' %}
+    {{ key.sai_key_type }} {{ key.sai_key_name | lower }};
 {% else %}
     {{ key.sai_key_type }} {{ key.sai_key_name | lower }};
 {% endif %}
 
+{% if key.match_type == 'ternary' %}
+    /**
+     * @brief Ternary key {{ key.sai_key_name }} mask
+     */
+    {{ key.sai_key_type }} {{ key.sai_key_name | lower }}_mask;
+
+{% endif %}
 {% endfor %}
+{% if table['keys'] | selectattr('match_type', 'ne', 'exact') | list | length > 0 %}
+{% if table['keys'] | selectattr('match_type', 'eq', 'lpm') | list | length == 0 %}
+    /**
+     * @brief Rule priority in table
+     */
+    sai_uint32_t priority;
+
+{% endif %}
+{% endif %}
 } sai_{{ table.name }}_t;
 
 {% endif %}
@@ -121,6 +126,7 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% set ns.firstattr = true %}
 {% endif %}
 {% if table.is_object == 'true' %}
+{% if table['keys'] | length > 1 %}
 {% for key in table['keys'] %}
     /**
      * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.sai_key_name }}
@@ -151,31 +157,36 @@ typedef enum _sai_{{ table.name }}_attr_t
 
 {% endfor %}
 {% endif %}
-{% for action in table.actions %}
-{% for param in action.params %}
+{% endif %}
+{% for param in table.actionParams %}
     /**
-     * @brief Action {{ action.name }} parameter {{ param.name | upper }}
+     * @brief Action {% for action in param.paramActions %}{{ action }}{{ ", " if not loop.last else "" }}{% endfor %} parameter {{ param.name | upper }}
      *
      * @type {{ param.type }}
      * @flags CREATE_AND_SET
 {% if param.type == 'sai_uint16_t' %}
      * @isvlan false
 {% endif %}
-{% if table.actions | length > 1 %}
-     * @condition SAI_{{ table.name | upper }}_ATTR_ACTION == SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}
-{% endif %}
 {% if param.type == 'sai_ip_address_t' %}
      * @default 0.0.0.0
+{% elif param.type == 'sai_ip_addr_family_t' %}
+     * @default SAI_IP_ADDR_FAMILY_IPV4
 {% elif param.type == 'sai_mac_t' %}
      * @default 0:0:0:0:0:0
 {% elif param.type == 'bool' %}
      * @default false
 {% elif param.type == 'sai_object_id_t' %}
-     * @objects SAI_OBJECT_TYPE_{{ param.name | replace('_id', '') | upper }}
+     * @objects SAI_OBJECT_TYPE_{{ param.objectName | upper }}
      * @allownull true
      * @default SAI_NULL_OBJECT_ID
 {% else %}
      * @default 0
+{% endif %}
+{% if table.actions | length > 1 %}
+{% if param.paramActions | length > 0 %}
+     * @validonly {% for action in param.paramActions %}SAI_{{ table.name | upper }}_ATTR_ACTION == SAI_{{ table.name | upper }}_ACTION_{{ action | upper }}{{ " or " if not loop.last else "" }}{% endfor %}
+
+{% endif %}
 {% endif %}
      */
 {% if not ns.firstattr %}
@@ -186,18 +197,6 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% endif %}
 
 {% endfor %}
-{% endfor %}
-{% if table.stages | length > 0 %}
-    /**
-     * @brief Stage
-     *
-     * @type sai_{{ table.name }}_stage_t
-     * @flags CREATE_AND_SET
-     * @default SAI_{{ table.name | upper }}_STAGE_{{ table.stages[0] | upper }}
-     */
-    SAI_{{ table.name | upper }}_ATTR_STAGE,
-
-{% endif %}
 {% if table.with_counters == 'true' %}
     /**
      * @brief Attach a counter
@@ -213,6 +212,7 @@ typedef enum _sai_{{ table.name }}_attr_t
     SAI_{{ table.name | upper }}_ATTR_COUNTER_ID,
 
 {% endif %}
+{% if table.is_object == 'true' %}
 {% if table['keys'] | selectattr('match_type', 'ne', 'exact') | list | length > 0 %}
 {% if table['keys'] | selectattr('match_type', 'eq', 'lpm') | list | length == 0 %}
     /**
@@ -223,6 +223,7 @@ typedef enum _sai_{{ table.name }}_attr_t
      */
     SAI_{{ table.name | upper }}_ATTR_PRIORITY,
 
+{% endif %}
 {% endif %}
 {% endif %}
     /**

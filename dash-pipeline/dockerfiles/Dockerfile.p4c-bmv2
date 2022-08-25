@@ -1,0 +1,123 @@
+# This Dockerfile builds an image used to compile P4 programs for the bmv2 backend only
+# It's based on public p4lang/p4c docker but strips out uneeded backends.
+# See https://docs.docker.com/develop/develop-images/multistage-build/
+# FROM p4lang/p4c:latest as p4lang-p4c
+# :latest on 2022-08-19:
+FROM p4lang/p4c@sha256:39a2eb7374f94b899ef75f5ad9fb0bad170ef7697adf2d54ac10286488ad4490 as p4lang-p4c
+LABEL maintainer="SONIC-DASH Community"
+LABEL description="DASH p4c-bmv2 compiler, minimal"
+
+# Configure make to run as many parallel jobs as cores available
+ARG available_processors
+ARG MAKEFLAGS=-j$available_processors
+
+ARG CC=gcc
+ARG CXX=g++
+# Set TZ to avoid interactive installer
+ENV TZ=America/Los_Angeles
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ENV GIT_SSL_NO_VERIFY=true
+
+# Just copy minimal p4c bins & libs for bm2 backends
+# ~632 MB vs. 971MB for unmodifed p4lang/p4c:stable
+FROM amd64/ubuntu:20.04
+# Need python for "p4c" wrapper &  gcc for the C preprocessor
+RUN apt update && apt install -y python3 gcc
+
+COPY --from=p4lang-p4c /usr/local/lib/* /usr/local/lib/
+
+COPY --from=p4lang-p4c \
+        /usr/lib/x86_64-linux-gnu/libboost_*so* \
+        /usr/lib/x86_64-linux-gnu/libgc*so* \
+        /usr/lib/x86_64-linux-gnu/libisl*so* \
+        /usr/lib/x86_64-linux-gnu/libmpc*so* \
+        /usr/lib/x86_64-linux-gnu/libmpfr*so* \
+        /usr/lib/x86_64-linux-gnu/
+
+COPY --from=p4lang-p4c /usr/lib/gcc/x86_64-linux-gnu /usr/lib/gcc/x86_64-linux-gnu/
+COPY --from=p4lang-p4c /usr/bin/cpp /usr/bin/
+COPY --from=p4lang-p4c /usr/local/share/p4c/ /usr/local/share/p4c/
+
+WORKDIR /usr/local/bin
+
+COPY --from=p4lang-p4c \
+        /usr/local/bin/p4c \
+        /usr/local/bin/p4c-bm2-ss \
+        /usr/local/bin/
+
+CMD bash
+
+# # Alternate approach - selective remove backends etc.
+# # ~ 726 MB vs 971MG for p4lang/p4c:stable
+# FROM p4lang/p4c:stable as p4lang-p4c
+# LABEL maintainer="SONIC-DASH Community"
+# LABEL description="DASH p4c-bmv2 compiler, minimal"
+
+# # Configure make to run as many parallel jobs as cores available
+# ARG available_processors
+# ARG MAKEFLAGS=-j$available_processors
+
+# ARG CC=gcc
+# ARG CXX=g++
+# # Set TZ to avoid interactive installer
+# ENV TZ=America/Los_Angeles
+# RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+# ENV GIT_SSL_NO_VERIFY=true
+
+# # Delete unneeded backends
+# WORKDIR /usr/local/bin
+# RUN rm \
+#     UTscapy \
+#     bm_CLI \
+#     bm_nanomsg_events \
+#     bm_p4dbg \
+#     ccache \
+#     coverage \
+#     coverage-2.7 \
+#     coverage-3.5 \
+#     coverage2 \
+#     coverage3 \
+#     cygdb \
+#     cython \
+#     cythonize \
+#     easy_install \
+#     grpc_cpp_plugin \
+#     grpc_csharp_plugin \
+#     grpc_node_plugin \
+#     grpc_objective_c_plugin \
+#     grpc_php_plugin \
+#     grpc_python_plugin \
+#     grpc_ruby_plugin \
+#     nanocat \
+#     p4c-dpdk \
+#     p4c-ebpf \
+#     p4c-graphs \
+#     p4c-ubpf \
+#     p4test \
+#     pi_convert_p4info \
+#     pi_gen_fe_defines \
+#     pi_gen_native_json \
+#     protoc \
+#     psa_switch \
+#     psa_switch_CLI \
+#     ptf \
+#     scapy \
+#     simple_switch \
+#     simple_switch_CLI \
+#     simple_switch_grpc \
+#     sysrepo-plugind \
+#     sysrepocfg \
+#     sysrepoctl \
+#     sysrepod \
+#     thrift \
+#     wheel \
+#     yanglint \
+#     yangre 
+
+# # Copy everything from p4lang-p4c as one layer to avoid the deleted files above
+# FROM scratch
+# COPY --from=p4lang-p4c / /
+
+
+# CMD bash
+

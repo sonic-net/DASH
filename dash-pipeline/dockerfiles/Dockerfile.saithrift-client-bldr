@@ -1,0 +1,37 @@
+
+#FROM amd64/ubuntu:20.04
+# amd64/ubuntu:20.04 on 2022-07-03
+FROM amd64/ubuntu@sha256:b2339eee806d44d6a8adc0a790f824fb71f03366dd754d400316ae5a7e3ece3e
+LABEL maintainer="SONiC-DASH Community "
+LABEL description="This Docker image contains the toolchain to build and install \
+the saithrift client and test programs for DASH. It does not contain thrift/saithrift libraries"
+ADD requirements.txt /tests/
+
+# Below we build the baseline set of tools to run saithrift client tests
+# Contents do not include the thrift and saithrift client libraries, which need
+# to be added to form another container which reflects the current DASH sai libraries
+# Those contents are built in saithrift-server workflow.
+RUN apt update && apt install -y python3 python3-pip sudo && \
+    sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1 && \
+    sudo python3 -m pip install -r /tests/requirements.txt && \
+    sudo pip3 install scapy pysubnettree
+
+WORKDIR /
+
+ARG user
+ARG uid
+ARG guid
+ARG hostname
+
+ENV BUILD_HOSTNAME $hostname
+ENV USER $user
+
+RUN groupadd -f -r -g $guid g$user
+
+RUN useradd $user -l -u $uid -g $guid -d /var/$user -m -s /bin/bash
+
+RUN echo "$user ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers
+
+USER $user
+
+CMD ["/bin/bash"]

@@ -1,0 +1,42 @@
+# This Dockerfile creates a simple scratch layer with just gRPC libraries, to copy into other images.
+# gRPC is built from source, then the libraries are copied into a scratch image.
+#FROM amd64/ubuntu:20.04 as builder
+# amd64/ubuntu:20.04 on 2022-07-03
+FROM amd64/ubuntu@sha256:b2339eee806d44d6a8adc0a790f824fb71f03366dd754d400316ae5a7e3ece3e as builder
+LABEL maintainer="SONIC-DASH Community"
+LABEL description="DASH gRPC 1.43.2 docker image, no sources"
+
+# Configure make to run as many parallel jobs as cores available
+ARG available_processors
+ARG MAKEFLAGS=-j$available_processors
+
+ARG CC=gcc
+ARG CXX=g++
+# Set TZ to avoid interactive installer
+ENV TZ=America/Los_Angeles
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ENV GIT_SSL_NO_VERIFY=true
+
+WORKDIR /
+RUN apt-get update -qq && apt-get install -qq --no-install-recommends \
+                git \
+                build-essential \
+                autoconf \
+                libtool \
+                pkg-config \
+                cmake && \
+                git clone --depth=1 -b v1.43.2 https://github.com/google/grpc.git && \
+                    cd grpc/ && \
+                    git submodule update --init --recursive && \
+                    mkdir -p cmake/build && \
+                    cd cmake/build && \
+                    cmake -DBUILD_SHARED_LIBS=ON -DgRPC_INSTALL=ON --parallel 1 ../.. && \
+                    make  && \
+                    make install && \
+                    cd / && \
+                    rm -rf grpc
+
+# Just copy all libs needed to run bmv2 and build client apps for its P4Runtime etc.
+FROM scratch
+COPY --from=builder /usr/local/lib/* usr/local/lib/
+

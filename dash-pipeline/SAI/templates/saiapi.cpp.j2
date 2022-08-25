@@ -39,12 +39,23 @@ sai_status_t sai_create_{{ table.name }}(
     auto action = entry->mutable_action();
     auto expectedParams = 0;
     auto matchedParams = 0;
-
-    // Search the action 
+    sai_object_id_t objId = 0;
+    // Search the action
     pi_p4_id_t actionId;
 
     matchActionEntry->set_table_id(tableId);
 
+    {% if table['keys'] | length== 1 %}
+    // SAI object table with single P4 key - object ID itself is the P4 table key
+    // Generate a SAI object ID and fill it as the P4 table key
+    auto mf = matchActionEntry->add_match();
+    mf->set_field_id({{table['keys'][0].id}});
+    objId = NextObjIndex();
+    auto mf_exact = mf->mutable_exact();
+    {{table['keys'][0].sai_key_field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
+    {% else %}
+    // SAI object table with multiple P4 table keys
+    // Copy P4 table keys from appropriate SAI attributes
     for (uint32_t i = 0; i < attr_count; i++) {
         switch(attr_list[i].id) {
             {% for key in table['keys'] %}
@@ -65,15 +76,37 @@ sai_status_t sai_create_{{ table.name }}(
                 {% elif key.match_type == 'range_list' %}
                 goto ErrRet;
                 assert(0 && "range_list is not supported");
+                // TODO: if it is ternary, need to set the mask
                 // auto mf1_list = mf1->mutable_xxx();
                 //{{key.sai_range_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+                {% elif key.match_type == 'optional' %}
+                auto mf_optional = mf->mutable_optional();
+                {{key.sai_key_field}}SetVal(attr_list[i].value, mf_optional, {{key.bitwidth}});
                 {% endif %}
-                // TODO: if it is ternary, need to set the mask
+                {% if 'v4_or_v6_id' in key %}
+                {
+                    // set v4_or_v6 field
+                    auto mf = matchActionEntry->add_match();
+                    mf->set_field_id({{key.v4_or_v6_id}});
+                    auto mf_exact = mf->mutable_exact();
+                    booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
+                }
+                {% endif %}
                 break;
             }
             {% endfor %}
+            {% if table['keys'] | selectattr('match_type', 'ne', 'exact') | list | length > 0 %}
+            {% if table['keys'] | selectattr('match_type', 'eq', 'lpm') | list | length == 0 %}
+            // Table has non lpm ternary keys - add priority field
+            case SAI_{{ table.name | upper }}_ATTR_PRIORITY: {
+                matchActionEntry->set_priority(attr_list[i].value.u32);
+                break;
+            }
+            {% endif %}
+            {% endif %}
         }
     }
+    {% endif %}
 
 
     // If there is only one action, simply set it.
@@ -103,16 +136,23 @@ sai_status_t sai_create_{{ table.name }}(
 
     for (uint32_t i = 0; i < attr_count; i++) {
         switch(attr_list[i].id) {
-            {% for action in table.actions %}
-            {% for param in action.params %}
+            {% for param in table.actionParams %}
             case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}: {
                 auto param = action->add_params();
                 param->set_param_id({{param.id}});
                 {{param.field}}SetVal(attr_list[i].value, param, {{param.bitwidth}});
                 matchedParams++;
+                {% if 'v4_or_v6_id' in param %}
+                {
+                    // set v4_or_v6 field
+                    auto param = action->add_params();
+                    param->set_param_id({{param.v4_or_v6_id}});
+                    booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param, 1);
+                    matchedParams++;
+                }
+                {% endif %}
                 break;
             }
-            {% endfor %}
             {% endfor %}
         }
     }
@@ -122,8 +162,6 @@ sai_status_t sai_create_{{ table.name }}(
     if (matchedParams != expectedParams) {
         goto ErrRet;
     }
-    // TODO: ternaly needs to set priority
-    uint64_t objId;
     if (true == InsertInTable(matchActionEntry, &objId)) {
         *{{ table.name }}_id = objId;
         return 0;
@@ -189,11 +227,20 @@ sai_status_t sai_create_{{ table.name }}(
         {% elif key.match_type == 'range_list' %}
         assert(0 && "range_list is not supported");
         goto ErrRet;
+        // TODO: if it is ternary, need to set the mask
         // auto mf1_list = mf1->mutable_xxx();
         //{{key.sai_range_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
         {% endif %}
-        // TODO: if it is ternary, need to set the mask
     }
+    {% if 'v4_or_v6_id' in key %}
+    {
+        // set v4_or_v6 field
+        auto mf = matchActionEntry->add_match();
+        mf->set_field_id({{key.v4_or_v6_id}});
+        auto mf_exact = mf->mutable_exact();
+        booldataSetVal((tableEntry->{{ key.sai_key_name | lower }}.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
+    }
+    {% endif %}
     {% endfor %}
 
 
@@ -222,16 +269,23 @@ sai_status_t sai_create_{{ table.name }}(
 
     for (uint32_t i = 0; i < attr_count; i++) {
         switch(attr_list[i].id) {
-            {% for action in table.actions %}
-            {% for param in action.params %}
+            {% for param in table.actionParams %}
             case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}: {
                 auto param = action->add_params();
                 param->set_param_id({{param.id}});
                 {{param.field}}SetVal(attr_list[i].value, param, {{param.bitwidth}});
                 matchedParams++;
+                {% if 'v4_or_v6_id' in param %}
+                {
+                    // set v4_or_v6 field
+                    auto param = action->add_params();
+                    param->set_param_id({{param.v4_or_v6_id}});
+                    booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param, 1);
+                    matchedParams++;
+                }
+                {% endif %}
                 break;
             }
-            {% endfor %}
             {% endfor %}
         }
     }
@@ -281,12 +335,20 @@ sai_status_t sai_remove_{{ table.name }}(
         // auto mf1_list = mf1->mutable_xxx();
         //{{key.sai_range_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
         {% endif %}
-        // TODO: if it is ternary, need to set the mask
     }
+    {% if 'v4_or_v6_id' in key %}
+    {
+        // set v4_or_v6 field
+        auto mf = matchActionEntry->add_match();
+        mf->set_field_id({{key.v4_or_v6_id}});
+        auto mf_exact = mf->mutable_exact();
+        booldataSetVal((tableEntry->{{ key.sai_key_name | lower }}.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
+    }
+    {% endif %}
     {% endfor %}
 
     retCode = MutateTableEntry(matchActionEntry, p4::v1::Update_Type_DELETE);
-    if (grpc::StatusCode::OK != retCode) {
+    if (grpc::StatusCode::OK == retCode) {
         delete matchActionEntry;
         return 0;
     }
@@ -314,7 +376,8 @@ sai_status_t sai_get_{{ table.name }}_attribute(
 {% endif %}
 {% endfor %}
 
-static sai_{{ app_name }}_api_t sai_{{app_name }}_api_impl = {
+/* TODO [cs] Generate .h file for _impl to use within sai_api_query() */
+sai_{{ app_name }}_api_t sai_{{app_name }}_api_impl = {
 {% for table in tables %}
     .create_{{ table.name }} =  sai_create_{{ table.name }},
     .remove_{{ table.name }} = sai_remove_{{ table.name }},

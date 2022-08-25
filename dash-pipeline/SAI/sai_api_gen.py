@@ -14,6 +14,7 @@ NAME_TAG = 'name'
 TABLES_TAG = 'tables'
 BITWIDTH_TAG = 'bitwidth'
 ACTIONS_TAG = 'actions'
+ACTION_PARAMS_TAG = 'actionParams'
 PREAMBLE_TAG = 'preamble'
 OTHER_MATCH_TYPE_TAG = 'otherMatchType'
 MATCH_TYPE_TAG = 'matchType'
@@ -22,6 +23,8 @@ ACTION_REFS_TAG = 'actionRefs'
 MATCH_FIELDS_TAG = 'matchFields'
 NOACTION = 'NoAction'
 STAGES_TAG = 'stages'
+PARAM_ACTIONS = 'paramActions'
+OBJECT_NAME_TAG = 'objectName'
 
 def get_sai_key_type(key_size, key_header, key_field):
     if key_size == 1:
@@ -32,6 +35,8 @@ def get_sai_key_type(key_size, key_header, key_field):
         return 'sai_object_id_t', "u16"
     elif key_size <= 16:
         return 'sai_uint16_t', "u16"
+    elif key_size == 32 and ('ip_addr_family' in key_field):
+        return 'sai_ip_addr_family_t', "u32"
     elif key_size == 32 and ('addr' in key_field or 'ip' in key_header):
         return 'sai_ip_address_t', "ipaddr"
     elif key_size == 32 and ('_id' in key_field):
@@ -70,7 +75,6 @@ def get_sai_list_type(key_size, key_header, key_field):
         return 'sai_u64_list_t', "no mapping"
     raise ValueError(f'key_size={key_size} is not supported')
 
-
 def get_sai_range_list_type(key_size, key_header, key_field):
     if key_size <= 8:
         return 'sai_u8_range_list_t', 'u8rangelist'
@@ -97,7 +101,7 @@ def get_sai_key_data(key):
     sai_key_data['sai_key_name'] = sai_key_name
 
     key_size = key[BITWIDTH_TAG]
-    
+
     if OTHER_MATCH_TYPE_TAG in key:
         sai_key_data['match_type'] =  key[OTHER_MATCH_TYPE_TAG].lower()
     elif MATCH_TYPE_TAG in key:
@@ -105,7 +109,7 @@ def get_sai_key_data(key):
     else:
         raise ValueError(f'No valid match tag found')
 
-    if sai_key_data['match_type'] == 'exact':
+    if sai_key_data['match_type'] == 'exact' or  sai_key_data['match_type'] == 'optional' or sai_key_data['match_type'] == 'ternary':
         sai_key_data['sai_key_type'], sai_key_data['sai_key_field'] = get_sai_key_type(key_size, key_header, key_field)
     elif sai_key_data['match_type'] == 'lpm':
         sai_key_data['sai_lpm_type'], sai_key_data['sai_lpm_field'] = get_sai_lpm_type(key_size, key_header, key_field)
@@ -145,9 +149,34 @@ def table_with_counters(program, table_id):
             return 'true'
     return 'false'
 
+def fill_action_params(table_params, param_names, action):
+    for param in action[PARAMS_TAG]:
+        # skip v4/v6 selector
+        if 'v4_or_v6' in param[NAME_TAG]:
+           continue
+        if param[NAME_TAG] not in param_names:
+            param_names.append(param[NAME_TAG])
+            param[PARAM_ACTIONS] = [action[NAME_TAG]]
+            table_params.append(param)
+        else:
+            # ensure that same param passed to multiple actions of the
+            # same P4 table does not generate more than 1 SAI attribute
+            for tbl_param in table_params:
+                if tbl_param[NAME_TAG] == param[NAME_TAG]:
+                    tbl_param[PARAM_ACTIONS].append(action[NAME_TAG])
+
+    for param in action[PARAMS_TAG]:
+        # mark presence of v4/v6 selector in the parent param
+        if 'v4_or_v6' in param[NAME_TAG]:
+            v4_or_v6_param_name = param[NAME_TAG]
+            for param2 in  action[PARAMS_TAG]:
+                if "is_" + param2[NAME_TAG] + "_v4_or_v6" == param[NAME_TAG]:
+                    param2["v4_or_v6_id"] = param['id']
+                    break
 
 def generate_sai_apis(program, ignore_tables):
     sai_apis = []
+    table_names = []
     all_actions = extract_action_data(program)
     tables = sorted(program[TABLES_TAG], key=lambda k: k[PREAMBLE_TAG][NAME_TAG])
     for table in tables:
@@ -155,13 +184,17 @@ def generate_sai_apis(program, ignore_tables):
         sai_table_data['keys'] = []
         sai_table_data[ACTIONS_TAG] = []
         sai_table_data[STAGES_TAG] = []
+        sai_table_data[ACTION_PARAMS_TAG] = []
 
         table_control, table_name = table[PREAMBLE_TAG][NAME_TAG].split('.', 1)
         if table_name in ignore_tables:
             continue
 
         table_name, api_name = table_name.split('|')
-        sai_table_data[NAME_TAG] = table_name.replace('.' , '_')
+        if '.' in table_name:
+            sai_table_data[NAME_TAG] = table_name.split('.')[-1]
+        else:
+            sai_table_data[NAME_TAG] = table_name
         sai_table_data['id'] =  table[PREAMBLE_TAG]['id']
         sai_table_data['with_counters'] = table_with_counters(program, sai_table_data['id'])
 
@@ -189,21 +222,31 @@ def generate_sai_apis(program, ignore_tables):
                 continue
             sai_table_data['keys'].append(get_sai_key_data(key))
 
+        for key in table[MATCH_FIELDS_TAG]:
+            # mark presence of v4/v6 selector in the parent key field
+            if 'v4_or_v6' in key[NAME_TAG]:
+                _, v4_or_v6_key_name = key[NAME_TAG].split(':')
+                for key2 in sai_table_data['keys']:
+                    if "is_" + key2['sai_key_name'] + "_v4_or_v6" == v4_or_v6_key_name:
+                        key2["v4_or_v6_id"] = key['id']
+                        break
+
+        param_names = []
         for action in table[ACTION_REFS_TAG]:
             action_id = action["id"]
             if all_actions[action_id][NAME_TAG] != NOACTION:
+                fill_action_params(sai_table_data[ACTION_PARAMS_TAG], param_names, all_actions[action_id])
                 sai_table_data[ACTIONS_TAG].append(all_actions[action_id])
 
         if len(sai_table_data['keys']) == 1 and sai_table_data['keys'][0]['sai_key_name'].endswith(table_name.split('.')[-1] + '_id'):
             sai_table_data['is_object'] = 'true'
-            # Object ID itself is a key
-            sai_table_data['keys'] = []
         elif len(sai_table_data['keys']) > 5:
             sai_table_data['is_object'] = 'true'
         else:
             sai_table_data['is_object'] = 'false'
             sai_table_data['name'] = sai_table_data['name'] + '_entry'
 
+        table_names.append(sai_table_data[NAME_TAG])
         is_new_api = True
         for sai_api in sai_apis:
             if sai_api['app_name'] == api_name:
@@ -217,7 +260,7 @@ def generate_sai_apis(program, ignore_tables):
             new_api[TABLES_TAG] = [sai_table_data]
             sai_apis.append(new_api)
 
-    return sai_apis
+    return sai_apis, table_names
 
 def write_sai_impl_files(sai_api):
     env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
@@ -269,10 +312,14 @@ def write_sai_files(sai_api):
     new_lines = []
     for line in lines:
         if 'Add new experimental APIs above this line' in line:
-            new_lines.append('    SAI_API_' + sai_api['app_name'].upper() + ',\n\n')
+            new_line = '    SAI_API_' + sai_api['app_name'].upper() + ',\n'
+            if new_line not in lines:
+                new_lines.append(new_line + '\n')
         if 'new experimental object type includes' in line:
             new_lines.append(line)
-            new_lines.append('#include "saiexperimental' + sai_api['app_name'].replace('_', '') + '.h"\n')
+            new_line = '#include "saiexperimental' + sai_api['app_name'].replace('_', '') + '.h"\n'
+            if new_line not in lines:
+                new_lines.append(new_line)
             continue
 
         new_lines.append(line)
@@ -288,7 +335,9 @@ def write_sai_files(sai_api):
     for line in lines:
         if 'Add new experimental object types above this line' in line:
             for table in sai_api[TABLES_TAG]:
-                new_lines.append('    SAI_OBJECT_TYPE_' + table[NAME_TAG].upper() + ',\n\n')
+                new_line = '    SAI_OBJECT_TYPE_' + table[NAME_TAG].upper() + ',\n'
+                if new_line not in lines:
+                    new_lines.append(new_line + '\n')
 
         new_lines.append(line)
 
@@ -304,11 +353,15 @@ def write_sai_files(sai_api):
         if 'Add new experimental entries above this line' in line:
             for table in sai_api[TABLES_TAG]:
                 if table['is_object'] == 'false':
-                    new_lines.append('    /** @validonly object_type == SAI_OBJECT_TYPE_' + table[NAME_TAG].upper() + ' */\n')
-                    new_lines.append('    sai_' + table[NAME_TAG] + '_t ' + table[NAME_TAG] + ';\n\n')
+                    new_line = '    sai_' + table[NAME_TAG] + '_t ' + table[NAME_TAG] + ';\n'
+                    if new_line not in lines:
+                        new_lines.append('    /** @validonly object_type == SAI_OBJECT_TYPE_' + table[NAME_TAG].upper() + ' */\n')
+                        new_lines.append(new_line + '\n')
         if 'new experimental object type includes' in line:
             new_lines.append(line)
-            new_lines.append('#include "../experimental/saiexperimental' + sai_api['app_name'].replace('_', '') + '.h"\n')
+            new_line = '#include "../experimental/saiexperimental' + sai_api['app_name'].replace('_', '') + '.h"\n'
+            if new_line not in lines:
+                new_lines.append(new_line)
             continue
 
         new_lines.append(line)
@@ -324,36 +377,44 @@ parser.add_argument('filepath', type=str, help='Path to P4 program RUNTIME JSON 
 parser.add_argument('apiname', type=str, help='Name of the new SAI API')
 parser.add_argument('--print-sai-lib', type=bool)
 parser.add_argument('--ignore-tables', type=str, default='', help='Comma separated list of tables to ignore')
-parser.add_argument('--overwrite',  type=bool, default=False, help='Restore SAI subdirectories')
 args = parser.parse_args()
 
 if not os.path.isfile(args.filepath):
     print('File ' + args.filepath + ' does not exist')
     exit(1)
 
-if os.path.exists('./lib'):
-    if args.overwrite == False:
-        print('Directory ./lib already exists. Please remove in order to proceed')
-        exit(1)
-    else:
-        print('Directory ./lib will be deleted...')
-        shutil.rmtree('./lib')
-
+# 
 # Get SAI dictionary from P4 dictionary
 print("Generating SAI API...")
 with open(args.filepath) as json_program_file:
     json_program = json.load(json_program_file)
 
-sai_apis = generate_sai_apis(json_program, args.ignore_tables.split(','))
+sai_apis, all_table_names = generate_sai_apis(json_program, args.ignore_tables.split(','))
 
-os.mkdir("lib")
-
-# Write SAI dictionary into SAI API headers
 sai_api_name_list = []
 for sai_api in sai_apis:
+    # Update object name reference for action params
+    for table in sai_api[TABLES_TAG]:
+        for param in table[ACTION_PARAMS_TAG]:
+            if param['type'] == 'sai_object_id_t':
+                table_ref = param[NAME_TAG][:-len("_id")]
+                for table_name in all_table_names:
+                    if table_ref.endswith(table_name):
+                        param[OBJECT_NAME_TAG] = table_name
+    # Update object name reference for keys
+    for table in sai_api[TABLES_TAG]:
+        for key in table['keys']:
+            if 'sai_key_type' in key:
+                if key['sai_key_type'] == 'sai_object_id_t':
+                    table_ref = key['sai_key_name'][:-len("_id")]
+                    for table_name in all_table_names:
+                        if table_ref.endswith(table_name):
+                            key[OBJECT_NAME_TAG] = table_name
+    # Write SAI dictionary into SAI API headers
     write_sai_files(sai_api)
     write_sai_impl_files(sai_api)
     sai_api_name_list.append(sai_api['app_name'].replace('_', ''))
+
 write_sai_makefile(sai_api_name_list)
 
 if args.print_sai_lib:
