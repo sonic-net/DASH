@@ -25,6 +25,7 @@ NOACTION = 'NoAction'
 STAGES_TAG = 'stages'
 PARAM_ACTIONS = 'paramActions'
 OBJECT_NAME_TAG = 'objectName'
+SCOPE_TAG = 'scope'
 
 def get_sai_key_type(key_size, key_header, key_field):
     if key_size == 1:
@@ -234,7 +235,7 @@ def generate_sai_apis(program, ignore_tables):
         param_names = []
         for action in table[ACTION_REFS_TAG]:
             action_id = action["id"]
-            if all_actions[action_id][NAME_TAG] != NOACTION:
+            if all_actions[action_id][NAME_TAG] != NOACTION and not (SCOPE_TAG in action and action[SCOPE_TAG] == 'DEFAULT_ONLY'):
                 fill_action_params(sai_table_data[ACTION_PARAMS_TAG], param_names, all_actions[action_id])
                 sai_table_data[ACTIONS_TAG].append(all_actions[action_id])
 
