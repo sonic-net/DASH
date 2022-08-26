@@ -25,8 +25,8 @@ DASH_HOST?=dash
 # Needed Libraries only
 DOCKER_GRPC_IMG ?=chrissommers/dash-grpc:1.43.2
 
-# Slimmed-down version bmv2 backend only 632MB - works:
-DOCKER_P4C_BMV2_IMG ?=chrissommers/dash-p4c-bmv2:220819a
+# Slimmed-down version bmv2 backend only 632MB:
+DOCKER_P4C_BMV2_IMG ?=chrissommers/dash-p4c-bmv2:220825
 
 # Builds SAI-P4RT clients to run inside bmv2 process
 DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2-bldr:220819
