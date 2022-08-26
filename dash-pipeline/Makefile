@@ -489,10 +489,10 @@ veth2: /sys/class/net/veth2
 	sudo sysctl net.ipv6.conf.veth3.accept_ra_pinfo=0
 	sudo sysctl net.ipv6.conf.veth3.router_solicitations=0
 
+# Delete veth's, test existence to avoid needless use of sudo
 network-clean:
-	# Note, deleting one member (e.g. veth0) deletes its peer (e.g. veth1)
-	-sudo ip link delete dev veth0
-	-sudo ip link delete dev veth2
+	@-([ -e /sys/class/net/veth0 ] && sudo ip link delete dev veth0 && echo "Deleted veth0/1") || echo "No veth0, not deleting"
+	@-([ -e /sys/class/net/veth2 ] && sudo ip link delete dev veth2 && echo "Deleted veth2/3") || echo "No veth2, not deleting"
 
 ###############################
 # IXIA-C TARGETS
