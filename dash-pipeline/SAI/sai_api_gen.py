@@ -109,7 +109,7 @@ def get_sai_key_data(key):
     else:
         raise ValueError(f'No valid match tag found')
 
-    if sai_key_data['match_type'] == 'exact' or  sai_key_data['match_type'] == 'optional':
+    if sai_key_data['match_type'] == 'exact' or  sai_key_data['match_type'] == 'optional' or sai_key_data['match_type'] == 'ternary':
         sai_key_data['sai_key_type'], sai_key_data['sai_key_field'] = get_sai_key_type(key_size, key_header, key_field)
     elif sai_key_data['match_type'] == 'lpm':
         sai_key_data['sai_lpm_type'], sai_key_data['sai_lpm_field'] = get_sai_lpm_type(key_size, key_header, key_field)

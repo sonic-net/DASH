@@ -82,7 +82,23 @@ typedef struct _sai_{{ table.name }}_t
     {{ key.sai_key_type }} {{ key.sai_key_name | lower }};
 {% endif %}
 
+{% if key.match_type == 'ternary' %}
+    /**
+     * @brief Ternary key {{ key.sai_key_name }} mask
+     */
+    {{ key.sai_key_type }} {{ key.sai_key_name | lower }}_mask;
+
+{% endif %}
 {% endfor %}
+{% if table['keys'] | selectattr('match_type', 'ne', 'exact') | list | length > 0 %}
+{% if table['keys'] | selectattr('match_type', 'eq', 'lpm') | list | length == 0 %}
+    /**
+     * @brief Rule priority in table
+     */
+    sai_uint32_t priority;
+
+{% endif %}
+{% endif %}
 } sai_{{ table.name }}_t;
 
 {% endif %}
@@ -196,6 +212,7 @@ typedef enum _sai_{{ table.name }}_attr_t
     SAI_{{ table.name | upper }}_ATTR_COUNTER_ID,
 
 {% endif %}
+{% if table.is_object == 'true' %}
 {% if table['keys'] | selectattr('match_type', 'ne', 'exact') | list | length > 0 %}
 {% if table['keys'] | selectattr('match_type', 'eq', 'lpm') | list | length == 0 %}
     /**
@@ -206,6 +223,7 @@ typedef enum _sai_{{ table.name }}_attr_t
      */
     SAI_{{ table.name | upper }}_ATTR_PRIORITY,
 
+{% endif %}
 {% endif %}
 {% endif %}
     /**
