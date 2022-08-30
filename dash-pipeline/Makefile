@@ -27,7 +27,7 @@ PWD := $(shell pwd)
 DOCKER_GRPC_IMG ?=chrissommers/dash-grpc:1.43.2
 
 # Slimmed-down version bmv2 backend only 632MB - works:
-DOCKER_P4C_BMV2_IMG ?=chrissommers/dash-p4c-bmv2:220819
+DOCKER_P4C_BMV2_IMG ?=chrissommers/dash-p4c-bmv2:220830
 
 # Builds sai-P4rt clients to run inside bmvs process
 DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2-bldr:220630
