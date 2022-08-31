@@ -1,6 +1,5 @@
 name: DASH-docker-p4c-bmv2-build-publish-acr
 
-
 on:
   push:
     branches: [ "**" ]
