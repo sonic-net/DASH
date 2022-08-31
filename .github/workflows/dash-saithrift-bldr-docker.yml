@@ -1,0 +1,44 @@
+name: DASH-docker-saithrift-bldr-image
+
+on:
+  push:
+    branches: [ "**" ]
+    paths:
+      - '.github/workflows/dash-saithrift-bldr-docker.yml'
+      - 'dash-pipeline/Makefile'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-bldr'
+      - 'dash-pipeline/.dockerignore'
+      - 'dash-pipeline/dockerfiles/.dockerignore'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '.github/workflows/dash-saithrift-bldr-docker.yml'
+      - 'dash-pipeline/Makefile'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-bldr'
+      - 'dash-pipeline/.dockerignore'
+      - 'dash-pipeline/dockerfiles/.dockerignore'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and publish dash-saithrift-bldr-image
+    runs-on: ubuntu-20.04
+    env:
+      docker_fg_flags: -u root --privileged
+      docker_bg_flags: -d -u root --privileged
+    defaults:
+      run:
+        working-directory: ./dash-pipeline
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build and publish docker-saithrift-bldr image
+      run:  make docker-saithrift-bldr
+    - uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.DASH_ACR_LOGIN_SERVER }}
+        username: ${{ secrets.DASH_ACR_USERNAME }}
+        password: ${{ secrets.DASH_ACR_PASSWORD }}    
+    - name: Build dash-saithrift-bldr image 
+      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saithrift-bldr
+    - name: Publish dash-saithrift-bldr docker image
+      run: docker push sonicdash.azurecr.io/dash-saithrift-bldr:220719
