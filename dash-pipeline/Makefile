@@ -22,7 +22,7 @@ fix-perms:
 PWD := $(shell pwd)
 
 # Default Docker images, override from env var
-DASH_ACR_REGISTRY= ?= sonicdash.azurecr.io
+DASH_ACR_REGISTRY ?=sonicdash.azurecr.io
 
 # Needed Libraries only
 DOCKER_GRPC_IMG ?=chrissommers/dash-grpc:1.43.2
