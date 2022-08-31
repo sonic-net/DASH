@@ -34,6 +34,5 @@ jobs:
         login-server: ${{ secrets.DASH_ACR_LOGIN_SERVER }}
         username: ${{ secrets.DASH_ACR_USERNAME }}
         password: ${{ secrets.DASH_ACR_PASSWORD }}    
-    #- name: Publish dash-p4c-bmv2 docker image to ACR
-    # sonicdash.azurecr.io
-    #  run: docker push sonicdash.azurecr.io/dash-p4c-bmv2:220819
+    - name: Publish dash-p4c-bmv2 docker image to ACR
+      run: docker push sonicdash.azurecr.io/dash-p4c-bmv2:220819
