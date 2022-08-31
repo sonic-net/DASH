@@ -2,3 +2,6 @@
 	path = dash-pipeline/SAI/SAI
 	url = https://github.com/reshmaintel/SAI.git
 	branch = dash-ptf-ci
+[submodule "test/SAI-Challenger.OCP"]
+	path = test/SAI-Challenger.OCP
+	url = https://github.com/plvisiondevs/SAI-Challenger.OCP
