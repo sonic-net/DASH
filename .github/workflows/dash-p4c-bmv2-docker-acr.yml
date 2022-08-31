@@ -22,6 +22,7 @@ jobs:
   build:
     name: Build docker dash-p4c-bmv2 image
     runs-on: ubuntu-20.04
+    
     defaults:
       run:
         working-directory: ./dash-pipeline
@@ -29,5 +30,11 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build dash-p4c-bmv2 docker image
       run: make docker-dash-p4c
-    - name: Publish dash-p4c-bmv2 docker image
-      run: make docker-publish-dash-p4c
+    - uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.DASH_ACR_LOGIN_SERVER }}
+        username: ${{ secrets.DASH_ACR_USERNAME }}
+        password: ${{ secrets.DASH_ACR_PASSWORD }}    
+    #- name: Publish dash-p4c-bmv2 docker image to ACR
+    # sonicdash.azurecr.io
+    #  run: docker push sonicdash.azurecr.io/dash-p4c-bmv2:220819
