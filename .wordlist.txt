@@ -46,17 +46,22 @@ bm
 BMV
 bmv
 BMv
+bootup
+Bootup
 br
 breakpoint
 Bringup
 bruh
 buildimage
+BulkSyncDone
 BW
 bw
 bz
 callout
 cd
 centos
+Cfg
+cfg
 checkboxes
 chris
 ci
@@ -64,12 +69,16 @@ CLA
 cla
 CLI
 CloudStorm
+CNIP
 codebase
+compat
+Compat
 conf
 CONFDB
 confgen
 config
 Containerlab
+CP
 CreatedHalfOpenFlow
 CreatedOtherFlow
 CreatedTcpFlow
@@ -98,6 +107,9 @@ DataCenter
 datagram
 Datagram
 datagrams
+datapath
+Datapath
+dataplanes
 datastore
 DBs
 DDoS
@@ -110,6 +122,7 @@ DEST
 dest
 dev
 DHCP
+dir
 Disaggregated
 Disaggregation
 distro
@@ -129,6 +142,7 @@ downcasting
 DPDK
 DPU
 dpu
+DPUControlMsgs
 DPUs
 drawio
 drilldown
@@ -149,6 +163,7 @@ DroppedRedirectPackets
 DroppedResourcesMemory
 DroppedResourcesPacket
 DroppedResourcesUnifiedFlow
+DSC
 DSCP
 dst
 DuringPortTimer
@@ -199,6 +214,7 @@ gRPC
 grpc
 guid
 GW
+HB
 HD
 HLD
 hld
@@ -207,6 +223,7 @@ hoc
 HOSTIF
 HSL
 https
+hw
 HW
 ICMP
 idempotency
@@ -255,6 +272,7 @@ kvm
 lang
 libsai
 linux
+liveness
 LLDP
 lldp
 loadbalancer
@@ -318,6 +336,7 @@ OpenConfig
 openconfig
 opensource
 OpenTrafficGenerator
+oper
 OPER
 orch
 OrchAgent
@@ -336,6 +355,7 @@ params
 PAs
 PCI
 PCIe
+Pensando
 performant
 pingmesh
 PIR
@@ -384,6 +404,7 @@ repos
 resimulation
 responder
 Resttapi
+retransmission
 retransmit
 retransmitted
 reviewable
@@ -420,6 +441,7 @@ sdn
 Sflow
 SHA
 sharding
+SInce
 SKU
 SKUs
 SLB
@@ -443,6 +465,8 @@ SRC
 src
 STATEDB
 stateful
+statemachine
+struct
 subclassed
 subdirectories
 subdirectory
@@ -457,10 +481,15 @@ subtype
 supportability
 SUT
 svg
+sw
+SwitchoverDone
+switchovers
 SWSS
 swss
 SynAck
 syncd
+synched
+synching
 TBD
 tbd
 TCP
