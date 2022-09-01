@@ -25,22 +25,22 @@ PWD := $(shell pwd)
 DASH_ACR_REGISTRY ?=sonicdash.azurecr.io
 
 # Needed Libraries only
-DOCKER_GRPC_IMG ?=chrissommers/dash-grpc:1.43.2
+DOCKER_GRPC_IMG ?=$(DASH_ACR_REGISTRY)/dash-grpc:1.43.2
 
 # Slimmed-down version bmv2 backend only 632MB - works:
 DOCKER_P4C_BMV2_IMG ?=$(DASH_ACR_REGISTRY)/dash-p4c-bmv2:220819
 
 # Builds sai-P4rt clients to run inside bmvs process
-DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2-bldr:220630
+DOCKER_BMV2_BLDR_IMG ?=$(DASH_ACR_REGISTRY)/dash-bmv2-bldr:220630
 
 # Runs bmv2 process - consider slimmer if don't need sai/p4rt clients inside
 DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 
 # Compiles sai headers, libsai, saithrift server & client/server libs
-DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220719
+DOCKER_SAITHRIFT_BLDR_IMG ?=$(DASH_ACR_REGISTRY)/dash-saithrift-bldr:220719
 
 # Base image with test frameworks, DASH client libs not installed
-DOCKER_SAITHRIFT_CLIENT_BLDR_IMG ?=chrissommers/dash-saithrift-client-bldr:220723
+DOCKER_SAITHRIFT_CLIENT_BLDR_IMG ?=$(DASH_ACR_REGISTRY)/dash-saithrift-client-bldr:220723
 
 # Client image built locally with saithrift client libs + PTF & Pytest frameworks
 # TODO: consider some other tagging scheme
@@ -294,9 +294,6 @@ docker-bmv2-bldr:
 	    --build-arg available_processors=$(shell nproc) \
 	    dockerfiles
 
-docker-publish-bmv2-bldr:
-	echo "TO DO when we have a proper repository"
-
 docker-pull-bmv2-bldr:
 	docker pull $(DOCKER_BMV2_BLDR_IMG)
 ###############################
@@ -310,9 +307,6 @@ docker-saithrift-bldr:
 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
 	    --build-arg available_processors=$(shell nproc) \
 		dockerfiles
-
-docker-publish-saithrift-bldr:
-	echo "TO DO when we have a proper repository"
 
 docker-pull-saithrift-bldr:
 	docker pull $(DOCKER_SAITHRIFT_BLDR_IMG)
@@ -332,9 +326,6 @@ docker-saithrift-client-bldr:
 
 docker-pull-saithrift-client-bldr:
 	docker pull $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG)
-
-docker-publish-saithrift-client-bldr:
-	echo "TO DO when we have a proper repository"
 
 ###############################
 		
@@ -409,8 +400,6 @@ docker-dash-p4c:
 docker-pull-dash-p4c:
 	docker pull $(DOCKER_P4C_BMV2_IMG)
 
-docker-publish-dash-p4c:
-	echo "TO DO when we have a proper repository"
 ###############################
 
 docker-dash-grpc:
@@ -426,9 +415,6 @@ docker-dash-grpc:
 
 docker-pull-dash-grpc:
 	docker pull $(DOCKER_GRPC_IMG)
-
-docker-publish-dash-grpc:
-	echo "TO DO when we have a proper repository"
 
 ###############################
 # BMV2-PKTGEN NETWORKING TARGETS
