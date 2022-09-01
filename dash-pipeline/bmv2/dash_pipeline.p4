@@ -43,7 +43,7 @@ control dash_ingress(inout headers_t hdr,
 
         actions = {
             accept;
-            deny;
+            @defaultonly deny;
         }
 
         const default_action = deny;
@@ -175,7 +175,7 @@ control dash_ingress(inout headers_t hdr,
 
         actions = {
             permit;
-            deny;
+            @defaultonly deny;
         }
 
         const default_action = deny;
