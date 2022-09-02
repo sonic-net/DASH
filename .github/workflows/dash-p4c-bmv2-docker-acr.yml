@@ -35,4 +35,4 @@ jobs:
         username: ${{ secrets.DASH_ACR_USERNAME }}
         password: ${{ secrets.DASH_ACR_PASSWORD }}    
     - name: Publish dash-p4c-bmv2 docker image to ACR
-      run: docker push sonicdash.azurecr.io/dash-p4c-bmv2:220819
+      run: make docker-publish-dash-p4c
