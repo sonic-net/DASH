@@ -35,4 +35,4 @@ jobs:
         username: ${{ secrets.DASH_ACR_USERNAME }}
         password: ${{ secrets.DASH_ACR_PASSWORD }}    
     - name: Publish dash-bmv2-bldr image
-      run: docker push sonicdash.azurecr.io/dash-bmv2-bldr:220630
+      run: make docker-publish-bmv2-bldr

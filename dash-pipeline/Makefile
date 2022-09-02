@@ -296,6 +296,12 @@ docker-bmv2-bldr:
 
 docker-pull-bmv2-bldr:
 	docker pull $(DOCKER_BMV2_BLDR_IMG)
+
+
+docker-publish-bmv2-bldr:
+	@echo "Publish $(DOCKER_BMV2_BLDR_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_BMV2_BLDR_IMG)
+
 ###############################
 docker-saithrift-bldr:
 	docker build \
