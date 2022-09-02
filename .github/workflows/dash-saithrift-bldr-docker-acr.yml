@@ -41,4 +41,4 @@ jobs:
     - name: Build dash-saithrift-bldr image 
       run:  DOCKER_FLAGS=$docker_fg_flags make docker-saithrift-bldr
     - name: Publish dash-saithrift-bldr docker image
-      run: docker push sonicdash.azurecr.io/dash-saithrift-bldr:220719
+      run: make docker-publish-saithrift-bldr
