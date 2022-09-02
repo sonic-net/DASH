@@ -5,3 +5,4 @@
 [submodule "test/SAI-Challenger.OCP"]
 	path = test/SAI-Challenger.OCP
 	url = https://github.com/plvisiondevs/SAI-Challenger.OCP
+	branch = dash-testing

@@ -502,6 +502,13 @@ undeploy-ixiac:
 
 SAI_CHALLENGER_PATH = $(PWD)/../test/SAI-Challenger.OCP
 
+DOCKER_SAI_CHALLENGER_CLIENT = sc-client-thrift
+
+CONTAINER_SAI_CHALLENGER_CLIENT_NAME = $(DOCKER_SAI_CHALLENGER_CLIENT)-run
+
+# SAI-C SERVER STAFF IS TEMPORARY AND WILL BE REMOVED LATER
+CONTAINER_SAI_CHALLENGER_SERVER_NAME = sc-server-trident2-saivs-run
+
 # SAI-C SERVER STAFF IS TEMPORARY AND WILL BE REMOVED LATER
 sai-challenger-build:sai-challenger-client-build sai-challenger-server-build
 
@@ -512,23 +519,33 @@ sai-challenger-start:sai-challenger-client-start sai-challenger-server-start sai
 sai-challenger-stop:sai-challenger-client-stop sai-challenger-server-stop
 
 sai-challenger-test:
-	cd $(SAI_CHALLENGER_PATH) && ./exec.sh -i client pytest --setup=../setups/sai_dpu_client_server.json -v -k "test_dpu_basic"
+	docker exec $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) pytest --setup=../setups/sai_dpu_client_server.json -v -k "test_dpu_basic"
+
+sai-challenger-test-ixiac:deploy-ixiac
+	docker exec $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) pytest --setup=../setups/snappi_bmv2_client_server.json -v -k "test_dpu_basic"
 
 sai-challenger-client-build:
 	cd $(SAI_CHALLENGER_PATH) && ./build.sh -i client
+	docker build \
+		-f dockerfiles/Dockerfile.saic-saithrift-client \
+		-t $(DOCKER_SAI_CHALLENGER_CLIENT) \
+		.
 
 sai-challenger-client-start:
-#	cd $(SAI_CHALLENGER_PATH) && ./run.sh -i client -r
-	docker run --name sc-client-run \
-        -v $(SAI_CHALLENGER_PATH):/sai-challenger \
-        --cap-add=NET_ADMIN \
-        --device /dev/net/tun:/dev/net/tun \
-        --rm \
-        -v $(SAI_CHALLENGER_PATH)/../test-cases/challenger_basic_test/:/sai-challenger/tests \
-        -d sc-client
+	docker run --name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) \
+		-v $(SAI_CHALLENGER_PATH):/sai-challenger \
+		--cap-add=NET_ADMIN \
+		--device /dev/net/tun:/dev/net/tun \
+		--rm \
+		-v $(SAI_CHALLENGER_PATH)/../test-cases/test_vector_example/:/sai-challenger/tests \
+		-d \
+		--network=host \
+		--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) \
+		$(DOCKER_SAI_CHALLENGER_CLIENT)
 
 sai-challenger-client-stop:
-	cd $(SAI_CHALLENGER_PATH) && ./run.sh -i client -c stop
+#	cd $(SAI_CHALLENGER_PATH) && ./run.sh -i client -c stop
+	docker container stop $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
 
 # SAI-C SERVER STAFF IS TEMPORARY AND WILL BE REMOVED LATER
 sai-challenger-server-build:
@@ -544,7 +561,7 @@ sai-challenger-server-stop:
 
 # SAI-C SERVER STAFF IS TEMPORARY AND WILL BE REMOVED LATER
 sai-challenger-create-veth:
-	sudo $(SAI_CHALLENGER_PATH)/veth-create-host.sh sc-server-trident2-saivs-run sc-client-run
+	sudo $(SAI_CHALLENGER_PATH)/veth-create-host.sh $(CONTAINER_SAI_CHALLENGER_SERVER_NAME) $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
 
 ###############################
 # ENVIRONMENT SETUP TARGETS
