@@ -1,0 +1,73 @@
+[
+  {
+    "name": "pa_validation_entry",
+    "op": "remove",
+    "type": "SAI_OBJECT_TYPE_PA_VALIDATION_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "eni_id": "$eni_id",
+      "sip": "20.20.20.20",
+      "vni": "1000"
+    }
+  },
+  {
+    "name": "inbound_routing_entry",
+    "op": "remove",
+    "type": "SAI_OBJECT_TYPE_INBOUND_ROUTING_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vni": "1000"
+    }
+  },
+  {
+    "name": "eni_ether_address_map_entry",
+    "op": "remove",
+    "type": "SAI_OBJECT_TYPE_ENI_ETHER_ADDRESS_MAP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "address": "00:AA:AA:AA:AA:00"
+    }
+  },
+  {
+    "name": "eni_id",
+    "op": "remove",
+    "type": "SAI_OBJECT_TYPE_ENI",
+    "key": "$eni_id"
+  },
+  {
+    "name": "vnet_1",
+    "op": "remove",
+    "type": "SAI_OBJECT_TYPE_VNET",
+    "key": "$vnet_1"
+  },
+  {
+    "name": "acl_out_1",
+    "op": "remove",
+    "type": "SAI_OBJECT_TYPE_DASH_ACL_GROUP",
+    "key": "$acl_out_1"
+  },
+  {
+    "name": "acl_in_1",
+    "op": "remove",
+    "type": "SAI_OBJECT_TYPE_DASH_ACL_GROUP",
+    "key": "$acl_in_1"
+  },
+  {
+    "name": "direction_lookup_entry",
+    "op": "remove",
+    "type": "SAI_OBJECT_TYPE_DIRECTION_LOOKUP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vni": "2000"
+    }
+  },
+  {
+    "name": "vip_entry",
+    "op": "remove",
+    "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vip": "192.168.0.1"
+    }
+  }
+]

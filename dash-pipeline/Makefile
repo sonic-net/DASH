@@ -116,7 +116,7 @@ DOCKER_RUN_SAITHRIFT_BLDR =\
 
 sai: fix-perms sai-clean sai-headers sai-meta libsai
 
-sai-headers: fix-perms p4 | SAI/SAI 
+sai-headers: fix-perms p4 | SAI/SAI
 	@echo "Generate SAI library headers and implementation..."
 	mkdir -p SAI/lib
 	$(DOCKER_RUN) \
@@ -127,7 +127,7 @@ sai-headers: fix-perms p4 | SAI/SAI
 	# Fixup perms from generate_dash_api using sudo to call python,so subsequent scripts can access
 	sudo chmod -R a+rw $(PWD)/SAI/SAI
 
-sai-meta: fix-perms 
+sai-meta: fix-perms
 	@echo "Generate SAI metadata..."
 	# hack - remove scripts which cause Git ownership failures in CI pipelines
 	# We don't need them, they're to check that SAI headers didn't experience enum changes etc.
@@ -143,7 +143,7 @@ sai-meta: fix-perms
 	sudo chmod -R o+rw SAI/
 
 # TODO - add SAI header dependencies
-libsai: fix-perms 
+libsai: fix-perms
 	@echo "build libsai.so..."
 	$(DOCKER_RUN) \
 		$(DOCKER_FLAGS) \
@@ -152,7 +152,7 @@ libsai: fix-perms
 		$(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
-libsai-clean: fix-perms 
+libsai-clean: fix-perms
 	-rm -rf SAI/lib/libsai.so
 
 .PHONY:sai-clean
@@ -336,7 +336,7 @@ docker-publish-saithrift-client-bldr:
 	echo "TO DO when we have a proper repository"
 
 ###############################
-		
+
 # Client image, rebuild any time SAI interface changes
 # TODO - add sai header (inc/ and experimental) dependencies
 docker-saithrift-client:
@@ -537,7 +537,9 @@ sai-challenger-client-start:
 		--cap-add=NET_ADMIN \
 		--device /dev/net/tun:/dev/net/tun \
 		--rm \
+		--network=host \
 		-v $(SAI_CHALLENGER_PATH)/../test-cases/test_vector_example/:/sai-challenger/tests \
+		-v $(PWD)/../:/dash \
 		-d \
 		--network=host \
 		--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) \
