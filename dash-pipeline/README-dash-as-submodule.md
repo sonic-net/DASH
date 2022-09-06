@@ -1,4 +1,4 @@
-**C'Mon, I want a [Quick-Start](#quick-start)!**
+**I want a [Quick-Start](#quick-start)!**
 
 **Table of Contents**
 
@@ -45,7 +45,7 @@ A minimal sample project created using this recipe can be found here: https://gi
     make [-f Makefile.3rdpty] dash-pipeline-regression
     ```
     This will run `make clean && make all` from the dash project. You don't *have* to do this since many of the artifacts are irrelevant for third-party adaptations.
-8. *OPTIONAL:* You can also `cd <DASHDIR>/dash-pipeline` and run any of the steps outlined in the DASH bmv2 [workflows](README-dash-workflows.md), such as the following. This has the benefit of verifying the function of SW traffic generators etc. in your environment. You can use this to confirm funtional tests against the reference implementation.
+8. *OPTIONAL:* You can also `cd <DASHDIR>/dash-pipeline` and run any of the steps outlined in the DASH bmv2 [workflows](README-dash-workflows.md), such as the following. This has the benefit of verifying the function of SW traffic generators etc. in your environment. You can use this to confirm functional tests against the reference implementation.
     ```
     make run-switch              # console 1
     make run-saithrift-server    # console 2
@@ -103,7 +103,7 @@ The figure below shows the traditional bmv2-based workflow and is described in [
 ![dash-p4-bmv2-thrift-workflow](https://github.com/Azure/DASH/raw/main/dash-pipeline/images/dash-p4-bmv2-thrift-workflow.svg
 )
 ## Custom DASH Workflow
-The reference project contains a `Makefile.3rdpty` to serve as a starting point. It has make targets which are just wrappers to invoke predefined Makefile targets in the DASH repository (e.g. using `make -C...`). It also has placeholder make targets where third-party cusomization is required. You can modify it arbitrarily. The intent was to reuse as much as possible from DASH.
+The reference project contains a `Makefile.3rdpty` to serve as a starting point. It has make targets which are just wrappers to invoke predefined Makefile targets in the DASH repository (e.g. using `make -C...`). It also has placeholder make targets where third-party customization is required. You can modify it arbitrarily. The intent was to reuse as much as possible from DASH.
 
 The drawing below shows where third-party customization will be needed, using "exciting" colors.
 
@@ -143,4 +143,4 @@ If test ports other than `veth0/1` and `veth2/3` are used, some modifications of
 ## Custom Tests
 You can use the tests under DASH by calling the appropriate DASH make targets from the parent project. You can also have private tests in your own project repository which you invoke from your Makefiles. We recommend if you write new tests which are generally applicable that you consider upstreaming to the Community repository.
 ## Third-Party CI Pipeline Automation (Git Actions)
-You should be able to adapt the CI automation files from the dash project as located under [.github/workflows](../.github/workflows). You will need to modify them to suit your project by changing the trigger conditions (e.g. filesystem paths) and steps.
+You should be able to adapt the CI automation files from the dash project as located under [.github/workflows](../.github/workflows). You will need to modify them to suit your project by changing the trigger conditions (e.g. file system paths) and steps.
