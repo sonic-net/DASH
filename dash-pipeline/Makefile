@@ -541,7 +541,6 @@ sai-challenger-client-start:
 		-v $(SAI_CHALLENGER_PATH)/../test-cases/test_vector_example/:/sai-challenger/tests \
 		-v $(PWD)/../:/dash \
 		-d \
-		--network=host \
 		--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) \
 		$(DOCKER_SAI_CHALLENGER_CLIENT)
 
