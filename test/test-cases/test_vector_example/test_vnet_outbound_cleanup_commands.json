@@ -1,0 +1,42 @@
+[
+  {
+    "name": "ocpe",
+    "op": "remove"
+  },
+  {
+    "name": "ore",
+    "op": "remove"
+  },
+#  {
+#    "name": "out_acl_rule_id",
+#    "op": "remove"
+#  },
+  {
+    "name": "eam",
+    "op": "remove"
+  },
+  {
+    "name": "eni",
+    "op": "remove"
+  },
+  {
+    "name": "vnet",
+    "op": "remove"
+  },
+  {
+    "name": "out_acl_group_id",
+    "op": "remove"
+  },
+  {
+    "name": "in_acl_group_id",
+    "op": "remove"
+  },
+  {
+    "name": "dle",
+    "op": "remove"
+  },
+  {
+    "name": "vpe",
+    "op": "remove"
+  }
+]
