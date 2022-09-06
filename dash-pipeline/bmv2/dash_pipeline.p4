@@ -43,7 +43,7 @@ control dash_ingress(inout headers_t hdr,
 
         actions = {
             accept;
-            deny;
+            @defaultonly deny;
         }
 
         const default_action = deny;
@@ -140,7 +140,9 @@ control dash_ingress(inout headers_t hdr,
 
         actions = {
             set_eni_attrs;
+            @defaultonly deny;
         }
+        const default_action = deny;
     }
 
     direct_counter(CounterType.packets_and_bytes) eni_counter;
@@ -158,17 +160,17 @@ control dash_ingress(inout headers_t hdr,
     }
 
     action permit() {
-        meta.dropped = false;
     }
 
-    action vxlan_decap_pa_validate() {}
+    action vxlan_decap_pa_validate(bit<16> src_vnet_id) {
+        meta.vnet_id = src_vnet_id;
+    }
 
     @name("pa_validation|dash_vnet")
     table pa_validation {
         key = {
-            meta.eni_id: exact @name("meta.eni_id:eni_id");
+            meta.vnet_id: exact @name("meta.vnet_id:vnet_id");
             hdr.ipv4.src_addr : exact @name("hdr.ipv4.src_addr:sip");
-            hdr.vxlan.vni : exact @name("hdr.vxlan.vni:VNI");
         }
 
         actions = {
@@ -182,7 +184,9 @@ control dash_ingress(inout headers_t hdr,
     @name("inbound_routing|dash_vnet")
     table inbound_routing {
         key = {
+            meta.eni_id: exact @name("meta.eni_id:eni_id");
             hdr.vxlan.vni : exact @name("hdr.vxlan.vni:VNI");
+            hdr.ipv4.src_addr : ternary @name("hdr.ipv4.src_addr:sip");
         }
         actions = {
             vxlan_decap(hdr);
@@ -205,7 +209,9 @@ control dash_ingress(inout headers_t hdr,
 
         actions = {
             set_eni;
+            @defaultonly deny;
         }
+        const default_action = deny;
     }
 
     action set_acl_group_attrs(bit<32> ip_addr_family) {
@@ -239,12 +245,6 @@ control dash_ingress(inout headers_t hdr,
             /* Use the same VIP that was in packet's destination if it's
                present in the VIP table */
             meta.encap_data.underlay_sip = hdr.ipv4.dst_addr;
-        }
-        // TODO [cs] shouldn't this also be called at end of ingress?
-        // Shouldn't it call mark_to_drop(standard_metadata);
-
-        if (meta.dropped) {
-            return;
         }
 
         /* If Outer VNI matches with a reserved VNI, then the direction is Outbound - */
@@ -285,7 +285,6 @@ control dash_ingress(inout headers_t hdr,
         eni.apply();
         if (meta.eni_data.admin_state == 0) {
             deny();
-            return;
         }
         acl_group.apply();
 
@@ -299,9 +298,6 @@ control dash_ingress(inout headers_t hdr,
 
         if (meta.dropped) {
             drop_action();
-        } else {
-            /* Send packet to port 1 by default if we reached the end of pipeline */
-            standard_metadata.egress_spec = 1;
         }
     }
 }

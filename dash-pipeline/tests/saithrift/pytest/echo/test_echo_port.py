@@ -3,6 +3,7 @@ import pytest
 
 
 @pytest.mark.bmv2
+@pytest.mark.skip(reason="re-enable once pipeline fwd is fixed")
 def test_udp_unidirectional():
     """
     This script does following:

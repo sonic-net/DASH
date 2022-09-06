@@ -1,9 +1,9 @@
 # This Dockerfile builds an image used to compile P4 programs for the bmv2 backend only
 # It's based on public p4lang/p4c docker but strips out uneeded backends.
 # See https://docs.docker.com/develop/develop-images/multistage-build/
-# FROM p4lang/p4c:stable as p4lang-p4c
-# :stable on 2022-07-03:
-FROM p4lang/p4c@sha256:e4e8aa3f38e84cc51acb7df60257309a6ddfd77a2d0a05e0db445750f209be93 as p4lang-p4c
+# FROM p4lang/p4c:latest as p4lang-p4c
+# :latest on 2022-08-19:
+FROM p4lang/p4c@sha256:39a2eb7374f94b899ef75f5ad9fb0bad170ef7697adf2d54ac10286488ad4490 as p4lang-p4c
 LABEL maintainer="SONIC-DASH Community"
 LABEL description="DASH p4c-bmv2 compiler, minimal"
 

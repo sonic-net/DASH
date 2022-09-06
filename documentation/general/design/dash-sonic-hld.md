@@ -132,7 +132,7 @@ In the outbound flow, the appliance shall assume it is the first appliance to ap
 
 After the ACL stage, it does LPM routing based on the inner dst-ip and applies the respective action (encap, subsequent CA-PA mapping). Finally, update the connection tracking table for both inbound and outbound.
 
-The figure below shows how the VNI to be encapsulated in the outgoing packet is derived based on the ENI, outboud routing and outbound CA-PA mapping table lookup in the Dash outbound packet processing pipeline.
+The figure below shows how the VNI to be encapsulated in the outgoing packet is derived based on the ENI, outbound routing and outbound CA-PA mapping table lookup in the Dash outbound packet processing pipeline.
 
   ![dash-outbound-vni](./images/dash-hld-outbound-vni.svg)
 	

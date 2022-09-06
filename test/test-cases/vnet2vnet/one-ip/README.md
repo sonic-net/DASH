@@ -1,7 +1,7 @@
 The purpose of this test case is to obtain the best performance numbers the hardware can achieve
 Combined with the worst case scenario cases (TBD) we will be able to determine the range of performance within the hardware can operate.
 
-![vxlan_1vpc_1ip](../../images/test_vxlan_1vpc_1ip.svg)
+![vxlan_1vpc_1ip](../../../images/test_vxlan_1vpc_1ip.svg)
 
 1. Configure VXLAN with 1 VPC and 1 VNI.
 2. Configure BGP to achieve connectivity between the loopback interfaces.

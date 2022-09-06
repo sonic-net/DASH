@@ -25,6 +25,7 @@ NOACTION = 'NoAction'
 STAGES_TAG = 'stages'
 PARAM_ACTIONS = 'paramActions'
 OBJECT_NAME_TAG = 'objectName'
+SCOPE_TAG = 'scope'
 
 def get_sai_key_type(key_size, key_header, key_field):
     if key_size == 1:
@@ -109,7 +110,7 @@ def get_sai_key_data(key):
     else:
         raise ValueError(f'No valid match tag found')
 
-    if sai_key_data['match_type'] == 'exact' or  sai_key_data['match_type'] == 'optional':
+    if sai_key_data['match_type'] == 'exact' or  sai_key_data['match_type'] == 'optional' or sai_key_data['match_type'] == 'ternary':
         sai_key_data['sai_key_type'], sai_key_data['sai_key_field'] = get_sai_key_type(key_size, key_header, key_field)
     elif sai_key_data['match_type'] == 'lpm':
         sai_key_data['sai_lpm_type'], sai_key_data['sai_lpm_field'] = get_sai_lpm_type(key_size, key_header, key_field)
@@ -165,6 +166,15 @@ def fill_action_params(table_params, param_names, action):
                 if tbl_param[NAME_TAG] == param[NAME_TAG]:
                     tbl_param[PARAM_ACTIONS].append(action[NAME_TAG])
 
+    for param in action[PARAMS_TAG]:
+        # mark presence of v4/v6 selector in the parent param
+        if 'v4_or_v6' in param[NAME_TAG]:
+            v4_or_v6_param_name = param[NAME_TAG]
+            for param2 in  action[PARAMS_TAG]:
+                if "is_" + param2[NAME_TAG] + "_v4_or_v6" == param[NAME_TAG]:
+                    param2["v4_or_v6_id"] = param['id']
+                    break
+
 def generate_sai_apis(program, ignore_tables):
     sai_apis = []
     table_names = []
@@ -213,10 +223,19 @@ def generate_sai_apis(program, ignore_tables):
                 continue
             sai_table_data['keys'].append(get_sai_key_data(key))
 
+        for key in table[MATCH_FIELDS_TAG]:
+            # mark presence of v4/v6 selector in the parent key field
+            if 'v4_or_v6' in key[NAME_TAG]:
+                _, v4_or_v6_key_name = key[NAME_TAG].split(':')
+                for key2 in sai_table_data['keys']:
+                    if "is_" + key2['sai_key_name'] + "_v4_or_v6" == v4_or_v6_key_name:
+                        key2["v4_or_v6_id"] = key['id']
+                        break
+
         param_names = []
         for action in table[ACTION_REFS_TAG]:
             action_id = action["id"]
-            if all_actions[action_id][NAME_TAG] != NOACTION:
+            if all_actions[action_id][NAME_TAG] != NOACTION and not (SCOPE_TAG in action and action[SCOPE_TAG] == 'DEFAULT_ONLY'):
                 fill_action_params(sai_table_data[ACTION_PARAMS_TAG], param_names, all_actions[action_id])
                 sai_table_data[ACTIONS_TAG].append(all_actions[action_id])
 
