@@ -15,7 +15,7 @@
   - [Third-Party CI Pipeline Automation (Git Actions)](#third-party-ci-pipeline-automation-git-actions)
 # Importing the DASH project into another project
 
-The [Azure/DASH project](https://github.com/Azure/DASH) can be used as a resouce within other projects, such as third-party, commercial or open-source DASH implementations. For example, a commercial DPU vendor can incorporate the DASH project into a private Git repository and utilize many of the components, providing consistency with the community implementation and definition, reusing test-cases, and avoiding duplication of efforts.
+The [Azure/DASH project](https://github.com/Azure/DASH) can be used as a resource within other projects, such as third-party, commercial or open-source DASH implementations. For example, a commercial DPU vendor can incorporate the DASH project into a private Git repository and utilize many of the components, providing consistency with the community implementation and definition, reusing test-cases, and avoiding duplication of efforts.
 
 # Quick-Start
 This will show you how to import the [Azure/DASH project](https://github.com/Azure/DASH) project into your own Git project.
