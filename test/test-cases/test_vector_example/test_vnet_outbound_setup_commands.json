@@ -134,12 +134,14 @@
     "type": "SAI_OBJECT_TYPE_OUTBOUND_CA_TO_PA_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
-      "eni_id": "$eni",
-      "dip": "10.10.2.10",
-      "vni": "1000"
+      "dst_vnet_id": "$vnet",
+      "dip": "10.1.2.50"
     },
     "attributes": [
-      "SAI_PA_VALIDATION_ENTRY_ATTR_ACTION", "SAI_PA_VALIDATION_ENTRY_ACTION_PERMIT"
+      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP", "172.16.1.20",
+      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC", "00:DD:DD:DD:DD:DD",
+      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_USE_DST_VNET_VNI", "True"
     ]
   }
 ]
+
