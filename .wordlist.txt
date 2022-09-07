@@ -64,6 +64,7 @@ Cfg
 cfg
 checkboxes
 chris
+chrispsommers
 ci
 CLA
 cla
@@ -99,6 +100,7 @@ CurrentUdpFlow
 customizable
 Cx
 cyberithub
+dashsubmodule
 DASHOrch
 dashorch
 DashOrch
@@ -109,6 +111,8 @@ Datagram
 datagrams
 datapath
 Datapath
+dataplane
+Dataplane
 dataplanes
 datastore
 DBs
@@ -136,6 +140,7 @@ Dockerfiles
 dockerfiles
 dockerhub
 Dockerhub
+dockerized
 DoS
 DotNet
 downcasting
@@ -236,6 +241,7 @@ InbfromLB
 INIT
 Init
 initializer
+integrations
 integrators
 interoperable
 io
@@ -281,8 +287,10 @@ loopback
 LPM
 lts
 Macsec
+makefile
 Makefile
 Makefiles
+makefiles
 MatchedHalfOpenFlow
 MatchedOtherFlow
 MatchedTcpFlow
@@ -392,6 +400,7 @@ Pyunit
 qcow
 QoS
 Radv
+rdpty
 reachability
 README
 READMEs
@@ -548,6 +557,7 @@ unpair
 Unpair
 untracked
 upcasting
+upstreaming
 vcpus
 veth
 VFP
