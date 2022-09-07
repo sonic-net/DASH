@@ -59,16 +59,6 @@
       "SAI_ENI_ATTR_VM_UNDERLAY_DIP", "172.16.1.20",
       "SAI_ENI_ATTR_VM_VNI", "9",
       "SAI_ENI_ATTR_VNET_ID", "$vnet",
-#      "SAI_ENI_ATTR_INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID", "$in_acl_group_id",
-#      "SAI_ENI_ATTR_INBOUND_V4_STAGE2_DASH_ACL_GROUP_ID", "$in_acl_group_id",
-#      "SAI_ENI_ATTR_INBOUND_V4_STAGE3_DASH_ACL_GROUP_ID", "$in_acl_group_id",
-#      "SAI_ENI_ATTR_INBOUND_V4_STAGE4_DASH_ACL_GROUP_ID", "$in_acl_group_id",
-#      "SAI_ENI_ATTR_INBOUND_V4_STAGE5_DASH_ACL_GROUP_ID", "$in_acl_group_id",
-#      "SAI_ENI_ATTR_INBOUND_V6_STAGE1_DASH_ACL_GROUP_ID", "$out_acl_group_id",
-#      "SAI_ENI_ATTR_INBOUND_V6_STAGE2_DASH_ACL_GROUP_ID", "$out_acl_group_id",
-#      "SAI_ENI_ATTR_INBOUND_V6_STAGE3_DASH_ACL_GROUP_ID", "$out_acl_group_id",
-#      "SAI_ENI_ATTR_INBOUND_V6_STAGE4_DASH_ACL_GROUP_ID", "$out_acl_group_id",
-#      "SAI_ENI_ATTR_INBOUND_V6_STAGE5_DASH_ACL_GROUP_ID", "$out_acl_group_id",
       "SAI_ENI_ATTR_INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID", "0",
       "SAI_ENI_ATTR_INBOUND_V4_STAGE2_DASH_ACL_GROUP_ID", "0",
       "SAI_ENI_ATTR_INBOUND_V4_STAGE3_DASH_ACL_GROUP_ID", "0",
@@ -103,17 +93,17 @@
       "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID", "$eni"
     ]
   },
-# {
-#    "name": "out_acl_rule_id",
-#    "op": "create",
-#    "type": "SAI_OBJECT_TYPE_DASH_ACL_RULE",
-#    "attributes": [
-#      "SAI_DASH_ACL_RULE_ATTR_DASH_ACL_GROUP_ID", "$out_acl_group_id",
-#      "SAI_DASH_ACL_RULE_ATTR_DIP", "10.1.2.50",
-#      "SAI_DASH_ACL_RULE_ATTR_PRIORITY", "10",
-#      "SAI_DASH_ACL_RULE_ATTR_ACTION", "SAI_DASH_ACL_RULE_ACTION_PERMIT"
-#    ]
-#  },
+{
+   "name": "out_acl_rule_id",
+   "op": "create",
+   "type": "SAI_OBJECT_TYPE_DASH_ACL_RULE",
+   "attributes": [
+     "SAI_DASH_ACL_RULE_ATTR_DASH_ACL_GROUP_ID", "$out_acl_group_id",
+     "SAI_DASH_ACL_RULE_ATTR_DIP", "10.1.2.50",
+     "SAI_DASH_ACL_RULE_ATTR_PRIORITY", "10",
+     "SAI_DASH_ACL_RULE_ATTR_ACTION", "SAI_DASH_ACL_RULE_ACTION_PERMIT"
+   ]
+ },
   {
     "name": "ore",
     "op": "create",
