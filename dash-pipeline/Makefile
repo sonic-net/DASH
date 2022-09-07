@@ -506,33 +506,17 @@ DOCKER_SAI_CHALLENGER_CLIENT = sc-client-thrift
 
 CONTAINER_SAI_CHALLENGER_CLIENT_NAME = $(DOCKER_SAI_CHALLENGER_CLIENT)-run
 
-# SAI-C SERVER STAFF IS TEMPORARY AND WILL BE REMOVED LATER
-CONTAINER_SAI_CHALLENGER_SERVER_NAME = sc-server-trident2-saivs-run
+CONTAINER_SAI_CHALLENGER_CLIENT_EXEC = docker exec $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
 
-# SAI-C SERVER STAFF IS TEMPORARY AND WILL BE REMOVED LATER
-sai-challenger-build:sai-challenger-client-build sai-challenger-server-build
-
-# SAI-C SERVER STAFF IS TEMPORARY AND WILL BE REMOVED LATER
-sai-challenger-start:sai-challenger-client-start sai-challenger-server-start sai-challenger-create-veth
-
-# SAI-C SERVER STAFF IS TEMPORARY AND WILL BE REMOVED LATER
-sai-challenger-stop:sai-challenger-client-stop sai-challenger-server-stop
-
-sai-challenger-test:
-	docker exec $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) pytest --setup=../setups/sai_dpu_client_server.json -v -k "test_dpu_basic"
-
-sai-challenger-test-ixiac:deploy-ixiac
-	docker exec $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) pytest --setup=../setups/snappi_bmv2_client_server.json -v -k "test_dpu_basic"
-
-sai-challenger-client-build:
+build-saic-client:
 	cd $(SAI_CHALLENGER_PATH) && ./build.sh -i client
 	docker build \
 		-f dockerfiles/Dockerfile.saic-saithrift-client \
 		-t $(DOCKER_SAI_CHALLENGER_CLIENT) \
 		.
 
-sai-challenger-client-start:
-	docker run --name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) \
+run-saic-client:
+	docker run \
 		-v $(SAI_CHALLENGER_PATH):/sai-challenger \
 		--cap-add=NET_ADMIN \
 		--device /dev/net/tun:/dev/net/tun \
@@ -544,25 +528,11 @@ sai-challenger-client-start:
 		--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) \
 		$(DOCKER_SAI_CHALLENGER_CLIENT)
 
-sai-challenger-client-stop:
-#	cd $(SAI_CHALLENGER_PATH) && ./run.sh -i client -c stop
+kill-saic-client: undeploy-ixiac
 	docker container stop $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
 
-# SAI-C SERVER STAFF IS TEMPORARY AND WILL BE REMOVED LATER
-sai-challenger-server-build:
-	cd $(SAI_CHALLENGER_PATH) && ./build.sh -i server -a trident2 -t saivs
-
-# SAI-C SERVER STAFF IS TEMPORARY AND WILL BE REMOVED LATER
-sai-challenger-server-start:
-	cd $(SAI_CHALLENGER_PATH) && ./run.sh -i server -a trident2 -t saivs -r
-
-# SAI-C SERVER STAFF IS TEMPORARY AND WILL BE REMOVED LATER
-sai-challenger-server-stop:
-	cd $(SAI_CHALLENGER_PATH) && ./run.sh -i server -a trident2 -t saivs -c stop
-
-# SAI-C SERVER STAFF IS TEMPORARY AND WILL BE REMOVED LATER
-sai-challenger-create-veth:
-	sudo $(SAI_CHALLENGER_PATH)/veth-create-host.sh $(CONTAINER_SAI_CHALLENGER_SERVER_NAME) $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
+run-saic-test-thrift: deploy-ixiac
+	$(CONTAINER_SAI_CHALLENGER_CLIENT_EXEC) pytest -sv --setup=sai_dpu_client_server.json test_sai_vnet_inbound.py
 
 ###############################
 # ENVIRONMENT SETUP TARGETS
