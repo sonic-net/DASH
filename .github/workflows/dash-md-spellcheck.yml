@@ -1,0 +1,19 @@
+name: Spellcheck
+on:
+  pull_request:
+    paths:
+    - '**/*.md'
+    - '.wordlist.txt'
+  push:
+    paths:
+    - '**/*.md'
+    - '.wordlist.txt'
+  workflow_dispatch:
+
+jobs:
+  spelling:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Spellcheck
+      uses: rojopolis/spellcheck-github-actions@0.26.0

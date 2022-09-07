@@ -35,7 +35,7 @@ control outbound(inout headers_t hdr,
     table routing {
         key = {
             meta.eni_id : exact @name("meta.eni_id:eni_id");
-            meta.is_dst_ip_v6 : exact @name("meta.is_dst_ip_v6:v4_or_v6");
+            meta.is_dst_ip_v6 : exact @name("meta.is_dst_ip_v6:is_destination_v4_or_v6");
             meta.dst_ip_addr : lpm @name("meta.dst_ip_addr:destination");
         }
 
@@ -66,13 +66,15 @@ control outbound(inout headers_t hdr,
         key = {
             /* Flow for express route */
             meta.dst_vnet_id: exact @name("meta.dst_vnet_id:dst_vnet_id");
-            meta.is_lkup_dst_ip_v6 : exact @name("meta.is_lkup_dst_ip_v6:v4_or_v6");
+            meta.is_lkup_dst_ip_v6 : exact @name("meta.is_lkup_dst_ip_v6:is_dip_v4_or_v6");
             meta.lkup_dst_ip_addr : exact @name("meta.lkup_dst_ip_addr:dip");
         }
 
         actions = {
             set_tunnel_mapping;
+            @defaultonly drop;
         }
+        const default_action = drop;
 
         counters = ca_to_pa_counter;
     }
@@ -118,8 +120,8 @@ control outbound(inout headers_t hdr,
         meta.is_lkup_dst_ip_v6 = meta.is_dst_ip_v6;
 
         switch (routing.apply().action_run) {
-            route_vnet:
-            route_vnet_direct: {
+            route_vnet_direct:
+            route_vnet: {
                 ca_to_pa.apply();
                 vnet.apply();
 

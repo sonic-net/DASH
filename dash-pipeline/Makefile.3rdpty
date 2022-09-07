@@ -1,0 +1,66 @@
+all: dash-p4 sai thirdparty-saithrift-server docker-saithrift-client
+
+clean: dash-p4-clean dash-sai-clean
+
+# Submodule location relative to this Makefile
+DASHDIR ?=DASH
+
+DASH: dash-submodule
+
+.PHONY: dash-submodule
+dash-submodule:
+	@echo "Initializing DASH submodule..."
+	git submodule update --init DASH
+
+# Build entire dash-pipeline codebase as sanity check
+dash-pipeline-regression: DASH
+	$(MAKE) -C $(DASHDIR)/dash-pipeline clean
+	$(MAKE) -C $(DASHDIR)/dash-pipeline all
+
+dash-pipeline-clean: DASH
+	$(MAKE) -C $(DASHDIR)/dash-pipeline clean
+
+.PHONY: sai
+sai: dash-sai-clean dash-sai-headers dash-sai-meta thirdparty-libsai
+
+
+# Build behavioral model code, needed for SAI headers
+dash-p4:
+	$(MAKE) -C $(DASHDIR)/dash-pipeline p4
+
+dash-p4-clean:
+	$(MAKE) -C $(DASHDIR)/dash-pipeline p4-clean
+
+dash-sai-clean:
+	$(MAKE) -C $(DASHDIR)/dash-pipeline sai-clean
+
+# Autogenerate SAI headers
+dash-sai-headers:
+	$(MAKE) -C $(DASHDIR)/dash-pipeline sai-headers
+
+# Autogenerate SAI meta, needed for saithrift client/server
+dash-sai-meta:
+	$(MAKE) -C $(DASHDIR)/dash-pipeline sai-meta
+
+# Implementation-dependent libsai library
+thirdparty-libsai:
+	@echo "Build third-pary libsai"
+	@echo "   Put libsai.so under $(DASHDIR)/dash-pipeline/SAI/lib"
+	@echo "   For use by saithrift-server build stage."
+
+thirdparty-saithrift-server:
+	@echo "Build third-party saithrift-server"
+	@echo "   Expects libsai.so under $(DASHDIR)/dash-pipeline/SAI/lib"
+	# For reference:
+	# $(MAKE) -C $(DASHDIR)/dash-pipeline saithrift-server
+
+docker-saithrift-client:
+	@echo "Build third-pary saithrift-client"
+	@echo "   Expects saithrift-server already built"
+	# Uncomment when saithrift server can be built
+	# $(MAKE) -C $(DASHDIR)/dash-pipeline docker-saithrift-client
+
+run-all-tests:
+	# Uncomment when saithrift client & server can be built
+	# Can add more custom tests in addition to DASH tests
+	# make -C $(DASHDIR)/dash-pipeline run-all-tests

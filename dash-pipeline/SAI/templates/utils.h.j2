@@ -65,7 +65,7 @@ template<typename T>
 void u32SetVal(const sai_attribute_value_t &value, T &t, int bits = 32){
     assert(bits <= 32);
     uint32_t val = value.u32;
-    val = htons(val);
+    val = htonl(val);
     val = val >> (32 - bits);
     int bytes = (bits + 7) / 8;
     t->set_value(&val, bytes);
@@ -75,7 +75,7 @@ template<typename T>
 void u32SetVal(const sai_uint32_t &value, T &t, int bits = 32){
     assert(bits <= 32);
     uint32_t val = value;
-    val = htons(val);
+    val = htonl(val);
     val = val >> (32 - bits);
     int bytes = (bits + 7) / 8;
     t->set_value(&val, bytes);
@@ -118,7 +118,6 @@ void ipaddrSetVal(const sai_ip_address_t &value, T &t, int bits = -1){
     switch(value.addr_family) {
         case SAI_IP_ADDR_FAMILY_IPV4: {
             uint32_t val = value.addr.ip4;
-            val = htonl(val);
             t->set_value(&val, 4);
         }
         break;
@@ -154,9 +153,9 @@ void ipPrefixSetVal(const sai_ip_prefix_t &value, T &t, int bits = -1){
     switch(value.addr_family) {
         case SAI_IP_ADDR_FAMILY_IPV4: {
             uint32_t val = value.addr.ip4;
-            val = htonl(val);
             t->set_value(&val, 4);
-            t->set_prefix_len(leadingNonZeroBits(value.addr.ip4));
+            val = htonl(val);
+            t->set_prefix_len(leadingNonZeroBits(val)+96);
         }
         break;
         case SAI_IP_ADDR_FAMILY_IPV6: {
