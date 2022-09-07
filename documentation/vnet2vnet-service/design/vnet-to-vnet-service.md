@@ -307,7 +307,7 @@ packet destined to our appliance VIP from 101.1.2.0/24.
 3. The resulting VNET is Vnet1.
 4. The inbound routing rule says to perform PA validation as well.
 5. We have a PA validation entry for our ENI and SRC PA 101.1.2.3, so the packet is allowed.
-6. We decap the packet and encap it to ENI's PA 25.1.1.1.
+6. We decap the packet and encap it to ENI PA 25.1.1.1.
 
 ## Routing a packet back from 101.1.2.9.
 
