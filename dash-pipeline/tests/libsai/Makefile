@@ -1,4 +1,7 @@
 # Call make in each subdirectory
+.ONESHELL:
+SHELL = /bin/bash
+.SHELLFLAGS += -e
 SUBDIRS := $(wildcard */.)
 
 
