@@ -5,11 +5,14 @@ Accton
 ACK
 Ack
 ack
+acl
 ACL
 ACLs
 ACR
 adaptor
 adaptors
+addr
+ADDR
 agnostically
 amd
 apache
@@ -328,6 +331,7 @@ Novus
 NPUS
 NSG
 NSGs
+num
 NumberOfFlowResimulated
 NVA
 NVidia
@@ -383,6 +387,7 @@ Prem
 preprocessor
 preprogrammed
 prereq
+Pritsak
 PrivateAddress
 programmability
 protobuf
@@ -399,6 +404,7 @@ pytests
 Pyunit
 qcow
 QoS
+qos
 Radv
 rdpty
 reachability
@@ -561,6 +567,7 @@ upstreaming
 vcpus
 veth
 VFP
+vip
 virsh
 virt
 virtio
@@ -593,6 +600,7 @@ vPORT
 VPorts
 VTEP
 VTEPs
+VxLAN
 VXLAN
 vxlan
 warmboots
