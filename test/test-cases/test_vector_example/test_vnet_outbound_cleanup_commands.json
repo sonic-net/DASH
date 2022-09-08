@@ -7,10 +7,6 @@
     "name": "ore",
     "op": "remove"
   },
-#  {
-#    "name": "out_acl_rule_id",
-#    "op": "remove"
-#  },
   {
     "name": "eam",
     "op": "remove"

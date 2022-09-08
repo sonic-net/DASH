@@ -93,17 +93,6 @@
       "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID", "$eni"
     ]
   },
-{
-   "name": "out_acl_rule_id",
-   "op": "create",
-   "type": "SAI_OBJECT_TYPE_DASH_ACL_RULE",
-   "attributes": [
-     "SAI_DASH_ACL_RULE_ATTR_DASH_ACL_GROUP_ID", "$out_acl_group_id",
-     "SAI_DASH_ACL_RULE_ATTR_DIP", "10.1.2.50",
-     "SAI_DASH_ACL_RULE_ATTR_PRIORITY", "10",
-     "SAI_DASH_ACL_RULE_ATTR_ACTION", "SAI_DASH_ACL_RULE_ACTION_PERMIT"
-   ]
- },
   {
     "name": "ore",
     "op": "create",

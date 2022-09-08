@@ -145,9 +145,8 @@
     "type": "SAI_OBJECT_TYPE_PA_VALIDATION_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
-      "eni_id": "$eni_id",
-      "sip": "10.10.2.10",
-      "vni": "1000"
+      "vnet_id": "$vnet_1",
+      "sip": "10.10.2.10"
     },
     "attributes": [
       "SAI_PA_VALIDATION_ENTRY_ATTR_ACTION",
