@@ -6,6 +6,6 @@
 	path = test/SAI-Challenger.OCP
 	url = https://github.com/plvisiondevs/SAI-Challenger.OCP
 	branch = dash-testing
-[submodule "dash-pipeline/test/third-party/cgyang"]
-	path = dash-pipeline/test/third-party/cgyang
+[submodule "dash-pipeline/cgyang"]
+	path = dash-pipeline/cgyang
 	url = https://github.com/mgheorghe/cgyang

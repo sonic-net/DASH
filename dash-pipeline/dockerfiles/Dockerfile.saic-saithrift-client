@@ -35,6 +35,6 @@ RUN python3 -m pip install -r /tests/requirements.txt && \
         python3 setup.py install && \
     ln -s ${SAI_CHALLENGER_PATH} /usr/local/lib/python3.7/dist-packages/saichallenger && \
     ln -s ${DASH_PATH}/test/test-cases/test_vector_example ${SAI_CHALLENGER_PATH}/test_vector_example && \
-    ln -s ${DASH_PATH}/dash-pipeline/test/third-party/cgyang/saigen /usr/local/lib/python3.7/dist-packages/saigen
+    ln -s ${DASH_PATH}/dash-pipeline/cgyang/saigen /usr/local/lib/python3.7/dist-packages/saigen
 
 CMD ["/usr/bin/supervisord"]
