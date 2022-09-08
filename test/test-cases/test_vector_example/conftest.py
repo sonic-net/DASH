@@ -76,4 +76,5 @@ def confgen():
                 result.extend(c.items())
             return result
 
-    return SaiConfig({}, saigen.simple_params.simple_params)
+    return SaiConfig()
+    # return SaiConfig({}, saigen.simple_params.simple_params)

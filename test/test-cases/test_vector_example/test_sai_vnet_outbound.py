@@ -129,15 +129,11 @@ class TestSaiVnetOutbound:
 
         confgen.mergeParams(TEST_VNET_OUTBOUND_CONFIG)
         confgen.generate()
-
         for item in confgen.items():
-            # dpu.process_commands(item)
-            # dpu.process_commands(confgen.items())
             pprint(item)
 
         with (current_file_dir / 'test_vnet_outbound_setup_commands.json').open(mode='r') as config_file:
             setup_commands = json.load(config_file)
-
         result = [*dpu.process_commands(setup_commands)]
         print("\n======= SAI commands RETURN values =======")
         pprint(result)
@@ -180,9 +176,11 @@ class TestSaiVnetOutbound:
         self.pkt_exp = vxlan_exp_pkt
 
         print("\nSending outbound packet...\n\n", vxlan_pkt.__repr__())
-        send_packet(self, 0, vxlan_pkt)
+        send_packet(dataplane, 0, vxlan_pkt)
+
         print("\nVerifying packet...\n", self.pkt_exp.__repr__())
-        verify_packet(self, self.pkt_exp, 0)
+        verify_packet(dataplane, self.pkt_exp, 0)
+
         print ("test_sai_vnet_outbound OK")
 
     def test_remove_vnet_config(self, confgen, dpu, dataplane):
@@ -193,7 +191,6 @@ class TestSaiVnetOutbound:
         for item in confgen.items():
             item['OP'] = 'remove'
             pprint(item)
-            #dpu.process_commands(item)
 
         with (current_file_dir / 'test_vnet_outbound_cleanup_commands.json').open(mode='r') as config_file:
             cleanup_commands = json.load(config_file)
