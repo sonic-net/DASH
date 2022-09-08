@@ -3,9 +3,11 @@ on:
   pull_request:
     paths:
     - '**/*.md'
+    - '.wordlist.txt'
   push:
     paths:
     - '**/*.md'
+    - '.wordlist.txt'
   workflow_dispatch:
 
 jobs:
