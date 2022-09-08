@@ -25,6 +25,7 @@ NOACTION = 'NoAction'
 STAGES_TAG = 'stages'
 PARAM_ACTIONS = 'paramActions'
 OBJECT_NAME_TAG = 'objectName'
+SCOPE_TAG = 'scope'
 
 def get_sai_key_type(key_size, key_header, key_field):
     if key_size == 1:
@@ -234,7 +235,7 @@ def generate_sai_apis(program, ignore_tables):
         param_names = []
         for action in table[ACTION_REFS_TAG]:
             action_id = action["id"]
-            if all_actions[action_id][NAME_TAG] != NOACTION:
+            if all_actions[action_id][NAME_TAG] != NOACTION and not (SCOPE_TAG in action and action[SCOPE_TAG] == 'DEFAULT_ONLY'):
                 fill_action_params(sai_table_data[ACTION_PARAMS_TAG], param_names, all_actions[action_id])
                 sai_table_data[ACTIONS_TAG].append(all_actions[action_id])
 
@@ -270,7 +271,7 @@ def write_sai_impl_files(sai_api):
     with open('./lib/sai' + sai_api['app_name'].replace('_', '') + '.cpp', 'w') as o:
         o.write(sai_impl_str)
 
-def write_sai_makefile(sai_api_name_list):
+def write_sai_makefile(sai_api_name_list, sai_api_full_name_list):
     env = Environment(loader=FileSystemLoader('.'))
     makefile_tm = env.get_template('/templates/Makefile.j2')
     makefile_str = makefile_tm.render(api_names = sai_api_name_list)
@@ -280,7 +281,7 @@ def write_sai_makefile(sai_api_name_list):
 
     env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
     sai_impl_tm = env.get_template('/templates/utils.cpp.j2')
-    sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'])
+    sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'], api_names = sai_api_full_name_list)
 
     with open('./lib/utils.cpp', 'w') as o:
         o.write(sai_impl_str)
@@ -392,6 +393,7 @@ with open(args.filepath) as json_program_file:
 sai_apis, all_table_names = generate_sai_apis(json_program, args.ignore_tables.split(','))
 
 sai_api_name_list = []
+sai_api_full_name_list = []
 for sai_api in sai_apis:
     # Update object name reference for action params
     for table in sai_api[TABLES_TAG]:
@@ -414,8 +416,9 @@ for sai_api in sai_apis:
     write_sai_files(sai_api)
     write_sai_impl_files(sai_api)
     sai_api_name_list.append(sai_api['app_name'].replace('_', ''))
+    sai_api_full_name_list.append(sai_api['app_name'])
 
-write_sai_makefile(sai_api_name_list)
+write_sai_makefile(sai_api_name_list, sai_api_full_name_list)
 
 if args.print_sai_lib:
     print(json.dumps(sai_api, indent=2))
