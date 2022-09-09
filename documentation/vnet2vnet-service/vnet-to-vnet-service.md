@@ -305,8 +305,8 @@ setting i.e., without DASH optimization.
 ## References
 
 - [Disaggregated API for SONiC Hosts (DASH) high level
-  design](../../general/design/dash-high-level-design.md)
-- [SONiC-DASH HLD](../../general/design/dash-sonic-hld.md)
+  design](../general/dash-high-level-design.md)
+- [SONiC-DASH HLD](../general/dash-sonic-hld.md)
 - [P4 Getting
   Started](https://github.com/p4lang/education/blob/master/GettingStarted.md)
 - [P4-16 Language Specification](https://p4.org/p4-spec/docs/P4-16-v1.2.2.html)
