@@ -73,11 +73,11 @@ DASH performance enhancements (so called *bump in the wire*) happens.
 When talking about packet flow, we need to think about a process that involves
 several steps, as explained below. 
 
-> [!NOTE] From [SONiC-DASH HLD](../../general/design/dash-sonic-hld.md)
+> [!NOTE] From [SONiC-DASH HLD](../general/dash-sonic-hld.md)
 
 ### Outbound packet processing pipeline
 
-![dash-outbound](../../general/design/images/dash-hld-outbound-packet-processing-pipeline.svg)
+![dash-outbound](../general/images/dash-hld-outbound-packet-processing-pipeline.svg)
 
 <figcaption><i>Figure 2 - Outbound packet processing pipeline</i></figcaption><br/><br/>
 
@@ -107,7 +107,7 @@ In the outbound flow, the criteria listed below are applied.
 
 ### Inbound packet processing pipeline
 
-![dash-outbound](../../general/design/images/dash-hld-inbound-packet-processing-pipeline.svg)
+![dash-outbound](../general/images/dash-hld-inbound-packet-processing-pipeline.svg)
 
 <figcaption><i>Figure 3 - Inbound packet processing pipeline</i></figcaption><br/><br/>
 
