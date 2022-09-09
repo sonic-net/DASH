@@ -8,7 +8,7 @@ This folder contains DASH data plane design and requirements documents.
 | Document                                               | Description                                |
 | ------------------------------------------------------ | ------------------------------------------ |
 |[dash-update-timing.md](dash-update-timing.md)          |Routing, ACL, Mapping Updates (WIP)         |
-|[dash-config-schema-json](dash-config-schema-json.md)   |Configuration schema example                |
+|[dash-config-schema-json.md](dash-config-schema-json.md)   |Configuration schema example                |
 
 
 
