@@ -3,7 +3,7 @@ SHELL = /bin/bash
 # "All" type targets for convenience
 all:p4 sai saithrift-server docker-saithrift-client test
 
-run-all-tests:run-libsai-test deploy-ixiac run-saithrift-client-tests
+run-all-tests:run-libsai-test run-saithrift-client-tests
 run-saithrift-client-tests: run-saithrift-ptftests run-saithrift-pytests
 run-saithrift-client-dev-tests: run-saithrift-dev-ptftests run-saithrift-dev-pytests
 
@@ -357,14 +357,14 @@ DOCKER_RUN_SAITHRIFT_CLIENT=\
 	$(DOCKER_FLAGS) \
 
 # Run "production" Pytests bundled inside docker
-run-saithrift-pytests:deploy-ixiac
+run-saithrift-pytests:deploy-ixiac disable-ipv6
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
 	-w /tests/saithrift/pytest \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
 	./run-saithrift-pytests.sh
 
 # Run "dev" tests mounted from host
-run-saithrift-dev-pytests:deploy-ixiac
+run-saithrift-dev-pytests:deploy-ixiac disable-ipv6
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
 	-v $(PWD)/tests/:/tests-dev/ \
 	-w /tests-dev/saithrift/pytest \
@@ -373,7 +373,7 @@ run-saithrift-dev-pytests:deploy-ixiac
 
 # Run "production" PTF tests bundled inside docker
 # Note - if add ixia-c usage to PTF tests, add dependency deploy-ixiac
-run-saithrift-ptftests:
+run-saithrift-ptftests: disable-ipv6
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
 	-w /tests/saithrift/ptf \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
@@ -381,7 +381,7 @@ run-saithrift-ptftests:
 
 # Run "dev" PTF tests mounted from host
 # Note - if add ixia-c usage to PTF tests, add dependency deploy-ixiac
-run-saithrift-dev-ptftests:
+run-saithrift-dev-ptftests: disable-ipv6
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
 	-v $(PWD)/tests/:/tests-dev/ \
 	-w /tests-dev/saithrift/ptf \
@@ -449,7 +449,7 @@ docker-publish-dash-grpc:
 # BMV2-PKTGEN NETWORKING TARGETS
 ###############################
 
-network:veth0 veth2
+network:veth0 veth2 disable-ipv6
 
 veth0: /sys/class/net/veth0
 /sys/class/net/veth0:
@@ -459,17 +459,6 @@ veth0: /sys/class/net/veth0
 	sudo ip link set dev veth1 up
 	sudo ip link set veth0 mtu 9500
 	sudo ip link set veth1 mtu 9500
-	sudo sysctl net.ipv6.conf.veth0.disable_ipv6=1
-	#https://superuser.com/questions/33196/how-to-disable-autoconfiguration-on-ipv6-in-linux
-	sudo sysctl net.ipv6.conf.veth0.autoconf=0
-	sudo sysctl net.ipv6.conf.veth0.accept_ra=0
-	sudo sysctl net.ipv6.conf.veth0.accept_ra_pinfo=0
-	sudo sysctl net.ipv6.conf.veth0.router_solicitations=0
-	sudo sysctl net.ipv6.conf.veth1.disable_ipv6=1
-	sudo sysctl net.ipv6.conf.veth1.autoconf=0
-	sudo sysctl net.ipv6.conf.veth1.accept_ra=0
-	sudo sysctl net.ipv6.conf.veth1.accept_ra_pinfo=0
-	sudo sysctl net.ipv6.conf.veth1.router_solicitations=0
 
 veth2: /sys/class/net/veth2
 /sys/class/net/veth2:
@@ -478,16 +467,9 @@ veth2: /sys/class/net/veth2
 	sudo ip link set dev veth3 up
 	sudo ip link set veth2 mtu 9500
 	sudo ip link set veth3 mtu 9500
-	sudo sysctl net.ipv6.conf.veth2.disable_ipv6=1
-	sudo sysctl net.ipv6.conf.veth2.autoconf=0
-	sudo sysctl net.ipv6.conf.veth2.accept_ra=0
-	sudo sysctl net.ipv6.conf.veth2.accept_ra_pinfo=0
-	sudo sysctl net.ipv6.conf.veth2.router_solicitations=0
-	sudo sysctl net.ipv6.conf.veth3.disable_ipv6=1
-	sudo sysctl net.ipv6.conf.veth3.autoconf=0
-	sudo sysctl net.ipv6.conf.veth3.accept_ra=0
-	sudo sysctl net.ipv6.conf.veth3.accept_ra_pinfo=0
-	sudo sysctl net.ipv6.conf.veth3.router_solicitations=0
+
+disable-ipv6:
+	./disable_veth_ipv6.sh
 
 # Delete veth's, test existence to avoid needless use of sudo
 network-clean:
@@ -508,6 +490,7 @@ install-python-modules:
 
 deploy-ixiac:
 	cd ../test/third-party/traffic_gen && ./deploy_ixiac.sh
+	./disable_veth_ipv6.sh
 
 undeploy-ixiac:
 	cd ../test/third-party/traffic_gen && ./undeploy_ixiac.sh
