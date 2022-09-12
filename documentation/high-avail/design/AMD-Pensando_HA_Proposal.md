@@ -54,7 +54,7 @@ Each DPU sends heartbeat messages at a configured interval to its peer. When a p
 
 ## State Synchronization
 
-State synchronization between the 2 DPUs uses the CNIP IP. All state synchronization happens at the granularity of the DP-VIP and happens from the primary of the DP-VIP towards the secondary. State synchronization happens in 2 stages
+State synchronization between the 2 DPUs uses the CNIP IP. All state synchronization happens at the granularity of the DP-VIP and happens from the primary of the DP-VIP towards the secondary. State synchronization happens in 2 parallel stages
 
 1. Bulk Sync
 1. Data path sync
