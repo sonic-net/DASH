@@ -31,7 +31,7 @@ control outbound(inout headers_t hdr,
 
     direct_counter(CounterType.packets_and_bytes) routing_counter;
 
-    @name("outbound_routing|dash_vnet")
+    @name("outbound_routing|dash_outbound_routing")
     table routing {
         key = {
             meta.eni_id : exact @name("meta.eni_id:eni_id");
@@ -61,7 +61,7 @@ control outbound(inout headers_t hdr,
 
     direct_counter(CounterType.packets_and_bytes) ca_to_pa_counter;
 
-    @name("outbound_ca_to_pa|dash_vnet")
+    @name("outbound_ca_to_pa|dash_outbound_ca_to_pa")
     table ca_to_pa {
         key = {
             /* Flow for express route */

@@ -36,6 +36,8 @@
 | 0.5 | 06/13/2022  |     Chris Sommers     | Schema Relationships                |
 | 0.6 | 08/05/2022  |  Mukesh M Velayudhan  | Outbound VNI derivation in pipeline |
 | 0.7 | 08/09/2022  |     Prince Sunny      | Add Inbound Routing rules           |
+| 0.6 | 04/20/2022  |     Marian Pritsak    | APP_DB to SAI mapping               |
+
 
 # About this Manual
 This document provides more detailed design of DASH APIs, DASH orchestration agent, Config and APP DB Schemas and other SONiC buildimage changes required to bring up SONiC image on an appliance card. General DASH HLD can be found at [dash_hld](./dash-high-level-design.md).
@@ -371,6 +373,85 @@ mac_address              = MAC address as string     ; Inner dst mac
 metering_bucket          = bucket_id                 ; metering and counter
 use_dst_vni              = bool                      ; if true, use the destination VNET VNI for encap. If false or not specified, use source VNET's VNI
 ```
+
+### 3.2.9 DASH orchagent (Overlay)
+
+|     APP_DB Table      |      Key      |       Field      |             SAI Attributes/*objects*              |                     Comment                     |
+|-----------------------|---------------|------------------|---------------------------------------------------|-------------------------------------------------|
+| DASH_APPLIANCE        |               |                  |                                                   |                                                 |
+|                       | appliance_id  |                  |                                                   |                                                 |
+|                       |               | sip              | sai_vip_entry_t.vip                               |                                                 |
+|                       |               | vm_vni           | sai_direction_lookup_entry_t.VNI                  |                                                 |
+| DASH_VNET             |               |                  | *SAI_OBJECT_TYPE_VNET*                            |                                                 |
+|                       | vnet_name     |                  |                                                   |                                                 |
+|                       |               | vxlan_tunnel     |                                                   | VxLAN tunnel won't be used                      |
+|                       |               | vni              | SAI_VNET_ATTR_VNI                                 |                                                 |
+|                       |               | guid             |                                                   | Not relevant                                    |
+|                       |               | address_spaces   |                                                   |                                                 |
+|                       |               | peer_list        |                                                   |                                                 |
+| DASH_QOS              |               |                  |                                                   |                                                 |
+|                       | qos_name      |                  |                                                   |                                                 |
+|                       |               | qos_id           |                                                   |                                                 |
+|                       |               | bw               | SAI_ENI_ATTR_PPS                                  |                                                 |
+|                       |               | cps              | SAI_ENI_ATTR_CPS                                  |                                                 |
+|                       |               | flows            | SAI_ENI_ATTR_FLOWS                                |                                                 |
+| DASH_ENI              |               |                  | *SAI_OBJECT_TYPE_ENI*                             |                                                 |
+|                       | eni           |                  |                                                   |                                                 |
+|                       |               | eni_id*          | SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID       |                                                 |
+|                       |               | mac_address*     | sai_eni_ether_address_map_entry_t.address         |                                                 |
+|                       |               | eni_id**         | sai_outbound_eni_to_vni_entry_t.ENI               |                                                 |
+|                       |               | qos              |                                                   |                                                 |
+|                       |               | vnet**           | SAI_ENI_ATTR_VNET_ID                              | VNET object ID                                  |
+| DASH_ACL_V4_IN        |               |                  |                                                   | Same for V6                                     |
+|                       | eni           |                  |                                                   |                                                 |
+|                       |               | stage            | SAI_ENI_ATTR_INBOUND_V4_stage_DASH_ACL_GROUP_ID   | STAGE1..STAGE5                                  |
+|                       |               | acl_group_id     | SAI_ENI_ATTR_INBOUND_V4_stage_DASH_ACL_GROUP_ID   |                                                 |
+| DASH_ACL_GROUP        |               |                  | *SAI_OBJECT_TYPE_DASH_ACL_GROUP*                  |                                                 |
+|                       | group_id      |                  |                                                   |                                                 |
+|                       |               | ip_version       | SAI_DASH_ACL_GROUP_ATTR_IP_ADDR_FAMILY            |                                                 |
+| DASH_ACL_RULE         |               |                  | *SAI_OBJECT_TYPE_DASH_ACL_RULE*                   |                                                 |
+|                       | group_id      |                  | SAI_DASH_ACL_RULE_ATTR_GROUP_ID                   |                                                 |
+|                       | rule_num      |                  |                                                   |                                                 |
+|                       |               | priority         | SAI_DASH_ACL_RULE_ATTR_PRIORITY                   |                                                 |
+|                       |               | action           | SAI_DASH_ACL_RULE_ATTR_ACTION                     |                                                 |
+|                       |               | terminating      | SAI_DASH_ACL_RULE_ATTR_ACTION                     | AND_CONTINUE if not terminating                 |
+|                       |               | protocol         | SAI_DASH_ACL_RULE_ATTR_PROTOCOL                   |                                                 |
+|                       |               | src_addr         | SAI_DASH_ACL_RULE_ATTR_SIP                        |                                                 |
+|                       |               | dst_addr         | SAI_DASH_ACL_RULE_ATTR_DIP                        |                                                 |
+|                       |               | dst_port         | SAI_DASH_ACL_RULE_ATTR_DST_PORT                   |                                                 |
+|                       |               | src_port         | SAI_DASH_ACL_RULE_ATTR_SRC_PORT                   |                                                 |
+| DASH_ROUTE_TABLE      |               |                  |                                                   |                                                 |
+|                       | eni           |                  | sai_outbound_routing_entry_t.ENI                  |                                                 |
+|                       | prefix        |                  | sai_outbound_routing_entry_t.destination          |                                                 |
+|                       |               | action_type      |                                                   | Need action type for future cases               |
+|                       |               | vnet             | SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DEST_VNET_VNI     | VNI value taken from DASH_VNET table            |
+|                       |               | appliance        |                                                   | Not supported yet                               |
+|                       |               | overlay_ip       | SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_IP        |                                                 |
+|                       |               | underlay_ip      |                                                   | Not supported yet                               |
+|                       |               | overlay_sip      |                                                   | Not supported yet                               |
+|                       |               | underlay_dip     |                                                   | Not supported yet                               |
+|                       |               | customer_addr    |                                                   | Not supported yet                               |
+|                       |               | metering_bucket  | SAI_OUTBOUND_ROUTING_ENTRY_ATTR_COUNTER_ID        |                                                 |
+| DASH_MAPPING_TABLE    |               |                  |                                                   |                                                 |
+|                       | vnet          |                  | sai_outbound_ca_to_pa_entry_t.dest_vni            | VNET's VNI                                      |
+|                       | ip_address    |                  | sai_outbound_ca_to_pa_entry_t.dip                 |                                                 |
+|                       |               | routing_type     |                                                   |                                                 |
+|                       |               | underlay_ip      | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP     |                                                 |
+|                       |               | mac_address      | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC     |                                                 |
+|                       |               | metering_bucket  | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_COUNTER_ID       |                                                 |
+|                       | vnet*         |                  | sai_pa_validation_entry_t.vnet_id                 | VNET's VNI                                      |
+|                       |               | underlay_ip*     | sai_pa_validation_entry_t.sip                     | SAI_PA_VALIDATION_ENTRY_ATTR_ACTION is permit   |
+| DASH_ROUTE_RULE_TABLE |               |                  |                                                   |                                                 |
+|                       | eni           |                  | sai_inbound_routing_entry_t.eni_id                |                                                 |
+|                       | vni           |                  | sai_inbound_routing_entry_t.vni                   |                                                 |
+|                       | prefix        |                  | sai_inbound_routing_entry_t.prefix                |                                                 |
+|                       |               | action_type      |                                                   |                                                 |
+|                       |               | priority         | sai_inbound_routing_entry_t.priority              |                                                 |
+|                       |               | protocol         |                                                   |                                                 |
+|                       |               | vnet             | SAI_INBOUND_ROUTING_ENTRY_ATTR_SRC_VNET_ID        |                                                 |
+|                       |               | pa_validation    | SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION             | use PA_VALIDATE if true                         |
+|                       |               | metering_bucket  |                                                   |                                                 |
+
 
 ## 3.3 Module Interaction
 

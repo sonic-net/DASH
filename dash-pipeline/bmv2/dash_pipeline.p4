@@ -35,7 +35,7 @@ control dash_ingress(inout headers_t hdr,
     action accept() {
     }
 
-    @name("vip|dash")
+    @name("vip|dash_vip")
     table vip {
         key = {
             hdr.ipv4.dst_addr : exact @name("hdr.ipv4.dst_addr:VIP");
@@ -43,7 +43,7 @@ control dash_ingress(inout headers_t hdr,
 
         actions = {
             accept;
-            deny;
+            @defaultonly deny;
         }
 
         const default_action = deny;
@@ -53,7 +53,7 @@ control dash_ingress(inout headers_t hdr,
         meta.direction = direction_t.OUTBOUND;
     }
 
-    @name("direction_lookup|dash")
+    @name("direction_lookup|dash_direction_lookup")
     table direction_lookup {
         key = {
             hdr.vxlan.vni : exact @name("hdr.vxlan.vni:VNI");
@@ -132,7 +132,7 @@ control dash_ingress(inout headers_t hdr,
         }
     }
 
-    @name("eni|dash")
+    @name("eni|dash_eni")
     table eni {
         key = {
             meta.eni_id : exact @name("meta.eni_id:eni_id");
@@ -166,7 +166,7 @@ control dash_ingress(inout headers_t hdr,
         meta.vnet_id = src_vnet_id;
     }
 
-    @name("pa_validation|dash_vnet")
+    @name("pa_validation|dash_pa_validation")
     table pa_validation {
         key = {
             meta.vnet_id: exact @name("meta.vnet_id:vnet_id");
@@ -175,13 +175,13 @@ control dash_ingress(inout headers_t hdr,
 
         actions = {
             permit;
-            deny;
+            @defaultonly deny;
         }
 
         const default_action = deny;
     }
 
-    @name("inbound_routing|dash_vnet")
+    @name("inbound_routing|dash_inbound_routing")
     table inbound_routing {
         key = {
             meta.eni_id: exact @name("meta.eni_id:eni_id");
@@ -201,7 +201,7 @@ control dash_ingress(inout headers_t hdr,
         meta.eni_id = eni_id;
     }
 
-    @name("eni_ether_address_map|dash")
+    @name("eni_ether_address_map|dash_eni")
     table eni_ether_address_map {
         key = {
             meta.eni_addr : exact @name("meta.eni_addr:address");

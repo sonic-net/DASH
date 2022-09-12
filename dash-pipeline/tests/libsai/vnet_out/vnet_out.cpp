@@ -49,8 +49,6 @@ extern sai_status_t sai_create_dash_acl_group(
 extern sai_status_t sai_remove_dash_acl_group(
         _In_ sai_object_id_t eni_id);
 
-extern sai_dash_api_t sai_dash_api_impl;
-
 int main(int argc, char **argv)
 {
     sai_object_id_t switch_id = SAI_NULL_OBJECT_ID;
