@@ -40,8 +40,9 @@ jobs:
     name: Build and Test DASH Pipeline
     runs-on: ubuntu-20.04
     env:
-      docker_fg_flags: -u root --privileged
-      docker_bg_flags: -d -u root --privileged
+      docker_fg_flags: --privileged
+      docker_fg_root_flags: --privileged -u root
+      docker_bg_flags: -d --privileged
     defaults:
       run:
         working-directory: ./dash-pipeline
@@ -76,9 +77,9 @@ jobs:
     - name: Run saithrift server
       run:  DOCKER_FLAGS=$docker_bg_flags make run-saithrift-server
     - name: Run PTF Tests
-      run:  DOCKER_FLAGS=$docker_fg_flags make run-saithrift-ptftests
+      run:  DOCKER_FLAGS=$docker_fg_root_flags make run-saithrift-ptftests
     - name: Deploy ixia-c Traffic Generator
       run:  DOCKER_FLAGS=$docker_fg_flags make deploy-ixiac
     - name: Run Pytests
-      run:  DOCKER_FLAGS=$docker_fg_flags make run-saithrift-pytests
+      run:  DOCKER_FLAGS=$docker_fg_root_flags make run-saithrift-pytests
       
