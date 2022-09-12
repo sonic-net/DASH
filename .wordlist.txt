@@ -43,8 +43,10 @@ backend
 balancer
 Balancer
 balancers
+bg
 BGP
 bgp
+bidir
 bm
 BMV
 bmv
