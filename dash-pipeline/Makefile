@@ -26,8 +26,10 @@ DASH_ACR_REGISTRY ?=sonicdash.azurecr.io
 # Needed Libraries only
 DOCKER_GRPC_IMG ?=$(DASH_ACR_REGISTRY)/dash-grpc:1.43.2
 
-# Slimmed-down version bmv2 backend only 632MB - works:
-DOCKER_P4C_BMV2_IMG ?=$(DASH_ACR_REGISTRY)/dash-p4c-bmv2:220825
+
+# Slimmed-down version bmv2 backend only
+include dockerfiles/docker.dash-p4c-bmv2.env
+# DOCKER_P4C_BMV2_IMG ?=$(DASH_ACR_REGISTRY)/dash-p4c-bmv2:220825
 
 # Builds sai-P4rt clients to run inside bmvs process
 DOCKER_BMV2_BLDR_IMG ?=$(DASH_ACR_REGISTRY)/dash-bmv2-bldr:220819
@@ -73,9 +75,15 @@ sai-submodule:
 P4_SRC=$(wildcard bmv2/*.p4)
 P4_MAIN=bmv2/dash_pipeline.p4
 P4_OUTDIR=bmv2/dash_pipeline.bmv2
+<<<<<<< HEAD
 
 P4_ARTIFACTS=$(P4_OUTDIR)/dash_pipeline.json $(P4_OUTDIR)/dash_pipeline_p4rt.txt
 
+=======
+
+P4_ARTIFACTS=$(P4_OUTDIR)/dash_pipeline.json $(P4_OUTDIR)/dash_pipeline_p4rt.txt
+
+>>>>>>> publish-dockers-to-acr
 p4: $(P4_OUTDIR)/dash_pipeline.json
 
 .PHONY:p4-clean
