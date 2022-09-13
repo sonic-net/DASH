@@ -26,8 +26,9 @@ DASH_ACR_REGISTRY ?=sonicdash.azurecr.io
 # Needed Libraries only
 DOCKER_GRPC_IMG ?=$(DASH_ACR_REGISTRY)/dash-grpc:1.43.2
 
-# Slimmed-down version bmv2 backend only 632MB - works:
-DOCKER_P4C_BMV2_IMG ?=$(DASH_ACR_REGISTRY)/dash-p4c-bmv2:220825
+# Slimmed-down version bmv2 backend only
+include dockerfiles/docker.dash-p4c-bmv2.env
+# DOCKER_P4C_BMV2_IMG ?=$(DASH_ACR_REGISTRY)/dash-p4c-bmv2:220825
 
 # Builds sai-P4rt clients to run inside bmvs process
 DOCKER_BMV2_BLDR_IMG ?=$(DASH_ACR_REGISTRY)/dash-bmv2-bldr:220819
@@ -402,17 +403,6 @@ run-saithrift-client-bash:
 	/bin/bash
 
 ###############################
-
-# docker-dash-p4c:
-# 	docker build \
-# 		-f dockerfiles/Dockerfile.p4c-bmv2 \
-# 	    -t $(DOCKER_P4C_BMV2_IMG) \
-# 	    --build-arg user=$(USER) \
-# 	    --build-arg uid=$(shell id -u) \
-# 	    --build-arg guid=$(shell id -g) \
-# 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
-# 	    --build-arg available_processors=$(shell nproc) \
-# 		dockerfiles
 
 docker-dash-p4c:
 	docker build \
