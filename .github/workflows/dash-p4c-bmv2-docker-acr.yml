@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/dash-p4c-bmv2-docker-acr.yml'
       - 'dash-pipeline/dockerfiles/Dockerfile.p4c-bmv2'
+      - 'dash-pipeline/dockerfiles/docker.dash-p4c-bmv2.env'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
@@ -13,6 +14,7 @@ on:
     paths:
       - '.github/workflows/dash-p4c-bmv2-docker-acr.yml'
       - 'dash-pipeline/dockerfiles/Dockerfile.p4c-bmv2'
+      - 'dash-pipeline/dockerfiles/docker.dash-p4c-bmv2.env'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   workflow_dispatch:
