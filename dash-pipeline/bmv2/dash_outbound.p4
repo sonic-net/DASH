@@ -35,7 +35,7 @@ control outbound(inout headers_t hdr,
     table routing {
         key = {
             meta.eni_id : exact @name("meta.eni_id:eni_id");
-            meta.is_dst_ip_v6 : exact @name("meta.is_dst_ip_v6:is_destination_v4_or_v6");
+            meta.is_overlay_ip_v6 : exact @name("meta.is_overlay_ip_v6:is_destination_v4_or_v6");
             meta.dst_ip_addr : lpm @name("meta.dst_ip_addr:destination");
         }
 
@@ -117,7 +117,7 @@ control outbound(inout headers_t hdr,
 #endif // PNA_CONNTRACK
 
         meta.lkup_dst_ip_addr = meta.dst_ip_addr;
-        meta.is_lkup_dst_ip_v6 = meta.is_dst_ip_v6;
+        meta.is_lkup_dst_ip_v6 = meta.is_overlay_ip_v6;
 
         switch (routing.apply().action_run) {
             route_vnet_direct:

@@ -117,7 +117,7 @@ control dash_ingress(inout headers_t hdr,
         meta.encap_data.vni          = vm_vni;
         meta.vnet_id                 = vnet_id;
 
-        if (meta.is_dst_ip_v6 == 1) {
+        if (meta.is_overlay_ip_v6 == 1) {
             if (meta.direction == direction_t.OUTBOUND) {
                 ACL_GROUPS_COPY_TO_META(outbound_v6);
             } else {
@@ -216,11 +216,11 @@ control dash_ingress(inout headers_t hdr,
 
     action set_acl_group_attrs(bit<32> ip_addr_family) {
         if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
-            if (meta.is_dst_ip_v6 == 1) {
+            if (meta.is_overlay_ip_v6 == 1) {
                 meta.dropped = true;
             }
         } else {
-            if (meta.is_dst_ip_v6 == 0) {
+            if (meta.is_overlay_ip_v6 == 0) {
                 meta.dropped = true;
             }
         }
@@ -266,12 +266,18 @@ control dash_ingress(inout headers_t hdr,
             }
         }
 
+        meta.is_overlay_ip_v6 = 0;
+        meta.ip_protocol = 0;
         meta.dst_ip_addr = 0;
-        meta.is_dst_ip_v6 = 0;
+        meta.src_ip_addr = 0;
         if (hdr.ipv6.isValid()) {
+            meta.ip_protocol = hdr.ipv6.next_header;
+            meta.src_ip_addr = hdr.ipv6.src_addr;
             meta.dst_ip_addr = hdr.ipv6.dst_addr;
-            meta.is_dst_ip_v6 = 1;
+            meta.is_overlay_ip_v6 = 1;
         } else if (hdr.ipv4.isValid()) {
+            meta.ip_protocol = hdr.ipv4.protocol;
+            meta.src_ip_addr = (bit<128>)hdr.ipv4.src_addr;
             meta.dst_ip_addr = (bit<128>)hdr.ipv4.dst_addr;
         }
 

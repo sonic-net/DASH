@@ -29,9 +29,10 @@ match_kind {
     table table_name { \
         key = { \
             meta. ## table_name ##_dash_acl_group_id : exact @name("meta.dash_acl_group_id:dash_acl_group_id"); \
-            hdr.ipv4.dst_addr : LIST_MATCH @name("hdr.ipv4.dst_addr:dip"); \
-            hdr.ipv4.src_addr : LIST_MATCH @name("hdr.ipv4.src_addr:sip"); \
-            hdr.ipv4.protocol : LIST_MATCH @name("hdr.ipv4.src_addr:protocol"); \
+            meta.is_overlay_ip_v6 : exact @name("meta.is_overlay_ip_v6:is_overlay_pkt_ip_v6"); \
+            meta.dst_ip_addr : LIST_MATCH @name("meta.dst_ip_addr:dip"); \
+            meta.src_ip_addr : LIST_MATCH @name("meta.src_ip_addr:sip"); \
+            meta.ip_protocol : LIST_MATCH @name("meta.ip_protocol:protocol"); \
             hdr.tcp.src_port : RANGE_LIST_MATCH @name("hdr.tcp.src_port:src_port"); \
             hdr.tcp.dst_port : RANGE_LIST_MATCH @name("hdr.tcp.dst_port:dst_port"); \
         } \
