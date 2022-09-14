@@ -1,12 +1,12 @@
 name: DASH-docker-grpc1.43.2-build-publish-acr
 
-
 on:
   push:
     branches: [ "**" ]
     paths:
       - '.github/workflows/dash-grpc1.43.2-docker-acr.yml'
       - 'dash-pipeline/dockerfiles/Dockerfile.grpc1.43.2'
+      - 'dash-pipeline/dockerfiles/DOCKER_GRPC_IMG.env'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
@@ -14,6 +14,7 @@ on:
     paths:
       - '.github/workflows/dash-grpc1.43.2-docker-acr.yml'
       - 'dash-pipeline/dockerfiles/Dockerfile.grpc1.43.2'
+      - 'dash-pipeline/dockerfiles/DOCKER_GRPC_IMG.env'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   workflow_dispatch:

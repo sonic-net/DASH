@@ -7,6 +7,7 @@ on:
       - '.github/workflows/dash-saithrift-bldr-docker-acr.yml'
       - 'dash-pipeline/Makefile'
       - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-bldr'
+      - 'dash-pipeline/dockerfiles/DOCKER_SAITHRIFT_BLDR_IMG.env'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
@@ -15,6 +16,7 @@ on:
       - '.github/workflows/dash-saithrift-bldr-docker-acr.yml'
       - 'dash-pipeline/Makefile'
       - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-bldr'
+      - 'dash-pipeline/dockerfiles/DOCKER_SAITHRIFT_BLDR_IMG.env'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   workflow_dispatch:

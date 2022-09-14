@@ -20,28 +20,28 @@ DASH_UID ?=4321
 DASH_GUID?=4321
 DASH_HOST?=dash
 
-# Default Docker images, override from env var
-DASH_ACR_REGISTRY ?=sonicdash.azurecr.io
 
-# Needed Libraries only
-DOCKER_GRPC_IMG ?=$(DASH_ACR_REGISTRY)/dash-grpc:1.43.2
-
+# Include file defines DOCKER_GRPC_IMG
+include DOCKER_GRPC_IMG.env
 
 # Slimmed-down version bmv2 backend only
+# include file defines DOCKER_P4C_BMV2_IMG
 include dockerfiles/docker.dash-p4c-bmv2.env
-# DOCKER_P4C_BMV2_IMG ?=$(DASH_ACR_REGISTRY)/dash-p4c-bmv2:220825
 
-# Builds sai-P4rt clients to run inside bmvs process
-DOCKER_BMV2_BLDR_IMG ?=$(DASH_ACR_REGISTRY)/dash-bmv2-bldr:220819
+# Builds sai-P4rt clients to run inside bmv2 process
+# include file defines DOCKER_BMV2_BLDR_IMG
+include dockerfiles/DOCKER_BMV2_BLDR_IMG.env
 
 # Runs bmv2 process - consider slimmer if don't need sai/p4rt clients inside
 DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 
 # Compiles sai headers, libsai, saithrift server & client/server libs
-DOCKER_SAITHRIFT_BLDR_IMG ?=$(DASH_ACR_REGISTRY)/dash-saithrift-bldr:220819
+# include file defines DOCKER_SAITHRIFT_BLDR_IMG
+include DOCKER_SAITHRIFT_BLDR_IMG.env
 
 # Base image with test frameworks, DASH client libs not installed
-DOCKER_SAITHRIFT_CLIENT_BLDR_IMG ?=$(DASH_ACR_REGISTRY)/dash-saithrift-client-bldr:220819
+# include file defines DOCKER_SAITHRIFT_CLIENT_BLDR_IMG
+include DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env
 
 # Client image built locally with saithrift client libs + PTF & Pytest frameworks
 # TODO: consider some other tagging scheme
