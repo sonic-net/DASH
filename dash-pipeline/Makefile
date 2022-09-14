@@ -26,7 +26,7 @@ include dockerfiles/DOCKER_GRPC_IMG.env
 
 # Slimmed-down version bmv2 backend only
 # include file defines DOCKER_P4C_BMV2_IMG
-include dockerfiles/docker.dash-p4c-bmv2.env
+include dockerfiles/DOCKER_P4C_BMV2_IMG.env
 
 # Builds sai-P4rt clients to run inside bmv2 process
 # include file defines DOCKER_BMV2_BLDR_IMG
