@@ -20,7 +20,6 @@ DASH_UID ?=4321
 DASH_GUID?=4321
 DASH_HOST?=dash
 
-
 # Include file defines DOCKER_GRPC_IMG
 include dockerfiles/DOCKER_GRPC_IMG.env
 
