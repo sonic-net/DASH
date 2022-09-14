@@ -22,7 +22,7 @@ DASH_HOST?=dash
 
 
 # Include file defines DOCKER_GRPC_IMG
-include DOCKER_GRPC_IMG.env
+include dockerfiles/DOCKER_GRPC_IMG.env
 
 # Slimmed-down version bmv2 backend only
 # include file defines DOCKER_P4C_BMV2_IMG
@@ -37,11 +37,11 @@ DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 
 # Compiles sai headers, libsai, saithrift server & client/server libs
 # include file defines DOCKER_SAITHRIFT_BLDR_IMG
-include DOCKER_SAITHRIFT_BLDR_IMG.env
+include dockerfiles/DOCKER_SAITHRIFT_BLDR_IMG.env
 
 # Base image with test frameworks, DASH client libs not installed
 # include file defines DOCKER_SAITHRIFT_CLIENT_BLDR_IMG
-include DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env
+include dockerfiles/DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env
 
 # Client image built locally with saithrift client libs + PTF & Pytest frameworks
 # TODO: consider some other tagging scheme
