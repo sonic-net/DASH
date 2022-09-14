@@ -25,7 +25,12 @@ INNER_REMOTE_IP = "172.19.1.1"
 # Test Vector
 TEST_VNET_INBOUND_CONFIG = {
 
-    'ENI_COUNT': 1,
+    'ACL_TABLE_COUNT':                  1,
+    'ENI_COUNT':                        1,
+    'ENI_START':                        1,
+    'IP_PER_ACL_RULE':                  1,
+    'IP_MAPPED_PER_ACL_RULE':           1,
+    'IP_ROUTE_DIVIDER_PER_ACL_RULE':    8,
 
     'DASH_VIP': [
         {'vip_1': {'IPv4': VIP}}
@@ -149,23 +154,17 @@ class TestSaiVnetInbound:
                                         eth_src="00:00:00:00:00:00",
                                         ip_dst=PA_VALIDATION_DIP,
                                         ip_src=PA_VALIDATION_SIP,
-                                        udp_sport=0,
+                                        udp_sport=11638,
                                         with_udp_chksum=False,
                                         vxlan_vni=INBOUND_ROUTING_VNI,
                                         inner_frame=inner_exp_pkt)
-        # TODO: Fix IP chksum
-        vxlan_exp_pkt['IP'].chksum = 0
-        # # TODO: Fix UDP length
-        vxlan_exp_pkt['IP']['UDP']['VXLAN'].flags = 0
 
-        dataplane.start_capture()
+        # dataplane.start_capture()
         print("\nSending outbound packet...\n\n", vxlan_pkt.__repr__())
         send_packet(dataplane, 0, vxlan_pkt)
 
         print("\nVerifying packet...\n", vxlan_exp_pkt.__repr__())
         verify_packet(dataplane, vxlan_exp_pkt, 1)
-
-        print ("run_traffic_check OK")
 
     def test_remove_vnet_config(self, confgen, dpu, dataplane):
 

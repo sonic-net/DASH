@@ -15,9 +15,9 @@ SWITCH_ID = 5
 OUTBOUND_VNI = 60
 VNET_VNI = 100
 VM_VNI = 9
-ENI_MAC = "00:CC:CC:CC:CC:CC"
+ENI_MAC = "00:cc:cc:cc:cc:cc"
 OUR_MAC = "00:00:02:03:04:05"
-DST_CA_MAC = "00:DD:DD:DD:DD:DD"
+DST_CA_MAC = "00:dd:dd:dd:dd:dd"
 VIP = "172.16.1.100"
 OUTBOUND_VNI = 100
 DST_CA_IP = "10.1.2.50"
@@ -27,6 +27,14 @@ CA_PREFIX = "10.1.0.0/16"
 
 # Test Vector
 TEST_VNET_OUTBOUND_CONFIG = {
+
+    'ACL_TABLE_COUNT':                  1,
+    'ENI_COUNT':                        1,
+    'ENI_START':                        1,
+    'IP_PER_ACL_RULE':                  1,
+    'IP_MAPPED_PER_ACL_RULE':           1,
+    'IP_ROUTE_DIVIDER_PER_ACL_RULE':    8,
+
     'DASH_VIP': [
         { 'vpe':
             { 'SWITCH_ID': '$SWITCH_ID',
@@ -142,9 +150,8 @@ class TestSaiVnetOutbound:
 
         src_vm_ip = "10.1.1.10"
         outer_smac = "00:00:05:06:06:06"
-        inner_smac = "00:00:04:06:06:06"
 
-        inner_pkt = simple_udp_packet(eth_dst="02:02:02:02:02:02",
+        inner_pkt = simple_udp_packet(eth_dst=DST_CA_MAC,
                                       eth_src=ENI_MAC,
                                       ip_dst=DST_CA_IP,
                                       ip_src=src_vm_ip)
@@ -158,30 +165,23 @@ class TestSaiVnetOutbound:
                                         inner_frame=inner_pkt)
 
         inner_exp_pkt = simple_udp_packet(eth_dst=DST_CA_MAC,
-                                      eth_src=ENI_MAC,
-                                      ip_dst=DST_CA_IP,
-                                      ip_src=src_vm_ip)
-        vxlan_exp_pkt = simple_vxlan_packet(eth_dst="00:00:00:00:00:00",
-                                        eth_src="00:00:00:00:00:00",
-                                        ip_dst=DST_PA_IP,
-                                        ip_src=VIP,
-                                        udp_sport=0, # TODO: Fix sport in pipeline
-                                        with_udp_chksum=False,
-                                        vxlan_vni=VNET_VNI,
-                                        inner_frame=inner_exp_pkt)
-        # TODO: Fix IP chksum
-        vxlan_exp_pkt['IP'].chksum = 0
-        # TODO: Fix UDP length
-        vxlan_exp_pkt['IP']['UDP']['VXLAN'].flags = 0
-        self.pkt_exp = vxlan_exp_pkt
+                                          eth_src=ENI_MAC,
+                                          ip_dst=DST_CA_IP,
+                                          ip_src=src_vm_ip)
+        vxlan_exp_pkt = simple_vxlan_packet(eth_dst=OUR_MAC,
+                                            eth_src=outer_smac,
+                                            ip_dst=VIP,
+                                            ip_src=SRC_VM_PA_IP,
+                                            udp_sport=11638,
+                                            with_udp_chksum=False,
+                                            vxlan_vni=VNET_VNI,
+                                            inner_frame=inner_exp_pkt)
 
         print("\nSending outbound packet...\n\n", vxlan_pkt.__repr__())
         send_packet(dataplane, 0, vxlan_pkt)
 
-        print("\nVerifying packet...\n", self.pkt_exp.__repr__())
-        verify_packet(dataplane, self.pkt_exp, 0)
-
-        print ("test_sai_vnet_outbound OK")
+        print("\nVerifying packet...\n", vxlan_exp_pkt.__repr__())
+        verify_packet(dataplane, vxlan_exp_pkt, 0)
 
     def test_remove_vnet_config(self, confgen, dpu, dataplane):
 
