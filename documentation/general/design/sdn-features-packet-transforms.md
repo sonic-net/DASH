@@ -326,7 +326,7 @@ Action| VNI |
 
 ## Telemetry
 
-## Counters
+## Counters - need to ensure the proposed counters are supportable in the P4 behavioral model (DASH pipeline)
 
 Counters are objects for counting data per ENI. The following are their main
 characteristics:
@@ -371,7 +371,7 @@ thinking about how to add Metering- and reconcile this in the P4 model.
 | TotalPacket      | Total packets to/from a VM. Exposed to customer; 2 counters, 1 per direction | ENI |
 | TotalBytes      | Total bytes to/from a VM. Exposed to customer; 2 counters, 1 per direction     |   ENI |
 | TotalUnicastPacketForwarded |       |    ENI |
-| TotalMulticastPacketsForwarded |       |    ENI |
+| TotalMulticastPacketsForwarded - check on Multicast |       |    ENI |
 | TcpConnectionsResetHalfTTL | TCP connections that had a TCP reset and its TTL cut down to 5 seconds      |    ENI |
 | NonSynStateful | Non-SYN TCP packets that are natted and not dropped by setting (SLB scenario)      |    ENI |
 | NumberOfFlowResimulated DuringPortTimer | Number of connections updated in an internal port-level update      |    ENI |
@@ -435,13 +435,14 @@ thinking about how to add Metering- and reconcile this in the P4 model.
 | CreationRateMaxOtherFlow | follow above      |    ENI |
 | No ENI Match | evident      |    ENI |
 | CPS Counters |       |    ENI & Global |
+| Pipeline Counters Ex: per Rule/ACL Match? |       |    ENI & Global |
 
 
 **Questions**  
 
 - How often will we read?  
 - What type of API to use?  
-- Will we push or pull from the Controller?
+- Will we push or pull from the Controller?  Could be a controller that streams (with a subscription - standard gNMI telemetry) for example.
 
 ## BGP
 
