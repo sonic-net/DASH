@@ -29,7 +29,6 @@ match_kind {
     table table_name { \
         key = { \
             meta. ## table_name ##_dash_acl_group_id : exact @name("meta.dash_acl_group_id:dash_acl_group_id"); \
-            meta.is_overlay_ip_v6 : exact @name("meta.is_overlay_ip_v6:is_overlay_pkt_ip_v6"); \
             meta.dst_ip_addr : LIST_MATCH @name("meta.dst_ip_addr:dip"); \
             meta.src_ip_addr : LIST_MATCH @name("meta.src_ip_addr:sip"); \
             meta.ip_protocol : LIST_MATCH @name("meta.ip_protocol:protocol"); \
