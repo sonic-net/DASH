@@ -12,8 +12,8 @@ ACR
 acr
 adaptor
 adaptors
-addr
 ADDR
+addr
 agnostically
 amd
 apache
@@ -44,9 +44,11 @@ backend
 balancer
 Balancer
 balancers
+bg
 BGP
 bgp
 bldr
+bidir
 bm
 BMV
 bmv
@@ -406,6 +408,7 @@ PyTest
 pytests
 Pyunit
 qcow
+qos
 QoS
 qos
 Radv
@@ -571,6 +574,7 @@ vcpus
 veth
 VFP
 vip
+VIP
 virsh
 virt
 virtio
@@ -605,6 +609,8 @@ VTEP
 VTEPs
 VxLAN
 VXLAN
+VxLAN
+VxLan
 vxlan
 warmboots
 wflow
