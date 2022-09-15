@@ -21,6 +21,7 @@ on:
 
 jobs:
   build:
+    if: github.repository != 'Azure/DASH'
     name: Build docker dash-bmv2-bldr image
     runs-on: ubuntu-20.04
     defaults:
