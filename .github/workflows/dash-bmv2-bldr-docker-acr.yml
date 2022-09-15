@@ -31,9 +31,9 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build dash-bmv2-bldr docker image
       run: make docker-bmv2-bldr
-    - name Get docker image name:tag from env file
+    - name: Get docker image name:tag from env file
       run: . dockerfiles/DOCKER_BMV2_BLDR_IMG.env 
-    - name Show Env vars
+    - name: Show Env vars
       run: env
     - name: Save docker image artifact temporarily for subsequent publishing
       run : docker save --output image.tar "${ DOCKER_BMV2_BLDR_IMG }"
