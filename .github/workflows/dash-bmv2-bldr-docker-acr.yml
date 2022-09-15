@@ -32,16 +32,12 @@ jobs:
     - name: Build dash-bmv2-bldr docker image
       run: make docker-bmv2-bldr
     - name: Get docker image name:tag from env file
-      run: . dockerfiles/DOCKER_BMV2_BLDR_IMG.env 
-    - name: Show Env vars
-      run: env
-    - name: Save docker image artifact temporarily for subsequent publishing
-      run : docker save --output image.tar "${ DOCKER_BMV2_BLDR_IMG }"
-    - name: Upload Docker image
+      run: make docker-save-bmv2-bldr
+    - name: Upload Docker image artifact for publishing job
       uses: actions/upload-artifact@v2
       with:
         name: docker-image
-        path: image.tar
+        path: bmv2-bldr-image.tar
         retention-days: 1      
   publish:
     name: Publish docker dash-bmv2-bldr image
@@ -54,14 +50,12 @@ jobs:
       # Load and un-archive the Docker image
     steps:
     - uses: actions/checkout@v3
-    - name: Download Docker image
+    - name: Download Docker image artifact for publishing job
       uses: actions/download-artifact@v2
       with:
         name: docker-image
     - name: Load Docker image artifact
-      run: docker load --input image.tar
-
-
+      run: make docker-load-bmv2-bldr
     - uses: azure/docker-login@v1
       with:
         login-server: ${{ secrets.DASH_ACR_LOGIN_SERVER }}

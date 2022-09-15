@@ -298,6 +298,11 @@ docker-bmv2-bldr:
 docker-pull-bmv2-bldr:
 	docker pull $(DOCKER_BMV2_BLDR_IMG)
 
+# Only used for CI publishing to save artifact between jobs:
+docker-save-bmv2-bldr:
+	docker save --output bmv2-bldr-image.tar $(DOCKER_BMV2_BLDR_IMG)
+docker-load-bmv2-bldr:
+	docker load --input bmv2-bldr-image.tar
 
 docker-publish-bmv2-bldr:
 	@echo "Publish $(DOCKER_BMV2_BLDR_IMG) - requires credentials, can only do from DASH repo, not a fork"
