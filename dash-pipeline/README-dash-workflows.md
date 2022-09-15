@@ -5,7 +5,7 @@
 See also:
 * [README.md](README.md) Top-level README for dash-pipeline
 * [README-dash-ci](README-dash-ci.md) for CI pipelines.
-* [README-dash-docker](README-dash-docker.md) for Docker usage.
+* [README-dash-docker](README-dash-docker.md) for Docker overview and workflows
 * [README-saithrift](README-saithrift.md) for saithrift client/server and test workflows.
 * [README-ptftests](README-ptftests.md) for saithrift PTF test-case development and usage.
 * [README-pytests](README-pytests.md) for saithrift Pytest test-case development and usage.
@@ -54,7 +54,7 @@ See also:
     - [Typical Workflow: Committing new code - ignoring SAI submodule](#typical-workflow-committing-new-code---ignoring-sai-submodule)
     - [Committing new SAI submodule version](#committing-new-sai-submodule-version)
 - [Configuration Management](#configuration-management)
-  - [DASH Repository Versioning](#dash-repo-versioning)
+  - [DASH Repository Versioning](#dash-repository-versioning)
   - [Submodules](#submodules)
   - [Docker Image Versioning](#docker-image-versioning)
     - [Project-Specific Images](#project-specific-images)
@@ -155,7 +155,6 @@ Dockerfile build targets are separately described in [README-dash-docker](README
 | [run-saithrift-pytests](#run-saithrift-client-pytests) | Run Pytests under [tests/saithrift/pytest](tests/libsai/pytest) using tests built into [docker-saithrift-client](#build-saithrift-client-docker-image) image
 |[run-saithrift-client-tests](#run-saithrift-client-tests) | Run all saithrift tests |
 | [run-saithrift-dev-ptftests](#run-saithrift-client-ptf-tests) <br> [run-saithrift-dev-pytests](#run-saithrift-client-dev-pytests) <br> [run-saithrift-client-dev-tests](#run-saithrift-client-dev-tests) | Like the three targets above. above, but run tests from host directory `tests/saithrift` instead of tests built into the `saithrift-client` container for faster test-case development code/test cycles.
-
 
 # Detailed DASH Behavioral Model Build Workflow
 
