@@ -32,7 +32,7 @@ jobs:
     - name: Build dash-bmv2-bldr docker image
       run: make docker-bmv2-bldr
     - name: Save docker image artifact temporarily for subsequent publishing
-      run : . dockerfiles/DOCKER_BMV2_BLDR_IMG.env && docker save --output image.tar "${ DOCKER_P4C_BMV2_IMG }"
+      run : . dockerfiles/DOCKER_BMV2_BLDR_IMG.env && docker save --output image.tar "${ DOCKER_BMV2_BLDR_IMG }"
     - name: Upload Docker image
       uses: actions/upload-artifact@v2
       with:
