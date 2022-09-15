@@ -132,11 +132,14 @@
     "type": "SAI_OBJECT_TYPE_INBOUND_ROUTING_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
+      "eni_id": "$eni_id",
       "vni": "1000"
     },
     "attributes": [
       "SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION",
-      "SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE"
+      "SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE",
+      "SAI_INBOUND_ROUTING_ENTRY_ATTR_SRC_VNET_ID",
+      "$vnet_1"
     ]
   },
   {
@@ -145,9 +148,8 @@
     "type": "SAI_OBJECT_TYPE_PA_VALIDATION_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
-      "eni_id": "$eni_id",
       "sip": "10.10.2.10",
-      "vni": "1000"
+      "vnet_id": "$vnet_1"
     },
     "attributes": [
       "SAI_PA_VALIDATION_ENTRY_ATTR_ACTION",
