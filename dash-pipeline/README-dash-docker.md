@@ -137,7 +137,7 @@ As explained above, credentials are required to push docker images to ACR. There
 
 Conditionals are used in the CI jobs to gate their execution.
 
-For example, this snippet containing an `if:` clause ensures we only push an image if we are running in the context of the `Azure/DASH` project (any branch), not in a fork. Similary, the same expression but with the `!=` operator, is used in CI action scripts which should only run in a fork, *not* the main repo. 
+For example, this snippet containing an `if:` clause ensures we only push an image if we are running in the context of the `Azure/DASH` project (any branch), not in a fork. Similarly, the same expression but with the `!=` operator, is used in CI action scripts which should only run in a fork, *not* the main repo. 
 ```
 jobs:
   build:
