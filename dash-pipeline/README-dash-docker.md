@@ -147,7 +147,7 @@ jobs:
 ```
 >**Note:** Experienced GitHub Action developers might wonder why a single CI script couldn't combine the behavior of both scripts by making only the publish part conditional. It was tried per the advice [here](https://emmer.dev/blog/publishing-docker-images-with-github-actions/) but the saved docker file in the build job failed to upload to make it available to the publish job. So, two scripts are used.
 
-The screenshot below from the Git Actions page shows an example of two Dockerfile-triggered Git action jobs: one which was executed (build and publish), and one which was skipped (build only), based on the repo it was running in. The grey circle with a slash indicates a skipped job.
+The screenshot below from the Git Actions page shows an example of two Dockerfile-triggered Git action jobs: one which was executed (build and publish), and one which was skipped (build only), based on the repo it was running in. The gray circle with a slash indicates a skipped job.
 
 ![git-conditional-actions-skipped](images/git-conditional-actions-skipped.png)
 ## Detailed Dockerfile Build  and Publish Workflows
