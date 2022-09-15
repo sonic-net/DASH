@@ -145,7 +145,11 @@ jobs:
     # Can only publish from within DASH repo (need credentials from secrets)
     if: github.repository == 'Azure/DASH'
 ```
->**Note:** Experienced GitHub Action developers might wonder why a single CI script couldn't combine the behavior of both scripts by making only the publish part conditional. It was tried per the advice [here](https://emmer.dev/blog/publishing-docker-images-with-github-actions/) but the saved docker file in the build job failed to upload to make it available to the publish job. So two scripts are used.
+>**Note:** Experienced GitHub Action developers might wonder why a single CI script couldn't combine the behavior of both scripts by making only the publish part conditional. It was tried per the advice [here](https://emmer.dev/blog/publishing-docker-images-with-github-actions/) but the saved docker file in the build job failed to upload to make it available to the publish job. So, two scripts are used.
+
+The screenshot below from the Git Actions page shows an example of two Dockerfile-triggered Git action jobs: one which was executed (build and publish), and one which was skipped (build only), based on the repo it was running in. The grey circle with a slash indicates a skipped job.
+
+![git-conditional-actions-skipped](images/git-conditional-actions-skipped.png)
 ## Detailed Dockerfile Build  and Publish Workflows
 Practical Docker image development and publishing workflows are illustrated below and explained ahead. There is room for improvement, and more sophisticated CI action scripts might improve the developer experience. Please feel free to contribute your expertise!
 
