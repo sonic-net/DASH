@@ -21,8 +21,9 @@ on:
 
 jobs:
   build:
-    if: github.repository != 'Azure/DASH'
     name: Build docker dash-bmv2-bldr image
+    # Only run on forks (in main repo, run build/publish workflows instead)
+    if: github.repository != 'Azure/DASH'
     runs-on: ubuntu-20.04
     defaults:
       run:

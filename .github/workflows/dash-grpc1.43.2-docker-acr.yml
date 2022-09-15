@@ -21,6 +21,8 @@ on:
 
 jobs:
   build:
+    # Can only publish from within DASH repo (need credentials from secrets)
+    if: github.repository == 'Azure/DASH'
     name: Build and publish docker dash-grpc1.43.2 image
     runs-on: ubuntu-20.04
     defaults:

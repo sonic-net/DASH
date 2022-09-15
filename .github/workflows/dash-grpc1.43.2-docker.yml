@@ -22,6 +22,8 @@ on:
 jobs:
   build:
     name: Build docker dash-grpc1.43.2 image
+    # Only run on forks (in main repo, run build/publish workflows instead)
+    if: github.repository != 'Azure/DASH'
     runs-on: ubuntu-20.04
     defaults:
       run:

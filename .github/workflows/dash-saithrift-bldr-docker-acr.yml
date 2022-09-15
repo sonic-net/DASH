@@ -24,6 +24,8 @@ on:
 jobs:
   build:
     name: Build and publish dash-saithrift-bldr-image
+    # Can only publish from within DASH repo (need credentials from secrets)
+    if: github.repository == 'Azure/DASH'
     runs-on: ubuntu-20.04
     env:
       docker_fg_flags: -u root --privileged

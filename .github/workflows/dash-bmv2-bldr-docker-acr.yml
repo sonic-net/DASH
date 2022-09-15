@@ -21,8 +21,9 @@ on:
 
 jobs:
   build:
-    if: github.repository == 'Azure/DASH'
     name: Build and publish docker dash-bmv2-bldr image
+    # Can only publish from within DASH repo (need credentials from secrets)
+    if: github.repository == 'Azure/DASH'
     runs-on: ubuntu-20.04
     defaults:
       run:
