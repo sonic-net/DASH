@@ -9,6 +9,7 @@ acl
 ACL
 ACLs
 ACR
+acr
 adaptor
 adaptors
 addr
@@ -45,6 +46,7 @@ Balancer
 balancers
 BGP
 bgp
+bldr
 bm
 BMV
 bmv
@@ -140,6 +142,7 @@ DNAT’ing
 DNATing
 Dockerfile
 Dockerfiles
+Dockerfile's
 dockerfiles
 dockerhub
 Dockerhub

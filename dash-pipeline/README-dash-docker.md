@@ -7,7 +7,7 @@ See also:
 **Table of Contents**
 - [DASH Docker Images](#dash-docker-images)
   - [Disclaimer - Specific Docker Image Details](#disclaimer---specific-docker-image-details)
-  - [Overview](#overview)
+  - [Docker Overview](#docker-overview)
   - [Use of existing Public Docker images](#use-of-existing-public-docker-images)
   - [Running Containers during Make](#running-containers-during-make)
   - [Volume Mounts](#volume-mounts)
@@ -128,16 +128,16 @@ The following factors complicate the workflow a little bit:
 * The order of these triggers is not sequential, they can be triggered in parallel depending upon what changed. For example, pushing a change to a Dockerfile's tag definition (any file named `DOCKER_XXX_IMG.env` under [dockerfiles/](dockerfiles/)) will initiate building and publishing the Docker image *and* trigger a new run of the main dash-pipeline CI action ([dash-bmv2-ci.yml](../.github/workflows/dash-bmv2-ci.yml))
 * A make target requiring a new Docker image version might run before the new image has been built and published to ACR.
 
-The net result is that a CI build or test step might initially fail after a Git pull request or merge, because it depends on a new Docker image which is also being built simultaneoulsy and not published yet. Furthermore, some Docker images depend upon base docker images (`FROM` clause), which also might not yet be published at the time the derived image's build begins. Fortunately this can be remedied with a manual re-run of the failed jobs in the Git Actions page of your project. We'll explain everything ahead.
+The net result is that a CI build or test step might initially fail after a Git pull request or merge, because it depends on a new Docker image which is also being built simultaneously and not published yet. Furthermore, some Docker images depend upon base docker images (`FROM` clause), which also might not yet be published at the time the derived image's build begins. Fortunately this can be remedied with a manual re-run of the failed jobs in the Git Actions page of your project. We'll explain everything ahead.
 
 ## Separate CI scripts for forks vs. main repo
-As explained above, credentials are required to push docker images to ACR. Therefore, two different CI scripts exist for each dockerfile. Each Docker CI script has two variants, and `dash-xxx-docker-acr.yml`. The first variant only builds the docker image to catch regressions. The second variant also publishes to ACR.
+As explained above, credentials are required to push docker images to ACR. Therefore, two different CI scripts exist for each Dockerfile. Each Docker CI script has two variants, and `dash-xxx-docker-acr.yml`. The first variant only builds the docker image to catch regressions. The second variant also publishes to ACR.
 * Forked projects (forks of `Azure/DASH`) will execute a build of any changed Dockerfile to verify correctness, but will not attempt to publish.
 * Non-forked projects (branches of `Azure/DASH`) will execute a docker build and publish the images to ACR.
 
 Conditionals are used in the CI jobs to gate their execution.
 
-For example, this snippet containinf an `if:` clause ensures we only push an image if we are running in the context of the `Azure/DASH` project (any branch), not in a fork. Similary, the same expression but with the `!=` operator, is used in CI action scripts which should only run in a fork, *not* the main repo. 
+For example, this snippet containing an `if:` clause ensures we only push an image if we are running in the context of the `Azure/DASH` project (any branch), not in a fork. Similary, the same expression but with the `!=` operator, is used in CI action scripts which should only run in a fork, *not* the main repo. 
 ```
 jobs:
   build:
@@ -161,14 +161,14 @@ See the figure and descriptions below.
 1. Create a development branch in `Azure/DASH`, e.g. named `featureX`. This requires proper role-based permissions.
 2. Create or modify Dockerfiles, associated `.env` files containing image names and tags, Makefiles, etc. Build and test this new work in your development machine. All Docker images are stored to and retrieved from the local machine's docker environment.
 3. Perform `git commit` and `git push` to upload changes to GitHub. This will trigger CI actions, at a minimum to build/publish the docker images and run the main build/test CI actions. These run in parallel, which can lead to a race condition. If the main CI job tries to pull a new docker image which hasn't yet been published, it will fail the first time only.
-4. Manually re-run failed job(s) as needed, which should now pass, since the docker images should have sucessfully published. (If not, fix the dockerfiles or CI action files which control these steps). Steps 2-4 can be repeated as needed.
+4. Manually re-run failed job(s) as needed, which should now pass, since the docker images should have successfully published. (If not, fix the dockerfiles or CI action files which control these steps). Steps 2-4 can be repeated as needed.
 5. When feature work is complete, submit a pull request to the `main` branch. Once merged, it will again run all the CI jobs, which should pass.
 ### Developing/Publishing docker images in a fork of main repo
 This workflow does most of the work in a fork of the DASH repo. A branch of the main repo is still required to publish new images. This process is more complicated, but also more suitable for larger-scope changes. This allows the majority of the work to be done in a fork to lessen the main repo activity.
 
 Oftentimes, a new docker image is created and doesn't change much thereafter, but other project content evolves significantly during the development of a feature. This workflow gets the needed docker image into ACR using a combination of a fork (for the brunt of the work) and a branch (to get the docker image into ACR for subsequent development).
 
-Once the docker image is available in ACR, all further work can be done in the fork's branch, lessening the activity in the main repo which can affector distract multiple community developers via e-mail alerts, Action logs, etc.
+Once the docker image is available in ACR, all further work can be done in the fork's branch, lessening the activity in the main repo which can impact or distract multiple community developers via e-mail alerts, Action logs, etc.
 
 See the figure and descriptions below.
 
@@ -184,7 +184,7 @@ See the figure and descriptions below.
 
 
 ## Publishing Docker Images to Azure Container Registry
-Docker images are stored in Azure Container Registry (ACR). Pushing new images requires proper authentication credentials for the registry. These credentials are stored in Git Project "Secrets" accessible only to the project administrator. Therefore, publishing new images is done via Git Actions which reference the secrets as "environment variables" which are available in the CI action's runner context. These CI actions are triggered by anything which changes the docker image contents or even the tag, including Docerfiles, image names, Makefiles, etc.
+Docker images are stored in Azure Container Registry (ACR). Pushing new images requires proper authentication credentials for the registry. These credentials are stored in Git Project "Secrets" accessible only to the project administrator. Therefore, publishing new images is done via Git Actions which reference the secrets as "environment variables" which are available in the CI action's runner context. These CI actions are triggered by anything which changes the docker image contents or even the tag, including Dockerfiles, image names, Makefiles, etc.
 
 For example, the file [dash-bmv2-bldr-docker-acr.yml](../.github/workflows/dash-bmv2-bldr-docker-acr.yml) contains the following code:
 ```
