@@ -225,6 +225,12 @@ DASH_VNET_MAPPING_TABLE:Vnet1:10.1.1.1: {
     "underlay_ip":101.1.2.3,
     "mac_address":F922839922A2
 }
+
+DASH_ROUTE_RULE_TABLE:F4939FEFC47E:45654:100.1.2.0/24: {
+    "priority": "0",
+    "vnet": "VNET1",
+    "pa_validation": "true"
+}
 ```
 
 The next sections describe the lookup behavior in the outbound direction. For
@@ -290,6 +296,38 @@ packet destined to `10.2.5.1`. Below are the processing pipeline (lookup) steps.
 1. Perform LPM lookup. 
 2. Select routing table `DASH_ROUTE_TABLE:10.2.5.0/24`. The `action_type` is `drop`.
 3. Drop the packet.  
+
+## Routing a packet back from 101.1.2.3.
+
+Using the previous configuration, let's analyze the steps involved in routing a
+packet destined to our appliance VIP from 101.1.2.0/24.
+
+1. The packet won't have a special VNI, so we assume the inbound direction
+2. Perform VNET lookup. It is priority based, matches on VNI, ENI, and prefix. Protocol is not present.
+3. The resulting VNET is Vnet1.
+4. The inbound routing rule says to perform PA validation as well.
+5. We have a PA validation entry for our ENI and SRC PA 101.1.2.3, so the packet is allowed.
+6. We decap the packet and encap it to ENI PA 25.1.1.1.
+
+## Routing a packet back from 101.1.2.9.
+
+Using the previous configuration, let's analyze the steps involved in routing a
+packet destined to our appliance VIP from 101.1.2.0/24 for which we don't have a mapping entry in our config.
+
+1. The packet won't have a special VNI, so we assume the inbound direction
+2. Perform VNET lookup. It is priority based, matches on VNI, ENI, and prefix. Protocol is not present.
+3. The resulting VNET is Vnet1.
+4. The inbound routing rule says to perform PA validation as well.
+5. We don't have a PA validation entry for our ENI and SRC PA 101.1.2.9, so the packet is dropped.
+
+## Counters
+
+In the VNET to VNET scenario, 3 types of counters are required:
+1. Route entry counters (inbound and outbound).
+2. ACL rule counters.
+3. Mapping entry counters.
+
+They are per rule, grouped into buckets, packet counters, byte meters are not required.
 
 ## Appendix
 
