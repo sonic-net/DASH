@@ -163,10 +163,10 @@ See the figure and descriptions below.
 
 ![dash-docker-branch-workflow](images/dash-docker-branch-workflow.svg)
 
-1. Create a development branch in `Azure/DASH`, e.g. named `featureX`. This requires write-access to the projtec, typically confined to a few core maintainers.
+1. Create a development branch in `Azure/DASH`, e.g. named `featureX`. This requires write-access to the project, typically confined to a few core maintainers.
 2. Create or modify Dockerfiles, associated `.env` files containing image names and tags, Makefiles, etc. Build and test this new work in your development machine. All Docker images are stored to and retrieved from the local machine's docker environment.
 3. Perform `git commit` and `git push` to upload changes to GitHub. This will trigger CI actions, at a minimum to build/publish the docker images and run the main build/test CI actions. These run in parallel, which can lead to a race condition. If the main CI job tries to pull a new docker image which hasn't yet been published, it will fail the first time only.
-4. Manually re-run failed job(s) as needed, which should now pass, since the docker images should have successfully published. (If not, fix the dockerfiles or CI action files which control these steps). Steps 2-4 can be repeated as needed.
+4. Manually re-run failed job(s) as needed, which should now pass, since the docker images should have successfully published. (If not, fix the Dockerfiles or CI action files which control these steps). Steps 2-4 can be repeated as needed.
 5. When feature work is complete, submit a pull request to the `main` branch. Once merged, it will again run all the CI jobs, which should pass.
 ### Workflow II: Developing/Publishing docker images in a fork via PRs to a branch of the main repo
 This workflow does most of the work in a fork of the DASH repo. A branch of the main repo is still required to publish new images. This process is more complicated, but also more suitable for larger-scope changes. This allows the majority of the work to be done in a fork to lessen the main repo activity.
@@ -194,7 +194,7 @@ See the figure and descriptions below.
 ### Workflow III: Developing/Publishing docker images in a forked branch initially using Dockerhub
 This workflow allows a developer to do all initial work using a private Dockerhub account, and only at the final Pull Request stage does it use ACR. The benefit of this approach is it that doesn't use a branch of the main repo for the publishing stages to ACR, and therefore avoids the write permissions issues required to create such a branch.
 
-A concise description of this workflow is: make a dev branch in a fork. Do all code changes and new dockerfile creation, pushing and pulling using a Dockerhub account of your own choosing. Just prior to submitting a pull request, change the new image's repository to ACR. The pull-request will initiate CI pipelines which will publish the image.
+A concise description of this workflow is: make a dev branch in a fork. Do all code changes and new Dockerfile creation, pushing and pulling using a Dockerhub account of your own choosing. Just prior to submitting a pull request, change the new image's repository to ACR. The pull-request will initiate CI pipelines which will publish the image.
 
 See the detailed steps and a diagram below.
 
@@ -209,7 +209,7 @@ See the detailed steps and a diagram below.
 7. Push this change to the development repo. CI builds will fail because you cannot read the image from the new location; it hasn't been published to ACR yet!
 8. Submit a pull request to the main project `Azure/DASH`. The first run of the main CI pipeline will fail because the initial push of the new image to ACR is being published in a parallel CI pipeline and won't be ready in time.
 9. Re-run the failed job, it should pass since the image was published.
-10. Reveiew and accept the Pull Request. CI pipelines should again pass.
+10. Review and accept the Pull Request. CI pipelines should again pass.
 ## Publishing Docker Images to Azure Container Registry Using Secrets
 Docker images are stored in Azure Container Registry (ACR). Pushing new images requires proper authentication credentials for the registry. These credentials are stored in Git Project "Secrets" accessible only to the project administrator. Therefore, publishing new images is done via Git Actions which reference the secrets as "environment variables" which are available in the CI action's runner context. These CI actions are triggered by anything which changes the docker image contents or even the tag, including Dockerfiles, image names, Makefiles, etc.
 
