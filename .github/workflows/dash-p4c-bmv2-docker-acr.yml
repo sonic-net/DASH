@@ -35,7 +35,7 @@ jobs:
       run: make docker-dash-p4c
     - uses: azure/docker-login@v1
       with:
-        login-server: ${{ secrets.DASH_ACR_LOGIN_SERVER }}
+        login-server: sonicdash.azurecr.io
         username: ${{ secrets.DASH_ACR_USERNAME }}
         password: ${{ secrets.DASH_ACR_PASSWORD }}    
     - name: Publish dash-p4c-bmv2 docker image to ACR
