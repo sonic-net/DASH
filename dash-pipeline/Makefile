@@ -490,7 +490,6 @@ install-python-modules:
 
 deploy-ixiac:
 	cd ../test/third-party/traffic_gen && ./deploy_ixiac.sh
-	./disable_veth_ipv6.sh
 
 undeploy-ixiac:
 	cd ../test/third-party/traffic_gen && ./undeploy_ixiac.sh

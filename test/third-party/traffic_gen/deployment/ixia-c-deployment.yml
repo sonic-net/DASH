@@ -16,6 +16,7 @@ services:
     - OPT_LISTEN_PORT=${TCP_PORT_IFC1:-5555}
     - ARG_IFACE_LIST=virtual@af_packet,${IFC1}
     - OPT_NO_HUGEPAGES=Yes
+    - OPT_ENABLE_IPv6=${OPT_ENABLE_IPv6}    
   traffic_engine_2:
     image: ${DOCKER_REGISTRY}/ixia-c-traffic-engine:${TRAFFIC_ENGINE_VERSION:-latest}
     container_name: ixia-c-traffic-engine2-${USER}
@@ -27,3 +28,4 @@ services:
     - OPT_LISTEN_PORT=${TCP_PORT_IFC2:-5556}
     - ARG_IFACE_LIST=virtual@af_packet,${IFC2}
     - OPT_NO_HUGEPAGES=Yes
+    - OPT_ENABLE_IPv6=${OPT_ENABLE_IPv6}    
