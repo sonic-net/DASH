@@ -123,7 +123,7 @@ As stated in [Docker Overview](#docker-overview), to save time, for normal artif
 * Submitting a Pull Request to the main DASH branch and eventually merging it following the customary review process.
 
 The following factors complicate the workflow a little bit:
-* Images can only be published to ACR via a CI runner launched by the `Azure/DASH` parent repo's Git actions, because the credentials allowing writes to ACR are stored in this repo as "secrets." These secrets are not available in forks.
+* Images can only be published to ACR via a CI runner launched by the `Azure/DASH` parent project's Git actions, because the credentials allowing writes to ACR are stored in this repository as "secrets." These secrets are not available in forks.
 * Changes to Makefiles, Dockerfiles or GitHub Actions in [.github/workflows](../.github/workflows) are used to trigger various rebuilds, test suites and docker image publishing in the cloud.
 * The order of these triggers is not sequential, they can be triggered in parallel depending upon what changed. For example, pushing a change to a Dockerfile's tag definition (any file named `DOCKER_XXX_IMG.env` under [dockerfiles/](dockerfiles/)) will initiate building and publishing the Docker image *and* trigger a new run of the main dash-pipeline CI action ([dash-bmv2-ci.yml](../.github/workflows/dash-bmv2-ci.yml))
 * A make target requiring a new Docker image version might run before the new image has been built and published to ACR.
