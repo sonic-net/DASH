@@ -10,7 +10,7 @@ on:
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
-    branches: [ "main" ]
+    branches: [ "**" ]
     paths:
       - '.github/workflows/dash-bmv2-bldr-docker-acr.yml'
       - 'dash-pipeline/dockerfiles/Dockerfile.bmv2-bldr'

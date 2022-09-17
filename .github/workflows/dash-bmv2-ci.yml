@@ -18,7 +18,7 @@ on:
       - '!dash-pipeline/**.png'
       - '!dash-pipeline/**.txt'
   pull_request:
-    branches: [ "main" ]
+    branches: [ "**" ]
     paths:
       - '.gitmodules'
       - '.github/workflows/dash-bmv2-ci.yml'
