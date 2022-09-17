@@ -21,7 +21,7 @@ on:
 
 env:
   DASH_ACR_LOGIN_SERVER: sonicdash.azurecr.io
-  
+
 jobs:
   build:
     name: Build and publish docker dash-bmv2-bldr image
@@ -37,7 +37,7 @@ jobs:
       run: make docker-bmv2-bldr
     - uses: azure/docker-login@v1
       with:
-        login-server: $DASH_ACR_LOGIN_SERVER
+        login-server: sonicdash.azurecr.io
         username: ${{ secrets.DASH_ACR_USERNAME }}
         password: ${{ secrets.DASH_ACR_PASSWORD }}    
     - name: Publish dash-bmv2-bldr image
