@@ -36,28 +36,6 @@ They shall conform to each service's design specifications and compliance requir
 | Express Route (ER) Service            | [Express Route (ER) Service](./express-route-service/README.md)   |
 | Encryption Gateway Service            | [Encryption Gateway Service](./encrypt-gw-service/README.md)      |
 
-
-# Organization of Design & Requirements Documents
-Documentation consists of separate, but related *System Descriptions* (HLDs, architecture, theory of operations, etc.) and *Compliance Requirements* (hard specifications, typically numerical  but also behavioral). These two types of documents are deliberately kept separated, see [Relationships and Flow of Documents](#relationships-and-flow-of-documents).
-
-Documentation is organized into folders as follows. Each feature or topic has all the high-level specs  and the compliance requirements in the same parent folder, e.g. General, High-Availability, etc., making it easier to access related information about one topic. As the complexity grows, this helps keep things organized according to "functional topic." 
-```
-topic1
-    design
-        topic1 High-level Descriptions and architecture
-    requirements
-        topic1 compliance Requirements
-
-topic2
-    design
-        topic2 High-level Descriptions
-    requirements
-        topic2 compliance Requirements
-
-etc
-...
-```
-
 # Relationships and Flow of Documents
 The diagram below shows how High-Level Descriptions beget Compliance requirements, compliance requirements beget test cases, and test cases are executed by test scripts to produce Test Results.
 
