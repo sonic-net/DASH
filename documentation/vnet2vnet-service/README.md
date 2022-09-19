@@ -1,5 +1,3 @@
-[ [ << Back to DASH top-level Documents](../README.md#contents) ]
-
 # DASH VNET-to-VNET Service Documents
 
 This folder contains DASH VNET-to-VNET Service design and requirements documents.

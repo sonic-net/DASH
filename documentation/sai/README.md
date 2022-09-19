@@ -1,5 +1,3 @@
-[ [ << Back to DASH top-level Documents](../README.md#contents) ]
-
 # DASH SAI Documents
 
 This folder contains DASH SAI Interface design and requirements documents.

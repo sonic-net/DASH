@@ -1,4 +1,4 @@
-[ [ << Back to DASH top-level Documents](../README.md#contents) ]
+# DASH VNET Peering Service Documents
 
 This folder contains DASH VNET Peering Service design and requirements documents.
 

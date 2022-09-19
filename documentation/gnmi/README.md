@@ -1,4 +1,3 @@
-
 # DASH gNMI Documents
 
 This folder contains DASH gNMI Interface design and requirements documents.

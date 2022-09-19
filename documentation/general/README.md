@@ -1,5 +1,3 @@
-[ [ << Back to DASH top-level Documents](../README.md#contents) ]
-
 # DASH General Documents
 
 This folder contains DASH general design and requirements documents.
