@@ -1,4 +1,3 @@
-[ [ << Back to DASH top-level Documents](../README.md#contents) ]
 
 # DASH gNMI Documents
 
