@@ -1,10 +1,6 @@
 ---
-Last update: 09/18/2022
+Last update: 09/20/2022
 ---
-
-[[<< Back to parent directory](../README.md)]
-
-[[<< Back to DASH top-level Documents](../../README.md#contents)]
 
 # VNET to VNET scenario
 

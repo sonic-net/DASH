@@ -1,7 +1,3 @@
-[ [ << Back to parent directory](../README.md) ]
-
-[ [ << Back to DASH top-level Documents](../../README.md#contents) ]
-
 # DASH High-Availability presentations
 
 This folder contains DASH High Availability and Scale presentations

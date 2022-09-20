@@ -1,4 +1,3 @@
-[[ << Back to DASH top-level README ](../README.md)]
 # DASH Documentation 
 
 Documentation comprises system descriptions, High-level design (HLD) documents and detailed compliance requirements. These are contained in the [DASH/documentation](./) directory and subdirectories.

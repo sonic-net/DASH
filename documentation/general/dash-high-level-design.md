@@ -1,10 +1,6 @@
 ---
-Last update: 06/22/2022
+Last update: 09/20/2022
 ---
-
-[<< Back to parent directory](../README.md) ]
-
-[<< Back to DASH top-level Documents](../../README.md#contents) ]
 
 # Disaggregated API for SONiC Hosts (DASH) high level design 
 

@@ -1,9 +1,5 @@
-
-[ [ << Back to parent directory](../README.md) ]
-
-[ [ << Back to DASH top-level Documents](../../README.md#contents) ]
-
 # Program Scale Testing Requirements for LAB Validation
+
 >**NOTE**: This prelimiary document includes a text description of a so-called **"Hero Test"** to establish minimum performance requirements and screen captures of Layer 2/3 packet generator stream configurations for IXIA IxExplorer packet tester device. These L23 streams simulate L4 connection establishment. This document, and the testing methodology, will be replaced by a more formal, complete requirements specification and  automated testing scripts in due time.
 
 ## Table of Contents
