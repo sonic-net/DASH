@@ -1,7 +1,3 @@
-[<< Back to parent directory](../README.md) ]
-
-[<< Back to DASH top-level Documents](../../README.md#contents) ]
-
 # SDN pipeline basic elements
 
 - [Packet flow - selecting packet direction](#packet-flow---selecting-packet-direction)
@@ -26,6 +22,7 @@
   - [Service Tunneling](#service-tunneling)
   - [Inbound from LB](#inbound-from-lb)
   - [Outbound NAT - L4](#outbound-nat---l4)
+  - [To be added:  VNET Peering and VNET Global Peering](#to-be-added--vnet-peering-and-vnet-global-peering)
 - [References](#references)
 
 ## Packet flow - selecting packet direction

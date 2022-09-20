@@ -1,10 +1,15 @@
-[ [ << Back to DASH top-level Documents](../README.md#contents) ]
+# DASH Load Balancer Service Documents
 
 This folder contains DASH Load Balancer Service design and requirements documents.
 
-# Contents
+## Design
 
-| Folder                                                 | Description                                  |
-| ------------------------------------------------------ | -------------------------------------------- |
-| [design](design/README.md)                             | DASH Load Balancer Service design & architecture documents |
-| [requirements](requirements/README.md)                 | DASH Load Balancer Service requirements documents         |
+| Document                                               | Description                                |
+| ------------------------------------------------------ | ------------------------------------------ |
+| [load-balancer-v3.md](load-balancer-v3.md) | DASH Load Balancer design document   |
+
+
+## Requirements
+
+| Document                                               | Description                                |
+| ------------------------------------------------------ | ------------------------------------------ |
