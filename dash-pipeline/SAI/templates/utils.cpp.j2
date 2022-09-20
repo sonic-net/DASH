@@ -244,13 +244,11 @@ sai_switch_api_t sai_switch_api_impl = {
 };
 
 
-/* TODO [cs] This should be auto-generated or part of per-API, auto-generated include file */
-extern sai_dash_api_t sai_dash_api_impl;
-extern sai_dash_vnet_api_t sai_dash_vnet_api_impl;
-extern sai_dash_acl_api_t sai_dash_acl_api_impl;
+{% for api in api_names %}
+extern sai_{{ api }}_api_t sai_{{ api }}_api_impl;
+{% endfor %}
 
 
-/* TODO [cs] This should be auto-generated */
 sai_status_t sai_api_query(
         _In_ sai_api_t api,
         _Out_ void **api_method_table) {
@@ -260,18 +258,12 @@ sai_status_t sai_api_query(
             *api_method_table = (void *)&sai_switch_api_impl;
             break;
         
-        case SAI_API_DASH:
-            *api_method_table = (void *)&sai_dash_api_impl;
+{% for api in api_names %}
+        case SAI_API_{{ api | upper }}:
+            *api_method_table = (void *)&sai_{{ api }}_api_impl;
             break;
         
-        case SAI_API_DASH_ACL:
-            *api_method_table = (void *)&sai_dash_acl_api_impl;
-            break;
-
-        case SAI_API_DASH_VNET:
-            *api_method_table = (void *)&sai_dash_vnet_api_impl;
-            break;
-
+{% endfor %}
         default:
             return SAI_STATUS_NOT_SUPPORTED;
 

@@ -1,45 +1,44 @@
 SHELL = /bin/bash
 
 # "All" type targets for convenience
-all:fix-perms p4 sai saithrift-server docker-saithrift-client test build-saic-client
+all:p4 sai saithrift-server docker-saithrift-client test build-saic-client
 
-run-all-tests:run-libsai-test deploy-ixiac run-saithrift-client-tests run-saic-test-thrift
+run-all-tests:run-libsai-test run-saithrift-client-tests
 run-saithrift-client-tests: run-saithrift-ptftests run-saithrift-pytests
 run-saithrift-client-dev-tests: run-saithrift-dev-ptftests run-saithrift-dev-pytests
 
 .PHONY:clean
-clean: fix-perms kill-all p4-clean sai-clean test-clean network-clean saithrift-server-clean
-	rm -rf bmv2/dash_pipeline.bmv2
+clean: kill-all p4-clean sai-clean test-clean network-clean saithrift-server-clean
+	rm -rf $(P4_OUTDIR)
 
 kill-all: kill-saithrift-server kill-switch undeploy-ixiac kill-saic-client
 
-
-.PHONY: fix-perms
-fix-perms:
-	@echo "### Applying Fix permissions workaround..."
-	sudo chmod -R o+rw SAI/ bmv2/ tests/
-
 PWD := $(shell pwd)
+DASH_USER ?=dashuser
+DASH_GROUP ?=dashusers
+DASH_UID ?=4321
+DASH_GUID?=4321
+DASH_HOST?=dash
 
 # Default Docker images, override from env var
 
 # Needed Libraries only
 DOCKER_GRPC_IMG ?=chrissommers/dash-grpc:1.43.2
 
-# Slimmed-down version bmv2 backend only 632MB - works:
-DOCKER_P4C_BMV2_IMG ?=chrissommers/dash-p4c-bmv2:220819
+# Slimmed-down version bmv2 backend only 632MB:
+DOCKER_P4C_BMV2_IMG ?=chrissommers/dash-p4c-bmv2:220825
 
-# Builds sai-P4rt clients to run inside bmvs process
-DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2-bldr:220630
+# Builds SAI-P4RT clients to run inside bmv2 process
+DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2-bldr:220819
 
 # Runs bmv2 process - consider slimmer if don't need sai/p4rt clients inside
 DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 
 # Compiles sai headers, libsai, saithrift server & client/server libs
-DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220719
+DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220819
 
 # Base image with test frameworks, DASH client libs not installed
-DOCKER_SAITHRIFT_CLIENT_BLDR_IMG ?=chrissommers/dash-saithrift-client-bldr:220723
+DOCKER_SAITHRIFT_CLIENT_BLDR_IMG ?=chrissommers/dash-saithrift-client-bldr:220819
 
 # Client image built locally with saithrift client libs + PTF & Pytest frameworks
 # TODO: consider some other tagging scheme
@@ -70,24 +69,26 @@ sai-submodule:
 # P4 Source code compile TARGETS
 ######################################
 
-P4_ARTIFACTS=bmv2/dash_pipeline.bmv2/dash_pipeline.json bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt
-
-p4: fix-perms bmv2/dash_pipeline.bmv2/dash_pipeline.json
-
-.PHONY:p4-clean
-p4-clean:
-	-rm -rf bmv2/dash_pipeline.bmv2
-
 P4_SRC=$(wildcard bmv2/*.p4)
 P4_MAIN=bmv2/dash_pipeline.p4
 P4_OUTDIR=bmv2/dash_pipeline.bmv2
+
+P4_ARTIFACTS=$(P4_OUTDIR)/dash_pipeline.json $(P4_OUTDIR)/dash_pipeline_p4rt.txt
+
+p4: $(P4_OUTDIR)/dash_pipeline.json
+
+.PHONY:p4-clean
+p4-clean:
+	-rm -rf $(P4_OUTDIR)
 # Compile P4 into bmv2 .json fle and P4info for SAI header autogeneration
 $(P4_ARTIFACTS): $(P4_SRC)
 	@echo "Compile P4 program $(P4_MAIN) ..."
 	mkdir -p $(P4_OUTDIR) && \
+	chmod o+w $(P4_OUTDIR) && \
 	docker run \
 	--rm \
 	--name dash-p4c-$(USER) \
+	-u $(DASH_USER) \
 	$(DOCKER_FLAGS) \
 	-v $(PWD)/bmv2:/bmv2 \
 	-w / \
@@ -114,20 +115,18 @@ DOCKER_RUN_SAITHRIFT_BLDR =\
 # TODO - create separate rules for headers, libsai.so
 .PHONY:sai
 
-sai: fix-perms sai-clean sai-headers sai-meta libsai
+sai: sai-clean sai-headers sai-meta libsai
 
-sai-headers: fix-perms p4 | SAI/SAI
+sai-headers: p4 | SAI/SAI
 	@echo "Generate SAI library headers and implementation..."
-	mkdir -p SAI/lib
+	mkdir -p SAI/lib && chmod -R o+w SAI && \
 	$(DOCKER_RUN) \
 		$(DOCKER_FLAGS) \
 		--name build_sai-$(USER) \
 		-w /SAI $(DOCKER_SAITHRIFT_BLDR_IMG) \
 	    ./generate_dash_api.sh
-	# Fixup perms from generate_dash_api using sudo to call python,so subsequent scripts can access
-	sudo chmod -R a+rw $(PWD)/SAI/SAI
 
-sai-meta: fix-perms
+sai-meta:
 	@echo "Generate SAI metadata..."
 	# hack - remove scripts which cause Git ownership failures in CI pipelines
 	# We don't need them, they're to check that SAI headers didn't experience enum changes etc.
@@ -140,10 +139,9 @@ sai-meta: fix-perms
 		-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/SAI/meta \
 		$(DOCKER_SAITHRIFT_BLDR_IMG) \
 	    make
-	sudo chmod -R o+rw SAI/
 
 # TODO - add SAI header dependencies
-libsai: fix-perms
+libsai:
 	@echo "build libsai.so..."
 	$(DOCKER_RUN) \
 		$(DOCKER_FLAGS) \
@@ -152,11 +150,11 @@ libsai: fix-perms
 		$(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
-libsai-clean: fix-perms
-	-rm -rf SAI/lib/libsai.so
+libsai-clean:
+	-rm -rf SAI/lib/*
 
 .PHONY:sai-clean
-sai-clean: fix-perms SAI/SAI libsai-clean
+sai-clean: SAI/SAI libsai-clean saithrift-server-clean
 	@echo "Restoring SAI subdirectories to baseline..."
 	rm -rf SAI/SAI/inc SAI/SAI/experimental SAI/SAI/meta
 	cd SAI/SAI && git checkout -- inc experimental meta
@@ -176,8 +174,8 @@ run-switch: network
 	$(DOCKER_RUN) \
 		--name simple_switch-$(USER) \
 		-u root \
-		-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline.json:/etc/dash/dash_pipeline.json \
-		-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
+		-v $(PWD)/$(P4_OUTDIR)/dash_pipeline.json:/etc/dash/dash_pipeline.json \
+		-v $(PWD)/$(P4_OUTDIR)/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
 		$(DOCKER_BMV2_RUN_IMG) \
 		env LD_LIBRARY_PATH=/usr/local/lib \
 		simple_switch_grpc \
@@ -194,7 +192,7 @@ kill-switch:
 # SAI-THRIFT SERVER TARGETS
 ###############################
 
-saithrift-server:fix-perms
+saithrift-server:
 	$(DOCKER_RUN_SAITHRIFT_BLDR) \
 	    make $@
 
@@ -204,8 +202,8 @@ DOCKER_RUN_SAITHRIFT_SRVR =\
 	$(DOCKER_FLAGS) \
 	--net=host \
 	--name dash-saithrift-server-$(USER) \
-	-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline.json:/etc/dash/dash_pipeline.json \
-	-v $(PWD)/bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
+	-v $(PWD)/$(P4_OUTDIR)/dash_pipeline.json:/etc/dash/dash_pipeline.json \
+	-v $(PWD)/$(P4_OUTDIR)/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
 	-v $(PWD)/SAI:/SAI \
 	-v $(PWD)/SAI/SAI/meta:/meta \
 	-w /SAI/rpc/usr/sbin \
@@ -226,6 +224,7 @@ run-saithrift-server-bash:
 saithrift-server-clean:
 	$(DOCKER_RUN_SAITHRIFT_BLDR) \
 	    make $@
+	rm -rf SAI/rpc
 
 ###############################
 # SAI TEST TARGETS
@@ -240,6 +239,7 @@ test-clean:
 
 .PHONY:libsai-test
 libsai-test:SAI/SAI SAI/lib/libsai.so
+	chmod -R a+w tests/libsai
 	$(DOCKER_RUN) \
 	    --name dash-build-test-$(USER) \
 		-w /tests/libsai  $(DOCKER_BMV2_BLDR_IMG) \
@@ -286,10 +286,11 @@ docker-bmv2-bldr:
 	docker build \
 		-f dockerfiles/Dockerfile.bmv2-bldr \
 	    -t $(DOCKER_BMV2_BLDR_IMG) \
-	    --build-arg user=$(USER) \
-	    --build-arg uid=$(shell id -u) \
-	    --build-arg guid=$(shell id -g) \
-	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+	    --build-arg user=$(DASH_USER) \
+	    --build-arg group=$(DASH_GROUP) \
+	    --build-arg uid=$(DASH_UID) \
+	    --build-arg guid=$(DASH_GUID) \
+	    --build-arg hostname=$(DASH_HOST) \
 	    --build-arg available_processors=$(shell nproc) \
 	    dockerfiles
 
@@ -303,10 +304,11 @@ docker-saithrift-bldr:
 	docker build \
 		-f dockerfiles/Dockerfile.saithrift-bldr \
 	    -t $(DOCKER_SAITHRIFT_BLDR_IMG) \
-	    --build-arg user=$(USER) \
-	    --build-arg uid=$(shell id -u) \
-	    --build-arg guid=$(shell id -g) \
-	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+	    --build-arg user=$(DASH_USER) \
+	    --build-arg group=$(DASH_GROUP) \
+	    --build-arg uid=$(DASH_UID) \
+	    --build-arg guid=$(DASH_GUID) \
+	    --build-arg hostname=$(DASH_HOST) \
 	    --build-arg available_processors=$(shell nproc) \
 		dockerfiles
 
@@ -322,10 +324,11 @@ docker-saithrift-client-bldr:
 	docker build \
 		-f dockerfiles/Dockerfile.saithrift-client-bldr \
 	    -t $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG) \
-	    --build-arg user=$(USER) \
-	    --build-arg uid=$(shell id -u) \
-	    --build-arg guid=$(shell id -g) \
-	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+	    --build-arg user=$(DASH_USER) \
+	    --build-arg group=$(DASH_GROUP) \
+	    --build-arg uid=$(DASH_UID) \
+	    --build-arg guid=$(DASH_GUID) \
+	    --build-arg hostname=$(DASH_HOST) \
 	    --build-arg available_processors=$(shell nproc) \
 		./tests
 
@@ -354,14 +357,14 @@ DOCKER_RUN_SAITHRIFT_CLIENT=\
 	$(DOCKER_FLAGS) \
 
 # Run "production" Pytests bundled inside docker
-run-saithrift-pytests:deploy-ixiac
+run-saithrift-pytests:deploy-ixiac disable-ipv6
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
 	-w /tests/saithrift/pytest \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
 	./run-saithrift-pytests.sh
 
 # Run "dev" tests mounted from host
-run-saithrift-dev-pytests:deploy-ixiac
+run-saithrift-dev-pytests:deploy-ixiac disable-ipv6
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
 	-v $(PWD)/tests/:/tests-dev/ \
 	-w /tests-dev/saithrift/pytest \
@@ -370,7 +373,7 @@ run-saithrift-dev-pytests:deploy-ixiac
 
 # Run "production" PTF tests bundled inside docker
 # Note - if add ixia-c usage to PTF tests, add dependency deploy-ixiac
-run-saithrift-ptftests:
+run-saithrift-ptftests: disable-ipv6
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
 	-w /tests/saithrift/ptf \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
@@ -378,7 +381,7 @@ run-saithrift-ptftests:
 
 # Run "dev" PTF tests mounted from host
 # Note - if add ixia-c usage to PTF tests, add dependency deploy-ixiac
-run-saithrift-dev-ptftests:
+run-saithrift-dev-ptftests: disable-ipv6
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
 	-v $(PWD)/tests/:/tests-dev/ \
 	-w /tests-dev/saithrift/ptf \
@@ -394,14 +397,26 @@ run-saithrift-client-bash:
 
 ###############################
 
+# docker-dash-p4c:
+# 	docker build \
+# 		-f dockerfiles/Dockerfile.p4c-bmv2 \
+# 	    -t $(DOCKER_P4C_BMV2_IMG) \
+# 	    --build-arg user=$(USER) \
+# 	    --build-arg uid=$(shell id -u) \
+# 	    --build-arg guid=$(shell id -g) \
+# 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+# 	    --build-arg available_processors=$(shell nproc) \
+# 		dockerfiles
+
 docker-dash-p4c:
 	docker build \
 		-f dockerfiles/Dockerfile.p4c-bmv2 \
 	    -t $(DOCKER_P4C_BMV2_IMG) \
-	    --build-arg user=$(USER) \
-	    --build-arg uid=$(shell id -u) \
-	    --build-arg guid=$(shell id -g) \
-	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+	    --build-arg user=$(DASH_USER) \
+	    --build-arg group=$(DASH_GROUP) \
+	    --build-arg uid=$(DASH_UID) \
+	    --build-arg guid=$(DASH_GUID) \
+	    --build-arg hostname=$(DASH_HOST) \
 	    --build-arg available_processors=$(shell nproc) \
 		dockerfiles
 
@@ -416,10 +431,11 @@ docker-dash-grpc:
 	docker build \
 		-f dockerfiles/Dockerfile.grpc1.43.2 \
 	    -t $(DOCKER_GRPC_IMG) \
-	    --build-arg user=$(USER) \
-	    --build-arg uid=$(shell id -u) \
-	    --build-arg guid=$(shell id -g) \
-	    --build-arg hostname=$(shell echo $$HOSTNAME) \
+	    --build-arg user=$(DASH_USER) \
+	    --build-arg group=$(DASH_GROUP) \
+	    --build-arg uid=$(DASH_UID) \
+	    --build-arg guid=$(DASH_GUID) \
+	    --build-arg hostname=$(DASH_HOST) \
 	    --build-arg available_processors=$(shell nproc) \
 		dockerfiles
 
@@ -433,7 +449,7 @@ docker-publish-dash-grpc:
 # BMV2-PKTGEN NETWORKING TARGETS
 ###############################
 
-network:veth0 veth2
+network:veth0 veth2 disable-ipv6
 
 veth0: /sys/class/net/veth0
 /sys/class/net/veth0:
@@ -443,17 +459,6 @@ veth0: /sys/class/net/veth0
 	sudo ip link set dev veth1 up
 	sudo ip link set veth0 mtu 9500
 	sudo ip link set veth1 mtu 9500
-	sudo sysctl net.ipv6.conf.veth0.disable_ipv6=1
-	#https://superuser.com/questions/33196/how-to-disable-autoconfiguration-on-ipv6-in-linux
-	sudo sysctl net.ipv6.conf.veth0.autoconf=0
-	sudo sysctl net.ipv6.conf.veth0.accept_ra=0
-	sudo sysctl net.ipv6.conf.veth0.accept_ra_pinfo=0
-	sudo sysctl net.ipv6.conf.veth0.router_solicitations=0
-	sudo sysctl net.ipv6.conf.veth1.disable_ipv6=1
-	sudo sysctl net.ipv6.conf.veth1.autoconf=0
-	sudo sysctl net.ipv6.conf.veth1.accept_ra=0
-	sudo sysctl net.ipv6.conf.veth1.accept_ra_pinfo=0
-	sudo sysctl net.ipv6.conf.veth1.router_solicitations=0
 
 veth2: /sys/class/net/veth2
 /sys/class/net/veth2:
@@ -462,21 +467,14 @@ veth2: /sys/class/net/veth2
 	sudo ip link set dev veth3 up
 	sudo ip link set veth2 mtu 9500
 	sudo ip link set veth3 mtu 9500
-	sudo sysctl net.ipv6.conf.veth2.disable_ipv6=1
-	sudo sysctl net.ipv6.conf.veth2.autoconf=0
-	sudo sysctl net.ipv6.conf.veth2.accept_ra=0
-	sudo sysctl net.ipv6.conf.veth2.accept_ra_pinfo=0
-	sudo sysctl net.ipv6.conf.veth2.router_solicitations=0
-	sudo sysctl net.ipv6.conf.veth3.disable_ipv6=1
-	sudo sysctl net.ipv6.conf.veth3.autoconf=0
-	sudo sysctl net.ipv6.conf.veth3.accept_ra=0
-	sudo sysctl net.ipv6.conf.veth3.accept_ra_pinfo=0
-	sudo sysctl net.ipv6.conf.veth3.router_solicitations=0
 
+disable-ipv6:
+	./disable_veth_ipv6.sh
+
+# Delete veth's, test existence to avoid needless use of sudo
 network-clean:
-	# Note, deleting one member (e.g. veth0) deletes its peer (e.g. veth1)
-	-sudo ip link delete dev veth0
-	-sudo ip link delete dev veth2
+	@-([ -e /sys/class/net/veth0 ] && sudo ip link delete dev veth0 && echo "Deleted veth0/1") || echo "No veth0, not deleting"
+	@-([ -e /sys/class/net/veth2 ] && sudo ip link delete dev veth2 && echo "Deleted veth2/3") || echo "No veth2, not deleting"
 
 ###############################
 # IXIA-C TARGETS

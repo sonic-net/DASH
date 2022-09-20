@@ -5,11 +5,14 @@ Accton
 ACK
 Ack
 ack
+acl
 ACL
 ACLs
 ACR
 adaptor
 adaptors
+ADDR
+addr
 agnostically
 amd
 apache
@@ -40,8 +43,10 @@ backend
 balancer
 Balancer
 balancers
+bg
 BGP
 bgp
+bidir
 bm
 BMV
 bmv
@@ -64,6 +69,7 @@ Cfg
 cfg
 checkboxes
 chris
+chrispsommers
 ci
 CLA
 cla
@@ -99,6 +105,7 @@ CurrentUdpFlow
 customizable
 Cx
 cyberithub
+dashsubmodule
 DASHOrch
 dashorch
 DashOrch
@@ -109,6 +116,8 @@ Datagram
 datagrams
 datapath
 Datapath
+dataplane
+Dataplane
 dataplanes
 datastore
 DBs
@@ -136,6 +145,7 @@ Dockerfiles
 dockerfiles
 dockerhub
 Dockerhub
+dockerized
 DoS
 DotNet
 downcasting
@@ -236,6 +246,7 @@ InbfromLB
 INIT
 Init
 initializer
+integrations
 integrators
 interoperable
 io
@@ -281,8 +292,10 @@ loopback
 LPM
 lts
 Macsec
+makefile
 Makefile
 Makefiles
+makefiles
 MatchedHalfOpenFlow
 MatchedOtherFlow
 MatchedTcpFlow
@@ -320,6 +333,7 @@ Novus
 NPUS
 NSG
 NSGs
+num
 NumberOfFlowResimulated
 NVA
 NVidia
@@ -375,6 +389,7 @@ Prem
 preprocessor
 preprogrammed
 prereq
+Pritsak
 PrivateAddress
 programmability
 protobuf
@@ -390,8 +405,10 @@ PyTest
 pytests
 Pyunit
 qcow
+qos
 QoS
 Radv
+rdpty
 reachability
 README
 READMEs
@@ -548,9 +565,12 @@ unpair
 Unpair
 untracked
 upcasting
+upstreaming
 vcpus
 veth
 VFP
+vip
+VIP
 virsh
 virt
 virtio
@@ -584,6 +604,8 @@ VPorts
 VTEP
 VTEPs
 VXLAN
+VxLAN
+VxLan
 vxlan
 warmboots
 wflow

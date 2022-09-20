@@ -54,7 +54,7 @@ Each DPU sends heartbeat messages at a configured interval to its peer. When a p
 
 ## State Synchronization
 
-State synchronization between the 2 DPUs uses the CNIP IP. All state synchronization happens at the granularity of the DP-VIP and happens from the primary of the DP-VIP towards the secondary. State synchronization happens in 2 stages
+State synchronization between the 2 DPUs uses the CNIP IP. All state synchronization happens at the granularity of the DP-VIP and happens from the primary of the DP-VIP towards the secondary. State synchronization happens in 2 parallel stages
 
 1. Bulk Sync
 1. Data path sync
@@ -145,7 +145,7 @@ This state is reached when bulk sync is complete and the admin role of the node 
 
 **Wait Primary**
 
-In this state the node is waiting for the Datapath to signal completion of taking over as primary. The datapath indicates this by notifying the SONIC stack via an oper status update message. At this point the peer is notified to move to standy.
+In this state the node is waiting for the Datapath to signal completion of taking over as primary. The datapath indicates this by notifying the SONIC stack via an oper status update message. At this point the peer is notified to move to standby.
 
 **Activate Secondary**
 
@@ -715,7 +715,7 @@ All flows inserted on the secondary before switchover are after evaluation of pr
 
 ![](images/planned_switchover.009.jpeg)
 
-Swithover can be a planned event for maintenance and other reasons. With planned switchover the goal is to have close to zero loss and to coordinate between the primary and secondary to achieve this goal. Both the DP-VIPs will switch roles to primary on this trigger.
+Switchover can be a planned event for maintenance and other reasons. With planned switchover the goal is to have close to zero loss and to coordinate between the primary and secondary to achieve this goal. Both the DP-VIPs will switch roles to primary on this trigger.
 
 The controller initiates the planned switchover and notifies the secondary DPU to initiate switchover. Once switchover is complete the newly primary DPU relays a SwitchoverDone message to the old primary DPU. The old primary initiates a withdrawal of protocol routes so the network can drain traffic. During this time the old primary continues to forward traffic so any traffic in transit is forwarded without being dropped. During this network convergence timeout both the primary and secondary are forwarding traffic and flow sync messages may be exchanged in both directions.
 
