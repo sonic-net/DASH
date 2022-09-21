@@ -1,5 +1,8 @@
 SHELL = /bin/bash
 
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+mkfile_dir := $(dir $(mkfile_path))
+
 # "All" type targets for convenience
 all:p4 sai saithrift-server docker-saithrift-client test
 
@@ -13,7 +16,7 @@ clean: kill-all p4-clean sai-clean test-clean network-clean saithrift-server-cle
 
 kill-all: kill-saithrift-server kill-switch undeploy-ixiac
 
-PWD := $(shell pwd)
+PWD := $(realpath $(mkfile_dir))
 DASH_USER ?=dashuser
 DASH_GROUP ?=dashusers
 DASH_UID ?=4321
@@ -102,7 +105,7 @@ $(P4_ARTIFACTS): $(P4_SRC)
 # DASH SAI HEADER & libsai.so TARGETS
 ######################################
 
-
+SAIRPC_VENDOR_EXTRA_LIBS?=""
 # Note we have to mount main DASH dir to allow container to "see" the parent Git repo for the SAI submodule
 DOCKER_RUN_SAITHRIFT_BLDR =\
 	docker run \
@@ -110,6 +113,7 @@ DOCKER_RUN_SAITHRIFT_BLDR =\
 	--rm \
 	--name dash-saithrift-bldr-$(USER) \
 	-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/saithrift \
+	-e SAIRPC_VENDOR_EXTRA_LIBS=$(SAIRPC_VENDOR_EXTRA_LIBS) \
 	$(DOCKER_SAITHRIFT_BLDR_IMG) \
 
 # TODO - create separate rules for headers, libsai.so
