@@ -10,7 +10,7 @@
 
 **kill-saic-client**: Stop Ixia-C and sc-client-thrift-run container.
 
-**run-saic-test-thrift**: Run test manually. This target may be triggerred with passing parameters, or with default parameters.  
+**run-saic-test-thrift**: Run test manually. This target may be triggerred with passing parameters, or with default parameters.
 Run with default parameters(Setup file: sai_dpu_client_server_snappi.json; Test: test_sai_vnet_*.pys):
 ```
 make run-saic-test-thrift
@@ -46,28 +46,42 @@ make run-saithrift-server
 ```
 
 ## Run tests manually
-Execute test inside the docker `sc-client-thrift-run` container or by `docker exec sc-client-thrift-run <command>` or by `run-saic-test-thrift` target.
 
-### Pure SAI tests run
-```
-Via Make target:
-make run-saic-test-thrift sai_dpu_client_server_snappi.json test_vnet_inbound.py
-make run-saic-test-thrift sai_dpu_client_server_snappi.json test_vnet_outbound.py
-
-Via docker exec:
-pytest -sv --setup=sai_dpu_client_server_snappi.json test_vnet_inbound.py
-pytest -sv --setup=sai_dpu_client_server_snappi.json test_vnet_outbound.py
+### Using make target
+Run all available VNET tests:
+```sh
+make run-saic-tests
 ```
 
-### Test Vector format tests
+Run tests in DASH config format with custom options:
+```sh
+make run-saic-tests sai_dpu_client_server_snappi.json test_sai_vnet_inbound.py
+make run-saic-tests sai_dpu_client_server_snappi.json test_sai_vnet_outbound.py
 ```
-Via Make target:
-make run-saic-test-thrift sai_dpu_client_server_snappi.json test_sai_vnet_inbound.py
-make run-saic-test-thrift sai_dpu_client_server_snappi.json test_sai_vnet_outbound.py
 
-Via docker exec:
+Run tests in SAI config format with custom options:
+```sh
+make run-saic-tests sai_dpu_client_server_snappi.json test_vnet_inbound.py
+make run-saic-tests sai_dpu_client_server_snappi.json test_vnet_outbound.py
+```
+
+### Manually from the docker (developers mode)
+Run the `dash-saichallenger-client-$USER` container.
+```sh
+make run-saic-client
+docker exec dash-saichallenger-client-ubuntu-$USER <command>
+```
+
+And execute tests in DASH config format (inside the container):
+```sh
 pytest -sv --setup=sai_dpu_client_server_snappi.json test_sai_vnet_inbound.py
 pytest -sv --setup=sai_dpu_client_server_snappi.json test_sai_vnet_outbound.py
+```
+
+Or in SAI config format:
+```sh
+pytest -sv --setup=sai_dpu_client_server_snappi.json test_vnet_inbound.py
+pytest -sv --setup=sai_dpu_client_server_snappi.json test_vnet_outbound.py
 ```
 
 # Known issues

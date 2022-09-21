@@ -1,7 +1,7 @@
 SHELL = /bin/bash
 
 # "All" type targets for convenience
-all:p4 sai saithrift-server docker-saithrift-client test build-saic-client
+all:p4 sai saithrift-server docker-saithrift-client test
 
 run-all-tests:run-libsai-test run-saithrift-client-tests
 run-saithrift-client-tests: run-saithrift-ptftests run-saithrift-pytests
@@ -500,14 +500,12 @@ undeploy-ixiac:
 
 SAI_CHALLENGER_PATH = $(PWD)/../test/SAI-Challenger.OCP
 
-DOCKER_SAI_CHALLENGER_CLIENT = sc-client-thrift
+DOCKER_SAI_CHALLENGER_CLIENT = anton7811/dash-saichallenger-client:220920
 
-CONTAINER_SAI_CHALLENGER_CLIENT_NAME = $(DOCKER_SAI_CHALLENGER_CLIENT)-run
-
-CONTAINER_SAI_CHALLENGER_CLIENT_EXEC = docker exec $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
+CONTAINER_SAI_CHALLENGER_CLIENT_NAME = dash-saichallenger-client-$(USER)
 
 # Add passing parameters to the run-saic-test-thrift target.
-ifeq (run-saic-test-thrift,$(firstword $(MAKECMDGOALS)))
+ifeq (run-saic-tests,$(firstword $(MAKECMDGOALS)))
   SAI_CHALLENGER_SETUP_FILE := $(wordlist 2, 2, $(MAKECMDGOALS))
   SAI_CHALLENGER_TEST := $(wordlist 3, 3, $(MAKECMDGOALS))
   $(eval $(SAI_CHALLENGER_SETUP_FILE):;@:)
@@ -529,34 +527,31 @@ build-saic-client:
 		-t $(DOCKER_SAI_CHALLENGER_CLIENT) \
 		.
 
+DOCKER_RUN_SAI_CHALLENGER_CLEINT=docker run \
+	-v $(SAI_CHALLENGER_PATH):/sai-challenger \
+	-v $(SAI_CHALLENGER_PATH)/../test-cases/test_vector_example/:/sai-challenger/tests \
+	-v $(PWD)/../:/dash \
+	--cap-add=NET_ADMIN \
+	--device /dev/net/tun:/dev/net/tun \
+	--rm \
+	--network=host \
+	--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
+
 run-saic-client: deploy-ixiac
-	docker run \
-		-v $(SAI_CHALLENGER_PATH):/sai-challenger \
-		--cap-add=NET_ADMIN \
-		--device /dev/net/tun:/dev/net/tun \
-		--rm \
-		--network=host \
-		-v $(SAI_CHALLENGER_PATH)/../test-cases/test_vector_example/:/sai-challenger/tests \
-		-v $(PWD)/../:/dash \
-		-d \
-		--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) \
-		$(DOCKER_SAI_CHALLENGER_CLIENT)
+	$(DOCKER_RUN_SAI_CHALLENGER_CLEINT) \
+	-d \
+	--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) \
+	$(DOCKER_SAI_CHALLENGER_CLIENT)
 
-kill-saic-client: undeploy-ixiac
-	-docker container stop $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
+kill-saic-client:
+	-docker kill $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
 
-# @brief Target with passing parameters.
-# @param SAI_CHALLENGER_SETUP_FILE Path to the setup file.
-#        Default is "../setups/sai_dpu_client_server.json".
-# @param SAI_CHALLENGER_TEST Test's name to start.
-#        Default is empty to start all tests.
-run-saic-test-thrift: deploy-ixiac
-# Check if client container is started. If not - start SAI-Challenger client
-  ifneq ($(shell docker container inspect -f '{{.State.Status}}' $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)), running)
-	echo "SAI-Challenger client container isn't running. Starting client..."
-	@make -C . run-saic-client
-  endif
-	-$(CONTAINER_SAI_CHALLENGER_CLIENT_EXEC) sh -c "pytest -sv --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)"
+run-saic-tests: deploy-ixiac
+	$(DOCKER_RUN_SAI_CHALLENGER_CLEINT) \
+	-w /sai-challenger/tests \
+	$(DOCKER_FLAGS) \
+	$(DOCKER_SAI_CHALLENGER_CLIENT) \
+	./run_vnet_tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
 
 ###############################
 # ENVIRONMENT SETUP TARGETS
