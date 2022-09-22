@@ -253,7 +253,7 @@ Its value will be added to the baseline SAIRPC_EXTRA_LIBS as defined in the sait
 
 Since the saithrift server is built within a docker container (and the parent repository is mounted as /dash), any of the extra libraries needed will need to be copied over under the parent repository, and the paths to those libraries will need to be relative to the docker mount point.
 
-In the example below, libprotobuf.a is a new external dependancy to the vendor specific libsai.so and has been copied over under the parent repository (in our case, dash-pipeline/SAI/lib).
+In the example below, libprotobuf.a is a new external dependency to the vendor specific libsai.so and has been copied over under the parent repository (in our case, dash-pipeline/SAI/lib).
 We use the provided Makefile.3rdpty as an entry point into the DASH makefiles.
 
 ```

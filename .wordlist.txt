@@ -281,7 +281,9 @@ Keysight
 KVM
 kvm
 lang
+LIBS
 libsai
+libprotobuf
 linux
 liveness
 LLDP
@@ -441,6 +443,7 @@ rx
 SAI
 sai
 sairedis
+SAIRPC
 saiserver
 saithrift
 sata
