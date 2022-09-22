@@ -7,9 +7,7 @@ The purpose is to generate discussion that will lead to an actual design doc.
 
 # HA Requirements
 
-The High Availability document lists the requirements:
-https://github.com/Azure/DASH/blob/main/documentation/high-avail/design/high-availability-and-scale.md
-
+See the [High Availability and Scale](high-availability-and-scale.md) document for the requirements.
 
 # Proposal
 

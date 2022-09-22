@@ -7,7 +7,8 @@ RPC_INST_DIR=$(shell pwd)/../rpc
 
 META=../SAI/meta
 
-SAIRPC_EXTRA_LIBS="\
+SAIRPC_VENDOR_EXTRA_LIBS?=
+SAIRPC_EXTRA_LIBS= "$(SAIRPC_VENDOR_EXTRA_LIBS) \
 		-L/lib/x86_64-linux-gnu -Wl,-rpath=/lib/x86_64-linux-gnu -lm \
 		-L/usr/local/lib/ -Wl,-rpath=/usr/local/lib \
 	    -lpthread \

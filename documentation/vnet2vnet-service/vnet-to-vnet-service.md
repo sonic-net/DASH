@@ -1,10 +1,6 @@
 ---
-Last update: 06/22/2022
+Last update: 09/20/2022
 ---
-
-[[<< Back to parent directory](../README.md)]
-
-[[<< Back to DASH top-level Documents](../../README.md#contents)]
 
 # VNET to VNET scenario
 
@@ -73,11 +69,11 @@ DASH performance enhancements (so called *bump in the wire*) happens.
 When talking about packet flow, we need to think about a process that involves
 several steps, as explained below. 
 
-> [!NOTE] From [SONiC-DASH HLD](../../general/design/dash-sonic-hld.md)
+> [!NOTE] From [SONiC-DASH HLD](../general/dash-sonic-hld.md)
 
 ### Outbound packet processing pipeline
 
-![dash-outbound](../../general/design/images/dash-hld-outbound-packet-processing-pipeline.svg)
+![dash-outbound](../general/images/dash-hld-outbound-packet-processing-pipeline.svg)
 
 <figcaption><i>Figure 2 - Outbound packet processing pipeline</i></figcaption><br/><br/>
 
@@ -107,7 +103,7 @@ In the outbound flow, the criteria listed below are applied.
 
 ### Inbound packet processing pipeline
 
-![dash-outbound](../../general/design/images/dash-hld-inbound-packet-processing-pipeline.svg)
+![dash-outbound](../general/images/dash-hld-inbound-packet-processing-pipeline.svg)
 
 <figcaption><i>Figure 3 - Inbound packet processing pipeline</i></figcaption><br/><br/>
 
@@ -305,8 +301,8 @@ setting i.e., without DASH optimization.
 ## References
 
 - [Disaggregated API for SONiC Hosts (DASH) high level
-  design](../../general/design/dash-high-level-design.md)
-- [SONiC-DASH HLD](../../general/design/dash-sonic-hld.md)
+  design](../general/dash-high-level-design.md)
+- [SONiC-DASH HLD](../general/dash-sonic-hld.md)
 - [P4 Getting
   Started](https://github.com/p4lang/education/blob/master/GettingStarted.md)
 - [P4-16 Language Specification](https://p4.org/p4-spec/docs/P4-16-v1.2.2.html)

@@ -468,7 +468,7 @@ The [figure below](#schema_relationships) illustrates the various schema and the
 * [SAI](https://github.com/Azure/DASH/tree/main/SAI) table and attribute objects
 
 #### Canonical Test Data and schema transformations
-For testing purposes, it is convenient to express test configurations in a single canonical format, and use this to drive the different API layers to verify correct behavior. A tentative JSON format for representing DASH service configurations is described in https://github.com/Azure/DASH/blob/main/documentation/gnmi/design/dash-reference-config-example.md. Test drivers can accept this input, transform it into different schemas and drive the associated interfaces. For example, a JSON representation of an ACL rule can be transformed into gNMI API calls, SAI-redis calls, SAI-thrift calls, etc.
+For testing purposes, it is convenient to express test configurations in a single canonical format, and use this to drive the different API layers to verify correct behavior. A tentative JSON format for representing DASH service configurations is described in [Reference configuration example (JSON)](../gnmi/dash-reference-config-example.md). Test drivers can accept this input, transform it into different schemas and drive the associated interfaces. For example, a JSON representation of an ACL rule can be transformed into gNMI API calls, SAI-redis calls, SAI-thrift calls, etc.
 
 ### Figure - Schema Relationships
 

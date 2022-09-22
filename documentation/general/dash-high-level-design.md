@@ -1,49 +1,44 @@
 ---
-Last update: 06/22/2022
+Last update: 09/20/2022
 ---
-
-[<< Back to parent directory](../README.md) ]
-
-[<< Back to DASH top-level Documents](../../README.md#contents) ]
 
 # Disaggregated API for SONiC Hosts (DASH) high level design 
 
-- [Disaggregated API for SONiC Hosts (DASH) high level design](#disaggregated-api-for-sonic-hosts-dash-high-level-design)
-  - [Introduction](#introduction)
-    - [Why DASH?](#why-dash)
-    - [Objectives](#objectives)
-  - [Compliance and requirements](#compliance-and-requirements)
-  - [Scenarios](#scenarios)
-  - [Azure provisioning example](#azure-provisioning-example)
-  - [DASH project](#dash-project)
-  - [Logical architecture (software stack)](#logical-architecture-software-stack)
-      - [SDN controller](#sdn-controller)
-        - [SDN and DPU High-Availability (HA)](#sdn-and-dpu-high-availability-ha)
-    - [gNMI container](#gnmi-container)
-      - [Multiple DPUs device](#multiple-dpus-device)
-    - [SONiC app containers](#sonic-app-containers)
-    - [Switch State Service (SWSS)](#switch-state-service-swss)
-    - [Switch Abstraction Interface (SAI) DASH extension](#switch-abstraction-interface-sai-dash-extension)
-    - [ASIC Drivers](#asic-drivers)
-    - [DASH capable ASICs](#dash-capable-asics)
-  - [SONiC integration](#sonic-integration)
-    - [DASH single DPU on NIC](#dash-single-dpu-on-nic)
-    - [DASH appliance](#dash-appliance)
-      - [High Level Architecture](#high-level-architecture)
-      - [Low level architecture](#low-level-architecture)
-    - [DASH smart switch](#dash-smart-switch)
-      - [High level architecture](#high-level-architecture-1)
-      - [Low level architecture](#low-level-architecture-1)
-  - [Example of network representation](#example-of-network-representation)
-    - [Deployment](#deployment)
-  - [Behavioral model](#behavioral-model)
-  - [SONiC Integration testing](#sonic-integration-testing)
-  - [DASH services conformance and performance testing](#dash-services-conformance-and-performance-testing)
-  - [Appendix](#appendix)
-    - [A day in the life of a DASH packet](#a-day-in-the-life-of-a-dash-packet)
-    - [A day in the life of a DASH SDN controller](#a-day-in-the-life-of-a-dash-sdn-controller)
-    - [A day in the life of a gNMI container](#a-day-in-the-life-of-a-gnmi-container)
-  - [References](#references)
+- [Introduction](#introduction)
+  - [Why DASH?](#why-dash)
+  - [Objectives](#objectives)
+- [Compliance and requirements](#compliance-and-requirements)
+- [Scenarios](#scenarios)
+- [Azure provisioning example](#azure-provisioning-example)
+- [DASH project](#dash-project)
+- [Logical architecture (software stack)](#logical-architecture-software-stack)
+    - [SDN controller](#sdn-controller)
+      - [SDN and DPU High-Availability (HA)](#sdn-and-dpu-high-availability-ha)
+  - [gNMI container](#gnmi-container)
+    - [Multiple DPUs device](#multiple-dpus-device)
+  - [SONiC app containers](#sonic-app-containers)
+  - [Switch State Service (SWSS)](#switch-state-service-swss)
+  - [Switch Abstraction Interface (SAI) DASH extension](#switch-abstraction-interface-sai-dash-extension)
+  - [ASIC Drivers](#asic-drivers)
+  - [DASH capable ASICs](#dash-capable-asics)
+- [SONiC integration](#sonic-integration)
+  - [DASH single DPU on NIC](#dash-single-dpu-on-nic)
+  - [DASH appliance](#dash-appliance)
+    - [High Level Architecture](#high-level-architecture)
+    - [Low level architecture](#low-level-architecture)
+  - [DASH smart switch](#dash-smart-switch)
+    - [High level architecture](#high-level-architecture-1)
+    - [Low level architecture](#low-level-architecture-1)
+- [Example of network representation](#example-of-network-representation)
+  - [Deployment](#deployment)
+- [Behavioral model](#behavioral-model)
+- [SONiC Integration testing](#sonic-integration-testing)
+- [DASH services conformance and performance testing](#dash-services-conformance-and-performance-testing)
+- [Appendix](#appendix)
+  - [A day in the life of a DASH packet](#a-day-in-the-life-of-a-dash-packet)
+  - [A day in the life of a DASH SDN controller](#a-day-in-the-life-of-a-dash-sdn-controller)
+  - [A day in the life of a gNMI container](#a-day-in-the-life-of-a-gnmi-container)
+- [References](#references)
 
 ## Introduction
 
@@ -109,18 +104,12 @@ achieve **10x or even 100x stateful connection performance** with hardware offlo
 The following are the compliance and requirements details applicable to the
 supported scenario:
 
-- [VNET to VNET
-  service](https://github.com/Azure/DASH/blob/main/documentation/vnet2vnet-service/requirements/README.md)
-- [VNET peering
-  service](https://github.com/Azure/DASH/blob/main/documentation/vnet-peering-service/requirements/README.md)
-- [Service tunnel & Private link
-  service](https://github.com/Azure/DASH/blob/main/documentation/stpl-service/requirements/README.md)
-- [Load balancer
-  service](https://github.com/Azure/DASH/blob/main/documentation/load-bal-service/requirements/README.md)
-- [Encryption gateway
-  service](https://github.com/Azure/DASH/blob/main/documentation/encrypt-gw-service/requirements/README.md)
-- [Express route gateway
-  service](https://github.com/Azure/DASH/blob/main/documentation/express-route-service/requirements/README.md)
+- [VNET to VNET service](../vnet2vnet-service/README.md)
+- [VNET peering service](../vnet-peering-service/README.md)
+- [Service tunnel & Private link service](../stpl-service/README.md)
+- [Load balancer service](../load-bal-service/README.md)
+- [Encryption gateway service](../encrypt-gw-service/README.md)
+- [Express route gateway service](../express-route-service/README.md)
 
 ## Scenarios
 
@@ -279,7 +268,7 @@ The only requirement on the card from the HA perspective is for the cards to
 setup a channel between themselves for flow synchronization.  The
 synchronization mechanism is left for technology suppliers to define and
 implement. For more information, see [High Availability and
-Scale](../../high-avail/design/high-availability-and-scale.md) document.
+Scale](../high-avail/high-availability-and-scale.md) document.
 
 
 ### gNMI container
@@ -342,8 +331,7 @@ In the case of a multiple DPUs device the following applies:
 
 The SWSS container comprises many daemons which operate on conceptual SONIC
 config objects across several databases. For more information and details about
-the integration, see [SONiC DASH
-HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-sonic-hld.md). 
+the integration, see [SONiC DASH HLD](dash-sonic-hld.md). 
 
 ### Switch Abstraction Interface (SAI) DASH extension
 
@@ -404,8 +392,7 @@ FPGAs, or some other high-density, performant hardware.
 
 The system architecture for SONiC DASH relies upon the [SONiC system
 architecture](https://github.com/Azure/SONiC/wiki/Architecture). For more
-information and details about the integration, see [SONiC DASH
-HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-sonic-hld.md). 
+information and details about the integration, see [SONiC DASH HLD](dash-sonic-hld.md). 
 
 The SONiC DASH integration introduces the following DASH modifications:
 
@@ -593,9 +580,11 @@ testing](https://github.com/Azure/DASH/tree/main/test).
 
 - [FAQ](https://github.com/Azure/DASH/wiki/FAQ)
 - [Glossary](https://github.com/Azure/DASH/wiki/Glossary)
-- [SAI headers](https://github.com/Azure/DASH/tree/main/SAI)
-- [DASH pipeline](https://github.com/Azure/DASH/tree/main/dash-pipeline)
+- [SAI headers](../sai/README.md)
+- [DASH pipeline](../../dash-pipeline/README.md)
 - [DASH conformance and performance testing](https://github.com/Azure/DASH/tree/main/test)
-- [SONiC DASH HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-sonic-hld.md)
+- [SONiC DASH HLD](dash-sonic-hld.md)
 - [SONiC System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture)
 - [P4 as a Single Source of Truth for SONiC DASH -  2022 P4 Workshop](https://www.youtube.com/watch?v=mT7-t_aDozM)
+
+
