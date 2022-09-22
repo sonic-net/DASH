@@ -247,6 +247,23 @@ This builds a saithrift-server daemon, which is linked to the `libsai` library a
 ```
 make saithrift-server
 ```
+In the case a vendor integrates its own `libsai` library into the saithrift server, the libsai might have new external dependencies (such as google protocol buffer) thus requiring for vendor specific libraries or linker options to be passed down to the saiserver linker.
+An environment variable (SAIRPC_VENDOR_EXTRA_LIBS) can be specified when invoking the saithrift server build command to provide path to new libraries and/or new linker options.
+Its value will be added to the baseline SAIRPC_EXTRA_LIBS as defined in the saithrift makefile.
+
+Since the saithrift server is built within a docker container (and the parent repository is mounted as /dash), any of the extra libraries needed will need to be copied over under the parent repository, and the paths to those libraries will need to be relative to the docker mount point.
+
+In the example below, libprotobuf.a is a new external dependency to the vendor specific libsai.so and has been copied over under the parent repository (in our case, dash-pipeline/SAI/lib).
+We use the provided Makefile.3rdpty as an entry point into the DASH makefiles.
+
+```
+SAIRPC_VENDOR_EXTRA_LIBS="/dash/dash-pipeline/SAI/lib/libprotobuf.a"
+thirdparty-saithrift-server: thirdparty-libsai
+	@echo "Build third-party saithrift-server"
+	@echo "   Expects libsai.so under $(DASHDIR)/dash-pipeline/SAI/lib"
+	SAIRPC_VENDOR_EXTRA_LIBS=$(SAIRPC_VENDOR_EXTRA_LIBS) $(MAKE) -C $(DASHDIR)/dash-pipeline saithrift-server
+```
+
 ## Build libsai C++ client test program(s)
 This compiles simple libsai client program(s) to verify the libsai-to-p4runtime-to-bmv2 stack. It performs table access(es).
 
