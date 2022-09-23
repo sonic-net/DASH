@@ -75,6 +75,7 @@ chrispsommers
 ci
 CLA
 cla
+classname
 CLI
 CloudStorm
 CNIP
@@ -408,6 +409,7 @@ PyPi
 pytest
 PyTest
 pytests
+Pytest's
 Pyunit
 qcow
 qos
