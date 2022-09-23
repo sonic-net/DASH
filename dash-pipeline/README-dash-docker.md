@@ -58,7 +58,7 @@ Some docker images are pulled from public repositories and used as-is, for examp
 During various build steps, a docker image is used to `docker run` a container(s) in which various `make` targets or other scripts are executed. So, the execution environment for most build steps is inside the docker container, not the normal user environment.
 
 ## Volume Mounts
-When the container is run, various local subdirectories are "mounted" as volumes in the container, via the `-v` flag, for example: `-v $(PWD)/SAI:/SAI`, which mounts the local `./SAI` directory as the container's `/SAI` directory. The container can thus read and write the local development environment directories and files to access source files and generate build artifacts. See the diagram below.
+When the container is run, various host machine subdirectories are "mounted" as volumes in the container, via the `-v` flag, for example: `-v $(PWD)/SAI:/SAI`, which mounts the host `./SAI` directory as the container's `/SAI` directory. The container can thus read and write the host development environment directories and files to access source files and generate build artifacts. See the diagram below.
 
 ![Docker Volume Mounts](images/docker-volume-mounts.svg)
 
@@ -164,7 +164,7 @@ See the figure and descriptions below.
 ![dash-docker-branch-workflow](images/dash-docker-branch-workflow.svg)
 
 1. Create a development branch in `Azure/DASH`, e.g. named `featureX`. This requires write-access to the project, typically confined to a few core maintainers.
-2. Create or modify Dockerfiles, associated `.env` files containing image names and tags, Makefiles, etc. Build and test this new work in your development machine. All Docker images are stored to and retrieved from the local machine's docker environment.
+2. Create or modify Dockerfiles, associated `.env` files containing image names and tags, Makefiles, etc. Build and test this new work in your development machine. All Docker images are stored to and retrieved from the host machine's docker environment.
 3. Perform `git commit` and `git push` to upload changes to GitHub. This will trigger CI actions, at a minimum to build/publish the docker images and run the main build/test CI actions. These run in parallel, which can lead to a race condition. If the main CI job tries to pull a new docker image which hasn't yet been published, it will fail the first time only.
 4. Manually re-run failed job(s) as needed, which should now pass, since the docker images should have successfully published. (If not, fix the Dockerfiles or CI action files which control these steps). Steps 2-4 can be repeated as needed.
 5. When feature work is complete, submit a pull request to the `main` branch. Once merged, it will again run all the CI jobs, which should pass.
@@ -185,7 +185,7 @@ See the figure and descriptions below.
 1. Create (or ask a maintainer to create) a branch in the `Azure/DASH` project. This will be used for publishing new docker images and perform the final pull-request into `main`. For this example we'll call the branch `featureX`.
 2. Create a fork, or update an existing one (`git pull`), and `git checkout featureX`.
 3. Create a new branch of this one, e.g. `git checkout -b featureX-dev`. This will be used to push changes to the `featureX` branch to effect docker image publishing. (Make sure you begin from the `featureX` branch before making the new one!)
-4. Create or modify Dockerfiles, associated `.env` files containing image names and tags, Makefiles, etc. Build and test this new work in your development machine. All Docker images are stored to and retrieved from the local machine's docker environment.
+4. Create or modify Dockerfiles, associated `.env` files containing image names and tags, Makefiles, etc. Build and test this new work in your development machine. All Docker images are stored to and retrieved from the host machine's docker environment.
 5. Commit and push changes to the forked project repo. This will trigger CI pipelines in the fork only. The main CI job will fail because it won't be able to pull the new docker images since they have not been published yet.
 6. Do a pull request from `featureX-dev` in your fork, to the `featureX` branch in the main repo. This will trigger CI actions to build and publish the new docker images. In parallel it will attempt a CI pipeline run to build and test everything, which will likely fail because required new images won't be published yet.
 7. Re-run the failed CI job, which should pass this time. From here you can proceed to step 8 (final PR) or return to step 4 and continue incremental development in your fork. Assuming the newly-published docker image published in step 6 is satisfactory, you can do more work on your fork and pushes to your forked project will trigger CI runs which should pass, since new docker images got published. If you need to make more docker updates, repeat steps 4-7 as needed.

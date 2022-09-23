@@ -3,17 +3,25 @@ See also:
 * [README-dash-workflows.md](README-dash-workflows.md) for build workflows and Make targets.
 * [README-ptftests](README-ptftests.md) for saithrift PTF test-case development and usage.
 * [README-pytests](README-pytests.md) for saithrift Pytest test-case development and usage.
+* 
 
 **Table of Contents**
 - [DASH saithrift client and server](#dash-saithrift-client-and-server)
   - [Overview](#overview)
 - [TODO](#todo)
+- [Adding DASH saithrift tests](#adding-dash-saithrift-tests)
 - [Running DASH saithrift tests](#running-dash-saithrift-tests)
   - [Running/Stopping the saithrift server](#runningstopping-the-saithrift-server)
   - [Production - Launch container, run tests in one shot](#production---launch-container-run-tests-in-one-shot)
   - [Development - Launch container, run tests in one shot](#development---launch-container-run-tests-in-one-shot)
 - [Developer: Run tests selectively from `bash` inside saithrift-client container](#developer-run-tests-selectively-from-bash-inside-saithrift-client-container)
   - [Select Directory - Container prebuilt directory, or mounted from host](#select-directory---container-prebuilt-directory-or-mounted-from-host)
+    - [Running all or selected PTF tests inside container](#running-all-or-selected-ptf-tests-inside-container)
+      - [Run all PTF Tests inside container](#run-all-ptf-tests-inside-container)
+      - [Run selected PTF Tests inside container](#run-selected-ptf-tests-inside-container)
+    - [Running all or selected Pytests inside container](#running-all-or-selected-pytests-inside-container)
+      - [Run all Pytests inside container](#run-all-pytests-inside-container)
+      - [Run selected Pytests inside container](#run-selected-pytests-inside-container)
 - [Test aftermath and clearing the switch config](#test-aftermath-and-clearing-the-switch-config)
 - [Tips and techniques for writing tests](#tips-and-techniques-for-writing-tests)
   - [Workspace File Layout](#workspace-file-layout)
@@ -29,7 +37,15 @@ The DASH saithrift API is used to configure and query a device under test (DUT) 
 
 This document describes how to run the saithrift server and client to run test suites. It also gives some advice for writing tests, debugging, etc.
 # TODO
-* Select saithrift server IP address to allow running client remotely from target.
+* Allow invoking selected saithrift-client test-cases (i.e. pass PTF and Pytest command-line options) from make targets, instead of only inside the container using `bash`.
+# Adding DASH saithrift tests
+The test case directory structure allows you to easily add new test cases by simply following the esisting structure. By default, all new test cases are automatically run via the various `make run-XXX-tests` targets, e.g. `make run-all-tests`. There is no need to modify any build/test scripts. The inherent features of PTF and Pytest make this automatic.
+
+Where to add test-cases? It's partially a matter of taste and partially a matter of following the existing structure.
+* You can add a new test class to an existing Python module. For example, you could add a PTF test class to the [test_saithrift_vnet.py](tests/saithrift/ptf/vnet/test_saithrift_vnet.py) file to build upon `vnet` test cases.
+* You can also add new modules (files) to an existing directory, e.g. [tests/ptf/vnet/](tests/saithrift/ptf/vnet) and add test-cases classes there. Creating a new file might be useful to organize groups of tests, expecially if you wish to run them selectively using command-line options (e.g. see [Run selected PTF Tests inside container](#run-selected-ptf-tests-inside-container)).
+* To add tests for an entire new feature, you might want to create a new directory under [tests/saithrift/ptf](tests/saithrift/ptf) or [tests/saithrift/pytest](tests/saithrift/pytest), then add test case file(s) with test-case classes.
+
 # Running DASH saithrift tests
 ## Running/Stopping the saithrift server
 ```
@@ -62,7 +78,9 @@ Enter the container, this will place you in the `/test-dev/` directory of the co
 make run-saithrift-client-bash 
 root@chris-z4:/tests-dev# 
 ```
-The running container is also mounted via `-v $(PWD)/test:/test-dev`  which mounts the current developer workspace into the running container. You can thereby create and edit new tests "live" from a text editor and see the effect inside the container in real-time. Note, the container image also contains the `/tests` directory which was copied into the Docker image when `make docker-saithrift-client` was last run. This means you have a "production" copy of tests as well as live "development" host volume simultaneously in the container.
+The running container is also mounted via `-v $(PWD)/test:/test-dev`  which mounts the current host workspace into the running container. You can thereby create and edit new tests "live" from a text editor and see the effect inside the container in real-time. Note, the container image also contains the `/tests` directory which was copied into the Docker image when `make docker-saithrift-client` was last run. This means you have a "production" copy of tests as well as live "development" host volume simultaneously in the container.
+
+>Note: This is not intended to provide a PTF or Pytest tutorial. It's just a handy reminder how to do very common activities like running one or a few tests. See the relevant PTF or Pytest documentation for running select tests or suites using `bash` commands. You can pass parameters via the command-line, to control which test groups are run using filenames, directories, or filtering on groups (PTF); or markers or string match expressions (pytest).
 
 ## Select Directory - Container prebuilt directory, or mounted from host
 
@@ -73,14 +91,45 @@ To get the desired subdirectory for Pytests or PTF test, choose the appropriate 
 * `cd /tests/saithrift/pytest`
 * `cd /tests-dev/saithrift/ptf`
 
-You can run all tests inside each respective directory by entering the directory and running the `run-saithrift-xxx` bash scripts, e.g.:
+### Running all or selected PTF tests inside container
+#### Run all PTF Tests inside container
+You can run all PTF tests by entering the directory and running the `run-saithrift-ptftests.sh` convenience script, e.g.:
 ```
 DASH/DASH/dash-pipeline$ make run-saithrift-client-bash
 ...
 root@chris-z4:/tests-dev/saithrift# cd ptf/
 root@chris-z4:/tests-dev/saithrift/ptf# ./run-saithrift-ptftests.sh 
 ```
-*OR*
+#### Run selected PTF Tests inside container
+By using the PTF command directly instead of the `run-saithrift-ptftests.sh` script you can control which tests you wish to run by directory, file and classname. Use the `./run-saithrift-ptftests.sh` as a starting point to get the basic syntax and options, then use knowledge of the `ptf` command to exert more control. Try `ptf -h` to get limited help, or go to the [PTF project page](https://github.com/p4lang/ptf) for more info.
+
+**Example: run all PTF tests in specified directory**
+
+This replaces the `--test-dir .` in the `./run-saithrift-ptftests.sh` with `--test-dir vnet` to run tests under the `vnet/` directory:
+```
+sudo ptf --test-dir vnet --pypath /SAI/ptf \
+	 --interface 0@veth1 --interface 1@veth3
+```
+
+**Example: run specified test module (file)**
+
+This specifies a directory `vnet` and a specific test module: `test_saithrift_vnet.py` (note, you must omit the `.py` extension). Note that  `--test-dir vnet` is optional; assuming the filename is unique, PTF will "find" it.
+
+```
+sudo ptf [--test-dir vnet] --pypath /SAI/ptf  --interface 0@veth1 --interface 1@veth3 test_saithrift_vnet
+```
+
+
+**Example: run specified test class**
+
+This specifies a directory `vnet` and a specific test class `test_saithrift_vnet.TestSaiThrift_outbound_udp_pkt`. Note that  `--test-dir vnet` is optional; assuming the filename/class are unique, PTF will "find" it.
+
+```
+sudo ptf [--test-dir vnet] --pypath /SAI/ptf  --interface 0@veth1 --interface 1@veth3 test_saithrift_vnet.TestSaiThrift_outbound_udp_pkt
+```
+
+### Running all or selected Pytests inside container
+#### Run all Pytests inside container
 ```
 DASH/DASH/dash-pipeline$ make run-saithrift-client-bash
 ...
@@ -88,8 +137,39 @@ root@chris-z4:/tests-dev/saithrift# cd pytest/
 root@chris-z4:/tests-dev/saithrift/pytest# ./run-saithrift-ptests.sh 
 ```
 
+#### Run selected Pytests inside container
+By using the pytest command directly instead of the `run-saithrift-ptftests.sh` script you can control which tests you wish to run by directory, file, string match, or markers. Use the `./run-saithrift-pytests.sh` as a starting point to get the basic syntax and options, then use knowledge of the `pytest` command to exert more control. Try `pytest -h` to get limited help, or go to the [Pytest manual page](https://docs.pytest.org/en/7.1.x/contents.html) for more info.
 
-See the relevant documentation for running select PTF or Pytests using `bash` commands. You can pass parameters via the command-line, to control which test groups are run using filenames, directories, or filtering on groups (PTF); or marks or match expressions (pytest).
+**Example: run all Pytest tests in specified directory**
+
+This runs all pytests under the `vnet` directory:
+```
+root@chris-z4:/tests-dev/saithrift/pytest#  python -m pytest -s vnet 
+```
+**Example: run Pytest via string matching**
+
+This runs a test class matching the string `test_sai_thrift_create_eni`. See output of `pytest -h` for more info on this powerful option; it allows complex Python expressions.
+```
+python -m pytest -s -k test_sai_thrift_create_eni
+```
+
+**Example: run Pytest via marker matching**
+
+This example uses Pytest's powerful "marker" capability. Markers are annotations preceding test classes. For example,
+the following code snippet addes several markers to a test case:
+```
+@pytest.mark.saithrift
+@pytest.mark.bmv2
+@pytest.mark.vnet
+def test_sai_thrift_create_eni(saithrift_client):
+    ...
+```
+To run all tests marked `vnet` use the following:
+```
+python -m pytest -s -m vnet
+```
+More powerful expressions are supportred, e.g. `-m 'mark1 and not mark2'`
+
 # Test aftermath and clearing the switch config
 Sometimes tests leave entries programmed into the switch, when they should have cleaned everything up. This can be caused by exceptions/assertions which fail and either inadvertently, or unavoidably, leave entries in tables. This might make a subsequent run of the same (or a different) test suite fail. In these cases, it might be best to execute the following sequence to restart the switch and saithrift server, then rerun test cases.
 :
