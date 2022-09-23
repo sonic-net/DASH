@@ -39,11 +39,11 @@ This document describes how to run the saithrift server and client to run test s
 # TODO
 * Allow invoking selected saithrift-client test-cases (i.e. pass PTF and Pytest command-line options) from make targets, instead of only inside the container using `bash`.
 # Adding DASH saithrift tests
-The test case directory structure allows you to easily add new test cases by simply following the esisting structure. By default, all new test cases are automatically run via the various `make run-XXX-tests` targets, e.g. `make run-all-tests`. There is no need to modify any build/test scripts. The inherent features of PTF and Pytest make this automatic.
+The test case directory structure allows you to easily add new test cases by simply following the existing structure. By default, all new test cases are automatically run via the various `make run-XXX-tests` targets, e.g. `make run-all-tests`. There is no need to modify any build/test scripts. The inherent features of PTF and Pytest make this automatic.
 
 Where to add test-cases? It's partially a matter of taste and partially a matter of following the existing structure.
 * You can add a new test class to an existing Python module. For example, you could add a PTF test class to the [test_saithrift_vnet.py](tests/saithrift/ptf/vnet/test_saithrift_vnet.py) file to build upon `vnet` test cases.
-* You can also add new modules (files) to an existing directory, e.g. [tests/ptf/vnet/](tests/saithrift/ptf/vnet) and add test-cases classes there. Creating a new file might be useful to organize groups of tests, expecially if you wish to run them selectively using command-line options (e.g. see [Run selected PTF Tests inside container](#run-selected-ptf-tests-inside-container)).
+* You can also add new modules (files) to an existing directory, e.g. [tests/ptf/vnet/](tests/saithrift/ptf/vnet) and add test-cases classes there. Creating a new file might be useful to organize groups of tests, especially if you wish to run them selectively using command-line options (e.g. see [Run selected PTF Tests inside container](#run-selected-ptf-tests-inside-container)).
 * To add tests for an entire new feature, you might want to create a new directory under [tests/saithrift/ptf](tests/saithrift/ptf) or [tests/saithrift/pytest](tests/saithrift/pytest), then add test case file(s) with test-case classes.
 
 # Running DASH saithrift tests
@@ -156,7 +156,7 @@ python -m pytest -s -k test_sai_thrift_create_eni
 **Example: run Pytest via marker matching**
 
 This example uses Pytest's powerful "marker" capability. Markers are annotations preceding test classes. For example,
-the following code snippet addes several markers to a test case:
+the following code snippet adds several markers to a test case:
 ```
 @pytest.mark.saithrift
 @pytest.mark.bmv2
@@ -168,7 +168,7 @@ To run all tests marked `vnet` use the following:
 ```
 python -m pytest -s -m vnet
 ```
-More powerful expressions are supportred, e.g. `-m 'mark1 and not mark2'`
+More powerful expressions are supported, e.g. `-m 'mark1 and not mark2'`
 
 # Test aftermath and clearing the switch config
 Sometimes tests leave entries programmed into the switch, when they should have cleaned everything up. This can be caused by exceptions/assertions which fail and either inadvertently, or unavoidably, leave entries in tables. This might make a subsequent run of the same (or a different) test suite fail. In these cases, it might be best to execute the following sequence to restart the switch and saithrift server, then rerun test cases.
