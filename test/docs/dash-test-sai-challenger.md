@@ -25,25 +25,38 @@ make run-saic-test-thrift <setup_file> <test_name>
 ```
 
 # How to start
+
+## os
+- install ubuntu 20.04
+
+## os depedencies
+```
+apt install docker-compose
+
+```
+
 ## Prepare repository
 ```
 git clone https://github.com/PLVision/DASH.git
-cd DASH && git checkout dev-tests-extension
+cd DASH && git checkout test-framework-extension
 git submodule update --init --recursive
 ```
 
 ## Build environment
 ```
 cd dash-pipeline
-make clean && make all
+make clean ;# skip on a fresh setup as it will fail
+make all
+
+pwd
 ```
 
 ## Start environment
 Run in the 3 separate windows/tabs.
-```
-make run-switch
-make run-saithrift-server
-```
+- take the output of `pwd` from previous step and do `cd <that location from pwd>` in each window
+- window 1: `make run-switch`
+- window 2: `make run-saithrift-server`
+- window 3: will be used to run the test as per instructions bellow
 
 ## Run tests manually
 
