@@ -28,7 +28,7 @@ Two test frameworks are suggested for automation:
 |---|---
 | VNETs | 1024
 | ENI per card | 64
-| Routes per ENI | 100k (**to clarify** in some md docs it is 200k)
+| Routes per ENI | 100k
 | NSGs per ENI | 6
 | ACLs per ENI | 6x100K prefixes
 | ACLs per ENI | 6x10K SRC/DST ports
@@ -38,7 +38,7 @@ Two test frameworks are suggested for automation:
 ### Performance
 | Item |	Expected value
 |---|---
-| CPS per card | 4M+
+| CPS per card | 5M
 | Flows per ENI | 1M
 | Flows per card | 16M per 200G (**64M**)
 
@@ -52,7 +52,8 @@ More requirements may be found in [DASH SONiC HLD](https://github.com/Azure/DASH
 
 1. [ENI config](./eni.md)<br>
 Verifies base CRUD operations and scaling for Elastic Network Interface (ENI),
-1. Connection tracking
+1. [Connection tracking](./conntrack.md)<br>
+Verifies the connection tracking mechanism, ageing, scaling and performance.
 1. ACL
 1. [VNET-to-VNET](./vnet.md)<br>
 Verifies VM to VM communication in VNET, using an Appliance for rules and routing offload.

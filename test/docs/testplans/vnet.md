@@ -31,7 +31,7 @@ The scenario allows the following:
 |---|---
 | VNETs | 1024
 | ENI per card | 64
-| Routes per ENI | 100k (**to clarify** in some md docs it is 200k)
+| Routes per ENI | 100k
 | NSGs per ENI | 6
 | ACLs per ENI | 6x100K prefixes
 | ACLs per ENI | 6x10K SRC/DST ports
@@ -65,12 +65,17 @@ More details may be found in [DASH SONiC HLD](https://github.com/Azure/DASH/blob
 # Automation
 
 Test cases are automated using SAI PTF test framework, except scale and performance tests.
+Scale and performance tests automation approach - to be defined.
 
 # Test suites
 
-**NOTE**: Each test has to send multiple traffic types:
-- Traffic that matches applied configuration (positive case)
-- Traffic that doesn't match applied configuration for each applied attribute (negative case).
+**Overall comments**
+1. Each scenario should be executed with and without underlay configuration:
+    - without underlay - same rx/tx port
+    - with underlay - use port to port traffic verification
+1. Each test should send multiple traffic types:
+    - Traffic that matches applied configuration (positive case)
+    - Traffic that doesn't match applied configuration for each applied attribute (negative case).
 
 ### **Outbound VNET routing**
 | # | Test case | Test Class.Method
@@ -91,9 +96,7 @@ Original table [link](https://github.com/Azure/DASH/blob/main/documentation/gene
 | --- | --- | ---
 | 1 | VNET2VNET routing with PA validation entry PERMIT.<br>SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE<br>SAI_PA_VALIDATION_ENTRY_ACTION_PERMIT| Vnet2VnetInboundTest.<br>vnet2VnetInboundPaValidatePermitTest
 | 2 | Direction lookup DENY action | Vnet2VnetInboundTest.<br/>vnet2VnetInboundDenyVniTest
-| 3 | Drop if CA DMAC does not match | Vnet2VnetInboundTest.<br/>vnet2VnetInboundInvalidEniMacTest
-| 4 | Drop if PA SIP does not match on PA validation | Vnet2VnetInboundTest.<br/>vnet2VnetInboundInvalidPaSrcIpTest
-| 5 | VNET2VNET routing without PA validation entry<br>SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP | -
+| 3 | VNET2VNET routing without PA validation entry<br>SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP | -
 
 
 ### **Integration**
@@ -103,6 +106,7 @@ Original table [link](https://github.com/Azure/DASH/blob/main/documentation/gene
 | 1 |Multiple inbound and outbound configurations at the same time. Send multiple allowed and forbidden traffic types. | -
 | 2 |Send non VXLAN traffic. (**to clarify** underlay routing?) | VnetRouteTest
 | 3 |Use multiple VIPs | -
+| 4 | Use same prefixes in CA and PA networks for outbound and inbound VNET at the same time | -
 
 ### **Negative**
 
@@ -111,6 +115,8 @@ Original table [link](https://github.com/Azure/DASH/blob/main/documentation/gene
 | 1 | Traffic with invalid VIP (Inbound and Outbound) | -
 | 2 | Traffic with valid VNI but no match to any ENI MAC | -
 | 3 | Invalid configurations:<br>- Multiple MACs for same ENI<br>- All different VNIs in ENI, direction lookup, vnet configuration.<br>- Add same VNI for different direction lookup entries. | -
+| 4 | Drop if CA DMAC does not match | Vnet2VnetInboundTest.<br/>vnet2VnetInboundInvalidEniMacTest
+| 5 | Drop if PA SIP does not match on PA validation | Vnet2VnetInboundTest.<br/>vnet2VnetInboundInvalidPaSrcIpTest
 
 ### **Scaling & Performance**
 
@@ -119,6 +125,7 @@ To be defined.
 
 ### **To clarify / Future**
 
+1. Items 5 and 7 in [other requirements](#other) are conflicting to each other.
 1. What is relation between vm_vni and vnet_id in ENI create?
 1. The lookup table is per ENI, but could be Global, or multiple Global lookup tables per ENIs. How to configure global lookup? Multiple lookups?
 1. In Encap and Decap rules we have:
