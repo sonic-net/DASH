@@ -82,7 +82,7 @@ parser dash_parser(packet_in packet,
 
     state parse_inner_ethernet {
         packet.extract(hd.inner_ethernet);
-        transition select(hd.ethernet.ether_type) {
+        transition select(hd.inner_ethernet.ether_type) {
             IPV4_ETHTYPE: parse_inner_ipv4;
             IPV6_ETHTYPE: parse_inner_ipv6;
             default: accept;
