@@ -560,6 +560,7 @@ class Vnet2VnetOutboundRouteVnetDirectTest(VNetAPI):
         +----------+-----------+
         """
         self.VIP_ADDRESS = "10.1.1.1"  # Appliance IP address
+        self.ENI_MAC = "00:01:00:00:03:14"
         self.SRC_VM_VNI = 1
         self.DST_VM_VNI = 2
 
@@ -572,9 +573,13 @@ class Vnet2VnetOutboundRouteVnetDirectTest(VNetAPI):
 
         # direction lookup VNI, reserved VNI assigned to the VM->Appliance
         self.direction_lookup_create(self.SRC_VM_VNI)
+        vnet_id_1 = self.vnet_create(self.SRC_VM_VNI)
 
-        eni_id = self.eni_create(vm_vni=self.SRC_VM_VNI)  # VM VNI = 1
-        self.eni_mac_map_create(eni_id, "00:01:00:00:03:14")  # ENI MAC address
+        eni_id = self.eni_create(vm_vni=self.SRC_VM_VNI,
+                                 vm_underlay_dip=sai_ipaddress("10.10.1.10"),
+                                 vnet_id=vnet_id_1)
+        self.eni_mac_map_create(eni_id, self.ENI_MAC)  # ENI MAC address
+
         vnet_id_2 = self.vnet_create(self.DST_VM_VNI)  # VNET VNI = 2
         # outbound routing
         self.outbound_routing_vnet_direct_create(eni_id, "192.168.1.0/24", vnet_id_2,
@@ -593,7 +598,7 @@ class Vnet2VnetOutboundRouteVnetDirectTest(VNetAPI):
         self.configureTest()
 
         # send packet and check
-        inner_pkt = simple_udp_packet(eth_src="00:00:00:09:03:14",
+        inner_pkt = simple_udp_packet(eth_src=self.ENI_MAC,
                                       eth_dst="20:30:40:50:60:70",
                                       ip_dst="192.168.1.1",
                                       ip_src="192.168.0.1",
@@ -659,6 +664,7 @@ class Vnet2VnetOutboundRouteDirectTest(VNetAPI):
         """
 
         self.VIP_ADDRESS = "10.1.1.1"  # Appliance VIP address
+        self.ENI_MAC = "00:01:00:00:03:14"
         self.SRC_VM_VNI = 1
 
     def configureTest(self):
@@ -671,8 +677,12 @@ class Vnet2VnetOutboundRouteDirectTest(VNetAPI):
         # direction lookup VNI, reserved VNI assigned to the VM->Appliance
         self.direction_lookup_create(self.SRC_VM_VNI)
 
-        eni_id = self.eni_create(vm_vni=self.SRC_VM_VNI)  # VM VNI = 1
-        self.eni_mac_map_create(eni_id, "00:01:00:00:03:14")  # ENI MAC address
+        vnet_id_1 = self.vnet_create(self.SRC_VM_VNI)
+
+        eni_id = self.eni_create(vm_vni=self.SRC_VM_VNI,
+                                 vm_underlay_dip=sai_ipaddress("10.10.1.10"),
+                                 vnet_id=vnet_id_1)
+        self.eni_mac_map_create(eni_id, self.ENI_MAC)  # ENI MAC address
 
         # outbound routing
         self.outbound_routing_direct_create(eni_id, "192.168.1.0/24")
@@ -688,7 +698,7 @@ class Vnet2VnetOutboundRouteDirectTest(VNetAPI):
         self.configureTest()
 
         # send packet and check
-        inner_pkt = simple_udp_packet(eth_src="00:00:00:09:03:14",
+        inner_pkt = simple_udp_packet(eth_src=self.ENI_MAC,
                                       eth_dst="20:30:40:50:60:70",
                                       ip_dst="192.168.1.1",
                                       ip_src="192.168.0.1",
