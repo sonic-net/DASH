@@ -66,7 +66,34 @@ class VNetAPI(VNetObjects):
         Create ENI
         """
 
-        eni_id = sai_thrift_create_eni(self.client, **kwargs)
+        default_kwargs = {
+            "admin_state": True,
+            "vm_underlay_dip": sai_ipaddress("0.0.0.0"),
+            "vm_vni": 1,
+            "vnet_id": 1,
+            "inbound_v4_stage1_dash_acl_group_id": 0,
+            "inbound_v4_stage2_dash_acl_group_id": 0,
+            "inbound_v4_stage3_dash_acl_group_id": 0,
+            "inbound_v4_stage4_dash_acl_group_id": 0,
+            "inbound_v4_stage5_dash_acl_group_id": 0,
+            "outbound_v4_stage1_dash_acl_group_id": 0,
+            "outbound_v4_stage2_dash_acl_group_id": 0,
+            "outbound_v4_stage3_dash_acl_group_id": 0,
+            "outbound_v4_stage4_dash_acl_group_id": 0,
+            "outbound_v4_stage5_dash_acl_group_id": 0,
+            "inbound_v6_stage1_dash_acl_group_id": 0,
+            "inbound_v6_stage2_dash_acl_group_id": 0,
+            "inbound_v6_stage3_dash_acl_group_id": 0,
+            "inbound_v6_stage4_dash_acl_group_id": 0,
+            "inbound_v6_stage5_dash_acl_group_id": 0,
+            "outbound_v6_stage1_dash_acl_group_id": 0,
+            "outbound_v6_stage2_dash_acl_group_id": 0,
+            "outbound_v6_stage3_dash_acl_group_id": 0,
+            "outbound_v6_stage4_dash_acl_group_id": 0,
+            "outbound_v6_stage5_dash_acl_group_id": 0
+        }
+        default_kwargs.update(kwargs)
+        eni_id = sai_thrift_create_eni(self.client, **default_kwargs)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.assertNotEqual(eni_id, 0)
         self.add_teardown_obj(self.eni_remove, eni_id)
