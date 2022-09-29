@@ -53,6 +53,10 @@ control dash_ingress(inout headers_t hdr,
         meta.direction = direction_t.OUTBOUND;
     }
 
+    action set_inbound_direction() {
+        meta.direction = direction_t.INBOUND;
+    }
+
     @name("direction_lookup|dash_direction_lookup")
     table direction_lookup {
         key = {
@@ -61,8 +65,10 @@ control dash_ingress(inout headers_t hdr,
 
         actions = {
             set_outbound_direction;
-            deny;
+            @defaultonly set_inbound_direction;
         }
+
+        const default_action = set_inbound_direction;
     }
 
     action set_appliance(EthernetAddress neighbor_mac,
@@ -248,7 +254,6 @@ control dash_ingress(inout headers_t hdr,
         }
 
         /* If Outer VNI matches with a reserved VNI, then the direction is Outbound - */
-        meta.direction = direction_t.INBOUND;
         direction_lookup.apply();
 
         appliance.apply();
