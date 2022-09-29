@@ -6,13 +6,13 @@ This contains a hierarchical set of directories containing DASH test cases organ
 | Folder | Description |
 | --- | --- |
 | functional | Tests to verify essential functionality using low-rate traffic (SAI PTF).
-| scale | Tests with hight-rate traffic and complex configuration to verify scaling real-world scenarios.
+| scale | Tests with high-rate traffic and complex configuration to verify scaling real-world scenarios.
 
 ## functional
 
 | Folder/File | Description |
 | --- | --- |
-| saidashvnet.py | VNET-to-VNET test cases
+| `saidashvnet.py` | VNET-to-VNET test cases
 
 
 ## scale
