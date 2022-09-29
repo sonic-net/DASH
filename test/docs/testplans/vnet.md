@@ -81,8 +81,8 @@ Scale and performance tests automation approach - to be defined.
 | # | Test case | Test Class.Method
 | --- | --- | ---
 | 1 | Route action ROUTE_VNET | -
-| 2 | Route action ROUTE_VNET_DIRECT | Vnet2VnetInboundTest.<br>Vnet2VnetOutboundRouteVnetDirectTest
-| 3 | Route action ROUTE_DIRECT | Vnet2VnetOutboundTest.<br>Vnet2VnetOutboundRouteDirectTest
+| 2 | Route action ROUTE_VNET_DIRECT | `Vnet2VnetInboundTest.`<br>`Vnet2VnetOutboundRouteVnetDirectTest`
+| 3 | Route action ROUTE_DIRECT | `Vnet2VnetOutboundTest.`<br>`Vnet2VnetOutboundRouteDirectTest`
 | 4 | dst_vnet_id True/False in OUTBOUND_CA_TO_PA_ENTRY | -
 | 5 | Use same CA prefixes in different outbound routing tables (different ENIs) | -
 | 6 | Use multiple overlapping routing prefixes in the same outbound routing table. | -
@@ -94,9 +94,8 @@ Original table [link](https://github.com/Azure/DASH/blob/main/documentation/gene
 
 | # | Test case | Test Class.Method
 | --- | --- | ---
-| 1 | VNET2VNET routing with PA validation entry PERMIT.<br>SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE<br>SAI_PA_VALIDATION_ENTRY_ACTION_PERMIT| Vnet2VnetInboundTest.<br>vnet2VnetInboundPaValidatePermitTest
-| 2 | Direction lookup DENY action | Vnet2VnetInboundTest.<br/>vnet2VnetInboundDenyVniTest
-| 3 | VNET2VNET routing without PA validation entry<br>SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP | -
+| 1 | VNET2VNET routing with PA validation entry PERMIT.<br>SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE<br>SAI_PA_VALIDATION_ENTRY_ACTION_PERMIT| `Vnet2VnetInboundTest`.<br>`vnet2VnetInboundPaValidatePermitTest`
+| 2 | VNET2VNET routing without PA validation entry<br>SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP | -
 
 
 ### **Integration**
@@ -104,7 +103,7 @@ Original table [link](https://github.com/Azure/DASH/blob/main/documentation/gene
 | # | Test case | Test Class.Method
 | --- | --- | ---
 | 1 |Multiple inbound and outbound configurations at the same time. Send multiple allowed and forbidden traffic types. | -
-| 2 |Send non VXLAN traffic. (**to clarify** underlay routing?) | VnetRouteTest
+| 2 |Send non VXLAN traffic. (**to clarify** underlay routing?) | `VnetRouteTest`
 | 3 |Use multiple VIPs | -
 | 4 | Use same prefixes in CA and PA networks for outbound and inbound VNET at the same time | -
 
@@ -115,8 +114,8 @@ Original table [link](https://github.com/Azure/DASH/blob/main/documentation/gene
 | 1 | Traffic with invalid VIP (Inbound and Outbound) | -
 | 2 | Traffic with valid VNI but no match to any ENI MAC | -
 | 3 | Invalid configurations:<br>- Multiple MACs for same ENI<br>- All different VNIs in ENI, direction lookup, vnet configuration.<br>- Add same VNI for different direction lookup entries. | -
-| 4 | Drop if CA DMAC does not match | Vnet2VnetInboundTest.<br/>vnet2VnetInboundInvalidEniMacTest
-| 5 | Drop if PA SIP does not match on PA validation | Vnet2VnetInboundTest.<br/>vnet2VnetInboundInvalidPaSrcIpTest
+| 4 | Drop if CA DMAC does not match | `Vnet2VnetInboundTest.`<br/>`vnet2VnetInboundInvalidEniMacTest`
+| 5 | Drop if PA SIP does not match on PA validation | `Vnet2VnetInboundTest.`<br/>`vnet2VnetInboundInvalidPaSrcIpTest`
 
 ### **Scaling & Performance**
 
@@ -132,7 +131,7 @@ To be defined.
     - static rule
     - based on mapping lookup
     - inner packet SRC/DEST IP calculated based on part of outer packet SRC/DEST IP<br>
-Question: What is static rule nad calculated values?
+Question: What is static rule and calculated values?
 1. How to test - Inbound (priority) route rules processing:
     - Most Outer Source IP Prefix
     - Most Outer Destination IP Prefix

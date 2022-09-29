@@ -56,10 +56,12 @@ Test cases are automated:
 
 | # | Test case | Test Class.Method
 | --- | --- | ---
-| 1 | Standard ageing (fully correct TCP session). | -
-| 2 | Standard ageing (fully correct UDP session). | -
-| 3 | Open TCP session but no data and no FIN | -
-| 4 | TCP session started from the middle (no SYN packet) | -
+| 1 | Standard ageing (fully correct TCP session, session dropped immediately). | -
+| 2 | Standard ageing (fully correct UDP session, session dropped after timeout). | -
+| 3 | Custom ageing (fully correct TCP session). | -
+| 4 | Custom ageing (fully correct UDP session). | -
+| 5 | Open TCP session but no data and no FIN. | -
+| 6 | TCP session started from the middle (no SYN packet). | -
 
 ## Integration
 
