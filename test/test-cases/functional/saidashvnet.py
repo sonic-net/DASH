@@ -103,16 +103,16 @@ class VNetAPI(VNetObjects):
     def eni_remove(self, eni_id):
         sai_thrift_remove_eni(self.client, eni_id)
 
-    def direction_lookup_create(self, vni, drop=False):
+    def direction_lookup_create(self, vni):
         """
         Create direction lookup entry
         """
 
         act = SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION
-        if drop:
-            act = SAI_DIRECTION_LOOKUP_ENTRY_ACTION_DENY
+
         direction_lookup_entry = sai_thrift_direction_lookup_entry_t(switch_id=self.switch_id, vni=vni)
         sai_thrift_create_direction_lookup_entry(self.client, direction_lookup_entry, action=act)
+
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.direction_lookup_remove, direction_lookup_entry)
 
@@ -380,7 +380,6 @@ class Vnet2VnetInboundTest(VNetAPI):
     def runTest(self):
         self.configureTest()
         self.vnet2VnetInboundPaValidatePermitTest()
-        self.vnet2VnetInboundDenyVniTest()
         self.vnet2VnetInboundRouteInvalidVniTest()
         self.vnet2VnetInboundInvalidEniMacTest()
         self.vnet2VnetInboundInvalidPaSrcIpTest()
@@ -467,28 +466,6 @@ class Vnet2VnetInboundTest(VNetAPI):
 
         print('\n', self.vnet2VnetInboundPaValidatePermitTest.__name__, ' OK')
 
-    def vnet2VnetInboundDenyVniTest(self):
-        """
-        Inbound VNET to VNET test with SAI_DIRECTION_LOOKUP_ENTRY_ACTION_DENY action
-        Verifies packet drop
-        """
-
-        # drop direction lookup VNI
-        drop_vni = 3
-        self.direction_lookup_create(drop_vni, drop=True)
-
-        # VNI matches Direction lookup Deny action
-        vxlan_pkt_invalid_vni = copy(self.vxlan_pkt)
-        vxlan_pkt_invalid_vni.getlayer('VXLAN').vni = drop_vni
-
-        print("Sending VxLAN IPv4 packet with VNI that matches direction lookup action Deny, expect drop")
-
-        send_packet(self, self.dev_port0, vxlan_pkt_invalid_vni)
-        verify_no_packet(self, self.inner_eth_packet, self.dev_port1, timeout=1)
-        verify_no_packet(self, self.outer_eth_packet, self.dev_port1, timeout=1)
-
-        print('\n', self.vnet2VnetInboundDenyVniTest.__name__, ' OK')
-
     def vnet2VnetInboundInvalidEniMacTest(self):
         """
         Inbound VNET to VNET test
@@ -541,6 +518,7 @@ class Vnet2VnetInboundTest(VNetAPI):
         verify_no_packet(self, self.outer_eth_packet, self.dev_port1, timeout=1)
 
         print('\n', self.vnet2VnetInboundRouteInvalidVniTest.__name__, ' OK')
+
 
 @group("draft")
 class Vnet2VnetOutboundRouteVnetDirectTest(VNetAPI):
