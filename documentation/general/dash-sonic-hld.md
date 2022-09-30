@@ -37,6 +37,7 @@
 | 0.6 | 08/05/2022  |  Mukesh M Velayudhan  | Outbound VNI derivation in pipeline |
 | 0.7 | 08/09/2022  |     Prince Sunny      | Add Inbound Routing rules           |
 | 0.6 | 04/20/2022  |     Marian Pritsak    | APP_DB to SAI mapping               |
+| 0.8 | 09/30/2022  |     Prabhat Aravind   | Update APP_DB table names           |
 
 
 # About this Manual
@@ -176,7 +177,7 @@ Following diagram captures the object reference model.
 ### 3.2.1 VNET
   
 ```
-DASH_VNET:{{vnet_name}} 
+DASH_VNET_TABLE:{{vnet_name}}
     "vni": {{vni}} 
     "guid": {{"string"}}
     "address_spaces": {{[list of addresses]}} (OPTIONAL)
@@ -186,14 +187,14 @@ DASH_VNET:{{vnet_name}}
 ### 3.2.2 QOS
   
 ```
-DASH_QOS:{{qos_name}} 
+DASH_QOS_TABLE:{{qos_name}}
     "qos_id": {{string}}
     "bw": {{bw}} 
     "cps": {{cps}}
     "flows": {{flows}}
 ```
 ```
-key                      = DASH_QOS:qos_name ; Qos name as key
+key                      = DASH_QOS_TABLE:qos_name ; Qos name as key
 ; field                  = value 
 bw                       = bandwidth in kbps
 cps                      = Number of connection per second
@@ -203,7 +204,7 @@ flows                    = Number of flows
 ### 3.2.3 ENI
   
 ```
-DASH_ENI:{{eni}} 
+DASH_ENI_TABLE:{{eni}}
     "eni_id": {{string}}
     "mac_address": {{mac_address}} 
     "qos": {{qos_name}}
@@ -212,7 +213,7 @@ DASH_ENI:{{eni}}
     "vnet": {{vnet_name}}
 ```
 ```
-key                      = DASH_ENI:eni ; ENI MAC as key
+key                      = DASH_ENI_TABLE:eni ; ENI MAC as key
 ; field                  = value 
 mac_address              = MAC address as string
 qos                      = Associated Qos profile
@@ -223,28 +224,28 @@ vnet                     = Vnet that ENI belongs to
 ### 3.2.4 ACL
   
 ```
-DASH_ACL_IN:{{eni}}:{{stage}}
+DASH_ACL_IN_TABLE:{{eni}}:{{stage}}
     "acl_group_id": {{group_id}} 
 ```
 ```
-DASH_ACL_OUT:{{eni}}:{{stage}}
+DASH_ACL_OUT_TABLE:{{eni}}:{{stage}}
     "acl_group_id": {{group_id}} 
 ```
 
 ```
-key                      = DASH_ACL_IN:eni:stage ; ENI name and stage as key; ACL stage can be {1, 2, 3 ..}
+key                      = DASH_ACL_IN_TABLE:eni:stage ; ENI name and stage as key; ACL stage can be {1, 2, 3 ..}
 ; field                  = value 
 acl_group_id             = ACL group ID
 ```
 
 ```
-DASH_ACL_GROUP:{{group_id}} 
+DASH_ACL_GROUP_TABLE:{{group_id}}
     "ip_version": {{ipv4/ipv6}}
     "guid": {{string}}
 ```
 
 ```
-DASH_ACL_RULE:{{group_id}}:{{rule_num}}
+DASH_ACL_RULE_TABLE:{{group_id}}:{{rule_num}}
     "priority": {{priority}}
     "action": {{action}}
     "terminating": {{bool}}
@@ -257,7 +258,7 @@ DASH_ACL_RULE:{{group_id}}:{{rule_num}}
 ```
 
 ```
-key                      = DASH_ACL_RULE:group_id:rule_num ; unique rule num within the group.
+key                      = DASH_ACL_RULE_TABLE:group_id:rule_num ; unique rule num within the group.
 ; field                  = value 
 priority                 = INT32 value  ; priority of the rule, lower the value, higher the priority
 action                   = allow/deny
@@ -272,7 +273,7 @@ dst_port                 = list of range of destination ports ',' separated
 ### 3.2.5 ROUTING TYPE
 	
 ```
-DASH_ROUTING_TYPE:{{routing_type}}: [
+DASH_ROUTING_TYPE_TABLE:{{routing_type}}: [
         "action_name":{{string}}
         "action_type": {{action_type}} 
         "encap_type": {{encap type}} (OPTIONAL)
@@ -281,7 +282,7 @@ DASH_ROUTING_TYPE:{{routing_type}}: [
 ```
 
 ```
-key                      = DASH_ROUTING_TYPE:routing_type; routing type can be {direct, vnet, vnet_direct, vnet_encap, appliance, privatelink, privatelinknsg, servicetunnel}; actions can be a list of action_types
+key                      = DASH_ROUTING_TYPE_TABLE:routing_type; routing type can be {direct, vnet, vnet_direct, vnet_encap, appliance, privatelink, privatelinknsg, servicetunnel}; actions can be a list of action_types
 ; field                  = value
 action_name              = action name as string
 action_type              = action_type can be {maprouting, direct, staticencap, appliance, 4to6, mapdecap, decap, drop}
@@ -292,13 +293,13 @@ vni                      = vni value associated with the corresponding action. A
 ### 3.2.6 APPLIANCE
 	
 ```
-DASH_APPLIANCE:{{appliance_id}} 
+DASH_APPLIANCE_TABLE:{{appliance_id}}
     "sip": {{ip_address}}
     "vm_vni": {{vni}}
 ```
 
 ```
-key                      = DASH_APPLIANCE:id ; attributes specific for the appliance
+key                      = DASH_APPLIANCE_TABLE:id ; attributes specific for the appliance
 ; field                  = value 
 sip                      = source ip address, to be used in encap
 vm_vni                   = VM VNI that is used for setting direction. Also used for inbound encap to VM
@@ -378,38 +379,38 @@ use_dst_vni              = bool                      ; if true, use the destinat
 
 |     APP_DB Table      |      Key      |       Field      |             SAI Attributes/*objects*              |                     Comment                     |
 |-----------------------|---------------|------------------|---------------------------------------------------|-------------------------------------------------|
-| DASH_APPLIANCE        |               |                  |                                                   |                                                 |
+| DASH_APPLIANCE_TABLE  |               |                  |                                                   |                                                 |
 |                       | appliance_id  |                  |                                                   |                                                 |
 |                       |               | sip              | sai_vip_entry_t.vip                               |                                                 |
 |                       |               | vm_vni           | sai_direction_lookup_entry_t.VNI                  |                                                 |
-| DASH_VNET             |               |                  | *SAI_OBJECT_TYPE_VNET*                            |                                                 |
+| DASH_VNET_TABLE       |               |                  | *SAI_OBJECT_TYPE_VNET*                            |                                                 |
 |                       | vnet_name     |                  |                                                   |                                                 |
 |                       |               | vxlan_tunnel     |                                                   | VxLAN tunnel won't be used                      |
 |                       |               | vni              | SAI_VNET_ATTR_VNI                                 |                                                 |
 |                       |               | guid             |                                                   | Not relevant                                    |
 |                       |               | address_spaces   |                                                   |                                                 |
 |                       |               | peer_list        |                                                   |                                                 |
-| DASH_QOS              |               |                  |                                                   |                                                 |
+| DASH_QOS_TABLE        |               |                  |                                                   |                                                 |
 |                       | qos_name      |                  |                                                   |                                                 |
 |                       |               | qos_id           |                                                   |                                                 |
 |                       |               | bw               | SAI_ENI_ATTR_PPS                                  |                                                 |
 |                       |               | cps              | SAI_ENI_ATTR_CPS                                  |                                                 |
 |                       |               | flows            | SAI_ENI_ATTR_FLOWS                                |                                                 |
-| DASH_ENI              |               |                  | *SAI_OBJECT_TYPE_ENI*                             |                                                 |
+| DASH_ENI_TABLE        |               |                  | *SAI_OBJECT_TYPE_ENI*                             |                                                 |
 |                       | eni           |                  |                                                   |                                                 |
 |                       |               | eni_id*          | SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID       |                                                 |
 |                       |               | mac_address*     | sai_eni_ether_address_map_entry_t.address         |                                                 |
 |                       |               | eni_id**         | sai_outbound_eni_to_vni_entry_t.ENI               |                                                 |
 |                       |               | qos              |                                                   |                                                 |
 |                       |               | vnet**           | SAI_ENI_ATTR_VNET_ID                              | VNET object ID                                  |
-| DASH_ACL_V4_IN        |               |                  |                                                   | Same for V6                                     |
+| DASH_ACL_V4_IN_TABLE  |               |                  |                                                   | Same for V6                                     |
 |                       | eni           |                  |                                                   |                                                 |
 |                       |               | stage            | SAI_ENI_ATTR_INBOUND_V4_stage_DASH_ACL_GROUP_ID   | STAGE1..STAGE5                                  |
 |                       |               | acl_group_id     | SAI_ENI_ATTR_INBOUND_V4_stage_DASH_ACL_GROUP_ID   |                                                 |
-| DASH_ACL_GROUP        |               |                  | *SAI_OBJECT_TYPE_DASH_ACL_GROUP*                  |                                                 |
+| DASH_ACL_GROUP_TABLE  |               |                  | *SAI_OBJECT_TYPE_DASH_ACL_GROUP*                  |                                                 |
 |                       | group_id      |                  |                                                   |                                                 |
 |                       |               | ip_version       | SAI_DASH_ACL_GROUP_ATTR_IP_ADDR_FAMILY            |                                                 |
-| DASH_ACL_RULE         |               |                  | *SAI_OBJECT_TYPE_DASH_ACL_RULE*                   |                                                 |
+| DASH_ACL_RULE_TABLE   |               |                  | *SAI_OBJECT_TYPE_DASH_ACL_RULE*                   |                                                 |
 |                       | group_id      |                  | SAI_DASH_ACL_RULE_ATTR_GROUP_ID                   |                                                 |
 |                       | rule_num      |                  |                                                   |                                                 |
 |                       |               | priority         | SAI_DASH_ACL_RULE_ATTR_PRIORITY                   |                                                 |
@@ -632,16 +633,16 @@ Refer DASH documentation for the test plan.
 ```
 [
     {
-        "DASH_VNET:Vnet1": {
+        "DASH_VNET_TABLE:Vnet1": {
             "vni": "45654",
             "guid": "559c6ce8-26ab-4193-b946-ccc6e8f930b2"
         },
         "OP": "SET"
     },
     {
-        "DASH_ENI:F4939FEFC47E": {
+        "DASH_ENI_TABLE:F4939FEFC47E": {
 	    "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
-	    "mac_address": "F4939FEFC47E",
+	    "mac_address": "F4-93-9F-EF-C4-7E",
 	    "underlay_ip": "25.1.1.1",
 	    "admin_state": "enabled",
 	    "vnet": "Vnet1"
@@ -649,21 +650,21 @@ Refer DASH documentation for the test plan.
         "OP": "SET"
     },
     {
-        "DASH_ROUTING_TYPE:vnet": {
+        "DASH_ROUTING_TYPE_TABLE:vnet": {
             "name": "action1",
             "action_type": "maprouting"
         },
         "OP": "SET"
     },
     {
-        "DASH_ROUTING_TYPE:vnet_direct": {
+        "DASH_ROUTING_TYPE_TABLE:vnet_direct": {
             "name": "action1",
             "action_type": "maprouting"
         },
         "OP": "SET"
     },
     {
-        "DASH_ROUTING_TYPE:vnet_encap": {
+        "DASH_ROUTING_TYPE_TABLE:vnet_encap": {
              "name": "action1",
              "action_type": "staticencap",
              "encap_type": "vxlan"
@@ -695,7 +696,7 @@ Refer DASH documentation for the test plan.
         "DASH_VNET_MAPPING_TABLE:Vnet1:10.0.0.6": {
             "routing_type":"vnet_encap",
             "underlay_ip":"2601:12:7a:1::1234",
-            "mac_address":"F922839922A2"
+            "mac_address":"F9-22-83-99-22-A2"
         },
         "OP": "SET"
     },
@@ -703,7 +704,7 @@ Refer DASH documentation for the test plan.
         "DASH_VNET_MAPPING_TABLE:Vnet1:10.0.0.5": {
             "routing_type":"vnet_encap",
             "underlay_ip":"100.1.2.3",
-            "mac_address":"F922839922A2"
+            "mac_address":"F9-22-83-99-22-A2"
         },
         "OP": "SET"
     },
@@ -711,7 +712,7 @@ Refer DASH documentation for the test plan.
         "DASH_VNET_MAPPING_TABLE:Vnet1:10.1.1.1": {
             "routing_type":"vnet_encap",
             "underlay_ip":"101.1.2.3",
-            "mac_address":"F922839922A2"
+            "mac_address":"F9-22-83-99-22-A2"
         },
         "OP": "SET"
     }
