@@ -440,11 +440,13 @@ runtime
 rx
 SAI
 sai
+saigen
 sairedis
 saiserver
 saithrift
 sata
 scalability
+scalable
 Scalable
 scapy
 Schemas
