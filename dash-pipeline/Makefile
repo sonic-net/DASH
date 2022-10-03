@@ -11,7 +11,7 @@ run-saithrift-client-dev-tests: run-saithrift-dev-ptftests run-saithrift-dev-pyt
 clean: kill-all p4-clean sai-clean test-clean network-clean saithrift-server-clean
 	rm -rf $(P4_OUTDIR)
 
-kill-all: kill-saithrift-server kill-switch undeploy-ixiac kill-saic-client
+kill-all: kill-saithrift-server kill-switch undeploy-ixiac kill-saichallenger-client
 
 PWD := $(shell pwd)
 DASH_USER ?=dashuser
@@ -504,8 +504,8 @@ DOCKER_SAI_CHALLENGER_CLIENT = anton7811/dash-saichallenger-client:220920
 
 CONTAINER_SAI_CHALLENGER_CLIENT_NAME = dash-saichallenger-client-$(USER)
 
-# Add passing parameters to the run-saic-test-thrift target.
-ifeq (run-saic-tests,$(firstword $(MAKECMDGOALS)))
+# Add passing parameters to the run-saichallenger-tests target.
+ifeq (run-saichallenger-tests,$(firstword $(MAKECMDGOALS)))
   SAI_CHALLENGER_SETUP_FILE := $(wordlist 2, 2, $(MAKECMDGOALS))
   SAI_CHALLENGER_TEST := $(wordlist 3, 3, $(MAKECMDGOALS))
   $(eval $(SAI_CHALLENGER_SETUP_FILE):;@:)
@@ -520,10 +520,10 @@ ifeq ($(SAI_CHALLENGER_TEST),)
 SAI_CHALLENGER_TEST := test_sai_vnet_*.py
 endif
 
-docker-saic-client:
+docker-saichallenger-client:
 	cd $(SAI_CHALLENGER_PATH) && ./build.sh -i client
 	docker build \
-		-f dockerfiles/Dockerfile.saic-client \
+		-f dockerfiles/Dockerfile.saichallenger-client \
 		-t $(DOCKER_SAI_CHALLENGER_CLIENT) \
 		.
 
@@ -537,16 +537,23 @@ DOCKER_RUN_SAI_CHALLENGER_CLEINT=docker run \
 	--network=host \
 	--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
 
-run-saic-client: deploy-ixiac
+run-saichallenger-client: deploy-ixiac
 	$(DOCKER_RUN_SAI_CHALLENGER_CLEINT) \
 	-d \
 	--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) \
 	$(DOCKER_SAI_CHALLENGER_CLIENT)
 
-kill-saic-client:
+run-saichallenger-client-bash: deploy-ixiac
+	$(DOCKER_RUN_SAI_CHALLENGER_CLEINT) \
+	-d \
+	--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) \
+	$(DOCKER_SAI_CHALLENGER_CLIENT) \
+	/bin/bash
+
+kill-saichallenger-client:
 	-docker kill $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
 
-run-saic-tests: deploy-ixiac
+run-saichallenger-tests: deploy-ixiac
 	$(DOCKER_RUN_SAI_CHALLENGER_CLEINT) \
 	-w /sai-challenger/tests \
 	$(DOCKER_FLAGS) \

@@ -4,37 +4,32 @@
 * Added test cases for SAI-Challenger by path: `DASH/test/test-cases/test_vector_example`
 
 # New make targets:
-**`docker-saic-client`**: Build SAI-Challenger docker image and docker image based on SAI-Challenger client docker image with sai_thrift, saigen and DASH files.
+**`docker-saichallenger-client`**: Build SAI-Challenger docker image and docker image based on SAI-Challenger client docker image with sai_thrift, saigen and DASH files.
 
-**`run-saic-client`**: Start Ixia-C and docker container `sc-client-thrift-run` from image built on `docker-saic-client` target. SAI-Challenger tests (`DASH/test/SAI-Challenger.OCP/tests`) folder replaced by `DASH/test/test-cases/test_vector_example` folder inside of container. Bound mount volume with DASH folder.
+**`run-saichallenger-client`**: Start Ixia-C and docker container `sc-client-thrift-run` from image built on `docker-saichallenger-client` target. SAI-Challenger tests (`DASH/test/SAI-Challenger.OCP/tests`) folder replaced by `DASH/test/test-cases/test_vector_example` folder inside of container. Bound mount volume with DASH folder.
 
-**`kill-saic-client`**: Stop Ixia-C and `sc-client-thrift-run` container.
+**`kill-saichallenger-client`**: Stop Ixia-C and `sc-client-thrift-run` container.
 
-**`run-saic-test-thrift`**: Run test manually. This target may be triggered with passing parameters, or with default parameters.
+**`run-saichallenger-tests`**: Run test manually. This target may be triggered with passing parameters, or with default parameters.
 Run with default parameters(Setup file: `sai_dpu_client_server_snappi.json`; Test: `test_sai_vnet_*.py`):
 ```
-make run-saic-test-thrift
+make run-saichallenger-tests
 ```
 
 Run with setup parameter and default test parameter (All tests):
 ```
-make run-saic-test-thrift <setup_file>
+make run-saichallenger-tests <setup_file>
 ```
 
 Run with setup parameter and test parameter:
 ```
-make run-saic-test-thrift <setup_file> <test_name>
+make run-saichallenger-tests <setup_file> <test_name>
 ```
 
 # How to start
 
-## os
-- install ubuntu 20.04
-
-## os dependencies
-```
-apt install docker-compose
-```
+## Environment
+Install dependencies listed [**here**](../../dash-pipeline/README.md#prerequisites).
 
 ## Prepare repository
 ```
@@ -64,26 +59,25 @@ Run in the 3 separate windows/tabs.
 ### Using make target
 Run all available VNET tests:
 ```sh
-make run-saic-tests
+make run-saichallenger-tests
 ```
 
 Run tests in DASH configuration format with the custom options:
 ```sh
-make run-saic-tests sai_dpu_client_server_snappi.json test_sai_vnet_inbound.py
-make run-saic-tests sai_dpu_client_server_snappi.json test_sai_vnet_outbound.py
+make run-saichallenger-tests sai_dpu_client_server_snappi.json test_sai_vnet_inbound.py
+make run-saichallenger-tests sai_dpu_client_server_snappi.json test_sai_vnet_outbound.py
 ```
 
 Run tests in SAI configuration format with custom options:
 ```sh
-make run-saic-tests sai_dpu_client_server_snappi.json test_vnet_inbound.py
-make run-saic-tests sai_dpu_client_server_snappi.json test_vnet_outbound.py
+make run-saichallenger-tests sai_dpu_client_server_snappi.json test_vnet_inbound.py
+make run-saichallenger-tests sai_dpu_client_server_snappi.json test_vnet_outbound.py
 ```
 
 ### Manually from the docker (developers mode)
 Run the `dash-saichallenger-client-$USER` container.
 ```sh
-make run-saic-client
-docker exec dash-saichallenger-client-ubuntu-$USER <command>
+make run-saichallenger-client-bash
 ```
 
 And execute tests in DASH configuration format (inside the container):
