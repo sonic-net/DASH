@@ -114,7 +114,7 @@ DASH Sonic implementation is targeted for appliance scenarios and must handles m
 7. Implementation must support ability to get all ACL rules/groups based on guid. 
 8. In normal operation, mappings churn often followed by routes and least for ACLs.
 9. ENIs shall have an admin-state that enables normal connections and forwarding only *after* all configurations for an ENI is applied during initial creation. When the ENI is admin-state down, the packets destined to this ENI shall be dropped. Order of operation/configuration shall be enforced by the controller. Sonic implementation shall honor the state set by controller and ENI shall accept and forward traffic only if the admin-state is set to 'up'. 
-10. ENI must support 1M active bi-directional TCP connections or UDP flows however the connection pool can be oversubscribed. An oversubscription of 2:1 would be expected, so the connection pool can be more optimal if excuted as one large table where ENI can be apart of the key.
+10. ENI must support 1M active bi-directional TCP connections or UDP flows however the connection pool can be oversubscribed. An oversubscription of 2:1 would be expected, so the connection pool can be more optimal if executed as one large table where ENI can be apart of the key.
 11. During VNET or ENI delete, implementation must support ability to delete all *mappings* or *routes* in a single API call.
 12. Add and Delete APIs are idempotent. As an example, deleting an object that doesn't exists shall not return an error. 
 13. During a delete operation, if there is a dependency (E.g. mappings still present when a VNET is deleted), implementation shall return *error* and shall not perform any force-deletions or delete dependencies implicitly. 
