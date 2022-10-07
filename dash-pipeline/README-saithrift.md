@@ -73,7 +73,7 @@ make run-saithrift-client-dev-tests       # run both suites above
 
 **TODO:** - pass params to the container to select tests etc.
 # Developer: Run tests selectively from `bash` inside saithrift-client container
-Enter the container, this will place you in the `/test-dev/` directory of the container which corresponds to the contents of the `DASH/dash-pipline/tests` directory on the host. In this way you can interactively run test-cases while you're editing them. When doing so, the container's `/test` directory remains in-place with tests which were copied into the container at image build-time.
+Enter the container, this will place you in the `/tests-dev/` directory of the container which corresponds to the contents of the `DASH/dash-pipline/tests` directory on the host. In this way you can interactively run test-cases while you're editing them. When doing so, the container's `/tests` directory remains in-place with tests which were copied into the container at image build-time.
 ```
 make run-saithrift-client-bash 
 root@chris-z4:/tests-dev# 
@@ -84,8 +84,8 @@ The running container is also mounted via `-v $(PWD)/test:/test-dev`  which moun
 
 ## Select Directory - Container prebuilt directory, or mounted from host
 
-* `cd /test/` - Enter directory which was prebuilt into container image; tests are not modifiable "live" from the host. This is good for canned tests.
-* `cd /test-dev/` - Enter directory which is mounted to `dash-pipeline/tests` from the host, allowing live editing in the host and running in the container. This is a convenient developer workflow.
+* `cd /tests/` - Enter directory which was prebuilt into container image; tests are not modifiable "live" from the host. This is good for canned tests.
+* `cd /tests-dev/` - Enter directory which is mounted to `dash-pipeline/tests` from the host, allowing live editing in the host and running in the container. This is a convenient developer workflow.
 
 To get the desired subdirectory for Pytests or PTF test, choose the appropriate path, e.g.:
 * `cd /tests/saithrift/pytest`
@@ -134,7 +134,7 @@ sudo ptf [--test-dir vnet] --pypath /SAI/ptf  --interface 0@veth1 --interface 1@
 DASH/DASH/dash-pipeline$ make run-saithrift-client-bash
 ...
 root@chris-z4:/tests-dev/saithrift# cd pytest/
-root@chris-z4:/tests-dev/saithrift/pytest# ./run-saithrift-ptests.sh 
+root@chris-z4:/tests-dev/saithrift/pytest# ./run-saithrift-pytests.sh 
 ```
 
 #### Run selected Pytests inside container

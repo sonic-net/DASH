@@ -63,9 +63,10 @@ What we are looking for in a series of testing is how well the NIC
 handles:
 
 1.  Connections/sec per ENI and per NIC
-1.  Number of active connections per ENI and per NIC
-1.  Number of flows per ENI and per NIC
-1.  Throughput under max connections per second load with the remaining
+2.  Number of active connections per ENI and per NIC
+3.  Number of flows per ENI and per NIC
+4.  ENIs' connection pool can be oversubscribed. An oversubscription of 2:1 would be expected, so the connection pool can be more optimal if executed as one large table where ENI can be apart of the key. The connection table would be the most appropriate table for oversubscription scenarios.
+5.  Throughput under max connections per second load with the remaining
     bandwidth is filled with pre-learned connections that receive at
     least one packet per second while driving the links to near 100%
     utilization. This requires some work up front to get the right mix
@@ -74,10 +75,10 @@ handles:
     jitter**. We therefore also run the test sufficiently long to see if
     there were any queue build-ups which would eventually lead to drops
     and distort both latency and jitter results.
-1.  Aging of (TCP connections) and (UDP bi-directional flows) such that
+6.  Aging of (TCP bi-directional connections) and (UDP bi-directional flows) such that
     after the test is complete all connections are aged within the 1
     second interval or any other interval we program.
-1.  We are expecting to cover below scenarios as follow-on tests:
+7.  We are expecting to cover below scenarios as follow-on tests:
 
         a. Age arbitrary connections to verify that aging is also working
         properly under maximum load.
@@ -102,7 +103,7 @@ Why are we running these tests?
     expect the CPS to increase. **Any NIC for the application that
     cannot achieve millions of connections/sec will automatically be
     disqualified from further testing.**
-1.  Many NICs can create (a large number) of connections simply by
+2.  Many NICs can create (a large number) of connections simply by
     adding more external memory for the connection table. For example, a
     NIC can create 1M connections in its external table, however if
     packets arrive across the entire connection set in a random order,
@@ -117,7 +118,7 @@ Why are we running these tests?
     keepalives once every few minutes) is referred to as an idle
     connection and is a useless parameter that should never be
     advertised and will not be tested other than for conformance.**
-1.  Aging is also a vital component of tracking connections. Even under
+3.  Aging is also a vital component of tracking connections. Even under
     the worst load the system must be able to age connections. All
     packets will require either connection setup/teardown or policy
     lookups/updates involving external memory and hence the memory
@@ -125,7 +126,7 @@ Why are we running these tests?
     in this document will ensure that no matter what processing is going
     on, the connection table will be maintained providing the proper
     aging intervals to each connection.
-1.  We need to be able to enter/delete many new policies at any time
+4.  We need to be able to enter/delete many new policies at any time
     regardless of load. For this reason, we will run the test without
     updates to policy to get a baseline and then again with some
     extensive policies being added/deleted during the same test. We will
@@ -304,10 +305,10 @@ both scenarios:
 | ACLs prefixes | 10x100K    | 64M          | 128M  | 256M  | 512M  |
 | ACLs Ports    | 10x10K     | 6.4M         | 12.8M | 25.6M | 51.2M |
 | Mappings (CA to PA)     | 160K       | 10M          | 20M   | 40M   | 80M   |
-| Act Con       | 1M (bidir) | 64M          | 128M  | 256M  | 512M  |
+| Act Con       | 1M (bidir w/ connection pool capable of oversubscription) | 64M          | 128M  | 256M  | 512M  |
 | CPS           |            | 3.75M        | 7.5M  | 15M   | 30M   |
-| bg flows TCP  |            | 1M  (bidir)  |  2M   | 4M    |  8M   |
-| bg flows UDP  |            | 1M  (bidir)  | 2M    | 4M    | 8M    |
+| bg flows TCP  |            | 1M  (bidir w/ connection pool capable of oversubscription)  |  2M   | 4M    |  8M   |
+| bg flows UDP  |            | 1M  (bidir w/ connection pool capable of oversubscription)  | 2M    | 4M    | 8M    |
 
 - ACL rules per NSG = 1000
 - Prefixes per ACL rule = 100
@@ -326,7 +327,7 @@ both scenarios:
     - 48 \* 200k prefixes per NSG = 9.6M Prefixes
     - 2M Mapping Table
 
-1. &nbsp; 1 ENI Scenario
+2. &nbsp; 1 ENI Scenario
     - 1 ENI/VPort
     - 1.6M routes
     - 48 NSGs

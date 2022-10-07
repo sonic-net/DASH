@@ -42,9 +42,11 @@ struct metadata_t {
     eni_data_t eni_data;
     bit<16> inbound_vm_id;
     bit<8> appliance_id;
-    bit<1> is_dst_ip_v6;
+    bit<1> is_overlay_ip_v6;
     bit<1> is_lkup_dst_ip_v6;
+    bit<8> ip_protocol;
     IPv4ORv6Address dst_ip_addr;
+    IPv4ORv6Address src_ip_addr;
     IPv4ORv6Address lkup_dst_ip_addr;
     conntrack_data_t conntrack_data;
     bit<16> stage1_dash_acl_group_id;

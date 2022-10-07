@@ -74,6 +74,9 @@ action vxlan_decap(inout headers_t hdr) {
     hdr.ipv4 = hdr.inner_ipv4;
     hdr.inner_ipv4.setInvalid();
 
+    hdr.ipv6 = hdr.inner_ipv6;
+    hdr.inner_ipv6.setInvalid();
+
     hdr.vxlan.setInvalid();
     hdr.udp.setInvalid();
 
