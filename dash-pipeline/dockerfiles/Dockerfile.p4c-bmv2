@@ -24,9 +24,9 @@ FROM amd64/ubuntu:20.04
 # Need python for "p4c" wrapper &  gcc for the C preprocessor
 RUN apt update && apt install -y python3 gcc
 
-COPY --from=p4lang-p4c /usr/local/lib/* /usr/local/lib/
+COPY --from=chrissommers/dash-p4c-bldr:221007 /usr/local/lib/* /usr/local/lib/
 
-COPY --from=p4lang-p4c \
+COPY --from=chrissommers/dash-p4c-bldr:221007 \
         /usr/lib/x86_64-linux-gnu/libboost_*so* \
         /usr/lib/x86_64-linux-gnu/libgc*so* \
         /usr/lib/x86_64-linux-gnu/libisl*so* \
@@ -34,13 +34,13 @@ COPY --from=p4lang-p4c \
         /usr/lib/x86_64-linux-gnu/libmpfr*so* \
         /usr/lib/x86_64-linux-gnu/
 
-COPY --from=p4lang-p4c /usr/lib/gcc/x86_64-linux-gnu /usr/lib/gcc/x86_64-linux-gnu/
-COPY --from=p4lang-p4c /usr/bin/cpp /usr/bin/
-COPY --from=p4lang-p4c /usr/local/share/p4c/ /usr/local/share/p4c/
+COPY --from=chrissommers/dash-p4c-bldr:221007 /usr/lib/gcc/x86_64-linux-gnu /usr/lib/gcc/x86_64-linux-gnu/
+COPY --from=chrissommers/dash-p4c-bldr:221007 /usr/bin/cpp /usr/bin/
+COPY --from=chrissommers/dash-p4c-bldr:221007 /usr/local/share/p4c/ /usr/local/share/p4c/
 
 WORKDIR /usr/local/bin
 
-COPY --from=p4lang-p4c \
+COPY --from=chrissommers/dash-p4c-bldr:221007 \
         /usr/local/bin/p4c \
         /usr/local/bin/p4c-bm2-ss \
         /usr/local/bin/

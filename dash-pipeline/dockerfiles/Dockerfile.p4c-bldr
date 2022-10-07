@@ -1,0 +1,113 @@
+# It uses grpc 1.43.2 as base to ensure right lib versions.
+FROM chrissommers/dash-grpc:1.43.2 as grpc
+
+# https://hub.docker.com/r/p4lang/behavioral-model
+FROM p4lang/behavioral-model:no-pi
+LABEL maintainer="SONIC-DASH Community"
+LABEL description="DASH pipeline P4 Behavioral Model and toolchain"
+
+# Configure make to run as many parallel jobs as cores available
+ARG available_processors
+ARG MAKEFLAGS=-j$available_processors
+
+
+# Select the compiler to use.
+# We install the default version of GCC (GCC 9), as well as clang 8 and clang 10.
+ARG sswitch_grpc=yes
+ARG CC=gcc
+ARG CXX=g++
+ENV TZ=America/Los_Angeles
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+ENV GIT_SSL_NO_VERIFY=true
+
+ENV PI_DEPS automake \
+            build-essential \
+            clang-8 \
+            clang-10 \
+            clang-format-8 \
+            g++ \
+            libboost-dev \
+            libboost-system-dev \
+            libboost-thread-dev \
+            libtool \
+            libtool-bin \
+            pkg-config \
+            libreadline-dev \
+            libpcap-dev \
+            libmicrohttpd-dev \
+            doxygen \
+            valgrind \
+            vim \
+            git-core \
+            python3 \
+            cmake \
+            python3-pip
+
+ENV PI_RUNTIME_DEPS libboost-system1.71.0 \
+                    libboost-thread1.71.0 \
+                    libpcap0.8 \
+                    python3 \
+                    python-is-python3
+
+RUN apt-get update && apt-get install -y --no-install-recommends $PI_DEPS $PI_RUNTIME_DEPS
+
+COPY --from=grpc /usr/local/lib/lib*grpc*.so* \
+            /usr/local/lib/libabsl*.so* \
+            /usr/local/lib/libgpr*.so* \
+            /usr/local/lib/libupb*.so* \
+            /usr/local/lib/libre2*.so* \
+            /usr/local/lib/libaddress_sorting*.so* \
+            /usr/local/lib/libssl*.so* \
+            /usr/local/lib/libcrypto*.so* \
+            ./
+
+ENV LD_LIBRARY_PATH=/usr/local/lib
+
+RUN apt-get install -y cmake g++ git automake libtool libgc-dev bison flex \
+        libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev \
+        libboost-graph-dev llvm pkg-config python3 python3-pip \
+        tcpdump
+
+RUN pip3 install ipaddr scapy ply
+
+WORKDIR /
+
+RUN git clone https://github.com/p4lang/PI
+WORKDIR /PI/
+RUN git submodule update --init --recursive
+RUN apt-get update && \
+    ./autogen.sh && \
+    ./configure --enable-Werror --with-bmv2 --with-proto --with-cli --with-internal-rpc --with-sysrepo && \
+    ./proto/sysrepo/install_yangs.sh && \
+    make && \
+    make install
+
+WORKDIR /
+
+RUN pip install jinja2
+
+RUN git clone --recursive https://github.com/marian-pritsak/p4c.git
+
+RUN cd p4c && \
+        mkdir build && \
+        cd build && \
+        cmake .. && \
+        make -j4 && \
+        make install
+
+ARG user
+ARG uid
+ARG guid
+ARG hostname
+
+ENV BUILD_HOSTNAME $hostname
+ENV USER $user
+
+RUN groupadd -f -r -g $guid g$user
+
+RUN useradd $user -l -u $uid -g $guid -d /var/$user -m -s /bin/bash
+
+RUN echo "$user ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers
+
+USER $user

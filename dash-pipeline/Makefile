@@ -43,6 +43,9 @@ DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220819
 # Base image with test frameworks, DASH client libs not installed
 DOCKER_SAITHRIFT_CLIENT_BLDR_IMG ?=chrissommers/dash-saithrift-client-bldr:220819
 
+# P4c builder - p4c build dependencies, custom p4c fork
+DOCKER_P4C_BLDR_IMG ?=chrissommers/dash-p4c-bldr:221007
+
 # Client image built locally with saithrift client libs + PTF & Pytest frameworks
 # TODO: consider some other tagging scheme
 DOCKER_SAITHRIFT_CLIENT_IMG ?= local/dash-saithrift-client:latest
@@ -411,6 +414,19 @@ run-saithrift-client-bash:
 # 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
 # 	    --build-arg available_processors=$(shell nproc) \
 # 		dockerfiles
+
+# Builder, has base packages to make client docker
+docker-dash-p4c-bldr:
+	docker build \
+		-f dockerfiles/Dockerfile.p4c-bldr \
+	    -t $(DOCKER_P4C_BLDR_IMG) \
+	    --build-arg user=$(DASH_USER) \
+	    --build-arg group=$(DASH_GROUP) \
+	    --build-arg uid=$(DASH_UID) \
+	    --build-arg guid=$(DASH_GUID) \
+	    --build-arg hostname=$(DASH_HOST) \
+	    --build-arg available_processors=$(shell nproc) \
+		./tests
 
 docker-dash-p4c:
 	docker build \
