@@ -529,7 +529,7 @@ docker-saichallenger-client:
 
 DOCKER_RUN_SAI_CHALLENGER_CLEINT=docker run \
 	-v $(SAI_CHALLENGER_PATH):/sai-challenger \
-	-v $(SAI_CHALLENGER_PATH)/../test-cases/test_vector_example/:/sai-challenger/tests \
+	-v $(SAI_CHALLENGER_PATH)/../test-cases/test_vector_example/:/sai-challenger/dash_tests \
 	-v $(PWD)/../:/dash \
 	--cap-add=NET_ADMIN \
 	--device /dev/net/tun:/dev/net/tun \
@@ -545,8 +545,8 @@ run-saichallenger-client: deploy-ixiac
 
 run-saichallenger-client-bash: deploy-ixiac
 	$(DOCKER_RUN_SAI_CHALLENGER_CLEINT) \
-	-d \
-	--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) \
+	-w /sai-challenger/dash_tests \
+	$(DOCKER_FLAGS) \
 	$(DOCKER_SAI_CHALLENGER_CLIENT) \
 	/bin/bash
 
@@ -555,7 +555,7 @@ kill-saichallenger-client:
 
 run-saichallenger-tests: deploy-ixiac
 	$(DOCKER_RUN_SAI_CHALLENGER_CLEINT) \
-	-w /sai-challenger/tests \
+	-w /sai-challenger/dash_tests \
 	$(DOCKER_FLAGS) \
 	$(DOCKER_SAI_CHALLENGER_CLIENT) \
 	./run_vnet_tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)

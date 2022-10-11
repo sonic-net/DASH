@@ -28,7 +28,7 @@
     "mode": "ixia_c",
     "controller": "https://127.0.0.1:443",
     "port_groups": [{"10G": "veth1", "init": "10G", "alias": 0},
-                    {"10G": "veth2", "init": "10G", "alias": 1}
+                    {"10G": "veth3", "init": "10G", "alias": 1}
                    ]
   }
 ],

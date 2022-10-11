@@ -44,7 +44,7 @@
     "op": "create",
     "type": "SAI_OBJECT_TYPE_VNET",
     "attributes": [
-      "SAI_VNET_ATTR_VNI", "100"
+      "SAI_VNET_ATTR_VNI", "1000"
     ]
   },
   {
@@ -87,7 +87,7 @@
     "type": "SAI_OBJECT_TYPE_ENI_ETHER_ADDRESS_MAP_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
-      "address": "00:CC:CC:CC:CC:CC"
+      "address": "00:CC:CC:CC:00:00"
     },
     "attributes": [
       "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID", "$eni"
@@ -118,9 +118,8 @@
     },
     "attributes": [
       "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP", "172.16.1.20",
-      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC", "00:DD:DD:DD:DD:DD",
+      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC", "00:DD:DD:DD:00:00",
       "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_USE_DST_VNET_VNI", "True"
     ]
   }
 ]
-

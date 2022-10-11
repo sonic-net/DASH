@@ -112,12 +112,12 @@ class TestSaiVnetInbound:
 
     def test_create_vnet_config(self, confgen, dpu, dataplane):
 
-        confgen.mergeParams(TEST_VNET_INBOUND_CONFIG)
-        confgen.generate()
-        for item in confgen.items():
-            pprint(item)
+        # confgen.mergeParams(TEST_VNET_INBOUND_CONFIG)
+        # confgen.generate()
+        # for item in confgen.items():
+        #     pprint(item)
 
-        with (current_file_dir / 'test_vnet_inbound_setup_commands.json').open(mode='r') as config_file:
+        with (current_file_dir / 'vnet_inbound_setup_commands.json').open(mode='r') as config_file:
             vnet_inbound_setup_commands = json.load(config_file)
         result = [*dpu.process_commands(vnet_inbound_setup_commands)]
         print("\n======= SAI commands RETURN values =======")
@@ -168,16 +168,18 @@ class TestSaiVnetInbound:
 
     def test_remove_vnet_config(self, confgen, dpu, dataplane):
 
-        confgen.mergeParams(TEST_VNET_INBOUND_CONFIG)
-        confgen.generate()
+        # confgen.mergeParams(TEST_VNET_INBOUND_CONFIG)
+        # confgen.generate()
+        # for item in confgen.items():
+        #     item['OP'] = 'remove'
+        #     pprint(item)
 
-        for item in confgen.items():
-            item['OP'] = 'remove'
-            pprint(item)
+        with (current_file_dir / 'vnet_inbound_setup_commands.json').open(mode='r') as config_file:
+            setup_commands = json.load(config_file)
+        cleanup_commands = []
+        for cmd in reversed(setup_commands):
+            cleanup_commands.append({'name': cmd['name'], 'op': 'remove'})
 
-        with (current_file_dir / 'test_vnet_inbound_cleanup_commands.json').open(mode='r') as config_file:
-            vnet_inbound_cleanup_commands = json.load(config_file)
-
-        result = [*dpu.process_commands(vnet_inbound_cleanup_commands)]
+        result = [*dpu.process_commands(cleanup_commands)]
         print("\n======= SAI commands RETURN values =======")
         pprint(result)
