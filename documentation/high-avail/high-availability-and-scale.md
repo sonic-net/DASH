@@ -386,3 +386,15 @@ exist in its table then this update message should be ignored.
 
 -   When pairing is re-established, it is recommended that the secondary card for simplicity to empty entire state of 
 the flow table. This will allow it to receive clean state.
+
+
+#### We need to define the Standardized MetaData (Control Plane)
+Standardize MetaData common to all technology providers (outside of opaque info that is provider specific)
+Message data structure
+CA<->PA mapping
+SDN Controller messages
+outgoing encap data
+5-tuple flow data
+
+#### We need to Define packet format (gRPC? See AMD HA Proposal)
+
