@@ -9,10 +9,13 @@ This document describes the High availability mechanisms for DPUs in the DASH fr
 This proposal has the following design goals
 
 1. All connections setup before switchover should work reliably after planned and unplanned switchovers
-1. 0 downtime planned switchover, <2 sec downtime unplanned switchover
-1. Data packets should not be dropped due to flow replication delays
-1. Sync connection setup and teardown at datapath rate to support high CPS
-1. Sync only required packets to conserve PPS for data traffic
+2. 0 downtime planned switchover, <2 sec downtime unplanned switchover
+3. Data packets should not be dropped due to flow replication delays
+4. Sync connection setup and teardown at datapath rate to support high CPS
+5. Sync only required packets to conserve PPS for data traffic
+6. Allow controller to trigger flow reconciliation to fixup flows after all switchovers
+7. Allow Preemption so admin active becomes the operation active in steady state. Preemption in such cases should be controllable by the controller.
+
 
 ## Functional Description
 
@@ -50,16 +53,41 @@ Each ENI configured on the DPU is associated with a DP-VIP by the controller. In
 
 ### Datapath Heartbeat
 
-Each DPU sends heartbeat messages at a configured interval to its peer. When a peer loses a set number of heartbeats it declares the peer unreachable and a switchover is initiated. The interval between heartbeats and the number of missed heartbeats are configurable. The Heartbeats can be aggressive hence it is left to the DPU to perform the heartbeat.
+Each DPU sends heartbeat messages at a configured interval to its peer. When a peer loses a set number of heartbeats it declares the peer unreachable and a switchover is initiated. The interval between heartbeats and the number of missed heartbeats are configurable. The Heartbeats can be aggressive hence it is left to the DPU to perform the heartbeat. The Heartbeats can be aggressive hence it is left to the DPU to perform the heartbeat.
+
+The heartbeat has to use a separate channel than any other control plane messages. This is to avoid any head of line blocking and delays in the heartbeat responses due to processing of control messages. The heartbeat frequency can be quite aggressive and can be sensitive to such delays if it uses the same channel as other control plane messages. The packets on the wire are tagged with a high priority DSCP so the network can give it the right treatment.
 
 ## State Synchronization
 
-State synchronization between the 2 DPUs uses the CNIP IP. All state synchronization happens at the granularity of the DP-VIP and happens from the primary of the DP-VIP towards the secondary. State synchronization happens in 2 parallel stages
+State synchronization between the 2 DPUs uses the CNIP IP. All state synchronization happens at the granularity of the DP-VIP and happens from the primary of the DP-VIP towards the secondary. 
+
+One of the goals of this design is to ensure that any traffic that was forwarded before switchover continues to be forwarded after switchover. This is important because although the controller ensures that configured policies on the two paired nodes will be eventually consistent, there are windows where the configurations can be out of sync between the nodes for windows of time since the configuration push is not atomic between the paired nodes. To provide consistency in forwarding on switchover the design uses the policy lookup on the primary to be the source of truth between the pair. State synchronization from the primary to the secondary carries for each flow the results of the lookup on the primary. On switchover the new Primary continues to forward based on the old primary’s results hence maintaining continuity. The Controller can then trigger an update of the state (Flow reconciliation) when configuration on the new primary is up-to-date.
+
+Flow state synchronization hence involves 2 components
+Flow key
+Policy lookup results on the primary (metadata)
+
+Actually flow lookup results and format will depend on the underlying implementation hence exact formats are not defined in this document. But the below 2 lists show the classes of state that are synchronized and not synchronized
+
+**State Synchronized**
+1. Policy results from Security Lookup
+2. Mapping/Route lookup results
+3. Rewrite information, Src IP/Dst/IP/Src Port/Dst Port/VNI translations etc.
+4. Metering Class
+
+**State that is not synchronized**
+1. Metering data
+2. All Statistics
+3. TCP Flow sequence number and acknowledgment numbers used for tracking
+4. Dynamic underlay forwarding results like routing next hops etc.
+
+
+State synchronization happens in 2 parallel stages
 
 1. Bulk Sync
-1. Data path sync
+2. Data path sync
 
-The below figure shows the channels used for synchronization. The Bulk sync and the datapath synchronization uses 2 different channels.
+The below figure shows the channels used for synchronization. The Bulk sync and the datapath synchronization uses 2 different channels.  It should be noted that once Bulk sync has started Datapath Sync can be happening in parallel.
 
 ![](images/channels.003.png)
 
@@ -98,6 +126,27 @@ Due to the scale requirements for DASH the flow table size that needs to be hand
 - Flow aging during bulk sync
 
 All these problems require the hw implementation maintain a mechanism of marking the flows with a synchronization status and handle these events as per that status. During Bulk sync there might be flows that are in the bulk sync snapshot that are affected by changes. The actual mechanism of handling would differ by implementation and is not covered here. When implementation specific signaling is needed between the DPUs for such optimizations, the control plane channel allows for such messages to be relayed.
+
+At any given time during bulk sync, there are flows that are in the bulk sync snapshot and flows that were created after the bulk sync started. These classes of flows can be differentiated by the "color". Apart from this within the flows that are in the bulk sync snapshot, there are flows that have already been synched to the peer  and flows that are yet to be synched. It is okay to rely on DP sync for the former (for flow updates) but not for the latter.
+
+## Switchover
+Switchover of traffic from primary to secondary can happen due to either planned or unplanned events. Planned switchover occurs when there is an administrative trigger possibly due to maintenance. Since it is planned there is an opportunity to manage the transition such that there is minimal disruption and close to 0.
+
+The following components are in the critical path and  contribute to switchover times
+1. Detection of the event that should trigger a switchover
+2. Network reconvergence (fabric connecting the traffic sources and primary and secondary nodes)
+3. Actions on the secondary to transition datapath from secondary to primary-standalone mode.
+With Planned switchover, (1) is via an administrative event so there is no detection involved. (2) is coordinated such that both nodes are forwarding during this network convergence time hence mitigating any traffic loss and (3) is also planned in such a way that it happens before the primary stops forwarding hence mitigating that component.
+
+With Unplanned switchover since it is happening due to an external trigger all 3 components come into play. Heartbeat exchange discovers the failure of the primary node, the loss of the primary node also triggers the network reconvergence.
+
+Detailed flows for both these scenarios are discussed in a later section.
+
+## Flow Reconciliation
+Once Switchover is complete the controller triggers Flow Reconciliation on the DPU after ensuring that all configuration on the newly active DPU is up to date. On receipt of the Flow reconciliation event the DPU reevaluates the existing flows against the current configuration and fixes up the flow state as needed. Any fixed up flows will be synchronized with the peer as needed.
+
+## Flow Aging
+Once the initial flow has been synchronized to the secondary, the traffic is seen only by the primary and not seen by the secondary in steady state. Hence aging functionality for stale flows is driven by the Primary. Aged out flows are then synchronized to the secondary on the control plane channel..
 
 ## HA State Machine
 
@@ -147,6 +196,22 @@ This state is reached when bulk sync is complete and the admin role of the node 
 
 In this state the node is waiting for the Datapath to signal completion of taking over as primary. The datapath indicates this by notifying the SONIC stack via an oper status update message. At this point the peer is notified to move to standby.
 
+**Primary**
+
+This is the terminal state for the node when the node is configured as the primary. In this state the local datapath is forwarding traffic actively and synching state to the peer.
+
+**Wait Switchover**
+The Primary can be forced to drain all traffic and have the secondary take over as primary by an admin trigger. The next four states go through this sequence of planned switchover. In this state the Secondary is signaled to prepare to receive traffic. The secondary switches to primary and on completion sends a switchover done back to this node.
+
+**Shutdown Prepare**
+In this state a notification is sent to the DPU to prepare for shutdown. Network advertisements for the VIP are also withdrawn at this time, hence allowing the network to redirect all traffic to the secondary.
+
+**Wait Shutdown Prepare**
+A timer is started, the duration of which depends on the network convergence time of the network. On expiry of this timer a notification is sent to the secondary to switch to standalone mode and the state machine exits this state.
+
+**Wait Shutdown**
+This state waits for confirmation from the Secondary that it has switched to secondary mode and once that is received the statemachine terminates on the primary.
+
 **Activate Secondary**
 
 This state is reached when bulk sync is complete and the admin role of the node is secondary. The node then attempts to get to the secondary state. This is triggered by notifying the underlying datapath to switch to the secondary role. At this point the VIP routes are advertised. The routes may be advertised with a less desirable metric.
@@ -157,75 +222,75 @@ In this state the node is waiting for the Datapath to signal completion of state
 
 **Secondary**
 
-If the configured role is secondary the node goes to terminal state secondary. The DPU then waits for a switchover event to switch to primary. In this state the node keeps receiving flow sync messages from the peer and keeps the datapath ready for switchover.
+If the configured role is secondary the node goes to terminal state secondary. The DPU then waits for a switchover event to switch to primary. In this state the node keeps receiving flow sync messages from the peer and keeps the datapath ready for switchover. In this state switchover can occur due to 2 triggers
+1. Failure of the Primary
+2. Admin initiated switchover.
 
-**Primary**
+Failure of the Primary leads the Secondary to switchover to the Standalone-Primary State. When an administrative switchover is initiated the Secondary reaches the Standalone-Primary state via a sequence of states. This sequence helps reduce any drops in user traffic.
 
-This is the terminal state for the node when the node is configured as the primary. In this state the local datapath is forwarding traffic actively and synching state to the peer.
+**Switch Primary**
+This state is triggered on the secondary when there is a user trigger to drain traffic from the Primary and have the secondary take over. This user trigger itself is applied on the Primary by the admin and relayed to the secondary. In this state the DPU Dataplane is notified to switch to Primary state. When the DPU receives this notification the DP switches state to Primary and hence syncs any new flows and updates to the peer. At the same time it processes any flow updates from its peer. This is a short lived state where there is a 2 way sync between the peers. This is setup this way in preparation because during the subsequent states the Network advertisements are withdrawn from the old primary. While the network is converging traffic can be forwarded by the network to either the primary and the secondary. The 2 way sync between the peers handles this.
+
+**Wait Switch Primary**
+In this state the node waits for the DPU to complete switching the Dataplane to Active state and notify the State machine.
+
+**Switch Standalone**
+In this state the DPU is notified to switchover to standalone. The Primary (this node's peer) triggers this once the network convergence timeout has expired on the primary side. The Datapath switches to an intermediate state PRE_STANDALONE. In this state, datapath still accepts flow sync acknowledgments that were in flight from the peer. This state is needed for a duration of time so as to allow for draining all in flight messages.
+
+**Wait Switch Standalone**
+Once the DPU drain timer expires the DPU notifies switchover done which takes the state machine to exit this state and move to full standalone primary. A message is sent to the old primary to shutdown before exiting this state.
+
 
 ### SAI Definitions
 
 The SAI API calls necessary for communication between the SONIC stack and the SAI-DASH SDK are defined below.
 
 ```cpp
+#if !defined (__SAIEXPERIMENTALDASHHA_H_)
+#define __SAIEXPERIMENTALDASHHA_H_
+
 #include <saitypes.h>
 
+/**
+ * @brief Enumeration pf control plane operations for sai_cp_control_message
+ */
+typedef enum _sai_dash_ha_dpu_message_types_t {
+    /**
+     * @brief Start of attributes
+     */
+    SAI_DASH_HA_DPU_MESSAGE_TYPE_START,
+
+    /**
+     * @brief Vendor specific message
+     */
+    SAI_DASH_HA_DPU_MESSAGE_TYPE_VENDOR_SPECIFIC = SAI_DASH_HA_DPU_MESSAGE_TYPE_START,
+
+    /**
+     * @brief End of attributes
+     */
+    SAI_DASH_HA_DPU_MESSAGE_TYPE_END,
+
+} sai_dash_ha_dpu_message_types_t
 /**
  * @brief Notification data format for received for the DPU Control message
  *  callback.
  */
-typedef struct _sai_dash_dpu_control_message_notification_data_t {
+typedef struct _sai_dash_ha_dpu_control_message_notification_data_t {
     /**
      * @brief Control message Type
      */
-     sai_uint16_t type;
+     sai_dash_ha_dpu_message_types_t type;
 
     /**
      * @brief Data for the message
      */
      sai_u8_list_t data;
-} sai_dash_dpu_control_message_notification_data_t;
-
-/**
- * @brief L4 information for TCP and UDP flows.
- */
-typedef struct _sai_dash_flow_tcp_udp_info_t {
-    /** Source port */
-    sai_uint16_t src_port;
-
-    /** Destination port */
-    sai_uint16_t dst_port;
-} sai_dash_flow_tcp_udp_info_t;
-
-/**
- * @brief L4 flow information for ICMP flows.
- */
-typedef struct _sai_dash_flow_icmp_info_t {
-    /** ICMP Type */
-    sai_uint32_t type;
-
-    /** ICMP code */
-    sai_uint32_t code;
-
-    /** ICMP ID */
-    sai_uint32_t id;
-} sai_dash_flow_icmp_info_t;
-
-/**
- * @brief L4 Flow information
- */
-typedef union _sai_dash_flow_l4_info_t {
-    /** TCP/UDP info */
-    sai_dash_flow_tcp_udp_info_t tcp_udp;
-
-    /** ICMP Info */
-    sai_dash_flow_icmp_info_t icmp;
-} sai_dash_flow_l4_info_t;
+} sai_dash_ha_dpu_control_message_notification_data_t;
 
 /**
  * @brief Notification Data format for received flow sync messages from the DPU
  */
-typedef struct _sai_dash_flow_sync_message_notification_data_t {
+typedef struct _sai_dash_ha_flow_sync_message_notification_data_t {
     /**
      * @brief ENI MAC for this flow
      */
@@ -249,37 +314,223 @@ typedef struct _sai_dash_flow_sync_message_notification_data_t {
     /**
      * @brief L4 Information (TCP/UDP/ICMP)
      */
-    sai_dash_flow_l4_info_t l4_info;
+    sai_dash_ha_flow_l4_info_t l4_info;
 
     /**
      * @brief policy results metadata
      */
      sai_u8_list_t metadata;
-} sai_dash_flow_sync_message_notification_data_t;
+} sai_dash_ha_flow_sync_message_notification_data_t;
 
 /**
- * @brief Attributes ID for get_peer_capabilities
+ * @brief Notification Data format for received oper state updates from the DPU
  */
-typedef enum  _sai_get_peer_capabilities_attr_t {
+typedef struct _sai_dash_ha_oper_role_status_notification_data_t {
+    /**
+     * @brief VIP ID this update corresponds to
+     */
+    sai_object_id_t vipID;
+
+    /**
+     * @brief Status update
+     */
+    sai_dash_ha_oper_role_status_val_t status;
+
+    /**
+     * @brief Optional data for the message
+     */
+     sai_u8_list_t data;
+}
+
+/**
+ * @brief L4 information for TCP and UDP flows.
+ */
+typedef struct _sai_dash_ha_flow_tcp_udp_info_t {
+    /** Source port */
+    sai_uint16_t src_port;
+
+    /** Destination port */
+    sai_uint16_t dst_port;
+} sai_dash_ha_flow_tcp_udp_info_t;
+
+/**
+ * @brief L4 flow information for ICMP flows.
+ */
+typedef struct _sai_dash_ha_flow_icmp_info_t {
+    /** ICMP Type */
+    sai_uint32_t type;
+
+    /** ICMP code */
+    sai_uint32_t code;
+
+    /** ICMP ID */
+    sai_uint32_t id;
+} sai_dash_ha_flow_icmp_info_t;
+
+/**
+ * @brief L4 Flow information
+ */
+typedef union _sai_dash_ha_flow_l4_info_t {
+    /** TCP/UDP info */
+    sai_dash_ha_flow_tcp_udp_info_t tcp_udp;
+
+    /** ICMP Info */
+    sai_dash_ha_flow_icmp_info_t icmp;
+} sai_dash_ha_flow_l4_info_t;
+
+/**
+ * @brief Attribute data for #SAI_DASH_HA_SESSION_ATTR_ROLE
+ */
+typedef enum _sai_dash_ha_session_role_t
+{
+    /**
+     * @brief Admin role Primary. Becomes primary when peering is active.
+     */
+    SAI_DASH_HA_SESSION_ROLE_PRIMARY,
+
+    /**
+     * @brief Admin role Secondary. Becomes Secondary when peering is active.
+     */
+    SAI_DASH_HA_SESSION_ROLE_SECONDARY,
+
+} sai_dash_ha_session_role_t;
+
+/**
+ * @brief Attribute ID for DASH HA session
+ */
+typedef enum _sai_dash_ha_session_attr_t
+{
+    /**
+     * @brief Start of attributes
+     */
+    SAI_DASH_HA_SESSION_ATTR_START,
+
+    /**
+     * @brief Peer's IP address
+     *
+     * @type sai_ip_address_t
+     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
+     */
+    SAI_DASH_HA_SESSION_ATTR_PEER_IP,
+
+    /**
+     * @brief Sessions Admin role
+     *
+     * @type sai_dash_ha_session_role_t
+     * @flags CREATE_AND_SET
+     * @default SAI_DASH_HA_SESSION_ROLE_PRIMARY
+     */
+    SAI_DASH_HA_SESSION_ATTR_ADMIN_ROLE,
+
     /**
      * @brief HB Interval
      * @type sai_uint16_t
      */
-    SAI_DASH_GET_PEER_CAPABILITIES_ATTR_HB_INTERVAL,
+    SAI_DASH_HA_SESSION_ATTR_HB_INTERVAL,
 
     /**
      * @brief HB Miss Count
      * @type sai_uint16_t
      */
-    SAI_DASH_GET_PEER_CAPABILITIES_ATTR_HB_MISS_COUNT,
+    SAI_DASH_HA_SESSION_ATTR_HB_MISS_COUNT,
+
+    /**
+     * @brief Named pipe for bi-directional control stream
+     * @type sai_uint8_list_t
+     */
+    SAI_DASH_HA_REGISTER_CP_CHANNEL_ATTR_NAMED_PIPE,
+
+    /**
+     * @brief End of attributes
+     */
+    SAI_DASH_HA_SESSION_ATTR_END,
+
+} sai_dash_ha_session_attr_t;
+
+/**
+ * @brief Create DASH HA session
+ *
+ * @param[out] dash_ha_session_id Entry id
+ * @param[in] attr_count Number of attributes
+ * @param[in] attr_list Array of attributes
+ *
+ * @return #SAI_STATUS_SUCCESS on success Failure status code on error
+ */
+typedef sai_status_t (*sai_create_dash_ha_session_fn)(
+        _In_ sai_object_id_t *dash_ha_vip_id,
+        _In_ uint32_t attr_count,
+        _In_ const sai_attribute_t *attr_list);
+
+/**
+ * @brief Remove DASH HA session
+ *
+ * @param[in] dash_ha_session_id Entry id
+ *
+ * @return #SAI_STATUS_SUCCESS on success Failure status code on error
+ */
+typedef sai_status_t (*sai_remove_dash_ha_session_fn)(
+        _In_ sai_object_id_t dash_ha_vip_id);
+
+/**
+ * @brief Set attribute for DASH HA session
+ *
+ * @param[in] dash_ha_session_id Entry id
+ * @param[in] attr Attribute
+ *
+ * @return #SAI_STATUS_SUCCESS on success Failure status code on error
+ */
+typedef sai_status_t (*sai_set_dash_ha_session_attribute_fn)(
+        _In_ sai_object_id_t dash_ha_vip_id,
+        _In_ const sai_attribute_t *attr);
+
+/**
+ * @brief Get attribute for DASH HA session
+ *
+ * @param[in] dash_ha_vip_id Entry id
+ * @param[in] attr_count Number of attributes
+ * @param[inout] attr_list Array of attributes
+ *
+ * @return #SAI_STATUS_SUCCESS on success Failure status code on error
+ */
+typedef sai_status_t (*sai_get_dash_ha_session_attribute_fn)(
+        _In_ sai_object_id_t dash_ha_vip_id,
+        _In_ uint32_t attr_count,
+        _Inout_ sai_attribute_t *attr_list);
+
+/**
+ * @brief Attributes ID for get_peer_capabilities
+ */
+typedef enum  _sai_dash_ha_get_capabilities_attr_t {
+
+    /**
+     * @brief Start of attributes
+     */
+    SAI_DASH_HA_GET_CAPABILITIES_ATTR_START,
+
+    /**
+     * @brief HB Interval minimum
+     * @type sai_uint16_t
+     */
+    SAI_DASH_HA_GET_CAPABILITIES_ATTR_HB_MIN_INTERVAL = SAI_DASH_HA_GET_PEER_CAPABILITIES_ATTR_START,
+
+    /**
+     * @brief HB Miss Count
+     * @type sai_uint16_t
+     */
+    SAI_DASH_HA_GET_CAPABILITIES_ATTR_HB_MISS_COUNT,
 
     /**
      * @brief Capabilities
      * @type sai_uint8_list_t
      */
-    SAI_DASH_GET_PEER_CAPABILITIES_ATTR_CAPABILITIES,
+    SAI_DASH_HA_GET_CAPABILITIES_ATTR_CAPABILITIES,
 
-} sai_get_peer_capabilities_attr_t;
+    /**
+     * @brief End of attributes
+     */
+    SAI_DASH_HA_GET_CAPABILITIES_ATTR_END,
+
+} sai_dash_ha_get_capabilities_attr_t;
 
 /**
  * @brief Get Capabilities of the DP
@@ -290,59 +541,45 @@ typedef enum  _sai_get_peer_capabilities_attr_t {
  *
  * @return #SAI_STATUS_SUCCESS on success Failure status code on error
  */
-typedef sai_status_t (*sai_get_capabilities_fn) (
+typedef sai_status_t (*sai_dash_ha_get_capabilities_fn) (
     _In_ sai_object_id_t vipID;
     _In_ uint32_t attr_count,
     _InOut_ sai_attribute_t *attr_list);
 
 /**
- * @brief Attributes ID for register_cp_channel
- */
-typedef enum  _sai_register_cp_channel_attr_t {
-    /**
-     * @brief Named pipe for bi-directional control stream
-     * @type sai_uint8_list_t
-     */
-    SAI_DASH_REGISTER_CP_CHANNEL_ATTR_NAMED_PIPE,
-}
-
-/**
- * @brief Register the CP control channel with the DP
- *
- * @param[in] sai_object_id_t vipID
- * @param[in] attr_count Number of attributes
- * @param[in] attr_list Array of attributes
- *
- * @return #SAI_STATUS_SUCCESS on success Failure status code on error
- */
-typedef sai_status_t (*sai_register_cp_channel_fn) (
-    _In_ sai_object_id_t vipID;
-    _In_ uint32_t attr_count,
-    _In_ sai_attribute_t *attr_list);
-
-/**
  * @brief Attributes ID for process_peer_capabilities
  */
-typedef enum  _sai_process_peer_capabilities_attr_t {
+typedef enum  _sai_dash_ha_process_peer_capabilities_attr_t {
+
+    /**
+     * @brief Start of attributes
+     */
+    SAI_DASH_HA_PROCESS_PEER_CAPABILITIES_ATTR_START,
+
     /**
      * @brief HB Interval
      * @type sai_uint16_t
      */
-    SAI_DASH_PROCESS_PEER_CAPABILITIES_ATTR_HB_INTERVAL,
+    SAI_DASH_HA_PROCESS_PEER_CAPABILITIES_ATTR_HB_INTERVAL = SAI_DASH_HA_PROCESS_PEER_CAPABILITIES_ATTR_START,
 
     /**
      * @brief HB Miss Count
      * @type sai_uint16_t
      */
-    SAI_DASH_PROCESS_PEER_CAPABILITIES_ATTR_HB_MISS_COUNT,
+    SAI_DASH_HA_PROCESS_PEER_CAPABILITIES_ATTR_HB_MISS_COUNT,
 
     /**
      * @brief Capabilities
      * @type sai_uint8_list_t
      */
-    SAI_DASH_PROCESS_PEER_CAPABILITIES_ATTR_CAPABILITIES,
+    SAI_DASH_HA_PROCESS_PEER_CAPABILITIES_ATTR_CAPABILITIES,
 
-} sai_process_peer_capabilities_attr_t;
+    /**
+     * @brief End of attributes
+     */
+    SAI_DASH_HA_PROCESS_PEER_CAPABILITIES_ATTR_END,
+
+} sai_dash_ha_process_peer_capabilities_attr_t;
 
 /**
  * @brief Process peer capabilities of peer DPU
@@ -353,7 +590,7 @@ typedef enum  _sai_process_peer_capabilities_attr_t {
  *
  * @return #SAI_STATUS_SUCCESS on success Failure status code on error
  */
-typedef sai_status_t (*sai_process_peer_capabilities_fn) (
+typedef sai_status_t (*sai_dash_ha_process_peer_capabilities_fn) (
     _In_ sai_object_id_t vipID;
     _In_ uint32_t attr_count,
     _Inout_ sai_attribute_t *attr_list);
@@ -361,19 +598,31 @@ typedef sai_status_t (*sai_process_peer_capabilities_fn) (
 /**
  * @brief Attributes ID for process_dpu_control_message
  */
-typedef enum _sai_process_dpu_control_message_attr_t {
+typedef enum _sai_dash_ha_process_dpu_control_message_attr_t {
+
+    /**
+     * @brief Start of attributes
+     */
+    SAI_DASH_HA_PROCESS_DPU_CONTROL_MESSAGE_ATTR_START,
+
     /**
     * @brief Type
-    * @type sai_uint16_t
+    * @type sai_dash_ha_dpu_message_types_t
     */
-    SAI_DASH_PROCESS_DPU_CONTROL_MESSAGE_ATTR_TYPE,
+    SAI_DASH_HA_PROCESS_DPU_CONTROL_MESSAGE_ATTR_TYPE = SAI_DASH_HA_PROCESS_DPU_CONTROL_MESSAGE_ATTR_START,
 
     /**
     * @brief Data
     * @type sai_u8_list_t
     */
-    SAI_DASH_PROCESS_DPU_CONTROL_MESSAGE_ATTR_DATA,
-} sai_process_dpu_control_message_attr_t;
+    SAI_DASH_HA_PROCESS_DPU_CONTROL_MESSAGE_ATTR_DATA,
+
+    /**
+     * @brief End of attributes
+     */
+    SAI_DASH_HA_PROCESS_DPU_CONTROL_MESSAGE_ATTR_END,
+
+} sai_dash_ha_process_dpu_control_message_attr_t;
 
 /**
  * @brief Control Messages exchanged between Datapaths of DPU
@@ -384,7 +633,7 @@ typedef enum _sai_process_dpu_control_message_attr_t {
  *
  * @return #SAI_STATUS_SUCCESS on success Failure status code on error
  */
-typedef sai_status_t (*sai_process_dpu_control_message_fn) (
+typedef sai_status_t (*sai_dash_ha_process_dpu_control_message_fn) (
     _In_ sai_object_id_t vipID;
     _In_ uint32_t attr_count,
     _In_ sai_attribute_t *attr_list);
@@ -392,13 +641,25 @@ typedef sai_status_t (*sai_process_dpu_control_message_fn) (
 /**
  * @brief Attributes ID for process_flow_sync_message
  */
-typedef enum _sai_process_flow_sync_message_attr_t {
+typedef enum _sai_dash_ha_process_flow_sync_message_attr_t {
+
+    /**
+     * @brief Start of attributes
+     */
+    SAI_DASH_HA_PROCESS_FLOW_SYNC_MESSAGE_ATTR_START,
+
     /**
     * @brief Flow information
     * @type sai_dash_flow_sync_message_notification_data_t
     */
-    SAI_DASH_PROCESS_FLOW_SYNC_MESSAGE_ATTR_FLOW_INFO,
-} sai_process_flow_sync_message_attr_t;
+    SAI_DASH_HA_PROCESS_FLOW_SYNC_MESSAGE_ATTR_FLOW_INFO = SAI_DASH_HA_PROCESS_FLOW_SYNC_MESSAGE_ATTR_START,
+
+    /**
+     * @brief End of attributes
+     */
+    SAI_DASH_HA_PROCESS_FLOW_SYNC_MESSAGE_ATTR_END,
+
+} sai_dash_ha_process_flow_sync_message_attr_t;
 
 /**
  * @brief FLow Sync messages exchanged between of DPU
@@ -409,20 +670,99 @@ typedef enum _sai_process_flow_sync_message_attr_t {
  *
  * @return #SAI_STATUS_SUCCESS on success Failure status code on error
  */
-typedef sai_status_t (*sai_process_flow_sync_message_fn) (
+typedef sai_status_t (*sai_dash_ha_process_flow_sync_message_fn) (
     _In_ sai_object_id_t vipID;
     _In_ uint32_t attr_count,
     _In_ sai_attribute_t *attr_list);
 
 /**
+ * @brief Enumeration of operational states.
+ */
+typedef enum _sai_dash_ha_oper_status_val_t {
+
+    /*
+     * @brief Oper status none.
+     */
+    SAI_DASH_HA_OPER_ROLE_STATUS_NONE,
+
+    /*
+     * @brief Oper status Peer discovered and connected.
+     */
+    SAI_DASH_HA_OPER_ROLE_STATUS_PEER_CONNECTED,
+
+    /*
+     * @brief Oper status lost peer connectivity.
+     */
+    SAI_DASH_HA_OPER_ROLE_STATUS_PEER_LOST,
+
+    /*
+     * @brief Oper status bulk sync is complete.
+     */
+    SAI_DASH_HA_CONTROL_MESSAGE_BULK_SYNC_DONE,
+
+    /*
+     * @brief Oper status Standalone.
+     */
+    SAI_DASH_HA_OPER_ROLE_STATUS_STANDALONE,
+
+    /*
+     * @brief Oper status Primary.
+     */
+    SAI_DASH_HA_OPER_ROLE_STATUS_PRIMARY,
+
+    /*
+     * @brief Oper status Secondary.
+     */
+    SAI_DASH_HA_OPER_ROLE_STATUS_SECONDARY,
+
+    /*
+     * @brief Oper status PRE_STABDALONE.
+     */
+    SAI_DASH_HA_OPER_ROLE_STATUS_PRE_STANDALONE,
+
+    /*
+     * @brief Oper status flow reconciliation is complete.
+     */
+    SAI_DASH_HA_CONTROL_MESSAGE_RECONCILE_DONE,
+
+    /*
+     * @brief Oper status switchover is complete.
+     */
+    SAI_DASH_HA_CONTROL_MESSAGE_SWITCHOVER_DONE,
+
+    /*
+     * @brief Oper Role none.
+     */
+    SAI_DASH_HA_CONTROL_MESSAGE_SWITCH_STANDALONE_DONE,
+
+    /*
+     * @brief Oper status ready to shutdown.
+     */
+    SAI_DASH_HA_CONTROL_MESSAGE_SHUTDOWN_READY,
+
+}  sai_dash_ha_oper_role_status_val_t;
+
+/**
  * @brief Attributes ID for oper_role_status
  */
-typedef enum _sai_oper_role_status_attr_t {
+typedef enum _sai_dash_ha_oper_role_status_attr_t {
+
+    /**
+     * @brief Start of attributes
+     */
+    SAI_DASH_HA_OPER_ROLE_STATUS_ATTR_START,
+
     /**
     * @brief OperState
-    * @type sai_uint16_t
+    * @type sai_dash_ha_oper_status_val_t
     */
-    SAI_DASH_OPER_ROLE_STATUS_ATTR_OPER_STATE,
+    SAI_DASH_HA_OPER_ROLE_STATUS_ATTR_OPER_STATE = SAI_DASH_HA_OPER_ROLE_STATUS_ATTR_START,
+
+    /**
+     * @brief End of attributes
+     */
+    SAI_DASH_HA_OPER_ROLE_STATUS_ATTR_END,
+
 };
 
 /**
@@ -436,21 +776,89 @@ typedef enum _sai_oper_role_status_attr_t {
  *
  * @return #SAI_STATUS_SUCCESS on success Failure status code on error
  */
-typedef sai_status_t (*sai_oper_role_status_fn) (
+typedef sai_status_t (*sai_dash_ha_oper_status_fn) (
     _In_ sai_object_id_t vipID;
     _In_ uint32_t attr_count,
     _In_ sai_attribute_t *attr_list);
 
 /**
+ * @brief Enumeration of control plane operations for sai_cp_control_message
+ */
+typedef enum _sai_dash_ha_cp_control_message_operation_t {
+
+    /*
+     * @brief Control message none.
+     */
+    SAI_DASH_HA_CONTROL_MESSAGE_NONE,
+
+    /*
+     * @brief control message start bulk sync
+     */
+    SAI_DASH_HA_CONTROL_MESSAGE_BULK_SYNC_START,
+
+    /*
+     * @brief control message bulk sync done.
+     */
+    SAI_DASH_HA_CONTROL_MESSAGE_BULK_SYNC_DONE,
+
+    /*
+     * @brief control message to activate as primary.
+     */
+    SAI_DASH_HA_CONTROL_MESSAGE_ACTIVATE_PRIMARY,
+
+    /*
+     * @brief control message activate as secondary.
+     */
+    SAI_DASH_HA_CONTROL_MESSAGE_ACTIVATE_SECONDARY,
+
+    /*
+     * @brief control message start flow reconciliation.
+     */
+    SAI_DASH_HA_CONTROL_MESSAGE_FLOW_RECONCILE,
+
+    /*
+     * @brief control message switchover to primary.
+     */
+    SAI_DASH_HA_CONTROL_MESSAGE_SWITCHOVER_PRIMARY,
+
+    /*
+     * @brief control message switch to standalone.
+     */
+    SAI_DASH_HA_CONTROL_MESSAGE_SWITCH_STANDALONE,
+
+    /*
+     * @brief control message prepare for shutdown.
+     */
+    SAI_DASH_HA_CONTROL_MESSAGE_SHUTDOWN_PREPARE,
+
+    /*
+     * @brief control message shutdown.
+     */
+    SAI_DASH_HA_CONTROL_MESSAGE_SHUTDOWN,
+
+}  sai_dash_ha_cp_control_message_operation_t;
+
+/**
  * @brief Attributes ID for cp_control_message
  */
-typedef enum _sai_cp_control_message_attr_t {
+typedef enum _sai_dash_ha_cp_control_message_attr_t {
+    /**
+     * @brief Start of attributes
+     */
+    SAI_DASH_HA_CP_CONTROL_MESSAGE_ATTR_START,
+
     /**
     * @brief Operation
-    * @type sai_uint16_t
+    * @type sai_dash_ha_cp_control_message_operation_t
     */
-    SAI_DASH_CP_CONTROL_MESSAGE_ATTR_OPERATION,
-} sai_cp_control_message_attr_t;
+    SAI_DASH_HA_CP_CONTROL_MESSAGE_ATTR_OPERATION = SAI_DASH_HA_CP_CONTROL_MESSAGE_ATTR_START,
+
+    /**
+     * @brief End of attributes
+     */
+    SAI_DASH_HA_CP_CONTROL_MESSAGE_ATTR_END,
+
+} sai_dash_ha_cp_control_message_attr_t;
 
 /**
  * @brief Process CP control message
@@ -463,23 +871,110 @@ typedef enum _sai_cp_control_message_attr_t {
  *
  * @return #SAI_STATUS_SUCCESS on success Failure status code on error
  */
-typedef sai_status_t (*sai_cp_control_message_fn) (
+typedef sai_status_t (*sai_dash_ha_cp_control_message_fn) (
     _In_ sai_object_id_t vipID;
     _In_ uint32_t attr_count,
     _In_ sai_attribute_t *attr_list;
 )
 
 typedef struct _sai_dash_ha_api_t {
-    sai_register_cp_channel_fn          register_cp_channel;
-    sai_get_capabilities_fn             get_capabilities;
-    sai_process_peer_capabilities_fn    process_peer_capabilities;
-    sai_process_dpu_control_message_fn  process_dpu_control_message;
-    sai_process_flow_sync_message_fn    process_flow_sync_message;
-    sai_oper_role_status_fn             oper_role_status;
-    sai_cp_control_message_fn           cp_control_message;
+    sai_create_dash_ha_session_fn               create_dash_ha_session;
+    sai_remove_dash_ha_session_fn               remove_dash_ha_session;
+    sai_set_dash_ha_session_attribute_fn        set_dash_ha_session_attribute;
+    sai_get_dash_ha_session_attribute_fn        get_dash_ha_session_attribute;
+
+    sai_dash_ha_get_capabilities_fn             get_dash_ha_capabilities;
+    sai_dash_ha_process_peer_capabilities_fn    process_dash_ha_peer_capabilities;
+    sai_dash_ha_process_dpu_control_message_fn  process_dash_ha_dpu_control_message;
+    sai_dash_ha_process_flow_sync_message_fn    process_dash_ha_flow_sync_message;
+    sai_dash_ha_oper_status_fn                  dash_ha_oper_status;
+    sai_dash_ha_cp_control_message_fn           dash_ha_cp_control_message;
 } sai_dash_ha_api_t;
+
 ```
 
+### Examples
+
+```cpp
+/*
+ * Get capabilities
+ */
+    sai_object_id vip_id;
+    sai_attribute_t sai_attrs_list[3];
+
+    dash_ha_api->get_dash_ha_capabilities(3, sai_attrs_list)
+    // Process and save received capabilities
+
+/*
+ * Process DASH HA capabilities received from the peer on the gRPC channel
+ * DPU Info received on the GRPC channel is passed to the DPU.
+ */
+    sai_attribute_t sai_attrs_list[3];
+    sai_attrs_list[0].id = SAI_DASH_HA_PROCESS_PEER_CAPABILITIES_ATTR_HB_INTERVAL;
+    sai_attr_list[0].value = recvd_dpu_info.hbinterval();
+
+
+    sai_attrs_list[1].id = SAI_DASH_HA_PROCESS_PEER_CAPABILITIES_ATTR_HB_MISS_COUNT;
+    sai_attrs_list[1].value = recvd_dpu_info.misscount();
+
+    sai_attrs_list[2].id = SAI_DASH_HA_PROCESS_PEER_CAPABILITIES_ATTR_CAPABILITIES;
+    sai_attrs_list[2].value.count = recvd_dpu_info.capabilities().size();
+    sai_attrs_list[2].value.list = recvd_dpu_info.capabilities().c_str();
+    dash_ha_api->process_dash_ha_peer_capabilities(3, sai_attrs_list);
+
+/*
+ * Create new HA Session ID once peer is deemed compatible
+ * create a bi direction named FIFO for messages to-from DPU
+ * pass negotiated HB values.
+ */
+    sai_object_id vip_id;
+    sai_attribute_t sai_attrs_list[5];
+    sai_attrs_list[0].id = SAI_DASH_HA_SESSION_ATTR_PEER_IP;
+    sai_attrs_list[0].value.ipaddr.addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
+    sai_attrs_list[0].value.ipaddr.addr.ipv4 = 0x0a0a0a01;
+
+    sai_attrs_list[1].id = SAI_DASH_HA_SESSION_ATTR_ADMIN_ROLE;
+    sai_attrs_list[1].value = SAI_DASH_HA_SESSION_ROLE_PRIMARY;
+
+    sai_attrs_list[2].id = SAIDASH_HA_SESSION_ATTR_HB_INTERVAL;
+    sai_attrs_list[2].value = 150;
+
+    sai_attrs_list[3].id = SAI_DASH_HA_SESSION_ATTR_HB_MISS_COUNT;
+    sai_attrs_list[3].value = 3;
+
+    sai_attrs_list[4].id = SAI_DASH_HA_REGISTER_CP_CHANNEL_ATTR_NAMED_PIPE;
+    sai_attrs_list[4].value.count = len(vip_named_pipe_path);
+    sai_attrs_list[5].value.list = vip_named_pipe_path;
+
+    vip_id = 1;
+    dash_ha_api->create_dash_ha_session(&vip_id, 5, sai_attrs_list)
+
+/*
+ * Process DPU Control messages
+ * Pass any DPUControlMsg received on the gRPC channel to the DPU.
+ */
+     sai_attribute_t sai_attrs_list[2];
+     sai_attrs_list[0].id = SAI_DASH_HA_PROCESS_DPU_CONTROL_MESSAGE_ATTR_TYPE;
+     // only SAI_DASH_HA_DPU_MESSAGE_TYPE_VENDOR_SPECIFIC is defined now
+     sai_attr_list[0].value = SAI_DASH_HA_DPU_MESSAGE_TYPE_VENDOR_SPECIFIC;
+
+     sai_attrs_list[1].id = SAI_DASH_HA_PROCESS_DPU_CONTROL_MESSAGE_ATTR_DATA;
+     sai_attr_list[1].value.count = recvd_dpu_msg.data().size();
+     sai_attr_list[1].value.list = recvd_dpu_msg.data().c_str();
+
+     dash_ha_api->process_dash_ha_dpu_control_message(2, sai_attrs_list);
+
+/*
+ * Process CP Control messages
+ */
+    sai_object_id vip_id;
+    sai_attribute_t sai_attrs_list[1];
+    sai_attrs_list[0].id = SAI_DASH_HA_CP_CONTROL_MESSAGE_ATTR_OPERATION;
+    sai_attr_list[0].value = SAI_DASH_HA_CONTROL_MESSAGE_BULK_SYNC_START;
+
+    vip_id = 1;
+    dash_ha_api->dash_ha_cp_control_message(&vip_id, 1, sai_attrs_list);
+```
 ### Control Plane Channel Message Definitions
 
 The below definitions pertain to the GRPC channel defined as the Control Plane Channel. This channel is established between the SONIC stacks on the two peer nodes. These messages can be originated from SONIC or sent by the DPU implementation and relayed via SONIC.
@@ -497,12 +992,12 @@ enum IPAF {
 
 // Admin Roles for a VIP
 enum AdminRole {
-    // Unspecified
-    AdminNone      = 0;
-    // Primary node for peering session.
-    AdminPrimary   = 1;
+  // Unspecified
+  AdminNone      = 0;
+  // Primary node for peering session.
+  AdminPrimary   = 1;
   // Secondary node for peering session.
-    AdminSecondary = 2;
+  AdminSecondary = 2;
 }
 
 // Operational state of the VIP
@@ -587,6 +1082,9 @@ enum CPControlOperation {
   OpSwitchover          = 6;
   OpSwitchoverReady     = 7;
   OpSwitchoverDone      = 8;
+  OpSwitchToPrimary     = 9;
+  OpSwitchToStandalone  = 10;
+  OpSwitchToSecondary   = 11;
 }
 
 // Message used to trigger/Notify state change events between peers.
@@ -625,6 +1123,8 @@ message CompatCheck {
   repeated DpVIPInfo VipInfo = 1;
   // Copability information for the Datapath.
   DPUInfo DPUCapabilities    = 2;
+  // Version Information
+  string  Version            = 3;
 }
 
 // Results from the Compatibility check between the nodes.
@@ -719,5 +1219,16 @@ Switchover can be a planned event for maintenance and other reasons. With planne
 
 The controller initiates the planned switchover and notifies the secondary DPU to initiate switchover. Once switchover is complete the newly primary DPU relays a SwitchoverDone message to the old primary DPU. The old primary initiates a withdrawal of protocol routes so the network can drain traffic. During this time the old primary continues to forward traffic so any traffic in transit is forwarded without being dropped. During this network convergence timeout both the primary and secondary are forwarding traffic and flow sync messages may be exchanged in both directions.
 
-After the network convergence time the new Primary enters PRE\_STANDALONE state and waits for a flush time out and transitions to standalone state.
+After the network convergence time the new Primary enters PRE\_STANDALONE state and waits for a flush time out and transitions to standalone state. During the PRE_STANDALONE state the node processes any acknowledgments that are received from the old peer, but does not originate any flow sync messages.
+
+### Primary Preemption
+
+![](images/prepemt_flow.010.png)
+
+Primary Preemption happens when the Administrative Primary comes up and peers with the administrative secondary. The peer has all the latest state, which the admin Primary synchronizes via bulk sync and the DP sync as discussed earlier. Once this state is synchronized the primary is ready to initiate the preemption. On receiving notification from the controller the node initiates Preemption.
+
+The Admin Primary first switches the role to the primary. This also triggers the Network Protocol routes to be advertised so traffic can be attracted to the active. At this point in time the network drains the traffic from the secondary and starts forwarding traffic to the primary. As with the case with planned switchover, there is a window during the network reconvergence where some traffic may hit the secondary and the rest hits the standby. There is a timer started on the primary to track this time. During this time both the primary and the secondary are actively forwarding and synchronizing state to each other. Once the timer expires the Active signals the secondary to switch to standby.
+
+As with any switchover the controller then initiates a Flow Reconciliation to bring the flows up to the latest configuration on the Primary.
+
 **AMD-Pensando** 25
