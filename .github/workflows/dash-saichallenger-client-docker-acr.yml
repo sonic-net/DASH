@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "**" ]
     paths:
-      - '.github/workflows/dash-saichallenger-client-docker.yml'
+      - '.github/workflows/dash-saichallenger-client-docker-acr.yml'
       - 'dash-pipeline/Makefile'
       - 'dash-pipeline/dockerfiles/Dockerfile.saichallenger-client'
       - 'dash-pipeline/.dockerignore'
@@ -12,7 +12,7 @@ on:
   pull_request:
     branches: [ "main" ]
     paths:
-      - '.github/workflows/dash-saichallenger-client-docker.yml'
+      - '.github/workflows/dash-saichallenger-client-docker-acr.yml'
       - 'dash-pipeline/Makefile'
       - 'dash-pipeline/dockerfiles/Dockerfile.saichallenger-client'
       - 'dash-pipeline/.dockerignore'
