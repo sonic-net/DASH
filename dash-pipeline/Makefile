@@ -547,7 +547,7 @@ docker-saichallenger-client:
 		-t $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
 		.
 
-docker-publish-saithrift-client-bldr:
+docker-publish-saichallenger-client:
 	@echo "Publish $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) - requires credentials, can only do from DASH repo, not a fork"
 	docker push $(DOCKER_SAI_CHALLENGER_CLIENT_IMG)
 
