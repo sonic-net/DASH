@@ -9,6 +9,7 @@ acl
 ACL
 ACLs
 ACR
+acr
 adaptor
 adaptors
 ADDR
@@ -23,6 +24,7 @@ apis
 APPDB
 APPL
 appldb
+Aravind
 archlinux
 ASIC
 asicdb
@@ -46,6 +48,7 @@ balancers
 bg
 BGP
 bgp
+bldr
 bidir
 bm
 BMV
@@ -73,6 +76,7 @@ chrispsommers
 ci
 CLA
 cla
+classname
 CLI
 CloudStorm
 CNIP
@@ -142,6 +146,7 @@ DNAT’ing
 DNATing
 Dockerfile
 Dockerfiles
+Dockerfile's
 dockerfiles
 dockerhub
 Dockerhub
@@ -281,7 +286,9 @@ Keysight
 KVM
 kvm
 lang
+LIBS
 libsai
+libprotobuf
 linux
 liveness
 LLDP
@@ -383,6 +390,7 @@ PowerShell
 pps
 PPSRule
 pptx
+Prabhat
 pre
 prebuilt
 Prem
@@ -403,10 +411,12 @@ PyPi
 pytest
 PyTest
 pytests
+Pytest's
 Pyunit
 qcow
 qos
 QoS
+qos
 Radv
 rdpty
 reachability
@@ -442,6 +452,7 @@ SAI
 sai
 saigen
 sairedis
+SAIRPC
 saiserver
 saithrift
 sata
@@ -605,6 +616,7 @@ vPORT
 VPorts
 VTEP
 VTEPs
+VxLAN
 VXLAN
 VxLAN
 VxLan

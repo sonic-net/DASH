@@ -5,7 +5,7 @@
 See also:
 * [README.md](README.md) Top-level README for dash-pipeline
 * [README-dash-ci](README-dash-ci.md) for CI pipelines.
-* [README-dash-docker](README-dash-docker.md) for Docker usage.
+* [README-dash-docker](README-dash-docker.md) for Docker overview and workflows
 * [README-saithrift](README-saithrift.md) for saithrift client/server and test workflows.
 * [README-ptftests](README-ptftests.md) for saithrift PTF test-case development and usage.
 * [README-pytests](README-pytests.md) for saithrift Pytest test-case development and usage.
@@ -54,7 +54,7 @@ See also:
     - [Typical Workflow: Committing new code - ignoring SAI submodule](#typical-workflow-committing-new-code---ignoring-sai-submodule)
     - [Committing new SAI submodule version](#committing-new-sai-submodule-version)
 - [Configuration Management](#configuration-management)
-  - [DASH Repository Versioning](#dash-repo-versioning)
+  - [DASH Repository Versioning](#dash-repository-versioning)
   - [Submodules](#submodules)
   - [Docker Image Versioning](#docker-image-versioning)
     - [Project-Specific Images](#project-specific-images)
@@ -156,7 +156,6 @@ Dockerfile build targets are separately described in [README-dash-docker](README
 |[run-saithrift-client-tests](#run-saithrift-client-tests) | Run all saithrift tests |
 | [run-saithrift-dev-ptftests](#run-saithrift-client-ptf-tests) <br> [run-saithrift-dev-pytests](#run-saithrift-client-dev-pytests) <br> [run-saithrift-client-dev-tests](#run-saithrift-client-dev-tests) | Like the three targets above. above, but run tests from host directory `tests/saithrift` instead of tests built into the `saithrift-client` container for faster test-case development code/test cycles.
 
-
 # Detailed DASH Behavioral Model Build Workflow
 
 This explains the various build steps in more details. The CI pipeline does most of these steps as well. All filenames and directories mentioned in the sections below are relative to the `dash-pipeline` directory (containing this README) unless otherwise specified. 
@@ -247,6 +246,23 @@ This builds a saithrift-server daemon, which is linked to the `libsai` library a
 ```
 make saithrift-server
 ```
+In the case a vendor integrates its own `libsai` library into the saithrift server, the libsai might have new external dependencies (such as google protocol buffer) thus requiring for vendor specific libraries or linker options to be passed down to the saiserver linker.
+An environment variable (SAIRPC_VENDOR_EXTRA_LIBS) can be specified when invoking the saithrift server build command to provide path to new libraries and/or new linker options.
+Its value will be added to the baseline SAIRPC_EXTRA_LIBS as defined in the saithrift makefile.
+
+Since the saithrift server is built within a docker container (and the parent repository is mounted as /dash), any of the extra libraries needed will need to be copied over under the parent repository, and the paths to those libraries will need to be relative to the docker mount point.
+
+In the example below, libprotobuf.a is a new external dependency to the vendor specific libsai.so and has been copied over under the parent repository (in our case, dash-pipeline/SAI/lib).
+We use the provided Makefile.3rdpty as an entry point into the DASH makefiles.
+
+```
+SAIRPC_VENDOR_EXTRA_LIBS="/dash/dash-pipeline/SAI/lib/libprotobuf.a"
+thirdparty-saithrift-server: thirdparty-libsai
+	@echo "Build third-party saithrift-server"
+	@echo "   Expects libsai.so under $(DASHDIR)/dash-pipeline/SAI/lib"
+	SAIRPC_VENDOR_EXTRA_LIBS=$(SAIRPC_VENDOR_EXTRA_LIBS) $(MAKE) -C $(DASHDIR)/dash-pipeline saithrift-server
+```
+
 ## Build libsai C++ client test program(s)
 This compiles simple libsai client program(s) to verify the libsai-to-p4runtime-to-bmv2 stack. It performs table access(es).
 
