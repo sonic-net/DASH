@@ -51,7 +51,7 @@ DOCKER_SAITHRIFT_CLIENT_IMG ?= local/dash-saithrift-client:latest
 
 # Base image with test frameworks, DASH client libs not installed
 # include file defines DOCKER_SAI_CHALLENGER_CLIENT_IMG
-include dash-pipeline/dockerfiles/DOCKER_SAI_CHALLENGER_CLIENT_IMG.env
+include dockerfiles/DOCKER_SAI_CHALLENGER_CLIENT_IMG.env
 
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
