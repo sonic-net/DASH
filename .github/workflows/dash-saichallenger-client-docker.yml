@@ -10,7 +10,7 @@ on:
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
-    branches: [ "main" ]
+    branches: [ "**" ]
     paths:
       - '.github/workflows/dash-saichallenger-client-docker.yml'
       - 'dash-pipeline/Makefile'

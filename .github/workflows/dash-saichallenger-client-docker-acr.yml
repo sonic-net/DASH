@@ -10,7 +10,7 @@ on:
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
-    branches: [ "main" ]
+    branches: [ "**" ]
     paths:
       - '.github/workflows/dash-saichallenger-client-docker-acr.yml'
       - 'dash-pipeline/Makefile'
@@ -23,7 +23,7 @@ jobs:
   build:
     # Can only publish from within DASH repo (need credentials from secrets)
     if: github.repository == 'Azure/DASH'
-    name: Build and publish dash-saichallenger-client-image
+    name: Build and publish dash-saichallenger-client image
     runs-on: ubuntu-20.04
     env:
       docker_fg_flags: -u root --privileged
