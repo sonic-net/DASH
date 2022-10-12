@@ -6,7 +6,7 @@ mkfile_dir := $(dir $(mkfile_path))
 # "All" type targets for convenience
 all:p4 sai saithrift-server docker-saithrift-client test
 
-run-all-tests:run-libsai-test run-saithrift-client-tests
+run-all-tests:run-libsai-test run-saithrift-client-tests run-saichallenger-tests
 run-saithrift-client-tests: run-saithrift-ptftests run-saithrift-pytests
 run-saithrift-client-dev-tests: run-saithrift-dev-ptftests run-saithrift-dev-pytests
 

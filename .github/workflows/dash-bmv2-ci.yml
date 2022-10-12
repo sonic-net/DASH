@@ -84,4 +84,6 @@ jobs:
       run:  DOCKER_FLAGS=$docker_fg_flags make deploy-ixiac
     - name: Run Pytests
       run:  DOCKER_FLAGS=$docker_fg_root_flags make run-saithrift-pytests
+    - name: Run SAI-Challenger Tests
+      run:  DOCKER_FLAGS=$docker_fg_root_flags make run-saichallenger-tests
       
