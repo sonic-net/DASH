@@ -49,6 +49,10 @@ include dockerfiles/DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env
 # TODO: consider some other tagging scheme
 DOCKER_SAITHRIFT_CLIENT_IMG ?= local/dash-saithrift-client:latest
 
+# Base image with test frameworks, DASH client libs not installed
+# include file defines DOCKER_SAI_CHALLENGER_CLIENT_IMG
+include dash-pipeline/dockerfiles/DOCKER_SAI_CHALLENGER_CLIENT_IMG.env
+
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
 
@@ -518,8 +522,6 @@ undeploy-ixiac:
 
 SAI_CHALLENGER_PATH = $(PWD)/../test/SAI-Challenger.OCP
 
-DOCKER_SAI_CHALLENGER_CLIENT = anton7811/dash-saichallenger-client:220920
-
 CONTAINER_SAI_CHALLENGER_CLIENT_NAME = dash-saichallenger-client-$(USER)
 
 # Add passing parameters to the run-saichallenger-tests target.
@@ -542,10 +544,14 @@ docker-saichallenger-client:
 	cd $(SAI_CHALLENGER_PATH) && ./build.sh -i client
 	docker build \
 		-f dockerfiles/Dockerfile.saichallenger-client \
-		-t $(DOCKER_SAI_CHALLENGER_CLIENT) \
+		-t $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
 		.
 
-DOCKER_RUN_SAI_CHALLENGER_CLEINT=docker run \
+docker-publish-saithrift-client-bldr:
+	@echo "Publish $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_SAI_CHALLENGER_CLIENT_IMG)
+
+DOCKER_RUN_SAI_CHALLENGER_CLIENT=docker run \
 	-v $(SAI_CHALLENGER_PATH):/sai-challenger \
 	-v $(SAI_CHALLENGER_PATH)/../test-cases/test_vector_example/:/sai-challenger/dash_tests \
 	-v $(PWD)/../:/dash \
@@ -556,26 +562,26 @@ DOCKER_RUN_SAI_CHALLENGER_CLEINT=docker run \
 	--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
 
 run-saichallenger-client: deploy-ixiac
-	$(DOCKER_RUN_SAI_CHALLENGER_CLEINT) \
+	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
 	-d \
 	--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) \
-	$(DOCKER_SAI_CHALLENGER_CLIENT)
+	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG)
 
 run-saichallenger-client-bash: deploy-ixiac
-	$(DOCKER_RUN_SAI_CHALLENGER_CLEINT) \
+	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
 	-w /sai-challenger/dash_tests \
 	$(DOCKER_FLAGS) \
-	$(DOCKER_SAI_CHALLENGER_CLIENT) \
+	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
 	/bin/bash
 
 kill-saichallenger-client:
 	-docker kill $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
 
 run-saichallenger-tests: deploy-ixiac
-	$(DOCKER_RUN_SAI_CHALLENGER_CLEINT) \
+	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
 	-w /sai-challenger/dash_tests \
 	$(DOCKER_FLAGS) \
-	$(DOCKER_SAI_CHALLENGER_CLIENT) \
+	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
 	./run_vnet_tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
 
 ###############################

@@ -1,4 +1,4 @@
-name: DASH-docker-saichallenger-client-image
+name: DASH-docker-saichallenger-client-img
 
 on:
   push:
