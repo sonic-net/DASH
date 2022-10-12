@@ -1,4 +1,5 @@
 import json
+import time
 from pathlib import Path
 from pprint import pprint
 
@@ -60,11 +61,11 @@ TEST_VNET_OUTBOUND_CONFIG = {
         'eni': {
             'ACL_GROUP': {
                 'INBOUND': {
-                    'STAGE1': 'DASH_ACL_GROUP#in_acl_group_id#0',
-                    'STAGE2': 'DASH_ACL_GROUP#in_acl_group_id#0',
-                    'STAGE3': 'DASH_ACL_GROUP#in_acl_group_id#0',
-                    'STAGE4': 'DASH_ACL_GROUP#in_acl_group_id#0',
-                    'STAGE5': 'DASH_ACL_GROUP#in_acl_group_id#0'
+                    'STAGE1': '$in_acl_group_id_#{0}',
+                    'STAGE2': '$in_acl_group_id_#{0}',
+                    'STAGE3': '$in_acl_group_id_#{0}}',
+                    'STAGE4': '$in_acl_group_id_#{0}}',
+                    'STAGE5': '$in_acl_group_id_#{0}}'
                 },
                 'OUTBOUND': {
                     'STAGE1': 0,
@@ -80,7 +81,7 @@ TEST_VNET_OUTBOUND_CONFIG = {
             'PPS': 100000,
             'VM_UNDERLAY_DIP': "172.16.1.1",
             'VM_VNI': 9,
-            'VNET_ID': 'DASH_VNET#vnet#0'
+            'VNET_ID': '$vnet_#{0}'
         }
     },
 
@@ -88,24 +89,24 @@ TEST_VNET_OUTBOUND_CONFIG = {
         'eam': {
             'SWITCH_ID': '$SWITCH_ID',
             'MAC': "00:cc:cc:cc:00:00",
-            'ENI_ID': 'DASH_ENI#eni#0'
+            'ENI_ID': '$eni_#{0}'
         }
     },
 
     'DASH_OUTBOUND_ROUTING': {
         'ore': {
             'SWITCH_ID': '$SWITCH_ID',
-            'ENI_ID': 'DASH_ENI#eni#0',
+            'ENI_ID': '$eni_#{0}',
             'DESTINATION': "10.1.0.0/16",
             'ACTION': 'ROUTE_VNET',
-            'DST_VNET_ID': 'DASH_VNET#vnet#0'
+            'DST_VNET_ID': '$vnet_#{0}'
         }
     },
 
     'DASH_OUTBOUND_CA_TO_PA': {
         'ocpe': {
             'SWITCH_ID': '$SWITCH_ID',
-            'DST_VNET_ID': 'DASH_VNET#vnet#0',
+            'DST_VNET_ID': '$vnet_#{0}',
             'DIP': "10.1.2.50",
             'UNDERLAY_DIP': "172.16.1.20",
             'OVERLAY_DMAC': "00:DD:DD:DD:00:00",
@@ -113,6 +114,7 @@ TEST_VNET_OUTBOUND_CONFIG = {
         }
     }
 }
+
 
 class TestSaiVnetOutbound:
 
@@ -131,17 +133,122 @@ class TestSaiVnetOutbound:
         print("\n======= SAI commands RETURN values =======")
         pprint(result)
 
+    @pytest.mark.ptf
+    def test_run_packets_check(self, dpu, dataplane):
+
+        SRC_VM_IP = "10.1.1.10"
+        OUTER_SMAC = "00:00:05:06:06:06"
+        OUR_MAC = "00:00:02:03:04:05"
+
+        VIP = TEST_VNET_OUTBOUND_CONFIG['DASH_VIP']['vpe']['IPV4']
+        VNET_VNI = TEST_VNET_OUTBOUND_CONFIG['DASH_VNET']['vnet']['VNI']
+        DIR_LOOKUP_VNI = TEST_VNET_OUTBOUND_CONFIG['DASH_DIRECTION_LOOKUP']['dle']['VNI']
+        SRC_VM_PA_IP = TEST_VNET_OUTBOUND_CONFIG['DASH_ENI']['eni']['VM_UNDERLAY_DIP']
+        ENI_MAC = TEST_VNET_OUTBOUND_CONFIG['DASH_ENI_ETHER_ADDRESS_MAP']['eam']['MAC']
+        DST_CA_IP = TEST_VNET_OUTBOUND_CONFIG['DASH_OUTBOUND_CA_TO_PA']['ocpe']['DIP']
+        DST_PA_IP = TEST_VNET_OUTBOUND_CONFIG['DASH_OUTBOUND_CA_TO_PA']['ocpe']["UNDERLAY_DIP"]
+        DST_CA_MAC = TEST_VNET_OUTBOUND_CONFIG['DASH_OUTBOUND_CA_TO_PA']['ocpe']["OVERLAY_DMAC"]
+
+        # # check VIP drop
+        # WRONG_VIP = "172.16.100.100"
+        # inner_pkt = simple_udp_packet(eth_dst="02:02:02:02:02:02",
+        #                               eth_src=ENI_MAC,
+        #                               ip_dst=DST_CA_IP,
+        #                               ip_src=SRC_VM_IP)
+        # vxlan_pkt = simple_vxlan_packet(eth_dst=OUR_MAC,
+        #                                 eth_src=OUTER_SMAC,
+        #                                 ip_dst=WRONG_VIP,
+        #                                 ip_src=SRC_VM_PA_IP,
+        #                                 udp_sport=11638,
+        #                                 with_udp_chksum=False,
+        #                                 vxlan_vni=OUTBOUND_VNI,
+        #                                 inner_frame=inner_pkt)
+        # print("\n\nSending packet with wrong vip...\n\n", vxlan_pkt.__repr__())
+        # send_packet(dataplane, 0, vxlan_pkt)
+        # print("\nVerifying drop...")
+        # verify_no_other_packets(dataplane)
+
+        # # check routing drop
+        # WRONG_DST_CA = "10.200.2.50"
+        # inner_pkt = simple_udp_packet(eth_dst="02:02:02:02:02:02",
+        #                               eth_src=ENI_MAC,
+        #                               ip_dst=WRONG_DST_CA,
+        #                               ip_src=SRC_VM_IP)
+        # vxlan_pkt = simple_vxlan_packet(eth_dst=OUR_MAC,
+        #                                 eth_src=OUTER_SMAC,
+        #                                 ip_dst=VIP,
+        #                                 ip_src=SRC_VM_PA_IP,
+        #                                 udp_sport=11638,
+        #                                 with_udp_chksum=False,
+        #                                 vxlan_vni=OUTBOUND_VNI,
+        #                                 inner_frame=inner_pkt)
+        # print("\nSending packet with wrong dst CA IP to verify routing drop...\n\n", vxlan_pkt.__repr__())
+        # send_packet(dataplane, 0, vxlan_pkt)
+        # print("\nVerifying drop...")
+        # verify_no_other_packets(dataplane)
+
+        # # check mapping drop
+        # WRONG_DST_CA = "10.1.211.211"
+        # inner_pkt = simple_udp_packet(eth_dst="02:02:02:02:02:02",
+        #                               eth_src=ENI_MAC,
+        #                               ip_dst=WRONG_DST_CA,
+        #                               ip_src=SRC_VM_IP)
+        # vxlan_pkt = simple_vxlan_packet(eth_dst=OUR_MAC,
+        #                                 eth_src=OUTER_SMAC,
+        #                                 ip_dst=VIP,
+        #                                 ip_src=SRC_VM_PA_IP,
+        #                                 udp_sport=11638,
+        #                                 with_udp_chksum=False,
+        #                                 vxlan_vni=OUTBOUND_VNI,
+        #                                 inner_frame=inner_pkt)
+        # print("\nSending packet with wrong dst CA IP to verify mapping drop...\n\n", vxlan_pkt.__repr__())
+        # send_packet(dataplane, 0, vxlan_pkt)
+        # print("\nVerifying drop...")
+        # verify_no_other_packets(dataplane)
+
+        # check forwarding
+        inner_pkt = simple_udp_packet(eth_dst = "02:02:02:02:02:02",
+                                      eth_src = ENI_MAC,
+                                      ip_dst  = DST_CA_IP,
+                                      ip_src  = SRC_VM_IP)
+        vxlan_pkt = simple_vxlan_packet(eth_dst         = OUR_MAC,
+                                        eth_src         = OUTER_SMAC,
+                                        ip_dst          = VIP,
+                                        ip_src          = SRC_VM_PA_IP,
+                                        udp_sport       = 11638,
+                                        with_udp_chksum = False,
+                                        vxlan_vni       = DIR_LOOKUP_VNI,
+                                        inner_frame     = inner_pkt)
+
+        inner_exp_pkt = simple_udp_packet(eth_dst = DST_CA_MAC,
+                                          eth_src = ENI_MAC,
+                                          ip_dst  = DST_CA_IP,
+                                          ip_src  = SRC_VM_IP)
+        vxlan_exp_pkt = simple_vxlan_packet(eth_dst         = "00:00:00:00:00:00",
+                                            eth_src         = "00:00:00:00:00:00",
+                                            ip_dst          = DST_PA_IP,
+                                            ip_src          = VIP,
+                                            udp_sport       = 0, # TODO: Fix sport in pipeline
+                                            with_udp_chksum = False,
+                                            vxlan_vni       = VNET_VNI,
+                                            vxlan_flags     = 0,
+                                            inner_frame     = inner_exp_pkt)
+        vxlan_exp_pkt['IP'].chksum = 0
+
+        print("\nSending outbound packet...\n\n", vxlan_pkt.__repr__())
+        send_packet(dataplane, 0, vxlan_pkt)
+        time.sleep(0.5)
+        print("\nVerifying packet...\n", vxlan_exp_pkt.__repr__())
+        verify_packet(dataplane, vxlan_exp_pkt, 0)
+
     @pytest.mark.snappi
     def test_simple_vxlan_packet(self, dpu, dataplane):
         dh.scale_vnet_outbound_flows(dataplane, TEST_VNET_OUTBOUND_CONFIG)
-
         dataplane.set_config()
         dataplane.start_traffic()
 
         stu.wait_for(lambda: dh.check_flow_packets_metrics(dataplane, dataplane.flows[0], show=True)[0],
                     "Test", timeout_seconds=10)
-
-        print("Test passed !")
 
     def test_remove_vnet_config(self, confgen, dpu, dataplane):
 
