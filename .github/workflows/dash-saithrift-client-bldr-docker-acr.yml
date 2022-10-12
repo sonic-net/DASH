@@ -53,4 +53,4 @@ jobs:
     - name: Build dash-saithrift-client-bldr image 
       run:  DOCKER_FLAGS=$docker_fg_flags make docker-saithrift-client-bldr
     - name: Publish dash-saithrift-client-bldr docker image
-      run: make docker-publish-saithrift-client-bldr
+      run: make docker-publish-saichallenger-client
