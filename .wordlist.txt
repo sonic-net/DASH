@@ -420,6 +420,7 @@ qos
 Radv
 rdpty
 reachability
+reconvergence
 README
 READMEs
 README's
@@ -450,12 +451,14 @@ runtime
 rx
 SAI
 sai
+saigen
 sairedis
 SAIRPC
 saiserver
 saithrift
 sata
 scalability
+scalable
 Scalable
 scapy
 Schemas

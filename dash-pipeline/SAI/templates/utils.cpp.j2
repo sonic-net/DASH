@@ -218,20 +218,77 @@ sai_status_t sai_create_switch_dummy(
     return SAI_STATUS_SUCCESS;
 }
 
-sai_status_t sai_get_switch_attribute_dummy(
+#define DASH_BMV2_NUM_PORTS 2 
+#define DASH_BMV2_DEFAULT_VLAN_ID (sai_object_id_t)((SAI_OBJECT_TYPE_VLAN<<48)+1)
+#define DASH_BMV2_DEFAULT_VRF_ID (sai_object_id_t)((SAI_OBJECT_TYPE_VIRTUAL_ROUTER<<48)+1)
+#define DASH_BMV2_DEFAULT_1Q_BRIDGE_ID (sai_object_id_t)((SAI_OBJECT_TYPE_BRIDGE<<48)+1)
+
+sai_object_id_t port_list[DASH_BMV2_NUM_PORTS] = {
+    (sai_object_id_t)((SAI_OBJECT_TYPE_PORT<<48) + 1),
+    (sai_object_id_t)((SAI_OBJECT_TYPE_PORT<<48) + 2)
+};
+
+sai_status_t sai_get_switch_attribute(
         _In_ sai_object_id_t switch_id,
         _In_ uint32_t attr_count,
         _Inout_ sai_attribute_t *attr_list) {
 
-    fprintf(stderr, "sai_get_switch_attribute_dummy()\n");
-    return SAI_STATUS_SUCCESS;
+    fprintf(stderr, "sai_get_switch_attribute()\n");
+    int i;
+    sai_attribute_t *attr = attr_list;
+    sai_object_list_t port_obj_list;
+    sai_object_id_t *objlist;
+    for (i = 0; i < attr_count ; i++, attr++) {
+        switch(attr->id) {
+        
+        case SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS:
+            attr->value.u32 = DASH_BMV2_NUM_PORTS;
+            fprintf(stderr, "  sai_get_switch_attribute() [%d] attr %d SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS = %d\n",
+                    i, attr->id, attr->value.u32);
+            return SAI_STATUS_SUCCESS;
+        
+        case SAI_SWITCH_ATTR_PORT_LIST:
+            // make a tmp port list, saiserver will free the memory
+            objlist = (sai_object_id_t *)malloc(sizeof(port_list));
+            memcpy(objlist, port_list, sizeof(port_list));
+            port_obj_list = {
+                .count = DASH_BMV2_NUM_PORTS,
+                .list = objlist
+            };                
+            attr->value.objlist = port_obj_list;
+            fprintf(stderr, "  sai_get_switch_attribute() [%d] attr %d SAI_SWITCH_ATTR_PORT_LIST = [%d objids]\n",
+                    i, attr->id, DASH_BMV2_NUM_PORTS);
+            return SAI_STATUS_SUCCESS;
+        
+        case SAI_SWITCH_ATTR_DEFAULT_VLAN_ID:
+            attr->value.oid = DASH_BMV2_DEFAULT_VLAN_ID;
+            fprintf(stderr, "  sai_get_switch_attribute() [%d] attr %d SAI_SWITCH_ATTR_DEFAULT_VLAN_ID = %lx\n",
+                    i, attr->id, attr->value.oid);
+            return SAI_STATUS_SUCCESS;
+        
+        case SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID:
+            attr->value.oid = DASH_BMV2_DEFAULT_VRF_ID;
+            fprintf(stderr, "  sai_get_switch_attribute() [0] attr %d SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID = %lx\n", attr->id, attr->value.oid);
+            return SAI_STATUS_SUCCESS;
+        
+        case SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID:
+            attr->value.oid = DASH_BMV2_DEFAULT_1Q_BRIDGE_ID;
+            fprintf(stderr, "  sai_get_switch_attribute() [0] attr %d SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID = %lx\n", attr->id, attr->value.oid);
+            return SAI_STATUS_SUCCESS;
+
+        default:
+            fprintf(stderr, "  sai_get_switch_attribute() [0] attr %d is NOT SUPPORTED - returning SAI_STATUS_SUCCESS anyway\n", attr->id);
+            return SAI_STATUS_NOT_SUPPORTED;
+        }
+    }
+    return SAI_STATUS_NOT_SUPPORTED;
 }
 
 sai_switch_api_t sai_switch_api_impl = {
     .create_switch = sai_create_switch_dummy,
     .remove_switch = (void *)0,
     .set_switch_attribute = (void *)0,
-    .get_switch_attribute = sai_get_switch_attribute_dummy,
+    .get_switch_attribute = sai_get_switch_attribute,
     .get_switch_stats = (void *)0,
     .get_switch_stats_ext = (void *)0,
     .clear_switch_stats = (void *)0,
