@@ -285,4 +285,4 @@ class TestSaiThrift_outbound_udp_pkt(ThriftInterfaceDataPlane):
             sai_thrift_remove_vip_entry(self.client, self.vpe)
             assert(status == SAI_STATUS_SUCCESS)
 
-        super(self.__class__, self).tearDown();
+        super(self.__class__, self).tearDown()
