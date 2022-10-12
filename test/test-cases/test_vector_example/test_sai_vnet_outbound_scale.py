@@ -209,14 +209,26 @@ class TestSaiVnetOutbound:
         #     print(cmd['name'], cmd['type'], res)
 
     @pytest.mark.snappi
-    def test_run_traffic_check(self, dpu, dataplane):
-        dh.scale_vnet_outbound_flows(dataplane, TEST_VNET_OUTBOUND_CONFIG_SCALE)
+    def test_run_traffic_check_fixed_packets(self, dpu, dataplane):
+        dh.scale_vnet_outbound_flows(dataplane, TEST_VNET_OUTBOUND_CONFIG_SCALE,
+                                     packets_per_flow=10, flow_duration=0, pps_per_flow=10)
         dataplane.set_config()
         dataplane.start_traffic()
-
         stu.wait_for(lambda: dh.check_flows_all_packets_metrics(dataplane, dataplane.flows,
-                                                                       name="Custom flow group", show=True)[0],
-                    "Test", timeout_seconds=2)
+                                                                name="Custom flow group", show=True)[0],
+                    "Test", timeout_seconds=5)
+        print("Test passed !")
+
+    @pytest.mark.snappi
+    def test_run_traffic_check_fixed_duration(self, dpu, dataplane):
+        TEST_DURATION = 10
+        dh.scale_vnet_outbound_flows(dataplane, TEST_VNET_OUTBOUND_CONFIG_SCALE,
+                                     packets_per_flow=0, flow_duration=TEST_DURATION, pps_per_flow=10)
+        dataplane.set_config()
+        dataplane.start_traffic()
+        stu.wait_for(lambda: dh.check_flows_all_seconds_metrics(dataplane, dataplane.flows,
+                                                                name="Custom flow group", show=True)[0],
+                    "Test", timeout_seconds=TEST_DURATION + 1)
         print("Test passed !")
 
     def test_remove_vnet_config(self, confgen, dpu, dataplane):
