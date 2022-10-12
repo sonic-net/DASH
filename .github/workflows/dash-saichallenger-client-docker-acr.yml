@@ -49,6 +49,6 @@ jobs:
         username: ${{ secrets.DASH_ACR_USERNAME }}
         password: ${{ secrets.DASH_ACR_PASSWORD }}    
     - name: Build SAI-Challenger client docker image
-       run:  DOCKER_FLAGS=$docker_fg_flags make docker-saichallenger-client
+      run: DOCKER_FLAGS=$docker_fg_flags make docker-saichallenger-client
     - name: Publish SAI-Challenger client docker image
-       run:  make docker-publish-saichallenger-client
+      run:  make docker-publish-saichallenger-client
