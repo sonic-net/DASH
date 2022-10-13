@@ -1,0 +1,41 @@
+name: DASH-docker-bmv2-bldr-build-publish-acr
+
+on:
+  push:
+    branches: [ "**" ]
+    paths:
+      - '.github/workflows/dash-bmv2-bldr-docker-acr.yml'
+      - 'dash-pipeline/dockerfiles/Dockerfile.bmv2-bldr'
+      - 'dash-pipeline/dockerfiles/DOCKER_BMV2_BLDR_IMG.env'
+      - 'dash-pipeline/.dockerignore'
+      - 'dash-pipeline/dockerfiles/.dockerignore'
+  pull_request:
+    branches: [ "**" ]
+    paths:
+      - '.github/workflows/dash-bmv2-bldr-docker-acr.yml'
+      - 'dash-pipeline/dockerfiles/Dockerfile.bmv2-bldr'
+      - 'dash-pipeline/dockerfiles/DOCKER_BMV2_BLDR_IMG.env'
+      - 'dash-pipeline/.dockerignore'
+      - 'dash-pipeline/dockerfiles/.dockerignore'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and publish docker dash-bmv2-bldr image
+    # Can only publish from within DASH repo (need credentials from secrets)
+    if: github.repository == 'Azure/DASH'
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: ./dash-pipeline
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build dash-bmv2-bldr docker image
+      run: make docker-bmv2-bldr
+    - uses: azure/docker-login@v1
+      with:
+        login-server: sonicdash.azurecr.io
+        username: ${{ secrets.DASH_ACR_USERNAME }}
+        password: ${{ secrets.DASH_ACR_PASSWORD }}    
+    - name: Publish dash-bmv2-bldr image
+      run: make docker-publish-bmv2-bldr

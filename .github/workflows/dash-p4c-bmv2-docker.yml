@@ -1,19 +1,20 @@
 name: DASH-docker-p4c-bmv2-build-image
 
-
 on:
   push:
     branches: [ "**" ]
     paths:
       - '.github/workflows/dash-p4c-bmv2-docker.yml'
       - 'dash-pipeline/dockerfiles/Dockerfile.p4c-bmv2'
+      - 'dash-pipeline/dockerfiles/DOCKER_P4C_BMV2_IMG.env'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
-    branches: [ "main" ]
+    branches: [ "**" ]
     paths:
       - '.github/workflows/dash-p4c-bmv2-docker.yml'
       - 'dash-pipeline/dockerfiles/Dockerfile.p4c-bmv2'
+      - 'dash-pipeline/dockerfiles/DOCKER_P4C_BMV2_IMG.env'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   workflow_dispatch:
@@ -21,6 +22,8 @@ on:
 jobs:
   build:
     name: Build docker dash-p4c-bmv2 image
+    # Only run on forks (in main repo, run build/publish workflows instead)
+    if: github.repository != 'Azure/DASH'
     runs-on: ubuntu-20.04
     defaults:
       run:
@@ -29,5 +32,3 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build dash-p4c-bmv2 docker image
       run: make docker-dash-p4c
-    - name: Publish dash-p4c-bmv2 docker image
-      run: make docker-publish-dash-p4c

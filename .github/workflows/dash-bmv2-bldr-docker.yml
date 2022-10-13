@@ -1,19 +1,20 @@
 name: DASH-docker-bmv2-bldr-build-image
 
-
 on:
   push:
     branches: [ "**" ]
     paths:
       - '.github/workflows/dash-bmv2-bldr-docker.yml'
       - 'dash-pipeline/dockerfiles/Dockerfile.bmv2-bldr'
+      - 'dash-pipeline/dockerfiles/DOCKER_BMV2_BLDR_IMG.env'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
-    branches: [ "main" ]
+    branches: [ "**" ]
     paths:
       - '.github/workflows/dash-bmv2-bldr-docker.yml'
       - 'dash-pipeline/dockerfiles/Dockerfile.bmv2-bldr'
+      - 'dash-pipeline/dockerfiles/DOCKER_BMV2_BLDR_IMG.env'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   workflow_dispatch:
@@ -21,6 +22,8 @@ on:
 jobs:
   build:
     name: Build docker dash-bmv2-bldr image
+    # Only run on forks (in main repo, run build/publish workflows instead)
+    if: github.repository != 'Azure/DASH'
     runs-on: ubuntu-20.04
     defaults:
       run:
@@ -29,5 +32,3 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build dash-bmv2-bldr docker image
       run: make docker-bmv2-bldr
-    - name: Publish dash-bmv2 docker image
-      run: make docker-publish-bmv2-bldr

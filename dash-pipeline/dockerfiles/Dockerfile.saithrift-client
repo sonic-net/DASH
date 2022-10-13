@@ -1,7 +1,5 @@
 
-#FROM amd64/ubuntu:20.04 as builder
-# amd64/ubuntu:20.04 on 2022-07-03
-FROM chrissommers/dash-saithrift-client-bldr:220723
+FROM sonicdash.azurecr.io/dash-saithrift-client-bldr:220819
 LABEL maintainer="SONiC-DASH Community "
 LABEL description="This Docker image contains the toolchain to run\
 the saithrift client and test programs for DASH."

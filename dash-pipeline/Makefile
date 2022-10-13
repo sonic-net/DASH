@@ -1,9 +1,12 @@
 SHELL = /bin/bash
 
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+mkfile_dir := $(dir $(mkfile_path))
+
 # "All" type targets for convenience
 all:p4 sai saithrift-server docker-saithrift-client test
 
-run-all-tests:run-libsai-test run-saithrift-client-tests
+run-all-tests:run-libsai-test run-saithrift-client-tests run-saichallenger-tests
 run-saithrift-client-tests: run-saithrift-ptftests run-saithrift-pytests
 run-saithrift-client-dev-tests: run-saithrift-dev-ptftests run-saithrift-dev-pytests
 
@@ -13,36 +16,42 @@ clean: kill-all p4-clean sai-clean test-clean network-clean saithrift-server-cle
 
 kill-all: kill-saithrift-server kill-switch undeploy-ixiac kill-saichallenger-client
 
-PWD := $(shell pwd)
+PWD := $(realpath $(mkfile_dir))
 DASH_USER ?=dashuser
 DASH_GROUP ?=dashusers
 DASH_UID ?=4321
 DASH_GUID?=4321
 DASH_HOST?=dash
 
-# Default Docker images, override from env var
+# Include file defines DOCKER_GRPC_IMG
+include dockerfiles/DOCKER_GRPC_IMG.env
 
-# Needed Libraries only
-DOCKER_GRPC_IMG ?=chrissommers/dash-grpc:1.43.2
+# Slimmed-down version bmv2 backend only
+# include file defines DOCKER_P4C_BMV2_IMG
+include dockerfiles/DOCKER_P4C_BMV2_IMG.env
 
-# Slimmed-down version bmv2 backend only 632MB:
-DOCKER_P4C_BMV2_IMG ?=chrissommers/dash-p4c-bmv2:220825
-
-# Builds SAI-P4RT clients to run inside bmv2 process
-DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2-bldr:220819
+# Builds sai-P4rt clients to run inside bmv2 process
+# include file defines DOCKER_BMV2_BLDR_IMG
+include dockerfiles/DOCKER_BMV2_BLDR_IMG.env
 
 # Runs bmv2 process - consider slimmer if don't need sai/p4rt clients inside
 DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 
 # Compiles sai headers, libsai, saithrift server & client/server libs
-DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220819
+# include file defines DOCKER_SAITHRIFT_BLDR_IMG
+include dockerfiles/DOCKER_SAITHRIFT_BLDR_IMG.env
 
 # Base image with test frameworks, DASH client libs not installed
-DOCKER_SAITHRIFT_CLIENT_BLDR_IMG ?=chrissommers/dash-saithrift-client-bldr:220819
+# include file defines DOCKER_SAITHRIFT_CLIENT_BLDR_IMG
+include dockerfiles/DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env
 
 # Client image built locally with saithrift client libs + PTF & Pytest frameworks
 # TODO: consider some other tagging scheme
 DOCKER_SAITHRIFT_CLIENT_IMG ?= local/dash-saithrift-client:latest
+
+# Base image with test frameworks, DASH client libs not installed
+# include file defines DOCKER_SAI_CHALLENGER_CLIENT_IMG
+include dockerfiles/DOCKER_SAI_CHALLENGER_CLIENT_IMG.env
 
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
@@ -72,7 +81,6 @@ sai-submodule:
 P4_SRC=$(wildcard bmv2/*.p4)
 P4_MAIN=bmv2/dash_pipeline.p4
 P4_OUTDIR=bmv2/dash_pipeline.bmv2
-
 P4_ARTIFACTS=$(P4_OUTDIR)/dash_pipeline.json $(P4_OUTDIR)/dash_pipeline_p4rt.txt
 
 p4: $(P4_OUTDIR)/dash_pipeline.json
@@ -102,7 +110,7 @@ $(P4_ARTIFACTS): $(P4_SRC)
 # DASH SAI HEADER & libsai.so TARGETS
 ######################################
 
-
+SAIRPC_VENDOR_EXTRA_LIBS?=""
 # Note we have to mount main DASH dir to allow container to "see" the parent Git repo for the SAI submodule
 DOCKER_RUN_SAITHRIFT_BLDR =\
 	docker run \
@@ -110,6 +118,7 @@ DOCKER_RUN_SAITHRIFT_BLDR =\
 	--rm \
 	--name dash-saithrift-bldr-$(USER) \
 	-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/saithrift \
+	-e SAIRPC_VENDOR_EXTRA_LIBS=$(SAIRPC_VENDOR_EXTRA_LIBS) \
 	$(DOCKER_SAITHRIFT_BLDR_IMG) \
 
 # TODO - create separate rules for headers, libsai.so
@@ -294,11 +303,19 @@ docker-bmv2-bldr:
 	    --build-arg available_processors=$(shell nproc) \
 	    dockerfiles
 
-docker-publish-bmv2-bldr:
-	echo "TO DO when we have a proper repository"
-
 docker-pull-bmv2-bldr:
 	docker pull $(DOCKER_BMV2_BLDR_IMG)
+
+# Only used for CI publishing to save artifact between jobs:
+docker-save-bmv2-bldr:
+	docker save --output bmv2-bldr-image.tar $(DOCKER_BMV2_BLDR_IMG)
+docker-load-bmv2-bldr:
+	docker load --input bmv2-bldr-image.tar
+
+docker-publish-bmv2-bldr:
+	@echo "Publish $(DOCKER_BMV2_BLDR_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_BMV2_BLDR_IMG)
+
 ###############################
 docker-saithrift-bldr:
 	docker build \
@@ -312,11 +329,12 @@ docker-saithrift-bldr:
 	    --build-arg available_processors=$(shell nproc) \
 		dockerfiles
 
-docker-publish-saithrift-bldr:
-	echo "TO DO when we have a proper repository"
-
 docker-pull-saithrift-bldr:
 	docker pull $(DOCKER_SAITHRIFT_BLDR_IMG)
+
+docker-publish-saithrift-bldr:
+	@echo "Publish $(DOCKER_SAITHRIFT_BLDR_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_SAITHRIFT_BLDR_IMG)
 
 ###############################
 # Builder, has base packages to make client docker
@@ -336,7 +354,8 @@ docker-pull-saithrift-client-bldr:
 	docker pull $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG)
 
 docker-publish-saithrift-client-bldr:
-	echo "TO DO when we have a proper repository"
+	@echo "Publish $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG)
 
 ###############################
 
@@ -424,7 +443,9 @@ docker-pull-dash-p4c:
 	docker pull $(DOCKER_P4C_BMV2_IMG)
 
 docker-publish-dash-p4c:
-	echo "TO DO when we have a proper repository"
+	@echo "Publish $(DOCKER_P4C_BMV2_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_P4C_BMV2_IMG)
+
 ###############################
 
 docker-dash-grpc:
@@ -443,7 +464,8 @@ docker-pull-dash-grpc:
 	docker pull $(DOCKER_GRPC_IMG)
 
 docker-publish-dash-grpc:
-	echo "TO DO when we have a proper repository"
+	@echo "Publish $(DOCKER_GRPC_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_GRPC_IMG)
 
 ###############################
 # BMV2-PKTGEN NETWORKING TARGETS
@@ -500,8 +522,6 @@ undeploy-ixiac:
 
 SAI_CHALLENGER_PATH = $(PWD)/../test/SAI-Challenger.OCP
 
-DOCKER_SAI_CHALLENGER_CLIENT = anton7811/dash-saichallenger-client:220920
-
 CONTAINER_SAI_CHALLENGER_CLIENT_NAME = dash-saichallenger-client-$(USER)
 
 # Add passing parameters to the run-saichallenger-tests target.
@@ -524,10 +544,14 @@ docker-saichallenger-client:
 	cd $(SAI_CHALLENGER_PATH) && ./build.sh -i client
 	docker build \
 		-f dockerfiles/Dockerfile.saichallenger-client \
-		-t $(DOCKER_SAI_CHALLENGER_CLIENT) \
+		-t $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
 		.
 
-DOCKER_RUN_SAI_CHALLENGER_CLEINT=docker run \
+docker-publish-saichallenger-client:
+	@echo "Publish $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_SAI_CHALLENGER_CLIENT_IMG)
+
+DOCKER_RUN_SAI_CHALLENGER_CLIENT=docker run \
 	-v $(SAI_CHALLENGER_PATH):/sai-challenger \
 	-v $(SAI_CHALLENGER_PATH)/../test-cases/test_vector_example/:/sai-challenger/dash_tests \
 	-v $(PWD)/../:/dash \
@@ -538,26 +562,26 @@ DOCKER_RUN_SAI_CHALLENGER_CLEINT=docker run \
 	--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
 
 run-saichallenger-client: deploy-ixiac
-	$(DOCKER_RUN_SAI_CHALLENGER_CLEINT) \
+	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
 	-d \
 	--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) \
-	$(DOCKER_SAI_CHALLENGER_CLIENT)
+	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG)
 
 run-saichallenger-client-bash: deploy-ixiac
-	$(DOCKER_RUN_SAI_CHALLENGER_CLEINT) \
+	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
 	-w /sai-challenger/dash_tests \
 	$(DOCKER_FLAGS) \
-	$(DOCKER_SAI_CHALLENGER_CLIENT) \
+	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
 	/bin/bash
 
 kill-saichallenger-client:
 	-docker kill $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
 
 run-saichallenger-tests: deploy-ixiac
-	$(DOCKER_RUN_SAI_CHALLENGER_CLEINT) \
+	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
 	-w /sai-challenger/dash_tests \
 	$(DOCKER_FLAGS) \
-	$(DOCKER_SAI_CHALLENGER_CLIENT) \
+	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
 	./run_vnet_tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
 
 ###############################

@@ -1,0 +1,41 @@
+name: DASH-docker-grpc1.43.2-build-publish-acr
+
+on:
+  push:
+    branches: [ "**" ]
+    paths:
+      - '.github/workflows/dash-grpc1.43.2-docker-acr.yml'
+      - 'dash-pipeline/dockerfiles/Dockerfile.grpc1.43.2'
+      - 'dash-pipeline/dockerfiles/DOCKER_GRPC_IMG.env'
+      - 'dash-pipeline/.dockerignore'
+      - 'dash-pipeline/dockerfiles/.dockerignore'
+  pull_request:
+    branches: [ "**" ]
+    paths:
+      - '.github/workflows/dash-grpc1.43.2-docker-acr.yml'
+      - 'dash-pipeline/dockerfiles/Dockerfile.grpc1.43.2'
+      - 'dash-pipeline/dockerfiles/DOCKER_GRPC_IMG.env'
+      - 'dash-pipeline/.dockerignore'
+      - 'dash-pipeline/dockerfiles/.dockerignore'
+  workflow_dispatch:
+
+jobs:
+  build:
+    # Can only publish from within DASH repo (need credentials from secrets)
+    if: github.repository == 'Azure/DASH'
+    name: Build and publish docker dash-grpc1.43.2 image
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: ./dash-pipeline
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build dash-grpc1.43.2 docker image
+      run: make docker-dash-grpc
+    - uses: azure/docker-login@v1
+      with:
+        login-server: sonicdash.azurecr.io
+        username: ${{ secrets.DASH_ACR_USERNAME }}
+        password: ${{ secrets.DASH_ACR_PASSWORD }}    
+    - name: Publish dash-grpc1.43.2 image
+      run: make docker-publish-dash-grpc

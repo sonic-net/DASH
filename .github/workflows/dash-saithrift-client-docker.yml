@@ -6,18 +6,14 @@ on:
     paths:
       - '.github/workflows/dash-saithrift-client-docker.yml'
       - 'dash-pipeline/Makefile'
-      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-bldr'
-      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client-bldr'
       - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
-    branches: [ "main" ]
+    branches: [ "**" ]
     paths:
       - '.github/workflows/dash-saithrift-client-docker.yml'
       - 'dash-pipeline/Makefile'
-      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-bldr'
-      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client-bldr'
       - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'

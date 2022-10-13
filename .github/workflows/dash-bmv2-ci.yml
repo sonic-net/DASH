@@ -11,14 +11,15 @@ on:
       - 'test/**.sh'
       - 'test/**.yml'
       - 'dash-pipeline/**'
-      - '!dash-pipeline/docker files/Dockerfile.*'
+      - '!dash-pipeline/dockerfiles/Dockerfile.*'
+      - 'dash-pipeline/dockerfiles/*.env'
       - '!dash-pipeline/.dockerignore'
       - '!dash-pipeline/**.md'
       - '!dash-pipeline/**.svg'
       - '!dash-pipeline/**.png'
       - '!dash-pipeline/**.txt'
   pull_request:
-    branches: [ "main" ]
+    branches: [ "**" ]
     paths:
       - '.gitmodules'
       - '.github/workflows/dash-bmv2-ci.yml'
@@ -27,7 +28,8 @@ on:
       - 'test/**.sh'
       - 'test/**.yml'
       - 'dash-pipeline/**'
-      - '!dash-pipeline/docker files/Dockerfile.*'
+      - '!dash-pipeline/dockerfiles/Dockerfile.*'
+      - 'dash-pipeline/dockerfiles/*.env'
       - '!dash-pipeline/.dockerignore'
       - '!dash-pipeline/**.md'
       - '!dash-pipeline/**.svg'
@@ -82,4 +84,6 @@ jobs:
       run:  DOCKER_FLAGS=$docker_fg_flags make deploy-ixiac
     - name: Run Pytests
       run:  DOCKER_FLAGS=$docker_fg_root_flags make run-saithrift-pytests
+    - name: Run SAI-Challenger Tests
+      run:  DOCKER_FLAGS=$docker_fg_root_flags make run-saichallenger-tests
       

@@ -1,12 +1,17 @@
-[ [ << Back to DASH top-level Documents](../README.md#contents) ]
-
 # DASH High-Availability Documents
 
 This folder contains DASH High Availability design and requirements documents.
 
-# Contents
+## Design
 
-| Folder                                                 | Description                                  |
-| ------------------------------------------------------ | -------------------------------------------- |
-| [design](design/README.md)                             | DASH High Availability design & architecture documents |
-| [requirements](requirements/README.md)                 | DASH High Availability requirements documents         |
+| Document                                               | Description                                |
+| ------------------------------------------------------ | ------------------------------------------ |
+| [high-availability-and-scale.md](high-availability-and-scale.md) | DASH High-Availability and Scale design document   |
+| [xsight-labs-ha-proposal-v1.md](xsight-labs-ha-proposal-v1.md) | Initial HA proposal document   |
+| [xsight-labs-ha-proposal-new-ideas.md](xsight-labs-ha-proposal-new-ideas.md)|Addendum to the initial HA proposal (preview)|
+
+
+## Requirements
+
+| Document                                               | Description                                |
+| ------------------------------------------------------ | ------------------------------------------ |
