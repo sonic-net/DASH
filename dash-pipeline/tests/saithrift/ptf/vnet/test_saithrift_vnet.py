@@ -219,7 +219,7 @@ class TestSaiThrift_outbound_udp_pkt(ThriftInterfaceDataPlane):
             send_packet(self, 0, vxlan_pkt)
             print("\nVerifying packet...\n", self.pkt_exp.__repr__())
             verify_packet(self, self.pkt_exp, 0)
-            print ("test_sai_thrift_outbound_udp_pkt_test OK")
+            print ("TestSaiThrift_outbound_udp_pkt OK")
         except AssertionError as ae:
             self.failure_teardown()
             raise ae
@@ -254,34 +254,35 @@ class TestSaiThrift_outbound_udp_pkt(ThriftInterfaceDataPlane):
     def tearDown(self):
 
         # Delete in reverse order
-        if self.cleaned_up:
-            return
-        status = sai_thrift_remove_outbound_ca_to_pa_entry(self.client, self.ocpe)
-        assert(status == SAI_STATUS_SUCCESS)                        
+        if not self.cleaned_up:
+            status = sai_thrift_remove_outbound_ca_to_pa_entry(self.client, self.ocpe)
+            assert(status == SAI_STATUS_SUCCESS)                        
 
-        status = sai_thrift_remove_outbound_routing_entry(self.client, self.ore)
-        assert(status == SAI_STATUS_SUCCESS)
+            status = sai_thrift_remove_outbound_routing_entry(self.client, self.ore)
+            assert(status == SAI_STATUS_SUCCESS)
 
-        #status = sai_thrift_remove_dash_acl_rule(self.client, self.out_acl_rule_id)
-        #assert(status == SAI_STATUS_SUCCESS)
+            #status = sai_thrift_remove_dash_acl_rule(self.client, self.out_acl_rule_id)
+            #assert(status == SAI_STATUS_SUCCESS)
 
-        status = sai_thrift_remove_eni_ether_address_map_entry(self.client, self.eam)
-        assert(status == SAI_STATUS_SUCCESS)
+            status = sai_thrift_remove_eni_ether_address_map_entry(self.client, self.eam)
+            assert(status == SAI_STATUS_SUCCESS)
 
-        status = sai_thrift_remove_eni(self.client, self.eni)
-        assert(status == SAI_STATUS_SUCCESS)
+            status = sai_thrift_remove_eni(self.client, self.eni)
+            assert(status == SAI_STATUS_SUCCESS)
 
-        status = sai_thrift_remove_vnet(self.client, self.vnet)
-        assert(status == SAI_STATUS_SUCCESS)                        
+            status = sai_thrift_remove_vnet(self.client, self.vnet)
+            assert(status == SAI_STATUS_SUCCESS)                        
 
-        status = sai_thrift_remove_dash_acl_group(self.client, self.out_acl_group_id)
-        assert(status == SAI_STATUS_SUCCESS)
+            status = sai_thrift_remove_dash_acl_group(self.client, self.out_acl_group_id)
+            assert(status == SAI_STATUS_SUCCESS)
 
-        status = sai_thrift_remove_dash_acl_group(self.client, self.in_acl_group_id)
-        assert(status == SAI_STATUS_SUCCESS)
+            status = sai_thrift_remove_dash_acl_group(self.client, self.in_acl_group_id)
+            assert(status == SAI_STATUS_SUCCESS)
 
-        status = sai_thrift_remove_direction_lookup_entry(self.client, self.dle)
-        assert(status == SAI_STATUS_SUCCESS)
+            status = sai_thrift_remove_direction_lookup_entry(self.client, self.dle)
+            assert(status == SAI_STATUS_SUCCESS)
 
-        sai_thrift_remove_vip_entry(self.client, self.vpe)
-        assert(status == SAI_STATUS_SUCCESS)
+            sai_thrift_remove_vip_entry(self.client, self.vpe)
+            assert(status == SAI_STATUS_SUCCESS)
+
+        super(self.__class__, self).tearDown()
