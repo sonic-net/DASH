@@ -1,6 +1,6 @@
 # SONiC-DASH HLD
 ## High Level Design Document
-### Rev 0.7
+### Rev 1.0
 
 # Table of Contents
 
@@ -38,7 +38,7 @@
 | 0.7 | 08/09/2022  |     Prince Sunny      | Add Inbound Routing rules           |
 | 0.6 | 04/20/2022  |     Marian Pritsak    | APP_DB to SAI mapping               |
 | 0.8 | 09/30/2022  |     Prabhat Aravind   | Update APP_DB table names           |
-
+| 1.0 | 10/10/2022  |     Prince Sunny      | ST and PL scenarios                 |
 
 # About this Manual
 This document provides more detailed design of DASH APIs, DASH orchestration agent, Config and APP DB Schemas and other SONiC buildimage changes required to bring up SONiC image on an appliance card. General DASH HLD can be found at [dash_hld](./dash-high-level-design.md).
@@ -54,6 +54,8 @@ This document provides more detailed design of DASH APIs, DASH orchestration age
 | ENI                      | Elastic Network Interface      |
 | gNMI                     | gRPC Network Management Interface |
 | vPORT                    | VM's NIC. Eni, Vnic, VPort are used interchangeably |
+| ST                       | Service Tunnel |
+| PL                       | Private Link |
 
 # 1 Requirements Overview
 
@@ -147,6 +149,10 @@ The figure below shows how the VNI to be encapsulated in the outgoing packet is 
 Based on the incoming packet's VNI, if it does not match against any reserved VNI, the pipeline shall set the direction as RX(Inbound) and using the inner dst-mac, maps to the corresponding ENI. In the inbound flow, Priority based "Routing Rule" lookup happens based on VNI and optionally SRC PA prefix and maps to a VNET. In other words, the VNET is derived from a VNI key or a combination of VNI key and SRC PA based on the routing rule entry. It is possible that in some cases, two VNETs in different region can have the same VNI key and hence Inbound routing rule shall have both SRC PA prefix and VNI key to uniquely determine the VNET. Using the derived VNET's mapping tables, source PA address is validated against the list of mappings. If the check passes, decap action is performed, else dropped. Note that, PA validation is conditional and routing rule shall specify (say, by a flag) whether to perform PA validation or not as there are some cases like SLB traffic for which PA validation is not required. After route lookup is the three stage ACL, processed in order. ACLs can have multiple src/dst IP ranges or port ranges as match criteria.
 	
 It is worth noting that CA-PA mapping table shall be used for both encap and decap process
+
+## 2.3 Service Tunnel (ST) and Private Link (PL) packet processing pipelines
+
+ST/PL is employed for scenarios like multiple different customers want to access a common shared resource (e.g storage). This shall not fall into the regular Vnet packet path or Vnet peering path and hence a Private Endpoint is assigned for such accesses, as part of ENI routing or VNET's mapping tables. The lookup happens as described in the above sections, but actions are different. For ST/PL, actions include IPv4 to IPv6 transpositions and special routing/mapping lookups for encapsulation. Based on the outbound flow, inbound flows are created for return traffic. By having packet transpositions, Service Tunnel feature provides the capability of encoding “region id”, “vnet id”, “subnet id” etc via packet transformation. IPv6 transformation includes last 32 bits of the IPv6 packet as IPv4 address, while the remaining 96 bits of the IPv6 packet is used for encoding. Private Link feature is an extension to Service Tunnel feature and enables customers to access public facing shared services via their private IP addresses within their vnet. More details on traffic flow is captured in the example section.
 	
 # 3 Modules Design
 
@@ -212,6 +218,8 @@ DASH_ENI_TABLE:{{eni}}
     "underlay_ip": {{ip_addr}}
     "admin_state": {{enabled/disabled}}
     "vnet": {{vnet_name}}
+    "pl_sip_encoding": {{string}} (OPTIONAL)
+    "pl_underlay_sip": {{ip_addr}} (OPTIONAL)
 ```
 ```
 key                      = DASH_ENI_TABLE:eni ; ENI MAC as key
@@ -221,6 +229,8 @@ qos                      = Associated Qos profile
 underlay_ip              = PA address for Inbound encapsulation to VM
 admin_state              = Enabled after all configurations are applied. 
 vnet                     = Vnet that ENI belongs to
+pl_sip_encoding          = Private Link encoding for IPv6 SIP transpositions; Format "field:<bit_offset>:<size_in_bits>:<value in hex>:field:<bit_offset>:<size_in_bits>:<value in hex>"
+pl_underlay_sip          = Underlay SIP to be used for all private link transformation for this ENI. 
 ```
 ### 3.2.4 ACL
   
@@ -314,8 +324,9 @@ DASH_ROUTE_TABLE:{{eni}}:{{prefix}}
     "vnet":{{vnet_name}} (OPTIONAL)
     "appliance":{{appliance_id}} (OPTIONAL)
     "overlay_ip":{{ip_address}} (OPTIONAL)
-    "underlay_ip":{{ip_address}} (OPTIONAL)
     "overlay_sip":{{ip_address}} (OPTIONAL)
+    "overlay_dip":{{ip_address}} (OPTIONAL)
+    "underlay_sip":{{ip_address}} (OPTIONAL)
     "underlay_dip":{{ip_address}} (OPTIONAL)
     "metering_bucket": {{bucket_id}} (OPTIONAL) 
 ```
@@ -326,10 +337,11 @@ key                      = DASH_ROUTE_TABLE:eni:prefix ; ENI route table with CA
 action_type              = routing_type              ; reference to routing type
 vnet                     = vnet name                 ; destination vnet name if routing_type is {vnet, vnet_direct}
 appliance                = appliance id              ; appliance id if routing_type is {appliance} 
-overlay_ip               = ip_address                ; overlay_ip to override if routing_type is {servicetunnel}, overly_ip to lookup if routing_type is {vnet_direct}, use dst ip from packet if not specified
-underlay_ip              = ip_address                ; underlay_ip to override if routing_type is {servicetunnel}, use dst ip from packet if not specified
-overlay_sip              = ip_address                ; overlay_sip if routing_type is {servicetunnel}  
-underlay_sip             = ip_address                ; overlay_sip if routing_type is {servicetunnel}
+overlay_ip               = ip_address                ; overly_ip to lookup if routing_type is {vnet_direct}, use dst ip from packet if not specified
+overlay_sip              = ip_address                ; overlay ipv6 src ip if routing_type is {servicetunnel}, transform last 32 bits from packet (src ip)
+overlay_dip              = ip_address                ; overlay ipv6 dst ip if routing_type is {servicetunnel}, transform last 32 bits from packet (dst ip) 
+underlay_sip             = ip_address                ; underlay ipv4 src ip if routing_type is {servicetunnel}; this is the ST VIP
+underlay_dip             = ip_address                ; underlay ipv4 dst ip to override if routing_type is {servicetunnel}, use dst ip from packet if not specified
 metering_bucket          = bucket_id                 ; metering and counter
 ```
 
@@ -365,6 +377,8 @@ DASH_VNET_MAPPING_TABLE:{{vnet}}:{{ip_address}}
     "mac_address":{{mac_address}} (OPTIONAL) 
     "metering_bucket": {{bucket_id}} (OPTIONAL)
     "use_dst_vni": {{bool}} (OPTIONAL)
+    "overlay_sip":{{ip_address}} (OPTIONAL)
+    "overlay_dip":{{ip_address}} (OPTIONAL)
 ```
 ```
 key                      = DASH_VNET_MAPPING_TABLE:vnet:ip_address ; CA-PA mapping table for Vnet
@@ -374,6 +388,8 @@ underlay_ip              = ip_address                ; PA address for the CA
 mac_address              = MAC address as string     ; Inner dst mac
 metering_bucket          = bucket_id                 ; metering and counter
 use_dst_vni              = bool                      ; if true, use the destination VNET VNI for encap. If false or not specified, use source VNET's VNI
+overlay_sip              = ip_address                ; overlay src ip if routing_type is {privatelink}, transform last 32 bits from packet 
+overlay_dip              = ip_address                ; overlay dst ip if routing_type is {privatelink} 
 ```
 
 ### 3.2.9 DASH orchagent (Overlay)
@@ -631,6 +647,8 @@ Refer DASH documentation for the test plan.
 
 ## 3.6 Example configuration
 
+### 3.6.1 VNET - VNET
+
 ```
 [
     {
@@ -743,5 +761,175 @@ For the example configuration above, the following is a brief explanation of loo
 		a. LPM lookup hits for entry 10.2.5.0/24
 		b. The action in this case is "drop". 
 		c. Packets gets dropped
-	
+
 For the inbound direction, after Route/ACL lookup, pipeline shall use the "underlay_ip" as specified in the ENI table to VXLAN encapsulate the packet and VNI shall be the ```vm_vni``` specified in the APPLIANCE table 
+
+
+### 3.6.2 Service Tunnel
+
+```
+[
+    {
+        "DASH_ROUTING_TYPE_TABLE:servicetunnel": [ 
+	{
+	     "name": "action1",
+             "action_type": "4to6",
+	},
+	{ 
+             "name": "action2",
+             "action_type": "staticencap",
+             "encap_type": "nvgre"
+	     "key":"100"
+        } ],         
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTE_TABLE:F4939FEFC47E:50.1.2.0/24": {
+            "action_type":"servicetunnel",
+            "overlay_sip":"fd00:108:0:d204:0:200::0",
+	    "overlay_dip":"2603:10e1:100:2::0",
+	    "underlay_sip":"40.1.2.1"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTE_TABLE:F4939FEFC47E:60.1.2.1/32": {
+            "action_type":"servicetunnel",
+            "overlay_sip":"fd00:108:0:d204:0:200::0",
+	    "overlay_dip":"2603:10e1:100:2::0",
+	    "underlay_sip":"30.1.2.1",
+	    "underlay_dip":"25.1.2.1"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTE_TABLE:F4939FEFC47E:70.1.2.0/24": {
+            "action_type":"servicetunnel",
+            "overlay_sip":"fd00:108:0:d204:0:200::0",
+	    "overlay_dip":"2603:10e1:100:2::4601:203",
+	    "underlay_sip":"34.1.2.1"
+        },
+        "OP": "SET"
+    },
+]
+```
+
+    
+For the example configuration above, the following is a brief explanation of lookup behavior in the outbound direction:
+
+	1. Packet destined to 50.1.2.1 from 10.1.1.1:
+		a. LPM lookup hits for entry 50.1.2.0/24
+		b. The action in this case is "servicetunnel"
+		c. First Action for "servicetunnel" is 4to6 transposition
+		d. Packet gets transformed as: Overlay SIP fd00:108:0:d204:0:200::a01:101, Overlay DIP 2603:10e1:100:2::3201:201
+		e. Second Action is Static NVGRE encap. 
+		f. Since underlay dip is not specified in the LPM table, It shall use Dst IP from packet, i.e 50.1.2.1 and underlay Src IP as 40.1.2.1
+	
+	2. Packet destined to 60.1.2.1 from 10.1.1.1:
+		a. LPM lookup hits for entry 60.1.2.0/24
+		b. The action in this case is "servicetunnel"
+		c. First Action for "servicetunnel" is 4to6 transposition
+		d. Packet gets transformed as: Overlay SIP fd00:108:0:d204:0:200::0a01:101, Overlay DIP 2603:10e1:100:2::3c01:201
+		e. Second Action is Static NVGRE encap. 
+		f. Since underlay sip/dip is specified in the LPM table, It shall use Src IP (25.1.2.1), Dst IP (60.1.2.1)
+
+	3. Packet destined to 70.1.2.1 from 10.1.1.1:
+		a. LPM lookup hits for entry 70.1.2.0/24
+		b. The action in this case is "servicetunnel"
+		c. First Action for "servicetunnel" is 4to6 transposition
+		d. Packet gets transformed as: Overlay SIP fd00:108:0:d204:0:200::0a01:101, since overlay DIP is fully provided, it shall be 2603:10e1:100:2::4601:203
+		e. Second Action is Static NVGRE encap. 
+		f. Since underlay dip is not specified in the LPM table, It shall use Dst IP from packet, i.e 70.1.2.1 and underlay Src IP as 34.1.2.1
+
+### 3.6.3 Private Link 
+
+```
+[
+    {
+        "DASH_ROUTING_TYPE_TABLE:privatelink": [ 
+	{
+	     "name": "action1",
+             "action_type": "4to6",
+	},
+	{ 
+             "name": "action2",
+             "action_type": "staticencap",
+             "encap_type": "nvgre"
+	     "key":"100"
+        } ],         
+        "OP": "SET"
+    },
+    {
+        "DASH_ENI_TABLE:F4939FEFC47E": {
+	    "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
+	    "mac_address": "F4-93-9F-EF-C4-7E",
+	    "underlay_ip": "25.1.1.1",
+	    "admin_state": "enabled",
+	    "vnet": "Vnet1",
+	    "pl_sip_encoding": "field:11:1:0x1:field:48:48:0x0a0b0d0a0b",
+	    "pl_underlay_sip": "55.1.2.3"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTE_TABLE:F4939FEFC47E:10.1.0.8/32": {
+            "action_type":"vnet",
+	    "vnet":"Vnet1"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_VNET_MAPPING_TABLE:Vnet1:10.1.0.8": {
+            "routing_type":"privatelink",
+            "mac_address":"F9-22-83-99-22-A2",
+            "underlay_ip":"50.1.2.3",
+	    "overlay_sip":"fd40:108:0:d204:0:200::0",
+	    "overlay_dip":"2603:10e1:100:2::3401:203",
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTE_TABLE:F4939FEFC47E:10.2.0.0/16": {
+            "action_type":"vnet_direct",
+            "vnet":"Vnet1",
+            "overlay_ip":"10.2.0.6"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_VNET_MAPPING_TABLE:Vnet1:10.2.0.6": {
+            "routing_type":"privatelink",
+            "mac_address":"F9-22-83-99-22-A2",
+            "underlay_ip":"50.2.2.6",
+	    "overlay_sip":"fd40:108:0:d204:0:200::0",
+	    "overlay_dip":"2603:10e1:100:2::3402:206",
+        },
+        "OP": "SET"
+    }
+]
+```
+    
+For the example configuration above, the following is a brief explanation of lookup behavior in the outbound direction:
+
+	1. Packet destined to 10.1.0.8 from 10.1.1.1:
+		a. LPM lookup hits for entry 10.1.0.8/32
+		b. The action in this case is "vnet"
+		c. Next lookup is in the mapping table and mapping table action here is "privatelink"
+		d. First Action for "privatelink" is 4to6 transposition
+		e. Packet gets transformed as: 
+		 	For Overlay SIP, using ENI's "pl_sip_encoding": "field:11:1:0x1:field:48:48:0x0a0b0c0d0a0b" -> Overlay SIP fd30:108:0:0a0b:0c0d0:0a0b:a01:101;	
+			Overlay DIP 2603:10e1:100:2::3401:203 (No transformation, provided as part of mapping)
+		f. Second Action is Static NVGRE encap. 
+		g. Underlay DIP shall be 50.1.2.3 (from mapping), Underlay SIP shall be 55.1.2.3 (from ENI)
+
+	2. Packet destined to 10.2.0.8 from 10.1.1.2:
+		a. LPM lookup hits for entry 10.2.0.0/16
+		b. The action in this case is "vnet_direct" with mapping lookup key as 10.2.0.6
+		c. Next lookup is in the mapping table and mapping table action here is "privatelink"
+		d. First Action for "privatelink" is 4to6 transposition
+		e. Packet gets transformed as: 
+		 	For Overlay SIP, using ENI's "pl_sip_encoding": "field:11:1:0x1:field:48:48:0x0a0b0c0d0a0b" -> Overlay SIP fd30:108:0:0a0b:0c0d0:0a0b:a01:102;	
+			Overlay DIP 2603:10e1:100:2::3402:206 (No transformation, provided as part of mapping)
+		f. Second Action is Static NVGRE encap. 
+		g. Underlay DIP shall be 50.2.2.6 (from mapping), Underlay SIP shall be 55.1.2.3 (from ENI)
+	
