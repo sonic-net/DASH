@@ -18,6 +18,8 @@ current_file_dir = Path(__file__).parent
 # Constants
 SWITCH_ID = 5
 
+# Simple, non-scaled configuration.
+# See README.md for details.
 TEST_VNET_OUTBOUND_CONFIG = {
 
     "ENI_COUNT": 1,
@@ -118,7 +120,8 @@ TEST_VNET_OUTBOUND_CONFIG = {
 
 class TestSaiVnetOutbound:
 
-    def test_create_vnet_config(self, confgen, dpu, dataplane):
+    def test_vnet_inbound_simple_create(self, confgen, dpu):
+        """Generate and apply configuration"""
 
         # confgen.mergeParams(TEST_VNET_OUTBOUND_CONFIG)
         # confgen.generate()
@@ -134,7 +137,8 @@ class TestSaiVnetOutbound:
         pprint(result)
 
     @pytest.mark.ptf
-    def test_run_packets_check(self, dpu, dataplane):
+    def test_vnet_inbound_simple_packet_modification(self, dpu, dataplane):
+        """Verify proper packet transformation."""
 
         SRC_VM_IP = "10.1.1.10"
         OUTER_SMAC = "00:00:05:06:06:06"
@@ -242,15 +246,37 @@ class TestSaiVnetOutbound:
         verify_packet(dataplane, vxlan_exp_pkt, 0)
 
     @pytest.mark.snappi
-    def test_simple_vxlan_packet(self, dpu, dataplane):
-        dh.scale_vnet_outbound_flows(dataplane, TEST_VNET_OUTBOUND_CONFIG)
+    def test_vnet_inbound_simple_traffic_fixed_packets(self, dpu, dataplane):
+        """
+        Verify same config with high-rate traffic.
+        packets_per_flow=10 means that each possible packet path will be verified using 10 packet.
+        NOTE: For BMv2 we keep here PPS limitation
+        """
+        dh.scale_vnet_outbound_flows(dataplane, TEST_VNET_OUTBOUND_CONFIG, packets_per_flow=10, pps_per_flow=10)
         dataplane.set_config()
         dataplane.start_traffic()
-
         stu.wait_for(lambda: dh.check_flow_packets_metrics(dataplane, dataplane.flows[0], show=True)[0],
                     "Test", timeout_seconds=10)
 
-    def test_remove_vnet_config(self, confgen, dpu, dataplane):
+    @pytest.mark.snappi
+    def test_vnet_inbound_simple_traffic_fixed_duration(self, dpu, dataplane):
+        """
+        Test with the fixed traffic duration to send.
+        flow_duration sets the total duration of traffic. Number of packets is limited by PPS.
+        For the HW PPS may be omitted and then it will send traffic on a line rate.
+        NOTE: This test does not verify the correctness of the packets transformation.
+        """
+        test_duration = 5
+        dh.scale_vnet_outbound_flows(dataplane, TEST_VNET_OUTBOUND_CONFIG,
+                                     packets_per_flow=0, flow_duration=test_duration, pps_per_flow=5)
+        dataplane.set_config()
+        dataplane.start_traffic()
+        stu.wait_for(lambda: dh.check_flows_all_seconds_metrics(dataplane, dataplane.flows,
+                                                                name="Custom flow group", show=True)[0],
+                    "Test", timeout_seconds=test_duration + 1)
+
+    def test_vnet_inbound_simple_remove(self, confgen, dpu):
+        """Verify configuration removal"""
 
         # confgen.mergeParams(TEST_VNET_OUTBOUND_CONFIG)
         # confgen.generate()
