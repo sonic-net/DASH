@@ -62,7 +62,7 @@ def configure_vnet_outbound_packet_flows(sai_dp, vip, dir_lookup, ca_smac, ca_di
         print(f">>>: {flow.name}")
 
 
-def scale_vnet_outbound_flows(sai_dp, test_conf: dict, packets_per_flow=1, pps_per_flow=10, flow_duration=0):
+def scale_vnet_outbound_flows(sai_dp, test_conf: dict, packets_per_flow=1, pps_per_flow=0, flow_duration=0):
     """
     Get scale options and define VNET Outbound routing flows.
 

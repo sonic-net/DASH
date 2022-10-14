@@ -1,3 +1,7 @@
+"""
+Verify VNET Inbound Routing scenario
+"""
+
 import json
 from pathlib import Path
 from pprint import pprint
@@ -110,7 +114,8 @@ TEST_VNET_INBOUND_CONFIG = {
 
 class TestSaiVnetInbound:
 
-    def test_create_vnet_config(self, confgen, dpu, dataplane):
+    def test_vnet_inbound_create(self, confgen, dpu):
+        """Test configuration create"""
 
         # confgen.mergeParams(TEST_VNET_INBOUND_CONFIG)
         # confgen.generate()
@@ -123,9 +128,10 @@ class TestSaiVnetInbound:
         print("\n======= SAI commands RETURN values =======")
         pprint(result)
 
+    @pytest.mark.ptf
     @pytest.mark.xfail(reason="https://github.com/Azure/DASH/issues/233")
-    def test_run_traffic_check(self, dpu, dataplane):
-        # Check forwarding
+    def test_vnet_inbound_traffic_check(self, dpu, dataplane):
+        """Verify traffic forwarding in PTF style"""
 
         outer_smac = "00:0a:05:06:06:06"
         outer_dmac = "00:0b:05:06:06:06"
@@ -167,7 +173,8 @@ class TestSaiVnetInbound:
         print("\nVerifying packet...\n", vxlan_exp_pkt.__repr__())
         verify_packet(dataplane, vxlan_exp_pkt, 1)
 
-    def test_remove_vnet_config(self, confgen, dpu, dataplane):
+    def test_vnet_inbound_remove(self, confgen, dpu):
+        """Test configuration remove"""
 
         # confgen.mergeParams(TEST_VNET_INBOUND_CONFIG)
         # confgen.generate()

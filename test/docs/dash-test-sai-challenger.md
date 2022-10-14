@@ -93,4 +93,3 @@ pytest -sv --setup=sai_dpu_client_server_snappi.json test_vnet_outbound.py
 ```
 
 # Known issues
-* [Test Vector format tests ](#Test Vector format tests): traffic check will fail as expected
