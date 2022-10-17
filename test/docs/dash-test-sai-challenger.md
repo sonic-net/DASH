@@ -1,12 +1,12 @@
 # General changes
-* Added [SAI-Challenger](https://github.com/PLVision/SAI-Challenger.OCP) submodule by path: `DASH/test/SAI-Challenger.OCP`.
+* Added [SAI-Challenger](https://github.com/opencomputeproject/SAI-Challenger.OCP) submodule by path: `DASH/test/SAI-Challenger`.
 * Added [saigen](https://github.com/mgheorghe/cgyang) submodule by path: `DASH/test/third-party/cgyang/saigen`.
-* Added test cases for SAI-Challenger by path: `DASH/test/test-cases/test_vector_example`
+* Added test cases for SAI-Challenger by path: `DASH/test/test-cases/scale/saic`
 
 # New make targets:
 **`docker-saichallenger-client`**: Build SAI-Challenger docker image and docker image based on SAI-Challenger client docker image with sai_thrift, saigen and DASH files.
 
-**`run-saichallenger-client`**: Start Ixia-C and docker container `sc-client-thrift-run` from image built on `docker-saichallenger-client` target. SAI-Challenger tests (`DASH/test/SAI-Challenger.OCP/tests`) folder replaced by `DASH/test/test-cases/test_vector_example` folder inside of container. Bound mount volume with DASH folder.
+**`run-saichallenger-client`**: Start Ixia-C and docker container `sc-client-thrift-run` from image built on `docker-saichallenger-client` target. To the original SAI-Challenger tests (`DASH/test/SAI-Challenger/tests`) folder a new folder `dash_tests` mounted from `DASH/test/test-cases/scale/saic` folder inside of container. Bound mount volume with DASH folder.
 
 **`kill-saichallenger-client`**: Stop Ixia-C and `sc-client-thrift-run` container.
 

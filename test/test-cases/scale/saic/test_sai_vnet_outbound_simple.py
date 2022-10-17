@@ -154,61 +154,61 @@ class TestSaiVnetOutbound:
         DST_CA_MAC = TEST_VNET_OUTBOUND_CONFIG['DASH_OUTBOUND_CA_TO_PA']['ocpe']["OVERLAY_DMAC"]
 
         # # check VIP drop
-        # WRONG_VIP = "172.16.100.100"
-        # inner_pkt = simple_udp_packet(eth_dst="02:02:02:02:02:02",
-        #                               eth_src=ENI_MAC,
-        #                               ip_dst=DST_CA_IP,
-        #                               ip_src=SRC_VM_IP)
-        # vxlan_pkt = simple_vxlan_packet(eth_dst=OUR_MAC,
-        #                                 eth_src=OUTER_SMAC,
-        #                                 ip_dst=WRONG_VIP,
-        #                                 ip_src=SRC_VM_PA_IP,
-        #                                 udp_sport=11638,
-        #                                 with_udp_chksum=False,
-        #                                 vxlan_vni=OUTBOUND_VNI,
-        #                                 inner_frame=inner_pkt)
-        # print("\n\nSending packet with wrong vip...\n\n", vxlan_pkt.__repr__())
-        # send_packet(dataplane, 0, vxlan_pkt)
-        # print("\nVerifying drop...")
-        # verify_no_other_packets(dataplane)
+        WRONG_VIP = "172.16.100.100"
+        inner_pkt = simple_udp_packet(eth_dst="02:02:02:02:02:02",
+                                      eth_src=ENI_MAC,
+                                      ip_dst=DST_CA_IP,
+                                      ip_src=SRC_VM_IP)
+        vxlan_pkt = simple_vxlan_packet(eth_dst=OUR_MAC,
+                                        eth_src=OUTER_SMAC,
+                                        ip_dst=WRONG_VIP,
+                                        ip_src=SRC_VM_PA_IP,
+                                        udp_sport=11638,
+                                        with_udp_chksum=False,
+                                        vxlan_vni=VNET_VNI,
+                                        inner_frame=inner_pkt)
+        print("\n\nSending packet with wrong vip...\n\n", vxlan_pkt.__repr__())
+        send_packet(dataplane, 0, vxlan_pkt)
+        print("\nVerifying drop...")
+        verify_no_other_packets(dataplane)
 
-        # # check routing drop
-        # WRONG_DST_CA = "10.200.2.50"
-        # inner_pkt = simple_udp_packet(eth_dst="02:02:02:02:02:02",
-        #                               eth_src=ENI_MAC,
-        #                               ip_dst=WRONG_DST_CA,
-        #                               ip_src=SRC_VM_IP)
-        # vxlan_pkt = simple_vxlan_packet(eth_dst=OUR_MAC,
-        #                                 eth_src=OUTER_SMAC,
-        #                                 ip_dst=VIP,
-        #                                 ip_src=SRC_VM_PA_IP,
-        #                                 udp_sport=11638,
-        #                                 with_udp_chksum=False,
-        #                                 vxlan_vni=OUTBOUND_VNI,
-        #                                 inner_frame=inner_pkt)
-        # print("\nSending packet with wrong dst CA IP to verify routing drop...\n\n", vxlan_pkt.__repr__())
-        # send_packet(dataplane, 0, vxlan_pkt)
-        # print("\nVerifying drop...")
-        # verify_no_other_packets(dataplane)
+        # check routing drop
+        WRONG_DST_CA = "10.200.2.50"
+        inner_pkt = simple_udp_packet(eth_dst="02:02:02:02:02:02",
+                                      eth_src=ENI_MAC,
+                                      ip_dst=WRONG_DST_CA,
+                                      ip_src=SRC_VM_IP)
+        vxlan_pkt = simple_vxlan_packet(eth_dst=OUR_MAC,
+                                        eth_src=OUTER_SMAC,
+                                        ip_dst=VIP,
+                                        ip_src=SRC_VM_PA_IP,
+                                        udp_sport=11638,
+                                        with_udp_chksum=False,
+                                        vxlan_vni=VNET_VNI,
+                                        inner_frame=inner_pkt)
+        print("\nSending packet with wrong dst CA IP to verify routing drop...\n\n", vxlan_pkt.__repr__())
+        send_packet(dataplane, 0, vxlan_pkt)
+        print("\nVerifying drop...")
+        verify_no_other_packets(dataplane)
 
-        # # check mapping drop
-        # WRONG_DST_CA = "10.1.211.211"
-        # inner_pkt = simple_udp_packet(eth_dst="02:02:02:02:02:02",
-        #                               eth_src=ENI_MAC,
-        #                               ip_dst=WRONG_DST_CA,
-        #                               ip_src=SRC_VM_IP)
-        # vxlan_pkt = simple_vxlan_packet(eth_dst=OUR_MAC,
-        #                                 eth_src=OUTER_SMAC,
-        #                                 ip_dst=VIP,
-        #                                 ip_src=SRC_VM_PA_IP,
-        #                                 udp_sport=11638,
-        #                                 with_udp_chksum=False,
-        #                                 vxlan_vni=OUTBOUND_VNI,
-        #                                 inner_frame=inner_pkt)
-        # print("\nSending packet with wrong dst CA IP to verify mapping drop...\n\n", vxlan_pkt.__repr__())
-        # send_packet(dataplane, 0, vxlan_pkt)
-        # print("\nVerifying drop...")
-        # verify_no_other_packets(dataplane)
+        # check mapping drop
+        WRONG_DST_CA = "10.1.211.211"
+        inner_pkt = simple_udp_packet(eth_dst="02:02:02:02:02:02",
+                                      eth_src=ENI_MAC,
+                                      ip_dst=WRONG_DST_CA,
+                                      ip_src=SRC_VM_IP)
+        vxlan_pkt = simple_vxlan_packet(eth_dst=OUR_MAC,
+                                        eth_src=OUTER_SMAC,
+                                        ip_dst=VIP,
+                                        ip_src=SRC_VM_PA_IP,
+                                        udp_sport=11638,
+                                        with_udp_chksum=False,
+                                        vxlan_vni=VNET_VNI,
+                                        inner_frame=inner_pkt)
+        print("\nSending packet with wrong dst CA IP to verify mapping drop...\n\n", vxlan_pkt.__repr__())
+        send_packet(dataplane, 0, vxlan_pkt)
+        print("\nVerifying drop...")
+        verify_no_other_packets(dataplane)
 
         # check forwarding
         inner_pkt = simple_udp_packet(eth_dst = "02:02:02:02:02:02",
