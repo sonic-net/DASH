@@ -14,7 +14,7 @@ import dash_helper.vnet2vnet_helper as dh
 
 current_file_dir = Path(__file__).parent
 
-# Constants for scale outbound
+# Constants for scale VNET outbound routing configuration
 NUMBER_OF_VIP = 1
 NUMBER_OF_DLE = 2
 NUMBER_OF_ENI = 2
@@ -25,6 +25,10 @@ NUMBER_OF_VNET = NUMBER_OF_ENI + (NUMBER_OF_ORE * NUMBER_OF_ENI)  # So far per O
 NUMBER_OF_IN_ACL_GROUP = 10
 NUMBER_OF_OUT_ACL_GROUP = 10
 
+
+# Scaled configuration
+# Pay attention to the 'count', 'start', 'step' keywords.
+# See README.md for details.
 TEST_VNET_OUTBOUND_CONFIG_SCALE = {
 
     'DASH_VIP': {
@@ -192,7 +196,8 @@ TEST_VNET_OUTBOUND_CONFIG_SCALE = {
 
 class TestSaiVnetOutbound:
 
-    def test_create_vnet_config(self, confgen, dpu, dataplane):
+    def test_create_vnet_config(self, confgen, dpu):
+        """Generate and apply configuration"""
 
         # confgen.mergeParams(TEST_VNET_OUTBOUND_CONFIG_SCALE)
         # confgen.generate()
@@ -210,28 +215,45 @@ class TestSaiVnetOutbound:
 
     @pytest.mark.snappi
     def test_run_traffic_check_fixed_packets(self, dpu, dataplane):
+        """
+        Test with the fixed number of packets to send.
+        packets_per_flow=1 means that each possible packet path will be verified using a single packet.
+        NOTE: This test does not verify the correctness of the packets transformation.
+        """
+
+        #Generate traffic configuration, apply it and run.
         dh.scale_vnet_outbound_flows(dataplane, TEST_VNET_OUTBOUND_CONFIG_SCALE,
                                      packets_per_flow=1, flow_duration=0, pps_per_flow=10)
         dataplane.set_config()
         dataplane.start_traffic()
+
+        # The following function waits for expected counters and fail if no success during time out.
         stu.wait_for(lambda: dh.check_flows_all_packets_metrics(dataplane, dataplane.flows,
                                                                 name="Custom flow group", show=True)[0],
                     "Test", timeout_seconds=5)
-        print("Test passed !")
 
     @pytest.mark.snappi
     def test_run_traffic_check_fixed_duration(self, dpu, dataplane):
-        TEST_DURATION = 5
+        """
+        Test with the fixed traffic duration to send.
+        flow_duration sets the total duration of traffic. Number of packets is limited by PPS.
+        For the HW PPS may be omitted and then it will send traffic on a line rate.
+        NOTE: This test does not verify the correctness of the packets transformation.
+        """
+        test_duration = 5
         dh.scale_vnet_outbound_flows(dataplane, TEST_VNET_OUTBOUND_CONFIG_SCALE,
-                                     packets_per_flow=0, flow_duration=TEST_DURATION, pps_per_flow=5)
+                                     packets_per_flow=0, flow_duration=test_duration, pps_per_flow=5)
         dataplane.set_config()
         dataplane.start_traffic()
         stu.wait_for(lambda: dh.check_flows_all_seconds_metrics(dataplane, dataplane.flows,
                                                                 name="Custom flow group", show=True)[0],
-                    "Test", timeout_seconds=TEST_DURATION + 1)
-        print("Test passed !")
+                    "Test", timeout_seconds=test_duration + 1)
 
     def test_remove_vnet_config(self, confgen, dpu, dataplane):
+        """
+        Generate and remove configuration
+        We generate configuration on remove stage as well to avoid storing giant objects in memory.
+        """
 
         # confgen.mergeParams(TEST_VNET_OUTBOUND_CONFIG_SCALE)
         # confgen.generate()

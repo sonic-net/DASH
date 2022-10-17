@@ -58,7 +58,7 @@ def confgen():
     class SaiConfig(ConfBase):
 
         def generate(self):
-            # Pass top-level params to sub-generrators.
+            # Pass top-level params to sub-generators.
             self.configs = [
                 saigen.vips.Vips(self.params_dict),
                 saigen.direction_lookup.DirectionLookup(self.params_dict),
