@@ -734,6 +734,24 @@ Refer DASH documentation for the test plan.
             "mac_address":"F9-22-83-99-22-A2"
         },
         "OP": "SET"
+    },
+    {
+        "DASH_ROUTE_RULE_TABLE:F4939FEFC47E:45654:101.1.2.3/32: {
+            "action_type":"decap",
+            "priority": 1,
+            "protocol": "0",
+            "vnet":"Vnet1",
+            "pa_validation": true
+	}
+    },
+    {
+        "DASH_ROUTE_RULE_TABLE:F4939FEFC47E:45654: {
+            "action_type":"decap",
+            "priority": 2,
+            "protocol": "0",
+            "vnet":"Vnet2",
+            "pa_validation": true
+	}
     }
 ]
 
@@ -763,7 +781,13 @@ For the example configuration above, the following is a brief explanation of loo
 		c. Packets gets dropped
 
 For the inbound direction, after Route/ACL lookup, pipeline shall use the "underlay_ip" as specified in the ENI table to VXLAN encapsulate the packet and VNI shall be the ```vm_vni``` specified in the APPLIANCE table 
-
+	
+	5. Inbound packet destined to 10.1.2.5 with source PA 101.1.2.3 and VNI 45654
+		a. After setting direction to inbound, the Route Rule table is looked up based on priority
+		b. First Inbound rule gets hit as PR prefix and VNI key match
+		c. PA validation is set to true and Vnet is given as Vnet1. 
+		d. PA 101.1.2.3 is matched against Vnet1's mapping table and it is a hit. (Validation succeeds)
+		e. Action is to decap the packet
 
 ### 3.6.2 Service Tunnel
 
