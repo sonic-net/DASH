@@ -18,6 +18,8 @@ There are several such `.yml` files and each one has specific trigger criteria a
 The main CI job called `DASH-BMV2-CI ` is to rebuild the entire dash-pipeline and run all the tests whenever any of the dependencies change: P4 code, Makefiles, scripts and tests, etc. This can be used to ensure new features and build recipes work, test-cases pass and regressions didn't creep in.
 
 There are also numerous `DASH-DOCKER-xxx` jobs which rebuild the various "builder" docker images. These are not invoked as often and are used to verify the infrastructure itself.
+
+Finally, CI Actions are used to publish Docker Images. See [Publishing Docker Images to Azure Container Registry](README-dash-docker.md#publishing-docker-images-to-azure-container-registry)
 # CI Badges
 * The CI badges will be updated according to the CI build status and appear on the front page of the repository (it's actually on the top-level README). You can click on this icon to drill down into the Git Actions history and view pass/fail details. Typical icons appear below:
 

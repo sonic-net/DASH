@@ -23,25 +23,27 @@ DASH_UID ?=4321
 DASH_GUID?=4321
 DASH_HOST?=dash
 
-# Default Docker images, override from env var
+# Include file defines DOCKER_GRPC_IMG
+include dockerfiles/DOCKER_GRPC_IMG.env
 
-# Needed Libraries only
-DOCKER_GRPC_IMG ?=chrissommers/dash-grpc:1.43.2
+# Slimmed-down version bmv2 backend only
+# include file defines DOCKER_P4C_BMV2_IMG
+include dockerfiles/DOCKER_P4C_BMV2_IMG.env
 
-# Slimmed-down version bmv2 backend only 632MB:
-DOCKER_P4C_BMV2_IMG ?=chrissommers/dash-p4c-bmv2:220825
-
-# Builds SAI-P4RT clients to run inside bmv2 process
-DOCKER_BMV2_BLDR_IMG ?=chrissommers/dash-bmv2-bldr:220819
+# Builds sai-P4rt clients to run inside bmv2 process
+# include file defines DOCKER_BMV2_BLDR_IMG
+include dockerfiles/DOCKER_BMV2_BLDR_IMG.env
 
 # Runs bmv2 process - consider slimmer if don't need sai/p4rt clients inside
 DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 
 # Compiles sai headers, libsai, saithrift server & client/server libs
-DOCKER_SAITHRIFT_BLDR_IMG ?=chrissommers/dash-saithrift-bldr:220819
+# include file defines DOCKER_SAITHRIFT_BLDR_IMG
+include dockerfiles/DOCKER_SAITHRIFT_BLDR_IMG.env
 
 # Base image with test frameworks, DASH client libs not installed
-DOCKER_SAITHRIFT_CLIENT_BLDR_IMG ?=chrissommers/dash-saithrift-client-bldr:220819
+# include file defines DOCKER_SAITHRIFT_CLIENT_BLDR_IMG
+include dockerfiles/DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env
 
 # Client image built locally with saithrift client libs + PTF & Pytest frameworks
 # TODO: consider some other tagging scheme
@@ -75,7 +77,6 @@ sai-submodule:
 P4_SRC=$(wildcard bmv2/*.p4)
 P4_MAIN=bmv2/dash_pipeline.p4
 P4_OUTDIR=bmv2/dash_pipeline.bmv2
-
 P4_ARTIFACTS=$(P4_OUTDIR)/dash_pipeline.json $(P4_OUTDIR)/dash_pipeline_p4rt.txt
 
 p4: $(P4_OUTDIR)/dash_pipeline.json
@@ -298,11 +299,19 @@ docker-bmv2-bldr:
 	    --build-arg available_processors=$(shell nproc) \
 	    dockerfiles
 
-docker-publish-bmv2-bldr:
-	echo "TO DO when we have a proper repository"
-
 docker-pull-bmv2-bldr:
 	docker pull $(DOCKER_BMV2_BLDR_IMG)
+
+# Only used for CI publishing to save artifact between jobs:
+docker-save-bmv2-bldr:
+	docker save --output bmv2-bldr-image.tar $(DOCKER_BMV2_BLDR_IMG)
+docker-load-bmv2-bldr:
+	docker load --input bmv2-bldr-image.tar
+
+docker-publish-bmv2-bldr:
+	@echo "Publish $(DOCKER_BMV2_BLDR_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_BMV2_BLDR_IMG)
+
 ###############################
 docker-saithrift-bldr:
 	docker build \
@@ -316,11 +325,12 @@ docker-saithrift-bldr:
 	    --build-arg available_processors=$(shell nproc) \
 		dockerfiles
 
-docker-publish-saithrift-bldr:
-	echo "TO DO when we have a proper repository"
-
 docker-pull-saithrift-bldr:
 	docker pull $(DOCKER_SAITHRIFT_BLDR_IMG)
+
+docker-publish-saithrift-bldr:
+	@echo "Publish $(DOCKER_SAITHRIFT_BLDR_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_SAITHRIFT_BLDR_IMG)
 
 ###############################
 # Builder, has base packages to make client docker
@@ -340,7 +350,8 @@ docker-pull-saithrift-client-bldr:
 	docker pull $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG)
 
 docker-publish-saithrift-client-bldr:
-	echo "TO DO when we have a proper repository"
+	@echo "Publish $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG)
 
 ###############################
 		
@@ -428,7 +439,9 @@ docker-pull-dash-p4c:
 	docker pull $(DOCKER_P4C_BMV2_IMG)
 
 docker-publish-dash-p4c:
-	echo "TO DO when we have a proper repository"
+	@echo "Publish $(DOCKER_P4C_BMV2_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_P4C_BMV2_IMG)
+
 ###############################
 
 docker-dash-grpc:
@@ -447,7 +460,8 @@ docker-pull-dash-grpc:
 	docker pull $(DOCKER_GRPC_IMG)
 
 docker-publish-dash-grpc:
-	echo "TO DO when we have a proper repository"
+	@echo "Publish $(DOCKER_GRPC_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_GRPC_IMG)
 
 ###############################
 # BMV2-PKTGEN NETWORKING TARGETS
