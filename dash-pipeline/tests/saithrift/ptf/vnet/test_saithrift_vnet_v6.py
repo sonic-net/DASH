@@ -1,8 +1,3 @@
-import pytest
-import snappi
-import scapy
-import time
-
 from sai_thrift.sai_headers import *
 from sai_base_test import *
 # TODO - when switch APIs implemented:
