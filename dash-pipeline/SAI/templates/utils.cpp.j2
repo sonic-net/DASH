@@ -152,8 +152,8 @@ grpc::StatusCode MutateTableEntry(p4::v1::TableEntry *entry, p4::v1::Update_Type
         LOG("GRPC call Write::" << updateTypeStr(updateType) << " OK" << entry->ShortDebugString() << std::endl);
     }
     else {
-        LOG("GRPC ERROR["<< status.error_code() <<"]: " << status.error_message() << ", " << status.error_details());
-        LOG("GRPC call Write::" << updateTypeStr(updateType) << " ERROR: " << std::endl << entry->ShortDebugString());
+        LOG("GRPC ERROR["<< status.error_code() <<"]: " << status.error_message() << ", " << status.error_details() << std::endl);
+        LOG("GRPC call Write::" << updateTypeStr(updateType) << " ERROR: " << std::endl << entry->ShortDebugString() << std::endl);
     }
     //MILIND?? What is this? reference release? memory release?
     entity->release_table_entry();
@@ -163,13 +163,12 @@ grpc::StatusCode MutateTableEntry(p4::v1::TableEntry *entry, p4::v1::Update_Type
 bool InsertInTable(p4::v1::TableEntry *entry, sai_object_id_t *objId) {
     auto retCode = MutateTableEntry(entry, p4::v1::Update_Type_INSERT);
     if (grpc::StatusCode::OK != retCode) {
-        delete entry;
         return false;
     }
 
     tableLock.lock();
     if (*objId == 0) {
-        *objId = nextId++;
+        *objId = NextObjIndex();
     }
     tableEntryMap[*objId] = entry;
     tableLock.unlock();
