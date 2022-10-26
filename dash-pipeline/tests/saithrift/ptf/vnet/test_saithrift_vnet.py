@@ -93,10 +93,9 @@ class TestSaiThrift_outbound_udp_pkt(ThriftInterfaceDataPlane):
 
             dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
                                           addr=sai_thrift_ip_addr_t(ip4=self.dst_ca_ip))
-            # TODO: Enable ACL rule
-            #self.out_acl_rule_id = sai_thrift_create_dash_acl_rule(self.client, dash_acl_group_id=self.out_acl_group_id,
-            #                                           dip=dip, priority=10, action=SAI_DASH_ACL_RULE_ACTION_PERMIT)
-            #assert(status == SAI_STATUS_SUCCESS)
+
+            self.out_acl_rule_id = sai_thrift_create_dash_acl_rule(self.client, dash_acl_group_id=self.out_acl_group_id, priority=10, action=SAI_DASH_ACL_RULE_ACTION_PERMIT)
+            assert(status == SAI_STATUS_SUCCESS)
 
             ca_prefix = sai_thrift_ip_prefix_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
                                                addr=sai_thrift_ip_addr_t(ip4="10.1.0.0"),
@@ -225,8 +224,8 @@ class TestSaiThrift_outbound_udp_pkt(ThriftInterfaceDataPlane):
             status = sai_thrift_remove_outbound_ca_to_pa_entry(self.client, self.ocpe)
         if hasattr(self, "ore"):
             status = sai_thrift_remove_outbound_routing_entry(self.client, self.ore)
-        #if hasattr(self, "out_acl_rule_id"):
-        #    sai_thrift_remove_dash_acl_rule(self.client, self.out_acl_rule_id)
+        if hasattr(self, "out_acl_rule_id"):
+           sai_thrift_remove_dash_acl_rule(self.client, self.out_acl_rule_id)
         if hasattr(self, "e2v"):
             sai_thrift_remove_outbound_eni_to_vni_entry(self.client, self.e2v)
         if hasattr(self, "eam"):
@@ -257,8 +256,8 @@ class TestSaiThrift_outbound_udp_pkt(ThriftInterfaceDataPlane):
         status = sai_thrift_remove_outbound_routing_entry(self.client, self.ore)
         assert(status == SAI_STATUS_SUCCESS)
 
-        #status = sai_thrift_remove_dash_acl_rule(self.client, self.out_acl_rule_id)
-        #assert(status == SAI_STATUS_SUCCESS)
+        status = sai_thrift_remove_dash_acl_rule(self.client, self.out_acl_rule_id)
+        assert(status == SAI_STATUS_SUCCESS)
 
         status = sai_thrift_remove_eni_ether_address_map_entry(self.client, self.eam)
         assert(status == SAI_STATUS_SUCCESS)
