@@ -58,3 +58,4 @@
         packet(protocol=17, dst_addr="10.0.0.2", "dst_port"="10"), EXPECT FOLLOW
 
 * All IPv4 address should be replaced by IPv6 for another round test
+* Inbound/Outbound directions
