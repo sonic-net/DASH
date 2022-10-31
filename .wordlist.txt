@@ -295,6 +295,7 @@ LLDP
 lldp
 loadbalancer
 lookups
+LOOKUPs
 loopback
 LPM
 lts
@@ -303,6 +304,7 @@ makefile
 Makefile
 Makefiles
 makefiles
+MAPs
 MatchedHalfOpenFlow
 MatchedOtherFlow
 MatchedTcpFlow
@@ -420,6 +422,7 @@ qos
 Radv
 rdpty
 reachability
+reconvergence
 README
 READMEs
 README's
@@ -450,12 +453,14 @@ runtime
 rx
 SAI
 sai
+saigen
 sairedis
 SAIRPC
 saiserver
 saithrift
 sata
 scalability
+scalable
 Scalable
 scapy
 Schemas

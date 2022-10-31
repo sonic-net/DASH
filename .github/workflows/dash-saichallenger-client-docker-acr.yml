@@ -1,29 +1,29 @@
-name: DASH-docker-saithrift-client-bldr-build-publish-acr
+name: DASH-docker-saichallenger-client-build-publish-acr
 
 on:
   push:
     branches: [ "**" ]
     paths:
-      - '.github/workflows/dash-saithrift-client-bldr-docker-acr.yml'
-      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client-bldr'
-      - 'dash-pipeline/dockerfiles/DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env'
+      - '.github/workflows/dash-saichallenger-client-docker-acr.yml'
+      - 'dash-pipeline/Makefile'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saichallenger-client'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
     branches: [ "**" ]
     paths:
-      - '.github/workflows/dash-saithrift-client-bldr-docker-acr.yml'
-      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client-bldr'
-      - 'dash-pipeline/dockerfiles/DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env'
+      - '.github/workflows/dash-saichallenger-client-docker-acr.yml'
+      - 'dash-pipeline/Makefile'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saichallenger-client'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build and publish dash-saithrift-client-bldr-image
     # Can only publish from within DASH repo (need credentials from secrets)
     if: github.repository == 'Azure/DASH'
+    name: Build and publish dash-saichallenger-client image
     runs-on: ubuntu-20.04
     env:
       docker_fg_flags: -u root --privileged
@@ -39,8 +39,6 @@ jobs:
       run:  DOCKER_FLAGS=$docker_fg_flags make p4
     - name: Install SAI submodule
       run:  git submodule update --init
-    - name: Build docker-saithrift-bldr image
-      run:  make docker-saithrift-bldr
     - name: Generate SAI API
       run:  DOCKER_FLAGS=$docker_fg_flags make sai
     - name: Generate SAI-Thrift client and server code and libs
@@ -50,7 +48,7 @@ jobs:
         login-server: sonicdash.azurecr.io
         username: ${{ secrets.DASH_ACR_USERNAME }}
         password: ${{ secrets.DASH_ACR_PASSWORD }}    
-    - name: Build dash-saithrift-client-bldr image 
-      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saithrift-client-bldr
-    - name: Publish dash-saithrift-client-bldr docker image
-      run: make docker-publish-saichallenger-client
+    - name: Build SAI-Challenger client docker image
+      run: DOCKER_FLAGS=$docker_fg_flags make docker-saichallenger-client
+    - name: Publish SAI-Challenger client docker image
+      run:  make docker-publish-saichallenger-client

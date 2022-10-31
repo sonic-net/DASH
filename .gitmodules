@@ -2,3 +2,10 @@
 	path = dash-pipeline/SAI/SAI
 	url = https://github.com/reshmaintel/SAI.git
 	branch = dash-ptf-ci
+[submodule "test/SAI-Challenger"]
+	path = test/SAI-Challenger
+	url = https://github.com/opencomputeproject/SAI-Challenger
+	branch = multiple-api-support
+[submodule "dash-pipeline/cgyang"]
+	path = dash-pipeline/cgyang
+	url = https://github.com/mgheorghe/cgyang
