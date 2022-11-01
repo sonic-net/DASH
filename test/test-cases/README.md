@@ -13,10 +13,3 @@ This contains a hierarchical set of directories containing DASH test cases organ
 | Folder/File | Description |
 | --- | --- |
 | [`saidashvnet.py`](./functional/saidashvnet.py) | VNET-to-VNET test cases
-
-
-## scale
-
-| Folder/File | Description |
-| --- | --- |
-| [vnet2vnet](scale/vnet2vnet/README.md) | DASH vnet2vnet Tests
