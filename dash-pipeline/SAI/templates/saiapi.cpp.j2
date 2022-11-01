@@ -119,17 +119,20 @@ sai_status_t sai_create_{{ table.name }}(
     {% else %}
     // Search the action 
     for (uint32_t i = 0; i < attr_count; i++) {
-        switch(attr_list[i].value.s32) {
-            {% for action in table.actions %}
-            case SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}: {
-                actionId = {{action.id}}; 
-                expectedParams = {{ action.params|length }};
-                break;
+        if (SAI_{{ table.name | upper }}_ATTR_ACTION == attr_list[i].id)
+        {
+            switch(attr_list[i].value.s32) {
+                {% for action in table.actions %}
+                case SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}: {
+                    actionId = {{action.id}}; 
+                    expectedParams = {{ action.params|length }};
+                    break;
+                }
+                {% endfor %}
             }
-            {% endfor %}
+            // only one action
+            break;
         }
-        // only one action
-        break;
     }
     {% endif %}
     action->set_action_id(actionId);
