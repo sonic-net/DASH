@@ -11,8 +11,8 @@ The files found within this directory serve the following purpose:
 
 | Test case                                      | Description                                               |
 | ---------------------------------------------- | --------------------------------------------------------- |
-| [vxlan_1eni_1ip](one-ip)           | minimum possible config                                    |
-| [vxlan_8eni_48k_IPs](48k-IPs)      | medium sized config                                       |
+| [vxlan_1eni_1ip](one-ip)                       | minimum possible config                                   |
+| [vxlan_8eni_48k_IPs](48K-ips)                  | medium sized config                                       |
 
 
 
@@ -95,6 +95,7 @@ The files found within this directory serve the following purpose:
 
 # test cases
 
-| Test case                                      | Description                                               |
-| ---------------------------------------------- | --------------------------------------------------------- |
-| [vxlan_1vpc_1ip](README.vxlan_1vpc_1ip.md)     | performance numbers for best case scenario                |
+| Test case                                      | Description                                                    |
+| ---------------------------------------------- | -------------------------------------------------------------- |
+| [vxlan_1vpc_1ip](one-ip/README.md)             | performance numbers for best case scenario                     |
+| [vxlan_8vpc_48K-ips](48K-ips/README.md)        | performance with an objective of maintaining 6M parallel flows |
