@@ -27,17 +27,18 @@
 
 ###### Revision
 
-| Rev |     Date    |       Author          | Change Description                  |
-|:---:|:-----------:|:---------------------:|:------------------------------------|
-| 0.1 | 02/01/2022  |     Prince Sunny      | Initial version                     |
-| 0.2 | 03/09/2022  |     Prince Sunny      | Packet Flows/DB Objects             |
-| 0.3 | 05/24/2022  |      Oleksandr        | Memory Footprints                   |
-| 0.4 | 06/01/2022  |     Prince Sunny      | Design Considerations               |
-| 0.5 | 06/13/2022  |     Chris Sommers     | Schema Relationships                |
-| 0.6 | 08/05/2022  |  Mukesh M Velayudhan  | Outbound VNI derivation in pipeline |
-| 0.7 | 08/09/2022  |     Prince Sunny      | Add Inbound Routing rules           |
-| 0.6 | 04/20/2022  |     Marian Pritsak    | APP_DB to SAI mapping               |
-| 0.8 | 09/30/2022  |     Prabhat Aravind   | Update APP_DB table names           |
+| Rev  |     Date    |       Author          | Change Description                       |
+|:----:|:-----------:|:---------------------:|:-----------------------------------------|
+| 0.1  | 02/01/2022  |     Prince Sunny      | Initial version                          |
+| 0.2  | 03/09/2022  |     Prince Sunny      | Packet Flows/DB Objects                  |
+| 0.3  | 05/24/2022  |      Oleksandr        | Memory Footprints                        |
+| 0.4  | 06/01/2022  |     Prince Sunny      | Design Considerations                    |
+| 0.5  | 06/13/2022  |     Chris Sommers     | Schema Relationships                     |
+| 0.6  | 08/05/2022  |  Mukesh M Velayudhan  | Outbound VNI derivation in pipeline      |
+| 0.7  | 08/09/2022  |     Prince Sunny      | Add Inbound Routing rules                |
+| 0.8  | 09/07/2022  |     Marian Pritsak    | APP_DB to SAI mapping                    |
+| 0.9  | 09/30/2022  |     Prabhat Aravind   | Update APP_DB table names                |
+| 0.10 | 11/02/2022  |     Lawrence Lee      | Update DASH_ROUTING_TYPE_TABLE schema    |
 
 
 # About this Manual
@@ -273,20 +274,34 @@ dst_port                 = list of range of destination ports ',' separated
 
 ### 3.2.5 ROUTING TYPE
 	
+Two different schemas are used for the routing type table. The first is used when there is only a single action associated with a routing type:
 ```
-DASH_ROUTING_TYPE_TABLE:{{routing_type}}: [
-        "action_name":{{string}}
-        "action_type": {{action_type}} 
+DASH_ROUTING_TYPE_TABLE:{{routing_type}}
+        "action_name": {{string}}
+        "action_type": {{action_type}}
         "encap_type": {{encap type}} (OPTIONAL)
         "vni": {{vni}} (OPTIONAL)
-    ]
+
+key                      = DASH_ROUTING_TYPE_TABLE:routing_type:action_name; routing type can be {direct, vnet, vnet_direct, vnet_encap, appliance, privatelink, privatelinknsg, servicetunnel}; action_name is a string
+; field                  = value
+action_name              = action name as a string
+action_type              = action_type can be {maprouting, direct, staticencap, appliance, 4to6, mapdecap, decap, drop}
+encap_type               = encap type depends on the action_type - {vxlan, nvgre}
+vni                      = vni value associated with the corresponding action. Applicable if encap_type is specified. 
 ```
 
+The second schema is used when multiple, ordered actions are associated with a routing type:
 ```
-key                      = DASH_ROUTING_TYPE_TABLE:routing_type; routing type can be {direct, vnet, vnet_direct, vnet_encap, appliance, privatelink, privatelinknsg, servicetunnel}; actions can be a list of action_types
+DASH_ROUTING_TYPE_TABLE:{{routing_type}}:{{action_name}}
+        "action_type": {{action_type}}
+        "action_order": {{int}}
+        "encap_type": {{encap type}} (OPTIONAL)
+        "vni": {{vni}} (OPTIONAL)
+
+key                      = DASH_ROUTING_TYPE_TABLE:routing_type:action_name; routing type can be {direct, vnet, vnet_direct, vnet_encap, appliance, privatelink, privatelinknsg, servicetunnel}; action_name is a string
 ; field                  = value
-action_name              = action name as string
 action_type              = action_type can be {maprouting, direct, staticencap, appliance, 4to6, mapdecap, decap, drop}
+action_order             = an integer indicating what order to execute the action among all actions for the same routing_type. 
 encap_type               = encap type depends on the action_type - {vxlan, nvgre}
 vni                      = vni value associated with the corresponding action. Applicable if encap_type is specified. 
 ```
@@ -652,26 +667,41 @@ Refer DASH documentation for the test plan.
     },
     {
         "DASH_ROUTING_TYPE_TABLE:vnet": {
-            "name": "action1",
+            "action_name": "action1",
             "action_type": "maprouting"
         },
         "OP": "SET"
     },
     {
         "DASH_ROUTING_TYPE_TABLE:vnet_direct": {
-            "name": "action1",
+            "action_name": "action1",
             "action_type": "maprouting"
         },
         "OP": "SET"
     },
     {
         "DASH_ROUTING_TYPE_TABLE:vnet_encap": {
-             "name": "action1",
-             "action_type": "staticencap",
-             "encap_type": "vxlan"
+            "action_name": "action1",
+            "action_type": "staticencap",
+            "encap_type": "vxlan"
         },
         "OP": "SET"
     },
+    {
+        "DASH_ROUTING_TYPE_TABLE:servicetunnel:4to6transform": {
+            "action_order": "1",
+            "action_type": "4to6"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTING_TYPE_TABLE:servicetunnel:encap": {
+            "action_order": "2",
+            "action_type": "staticencap",
+            "encap_type": "vxlan"
+        },
+        "OP": "SET"
+    }
     {
         "DASH_ROUTE_TABLE:F4939FEFC47E:10.1.0.0/16": {
             "action_type":"vnet",
