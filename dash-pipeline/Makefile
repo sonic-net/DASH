@@ -6,7 +6,7 @@ mkfile_dir := $(dir $(mkfile_path))
 # "All" type targets for convenience
 all:p4 sai saithrift-server docker-saithrift-client test
 
-run-all-tests:run-libsai-test run-saithrift-client-tests
+run-all-tests:run-libsai-test run-saithrift-client-tests run-saichallenger-tests
 run-saithrift-client-tests: run-saithrift-ptftests run-saithrift-pytests
 run-saithrift-client-dev-tests: run-saithrift-dev-ptftests run-saithrift-dev-pytests
 
@@ -14,7 +14,7 @@ run-saithrift-client-dev-tests: run-saithrift-dev-ptftests run-saithrift-dev-pyt
 clean: kill-all p4-clean sai-clean test-clean network-clean saithrift-server-clean
 	rm -rf $(P4_OUTDIR)
 
-kill-all: kill-saithrift-server kill-switch undeploy-ixiac
+kill-all: kill-saithrift-server kill-switch undeploy-ixiac kill-saichallenger-client
 
 PWD := $(realpath $(mkfile_dir))
 DASH_USER ?=dashuser
@@ -48,6 +48,10 @@ include dockerfiles/DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env
 # Client image built locally with saithrift client libs + PTF & Pytest frameworks
 # TODO: consider some other tagging scheme
 DOCKER_SAITHRIFT_CLIENT_IMG ?= local/dash-saithrift-client:latest
+
+# Base image with test frameworks, DASH client libs not installed
+# include file defines DOCKER_SAI_CHALLENGER_CLIENT_IMG
+include dockerfiles/DOCKER_SAI_CHALLENGER_CLIENT_IMG.env
 
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
@@ -122,7 +126,7 @@ DOCKER_RUN_SAITHRIFT_BLDR =\
 
 sai: sai-clean sai-headers sai-meta libsai
 
-sai-headers: p4 | SAI/SAI 
+sai-headers: p4 | SAI/SAI
 	@echo "Generate SAI library headers and implementation..."
 	mkdir -p SAI/lib && chmod -R o+w SAI && \
 	$(DOCKER_RUN) \
@@ -131,7 +135,7 @@ sai-headers: p4 | SAI/SAI
 		-w /SAI $(DOCKER_SAITHRIFT_BLDR_IMG) \
 	    ./generate_dash_api.sh
 
-sai-meta: 
+sai-meta:
 	@echo "Generate SAI metadata..."
 	# hack - remove scripts which cause Git ownership failures in CI pipelines
 	# We don't need them, they're to check that SAI headers didn't experience enum changes etc.
@@ -146,7 +150,7 @@ sai-meta:
 	    make
 
 # TODO - add SAI header dependencies
-libsai: 
+libsai:
 	@echo "build libsai.so..."
 	$(DOCKER_RUN) \
 		$(DOCKER_FLAGS) \
@@ -155,7 +159,7 @@ libsai:
 		$(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
-libsai-clean: 
+libsai-clean:
 	-rm -rf SAI/lib/*
 
 .PHONY:sai-clean
@@ -354,7 +358,7 @@ docker-publish-saithrift-client-bldr:
 	docker push $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG)
 
 ###############################
-		
+
 # Client image, rebuild any time SAI interface changes
 # TODO - add sai header (inc/ and experimental) dependencies
 docker-saithrift-client:
@@ -512,6 +516,73 @@ deploy-ixiac:
 undeploy-ixiac:
 	cd ../test/third-party/traffic_gen && ./undeploy_ixiac.sh
 
+###############################
+# SAI-CHALLENGER TARGETS
+###############################
+
+SAI_CHALLENGER_PATH = $(PWD)/../test/SAI-Challenger
+
+CONTAINER_SAI_CHALLENGER_CLIENT_NAME = dash-saichallenger-client-$(USER)
+
+# Add passing parameters to the run-saichallenger-tests target.
+ifeq (run-saichallenger-tests,$(firstword $(MAKECMDGOALS)))
+  SAI_CHALLENGER_SETUP_FILE := $(wordlist 2, 2, $(MAKECMDGOALS))
+  SAI_CHALLENGER_TEST := $(wordlist 3, 3, $(MAKECMDGOALS))
+  $(eval $(SAI_CHALLENGER_SETUP_FILE):;@:)
+  $(eval $(SAI_CHALLENGER_TEST):;@:)
+endif
+# If setup file's isn't passed, set it to the default.
+ifeq ($(SAI_CHALLENGER_SETUP_FILE),)
+SAI_CHALLENGER_SETUP_FILE := sai_dpu_client_server_snappi.json
+endif
+# If test's name isn't passed, set it to the default.
+ifeq ($(SAI_CHALLENGER_TEST),)
+SAI_CHALLENGER_TEST := test_sai_vnet_*.py
+endif
+
+docker-saichallenger-client:
+	cd $(SAI_CHALLENGER_PATH) && ./build.sh -i client
+	docker build \
+		-f dockerfiles/Dockerfile.saichallenger-client \
+		-t $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
+		.
+
+docker-publish-saichallenger-client:
+	@echo "Publish $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_SAI_CHALLENGER_CLIENT_IMG)
+
+DOCKER_RUN_SAI_CHALLENGER_CLIENT=docker run \
+	-v $(SAI_CHALLENGER_PATH):/sai-challenger \
+	-v $(SAI_CHALLENGER_PATH)/../test-cases/scale/saic/:/sai-challenger/dash_tests \
+	-v $(PWD)/../:/dash \
+	--cap-add=NET_ADMIN \
+	--device /dev/net/tun:/dev/net/tun \
+	--rm \
+	--network=host \
+	--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
+
+run-saichallenger-client: deploy-ixiac
+	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
+	-d \
+	--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) \
+	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG)
+
+run-saichallenger-client-bash: deploy-ixiac
+	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
+	-w /sai-challenger/dash_tests \
+	$(DOCKER_FLAGS) \
+	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
+	/bin/bash
+
+kill-saichallenger-client:
+	-docker kill $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
+
+run-saichallenger-tests: deploy-ixiac
+	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
+	-w /sai-challenger/dash_tests \
+	$(DOCKER_FLAGS) \
+	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
+	./run_vnet_tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
 
 ###############################
 # ENVIRONMENT SETUP TARGETS
