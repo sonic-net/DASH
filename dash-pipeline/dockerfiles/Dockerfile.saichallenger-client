@@ -20,6 +20,7 @@ ADD SAI/rpc/saithrift-0.9.tar.gz /
 # Install the python libraries
 RUN python3 -m pip install -r /tests/requirements.txt && \
     pip3 install scapy \
+                 dpugen>=0.0.3 \
                  pysubnettree \
                  macaddress \
                  munch && \
@@ -34,7 +35,6 @@ RUN python3 -m pip install -r /tests/requirements.txt && \
     cd /SAI/test/ptf && \
         python3 setup.py install && \
     ln -s ${SAI_CHALLENGER_PATH} /usr/local/lib/python3.7/dist-packages/saichallenger && \
-    ln -s ${DASH_PATH}/test/test-cases/scale/saic ${SAI_CHALLENGER_PATH}/dash_tests && \
-    ln -s ${DASH_PATH}/dash-pipeline/cgyang/saigen /usr/local/lib/python3.7/dist-packages/saigen
+    ln -s ${DASH_PATH}/test/test-cases/scale/saic ${SAI_CHALLENGER_PATH}/dash_tests
 
 CMD ["/usr/bin/supervisord"]

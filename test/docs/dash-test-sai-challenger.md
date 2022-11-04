@@ -1,6 +1,5 @@
 # General changes
 * Added [SAI-Challenger](https://github.com/opencomputeproject/SAI-Challenger.OCP) submodule by path: `DASH/test/SAI-Challenger`.
-* Added [saigen](https://github.com/mgheorghe/cgyang) submodule by path: `DASH/test/third-party/cgyang/saigen`.
 * Added test cases for SAI-Challenger by path: `DASH/test/test-cases/scale/saic`
 
 # New make targets:

@@ -1,8 +1,8 @@
 import logging
 import pytest
 
-import saigen
-from saigen.confbase import ConfBase
+from dpugen import saigen
+from dpugen.saigen.confbase import ConfBase
 
 # import sys
 # sys.path.insert(0, '/sai-challenger/common')  # Needed for correct load_module

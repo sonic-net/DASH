@@ -6,6 +6,3 @@
 	path = test/SAI-Challenger
 	url = https://github.com/opencomputeproject/SAI-Challenger
 	branch = multiple-api-support
-[submodule "dash-pipeline/cgyang"]
-	path = dash-pipeline/cgyang
-	url = https://github.com/mgheorghe/cgyang
