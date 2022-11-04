@@ -850,12 +850,12 @@ For the example configuration above, the following is a brief explanation of loo
 		f. Since underlay dip is not specified in the LPM table, It shall use Dst IP from packet, i.e 50.1.2.1 and underlay Src IP as 40.1.2.1
 	
 	2. Packet destined to 60.1.2.1 from 10.1.1.1:
-		a. LPM lookup hits for entry 60.1.2.0/24
+		a. LPM lookup hits for entry 60.1.2.1/32
 		b. The action in this case is "servicetunnel"
 		c. First Action for "servicetunnel" is 4to6 transposition
 		d. Packet gets transformed as: Overlay SIP fd00:108:0:d204:0:200::0a01:101, Overlay DIP 2603:10e1:100:2::3c01:201
 		e. Second Action is Static NVGRE encap. 
-		f. Since underlay sip/dip is specified in the LPM table, It shall use Src IP (25.1.2.1), Dst IP (60.1.2.1)
+		f. Since underlay sip/dip is specified in the LPM table, It shall use Dst IP (25.1.2.1), Src IP (30.1.2.1)
 
 	3. Packet destined to 70.1.2.1 from 10.1.1.1:
 		a. LPM lookup hits for entry 70.1.2.0/24
@@ -943,7 +943,7 @@ For the example configuration above, the following is a brief explanation of loo
 		e. Packet gets transformed as: 
 		 	For Overlay SIP, using ENI's "pl_sip_encoding": "field:11:1:0x1:field:48:48:0x0a0b0c0d0a0b" -> Overlay SIP fd30:108:0:0a0b:0c0d0:0a0b:a01:101;	
 			Overlay DIP 2603:10e1:100:2::3401:203 (No transformation, provided as part of mapping)
-		f. Second Action is Static NVGRE encap. 
+		f. Second Action is Static NVGRE encap with GRE key '100'. 
 		g. Underlay DIP shall be 50.1.2.3 (from mapping), Underlay SIP shall be 55.1.2.3 (from ENI)
 
 	2. Packet destined to 10.2.0.8 from 10.1.1.2:
@@ -954,6 +954,6 @@ For the example configuration above, the following is a brief explanation of loo
 		e. Packet gets transformed as: 
 		 	For Overlay SIP, using ENI's "pl_sip_encoding": "field:11:1:0x1:field:48:48:0x0a0b0c0d0a0b" -> Overlay SIP fd30:108:0:0a0b:0c0d0:0a0b:a01:102;	
 			Overlay DIP 2603:10e1:100:2::3402:206 (No transformation, provided as part of mapping)
-		f. Second Action is Static NVGRE encap. 
+		f. Second Action is Static NVGRE encap with GRE key '100'. 
 		g. Underlay DIP shall be 50.2.2.6 (from mapping), Underlay SIP shall be 55.1.2.3 (from ENI)
 	
