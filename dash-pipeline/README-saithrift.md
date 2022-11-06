@@ -3,7 +3,7 @@ See also:
 * [README-dash-workflows.md](README-dash-workflows.md) for build workflows and Make targets.
 * [README-ptftests](README-ptftests.md) for saithrift PTF test-case development and usage.
 * [README-pytests](README-pytests.md) for saithrift Pytest test-case development and usage.
-* 
+*
 
 **Table of Contents**
 - [DASH saithrift client and server](#dash-saithrift-client-and-server)
@@ -42,9 +42,9 @@ This document describes how to run the saithrift server and client to run test s
 The test case directory structure allows you to easily add new test cases by simply following the existing structure. By default, all new test cases are automatically run via the various `make run-XXX-tests` targets, e.g. `make run-all-tests`. There is no need to modify any build/test scripts. The inherent features of PTF and Pytest make this automatic.
 
 Where to add test-cases? It's partially a matter of taste and partially a matter of following the existing structure.
-* You can add a new test class to an existing Python module. For example, you could add a PTF test class to the [test_saithrift_vnet.py](tests/saithrift/ptf/vnet/test_saithrift_vnet.py) file to build upon `vnet` test cases.
-* You can also add new modules (files) to an existing directory, e.g. [tests/ptf/vnet/](tests/saithrift/ptf/vnet) and add test-cases classes there. Creating a new file might be useful to organize groups of tests, especially if you wish to run them selectively using command-line options (e.g. see [Run selected PTF Tests inside container](#run-selected-ptf-tests-inside-container)).
-* To add tests for an entire new feature, you might want to create a new directory under [tests/saithrift/ptf](tests/saithrift/ptf) or [tests/saithrift/pytest](tests/saithrift/pytest), then add test case file(s) with test-case classes.
+* You can add a new test class to an existing Python module. For example, you could add a PTF test class to the [saitdashvnet.py](../test/test-cases/functional/saidashvnet.py) file to build upon `vnet` test cases.
+* You can also add new modules (files) to an existing directory, e.g. [test/test-cases/functional/](test/test-cases/functional) and add test-cases classes there. Creating a new file might be useful to organize groups of tests, especially if you wish to run them selectively using command-line options (e.g. see [Run selected PTF Tests inside container](#run-selected-ptf-tests-inside-container)).
+* To add scale tests, you might want to create a new directory under [test/test-cases/scale](../test/test-cases/scale), then add test case file(s) with test-case classes.
 
 # Running DASH saithrift tests
 ## Running/Stopping the saithrift server
@@ -75,8 +75,8 @@ make run-saithrift-client-dev-tests       # run both suites above
 # Developer: Run tests selectively from `bash` inside saithrift-client container
 Enter the container, this will place you in the `/tests-dev/` directory of the container which corresponds to the contents of the `DASH/dash-pipline/tests` directory on the host. In this way you can interactively run test-cases while you're editing them. When doing so, the container's `/tests` directory remains in-place with tests which were copied into the container at image build-time.
 ```
-make run-saithrift-client-bash 
-root@chris-z4:/tests-dev# 
+make run-saithrift-client-bash
+root@chris-z4:/tests-dev#
 ```
 The running container is also mounted via `-v $(PWD)/test:/test-dev`  which mounts the current host workspace into the running container. You can thereby create and edit new tests "live" from a text editor and see the effect inside the container in real-time. Note, the container image also contains the `/tests` directory which was copied into the Docker image when `make docker-saithrift-client` was last run. This means you have a "production" copy of tests as well as live "development" host volume simultaneously in the container.
 
@@ -85,11 +85,11 @@ The running container is also mounted via `-v $(PWD)/test:/test-dev`  which moun
 ## Select Directory - Container prebuilt directory, or mounted from host
 
 * `cd /tests/` - Enter directory which was prebuilt into container image; tests are not modifiable "live" from the host. This is good for canned tests.
-* `cd /tests-dev/` - Enter directory which is mounted to `dash-pipeline/tests` from the host, allowing live editing in the host and running in the container. This is a convenient developer workflow.
+* `cd /tests-dev/` - Enter directory which is mounted to `test/test-cases` from the host, allowing live editing in the host and running in the container. This is a convenient developer workflow.
 
 To get the desired subdirectory for Pytests or PTF test, choose the appropriate path, e.g.:
 * `cd /tests/saithrift/pytest`
-* `cd /tests-dev/saithrift/ptf`
+* `cd /tests-dev/functional`
 
 ### Running all or selected PTF tests inside container
 #### Run all PTF Tests inside container
@@ -97,8 +97,7 @@ You can run all PTF tests by entering the directory and running the `run-saithri
 ```
 DASH/DASH/dash-pipeline$ make run-saithrift-client-bash
 ...
-root@chris-z4:/tests-dev/saithrift# cd ptf/
-root@chris-z4:/tests-dev/saithrift/ptf# ./run-saithrift-ptftests.sh 
+root@chris-z4:/tests-dev/# ./run-functional-tests.sh
 ```
 #### Run selected PTF Tests inside container
 By using the PTF command directly instead of the `run-saithrift-ptftests.sh` script you can control which tests you wish to run by directory, file and classname. Use the `./run-saithrift-ptftests.sh` as a starting point to get the basic syntax and options, then use knowledge of the `ptf` command to exert more control. Try `ptf -h` to get limited help, or go to the [PTF project page](https://github.com/p4lang/ptf) for more info.
@@ -134,7 +133,7 @@ sudo ptf [--test-dir vnet] --pypath /SAI/ptf  --interface 0@veth1 --interface 1@
 DASH/DASH/dash-pipeline$ make run-saithrift-client-bash
 ...
 root@chris-z4:/tests-dev/saithrift# cd pytest/
-root@chris-z4:/tests-dev/saithrift/pytest# ./run-saithrift-pytests.sh 
+root@chris-z4:/tests-dev/saithrift/pytest# ./run-saithrift-pytests.sh
 ```
 
 #### Run selected Pytests inside container
@@ -144,7 +143,7 @@ By using the pytest command directly instead of the `run-saithrift-ptftests.sh` 
 
 This runs all pytests under the `vnet` directory:
 ```
-root@chris-z4:/tests-dev/saithrift/pytest#  python -m pytest -s vnet 
+root@chris-z4:/tests-dev/saithrift/pytest#  python -m pytest -s vnet
 ```
 **Example: run Pytest via string matching**
 
@@ -238,7 +237,7 @@ See the following code snippet from a PTF test. A Pytest would look nearly ident
       status = sai_thrift_create_direction_lookup_entry(self.client, self.dle,
                           action=SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION)
       assert(status == SAI_STATUS_SUCCESS)
-      
+
       status = sai_thrift_create_eni_ether_address_map_entry(self.client,
                                                   eni_ether_address_map_entry=self.eam,
                                                   eni_id=self.eni)
@@ -367,14 +366,14 @@ Viola! You're ready to become a saithrift power-user. Rock on bruh!
 ## Run Interactive saithrift-server container
 This starts the container and opens a bash session instead of running the server like normal. The working directory `/SAI/rpc/usr/sbin` contains the saiserver.
 ```
-$ make run-saithrift-server-bash 
+$ make run-saithrift-server-bash
 docker run --rm -it --net=host --name dash-saithrift-server-chris -v /home/chris/chris-DASH/DASH/dash-pipeline/bmv2/dash_pipeline.bmv2/dash_pipeline.json:/etc/dash/dash_pipeline.json -v /home/chris/chris-DASH/DASH/dash-pipeline/bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt -v /home/chris/chris-DASH/DASH/dash-pipeline/SAI:/SAI -w /SAI/rpc/usr/sbin -v /home/chris/chris-DASH/DASH/dash-pipeline/SAI/SAI/meta:/meta -e LD_LIBRARY_PATH=/SAI/lib:/usr/local/lib chrissommers/dash-saithrift-bldr:220719 \
 /bin/bash
 chris@chris-z4:/SAI/rpc/usr/sbin$
 ```
 Start gdb on the saiserver process:
 ```
-chris@chris-z4:/SAI/rpc/usr/sbin$ gdb saiserver 
+chris@chris-z4:/SAI/rpc/usr/sbin$ gdb saiserver
 GNU gdb (Ubuntu 9.2-0ubuntu1~20.04.1) 9.2
 Copyright (C) 2020 Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
@@ -410,7 +409,7 @@ Breakpoint 2 (create_outbound_eni_to_vni_entry) pending.
 Run the process:
 ```
 (gdb) r
-Starting program: /SAI/rpc/usr/sbin/saiserver 
+Starting program: /SAI/rpc/usr/sbin/saiserver
 warning: Error disabling address space randomization: Operation not permitted
 [Thread debugging using libthread_db enabled]
 Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
