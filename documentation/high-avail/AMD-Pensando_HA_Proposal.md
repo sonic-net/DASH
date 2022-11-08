@@ -382,6 +382,11 @@ typedef enum _sai_dash_ha_rewrite_flags_t {
  */
 typedef struct _sai_dash_ha_rewrite_info_t {
     /**
+     * @brief Flow Rewrite Flags expressed as a bit map of sai_dash_ha_rewrite_flags_t
+     */
+    sai_uint64_t rewrite_flags;
+
+    /**
      * @brief Initiator Flow DMAC
      */
     sai_mac_t iflow_dmac;
@@ -400,11 +405,6 @@ typedef struct _sai_dash_ha_rewrite_info_t {
      * @brief Initiator Flow VNID
      */
     sai_uint32_t iflow_vni;
-
-    /**
-     * @brief Initiator Flow Rewrite Flags expressed as a bit map of sai_dash_ha_rewrite_flags_t
-     */
-    sai_uint16_t iflow_flags;
 
     /**
      * @brief Reverse Flow Source IP address
@@ -429,12 +429,7 @@ typedef struct _sai_dash_ha_rewrite_info_t {
     /**
      * @brief Reverse Flow VNID
      */
-    sai_uint32_t iflow_vni;
-
-    /**
-     * @brief Reverse Flow Rewrite Flags expressed as a bit map of sai_dash_ha_rewrite_flags_t
-     */
-    sai_uint16_t iflow_flags;
+    sai_uint32_t rflow_vni;
 } sai_dash_ha_rewrite_info_t;
 
 /**
@@ -456,7 +451,7 @@ typedef struct _sai_dash_ha_flow_sync_message_metadata_t {
     /**
      * @brief ID of metering class to be used
      */
-    sai_object_id_t meetering_class;
+    sai_uint64_t meetering_class;
 
     /**
      * @brief Rewrite information for the flow
