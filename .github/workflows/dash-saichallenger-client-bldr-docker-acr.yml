@@ -48,7 +48,7 @@ jobs:
         login-server: sonicdash.azurecr.io
         username: ${{ secrets.DASH_ACR_USERNAME }}
         password: ${{ secrets.DASH_ACR_PASSWORD }}    
-    - name: Build SAI-Challenger client docker image
-      run: DOCKER_FLAGS=$docker_fg_flags make docker-saichallenger-client-bldr
+    - name: Build SAI-Challenger client builder base docker image
+      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saichallenger-client-bldr
     - name: Publish SAI-Challenger client docker image
       run:  make docker-publish-saichallenger-client-bldr
