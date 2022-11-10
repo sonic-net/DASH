@@ -244,7 +244,7 @@ test-clean:
 
 .PHONY:libsai-test
 libsai-test:SAI/SAI SAI/lib/libsai.so
-	# chmod -R a+w tests/libsai
+	chmod -R a+w tests/libsai
 	$(DOCKER_RUN) \
 	    --name dash-build-test-$(USER) \
 		-w /tests/libsai  $(DOCKER_BMV2_BLDR_IMG) \
