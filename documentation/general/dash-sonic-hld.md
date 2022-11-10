@@ -559,7 +559,6 @@ SONiC for DASH shall have a lite swss initialization without the heavy-lift of e
 |                          | SAI_ROUTER_INTERFACE_ATTR_ADMIN_V6_STATE  |  
 |                          | SAI_ROUTER_INTERFACE_ATTR_MTU  |
 |                          | SAI_ROUTER_INTERFACE_ATTR_PORT_ID  |
-|                          | SAI_ROUTER_INTERFACE_ATTR_SRC_MAC_ADDRESS |
 |                          | SAI_ROUTER_INTERFACE_ATTR_TYPE  |  
 |                          | SAI_ROUTER_INTERFACE_ATTR_VIRTUAL_ROUTER_ID  |  
 | Route                    | SAI_ROUTE_ENTRY_ATTR_NEXT_HOP_ID  |  
