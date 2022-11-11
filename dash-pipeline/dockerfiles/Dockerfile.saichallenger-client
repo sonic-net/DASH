@@ -1,15 +1,7 @@
-FROM sc-client
+FROM sonicdash.azurecr.io/dash-saichallenger-client-bldr:221109
 
 ENV SAI_CHALLENGER_PATH /sai-challenger
 ENV DASH_PATH /dash
-
-ADD tests/ /tests/
-
-# Copy distro PTF submodule and tools from SAI repo
-ADD SAI/SAI/test/ptf /SAI/test/ptf
-
-# Install PTF test framework & test-cases from SAI repo
-ADD SAI/SAI/ptf /SAI/ptf/
 
 # Copy thrift python distro
 ADD SAI/rpc/thrift-0.11.0.tar.gz /
@@ -18,13 +10,7 @@ ADD SAI/rpc/thrift-0.11.0.tar.gz /
 ADD SAI/rpc/saithrift-0.9.tar.gz /
 
 # Install the python libraries
-RUN python3 -m pip install -r /tests/requirements.txt && \
-    pip3 install scapy \
-                 dpugen>=0.0.3 \
-                 pysubnettree \
-                 macaddress \
-                 munch && \
-    cd /saithrift-0.9 && \
+RUN cd /saithrift-0.9 && \
         python3 setup.py install && \
     cd / && \
         rm -rf saithrift-0.9 &&\
