@@ -20,25 +20,25 @@ def test_sai_thrift_get_switch_attribute(saithrift_client):
         port_list=sai_thrift_object_list_t(idlist=[], count=int(number_of_active_ports)))
     assert(number_of_active_ports == attr['port_list'].count)
     port_list = attr['port_list'].idlist
-    print ("port list = ", port_list)
+    print ("port list = ", ['0x%016x' % x for x in port_list])
     assert(port_list is not None)
 
     attr = sai_thrift_get_switch_attribute(
         saithrift_client, default_vlan_id=True)
     default_vlan_id = attr['default_vlan_id']
-    print ("default_vlan_id = %d" % default_vlan_id)
+    print ("default_vlan_id = 0x%016x" % default_vlan_id)
     assert(default_vlan_id !=0)
 
     attr = sai_thrift_get_switch_attribute(
         saithrift_client, default_virtual_router_id=True)
     default_virtual_router_id = attr['default_virtual_router_id']
-    print ("default_virtual_router_id = %d" % default_virtual_router_id)
+    print ("default_virtual_router_id = 0x%016x" % default_virtual_router_id)
     assert(default_virtual_router_id !=0)
     
     attr = sai_thrift_get_switch_attribute(
         saithrift_client, cpu_port=True)
     cpu_port = attr['cpu_port']
-    print ("cpu_port = %d" % cpu_port)
+    print ("cpu_port = 0x%016x" % cpu_port)
     assert(cpu_port is not None)
     
     attr = sai_thrift_get_port_attribute(

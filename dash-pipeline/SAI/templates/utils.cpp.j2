@@ -219,15 +219,19 @@ sai_status_t sai_create_switch_dummy(
 
 #define DASH_BMV2_NUM_PORTS 2 
 #define DASH_BMV2_CPU_QOS_NUMBER_OF_QUEUES 0
-#define DASH_BMV2_DEFAULT_CPU_PORT_ID (sai_object_id_t)((SAI_OBJECT_TYPE_PORT<<48)+1)
-#define DASH_BMV2_DEFAULT_VLAN_ID (sai_object_id_t)((SAI_OBJECT_TYPE_VLAN<<48)+1)
-#define DASH_BMV2_DEFAULT_VRF_ID (sai_object_id_t)((SAI_OBJECT_TYPE_VIRTUAL_ROUTER<<48)+1)
-#define DASH_BMV2_DEFAULT_1Q_BRIDGE_ID (sai_object_id_t)((SAI_OBJECT_TYPE_BRIDGE<<48)+1)
-#define DASH_BMV2_DEFAULT_1Q_BRIDGE_ID (sai_object_id_t)((SAI_OBJECT_TYPE_BRIDGE<<48)+1)
+
+#define OJBTYPE_SHFT 48
+#define MAKE_OID(_objtype, _objval) (sai_object_id_t)(((sai_object_id_t)_objtype<<OJBTYPE_SHFT)+(sai_object_id_t)_objval)
+
+#define DASH_BMV2_DEFAULT_CPU_PORT_ID MAKE_OID(SAI_OBJECT_TYPE_PORT,64)
+#define DASH_BMV2_DEFAULT_VLAN_ID MAKE_OID(SAI_OBJECT_TYPE_VLAN,1)
+#define DASH_BMV2_DEFAULT_VRF_ID MAKE_OID(SAI_OBJECT_TYPE_VIRTUAL_ROUTER,1)
+#define DASH_BMV2_DEFAULT_1Q_BRIDGE_ID MAKE_OID(SAI_OBJECT_TYPE_BRIDGE,1)
+#define DASH_BMV2_DEFAULT_1Q_BRIDGE_ID MAKE_OID(SAI_OBJECT_TYPE_BRIDGE,1)
 
 sai_object_id_t port_list[DASH_BMV2_NUM_PORTS] = {
-    (sai_object_id_t)((SAI_OBJECT_TYPE_PORT<<48) + 1),
-    (sai_object_id_t)((SAI_OBJECT_TYPE_PORT<<48) + 2)
+    MAKE_OID(SAI_OBJECT_TYPE_PORT,1),
+    MAKE_OID(SAI_OBJECT_TYPE_PORT,2)
 };
 
 sai_status_t sai_get_switch_attribute(
@@ -292,20 +296,20 @@ sai_status_t sai_get_switch_attribute(
     return SAI_STATUS_SUCCESS;
 }
 
-sai_switch_api_t sai_switch_api_impl = {
+static sai_switch_api_t sai_switch_api_impl = {
     .create_switch = sai_create_switch_dummy,
-    .remove_switch = (void *)0,
-    .set_switch_attribute = (void *)0,
+    .remove_switch = 0,
+    .set_switch_attribute = 0,
     .get_switch_attribute = sai_get_switch_attribute,
-    .get_switch_stats = (void *)0,
-    .get_switch_stats_ext = (void *)0,
-    .clear_switch_stats = (void *)0,
-    .switch_mdio_read = (void *)0,
-    .switch_mdio_write = (void *)0,
-    .create_switch_tunnel = (void *)0,
-    .remove_switch_tunnel = (void *)0,
-    .set_switch_tunnel_attribute = (void *)0,
-    .get_switch_tunnel_attribute = (void *)0
+    .get_switch_stats = 0,
+    .get_switch_stats_ext = 0,
+    .clear_switch_stats = 0,
+    .switch_mdio_read = 0,
+    .switch_mdio_write = 0,
+    .create_switch_tunnel = 0,
+    .remove_switch_tunnel = 0,
+    .set_switch_tunnel_attribute = 0,
+    .get_switch_tunnel_attribute = 0
 };
 
 
@@ -334,34 +338,34 @@ sai_status_t sai_get_port_attribute(
     return SAI_STATUS_SUCCESS;
 }
 
-sai_port_api_t sai_port_api_impl = {
-    .create_port = (void *)0,
-    .remove_port = (void *)0,
-    .set_port_attribute = (void *)0,
+static sai_port_api_t sai_port_api_impl = {
+    .create_port = 0,
+    .remove_port = 0,
+    .set_port_attribute = 0,
     .get_port_attribute = sai_get_port_attribute,
-    .get_port_stats = (void *)0,
-    .get_port_stats_ext = (void *)0,
-    .clear_port_stats = (void *)0,
-    .clear_port_all_stats = (void *)0,
-    .create_port_pool = (void *)0,
-    .remove_port_pool = (void *)0,
-    .set_port_pool_attribute = (void *)0,
-    .get_port_pool_attribute = (void *)0,
-    .get_port_pool_stats = (void *)0,
-    .get_port_pool_stats_ext = (void *)0,
-    .clear_port_pool_stats = (void *)0,
-    .create_port_connector = (void *)0,
-    .remove_port_connector = (void *)0,
-    .set_port_connector_attribute = (void *)0,
-    .get_port_connector_attribute = (void *)0,
-    .create_port_serdes = (void *)0,
-    .remove_port_serdes = (void *)0,
-    .set_port_serdes_attribute = (void *)0,
-    .get_port_serdes_attribute = (void *)0,
-    .create_ports = (void *)0,
-    .remove_ports = (void *)0,
-    .set_ports_attribute = (void *)0,
-    .get_ports_attribute = (void *)0
+    .get_port_stats = 0,
+    .get_port_stats_ext = 0,
+    .clear_port_stats = 0,
+    .clear_port_all_stats = 0,
+    .create_port_pool = 0,
+    .remove_port_pool = 0,
+    .set_port_pool_attribute = 0,
+    .get_port_pool_attribute = 0,
+    .get_port_pool_stats = 0,
+    .get_port_pool_stats_ext = 0,
+    .clear_port_pool_stats = 0,
+    .create_port_connector = 0,
+    .remove_port_connector = 0,
+    .set_port_connector_attribute = 0,
+    .get_port_connector_attribute = 0,
+    .create_port_serdes = 0,
+    .remove_port_serdes = 0,
+    .set_port_serdes_attribute = 0,
+    .get_port_serdes_attribute = 0,
+    .create_ports = 0,
+    .remove_ports = 0,
+    .set_ports_attribute = 0,
+    .get_ports_attribute = 0
 };
 
 
@@ -405,7 +409,7 @@ sai_status_t sai_object_type_get_availability(
         _Out_ uint64_t *count) { return SAI_STATUS_SUCCESS; }
         
 sai_object_type_t sai_object_type_query(
-        _In_ sai_object_id_t object_id) { return SAI_STATUS_SUCCESS; }
+        _In_ sai_object_id_t object_id) { return sai_object_type_t(object_id>>OJBTYPE_SHFT); }
 
 
 sai_object_id_t sai_switch_id_query(
