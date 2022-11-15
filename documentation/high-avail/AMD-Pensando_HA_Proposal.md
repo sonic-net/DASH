@@ -451,7 +451,7 @@ typedef struct _sai_dash_ha_flow_sync_message_metadata_t {
     /**
      * @brief ID of metering class to be used
      */
-    sai_uint64_t meetering_class;
+    sai_uint64_t metering_class;
 
     /**
      * @brief Rewrite information for the flow
