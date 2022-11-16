@@ -228,3 +228,4 @@ class TestSaiThrift_dash_acl(ThriftInterfaceDataPlane):
 
     def tearDown(self):
         self.clearup_objs()
+        super(self.__class__, self).tearDown()
