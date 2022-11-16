@@ -32,6 +32,9 @@ RUN cd /saithrift-0.9 && \
 # For dev, host directories can be mounted to another container directory to "see" tests in development
 ADD test/test-cases/ tests/
 
+# Copy dash-pipeline tests into container
+ADD dash-pipeline/tests/ ci-tests/
+
 WORKDIR /
 
 CMD ["/bin/bash"]

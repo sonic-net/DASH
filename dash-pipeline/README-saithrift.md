@@ -42,7 +42,7 @@ This document describes how to run the saithrift server and client to run test s
 The test case directory structure allows you to easily add new test cases by simply following the existing structure. By default, all new test cases are automatically run via the various `make run-XXX-tests` targets, e.g. `make run-all-tests`. There is no need to modify any build/test scripts. The inherent features of PTF and Pytest make this automatic.
 
 Where to add test-cases? It's partially a matter of taste and partially a matter of following the existing structure.
-* You can add a new test class to an existing Python module. For example, you could add a PTF test class to the [saitdashvnet.py](../test/test-cases/functional/saidashvnet.py) file to build upon `vnet` test cases.
+* You can add a new test class to an existing Python module. For example, you could add a PTF test class to the [`saidashvnet.py`](../test/test-cases/functional/ptf/saidashvnet.py) file to build upon `vnet` test cases.
 * You can also add new modules (files) to an existing directory, e.g. [test/test-cases/functional/](test/test-cases/functional) and add test-cases classes there. Creating a new file might be useful to organize groups of tests, especially if you wish to run them selectively using command-line options (e.g. see [Run selected PTF Tests inside container](#run-selected-ptf-tests-inside-container)).
 * To add scale tests, you might want to create a new directory under [test/test-cases/scale](../test/test-cases/scale), then add test case file(s) with test-case classes.
 

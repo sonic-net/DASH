@@ -374,15 +374,15 @@ DOCKER_RUN_SAITHRIFT_CLIENT=\
 # Run "production" Pytests bundled inside docker
 run-saithrift-pytests:deploy-ixiac disable-ipv6
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
-	-w /tests/saithrift/pytest \
+	-w /ci-tests/saithrift/pytest \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
 	./run-saithrift-pytests.sh
 
 # Run "dev" tests mounted from host
 run-saithrift-dev-pytests:deploy-ixiac disable-ipv6
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
-	-v $(PWD)/tests/:/tests-dev/ \
-	-w /tests-dev/saithrift/pytest \
+	-v $(PWD)/tests/:/ci-tests-dev/ \
+	-w /ci-tests-dev/saithrift/pytest \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
 	./run-saithrift-pytests.sh
 
