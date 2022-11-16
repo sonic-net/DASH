@@ -3,21 +3,21 @@ from sai_base_test import *
 # TODO - when switch APIs implemented:
 # class TestSaiThrift_outbound_udp_pkt(SaiHelper):
 
-class TestSaiThrift_outbound_udp_pkt(ThriftInterfaceDataPlane):
+class TestSaiThrift_outbound_udpv6_pkt(ThriftInterfaceDataPlane):
     """ Test saithrift vnet outbound"""
     def setUp(self):
-        super(TestSaiThrift_outbound_udp_pkt, self).setUp()
+        super(TestSaiThrift_outbound_udpv6_pkt, self).setUp()
         self.switch_id = 5
         self.outbound_vni = 60
-        self.vnet_vni = 100
-        self.eni_mac = "00:cc:cc:cc:cc:cc"
-        self.our_mac = "00:00:02:03:04:05"
-        self.dst_ca_mac = "00:dd:dd:dd:dd:dd"
-        self.vip = "172.16.1.100"
-        self.outbound_vni = 100
-        self.dst_ca_ip = "10.1.2.50"
-        self.dst_pa_ip = "172.16.1.20"
-        self.src_vm_pa_ip = "172.16.1.1"
+        self.vnet_vni = 50
+        self.eni_mac = "00:aa:aa:aa:aa:aa"
+        self.our_mac = "00:00:06:07:08:09"
+        self.dst_ca_mac = "00:bb:bb:bb:bb:bb"
+        self.vip = "172.16.1.200"
+        self.outbound_vni = 50
+        self.dst_ca_ip = "2000:aaaa::232"
+        self.dst_pa_ip = "172.16.1.30"
+        self.src_vm_pa_ip = "172.16.1.2"
         self.cleaned_up = False
 
         try:
@@ -36,10 +36,10 @@ class TestSaiThrift_outbound_udp_pkt(ThriftInterfaceDataPlane):
             assert(status == SAI_STATUS_SUCCESS)
 
             self.in_acl_group_id = sai_thrift_create_dash_acl_group(self.client,
-                                                                    ip_addr_family=SAI_IP_ADDR_FAMILY_IPV4)
+                                                                    ip_addr_family=SAI_IP_ADDR_FAMILY_IPV6)
             assert (self.in_acl_group_id != SAI_NULL_OBJECT_ID)
             self.out_acl_group_id = sai_thrift_create_dash_acl_group(self.client,
-                                                                     ip_addr_family=SAI_IP_ADDR_FAMILY_IPV4)
+                                                                     ip_addr_family=SAI_IP_ADDR_FAMILY_IPV6)
             assert (self.out_acl_group_id != SAI_NULL_OBJECT_ID)
 
             self.vnet = sai_thrift_create_vnet(self.client, vni=self.vnet_vni)
@@ -91,17 +91,20 @@ class TestSaiThrift_outbound_udp_pkt(ThriftInterfaceDataPlane):
                                                         eni_id=self.eni)
             assert(status == SAI_STATUS_SUCCESS)
 
-            dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
-                                          addr=sai_thrift_ip_addr_t(ip4=self.dst_ca_ip))
+            dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV6,
+                                          addr=sai_thrift_ip_addr_t(ip6=self.dst_ca_ip))
+            # TODO: Enable ACL rule
+            #self.out_acl_rule_id = sai_thrift_create_dash_acl_rule(self.client, dash_acl_group_id=self.out_acl_group_id,
+            #                                           dip=dip, priority=10, action=SAI_DASH_ACL_RULE_ACTION_PERMIT)
+            #assert(status == SAI_STATUS_SUCCESS)
 
-            self.out_acl_rule_id = sai_thrift_create_dash_acl_rule(self.client, dash_acl_group_id=self.out_acl_group_id, priority=10, action=SAI_DASH_ACL_RULE_ACTION_PERMIT)
-            assert(status == SAI_STATUS_SUCCESS)
-
-            ca_prefix = sai_thrift_ip_prefix_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
-                                               addr=sai_thrift_ip_addr_t(ip4="10.1.0.0"),
-                                               mask=sai_thrift_ip_addr_t(ip4="255.255.0.0"))
+            ca_prefix = sai_thrift_ip_prefix_t(addr_family=SAI_IP_ADDR_FAMILY_IPV6,
+                                               addr=sai_thrift_ip_addr_t(ip6="2000:aaaa::"),
+                                               mask=sai_thrift_ip_addr_t(ip6="ffff:ffff:ffff:ffff:ffff:ffff:ffff:0"))
+                                               
             self.ore = sai_thrift_outbound_routing_entry_t(switch_id=self.switch_id, eni_id=self.eni, destination=ca_prefix)
             status = sai_thrift_create_outbound_routing_entry(self.client, self.ore, action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET, dst_vnet_id = self.vnet)
+            print ("status returned is ", status)
             assert(status == SAI_STATUS_SUCCESS)
 
             underlay_dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
@@ -116,16 +119,16 @@ class TestSaiThrift_outbound_udp_pkt(ThriftInterfaceDataPlane):
 
     def runTest(self):
         try:
-            src_vm_ip = "10.1.1.10"
-            outer_smac = "00:00:05:06:06:06"
-            inner_smac = "00:00:04:06:06:06"
+            src_vm_ip = "2000:aaaa::10a"
+            outer_smac = "00:00:03:06:06:06"
+            inner_smac = "00:00:02:06:06:06"
 
             # check VIP drop
             wrong_vip = "172.16.100.100"
-            inner_pkt = simple_udp_packet(eth_dst="02:02:02:02:02:02",
+            inner_pkt = simple_udpv6_packet(eth_dst="02:02:02:02:02:02",
                                           eth_src=self.eni_mac,
-                                          ip_dst=self.dst_ca_ip,
-                                          ip_src=src_vm_ip)
+                                          ipv6_dst=self.dst_ca_ip,
+                                          ipv6_src=src_vm_ip)
             vxlan_pkt = simple_vxlan_packet(eth_dst=self.our_mac,
                                             eth_src=outer_smac,
                                             ip_dst=wrong_vip,
@@ -140,11 +143,11 @@ class TestSaiThrift_outbound_udp_pkt(ThriftInterfaceDataPlane):
             verify_no_other_packets(self)
 
             # check routing drop
-            wrong_dst_ca = "10.200.2.50"
-            inner_pkt = simple_udp_packet(eth_dst="02:02:02:02:02:02",
+            wrong_dst_ca = "2000:bbbb::232"
+            inner_pkt = simple_udpv6_packet(eth_dst="02:02:02:02:02:02",
                                           eth_src=self.eni_mac,
-                                          ip_dst=wrong_dst_ca,
-                                          ip_src=src_vm_ip)
+                                          ipv6_dst=wrong_dst_ca,
+                                          ipv6_src=src_vm_ip)
             vxlan_pkt = simple_vxlan_packet(eth_dst=self.our_mac,
                                             eth_src=outer_smac,
                                             ip_dst=self.vip,
@@ -159,11 +162,11 @@ class TestSaiThrift_outbound_udp_pkt(ThriftInterfaceDataPlane):
             verify_no_other_packets(self)
 
             # check mapping drop
-            wrong_dst_ca = "10.1.211.211"
-            inner_pkt = simple_udp_packet(eth_dst="02:02:02:02:02:02",
+            wrong_dst_ca = "2000:aaaa::d3d3"
+            inner_pkt = simple_udpv6_packet(eth_dst="02:02:02:02:02:02",
                                           eth_src=self.eni_mac,
-                                          ip_dst=wrong_dst_ca,
-                                          ip_src=src_vm_ip)
+                                          ipv6_dst=wrong_dst_ca,
+                                          ipv6_src=src_vm_ip)
             vxlan_pkt = simple_vxlan_packet(eth_dst=self.our_mac,
                                             eth_src=outer_smac,
                                             ip_dst=self.vip,
@@ -178,10 +181,10 @@ class TestSaiThrift_outbound_udp_pkt(ThriftInterfaceDataPlane):
             verify_no_other_packets(self)
 
             # check forwarding
-            inner_pkt = simple_udp_packet(eth_dst="02:02:02:02:02:02",
+            inner_pkt = simple_udpv6_packet(eth_dst="02:02:02:02:02:02",
                                           eth_src=self.eni_mac,
-                                          ip_dst=self.dst_ca_ip,
-                                          ip_src=src_vm_ip)
+                                          ipv6_dst=self.dst_ca_ip,
+                                          ipv6_src=src_vm_ip)
             vxlan_pkt = simple_vxlan_packet(eth_dst=self.our_mac,
                                             eth_src=outer_smac,
                                             ip_dst=self.vip,
@@ -191,10 +194,10 @@ class TestSaiThrift_outbound_udp_pkt(ThriftInterfaceDataPlane):
                                             vxlan_vni=self.outbound_vni,
                                             inner_frame=inner_pkt)
 
-            inner_exp_pkt = simple_udp_packet(eth_dst=self.dst_ca_mac,
+            inner_exp_pkt = simple_udpv6_packet(eth_dst=self.dst_ca_mac,
                                           eth_src=self.eni_mac,
-                                          ip_dst=self.dst_ca_ip,
-                                          ip_src=src_vm_ip)
+                                          ipv6_dst=self.dst_ca_ip,
+                                          ipv6_src=src_vm_ip)
             vxlan_exp_pkt = simple_vxlan_packet(eth_dst="00:00:00:00:00:00",
                                             eth_src="00:00:00:00:00:00",
                                             ip_dst=self.dst_pa_ip,
@@ -213,7 +216,7 @@ class TestSaiThrift_outbound_udp_pkt(ThriftInterfaceDataPlane):
             send_packet(self, 0, vxlan_pkt)
             print("\nVerifying packet...\n", self.pkt_exp.__repr__())
             verify_packet(self, self.pkt_exp, 0)
-            print ("TestSaiThrift_outbound_udp_pkt OK")
+            print ("TestSaiThrift_outbound_udpv6_pkt OK")
         except AssertionError as ae:
             self.failure_teardown()
             raise ae
@@ -224,8 +227,8 @@ class TestSaiThrift_outbound_udp_pkt(ThriftInterfaceDataPlane):
             status = sai_thrift_remove_outbound_ca_to_pa_entry(self.client, self.ocpe)
         if hasattr(self, "ore"):
             status = sai_thrift_remove_outbound_routing_entry(self.client, self.ore)
-        if hasattr(self, "out_acl_rule_id"):
-           sai_thrift_remove_dash_acl_rule(self.client, self.out_acl_rule_id)
+        #if hasattr(self, "out_acl_rule_id"):
+        #    sai_thrift_remove_dash_acl_rule(self.client, self.out_acl_rule_id)
         if hasattr(self, "e2v"):
             sai_thrift_remove_outbound_eni_to_vni_entry(self.client, self.e2v)
         if hasattr(self, "eam"):

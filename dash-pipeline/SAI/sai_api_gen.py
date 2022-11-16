@@ -69,13 +69,13 @@ def get_sai_list_type(key_size, key_header, key_field):
     elif key_size <= 16:
         return 'sai_u16_list_t', "u16list"
     elif key_size == 32 and ('addr' in key_field or 'ip' in key_header):
-        return 'sai_ip_address_list_t', "ipaddrlist"
+        return 'sai_ip_prefix_list_t', "ipprefixlist"
     elif key_size <= 32:
         return 'sai_u32_list_t', "u32list"
-    elif key_size <= 64:
-        ValueError(f'sai_u64_list_t is not supported')
-        return 'sai_u64_list_t', "no mapping"
-    raise ValueError(f'key_size={key_size} is not supported')
+    elif key_size == 128 and ('addr' in key_field or 'ip' in key_header):
+        return 'sai_ip_prefix_list_t', "ipprefixlist"
+    else:
+        raise ValueError(f'key_size={key_size} is not supported')
 
 def get_sai_range_list_type(key_size, key_header, key_field):
     if key_size <= 8:

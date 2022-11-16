@@ -258,6 +258,7 @@ io
 IP
 IPs
 ip
+ips
 IPDK
 IPU
 IPUs
@@ -423,6 +424,7 @@ reachability
 README
 READMEs
 README's
+reconvergence
 RedirectRuleResimulatedUf
 redis
 renderer
