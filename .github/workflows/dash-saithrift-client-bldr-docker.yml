@@ -25,8 +25,6 @@ on:
 jobs:
   build:
     name: Build dash-saithrift-client-bldr-image
-    # Only run on forks (in main repo, run build/publish workflows instead)
-    if: github.repository != 'Azure/DASH'
     runs-on: ubuntu-20.04
     env:
       docker_fg_flags: -u root --privileged
@@ -50,3 +48,13 @@ jobs:
       run:  DOCKER_FLAGS=$docker_fg_flags make saithrift-server
     - name: Build saithrift client docker image 
       run:  DOCKER_FLAGS=$docker_fg_flags make docker-saithrift-client-bldr
+
+    - uses: azure/docker-login@v1
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'Azure/DASH' }}
+      with:
+        login-server: sonicdash.azurecr.io
+        username: ${{ secrets.DASH_ACR_USERNAME }}
+        password: ${{ secrets.DASH_ACR_PASSWORD }}
+    - name: Publish dash-saithrift-client-bldr docker image
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'Azure/DASH' }}
+      run: make docker-publish-saithrift-client-bldr
