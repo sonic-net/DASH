@@ -54,12 +54,12 @@ jobs:
       run:  DOCKER_FLAGS=$docker_fg_flags make p4
     - name: Install SAI submodule
       run:  git submodule update --init
-    - name: Pull docker saithrift-bldr image
+    - name: Pull/Build docker saithrift-bldr image
       run:  make docker-saithrift-bldr
+    - name: Pull/Build docker bmv2-bldr image
+      run:  make docker-bmv2-bldr
     - name: Generate SAI API
       run:  DOCKER_FLAGS=$docker_fg_flags make sai
-    - name: Pull docker bmv2-bldr image
-      run:  make docker-bmv2-bldr
     - name: Build libsai c++ tests
       run:  DOCKER_FLAGS=$docker_fg_flags make test
     - name: Prepare network
