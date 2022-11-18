@@ -23,6 +23,8 @@ DASH_UID ?=4321
 DASH_GUID?=4321
 DASH_HOST?=dash
 
+ENABLE_DOCKER_PULL ?= y
+
 # Include file defines DOCKER_GRPC_IMG
 include dockerfiles/DOCKER_GRPC_IMG.env
 
@@ -287,7 +289,11 @@ init-switch:
 # DOCKER BUILD/PUBLISH TARGETS
 ###############################
 
+DOCKER_BMV2_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.bmv2-bldr | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_BMV2_BLDR_IMG = $(DOCKER_BMV2_BLDR_IMG_NAME):$(DOCKER_BMV2_BLDR_IMG_TAG)
+
 docker-bmv2-bldr:
+	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_BMV2_BLDR_IMG); } || \
 	docker build \
 		-f dockerfiles/Dockerfile.bmv2-bldr \
 	    -t $(DOCKER_BMV2_BLDR_IMG) \
@@ -313,7 +319,12 @@ docker-publish-bmv2-bldr:
 	docker push $(DOCKER_BMV2_BLDR_IMG)
 
 ###############################
+
+DOCKER_SAITHRIFT_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.saithrift-bldr | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_SAITHRIFT_BLDR_IMG = $(DOCKER_SAITHRIFT_BLDR_IMG_NAME):$(DOCKER_SAITHRIFT_BLDR_IMG_TAG)
+
 docker-saithrift-bldr:
+	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_SAITHRIFT_BLDR_IMG); } || \
 	docker build \
 		-f dockerfiles/Dockerfile.saithrift-bldr \
 	    -t $(DOCKER_SAITHRIFT_BLDR_IMG) \
@@ -334,7 +345,12 @@ docker-publish-saithrift-bldr:
 
 ###############################
 # Builder, has base packages to make client docker
+
+DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.saithrift-client-bldr | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_SAITHRIFT_CLIENT_BLDR_IMG = $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_NAME):$(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_TAG)
+
 docker-saithrift-client-bldr:
+	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG); } || \
 	docker build \
 		-f dockerfiles/Dockerfile.saithrift-client-bldr \
 	    -t $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG) \
@@ -423,7 +439,11 @@ run-saithrift-client-bash:
 # 	    --build-arg available_processors=$(shell nproc) \
 # 		dockerfiles
 
+DOCKER_P4C_BMV2_IMG_TAG = $(shell cat dockerfiles/Dockerfile.p4c-bmv2 | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_P4C_BMV2_IMG = $(DOCKER_P4C_BMV2_IMG_NAME):$(DOCKER_P4C_BMV2_IMG_TAG)
+
 docker-dash-p4c:
+	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_P4C_BMV2_IMG); } || \
 	docker build \
 		-f dockerfiles/Dockerfile.p4c-bmv2 \
 	    -t $(DOCKER_P4C_BMV2_IMG) \
@@ -444,7 +464,11 @@ docker-publish-dash-p4c:
 
 ###############################
 
+DOCKER_GRPC_IMG_TAG = $(shell cat dockerfiles/Dockerfile.grpc1.43.2 | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_GRPC_IMG = $(DOCKER_GRPC_IMG_NAME):$(DOCKER_GRPC_IMG_TAG)
+
 docker-dash-grpc:
+	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_GRPC_IMG); } || \
 	docker build \
 		-f dockerfiles/Dockerfile.grpc1.43.2 \
 	    -t $(DOCKER_GRPC_IMG) \
