@@ -1,6 +1,6 @@
 # This Dockerfile is used to make/run bmv2 switch.
 # It uses grpc 1.43.2 as base to ensure right lib versions.
-FROM chrissommers/dash-grpc:1.43.2 as grpc
+FROM sonicdash.azurecr.io/dash-grpc:1.43.2 as grpc
 
 # https://hub.docker.com/r/p4lang/behavioral-model
 #FROM p4lang/behavioral-model:latest

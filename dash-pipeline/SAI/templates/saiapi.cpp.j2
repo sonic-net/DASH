@@ -24,24 +24,42 @@
 
 using namespace std;
 
+{% set registered_group = [] %}
 {% for table in tables %}
+{% if table.name in registered_group %}{% continue %}{% endif %}
+{% do registered_group.append( table.name ) %}
 
 {% if table.is_object == 'true' %}
 sai_status_t sai_create_{{ table.name }}(
         _Out_ sai_object_id_t *{{ table.name }}_id,
         _In_ sai_object_id_t switch_id,
         _In_ uint32_t attr_count,
-        _In_ const sai_attribute_t *attr_list) { 
-    p4::v1::TableEntry * matchActionEntry = new p4::v1::TableEntry();
-    pi_p4_id_t tableId = {{table.id}};
-        // There shall be one and only one action_type
-    auto entry = matchActionEntry->mutable_action();
-    auto action = entry->mutable_action();
+        _In_ const sai_attribute_t *attr_list) {
+
+    p4::v1::TableEntry * matchActionEntry = nullptr;
+    pi_p4_id_t tableId = 0;
+    // There shall be one and only one action_type
+    p4::v1::TableAction* entry = nullptr;
+    p4::v1::Action* action = nullptr;
     auto expectedParams = 0;
     auto matchedParams = 0;
     sai_object_id_t objId = 0;
     // Search the action
-    pi_p4_id_t actionId;
+    pi_p4_id_t actionId = 0;
+
+    {% for group_item in tables%}
+    {% if group_item.name != table.name  %}{% continue %}{% endif %}
+    {% set table = group_item %}
+    {% if 'stage' in table %}
+    // For stage {{ table.stage }}
+    {% endif %}
+    matchActionEntry = new p4::v1::TableEntry();
+    tableId = {{table.id}};
+    entry = matchActionEntry->mutable_action();
+    action = entry->mutable_action();
+    expectedParams = 0;
+    matchedParams = 0;
+    objId = 0;
 
     matchActionEntry->set_table_id(tableId);
 
@@ -165,12 +183,17 @@ sai_status_t sai_create_{{ table.name }}(
     if (matchedParams != expectedParams) {
         goto ErrRet;
     }
-    if (true == InsertInTable(matchActionEntry, &objId)) {
-        *{{ table.name }}_id = objId;
-        return 0;
+    if (false == InsertInTable(matchActionEntry, &objId)) {
+        goto ErrRet;
     }
+
+    {% endfor %}
+
+    *{{ table.name }}_id = objId;
+    return 0;
 ErrRet:
     delete matchActionEntry;
+    RemoveFromTable({{ table.name }}_id);
     return -1;
 }
 
@@ -381,7 +404,10 @@ sai_status_t sai_get_{{ table.name }}_attribute(
 
 /* TODO [cs] Generate .h file for _impl to use within sai_api_query() */
 sai_{{ app_name }}_api_t sai_{{app_name }}_api_impl = {
+{% set registered_group = [] %}
 {% for table in tables %}
+{% if table.name in registered_group %}{% continue %}{% endif %}
+{% do registered_group.append( table.name ) %}
     .create_{{ table.name }} =  sai_create_{{ table.name }},
     .remove_{{ table.name }} = sai_remove_{{ table.name }},
     .set_{{ table.name }}_attribute = sai_set_{{ table.name }}_attribute,

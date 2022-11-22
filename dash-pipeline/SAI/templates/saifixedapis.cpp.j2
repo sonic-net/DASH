@@ -1,0 +1,255 @@
+/*
+ * Fixed SAI APIs which are not based on P4 pipeline code.
+ * Just sufficient to support testing & integrating bmv2's libsai.
+ */
+#include <mutex>
+#include <unordered_map>
+#include <atomic>
+#include <limits>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <PI/pi.h>
+#include <grpcpp/grpcpp.h>
+#include "p4/v1/p4runtime.grpc.pb.h"
+#include "utils.h"
+extern "C" {
+#include "sai.h"
+#include "saiobject.h"
+#include "saistatus.h"
+#include "saitypes.h"
+#include "saiextensions.h"
+}
+#include <fstream>
+#include <google/protobuf/text_format.h>
+#include <google/rpc/code.pb.h>
+
+#if __APPLE__
+#include <net/ethernet.h>
+#else
+#include <netinet/ether.h>
+#include <netinet/in.h>
+#endif
+
+using namespace std;
+
+sai_status_t sai_create_switch_dummy(
+        _Out_ sai_object_id_t *switch_id,
+        _In_ uint32_t attr_count,
+        _In_ const sai_attribute_t *attr_list) {
+
+    *switch_id = 0; // 
+    fprintf(stderr, "sai_create_switch_dummy()\n");
+    return SAI_STATUS_SUCCESS;
+}
+
+#define DASH_BMV2_NUM_PORTS 2 
+#define DASH_BMV2_CPU_QOS_NUMBER_OF_QUEUES 0
+
+#define OJBTYPE_SHFT 48
+#define MAKE_OID(_objtype, _objval) (sai_object_id_t)(((sai_object_id_t)_objtype<<OJBTYPE_SHFT)+(sai_object_id_t)_objval)
+
+#define DASH_BMV2_DEFAULT_CPU_PORT_ID MAKE_OID(SAI_OBJECT_TYPE_PORT,64)
+#define DASH_BMV2_DEFAULT_VLAN_ID MAKE_OID(SAI_OBJECT_TYPE_VLAN,1)
+#define DASH_BMV2_DEFAULT_VRF_ID MAKE_OID(SAI_OBJECT_TYPE_VIRTUAL_ROUTER,1)
+#define DASH_BMV2_DEFAULT_1Q_BRIDGE_ID MAKE_OID(SAI_OBJECT_TYPE_BRIDGE,1)
+
+sai_object_id_t port_list[DASH_BMV2_NUM_PORTS] = {
+    MAKE_OID(SAI_OBJECT_TYPE_PORT,1),
+    MAKE_OID(SAI_OBJECT_TYPE_PORT,2)
+};
+
+sai_status_t sai_get_switch_attribute(
+        _In_ sai_object_id_t switch_id,
+        _In_ uint32_t attr_count,
+        _Inout_ sai_attribute_t *attr_list) {
+
+    fprintf(stderr, "sai_get_switch_attribute()\n");
+    int i;
+    sai_attribute_t *attr = attr_list;
+    sai_object_list_t port_obj_list;
+    sai_object_id_t *objlist;
+    for (i = 0; i < attr_count ; i++, attr++) {
+        switch(attr->id) {
+        
+        case SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS:
+            attr->value.u32 = DASH_BMV2_NUM_PORTS;
+            fprintf(stderr, "  sai_get_switch_attribute() [%d] attr %d SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS = %d\n",
+                    i, attr->id, attr->value.u32);
+            return SAI_STATUS_SUCCESS;
+        
+        case SAI_SWITCH_ATTR_PORT_LIST:
+            // make a tmp port list, saiserver will free the memory
+            objlist = (sai_object_id_t *)malloc(sizeof(port_list));
+            memcpy(objlist, port_list, sizeof(port_list));
+            port_obj_list = {
+                .count = DASH_BMV2_NUM_PORTS,
+                .list = objlist
+            };                
+            attr->value.objlist = port_obj_list;
+            fprintf(stderr, "  sai_get_switch_attribute() [%d] attr %d SAI_SWITCH_ATTR_PORT_LIST = [%d objids]\n",
+                    i, attr->id, DASH_BMV2_NUM_PORTS);
+            return SAI_STATUS_SUCCESS;
+        
+        case SAI_SWITCH_ATTR_DEFAULT_VLAN_ID:
+            attr->value.oid = DASH_BMV2_DEFAULT_VLAN_ID;
+            fprintf(stderr, "  sai_get_switch_attribute() [%d] attr %d SAI_SWITCH_ATTR_DEFAULT_VLAN_ID = %lx\n",
+                    i, attr->id, attr->value.oid);
+            return SAI_STATUS_SUCCESS;
+        
+        case SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID:
+            attr->value.oid = DASH_BMV2_DEFAULT_VRF_ID;
+            fprintf(stderr, "  sai_get_switch_attribute() [0] attr %d SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID = %lx\n", attr->id, attr->value.oid);
+            return SAI_STATUS_SUCCESS;
+        
+        case SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID:
+            attr->value.oid = DASH_BMV2_DEFAULT_1Q_BRIDGE_ID;
+            fprintf(stderr, "  sai_get_switch_attribute() [0] attr %d SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID = %lx\n", attr->id, attr->value.oid);
+            return SAI_STATUS_SUCCESS;
+
+        case SAI_SWITCH_ATTR_CPU_PORT:
+            attr->value.oid = DASH_BMV2_DEFAULT_CPU_PORT_ID;
+            fprintf(stderr, "  sai_get_switch_attribute() [%d] attr %d DASH_BMV2_DEFAULT_CPU_PORT_ID = %lx\n",
+                    i, attr->id, attr->value.oid);
+            return SAI_STATUS_SUCCESS;
+
+        default:
+            fprintf(stderr, "  sai_get_switch_attribute() [0] attr %d is NOT SUPPORTED - returning SAI_STATUS_SUCCESS anyway\n", attr->id);
+            return SAI_STATUS_SUCCESS;
+        }
+    }
+    return SAI_STATUS_SUCCESS;
+}
+
+static sai_switch_api_t sai_switch_api_impl = {
+    .create_switch = sai_create_switch_dummy,
+    .remove_switch = 0,
+    .set_switch_attribute = 0,
+    .get_switch_attribute = sai_get_switch_attribute,
+    .get_switch_stats = 0,
+    .get_switch_stats_ext = 0,
+    .clear_switch_stats = 0,
+    .switch_mdio_read = 0,
+    .switch_mdio_write = 0,
+    .create_switch_tunnel = 0,
+    .remove_switch_tunnel = 0,
+    .set_switch_tunnel_attribute = 0,
+    .get_switch_tunnel_attribute = 0
+};
+
+
+sai_status_t sai_get_port_attribute(
+        _In_ sai_object_id_t port_id,
+        _In_ uint32_t attr_count,
+        _Inout_ sai_attribute_t *attr_list) {
+
+    fprintf(stderr, "sai_get_port_attribute()\n");
+    int i;
+    sai_attribute_t *attr = attr_list;
+
+    for (i = 0; i < attr_count ; i++, attr++) {
+        switch(attr->id) {
+        case SAI_PORT_ATTR_QOS_NUMBER_OF_QUEUES:
+            attr->value.u32 = DASH_BMV2_CPU_QOS_NUMBER_OF_QUEUES;
+            fprintf(stderr, "  sai_get_port_attribute() [0] attr %d SAI_PORT_ATTR_QOS_NUMBER_OF_QUEUES = %d\n", attr->id, attr->value.u32);
+            return SAI_STATUS_SUCCESS;
+
+        default:
+            fprintf(stderr, "  sai_get_port_attribute() [0] attr %d is NOT SUPPORTED - returning SAI_STATUS_SUCCESS anyway\n", attr->id);
+            return SAI_STATUS_SUCCESS;
+        }
+    }
+
+    return SAI_STATUS_SUCCESS;
+}
+
+static sai_port_api_t sai_port_api_impl = {
+    .create_port = 0,
+    .remove_port = 0,
+    .set_port_attribute = 0,
+    .get_port_attribute = sai_get_port_attribute,
+    .get_port_stats = 0,
+    .get_port_stats_ext = 0,
+    .clear_port_stats = 0,
+    .clear_port_all_stats = 0,
+    .create_port_pool = 0,
+    .remove_port_pool = 0,
+    .set_port_pool_attribute = 0,
+    .get_port_pool_attribute = 0,
+    .get_port_pool_stats = 0,
+    .get_port_pool_stats_ext = 0,
+    .clear_port_pool_stats = 0,
+    .create_port_connector = 0,
+    .remove_port_connector = 0,
+    .set_port_connector_attribute = 0,
+    .get_port_connector_attribute = 0,
+    .create_port_serdes = 0,
+    .remove_port_serdes = 0,
+    .set_port_serdes_attribute = 0,
+    .get_port_serdes_attribute = 0,
+    .create_ports = 0,
+    .remove_ports = 0,
+    .set_ports_attribute = 0,
+    .get_ports_attribute = 0
+};
+
+
+{% for api in api_names %}
+extern sai_{{ api }}_api_t sai_{{ api }}_api_impl;
+{% endfor %}
+
+
+sai_status_t sai_api_query(
+        _In_ sai_api_t api,
+        _Out_ void **api_method_table) {
+
+        switch(api) {
+        case SAI_API_SWITCH:
+            *api_method_table = (void *)&sai_switch_api_impl;
+            break;
+        
+        case SAI_API_PORT:
+            *api_method_table = (void *)&sai_port_api_impl;
+            break;
+        
+{% for api in api_names %}
+        case SAI_API_{{ api | upper }}:
+            *api_method_table = (void *)&sai_{{ api }}_api_impl;
+            break;
+        
+{% endfor %}
+        default:
+            return SAI_STATUS_NOT_SUPPORTED;
+
+        }
+        return SAI_STATUS_SUCCESS;
+}
+
+
+sai_status_t sai_object_type_get_availability(
+        _In_ sai_object_id_t switch_id,
+        _In_ sai_object_type_t object_type,
+        _In_ uint32_t attr_count,
+        _In_ const sai_attribute_t *attr_list,
+        _Out_ uint64_t *count) { return SAI_STATUS_SUCCESS; }
+        
+sai_object_type_t sai_object_type_query(
+        _In_ sai_object_id_t object_id) { return sai_object_type_t(object_id>>OJBTYPE_SHFT); }
+
+
+sai_object_id_t sai_switch_id_query(
+        _In_ sai_object_id_t object_id) { return SAI_STATUS_SUCCESS; }
+
+sai_status_t sai_query_attribute_enum_values_capability(
+        _In_ sai_object_id_t switch_id,
+        _In_ sai_object_type_t object_type,
+        _In_ sai_attr_id_t attr_id,
+        _Inout_ sai_s32_list_t *enum_values_capability) { return SAI_STATUS_SUCCESS; }
+
+sai_status_t sai_api_initialize(
+        _In_ uint64_t flags,
+        _In_ const sai_service_method_table_t *services) { return SAI_STATUS_SUCCESS; }
+
+sai_status_t sai_log_set(
+        _In_ sai_api_t api,
+        _In_ sai_log_level_t log_level) { return SAI_STATUS_SUCCESS; }

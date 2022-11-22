@@ -286,6 +286,14 @@ control dash_ingress(inout headers_t hdr,
             meta.dst_ip_addr = (bit<128>)hdr.ipv4.dst_addr;
         }
 
+        if (hdr.tcp.isValid()) {
+            meta.src_l4_port = hdr.tcp.src_port;
+            meta.dst_l4_port = hdr.tcp.dst_port;
+        } else if (hdr.udp.isValid()) {
+            meta.src_l4_port = hdr.udp.src_port;
+            meta.dst_l4_port = hdr.udp.dst_port;
+        }
+
         /* At this point the processing is done on customer headers */
 
         /* Put VM's MAC in the direction agnostic metadata field */
