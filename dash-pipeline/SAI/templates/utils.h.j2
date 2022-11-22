@@ -21,6 +21,7 @@
 #include <netinet/in.h>
 #endif
 
+#define LOG(x) std::cerr<<x
 
 template<typename T>
 void booldataSetVal(const sai_attribute_value_t &value, T &t, int bits = 8){

@@ -1,5 +1,6 @@
 #include <mutex>
 #include <unordered_map>
+#include <utility>
 #include <atomic>
 #include <limits>
 #include <stdint.h>
@@ -34,7 +35,7 @@ using namespace std;
 static std::shared_ptr<grpc::Channel> _grpcChannel;
 static const grpc::string _grpcTarget = "localhost:9876";
 static int deviceId;
-static unordered_map<sai_object_id_t, p4::v1::TableEntry *> tableEntryMap;
+static unordered_multimap<sai_object_id_t, p4::v1::TableEntry *> tableEntryMap;
 static std::mutex tableLock;
 static atomic<sai_object_id_t> nextId;
 static std::unique_ptr<p4::v1::P4Runtime::Stub> stub;
@@ -170,7 +171,7 @@ bool InsertInTable(p4::v1::TableEntry *entry, sai_object_id_t *objId) {
     if (*objId == 0) {
         *objId = NextObjIndex();
     }
-    tableEntryMap[*objId] = entry;
+    tableEntryMap.insert(std::make_pair(*objId, entry));
     tableLock.unlock();
     return true;
 }
@@ -181,179 +182,25 @@ sai_object_id_t NextObjIndex() {
 
 bool RemoveFromTable(sai_object_id_t id) {
     tableLock.lock();
-    auto itr = tableEntryMap.find(id);
-    if (itr == tableEntryMap.end()) {
+    auto range = tableEntryMap.equal_range(id);
+    if (range.first == range.second) {
         tableLock.unlock();
         LOG("id: " << id << " not present in the table for deletion!" <<endl);
         return false;
     }
 
-    auto entry = itr->second;
-    auto retCode = MutateTableEntry(entry, p4::v1::Update_Type_DELETE);
-    if (grpc::StatusCode::OK != retCode) {
-        tableLock.unlock();
-        return false;
+    grpc::StatusCode retCode = grpc::StatusCode::OK;
+
+    for (auto itr = range.first; itr != range.second; ++itr) {
+        auto entry = itr->second;
+        auto tempRet = MutateTableEntry(entry, p4::v1::Update_Type_DELETE);
+        if (grpc::StatusCode::OK != tempRet) {
+            retCode = tempRet;
+        }
+        delete entry;
     }
 
-    tableEntryMap.erase(itr);
+    tableEntryMap.erase(id);
     tableLock.unlock();
-    delete entry;
-    return true;
+    return retCode == grpc::StatusCode::OK;
 }
-
-/* TODO [cs] placeholders to satisfy sairpcgen until actual callbacks are written
- *           Replace with some reasonable minimal code to support PTF tests
- *           Put in own template files e.g. sai_switch.cpp.j2 sai_switch.h.j2
- *           Update sai_api_gen.py accordingly.
- */
-
-sai_status_t sai_create_switch_dummy(
-        _Out_ sai_object_id_t *switch_id,
-        _In_ uint32_t attr_count,
-        _In_ const sai_attribute_t *attr_list) {
-
-    *switch_id = 0; // 
-    fprintf(stderr, "sai_create_switch_dummy()\n");
-    return SAI_STATUS_SUCCESS;
-}
-
-#define DASH_BMV2_NUM_PORTS 2 
-#define DASH_BMV2_DEFAULT_VLAN_ID (sai_object_id_t)((SAI_OBJECT_TYPE_VLAN<<48)+1)
-#define DASH_BMV2_DEFAULT_VRF_ID (sai_object_id_t)((SAI_OBJECT_TYPE_VIRTUAL_ROUTER<<48)+1)
-#define DASH_BMV2_DEFAULT_1Q_BRIDGE_ID (sai_object_id_t)((SAI_OBJECT_TYPE_BRIDGE<<48)+1)
-
-sai_object_id_t port_list[DASH_BMV2_NUM_PORTS] = {
-    (sai_object_id_t)((SAI_OBJECT_TYPE_PORT<<48) + 1),
-    (sai_object_id_t)((SAI_OBJECT_TYPE_PORT<<48) + 2)
-};
-
-sai_status_t sai_get_switch_attribute(
-        _In_ sai_object_id_t switch_id,
-        _In_ uint32_t attr_count,
-        _Inout_ sai_attribute_t *attr_list) {
-
-    fprintf(stderr, "sai_get_switch_attribute()\n");
-    int i;
-    sai_attribute_t *attr = attr_list;
-    sai_object_list_t port_obj_list;
-    sai_object_id_t *objlist;
-    for (i = 0; i < attr_count ; i++, attr++) {
-        switch(attr->id) {
-        
-        case SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS:
-            attr->value.u32 = DASH_BMV2_NUM_PORTS;
-            fprintf(stderr, "  sai_get_switch_attribute() [%d] attr %d SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS = %d\n",
-                    i, attr->id, attr->value.u32);
-            return SAI_STATUS_SUCCESS;
-        
-        case SAI_SWITCH_ATTR_PORT_LIST:
-            // make a tmp port list, saiserver will free the memory
-            objlist = (sai_object_id_t *)malloc(sizeof(port_list));
-            memcpy(objlist, port_list, sizeof(port_list));
-            port_obj_list = {
-                .count = DASH_BMV2_NUM_PORTS,
-                .list = objlist
-            };                
-            attr->value.objlist = port_obj_list;
-            fprintf(stderr, "  sai_get_switch_attribute() [%d] attr %d SAI_SWITCH_ATTR_PORT_LIST = [%d objids]\n",
-                    i, attr->id, DASH_BMV2_NUM_PORTS);
-            return SAI_STATUS_SUCCESS;
-        
-        case SAI_SWITCH_ATTR_DEFAULT_VLAN_ID:
-            attr->value.oid = DASH_BMV2_DEFAULT_VLAN_ID;
-            fprintf(stderr, "  sai_get_switch_attribute() [%d] attr %d SAI_SWITCH_ATTR_DEFAULT_VLAN_ID = %lx\n",
-                    i, attr->id, attr->value.oid);
-            return SAI_STATUS_SUCCESS;
-        
-        case SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID:
-            attr->value.oid = DASH_BMV2_DEFAULT_VRF_ID;
-            fprintf(stderr, "  sai_get_switch_attribute() [0] attr %d SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID = %lx\n", attr->id, attr->value.oid);
-            return SAI_STATUS_SUCCESS;
-        
-        case SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID:
-            attr->value.oid = DASH_BMV2_DEFAULT_1Q_BRIDGE_ID;
-            fprintf(stderr, "  sai_get_switch_attribute() [0] attr %d SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID = %lx\n", attr->id, attr->value.oid);
-            return SAI_STATUS_SUCCESS;
-
-        default:
-            fprintf(stderr, "  sai_get_switch_attribute() [0] attr %d is NOT SUPPORTED - returning SAI_STATUS_SUCCESS anyway\n", attr->id);
-            return SAI_STATUS_NOT_SUPPORTED;
-        }
-    }
-    return SAI_STATUS_NOT_SUPPORTED;
-}
-
-sai_switch_api_t sai_switch_api_impl = {
-    .create_switch = sai_create_switch_dummy,
-    .remove_switch = (void *)0,
-    .set_switch_attribute = (void *)0,
-    .get_switch_attribute = sai_get_switch_attribute,
-    .get_switch_stats = (void *)0,
-    .get_switch_stats_ext = (void *)0,
-    .clear_switch_stats = (void *)0,
-    .switch_mdio_read = (void *)0,
-    .switch_mdio_write = (void *)0,
-    .create_switch_tunnel = (void *)0,
-    .remove_switch_tunnel = (void *)0,
-    .set_switch_tunnel_attribute = (void *)0,
-    .get_switch_tunnel_attribute = (void *)0
-};
-
-
-{% for api in api_names %}
-extern sai_{{ api }}_api_t sai_{{ api }}_api_impl;
-{% endfor %}
-
-
-sai_status_t sai_api_query(
-        _In_ sai_api_t api,
-        _Out_ void **api_method_table) {
-
-        switch(api) {
-        case SAI_API_SWITCH:
-            *api_method_table = (void *)&sai_switch_api_impl;
-            break;
-        
-{% for api in api_names %}
-        case SAI_API_{{ api | upper }}:
-            *api_method_table = (void *)&sai_{{ api }}_api_impl;
-            break;
-        
-{% endfor %}
-        default:
-            return SAI_STATUS_NOT_SUPPORTED;
-
-        }
-        return SAI_STATUS_SUCCESS;
-}
-
-
-sai_status_t sai_object_type_get_availability(
-        _In_ sai_object_id_t switch_id,
-        _In_ sai_object_type_t object_type,
-        _In_ uint32_t attr_count,
-        _In_ const sai_attribute_t *attr_list,
-        _Out_ uint64_t *count) { return SAI_STATUS_SUCCESS; }
-        
-sai_object_type_t sai_object_type_query(
-        _In_ sai_object_id_t object_id) { return SAI_STATUS_SUCCESS; }
-
-
-sai_object_id_t sai_switch_id_query(
-        _In_ sai_object_id_t object_id) { return SAI_STATUS_SUCCESS; }
-
-sai_status_t sai_query_attribute_enum_values_capability(
-        _In_ sai_object_id_t switch_id,
-        _In_ sai_object_type_t object_type,
-        _In_ sai_attr_id_t attr_id,
-        _Inout_ sai_s32_list_t *enum_values_capability) { return SAI_STATUS_SUCCESS; }
-
-sai_status_t sai_api_initialize(
-        _In_ uint64_t flags,
-        _In_ const sai_service_method_table_t *services) { return SAI_STATUS_SUCCESS; }
-
-sai_status_t sai_log_set(
-        _In_ sai_api_t api,
-        _In_ sai_log_level_t log_level) { return SAI_STATUS_SUCCESS; }
-
-

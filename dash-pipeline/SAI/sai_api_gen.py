@@ -5,6 +5,7 @@ try:
     import json
     import argparse
     import shutil
+    import copy
     from jinja2 import Template, Environment, FileSystemLoader
 except ImportError as ie:
     print("Import failed for " + ie.name)
@@ -22,7 +23,7 @@ PARAMS_TAG = 'params'
 ACTION_REFS_TAG = 'actionRefs'
 MATCH_FIELDS_TAG = 'matchFields'
 NOACTION = 'NoAction'
-STAGES_TAG = 'stages'
+STAGE_TAG = 'stage'
 PARAM_ACTIONS = 'paramActions'
 OBJECT_NAME_TAG = 'objectName'
 SCOPE_TAG = 'scope'
@@ -68,13 +69,13 @@ def get_sai_list_type(key_size, key_header, key_field):
     elif key_size <= 16:
         return 'sai_u16_list_t', "u16list"
     elif key_size == 32 and ('addr' in key_field or 'ip' in key_header):
-        return 'sai_ip_address_list_t', "ipaddrlist"
+        return 'sai_ip_prefix_list_t', "ipprefixlist"
     elif key_size <= 32:
         return 'sai_u32_list_t', "u32list"
-    elif key_size <= 64:
-        ValueError(f'sai_u64_list_t is not supported')
-        return 'sai_u64_list_t', "no mapping"
-    raise ValueError(f'key_size={key_size} is not supported')
+    elif key_size == 128 and ('addr' in key_field or 'ip' in key_header):
+        return 'sai_ip_prefix_list_t', "ipprefixlist"
+    else:
+        raise ValueError(f'key_size={key_size} is not supported')
 
 def get_sai_range_list_type(key_size, key_header, key_field):
     if key_size <= 8:
@@ -184,7 +185,6 @@ def generate_sai_apis(program, ignore_tables):
         sai_table_data = dict()
         sai_table_data['keys'] = []
         sai_table_data[ACTIONS_TAG] = []
-        sai_table_data[STAGES_TAG] = []
         sai_table_data[ACTION_PARAMS_TAG] = []
 
         table_control, table_name = table[PREAMBLE_TAG][NAME_TAG].split('.', 1)
@@ -199,23 +199,12 @@ def generate_sai_apis(program, ignore_tables):
         sai_table_data['id'] =  table[PREAMBLE_TAG]['id']
         sai_table_data['with_counters'] = table_with_counters(program, sai_table_data['id'])
 
-        # chechk if table belongs to a group
-        is_new_group = True
         if ':' in table_name:
             stage, group_name = table_name.split(':')
             table_name = group_name
             stage = stage.replace('.' , '_')
-            for sai_api in sai_apis:
-                for sai_table in sai_api[TABLES_TAG]:
-                    if sai_table['name'] == table_name:
-                        sai_table[STAGES_TAG].append(stage)
-                        is_new_group = False
-                        break
-            if is_new_group:
-                sai_table_data[NAME_TAG] = table_name
-                sai_table_data[STAGES_TAG].append(stage)
-            else:
-                continue
+            sai_table_data[NAME_TAG] = table_name
+            sai_table_data[STAGE_TAG] = stage
 
         for key in table[MATCH_FIELDS_TAG]:
             # skip v4/v6 selector
@@ -263,8 +252,23 @@ def generate_sai_apis(program, ignore_tables):
 
     return sai_apis, table_names
 
+def get_uniq_sai_api(sai_api):
+    """ Only keep one table per group(with same table name) """
+    groups = set()
+    sai_api = copy.deepcopy(sai_api)
+    tables = []
+    for table in sai_api[TABLES_TAG]:
+        if table[NAME_TAG] in groups:
+            continue
+        tables.append(table)
+        groups.add(table[NAME_TAG])
+    sai_api[TABLES_TAG] = tables
+    return sai_api
+
 def write_sai_impl_files(sai_api):
     env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
+    env.add_extension('jinja2.ext.loopcontrols')
+    env.add_extension('jinja2.ext.do')
     sai_impl_tm = env.get_template('/templates/saiapi.cpp.j2')
     sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'])
 
@@ -279,19 +283,16 @@ def write_sai_makefile(sai_api_name_list, sai_api_full_name_list):
     with open('./lib/Makefile', 'w') as o:
         o.write(makefile_str)
 
-    env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
-    sai_impl_tm = env.get_template('/templates/utils.cpp.j2')
-    sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'], api_names = sai_api_full_name_list)
+def write_sai_fixed_api_files(sai_api_full_name_list):
+    env = Environment(loader=FileSystemLoader('.'))
 
-    with open('./lib/utils.cpp', 'w') as o:
-        o.write(sai_impl_str)
+    for filename in ['utils.cpp', 'utils.h', 'saifixedapis.cpp']:
+        env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
+        sai_impl_tm = env.get_template('/templates/%s.j2' % filename)
+        sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'], api_names = sai_api_full_name_list)
 
-    env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
-    sai_impl_tm = env.get_template('/templates/utils.h.j2')
-    sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'])
-
-    with open('./lib/utils.h', 'w') as o:
-        o.write(sai_impl_str)
+        with open('./lib/%s' % filename, 'w') as o:
+            o.write(sai_impl_str)
 
 
 def write_sai_files(sai_api):
@@ -300,6 +301,8 @@ def write_sai_files(sai_api):
         sai_header_tm_str = sai_header_tm_file.read()
 
     env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
+    env.add_extension('jinja2.ext.loopcontrols')
+    env.add_extension('jinja2.ext.do')
     sai_header_tm = env.get_template('templates/saiapi.h.j2')
     sai_header_str = sai_header_tm.render(sai_api = sai_api)
 
@@ -335,6 +338,7 @@ def write_sai_files(sai_api):
     new_lines = []
     for line in lines:
         if 'Add new experimental object types above this line' in line:
+            
             for table in sai_api[TABLES_TAG]:
                 new_line = '    SAI_OBJECT_TYPE_' + table[NAME_TAG].upper() + ',\n'
                 if new_line not in lines:
@@ -413,12 +417,13 @@ for sai_api in sai_apis:
                         if table_ref.endswith(table_name):
                             key[OBJECT_NAME_TAG] = table_name
     # Write SAI dictionary into SAI API headers
-    write_sai_files(sai_api)
+    write_sai_files(get_uniq_sai_api(sai_api))
     write_sai_impl_files(sai_api)
     sai_api_name_list.append(sai_api['app_name'].replace('_', ''))
     sai_api_full_name_list.append(sai_api['app_name'])
 
 write_sai_makefile(sai_api_name_list, sai_api_full_name_list)
+write_sai_fixed_api_files(sai_api_full_name_list)
 
 if args.print_sai_lib:
     print(json.dumps(sai_api, indent=2))
