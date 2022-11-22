@@ -555,6 +555,9 @@ docker-publish-saichallenger-client-bldr:
 	@echo "Publish $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG) - requires credentials, can only do from DASH repo, not a fork"
 	docker push $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG)
 
+docker-pull-saichallenger-client-bldr:
+	docker pull $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG)
+
 docker-saichallenger-client:
 	cd $(SAI_CHALLENGER_PATH) && ./build.sh -i client
 	docker build \
