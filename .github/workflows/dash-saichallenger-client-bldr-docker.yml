@@ -1,32 +1,27 @@
-name: DASH-docker-saithrift-client-bldr-image
+name: DASH-docker-saichallenger-client-bldr-img
 
 on:
   push:
     branches: [ "**" ]
     paths:
-      - '.github/workflows/dash-saithrift-client-bldr-docker.yml'
-      - '.github/workflows/dash-saithrift-client-bldr-docker.yml'
+      - '.github/workflows/dash-saichallenger-client-bldr-docker.yml'
       - 'dash-pipeline/Makefile'
-      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client-bldr'
-      - 'dash-pipeline/dockerfiles/DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saichallenger-client-bldr'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
     branches: [ "**" ]
     paths:
-      - '.github/workflows/dash-saithrift-client-bldr-docker.yml'
+      - '.github/workflows/dash-saichallenger-client-bldr-docker.yml'
       - 'dash-pipeline/Makefile'
-      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client-bldr'
-      - 'dash-pipeline/dockerfiles/DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saichallenger-client-bldr'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build dash-saithrift-client-bldr-image
-    # Only run on forks (in main repo, run build/publish workflows instead)
-    if: github.repository != 'Azure/DASH'
+    name: Build dash-saichallenger-client-bldr-image
     runs-on: ubuntu-20.04
     env:
       docker_fg_flags: -u root --privileged
@@ -42,11 +37,9 @@ jobs:
       run:  DOCKER_FLAGS=$docker_fg_flags make p4
     - name: Install SAI submodule
       run:  git submodule update --init
-    - name: Build docker saithrift-bldr image
-      run:  make docker-saithrift-bldr
     - name: Generate SAI API
       run:  DOCKER_FLAGS=$docker_fg_flags make sai
     - name: Generate SAI-Thrift client and server code and libs
       run:  DOCKER_FLAGS=$docker_fg_flags make saithrift-server
-    - name: Build saithrift client builder docker image 
-      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saithrift-client-bldr
+    - name: Build SAI-Challenger client builder base docker image
+      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saichallenger-client-bldr
