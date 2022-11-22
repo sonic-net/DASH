@@ -1,9 +1,7 @@
 from sai_thrift.sai_headers import *
 from sai_base_test import *
 
-# TODO - when switch APIs implemented:
-# class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
-class SaiThriftVnetOutboundUdpPktTest(ThriftInterfaceDataPlane):
+class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
     """ Test saithrift vnet outbound"""
 
     def setUp(self):
