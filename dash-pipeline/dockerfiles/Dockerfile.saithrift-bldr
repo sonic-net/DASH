@@ -1,6 +1,6 @@
 
-FROM chrissommers/dash-grpc:1.43.2 as grpc
-FROM chrissommers/dash-bmv2-bldr:220819 as bmv2
+FROM sonicdash.azurecr.io/dash-grpc:1.43.2 as grpc
+FROM sonicdash.azurecr.io/dash-bmv2-bldr:220819 as bmv2
 # amd64/ubuntu:20.04 on 2022-07-03
 FROM amd64/ubuntu@sha256:b2339eee806d44d6a8adc0a790f824fb71f03366dd754d400316ae5a7e3ece3e as builder
 LABEL maintainer="SONiC-DASH Community "

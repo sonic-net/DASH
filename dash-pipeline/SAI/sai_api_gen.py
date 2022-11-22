@@ -68,13 +68,13 @@ def get_sai_list_type(key_size, key_header, key_field):
     elif key_size <= 16:
         return 'sai_u16_list_t', "u16list"
     elif key_size == 32 and ('addr' in key_field or 'ip' in key_header):
-        return 'sai_ip_address_list_t', "ipaddrlist"
+        return 'sai_ip_prefix_list_t', "ipprefixlist"
     elif key_size <= 32:
         return 'sai_u32_list_t', "u32list"
-    elif key_size <= 64:
-        ValueError(f'sai_u64_list_t is not supported')
-        return 'sai_u64_list_t', "no mapping"
-    raise ValueError(f'key_size={key_size} is not supported')
+    elif key_size == 128 and ('addr' in key_field or 'ip' in key_header):
+        return 'sai_ip_prefix_list_t', "ipprefixlist"
+    else:
+        raise ValueError(f'key_size={key_size} is not supported')
 
 def get_sai_range_list_type(key_size, key_header, key_field):
     if key_size <= 8:
@@ -279,19 +279,16 @@ def write_sai_makefile(sai_api_name_list, sai_api_full_name_list):
     with open('./lib/Makefile', 'w') as o:
         o.write(makefile_str)
 
-    env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
-    sai_impl_tm = env.get_template('/templates/utils.cpp.j2')
-    sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'], api_names = sai_api_full_name_list)
+def write_sai_fixed_api_files(sai_api_full_name_list):
+    env = Environment(loader=FileSystemLoader('.'))
 
-    with open('./lib/utils.cpp', 'w') as o:
-        o.write(sai_impl_str)
+    for filename in ['utils.cpp', 'utils.h', 'saifixedapis.cpp']:
+        env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
+        sai_impl_tm = env.get_template('/templates/%s.j2' % filename)
+        sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'], api_names = sai_api_full_name_list)
 
-    env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
-    sai_impl_tm = env.get_template('/templates/utils.h.j2')
-    sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'])
-
-    with open('./lib/utils.h', 'w') as o:
-        o.write(sai_impl_str)
+        with open('./lib/%s' % filename, 'w') as o:
+            o.write(sai_impl_str)
 
 
 def write_sai_files(sai_api):
@@ -419,6 +416,7 @@ for sai_api in sai_apis:
     sai_api_full_name_list.append(sai_api['app_name'])
 
 write_sai_makefile(sai_api_name_list, sai_api_full_name_list)
+write_sai_fixed_api_files(sai_api_full_name_list)
 
 if args.print_sai_lib:
     print(json.dumps(sai_api, indent=2))
