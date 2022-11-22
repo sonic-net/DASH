@@ -2,8 +2,8 @@
 # THIS MAKEFILE IS AUTO-GENERATED FROM templates/Makefile.j2
 # DO NOT MODIFY
 
+# Sources from OCP SAI Repo:
 SAI_DIR=../SAI/meta/
-
 SAI_SRCS=saimetadatautils.c \
 		saimetadata.c \
 		saiserialize.c
@@ -11,10 +11,16 @@ SAI_SRCS=saimetadatautils.c \
 SAI_SRC_PATHS=$(addprefix $(SAI_DIR),$(SAI_SRCS))
 SAI_OBJS=$(SAI_SRCS:.c=.o)
 
-#GXX_FLAGS=-D_GLIBCXX_USE_CXX11_ABI=0
+# DASH libsai "fixed" sources (not generated from P4 code)
+DASH_FIXED_SAI_SRCS=utils.cpp \
+		saifixedapis.cpp
+DASH_FIXED_SAI_OBJ=$(DASH_FIXED_SAI_SRCS:.cpp=.o)
 
-libsai.so: utils.cpp \
-		{% for api in api_names %}sai{{ api }}.cpp {% endfor %} 
+# DASH libsai "generated" sources (from P4 code)
+DASH_GEN_SAI_SRCS={% for api in api_names %}sai{{ api }}.cpp {% endfor %}
+DASH_GEN_SAI_OBJ=$(DASH_GEN_SAI_SRCS:.cpp=.o)
+
+libsai.so: $(DASH_FIXED_SAI_SRCS) $(DASH_GEN_SAI_SRCS)
 	gcc \
 		-fPIC \
 	    -c \
@@ -33,13 +39,13 @@ libsai.so: utils.cpp \
 	    -fPIC \
 	    -g \
 		$(GXX_FLAGS) \
-	    utils.cpp \
-	    {% for api in api_names %}sai{{ api }}.cpp {% endfor %}
+	    $(DASH_FIXED_SAI_SRCS) \
+	    $(DASH_GEN_SAI_SRCS)
 
 	g++ \
 	    -shared \
 	    -g \
 	    -o libsai.so \
-	    utils.o \
-		$(SAI_OBJS) \
-	    {% for api in api_names %}sai{{ api }}.o {% endfor %}
+	    $(DASH_FIXED_SAI_OBJ) \
+	    $(DASH_GEN_SAI_OBJ) \
+		$(SAI_OBJS)
