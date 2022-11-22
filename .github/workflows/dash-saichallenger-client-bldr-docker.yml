@@ -1,27 +1,27 @@
-name: DASH-docker-saichallenger-client-img
+name: DASH-docker-saichallenger-client-bldr-img
 
 on:
   push:
     branches: [ "**" ]
     paths:
-      - '.github/workflows/dash-saichallenger-client-docker.yml'
+      - '.github/workflows/dash-saichallenger-client-bldr-docker.yml'
       - 'dash-pipeline/Makefile'
-      - 'dash-pipeline/dockerfiles/Dockerfile.saichallenger-client'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saichallenger-client-bldr'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
     branches: [ "**" ]
     paths:
-      - '.github/workflows/dash-saichallenger-client-docker.yml'
+      - '.github/workflows/dash-saichallenger-client-bldr-docker.yml'
       - 'dash-pipeline/Makefile'
-      - 'dash-pipeline/dockerfiles/Dockerfile.saichallenger-client'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saichallenger-client-bldr'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build dash-saichallenger-client-image
+    name: Build dash-saichallenger-client-bldr-image
     runs-on: ubuntu-20.04
     env:
       docker_fg_flags: -u root --privileged
@@ -43,5 +43,3 @@ jobs:
       run:  DOCKER_FLAGS=$docker_fg_flags make saithrift-server
     - name: Build SAI-Challenger client builder base docker image
       run:  DOCKER_FLAGS=$docker_fg_flags make docker-saichallenger-client-bldr
-    - name: Build SAI-Challenger client docker image
-      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saichallenger-client

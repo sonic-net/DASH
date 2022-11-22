@@ -4,7 +4,7 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
 
 # "All" type targets for convenience
-all:p4 sai saithrift-server docker-saithrift-client test
+all:p4 sai saithrift-server docker-saithrift-client docker-saichallenger-client test
 
 run-all-tests:run-libsai-test run-saithrift-client-tests run-saichallenger-tests
 run-saithrift-client-tests: run-saithrift-ptftests run-saithrift-pytests
@@ -49,7 +49,11 @@ include dockerfiles/DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env
 # TODO: consider some other tagging scheme
 DOCKER_SAITHRIFT_CLIENT_IMG ?= local/dash-saithrift-client:latest
 
-# Base image with test frameworks, DASH client libs not installed
+# Base image with test frameworks, not installed
+# include file defines DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG
+include dockerfiles/DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG.env
+
+# Final SAIchallenger framework image with test frameworks, DASH client libs etc.
 # include file defines DOCKER_SAI_CHALLENGER_CLIENT_IMG
 include dockerfiles/DOCKER_SAI_CHALLENGER_CLIENT_IMG.env
 
@@ -540,16 +544,23 @@ ifeq ($(SAI_CHALLENGER_TEST),)
 SAI_CHALLENGER_TEST := test_sai_vnet_*.py
 endif
 
+docker-saichallenger-client-bldr:
+	cd $(SAI_CHALLENGER_PATH) && ./build.sh -i client
+	docker build \
+		-f dockerfiles/Dockerfile.saichallenger-client-bldr \
+		-t $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG) \
+		.
+
+docker-publish-saichallenger-client-bldr:
+	@echo "Publish $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG)
+
 docker-saichallenger-client:
 	cd $(SAI_CHALLENGER_PATH) && ./build.sh -i client
 	docker build \
 		-f dockerfiles/Dockerfile.saichallenger-client \
 		-t $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
 		.
-
-docker-publish-saichallenger-client:
-	@echo "Publish $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) - requires credentials, can only do from DASH repo, not a fork"
-	docker push $(DOCKER_SAI_CHALLENGER_CLIENT_IMG)
 
 DOCKER_RUN_SAI_CHALLENGER_CLIENT=docker run \
 	-v $(SAI_CHALLENGER_PATH):/sai-challenger \
