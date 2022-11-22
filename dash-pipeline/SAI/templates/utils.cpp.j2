@@ -1,5 +1,6 @@
 #include <mutex>
 #include <unordered_map>
+#include <utility>
 #include <atomic>
 #include <limits>
 #include <stdint.h>
@@ -34,7 +35,7 @@ using namespace std;
 static std::shared_ptr<grpc::Channel> _grpcChannel;
 static const grpc::string _grpcTarget = "localhost:9876";
 static int deviceId;
-static unordered_map<sai_object_id_t, p4::v1::TableEntry *> tableEntryMap;
+static unordered_multimap<sai_object_id_t, p4::v1::TableEntry *> tableEntryMap;
 static std::mutex tableLock;
 static atomic<sai_object_id_t> nextId;
 static std::unique_ptr<p4::v1::P4Runtime::Stub> stub;
@@ -170,7 +171,7 @@ bool InsertInTable(p4::v1::TableEntry *entry, sai_object_id_t *objId) {
     if (*objId == 0) {
         *objId = NextObjIndex();
     }
-    tableEntryMap[*objId] = entry;
+    tableEntryMap.insert(std::make_pair(*objId, entry));
     tableLock.unlock();
     return true;
 }
@@ -181,22 +182,25 @@ sai_object_id_t NextObjIndex() {
 
 bool RemoveFromTable(sai_object_id_t id) {
     tableLock.lock();
-    auto itr = tableEntryMap.find(id);
-    if (itr == tableEntryMap.end()) {
+    auto range = tableEntryMap.equal_range(id);
+    if (range.first == range.second) {
         tableLock.unlock();
         LOG("id: " << id << " not present in the table for deletion!" <<endl);
         return false;
     }
 
-    auto entry = itr->second;
-    auto retCode = MutateTableEntry(entry, p4::v1::Update_Type_DELETE);
-    if (grpc::StatusCode::OK != retCode) {
-        tableLock.unlock();
-        return false;
+    grpc::StatusCode retCode = grpc::StatusCode::OK;
+
+    for (auto itr = range.first; itr != range.second; ++itr) {
+        auto entry = itr->second;
+        auto tempRet = MutateTableEntry(entry, p4::v1::Update_Type_DELETE);
+        if (grpc::StatusCode::OK != tempRet) {
+            retCode = tempRet;
+        }
+        delete entry;
     }
 
-    tableEntryMap.erase(itr);
+    tableEntryMap.erase(id);
     tableLock.unlock();
-    delete entry;
-    return true;
+    return retCode == grpc::StatusCode::OK;
 }

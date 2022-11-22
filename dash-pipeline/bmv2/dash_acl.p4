@@ -32,8 +32,8 @@ match_kind {
             meta.dst_ip_addr : LIST_MATCH @name("meta.dst_ip_addr:dip"); \
             meta.src_ip_addr : LIST_MATCH @name("meta.src_ip_addr:sip"); \
             meta.ip_protocol : LIST_MATCH @name("meta.ip_protocol:protocol"); \
-            hdr.tcp.src_port : RANGE_LIST_MATCH @name("hdr.tcp.src_port:src_port"); \
-            hdr.tcp.dst_port : RANGE_LIST_MATCH @name("hdr.tcp.dst_port:dst_port"); \
+            meta.src_l4_port : RANGE_LIST_MATCH @name("meta.src_l4_port:src_port"); \
+            meta.dst_l4_port : RANGE_LIST_MATCH @name("meta.dst_l4_port:dst_port"); \
         } \
         actions = { \
             permit; \
