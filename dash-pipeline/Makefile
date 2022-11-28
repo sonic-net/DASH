@@ -23,6 +23,8 @@ DASH_UID ?=4321
 DASH_GUID?=4321
 DASH_HOST?=dash
 
+ENABLE_DOCKER_PULL ?= y
+
 # Include file defines DOCKER_GRPC_IMG
 include dockerfiles/DOCKER_GRPC_IMG.env
 
@@ -295,7 +297,11 @@ init-switch:
 # DOCKER BUILD/PUBLISH TARGETS
 ###############################
 
+DOCKER_BMV2_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.bmv2-bldr | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_BMV2_BLDR_IMG = $(DOCKER_BMV2_BLDR_IMG_NAME):$(DOCKER_BMV2_BLDR_IMG_TAG)
+
 docker-bmv2-bldr:
+	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_BMV2_BLDR_IMG); } || \
 	docker build \
 		-f dockerfiles/Dockerfile.bmv2-bldr \
 	    -t $(DOCKER_BMV2_BLDR_IMG) \
@@ -306,6 +312,9 @@ docker-bmv2-bldr:
 	    --build-arg hostname=$(DASH_HOST) \
 	    --build-arg available_processors=$(shell nproc) \
 	    dockerfiles
+	[ -n $(DOCKER_BMV2_BLDR_IMG_CTAG) ] && \
+		docker tag $(DOCKER_BMV2_BLDR_IMG) \
+		$(DOCKER_BMV2_BLDR_IMG_NAME):$(DOCKER_BMV2_BLDR_IMG_CTAG)
 
 docker-pull-bmv2-bldr:
 	docker pull $(DOCKER_BMV2_BLDR_IMG)
@@ -319,9 +328,16 @@ docker-load-bmv2-bldr:
 docker-publish-bmv2-bldr:
 	@echo "Publish $(DOCKER_BMV2_BLDR_IMG) - requires credentials, can only do from DASH repo, not a fork"
 	docker push $(DOCKER_BMV2_BLDR_IMG)
+	[ -n $(DOCKER_BMV2_BLDR_IMG_CTAG) ] && \
+		docker push $(DOCKER_BMV2_BLDR_IMG_NAME):$(DOCKER_BMV2_BLDR_IMG_CTAG)
 
 ###############################
+
+DOCKER_SAITHRIFT_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.saithrift-bldr | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_SAITHRIFT_BLDR_IMG = $(DOCKER_SAITHRIFT_BLDR_IMG_NAME):$(DOCKER_SAITHRIFT_BLDR_IMG_TAG)
+
 docker-saithrift-bldr:
+	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_SAITHRIFT_BLDR_IMG); } || \
 	docker build \
 		-f dockerfiles/Dockerfile.saithrift-bldr \
 	    -t $(DOCKER_SAITHRIFT_BLDR_IMG) \
@@ -332,6 +348,9 @@ docker-saithrift-bldr:
 	    --build-arg hostname=$(DASH_HOST) \
 	    --build-arg available_processors=$(shell nproc) \
 		dockerfiles
+	[ -n $(DOCKER_SAITHRIFT_BLDR_IMG_CTAG) ] && \
+		docker tag $(DOCKER_SAITHRIFT_BLDR_IMG) \
+		$(DOCKER_SAITHRIFT_BLDR_IMG_NAME):$(DOCKER_SAITHRIFT_BLDR_IMG_CTAG)
 
 docker-pull-saithrift-bldr:
 	docker pull $(DOCKER_SAITHRIFT_BLDR_IMG)
@@ -339,10 +358,17 @@ docker-pull-saithrift-bldr:
 docker-publish-saithrift-bldr:
 	@echo "Publish $(DOCKER_SAITHRIFT_BLDR_IMG) - requires credentials, can only do from DASH repo, not a fork"
 	docker push $(DOCKER_SAITHRIFT_BLDR_IMG)
+	[ -n $(DOCKER_SAITHRIFT_BLDR_IMG_CTAG) ] && \
+		docker push $(DOCKER_SAITHRIFT_BLDR_IMG_NAME):$(DOCKER_SAITHRIFT_BLDR_IMG_CTAG)
 
 ###############################
 # Builder, has base packages to make client docker
+
+DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.saithrift-client-bldr | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_SAITHRIFT_CLIENT_BLDR_IMG = $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_NAME):$(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_TAG)
+
 docker-saithrift-client-bldr:
+	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG); } || \
 	docker build \
 		-f dockerfiles/Dockerfile.saithrift-client-bldr \
 	    -t $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG) \
@@ -353,6 +379,9 @@ docker-saithrift-client-bldr:
 	    --build-arg hostname=$(DASH_HOST) \
 	    --build-arg available_processors=$(shell nproc) \
 		./tests
+	[ -n $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_CTAG) ] && \
+		docker tag $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG) \
+		$(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_NAME):$(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_CTAG)
 
 docker-pull-saithrift-client-bldr:
 	docker pull $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG)
@@ -360,6 +389,8 @@ docker-pull-saithrift-client-bldr:
 docker-publish-saithrift-client-bldr:
 	@echo "Publish $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG) - requires credentials, can only do from DASH repo, not a fork"
 	docker push $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG)
+	[ -n $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_CTAG) ] && \
+		docker push $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_NAME):$(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_CTAG)
 
 ###############################
 
@@ -431,7 +462,11 @@ run-saithrift-client-bash:
 # 	    --build-arg available_processors=$(shell nproc) \
 # 		dockerfiles
 
+DOCKER_P4C_BMV2_IMG_TAG = $(shell cat dockerfiles/Dockerfile.p4c-bmv2 | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_P4C_BMV2_IMG = $(DOCKER_P4C_BMV2_IMG_NAME):$(DOCKER_P4C_BMV2_IMG_TAG)
+
 docker-dash-p4c:
+	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_P4C_BMV2_IMG); } || \
 	docker build \
 		-f dockerfiles/Dockerfile.p4c-bmv2 \
 	    -t $(DOCKER_P4C_BMV2_IMG) \
@@ -442,6 +477,8 @@ docker-dash-p4c:
 	    --build-arg hostname=$(DASH_HOST) \
 	    --build-arg available_processors=$(shell nproc) \
 		dockerfiles
+	[ -n $(DOCKER_P4C_BMV2_IMG_CTAG) ] && \
+		docker tag $(DOCKER_P4C_BMV2_IMG) $(DOCKER_P4C_BMV2_IMG_NAME):$(DOCKER_P4C_BMV2_IMG_CTAG)
 
 docker-pull-dash-p4c:
 	docker pull $(DOCKER_P4C_BMV2_IMG)
@@ -449,10 +486,16 @@ docker-pull-dash-p4c:
 docker-publish-dash-p4c:
 	@echo "Publish $(DOCKER_P4C_BMV2_IMG) - requires credentials, can only do from DASH repo, not a fork"
 	docker push $(DOCKER_P4C_BMV2_IMG)
+	[ -n $(DOCKER_P4C_BMV2_IMG_CTAG) ] && \
+		docker push $(DOCKER_P4C_BMV2_IMG_NAME):$(DOCKER_P4C_BMV2_IMG_CTAG)
 
 ###############################
 
+DOCKER_GRPC_IMG_TAG = $(shell cat dockerfiles/Dockerfile.grpc1.43.2 | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_GRPC_IMG = $(DOCKER_GRPC_IMG_NAME):$(DOCKER_GRPC_IMG_TAG)
+
 docker-dash-grpc:
+	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_GRPC_IMG); } || \
 	docker build \
 		-f dockerfiles/Dockerfile.grpc1.43.2 \
 	    -t $(DOCKER_GRPC_IMG) \
@@ -463,6 +506,7 @@ docker-dash-grpc:
 	    --build-arg hostname=$(DASH_HOST) \
 	    --build-arg available_processors=$(shell nproc) \
 		dockerfiles
+	[ -n $(DOCKER_GRPC_IMG_CTAG) ] && docker tag $(DOCKER_GRPC_IMG) $(DOCKER_GRPC_IMG_NAME):$(DOCKER_GRPC_IMG_CTAG)
 
 docker-pull-dash-grpc:
 	docker pull $(DOCKER_GRPC_IMG)
@@ -470,6 +514,7 @@ docker-pull-dash-grpc:
 docker-publish-dash-grpc:
 	@echo "Publish $(DOCKER_GRPC_IMG) - requires credentials, can only do from DASH repo, not a fork"
 	docker push $(DOCKER_GRPC_IMG)
+	[ -n $(DOCKER_GRPC_IMG_CTAG) ] && docker push $(DOCKER_GRPC_IMG_NAME):$(DOCKER_GRPC_IMG_CTAG)
 
 ###############################
 # BMV2-PKTGEN NETWORKING TARGETS
@@ -544,12 +589,21 @@ ifeq ($(SAI_CHALLENGER_TEST),)
 SAI_CHALLENGER_TEST := test_sai_vnet_*.py
 endif
 
+
+DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.saichallenger-client-bldr | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG = $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_NAME):$(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_TAG)
+
 docker-saichallenger-client-bldr:
-	cd $(SAI_CHALLENGER_PATH) && ./build.sh -i client
-	docker build \
-		-f dockerfiles/Dockerfile.saichallenger-client-bldr \
-		-t $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG) \
-		.
+	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG); } || \
+		{ pushd $(SAI_CHALLENGER_PATH) && ./build.sh -i client && popd; \
+		docker build \
+			-f dockerfiles/Dockerfile.saichallenger-client-bldr \
+			-t $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG) \
+			. ;\
+		}
+	[ -n $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_CTAG) ] && \
+		docker tag $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG) \
+		$(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_NAME):$(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_CTAG)
 
 docker-publish-saichallenger-client-bldr:
 	@echo "Publish $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG) - requires credentials, can only do from DASH repo, not a fork"

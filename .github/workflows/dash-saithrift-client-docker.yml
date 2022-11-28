@@ -31,14 +31,16 @@ jobs:
         working-directory: ./dash-pipeline
     steps:
     - uses: actions/checkout@v3
-    - name: Pull docker p4c image
-      run:  make docker-pull-dash-p4c
+    - name: Pull/Build docker p4c image
+      run:  make docker-dash-p4c
     - name: Build P4 software switch (bmv2) and P4Info
       run:  DOCKER_FLAGS=$docker_fg_flags make p4
     - name: Install SAI submodule
       run:  git submodule update --init
-    - name: Build docker saithrift-bldr image
+    - name: Pull/Build docker saithrift-bldr image
       run:  make docker-saithrift-bldr
+    - name: Pull/Build docker bmv2-bldr image
+      run:  make docker-bmv2-bldr
     - name: Generate SAI API
       run:  DOCKER_FLAGS=$docker_fg_flags make sai
     - name: Generate SAI-Thrift client and server code and libs

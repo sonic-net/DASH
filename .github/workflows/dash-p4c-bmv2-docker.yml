@@ -22,8 +22,6 @@ on:
 jobs:
   build:
     name: Build docker dash-p4c-bmv2 image
-    # Only run on forks (in main repo, run build/publish workflows instead)
-    if: github.repository != 'Azure/DASH'
     runs-on: ubuntu-20.04
     defaults:
       run:
@@ -32,3 +30,13 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build dash-p4c-bmv2 docker image
       run: make docker-dash-p4c
+
+    - uses: azure/docker-login@v1
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'Azure/DASH' }}
+      with:
+        login-server: sonicdash.azurecr.io
+        username: ${{ secrets.DASH_ACR_USERNAME }}
+        password: ${{ secrets.DASH_ACR_PASSWORD }}
+    - name: Publish dash-p4c-bmv2 docker image to ACR
+      run: make docker-publish-dash-p4c
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'Azure/DASH' }}
