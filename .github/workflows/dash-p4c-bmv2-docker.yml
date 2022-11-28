@@ -37,6 +37,6 @@ jobs:
         login-server: sonicdash.azurecr.io
         username: ${{ secrets.DASH_ACR_USERNAME }}
         password: ${{ secrets.DASH_ACR_PASSWORD }}
-    - name: Publish dash-bmv2-bldr image
-      run: make docker-publish-bmv2-bldr
+    - name: Publish dash-p4c-bmv2 docker image to ACR
+      run: make docker-publish-dash-p4c
       if: ${{ github.event_name != 'pull_request' && github.repository == 'Azure/DASH' }}
