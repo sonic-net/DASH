@@ -5,4 +5,4 @@ Tests with high-rate traffic and complex configuration to verify scaling real-wo
 
 | Folder/File | Description |
 | --- | --- |
-| [vnet2vnet](scale/vnet2vnet/README.md) | Scale DASH vnet2vnet Tests
+| [vnet2vnet](vnet2vnet/README.md) | Scale DASH vnet2vnet Tests
