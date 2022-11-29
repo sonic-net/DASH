@@ -25,7 +25,7 @@ DASH_HOST?=dash
 
 ENABLE_DOCKER_PULL ?= y
 
-# Include file defines DOCKER_GRPC_IMG
+# Include file defines DOCKER_GRPC_IMG_NAME and DOCKER_GRPC_IMG_CTAG
 include dockerfiles/DOCKER_GRPC_IMG.env
 
 # Slimmed-down version bmv2 backend only
@@ -33,18 +33,18 @@ include dockerfiles/DOCKER_GRPC_IMG.env
 include dockerfiles/DOCKER_P4C_BMV2_IMG.env
 
 # Builds sai-P4rt clients to run inside bmv2 process
-# include file defines DOCKER_BMV2_BLDR_IMG
+# include file defines DOCKER_BMV2_BLDR_IMG_NAME and DOCKER_BMV2_BLDR_IMG_CTAG
 include dockerfiles/DOCKER_BMV2_BLDR_IMG.env
 
 # Runs bmv2 process - consider slimmer if don't need sai/p4rt clients inside
 DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 
 # Compiles sai headers, libsai, saithrift server & client/server libs
-# include file defines DOCKER_SAITHRIFT_BLDR_IMG
+# include file defines DOCKER_SAITHRIFT_BLDR_IMG_NAME and DOCKER_SAITHRIFT_BLDR_IMG_CTAG
 include dockerfiles/DOCKER_SAITHRIFT_BLDR_IMG.env
 
 # Base image with test frameworks, DASH client libs not installed
-# include file defines DOCKER_SAITHRIFT_CLIENT_BLDR_IMG
+# include file defines DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_NAME and DOCKER_SAITHRIFT_CLIENT_BLDR_CTAG
 include dockerfiles/DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env
 
 # Client image built locally with saithrift client libs + PTF & Pytest frameworks
@@ -52,7 +52,7 @@ include dockerfiles/DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env
 DOCKER_SAITHRIFT_CLIENT_IMG ?= local/dash-saithrift-client:latest
 
 # Base image with test frameworks, not installed
-# include file defines DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG
+# include file defines DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_name and DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_CTAG
 include dockerfiles/DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG.env
 
 # Final SAIchallenger framework image with test frameworks, DASH client libs etc.
@@ -588,7 +588,6 @@ endif
 ifeq ($(SAI_CHALLENGER_TEST),)
 SAI_CHALLENGER_TEST := test_sai_vnet_*.py
 endif
-
 
 DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.saichallenger-client-bldr | sha1sum | awk '{print substr($$1,0,11);}')
 DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG = $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_NAME):$(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_TAG)
