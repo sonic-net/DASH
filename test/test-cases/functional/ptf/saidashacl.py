@@ -3,6 +3,8 @@ import copy
 from sai_thrift.sai_headers import *
 from sai_base_test import *
 
+from saidashvnet import VNetAPI
+
 
 class AclRuleTest(object):
     def __init__(self, saithrift, acl_group, protocol, sip, dip, priority, action, exp_receive):
@@ -63,19 +65,19 @@ class AclRuleTest(object):
         print("Acl test {} OK".format(self.meta))
 
 
-class TestSaiThrift_dash_acl(ThriftInterfaceDataPlane):
+class SaiThriftDashAclTest(VNetAPI):
     """ Test saithrift DASH ACL"""
 
     def create_entry(self, create_func, remove_func, entry, *args, **kwargs):
         status = create_func(self.client, entry, *args, **kwargs)
         assert (status == SAI_STATUS_SUCCESS)
-        self.teardown_stack.append((remove_func, entry))
+        self.add_teardown_obj(remove_func, (self.client, entry))
         return status
 
     def create_obj(self, create_func, remove_func, *args, **kwargs):
         obj = create_func(self.client, *args, **kwargs)
         assert (obj != SAI_NULL_OBJECT_ID)
-        self.teardown_stack.append((remove_func, obj))
+        self.add_teardown_obj(remove_func, (self.client, obj))
         return obj
 
     def setUpSwitch(self):
@@ -198,7 +200,7 @@ class TestSaiThrift_dash_acl(ThriftInterfaceDataPlane):
                           dip=self.dst_ca_ip, priority=2, action=SAI_DASH_ACL_RULE_ACTION_DENY, exp_receive=False))
 
     def setUp(self):
-        super(TestSaiThrift_dash_acl, self).setUp()
+        super(SaiThriftDashAclTest, self).setUp()
         self.cleaned_up = False
         self.teardown_stack = []
         self.tests = []
@@ -207,25 +209,13 @@ class TestSaiThrift_dash_acl(ThriftInterfaceDataPlane):
             self.setUpSwitch()
             self.setupTest()
         except AssertionError as ae:
-            self.clearup_objs()
+            self.destroy_teardown_obj()
             raise ae
 
     def runTest(self):
-        try:
-            for test in self.tests:
-                print("\n\n")
-                test.runTest()
-        except AssertionError as ae:
-            self.clearup_objs()
-            raise ae
-
-    def clearup_objs(self):
-        if self.cleaned_up:
-            return
-        for remove_func, obj in self.teardown_stack:
-            assert (remove_func(self.client, obj) == SAI_STATUS_SUCCESS)
-        self.cleaned_up = True
+        for test in self.tests:
+            print("\n\n")
+            test.runTest()
 
     def tearDown(self):
-        self.clearup_objs()
-        super(self.__class__, self).tearDown()
+        super(SaiThriftDashAclTest, self).tearDown()

@@ -37,7 +37,7 @@ class VNetObjects(SaiHelperSimplified):
 
     def destroy_teardown_obj(self):
         for obj_func, obj_args in self.teardown_objects:
-            obj_func(obj_args)
+            obj_func(*obj_args)
             self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
 
 
