@@ -48,16 +48,14 @@ include dockerfiles/DOCKER_SAITHRIFT_BLDR_IMG.env
 include dockerfiles/DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env
 
 # Client image built locally with saithrift client libs + PTF & Pytest frameworks
-# TODO: consider some other tagging scheme
 DOCKER_SAITHRIFT_CLIENT_IMG ?= local/dash-saithrift-client:latest
 
 # Base image with test frameworks, not installed
 # include file defines DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_name and DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_CTAG
 include dockerfiles/DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG.env
 
-# Final SAIchallenger framework image with test frameworks, DASH client libs etc.
-# include file defines DOCKER_SAI_CHALLENGER_CLIENT_IMG
-include dockerfiles/DOCKER_SAI_CHALLENGER_CLIENT_IMG.env
+# SAIChallenger Client image built locally with saithrift client libs + PTF & Pytest frameworks
+DOCKER_SAI_CHALLENGER_CLIENT_IMG ?= local/dash-saichallenger-client:latest
 
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
