@@ -124,7 +124,7 @@ DOCKER_RUN_SAITHRIFT_BLDR =\
 
 sai: sai-clean sai-headers sai-meta libsai
 
-sai-headers: p4 | SAI/SAI 
+sai-headers: p4 | SAI/SAI
 	@echo "Generate SAI library headers and implementation..."
 	mkdir -p SAI/lib && chmod -R o+w SAI && \
 	$(DOCKER_RUN) \
@@ -133,7 +133,7 @@ sai-headers: p4 | SAI/SAI
 		-w /SAI $(DOCKER_SAITHRIFT_BLDR_IMG) \
 	    ./generate_dash_api.sh
 
-sai-meta: 
+sai-meta:
 	@echo "Generate SAI metadata..."
 	# hack - remove scripts which cause Git ownership failures in CI pipelines
 	# We don't need them, they're to check that SAI headers didn't experience enum changes etc.
@@ -148,7 +148,7 @@ sai-meta:
 	    make
 
 # TODO - add SAI header dependencies
-libsai: 
+libsai:
 	@echo "build libsai.so..."
 	$(DOCKER_RUN) \
 		$(DOCKER_FLAGS) \
@@ -157,7 +157,7 @@ libsai:
 		$(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
-libsai-clean: 
+libsai-clean:
 	-rm -rf SAI/lib/*
 
 .PHONY:sai-clean
@@ -385,14 +385,14 @@ docker-publish-saithrift-client-bldr:
 		docker push $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_NAME):$(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_CTAG)
 
 ###############################
-		
+
 # Client image, rebuild any time SAI interface changes
 # TODO - add sai header (inc/ and experimental) dependencies
 docker-saithrift-client:
 	docker build \
 		-f dockerfiles/Dockerfile.saithrift-client \
 	    -t $(DOCKER_SAITHRIFT_CLIENT_IMG) \
-		.
+		..
 
 DOCKER_RUN_SAITHRIFT_CLIENT=\
 	docker run \
@@ -405,15 +405,15 @@ DOCKER_RUN_SAITHRIFT_CLIENT=\
 # Run "production" Pytests bundled inside docker
 run-saithrift-pytests:deploy-ixiac disable-ipv6
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
-	-w /tests/saithrift/pytest \
+	-w /ci-tests/saithrift/pytest \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
 	./run-saithrift-pytests.sh
 
 # Run "dev" tests mounted from host
 run-saithrift-dev-pytests:deploy-ixiac disable-ipv6
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
-	-v $(PWD)/tests/:/tests-dev/ \
-	-w /tests-dev/saithrift/pytest \
+	-v $(PWD)/tests/:/ci-tests-dev/ \
+	-w /ci-tests-dev/saithrift/pytest \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
 	./run-saithrift-pytests.sh
 
@@ -421,23 +421,23 @@ run-saithrift-dev-pytests:deploy-ixiac disable-ipv6
 # Note - if add ixia-c usage to PTF tests, add dependency deploy-ixiac
 run-saithrift-ptftests: disable-ipv6
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
-	-w /tests/saithrift/ptf \
+	-w /tests/ \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
-	./run-saithrift-ptftests.sh
+	./run-functional-tests.sh
 
 # Run "dev" PTF tests mounted from host
 # Note - if add ixia-c usage to PTF tests, add dependency deploy-ixiac
 run-saithrift-dev-ptftests: disable-ipv6
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
-	-v $(PWD)/tests/:/tests-dev/ \
-	-w /tests-dev/saithrift/ptf \
+	-v $(PWD)/../test/test-cases/:/tests-dev/ \
+	-w /tests-dev/ \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
-	./run-saithrift-ptftests.sh
+	./run-functional-tests.sh
 
 run-saithrift-client-bash:
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
-	-v $(PWD)/tests/:/tests-dev/ \
-	-w /tests-dev/saithrift \
+	-v $(PWD)/../test/test-cases/:/tests-dev/ \
+	-w /tests-dev/ \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
 	/bin/bash
 
