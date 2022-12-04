@@ -16,8 +16,11 @@
 Thrift SAI interface ENI tests
 """
 
-from sai_thrift.sai_headers import *
+from unittest import skipIf
+
+from ptf.testutils import test_param_get
 from sai_dash_utils import *
+from sai_thrift.sai_headers import *
 
 
 class CreateDeleteEniTest(VnetAPI):
@@ -42,29 +45,41 @@ class CreateDeleteEniTest(VnetAPI):
         self.sip = '10.0.1.2'  # PA validation entry SIP address
 
     def runTest(self):
-        # All tests are interdependent,
+        # Not all tests are interdependent,
         # so they must be run in the following sequence:
+
+        # Create verification
         self.createInOutAclGroupsTest()
         self.createVnetTest()
         self.createDirectionLookupTest()
         self.createEniTest()
         self.createEniEtherAddressMapTest()
-        self.createInboundRoutingEntryTest()
-        self.createPaValidationTest()
+        if not test_params_get('bmv2'):
+            # Issue #233
+            self.createInboundRoutingEntryTest()
+            self.createPaValidationTest()
         self.createOutboundRoutingEntryTest()
         self.createCa2PaEntryTest()
-        self.dashAclGroupAttributesTest()
-        self.vnetAttributesTest()
-        self.directionLookupAttributesTest()
-        self.eniGetAttributesTest()
-        self.eniSetAndGetAttributesTest()
-        self.eniEtherAddressMapAttributesTest()
-        self.inboundRoutingEntryAttributesTest()
-        self.paValidationEntryAttributesTest()
-        self.outboundRoutingEntryAttributesTest()
-        self.outboundCa2PaEntryAttributesTest()
-        self.deleteVnetWhenMapExistTest()
-        self.deleteEniWhenMapExistTest()
+
+        # Attributes verification
+        if not test_params_get('bmv2'):
+            # TODO: add issue
+            self.dashAclGroupAttributesTest()
+            self.vnetAttributesTest()
+            self.directionLookupAttributesTest()
+            self.eniGetAttributesTest()
+            self.eniSetAndGetAttributesTest()
+            self.eniEtherAddressMapAttributesTest()
+            self.inboundRoutingEntryAttributesTest()
+            self.paValidationEntryAttributesTest()
+            self.outboundRoutingEntryAttributesTest()
+            self.outboundCa2PaEntryAttributesTest()
+
+        # Remove verification
+        if not test_params_get('bmv2'):
+            # TODO: add issue
+            self.deleteVnetWhenMapExistTest()
+            self.deleteEniWhenMapExistTest()
         # verify all entries can be removed with status success
         self.destroy_teardown_obj()
         # clear teardown_objects not to remove all entries again in tearDown
@@ -954,6 +969,7 @@ class CreateDeleteEniTest(VnetAPI):
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
 
 
+@skipIf(test_param_get('bmv2'), "Blocked by Issue #233. Inbound Routing is not supported in BMv2.")
 class EniScaleTest(VnetAPI):
     """
     Verifies ENI scaling:
@@ -1063,7 +1079,7 @@ class EniScaleTest(VnetAPI):
                                                 lpm="192.168.1.0/24")
 
 
-@group("draft")
+@skipIf(test_param_get('bmv2'), "Blocked by Issue #233. Inbound Routing is not supported in BMv2.")
 class CreateTwoSameEnisNegativeTest(VnetAPI):
     """
     Verifies failure in case of creation the same ENIs in one VNET
