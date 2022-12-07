@@ -43,6 +43,13 @@ jobs:
       run:  DOCKER_FLAGS=$docker_fg_flags make saithrift-server
     - name: Build SAI-Challenger client builder base docker image
       run:  DOCKER_FLAGS=$docker_fg_flags make docker-saichallenger-client-bldr
+      
+    - uses: azure/docker-login@v1
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'Azure/DASH' }}
+      with:
+        login-server: sonicdash.azurecr.io
+        username: ${{ secrets.DASH_ACR_USERNAME }}
+        password: ${{ secrets.DASH_ACR_PASSWORD }}
     - name: Publish SAI-Challenger client builder base docker image
       run:  make docker-publish-saichallenger-client-bldr
       if: ${{ github.event_name != 'pull_request' && github.repository == 'Azure/DASH' }}
