@@ -134,6 +134,6 @@ class TestSaiVnetOutbound:
         conf.mergeParams(TEST_VNET_OUTBOUND_CONFIG_SCALE)
         conf.generate()
         
-        cleanup_commands = [{'name': vip['name'], 'op': 'remove'} for vip in conf.items()]
+        cleanup_commands = [{'name': cmd['name'], 'op': 'remove'} for cmd in conf.items()]
         cleanup_commands = reversed(cleanup_commands)
         result = [*dpu.process_commands(cleanup_commands)]
