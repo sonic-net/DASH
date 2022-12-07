@@ -76,48 +76,18 @@ TEST_VNET_OUTBOUND_CONFIG_SCALE = {
 }
 
 
-dpu_gen = 'ON_THE_FLY'
+
 class TestSaiVnetOutbound:
 
     def test_create_vnet_config(self, dpu):
         """Generate and apply configuration"""
 
         results = []
-        out = "v_vnet_outbound_setup_commands_scale.json"        
-        if dpu_gen == 'ON_THE_FLY':
-            conf = dpugen.sai.SaiConfig()
-            #sa.common_parse_args(conf)
-            conf.mergeParams(TEST_VNET_OUTBOUND_CONFIG_SCALE)
-            conf.generate()
-            for item in conf.items():
-                #pprint(item)
-                results.append(dpu.command_processor.process_command(item))
-            
-            
-        elif dpu_gen == 'STATIC_JSON':
-            with (current_file_dir / 'vnet_outbound_setup_commands_scale.json').open(mode='r') as config_file:
-                setup_commands = json.load(config_file)
-            result = [*dpu.process_commands(setup_commands)]
-
-        
-        elif dpu_gen == 'GENERATED_JSON':
-            # TODO: make this work
-            import os
-            conf = dpugen.sai.SaiConfig()
-            #sa.common_parse_args(conf)
-            conf.mergeParams(TEST_VNET_OUTBOUND_CONFIG_SCALE)
-            conf.generate()
-            conf.write2File('json',os.path.join(current_file_dir,out))
-            #import pdb;pdb.set_trace()
-            with (current_file_dir / out).open(mode='r') as config_file:
-                setup_commands = json.load(config_file)
-            result = [*dpu.process_commands(setup_commands)]
-
-        else:
-            raise Exception('unsuported option')
-        # print("\n======= SAI commands RETURN values =======")
-        # for cmd, res in zip(setup_commands, result):
-        #     print(cmd['name'], cmd['type'], res)
+        conf = dpugen.sai.SaiConfig()
+        #sa.common_parse_args(conf)
+        conf.mergeParams(TEST_VNET_OUTBOUND_CONFIG_SCALE)
+        conf.generate()
+        result = [*dpu.process_commands( (conf.items()) )]
 
     @pytest.mark.snappi
     def test_run_traffic_check_fixed_packets(self, dpu, dataplane):
@@ -155,29 +125,15 @@ class TestSaiVnetOutbound:
                                                                 name="Custom flow group", show=True)[0],
                     "Test", timeout_seconds=test_duration + 1)
 
-    def test_remove_vnet_config(self, confgen, dpu, dataplane):
+    def test_remove_vnet_config(self, dpu, dataplane):
         """
         Generate and remove configuration
         We generate configuration on remove stage as well to avoid storing giant objects in memory.
         """
-
-        if dpu_gen:
-            confgen.mergeParams(TEST_VNET_OUTBOUND_CONFIG_SCALE)
-            confgen.generate()
-            results = []
-            for item in confgen.items():
-                item['op'] = 'remove'
-                pprint(item)
-                results.append(dpu.command_processor.process_command(item))
-
-        else:
-            with (current_file_dir / 'vnet_outbound_setup_commands_scale.json').open(mode='r') as config_file:
-                setup_commands = json.load(config_file)
-            cleanup_commands = []
-            for cmd in reversed(setup_commands):
-                cleanup_commands.append({'name': cmd['name'], 'op': 'remove'})
-
+        conf = dpugen.sai.SaiConfig()
+        conf.mergeParams(TEST_VNET_OUTBOUND_CONFIG_SCALE)
+        conf.generate()
+        
+        cleanup_commands = [{'name': vip['name'], 'op': 'remove'} for vip in conf.items()]
+        cleanup_commands = reversed(cleanup_commands)
         result = [*dpu.process_commands(cleanup_commands)]
-        # print("\n======= SAI commands RETURN values =======")
-        # for cmd, res in zip(cleanup_commands, result):
-        #     print(cmd['name'], res)
