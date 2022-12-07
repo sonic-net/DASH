@@ -11,7 +11,8 @@ on:
       - 'test/**.sh'
       - 'test/**.yml'
       - 'dash-pipeline/**'
-      - '!dash-pipeline/docker files/Dockerfile.*'
+      - '!dash-pipeline/dockerfiles/Dockerfile.*'
+      - 'dash-pipeline/dockerfiles/*.env'
       - '!dash-pipeline/.dockerignore'
       - '!dash-pipeline/**.md'
       - '!dash-pipeline/**.svg'
@@ -27,7 +28,8 @@ on:
       - 'test/**.sh'
       - 'test/**.yml'
       - 'dash-pipeline/**'
-      - '!dash-pipeline/docker files/Dockerfile.*'
+      - '!dash-pipeline/dockerfiles/Dockerfile.*'
+      - 'dash-pipeline/dockerfiles/*.env'
       - '!dash-pipeline/.dockerignore'
       - '!dash-pipeline/**.md'
       - '!dash-pipeline/**.svg'
@@ -82,4 +84,10 @@ jobs:
       run:  DOCKER_FLAGS=$docker_fg_flags make deploy-ixiac
     - name: Run Pytests
       run:  DOCKER_FLAGS=$docker_fg_root_flags make run-saithrift-pytests
+    - name: Pull/Build SAI-Challenger client builder docker image
+      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saichallenger-client-bldr
+    - name: Build SAI-Challenger client docker image
+      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saichallenger-client
+    - name: Run SAI-Challenger Tests
+      run:  DOCKER_FLAGS=$docker_fg_root_flags make run-saichallenger-tests
       

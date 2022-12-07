@@ -4,9 +4,9 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
 
 # "All" type targets for convenience
-all:p4 sai saithrift-server docker-saithrift-client test
+all:p4 sai saithrift-server docker-saithrift-client docker-saichallenger-client test
 
-run-all-tests:run-libsai-test run-saithrift-client-tests
+run-all-tests:run-libsai-test run-saithrift-client-tests run-saichallenger-tests
 run-saithrift-client-tests: run-saithrift-ptftests run-saithrift-pytests
 run-saithrift-client-dev-tests: run-saithrift-dev-ptftests run-saithrift-dev-pytests
 
@@ -14,7 +14,7 @@ run-saithrift-client-dev-tests: run-saithrift-dev-ptftests run-saithrift-dev-pyt
 clean: kill-all p4-clean sai-clean test-clean network-clean saithrift-server-clean
 	rm -rf $(P4_OUTDIR)
 
-kill-all: kill-saithrift-server kill-switch undeploy-ixiac
+kill-all: kill-saithrift-server kill-switch undeploy-ixiac kill-saichallenger-client
 
 PWD := $(realpath $(mkfile_dir))
 DASH_USER ?=dashuser
@@ -25,7 +25,7 @@ DASH_HOST?=dash
 
 ENABLE_DOCKER_PULL ?= y
 
-# Include file defines DOCKER_GRPC_IMG
+# Include file defines DOCKER_GRPC_IMG_NAME and DOCKER_GRPC_IMG_CTAG
 include dockerfiles/DOCKER_GRPC_IMG.env
 
 # Slimmed-down version bmv2 backend only
@@ -33,23 +33,29 @@ include dockerfiles/DOCKER_GRPC_IMG.env
 include dockerfiles/DOCKER_P4C_BMV2_IMG.env
 
 # Builds sai-P4rt clients to run inside bmv2 process
-# include file defines DOCKER_BMV2_BLDR_IMG
+# include file defines DOCKER_BMV2_BLDR_IMG_NAME and DOCKER_BMV2_BLDR_IMG_CTAG
 include dockerfiles/DOCKER_BMV2_BLDR_IMG.env
 
 # Runs bmv2 process - consider slimmer if don't need sai/p4rt clients inside
 DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 
 # Compiles sai headers, libsai, saithrift server & client/server libs
-# include file defines DOCKER_SAITHRIFT_BLDR_IMG
+# include file defines DOCKER_SAITHRIFT_BLDR_IMG_NAME and DOCKER_SAITHRIFT_BLDR_IMG_CTAG
 include dockerfiles/DOCKER_SAITHRIFT_BLDR_IMG.env
 
 # Base image with test frameworks, DASH client libs not installed
-# include file defines DOCKER_SAITHRIFT_CLIENT_BLDR_IMG
+# include file defines DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_NAME and DOCKER_SAITHRIFT_CLIENT_BLDR_CTAG
 include dockerfiles/DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env
 
 # Client image built locally with saithrift client libs + PTF & Pytest frameworks
-# TODO: consider some other tagging scheme
 DOCKER_SAITHRIFT_CLIENT_IMG ?= local/dash-saithrift-client:latest
+
+# Base image with test frameworks, not installed
+# include file defines DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_name and DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_CTAG
+include dockerfiles/DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG.env
+
+# SAIChallenger Client image built locally with saithrift client libs + PTF & Pytest frameworks
+DOCKER_SAI_CHALLENGER_CLIENT_IMG ?= local/dash-saichallenger-client:latest
 
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
@@ -557,6 +563,91 @@ deploy-ixiac:
 undeploy-ixiac:
 	cd ../test/third-party/traffic_gen && ./undeploy_ixiac.sh
 
+###############################
+# SAI-CHALLENGER TARGETS
+###############################
+
+SAI_CHALLENGER_PATH = $(PWD)/../test/SAI-Challenger
+
+CONTAINER_SAI_CHALLENGER_CLIENT_NAME = dash-saichallenger-client-$(USER)
+
+# Add passing parameters to the run-saichallenger-tests target.
+ifeq (run-saichallenger-tests,$(firstword $(MAKECMDGOALS)))
+  SAI_CHALLENGER_SETUP_FILE := $(wordlist 2, 2, $(MAKECMDGOALS))
+  SAI_CHALLENGER_TEST := $(wordlist 3, 3, $(MAKECMDGOALS))
+  $(eval $(SAI_CHALLENGER_SETUP_FILE):;@:)
+  $(eval $(SAI_CHALLENGER_TEST):;@:)
+endif
+# If setup file's isn't passed, set it to the default.
+ifeq ($(SAI_CHALLENGER_SETUP_FILE),)
+SAI_CHALLENGER_SETUP_FILE := sai_dpu_client_server_snappi.json
+endif
+# If test's name isn't passed, set it to the default.
+ifeq ($(SAI_CHALLENGER_TEST),)
+SAI_CHALLENGER_TEST := test_sai_vnet_*.py
+endif
+
+DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.saichallenger-client-bldr | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG = $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_NAME):$(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_TAG)
+
+docker-saichallenger-client-bldr:
+	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG); } || \
+		{ pushd $(SAI_CHALLENGER_PATH) && ./build.sh -i client && popd; \
+		docker build \
+			-f dockerfiles/Dockerfile.saichallenger-client-bldr \
+			-t $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG) \
+			. ;\
+		}
+	[ -n $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_CTAG) ] && \
+		docker tag $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG) \
+		$(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_NAME):$(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_CTAG)
+
+docker-publish-saichallenger-client-bldr:
+	@echo "Publish $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG)
+
+docker-pull-saichallenger-client-bldr:
+	docker pull $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG)
+
+docker-saichallenger-client:
+	cd $(SAI_CHALLENGER_PATH) && ./build.sh -i client
+	docker build \
+		-f dockerfiles/Dockerfile.saichallenger-client \
+		-t $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
+		.
+
+DOCKER_RUN_SAI_CHALLENGER_CLIENT=docker run \
+	-v $(SAI_CHALLENGER_PATH):/sai-challenger \
+	-v $(SAI_CHALLENGER_PATH)/../test-cases/scale/saic/:/sai-challenger/dash_tests \
+	-v $(PWD)/../:/dash \
+	--cap-add=NET_ADMIN \
+	--device /dev/net/tun:/dev/net/tun \
+	--rm \
+	--network=host \
+	--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
+
+run-saichallenger-client: deploy-ixiac
+	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
+	-d \
+	--name $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME) \
+	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG)
+
+run-saichallenger-client-bash: deploy-ixiac
+	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
+	-w /sai-challenger/dash_tests \
+	$(DOCKER_FLAGS) \
+	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
+	/bin/bash
+
+kill-saichallenger-client:
+	-docker kill $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
+
+run-saichallenger-tests: deploy-ixiac
+	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
+	-w /sai-challenger/dash_tests \
+	$(DOCKER_FLAGS) \
+	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
+	./run_vnet_tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
 
 ###############################
 # ENVIRONMENT SETUP TARGETS
