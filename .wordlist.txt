@@ -588,6 +588,7 @@ vcpus
 veth
 VFP
 vip
+vips
 VIP
 virsh
 virt
