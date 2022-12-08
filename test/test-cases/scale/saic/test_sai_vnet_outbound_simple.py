@@ -118,17 +118,14 @@ TEST_VNET_OUTBOUND_CONFIG = {
 }
 
 
+@pytest.mark.ptf
+@pytest.mark.snappi
 class TestSaiVnetOutbound:
 
-    def test_vnet_inbound_simple_create(self, confgen, dpu):
+    @pytest.mark.ptf
+    @pytest.mark.snappi
+    def test_vnet_inbound_simple_create(self, dpu):
         """Generate and apply configuration"""
-
-        # confgen.mergeParams(TEST_VNET_OUTBOUND_CONFIG)
-        # confgen.generate()
-        # results = []
-        # for item in confgen.items():
-        #     pprint(item)
-        #     results.append(dpu.command_processor.process_command(item))
 
         with (current_file_dir / 'vnet_outbound_setup_commands_simple.json').open(mode='r') as config_file:
             setup_commands = json.load(config_file)
@@ -275,16 +272,10 @@ class TestSaiVnetOutbound:
                                                                 name="Custom flow group", show=True)[0],
                     "Test", timeout_seconds=test_duration + 1)
 
-    def test_vnet_inbound_simple_remove(self, confgen, dpu):
+    @pytest.mark.ptf
+    @pytest.mark.snappi
+    def test_vnet_inbound_simple_remove(self, dpu):
         """Verify configuration removal"""
-
-        # confgen.mergeParams(TEST_VNET_OUTBOUND_CONFIG)
-        # confgen.generate()
-        # results = []
-        # for item in confgen.items():
-        #     item['op'] = 'remove'
-        #     pprint(item)
-        #     results.append(dpu.command_processor.process_command(item))
 
         with (current_file_dir / 'vnet_outbound_setup_commands_simple.json').open(mode='r') as config_file:
             setup_commands = json.load(config_file)
