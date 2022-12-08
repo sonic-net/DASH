@@ -4,12 +4,6 @@ from pprint import pprint
 
 import pytest
 import saichallenger.dataplane.snappi.snappi_traffic_utils as stu
-from saichallenger.dataplane.ptf_testutils import (send_packet,
-                                                   simple_udp_packet,
-                                                   simple_vxlan_packet,
-                                                   verify_no_other_packets,
-                                                   verify_packet)
-
 import dash_helper.vnet2vnet_helper as dh
 
 current_file_dir = Path(__file__).parent
@@ -82,12 +76,10 @@ class TestSaiVnetOutbound:
     def test_create_vnet_config(self, dpu):
         """Generate and apply configuration"""
 
-        results = []
         conf = dpugen.sai.SaiConfig()
-        #sa.common_parse_args(conf)
         conf.mergeParams(TEST_VNET_OUTBOUND_CONFIG_SCALE)
         conf.generate()
-        result = [*dpu.process_commands( (conf.items()) )]
+        results = [*dpu.process_commands( (conf.items()) )]
 
     @pytest.mark.snappi
     def test_run_traffic_check_fixed_packets(self, dpu, dataplane):
@@ -136,4 +128,4 @@ class TestSaiVnetOutbound:
         
         cleanup_commands = [{'name': cmd['name'], 'op': 'remove'} for cmd in conf.items()]
         cleanup_commands = reversed(cleanup_commands)
-        result = [*dpu.process_commands(cleanup_commands)]
+        results = [*dpu.process_commands(cleanup_commands)]
