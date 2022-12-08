@@ -1,15 +1,8 @@
 import logging
 import pytest
 
-from dpugen import saigen
-from dpugen.saigen.confbase import ConfBase
-
-# import sys
-# sys.path.insert(0, '/sai-challenger/common')  # Needed for correct load_module
-
 from saichallenger.common.sai_dpu import SaiDpu
 from saichallenger.common.sai_environment import init_setup
-
 
 def pytest_addoption(parser):
     parser.addoption("--traffic", action="store_true", default=False, help="run tests with traffic")
