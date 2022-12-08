@@ -3,7 +3,7 @@ import copy
 from sai_thrift.sai_headers import *
 from sai_base_test import *
 
-from saidashvnet import VNetAPI
+from sai_dash_utils import VnetAPI
 
 
 class AclRuleTest(object):
@@ -65,7 +65,7 @@ class AclRuleTest(object):
         print("Acl test {} OK".format(self.meta))
 
 
-class SaiThriftDashAclTest(VNetAPI):
+class SaiThriftDashAclTest(VnetAPI):
     """ Test saithrift DASH ACL"""
 
     def create_entry(self, create_func, remove_func, entry, *args, **kwargs):
