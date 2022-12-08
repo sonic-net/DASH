@@ -114,7 +114,7 @@ TEST_VNET_INBOUND_CONFIG = {
 
 class TestSaiVnetInbound:
 
-    def test_vnet_inbound_create(self, confgen, dpu):
+    def test_vnet_inbound_create(self, dpu):
         """Test configuration create"""
 
         # confgen.mergeParams(TEST_VNET_INBOUND_CONFIG)
@@ -173,7 +173,7 @@ class TestSaiVnetInbound:
         print("\nVerifying packet...\n", vxlan_exp_pkt.__repr__())
         verify_packet(dataplane, vxlan_exp_pkt, 1)
 
-    def test_vnet_inbound_remove(self, confgen, dpu):
+    def test_vnet_inbound_remove(self, dpu):
         """Test configuration remove"""
 
         # confgen.mergeParams(TEST_VNET_INBOUND_CONFIG)
