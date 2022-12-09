@@ -1,15 +1,35 @@
-import json
+#!/usr/bin/python3
+#
+# Pytest case which can be run as a normal pytest or as standalone executable, to dump generated configurations.
+#
+# PyTest:
+# =======
+# 
+# Note, not all tests involve sending traffic, for example setup/teardown of DUT configurations,
+# so PTF or snappi may not be relevant. Such cases are often marked for both dataplanes.
+#
+# run snappi-enabled tests using snappi dataplane (e.g. ixia-c pktgen):
+#   PYTHONPATH=. pytest -sv --setup sai_dpu_client_server_snappi.json -m snappi <this-filename> 
+# run PTF-enabled tests using snappi test fixture (e.g. ixia-c pktgen)
+#   PYTHONPATH=. pytest -sv --setup sai_dpu_client_server_snappi.json -m ptf <this-filename>
+# run PTF-enabled tests using PTF dataplane (e.g. scapy)
+#   PYTHONPATH=. pytest -sv --setup sai_dpu_client_server_ptf.json -m ptf <this-filename>
+#   
+# NOT SUPPORTED: run snappi-capable tests using PTF dataplane (PTF can't support snappi at this writing)
+#   PYTHONPATH=. pytest -sv --setup sai_dpu_client_server_ptf.json -m snappi <this-filename>
+#
+# Standalone:
+# <this-filename> -h  # Print help
+# <this-filename> -a  # Dump create & remove SAI records as JSON to stdout
+# <this-filename> -c  # Dump create SAI records as JSON to stdout
+# <this-filename> -r  # Dump create SAI records as JSON to stdout
+#
+import json, argparse
 from pathlib import Path
 from pprint import pprint
 
 import pytest
 import saichallenger.dataplane.snappi.snappi_traffic_utils as stu
-from saichallenger.dataplane.ptf_testutils import (send_packet,
-                                                   simple_udp_packet,
-                                                   simple_vxlan_packet,
-                                                   verify_no_other_packets,
-                                                   verify_packet)
-
 import dash_helper.vnet2vnet_helper as dh
 
 current_file_dir = Path(__file__).parent
@@ -76,18 +96,31 @@ TEST_VNET_OUTBOUND_CONFIG_SCALE = {
 }
 
 
-
 class TestSaiVnetOutbound:
-
-    def test_create_vnet_config(self, dpu):
-        """Generate and apply configuration"""
-
-        results = []
+    def make_create_vnet_config(self):
+        """ Generate a configuration
+            returns iterator (generator) of SAI records
+        """
         conf = dpugen.sai.SaiConfig()
-        #sa.common_parse_args(conf)
         conf.mergeParams(TEST_VNET_OUTBOUND_CONFIG_SCALE)
         conf.generate()
-        result = [*dpu.process_commands( (conf.items()) )]
+        return conf.items()
+
+    def make_remove_vnet_config(self):
+        """ Generate a configuration to remove entries
+            returns iterator (generator) of SAI records
+        """
+        cleanup_commands = [{'name': cmd['name'], 'op': 'remove'} for cmd in self.make_create_vnet_config()]
+        cleanup_commands = reversed(cleanup_commands)
+        for cmd in cleanup_commands:
+            yield cmd
+        return
+
+    @pytest.mark.ptf
+    @pytest.mark.snappi
+    def test_create_vnet_config(self, dpu):
+        """Generate and apply configuration"""
+        results = [*dpu.process_commands( (self.make_create_vnet_config()) )]
 
     @pytest.mark.snappi
     def test_run_traffic_check_fixed_packets(self, dpu, dataplane):
@@ -125,15 +158,35 @@ class TestSaiVnetOutbound:
                                                                 name="Custom flow group", show=True)[0],
                     "Test", timeout_seconds=test_duration + 1)
 
+    @pytest.mark.ptf
+    @pytest.mark.snappi
     def test_remove_vnet_config(self, dpu, dataplane):
         """
         Generate and remove configuration
         We generate configuration on remove stage as well to avoid storing giant objects in memory.
         """
-        conf = dpugen.sai.SaiConfig()
-        conf.mergeParams(TEST_VNET_OUTBOUND_CONFIG_SCALE)
-        conf.generate()
-        
-        cleanup_commands = [{'name': cmd['name'], 'op': 'remove'} for cmd in conf.items()]
-        cleanup_commands = reversed(cleanup_commands)
-        result = [*dpu.process_commands(cleanup_commands)]
+        results = [*dpu.process_commands( (self.make_remove_vnet_config()) )]
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='DASH SAI Config Generator for vnet outbound')
+    parser.add_argument('-a', action='store_true', help='Generate all SAI records as JSON to stdout')
+    parser.add_argument('-c', action='store_true', help='Generate "create" SAI records as JSON to stdout')
+    parser.add_argument('-r', action='store_true', help='Generate "remove"" SAI records as JSON to stdout')
+
+    args = parser.parse_args()
+
+    if not args.a and not args.c and not args.r:
+        # must provide at least one flag
+        print ("\n*** Please specify at least one option flag from [acr] to generate output ***\n", file=sys.stderr)
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+
+    if args.a or args.c:
+        print(json.dumps([cmd for cmd in (TestSaiVnetOutbound().make_create_vnet_config())],
+                         indent=2))
+
+    if args.a or args.r:
+        print(json.dumps([cmd for cmd in (TestSaiVnetOutbound().make_remove_vnet_config())],
+                         indent=2))
+
