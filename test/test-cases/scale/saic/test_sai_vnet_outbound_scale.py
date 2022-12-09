@@ -1,10 +1,14 @@
 #!/usr/bin/python3
 #
-# Pytest case can be run as normal pytest or as standalone executable to dump configurations
+# Pytest case which can be run as a normal pytest or as standalone executable, to dump generated configurations.
 #
 # PyTest:
 # =======
-# run snappi-enabled tests using snappi dataplane (e.g. ixia-c pktgen)
+# 
+# Note, not all tests involve sending traffic, for example setup/teardown of DUT configurations,
+# so PTF or snappi may not be relevant. Such cases are often marked for both dataplanes.
+#
+# run snappi-enabled tests using snappi dataplane (e.g. ixia-c pktgen):
 #   PYTHONPATH=. pytest -sv --setup sai_dpu_client_server_snappi.json -m snappi <this-filename> 
 # run PTF-enabled tests using snappi test fixture (e.g. ixia-c pktgen)
 #   PYTHONPATH=. pytest -sv --setup sai_dpu_client_server_snappi.json -m ptf <this-filename>
@@ -13,7 +17,7 @@
 #   
 # NOT SUPPORTED: run snappi-capable tests using PTF dataplane (PTF can't support snappi at this writing)
 #   PYTHONPATH=. pytest -sv --setup sai_dpu_client_server_ptf.json -m snappi <this-filename>
-#   
+#
 # Standalone:
 # <this-filename> -h  # Print help
 # <this-filename> -a  # Dump create & remove SAI records as JSON to stdout
