@@ -1,0 +1,62 @@
+[
+  {
+    "name": "outbound_ca_to_pa_#2",
+    "op": "remove"
+  },
+  {
+    "name": "outbound_ca_to_pa_#1",
+    "op": "remove"
+  },
+  {
+    "name": "outbound_routing_#6000",
+    "op": "remove"
+  },
+  {
+    "name": "outbound_routing_#5000",
+    "op": "remove"
+  },
+  {
+    "name": "eni_ether_address_map_#2",
+    "op": "remove"
+  },
+  {
+    "name": "eni_ether_address_map_#1",
+    "op": "remove"
+  },
+  {
+    "name": "eni_#6000",
+    "op": "remove"
+  },
+  {
+    "name": "eni_#5000",
+    "op": "remove"
+  },
+  {
+    "name": "vnet_#6001",
+    "op": "remove"
+  },
+  {
+    "name": "vnet_#6000",
+    "op": "remove"
+  },
+  {
+    "name": "vnet_#5001",
+    "op": "remove"
+  },
+  {
+    "name": "vnet_#5000",
+    "op": "remove"
+  },
+  {
+    "name": "direction_lookup_entry_#6000",
+    "op": "remove"
+  },
+  {
+    "name": "direction_lookup_entry_#5000",
+    "op": "remove"
+  },
+  {
+    "name": "vip_#1",
+    "op": "remove"
+  }
+]
