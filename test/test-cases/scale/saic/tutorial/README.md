@@ -12,7 +12,7 @@
 
 
 ## vnet_outbound_scale_config - JSON files
-To create JSON files for the examples which load scaled VNET configurations from files, we actually use the test_sai_vnet_outbound_small_scale_config_gen.py](test_sai_vnet_outbound_small_scale_config_gen) test-case in comand-line mode to generate the JSON as follows:
+To create JSON files for the examples which load scaled VNET configurations from files, we actually use the test_sai_vnet_outbound_small_scale_config_gen.py](test_sai_vnet_outbound_small_scale_config_gen) test-case in command-line mode to generate the JSON as follows:
 
 This generates JSON containing SAI records to create the vnet config:
 ```
