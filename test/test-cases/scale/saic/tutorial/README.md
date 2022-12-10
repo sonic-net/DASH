@@ -21,13 +21,13 @@ For example, we use the [test_sai_vnet_outbound_small_scale_config_gen.py](test_
 * `sai_vnet_outbound_small_scale_config_remove_gen.json`
 
 ## Using a Pytest in command-line mode to generate JSON
-Some of the Pytest scripts have a command-line mode. (Check the files for a `__main__` section.) THIs is useful to create persistent copies of generated configurations, or simply to examine the configuration and make adjustments during development. Each file has a `-h` option to show usage and available options.
+Some of the Pytest scripts have a command-line mode. (Check the files for a `__main__` section.) This is useful to create persistent copies of generated configurations, or simply to examine the configuration and make adjustments during development. Each file has a `-h` option to show usage and available options.
 
 To generate JSON containing SAI records to **create** the vnet config and redirect to a file:
 ```
 PYTHONPATH=.. test_sai_vnet_outbound_small_scale_config_gen.py -c > sai_vnet_outbound_small_scale_config_create_gen.json
 ```
-This generates JSON containing SAI records to **remove** the vnet config and redirect to a file:
+To generate JSON containing SAI records to **remove** the vnet config and redirect to a file:
 ```
 PYTHONPATH=.. test_sai_vnet_outbound_small_scale_config_gen.py -r > sai_vnet_outbound_small_scale_config_remove_gen.json
 ```
