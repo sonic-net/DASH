@@ -7,6 +7,7 @@ on:
       - '.github/workflows/dash-saichallenger-client-bldr-docker.yml'
       - 'dash-pipeline/Makefile'
       - 'dash-pipeline/dockerfiles/Dockerfile.saichallenger-client-bldr'
+      - 'dash-pipeline/dockerfiles/DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG.env'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
@@ -15,6 +16,7 @@ on:
       - '.github/workflows/dash-saichallenger-client-bldr-docker.yml'
       - 'dash-pipeline/Makefile'
       - 'dash-pipeline/dockerfiles/Dockerfile.saichallenger-client-bldr'
+      - 'dash-pipeline/dockerfiles/DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG.env'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   workflow_dispatch:
