@@ -157,6 +157,8 @@ downcasting
 DPDK
 DPU
 dpu
+dpugen
+DPUGEN
 DPUControlMsgs
 DPUs
 drawio
