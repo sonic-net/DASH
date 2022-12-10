@@ -8,6 +8,7 @@
     - [Using a Pytest in command-line mode to generate JSON](#using-a-pytest-in-command-line-mode-to-generate-json)
 
 # Tutorial - Writing DASH Pytests using SAI Challenger and `dpugen`
+This document takes you through several aspects of writing  using the [SAI Challenger](https://github.com/opencomputeproject/SAI-Challenger) test framework. This framework and its DASH enhancements are described [here](../../../../docs/dash-saichallenger-testbed.md)
 
 # Tutorial Files
 
