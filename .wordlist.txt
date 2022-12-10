@@ -456,6 +456,8 @@ runtime
 rx
 SAI
 sai
+saic
+SAIC
 saigen
 sairedis
 SAIRPC
