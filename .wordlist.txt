@@ -385,6 +385,7 @@ Pensando
 performant
 pingmesh
 PIR
+pluggable
 PLVision's
 pmon
 PNA
@@ -460,6 +461,7 @@ SAI
 sai
 saic
 SAIC
+saichallenger
 saigen
 sairedis
 SAIRPC

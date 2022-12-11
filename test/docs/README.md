@@ -10,7 +10,9 @@
 | [DASH P4 SAI-Thrift Test Workflow](dash-test-workflow-p4-saithrift.md) | Use of P4-based simulators or SW data planes to verify DASH behavior, using saithrift API. |
 | [Keysight Testbed](testbed/README.md) | Describes the setup and configuration of a DASH testbed using Keysight hardware traffic generators.|
 | [DASH PTF Testbed](dash-ptf-testbed.md) | Describes the integration of [SAI PTF](https://github.com/opencomputeproject/SAI/tree/master/ptf) into a DASH Test Framework
-| [DASH SAI Challenger Testbed](dash-saichallenger-testbed.md) | Describes the integration of [SAI Challenger](https://github.com/opencomputeproject/SAI-Challenger) and [dpugen](https://pypi.org/project/dpugen/) into a DASH Test Framework
+| [DASH SAI Challenger Testbed](dash-saichallenger-testbed.md) | Describes the integration of [SAI Challenger](https://github.com/opencomputeproject/SAI-Challenger) and [dpugen](https://pypi.org/project/dpugen/) into a DASH Test Framework |
+| [SAI Challenger DASH Schema](../test-cases/scale/saic/README-SAIC-DASH-config-spec.md) | High-level schema to generate scaled configurations (e.g. via [dpugen](https://pypi.org/project/dpugen/)) as well as the DASH "SAI Record" format which comprises SAI "CRUD" operations.
+[ SAI Challenger Tutorials](../test-cases/scale/saic/tutorial/README.md) | Guided tour of SAI Challenger for DASH
 | [snappi and SAI-Challenger based tests](dash-test-sai-challenger.md) | How to run scalable tests using SAI-Challenger and snappi. The scalability is achieved with additional DASH/SAI abstraction level in test code to simplify high scale DUT configuration. |
 
 
