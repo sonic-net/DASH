@@ -53,7 +53,7 @@ The following APIs are supported:
 * sai-redis - The device is configured by modifying/creating the entries in SONiC's redis ASIC DB, using a CRUD-style RPC bound tightly to SONiC redis schema. SAI Challenger automatically translates abstract config data records into sai-redis CRUD operations. This approach requires building and installing suitable SONiC daemons/containers (redis, syncd, etc.) on the DUT.
 * sai-thrift - The device is configured by calling the DUT's SAI API layer using a Thrift RPC. The DUT requires a Thrift server expecially built for this purpose. This is a more direct DUT dataplane config interface and is NOS-agnostic.
 # Dataplane (Test Traffic Generation)
-Testing networing DUTs consists of configuring a device and sending and receiving packets via its virtual or physical traffic ports. 
+Testing networking DUTs consists of configuring a device and sending and receiving packets via its virtual or physical traffic ports. 
 SAI Challenger supports both the legacy PTF dataplane (based on the CPU-driven [Scapy](https://scapy.net) package) and the newer [Open Traffic Generator](https://github.com/open-traffic-generator)-based approach which allows SW or HW-based traffic-generator usage, using a single [snappi](https://github.com/open-traffic-generator/snappi) API, regardless of the underlying taffic-generator platform.
 
 The choice of platforms is dictated by a setup JSON file. The same Pytest script can be called and passed the appropriate setup file (via the `--setup` option) to perform tests using a SW traffic generator such as [ixia-c](https://github.com/open-traffic-generator/ixia-c), or a commercial, hardware-based traffic generator, as long as it supports the [Open Traffic Generator](https://github.com/open-traffic-generator) specification.
@@ -61,7 +61,7 @@ The choice of platforms is dictated by a setup JSON file. The same Pytest script
 ## snappi for flow-based testing
 For flow-based traffic tests, e.g. one or more continuous traffic streams with well-defined packet headers at a specified rate, use the native snappi approach. This requires using the snappi SDK, which is a Python (or other language) library providing idiomatic access the OTG constructs. OTG/snappi also provides several other advantages such as precision scheduling, high data rates, incrementing (or other pattern) header fields, flow tracking using special instrumentation fields injected into the packet payload, etc.
 ## snappi for PTF-style testing (packet at a time)
-For convenience, SAI Challenger includes some wrapper libraries which present familiar [PTF](https://github.com/p4lang/ptf) packet utilities to send a single packet at a time. This allows you to utilize an OTG-compliant packet generator with familiar PTF contructs. The main advantages are:
+For convenience, SAI Challenger includes some wrapper libraries which present familiar [PTF](https://github.com/p4lang/ptf) packet utilities to send a single packet at a time. This allows you to utilize an OTG-compliant packet generator with familiar PTF constructs. The main advantages are:
 - Ease of migration of older PTF scripts
 - Simplicity when constructing and sending a few simple packets, versus setting up continuous streams or flows. Flow-based testing is powerful, but somewhat more complex.
 ## Native PTF/Scapy testing
