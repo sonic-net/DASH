@@ -408,6 +408,7 @@ prereq
 Pritsak
 PrivateAddress
 programmability
+programmatically
 protobuf
 provids
 PRs
@@ -504,6 +505,7 @@ SoC
 SoCs
 Sommers
 SONiC
+SONiC's
 SpoofingPacket
 SRC
 src
