@@ -15,7 +15,7 @@
 
 # SAI Challenger Test Framework for DASH
 ## Overview
-This framework supports both virtual testing of SW switches/devices at "CPU speeds" as well as physical Device Under Test (DUT) testing with HW traffic generators up to full line rate. A number of components have been enhanced and/or integrated to provide a powerful and convenient test framework for DASH devices, or even tradtional SONiC devices.
+This framework supports both virtual testing of SW switches/devices at "CPU speeds" as well as physical Device Under Test (DUT) testing with HW traffic generators up to full line rate. A number of components have been enhanced and/or integrated to provide a powerful and convenient test framework for DASH devices, or even traditional SONiC devices.
 
 * [SAI Challenger](https://github.com/opencomputeproject/SAI-Challenger) - Based on [Pytest](https://pytest.org/),  it was originally created to test [SAI](https://github.com/opencomputeproject/SAI)-based devices using [sai-redis](https://github.com/sonic-net/sonic-sairedis) and was meant for SONiC-powered network switches. It has since been enhanced to test devices with large-scale configurations and multiple configuration APIs, by adding the following features:
   *  Data-driven configuration schema to allow clean and easily-scalable test vectors without having to learn or write low-level RPCs (e.g. sai-thrift)
@@ -66,7 +66,7 @@ The choice of platforms is dictated by a setup JSON file. The same Pytest script
 ## snappi for flow-based testing
 For flow-based traffic tests, e.g. one or more continuous traffic streams with well-defined packet headers at a specified rate, use the native snappi approach. This requires using the snappi SDK, which is a Python (or other language) library providing idiomatic access the OTG constructs. OTG/snappi also provides several other advantages such as precision scheduling, high data rates, incrementing (or other pattern) header fields, flow tracking and latency measurements using special instrumentation fields injected into the packet payload, etc.
 ## Legacy PTF Packet Utility Support
-SAI Challenger provides the familiar PTF packet utilities for packet-at-a-time sending and receiving. An entry in the Pytest setup JSON file allows you to choose the underlying dataplane. Under the hood, SAI Challenger imports either the original PTF packet utilities package, or the snappi package which presents the same APIs but translates them into snappi constructs for sending/receiving "flows" cointaining a single packet.
+SAI Challenger provides the familiar PTF packet utilities for packet-at-a-time sending and receiving. An entry in the Pytest setup JSON file allows you to choose the underlying dataplane. Under the hood, SAI Challenger imports either the original PTF packet utilities package, or the snappi package which presents the same APIs but translates them into snappi constructs for sending/receiving "flows" containing a single packet.
 
 ### snappi for PTF-style testing (packet at a time)
 For convenience, SAI Challenger includes some wrapper libraries which present familiar [PTF](https://github.com/p4lang/ptf) packet utilities to send/receive/verify a single packet at a time. This allows you to utilize an OTG-compliant packet generator with familiar PTF constructs. The main advantages are:
@@ -84,7 +84,7 @@ This snippet in [sai_dpu_client_server_snappi.json](../test-cases/scale/saic/sai
 ### Native PTF/Scapy testing
 Finally, you can elect to use the native PTF dataplane, which employs Scapy as the traffic generator. In this case, the same APIs as  described in the previous paragraph are used to directly call Scapy.
 
-This snipet in [sai_dpu_client_server_ptf.json](../test-cases/scale/saic/sai_dpu_client_server_ptf.json) specifies to use the `PTF` dataplane:
+This snippet in [sai_dpu_client_server_ptf.json](../test-cases/scale/saic/sai_dpu_client_server_ptf.json) specifies to use the `PTF` dataplane:
 ```
 "DATAPLANE": [
   {
