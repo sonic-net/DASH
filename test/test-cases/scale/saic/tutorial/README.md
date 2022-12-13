@@ -23,7 +23,7 @@
     - [Pattern: `make_create_cmds()` helper](#pattern-make_create_cmds-helper)
     - [Pattern: `make_remove_cmds()` helper](#pattern-make_remove_cmds-helper)
     - [Pattern: reading JSON config files and applying them](#pattern-reading-json-config-files-and-applying-them)
-    - [Pattern: The magic of dpu.process\_commmands()](#pattern-the-magic-of-dpuprocess_commmands)
+    - [Pattern: The magic of dpu.process\_commands()](#pattern-the-magic-of-dpuprocess_commands)
 
 # Tutorial - Writing DASH Pytests using SAI Challenger and `dpugen`
 ## Overview
@@ -143,7 +143,7 @@ It is applied to the device using this simple technique:
 ```
 result = [*dpu.process_commands( (make_create_cmds()) )]
 ```
-See [Pattern: The magic of dpu.process\_commmands()](#pattern-the-magic-of-dpuprocess_commmands) to understand how the commands are applied to the DUT.
+See [Pattern: The magic of dpu.process\_commands()](#pattern-the-magic-of-dpuprocess_commands) to understand how the commands are applied to the DUT.
 
 We could have just defined the array in a variable and passed it to `process_commands()` but we wrapped it in `make_create_cmds()` as explained in [Pattern: `make_create_cmds()` helper](#pattern-make_create_cmds-helper).
 
@@ -186,7 +186,7 @@ The create commands are applied to the device using this simple technique:
 ```
 result = [*dpu.process_commands( (make_create_cmds()) )]
 ```
-See [Pattern: The magic of dpu.process\_commmands()](#pattern-the-magic-of-dpuprocess_commmands) to understand how the commands are applied to the DUT.
+See [Pattern: The magic of dpu.process\_commands()](#pattern-the-magic-of-dpuprocess_commands) to understand how the commands are applied to the DUT.
 
 The helper method `make_remove_cmds()` makes a list of commands to teardown the configuration, see [Pattern: `make_remove_cmds()` helper](#pattern-make_remove_cmds-helper).
 
@@ -221,7 +221,7 @@ result = [*dpu.process_commands( (make_create_cmds()) )]
 ```
 where `make_create_cmds()` is a wrapper around our custom generator. `make_create_cmds()` returns an iterator which emits items from the generator.
 
-See [Pattern: The magic of dpu.process\_commmands()](#pattern-the-magic-of-dpuprocess_commmands) to understand how the commands are applied to the DUT.
+See [Pattern: The magic of dpu.process\_commands()](#pattern-the-magic-of-dpuprocess_commands) to understand how the commands are applied to the DUT.
 
 Likewise, removing the config is equally simple:
 ```
@@ -239,7 +239,7 @@ The following commands were used to generate 256 unique vip entries. See the cod
 
 ./test_sai_vnet_vips_config_via_custom_gen.py -r -a1 192 -a2 193 -b1 168 -b2 169 -c1 1 -c2 2 -d1 1 -d2 32 > test_sai_vnet_vips_config_via_custom_gen_remove.json
 ```
-We used the tecnique described in [Pattern: reading JSON config files and applying them](#pattern-reading-json-config-files-and-applying-them) to read the JSON files and apply them to the DUT.
+We used the technique described in [Pattern: reading JSON config files and applying them](#pattern-reading-json-config-files-and-applying-them) to read the JSON files and apply them to the DUT.
 ### [test_sai_vnet_outbound_small_scale_config_via_dpugen.py](test_sai_vnet_outbound_small_scale_config_via_dpugen.py)
 This test builds upon earlier lessons. It demonstrates the use of [dpugen](https://pypi.org/project/dpugen/) for generating a small-scale, yet complete DASH VNET service configuration. Several high-level scaling parameters are fed to dpugen and it emits a sequence of SAI records corresponding to the requested configuration. We then apply these records using SAI Challenger.
 
@@ -277,7 +277,7 @@ We then apply these to the DUT as follows:
   results = [*dpu.process_commands( (self.make_create_commands()) )]
 ```
 
-The `process_commands()` method calls the generator's `items()` iterator (returned by our helper `make_create_commands()`). See [Pattern: The magic of dpu.process\_commmands()](#pattern-the-magic-of-dpuprocess_commmands).
+The `process_commands()` method calls the generator's `items()` iterator (returned by our helper `make_create_commands()`). See [Pattern: The magic of dpu.process\_commands()](#pattern-the-magic-of-dpuprocess_commands).
 
 Under the hood, SAI Challenger calls the generator's `items()` iterator (returned by our helper `make_create_commands()`) and processes the returned records one by one.
 
@@ -356,7 +356,7 @@ To be added in the future...
 ## Common Design Patterns for Device Configuration
 Here we present some recurring themes used not only in our in tutorial examples, but in "real" test cases elsewhere in this repo.
 ### Pattern: Command-line mode to create JSON files for select test-cases
-This pattern was developed to make the tuorials more useful, but is equally applicable for production tests.
+This pattern was developed to make the tutorials more useful, but is equally applicable for production tests.
 
 Some of the examples use DUT configuration files containing SAI records in JSON format, which are loaded and applied to the device via a  SAI-Challenger DUT API driver, e.g. SAI-thrift. Some of these JSON files were themselves generated  using one of the example `.py` files, some of which are dual-purpose Pytest scripts:
 * They can be executed by the Pytest framework to test the DUT.
@@ -404,14 +404,14 @@ def make_remove_cmds():
 ```
 
 Here's how this works:
-* Make an array of remove commands containing just the symbolic name of the entry (which SAI challenger automatically translates into OIDs when it calls the actual APIs, see [Pattern: The magic of dpu.process\_commmands()](#pattern-the-magic-of-dpuprocess_commmands)), and the operation code `remove`
+* Make an array of remove commands containing just the symbolic name of the entry (which SAI challenger automatically translates into OIDs when it calls the actual APIs, see [Pattern: The magic of dpu.process\_commands()](#pattern-the-magic-of-dpuprocess_commands)), and the operation code `remove`
 * Reverse the order of the array
 * Provide an iterator (generator) to this array as return value
 
 ### Pattern: reading JSON config files and applying them
 One technique is to create static JSON files representing create and remove commands, reading them in a test-case and applying them to the DUT.
 
-For example, here is the complete code from a test-case which does this. We  read create (setup) and remove (teardown) commands stored in separate files and apply them. Another possiblity would be to store only the create commands as a file, and generate the remove commands from the create commands at runtime, using techniques described in [Pattern: `make_remove_cmds()` helper](#pattern-make_remove_cmds-helper).
+For example, here is the complete code from a test-case which does this. We  read create (setup) and remove (teardown) commands stored in separate files and apply them. Another possibility would be to store only the create commands as a file, and generate the remove commands from the create commands at runtime, using techniques described in [Pattern: `make_remove_cmds()` helper](#pattern-make_remove_cmds-helper).
 ```
 import json
 from pathlib import Path
@@ -434,8 +434,8 @@ def test_sai_vnet_outbound_small_scale_config_remove_file(dpu):
         # pprint(result)
 ```
 
-The behavior of `process_commands()` is described in [Pattern: The magic of dpu.process\_commmands()](#pattern-the-magic-of-dpuprocess_commmands).
-### Pattern: The magic of dpu.process_commmands()
+The behavior of `process_commands()` is described in [Pattern: The magic of dpu.process\_commands()](#pattern-the-magic-of-dpuprocess_commands).
+### Pattern: The magic of dpu.process_commands()
 The `process_commands()` method which is in the SAI Challenger framework performs a lot of magic under the hood, including:
 * Reading through the entries one by one
 * Translating into the appropriate device API calls, in this case sai-thrift RPC calls.
