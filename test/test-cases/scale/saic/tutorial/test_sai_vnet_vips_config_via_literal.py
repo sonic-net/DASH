@@ -49,11 +49,13 @@ def make_create_cmds():
             ]
         } 
         ]
-# remove 16 vips
+
 def make_remove_cmds():
     """ Return an array of remove commands """
-    cleanup_commands = [{'name': vip['name'], 'op': 'remove'} for vip in make_create_cmds()]
-    return reversed(cleanup_commands)
+    cleanup_commands = [{'name': cmd['name'], 'op': 'remove'} for cmd in make_create_cmds()]
+    for cmd in reversed(cleanup_commands):
+        yield cmd
+    return
 
 class TestSaiDashVipsLiteral:
     @pytest.mark.ptf

@@ -81,6 +81,7 @@ CLI
 CloudStorm
 CNIP
 codebase
+collaterals
 compat
 Compat
 conf
@@ -354,6 +355,8 @@ NVidia
 NVMe
 observability
 OCP
+OID
+OIDs
 ok
 Oleksandr
 onboardsupport
@@ -512,6 +515,7 @@ src
 STATEDB
 stateful
 statemachine
+stdout
 struct
 subclassed
 subdirectories

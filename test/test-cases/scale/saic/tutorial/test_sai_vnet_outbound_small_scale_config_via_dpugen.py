@@ -96,20 +96,19 @@ TEST_VNET_OUTBOUND_CONFIG_SCALE = {
 }
 
 class TestSaiVnetOutbound:
-    def make_create_vnet_config(self):
+    def make_create_commands(self):
         """ Generate a configuration
             returns iterator (generator) of SAI records
         """
-        conf = dpugen.sai.SaiConfig()
-        conf.mergeParams(TEST_VNET_OUTBOUND_CONFIG_SCALE)
+        conf = dpugen.sai.SaiConfig(TEST_VNET_OUTBOUND_CONFIG_SCALE)
         conf.generate()
         return conf.items()
 
-    def make_remove_vnet_config(self):
+    def make_remove_commands(self):
         """ Generate a configuration to remove entries
             returns iterator (generator) of SAI records
         """
-        cleanup_commands = [{'name': cmd['name'], 'op': 'remove'} for cmd in self.make_create_vnet_config()]
+        cleanup_commands = [{'name': cmd['name'], 'op': 'remove'} for cmd in self.make_create_commands()]
         cleanup_commands = reversed(cleanup_commands)
         for cmd in cleanup_commands:
             yield cmd
@@ -119,7 +118,7 @@ class TestSaiVnetOutbound:
     @pytest.mark.snappi
     def test_create_vnet_scale_config_generated(self, dpu):
         """Generate and apply configuration"""
-        results = [*dpu.process_commands( (self.make_create_vnet_config()) )]
+        results = [*dpu.process_commands( (self.make_create_commands()) )]
 
 
     @pytest.mark.ptf
@@ -129,7 +128,7 @@ class TestSaiVnetOutbound:
         Generate and remove configuration
         We generate configuration on remove stage as well to avoid storing giant objects in memory.
         """
-        results = [*dpu.process_commands( (self.make_remove_vnet_config()) )]
+        results = [*dpu.process_commands( (self.make_remove_commands()) )]
 
 
 if __name__ == '__main__':
@@ -147,10 +146,10 @@ if __name__ == '__main__':
         sys.exit(1)
 
     if args.a or args.c:
-        print(json.dumps([cmd for cmd in (TestSaiVnetOutbound().make_create_vnet_config())],
+        print(json.dumps([cmd for cmd in (TestSaiVnetOutbound().make_create_commands())],
                          indent=2))
 
     if args.a or args.r:
-        print(json.dumps([cmd for cmd in (TestSaiVnetOutbound().make_remove_vnet_config())],
+        print(json.dumps([cmd for cmd in (TestSaiVnetOutbound().make_remove_commands())],
                          indent=2))
 

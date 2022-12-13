@@ -18,13 +18,10 @@ import pytest
 # Constants
 SWITCH_ID = 5
 
-# The array is expanded in-place by Python interpreter
-# using "list comprehension." The entire array sits in memory.
-# This is OK for smaller configs and simple loop expressions.
-def vip_inflate(vip_start=1,d1=1,d2=1):
+def make_create_cmds(vip_start=1,d1=1,d2=1):
     """
-    Return a populated array of vip dictionary entries 
-    with IP address 192.168.0.[d1..d2] and incrementing vip sdtarting at vip_start
+    Return a populated array of vip dictionary entries using list comprehension
+    with IP address 192.168.0.[d1..d2] and incrementing vip starting at vip_start
     """
     return [
         {
@@ -41,17 +38,6 @@ def vip_inflate(vip_start=1,d1=1,d2=1):
             ]
         } for x in range (d1,d2+1)]
 
-
-# create 16 vips
-def make_create_cmds(vip_start=1,d1=1,d2=1):
-    """ Return a generator (iterable) of create commands
-        Entries generated on the fly.
-        vip_start - starting VIP number, successive entries will increment this by 1
-        d1, d2 - starting, ending values (inclusive) for address octet "D" in the sequence A.B.C.D
-    """
-    return vip_inflate(vip_start, d1,d2)
-
-# remove 16 vips
 def make_remove_cmds(vip_start=1,d1=1,d2=1):
     """ Return an array of remove commands
         Entries generated via list comprehension; added to array in memory; reversed; then returned.
@@ -59,7 +45,8 @@ def make_remove_cmds(vip_start=1,d1=1,d2=1):
         d1, d2 - starting, ending values (inclusive) for address octet "D" in the sequence A.B.C.D
     """
     cleanup_commands = [{'name': vip['name'], 'op': 'remove'} for vip in make_create_cmds(vip_start, d1,d2)]
-    return reversed(cleanup_commands)
+    for cmd in reversed(cleanup_commands):
+        yield cmd
 
 class TestSaiDashVipsListComprehension:
     @pytest.mark.ptf
