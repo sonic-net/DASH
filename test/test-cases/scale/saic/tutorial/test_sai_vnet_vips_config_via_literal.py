@@ -18,55 +18,47 @@ import pytest
 # Constants
 SWITCH_ID = 5
 
-# The array is expanded in-place by Python interpreter
-# using "list comprehension." The entire array sits in memory.
-# This is OK for smaller configs and simple loop expressions.
-def vip_inflate(vip_start=1,d1=1,d2=1):
-    """
-    Return a populated array of vip dictionary entries 
-    with IP address 192.168.0.[d1..d2] and incrementing vip sdtarting at vip_start
-    """
+# create 16 vips
+def make_create_cmds():
+    """ Return some configuration entries expressed literally"""
     return [
         {
-            "name": "vip_entry%02d" % (vip_start +x-d1+1),
+            "name": "vip_entry#1",
             "op": "create",
             "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
             "key": {
             "switch_id": "$SWITCH_ID",
-            "vip": "192.168.0.%d" % x
+            "vip": "192.168.0.1"
             },
             "attributes": [
             "SAI_VIP_ENTRY_ATTR_ACTION",
             "SAI_VIP_ENTRY_ACTION_ACCEPT"
             ]
-        } for x in range (d1,d2+1)]
-
-
-# create 16 vips
-def make_create_cmds(vip_start=1,d1=1,d2=16):
-    """ Return a generator (iterable) of create commands
-        Entries generated on the fly.
-        vip_start - starting VIP number, successive entries will increment this by 1
-        d1, d2 - starting, ending values (inclusive) for address octet "D" in the sequence A.B.C.D
-    """
-    return vip_inflate(vip_start, d1,d2)
-
+        },
+        {
+            "name": "vip_entry#2",
+            "op": "create",
+            "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+            "key": {
+            "switch_id": "$SWITCH_ID",
+            "vip": "192.168.0.2"
+            },
+            "attributes": [
+            "SAI_VIP_ENTRY_ATTR_ACTION",
+            "SAI_VIP_ENTRY_ACTION_ACCEPT"
+            ]
+        } 
+        ]
 # remove 16 vips
-def make_remove_cmds(vip_start=1,d1=1,d2=16):
-    """ Return an array of remove commands
-        Entries generated via list comprehension; added to array in memory; reversed; then returned.
-        vip_start - starting VIP number, successive entries will increment this by 1
-        d1, d2 - starting, ending values (inclusive) for address octet "D" in the sequence A.B.C.D
-    """
-    cleanup_commands = [{'name': vip['name'], 'op': 'remove'} for vip in vip_inflate(vip_start, d1,d2)]
+def make_remove_cmds():
+    """ Return an array of remove commands """
+    cleanup_commands = [{'name': vip['name'], 'op': 'remove'} for vip in make_create_cmds()]
     return reversed(cleanup_commands)
 
-# @pytest.mark.ptf
-# @pytest.mark.snappi
-class TestSaiDashVipsListComprehension:
+class TestSaiDashVipsLiteral:
     @pytest.mark.ptf
     @pytest.mark.snappi
-    def test_many_vips_create_via_list_comprehension(self, dpu):
+    def test_many_vips_create_via_literal(self, dpu):
         """Verify VIP configuration create
         """
         result = [*dpu.process_commands( (make_create_cmds()) )]
@@ -75,7 +67,7 @@ class TestSaiDashVipsListComprehension:
 
     @pytest.mark.ptf
     @pytest.mark.snappi
-    def test_many_vips_remove_via_list_comprehension(self, dpu):
+    def test_many_vips_remove_via_literal(self, dpu):
         """Verify VIP configuration removal
         """
         result = [*dpu.process_commands(make_remove_cmds())]
@@ -87,9 +79,6 @@ if __name__ == '__main__':
     parser.add_argument('-a', action='store_true', help='Generate ALL commands as JSON to stdout')
     parser.add_argument('-c', action='store_true', help='Generate CREATE commands as JSON to stdout')
     parser.add_argument('-r', action='store_true', help='Generate REMOVE commands as JSON to stdout')
-    parser.add_argument('--vip-start', type=int, default=1, help='Starting vip number')
-    parser.add_argument('-d1', type=int, default=1, help='Starting value for D in VIP ip address sequence A.B.C.D')
-    parser.add_argument('-d2', type=int, default=1, help='Ending value for D in VIP ip address sequence A.B.C.D')
 
     args = parser.parse_args()
 
@@ -100,12 +89,10 @@ if __name__ == '__main__':
         sys.exit(1)
 
     if args.a or args.c:
-        print(json.dumps([item for item in make_create_cmds(args.vip_start, \
-                                                            args.d1,args.d2)],
+        print(json.dumps([item for item in make_create_cmds()],
                          indent=2))
 
     if args.a or args.r:
-        print (json.dumps([item for item in make_remove_cmds(args.vip_start, \
-                                                            args.d1,args.d2)],
+        print (json.dumps([item for item in make_remove_cmds()],
                          indent=2)) 
 

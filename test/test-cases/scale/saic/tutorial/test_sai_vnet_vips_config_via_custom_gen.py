@@ -38,7 +38,7 @@ def vip_generate(vip_start=1, a1=192, a2=192, b1=168, b2=168, c1=0, c2=0, d1=1, 
                 for d in range(d1,d2+1):
                     yield \
                     {
-                        "name": "vip_entry%d" % v,
+                        "name": "vip_entry#%d" % v,
                         "op": "create",
                         "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
                         "key": {
@@ -75,11 +75,10 @@ def make_remove_cmds(vip_start=1,a1=192, a2=193, b1=168, b2=169, c1=1,c2=2,d1=1,
         c1, c2 - starting, ending values (inclusive) for address octet "C" in the sequence A.B.C.D
         d1, d2 - starting, ending values (inclusive) for address octet "D" in the sequence A.B.C.D
     """
-    cleanup_commands = [{'name': vip['name'], 'op': 'remove'} for vip in vip_generate(vip_start, a1, a2, b1, b2, c1,c2,d1,d2)]
+    cleanup_commands = [{'name': vip['name'], 'op': 'remove'} for vip in make_create_cmds(vip_start, a1, a2, b1, b2, c1,c2,d1,d2)]
     return reversed(cleanup_commands)
 
-# @pytest.mark.ptf
-# @pytest.mark.snappi
+
 class TestSaiDashVipsGenerator:
     @pytest.mark.ptf
     @pytest.mark.snappi

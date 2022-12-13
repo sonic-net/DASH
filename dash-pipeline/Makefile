@@ -649,6 +649,13 @@ run-saichallenger-tests: deploy-ixiac
 	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
 	./run_tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
 
+run-saichallenger-tutorials: deploy-ixiac
+	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
+	-w /sai-challenger/dash_tests \
+	$(DOCKER_FLAGS) \
+	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
+	./run_tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) tutorial
+
 ###############################
 # ENVIRONMENT SETUP TARGETS
 ###############################

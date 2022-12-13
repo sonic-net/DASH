@@ -26,16 +26,16 @@ import pytest
 
 current_file_dir = Path(__file__).parent
 
-def test_sai_vnet_outbound_small_scale_config_create_file(dpu):
+def test_sai_vnet_vips_config_create_file(dpu):
 
-    with (current_file_dir / f'sai_vnet_outbound_small_scale_config_create_gen.json').open(mode='r') as config_file:
+    with (current_file_dir / f'test_sai_vnet_vips_config_via_list_comprehension_create.json').open(mode='r') as config_file:
         setup_commands = json.load(config_file)
         result = [*dpu.process_commands(setup_commands)]
         pprint(result)
 
 def test_sai_vnet_outbound_small_scale_config_remove_file(dpu):
 
-    with (current_file_dir / f'sai_vnet_outbound_small_scale_config_remove_gen.json').open(mode='r') as config_file:
+    with (current_file_dir / f'test_sai_vnet_vips_config_via_list_comprehension_remove.json').open(mode='r') as config_file:
         teardown_commands = json.load(config_file)
         result = [*dpu.process_commands(teardown_commands)]
         pprint(result)
