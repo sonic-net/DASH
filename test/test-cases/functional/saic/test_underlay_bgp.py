@@ -115,4 +115,6 @@ def test_underlay_bgp(confgen, dpu, dataplane):
 
     # STEP5 : Print Result of the test
     print("Final Result : {}".format(result))
-    assert result == False, "Test underlay bgp FAILED!!")
+
+    assert result == False, "Test underlay bgp FAILED!!"
+
