@@ -36,7 +36,7 @@ Some of the unique parts of the architecture, as compared say to PTF, are the co
  
 # DUT Configuration Data
 
-This framework supports several methods, listed below, to specify the DUT's configuration. The recommended way is to use "SAI records," which are per-object specifications of data (table entries and attributes) and the desired CRUD operations (SAI create, remove, set, get). See the [spec](../test-cases/scale/saic/README-SAIC-DASH-config-spec.md). The [tutorial](../test-cases/scale/saic/tutorial/README.md) gives examples of all these methods.
+This framework supports several methods, listed below, to specify the DUT's configuration. The recommended way is to use "SAI records," which are per-object specifications of data (table entries and attributes) and the desired CRUD operations (SAI create, remove, set, get). See  [README-SAIC-DASH-config-spec](README-SAIC-DASH-config-spec.md). The [tutorial](../test-cases/scale/saic/tutorial/README.md) gives examples of all these methods.
 
 ## Data-Driven DUT Configuration
 The following methods are preferred alternatives; they all use a data-driven approach, avoiding lock-in to a specific device RPC/API. Refer to the left-most part of the diagram above.

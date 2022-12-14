@@ -1,3 +1,5 @@
+See also:
+* [README-SAIC-DASH-config-spec](../../../../docs/README-SAIC-DASH-config-spec.md)
 <h1>Contents</h1>
 
 - [Tutorial - Writing DASH Pytests using SAI Challenger and `dpugen`](#tutorial---writing-dash-pytests-using-sai-challenger-and-dpugen)
@@ -279,8 +281,6 @@ We then apply these to the DUT as follows:
 
 The `process_commands()` method calls the generator's `items()` iterator (returned by our helper `make_create_commands()`). See [Pattern: The magic of dpu.process\_commands()](#pattern-the-magic-of-dpuprocess_commands).
 
-Under the hood, SAI Challenger calls the generator's `items()` iterator (returned by our helper `make_create_commands()`) and processes the returned records one by one.
-
 Here is a typical sequence of records as you can view in [test_sai_vnet_outbound_small_scale_config_via_dpugen_create.json](test_sai_vnet_outbound_small_scale_config_via_dpugen_create.json):
 ```
 [
@@ -313,7 +313,7 @@ Here is a typical sequence of records as you can view in [test_sai_vnet_outbound
   
   ... etc.
 ```
-For each record, SAI Challenger invokes a parser, makes DUT API calls over the chosen RPC interface (e.g. sai-thrift), checks the return values and   
+For each record, SAI Challenger invokes a parser, makes DUT API calls over the chosen RPC interface (e.g. sai-thrift), checks the return values and 
 stores the OIDs of the created objects in a dictionary which can be referred to by the `name` in each record, e.g. `vip_#1`.
 
 To teardown the configuration, we convert the *create* records into *remove* records containing just the `op` and name. We made a helper to do this as described in [Pattern: `make_remove_cmds()` helper](#pattern-make_remove_cmds-helper).
@@ -368,6 +368,31 @@ For example, we use the [test_sai_vnet_outbound_small_scale_config_via_dpugen.py
 
 This is useful to create persistent copies of generated configurations, or simply to examine the configuration and make adjustments during development. Only selected scripts have a command-line mode. (Check the files for a `__main__` section.) Each such file has a `-h` option to show usage and available options.
 
+Here's a sample "main" block:
+```
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='DASH SAI Config Generator for vip table entries')
+    parser.add_argument('-a', action='store_true', help='Generate ALL commands as JSON to stdout')
+    parser.add_argument('-c', action='store_true', help='Generate CREATE commands as JSON to stdout')
+    parser.add_argument('-r', action='store_true', help='Generate REMOVE commands as JSON to stdout')
+
+    args = parser.parse_args()
+
+    if not args.a and not args.c and not args.r:
+        # must provide at least one flag
+        print ("\n*** Please specify at least one option flag from [acr] to generate output ***\n", file=sys.stderr)
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+
+    if args.a or args.c:
+        print(json.dumps([item for item in make_create_cmds()],
+                         indent=2))
+
+    if args.a or args.r:
+        print (json.dumps([item for item in make_remove_cmds()],
+                         indent=2)) 
+```
+
 >**NOTE:** The output might contain diagnostic messages captured from `stdout`, so some hand-trimming of JSON may be needed. Check the file contents and edit as requires.
 
 **Example:**
@@ -384,7 +409,7 @@ PYTHONPATH=.. ./test_sai_vnet_outbound_small_scale_config_via_dpugen.py -r > tes
 ### Pattern: `make_create_cmds()` helper
 Generating device setup commands can be simple or complex, as the tutorials and production test cases illustrate. These are run at the start of a test case.
 
-In our tutorials, we use a wrapper method to get the configuration as an iterator, even if the configuration is a simple list containing one entry. This allows us to make a corresponding `remove()` helper as described ahead, in a consistent and concise way. It also makes it easy to implement the command-line mode which prints the configurations in JSON format.
+In our tutorials, we use a wrapper method to get the configuration as a list or an iterator. This allows us to make a corresponding `remove()` helper as described ahead, in a consistent and concise way. It also makes it easy to implement the command-line mode which prints the configurations in JSON format.
 >**NOTE:** Some of the examples have parameterized `make_create_cmds()` 
 ### Pattern: `make_remove_cmds()` helper
 
