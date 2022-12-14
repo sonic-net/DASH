@@ -54,7 +54,7 @@ class CreateDeleteEniTest(VnetAPI):
         self.createDirectionLookupTest()
         self.createEniTest()
         self.createEniEtherAddressMapTest()
-        if not test_params_get('bmv2'):
+        if not test_param_get('bmv2'):
             # Issue #233
             self.createInboundRoutingEntryTest()
             self.createPaValidationTest()
@@ -62,7 +62,7 @@ class CreateDeleteEniTest(VnetAPI):
         self.createCa2PaEntryTest()
 
         # Attributes verification
-        if not test_params_get('bmv2'):
+        if not test_param_get('bmv2'):
             # TODO: add issue
             self.dashAclGroupAttributesTest()
             self.vnetAttributesTest()
@@ -76,7 +76,7 @@ class CreateDeleteEniTest(VnetAPI):
             self.outboundCa2PaEntryAttributesTest()
 
         # Remove verification
-        if not test_params_get('bmv2'):
+        if not test_param_get('bmv2'):
             # TODO: add issue
             self.deleteVnetWhenMapExistTest()
             self.deleteEniWhenMapExistTest()
@@ -340,6 +340,7 @@ class CreateDeleteEniTest(VnetAPI):
                                             outbound_v6_stage3_dash_acl_group_id=True,
                                             outbound_v6_stage4_dash_acl_group_id=True,
                                             outbound_v6_stage5_dash_acl_group_id=True)
+        self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
 
         self.assertEqual(attr['cps'], self.cps)
         self.assertEqual(attr['pps'], self.pps)
@@ -376,20 +377,20 @@ class CreateDeleteEniTest(VnetAPI):
         Note: createEniTest should be run first to create ENI entry
         """
 
+        test_cps = self.cps * 2
+        test_pps = self.pps * 2
+        test_flows = self.flows * 2
+        test_admin_state = False
+        test_vm_vni = 5
+
+        test_vm_underlay_dip = sai_ipaddress('172.2.1.5')
+
+        test_vnet = self.vnet_create(vni=test_vm_vni)
+
+        test_ipv6_in_acl_group_id = self.dash_acl_group_create(ipv6=True)
+        test_ipv6_out_acl_group_id = self.dash_acl_group_create(ipv6=True)
+
         try:
-            test_cps = self.cps * 2
-            test_pps = self.pps * 2
-            test_flows = self.flows * 2
-            test_admin_state = False
-            test_vm_vni = 5
-
-            test_vm_underlay_dip = sai_ipaddress('172.2.1.5')
-
-            test_vnet = self.vnet_create(vni=test_vm_vni)
-
-            test_ipv6_in_acl_group_id = self.dash_acl_group_create(ipv6=True)
-            test_ipv6_out_acl_group_id = self.dash_acl_group_create(ipv6=True)
-
             # set and verify new cps value
             sai_thrift_set_eni_attribute(self.client, self.eni, cps=test_cps)
             self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
@@ -658,6 +659,7 @@ class CreateDeleteEniTest(VnetAPI):
                                                 outbound_v6_stage3_dash_acl_group_id=True,
                                                 outbound_v6_stage4_dash_acl_group_id=True,
                                                 outbound_v6_stage5_dash_acl_group_id=True)
+            self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
 
             self.assertEqual(attr['cps'], self.cps)
             self.assertEqual(attr['pps'], self.pps)
@@ -697,6 +699,7 @@ class CreateDeleteEniTest(VnetAPI):
         attr = sai_thrift_get_eni_ether_address_map_entry_attribute(self.client,
                                                                     eni_ether_address_map_entry=self.eni_mac_map_entry,
                                                                     eni_id=True)
+        self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.assertEqual(attr['eni_id'], self.eni)
 
         try:
@@ -766,6 +769,7 @@ class CreateDeleteEniTest(VnetAPI):
         attr = sai_thrift_get_pa_validation_entry_attribute(self.client,
                                                             pa_validation_entry=self.pa_valid_entry,
                                                             action=True)
+        self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.assertEqual(attr['action'], SAI_PA_VALIDATION_ENTRY_ACTION_PERMIT)
 
     def inboundRoutingEntryAttributesTest(self):
@@ -780,6 +784,7 @@ class CreateDeleteEniTest(VnetAPI):
                                                               inbound_routing_entry=self.inbound_routing_entry,
                                                               action=True,
                                                               src_vnet_id=True)
+        self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.assertEqual(attr['action'], SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE)
         self.assertEqual(attr['src_vnet_id'], self.outbound_vnet)
 
@@ -837,6 +842,7 @@ class CreateDeleteEniTest(VnetAPI):
                                                                action=True,
                                                                dst_vnet_id=True,
                                                                overlay_ip=True)
+        self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.assertEqual(attr['action'], SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT)
         self.assertEqual(attr['dst_vnet_id'], self.outbound_vnet)
         self.assertEqual(attr['overlay_ip'], self.overlay_ip)
@@ -910,6 +916,7 @@ class CreateDeleteEniTest(VnetAPI):
             overlay_dmac=True,
             use_dst_vnet_vni=True
         )
+        self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.assertEqual(attr['underlay_dip'], self.underlay_dip)
         self.assertEqual(attr['overlay_dmac'], self.overlay_dmac)
         self.assertEqual(attr['use_dst_vnet_vni'], True)
@@ -973,8 +980,8 @@ class CreateDeleteEniTest(VnetAPI):
 class EniScaleTest(VnetAPI):
     """
     Verifies ENI scaling:
-     - creation/deletion a max number of ENI entries
-     - recreation (repeated creation/deletion a max number of ENI entries)
+     - creation/deletion a min required number of ENI entries
+     - recreation (repeated creation/deletion a min required number of ENI entries)
 
     Configuration:
     Empty configuration
@@ -982,42 +989,37 @@ class EniScaleTest(VnetAPI):
     def setUp(self):
         super(EniScaleTest, self).setUp()
 
-        self.MAX_ENI = 64  # Expected max number of ENI entries per card
-
-        self.cps = 10000         # ENI connections per second
-        self.pps = 100000        # ENI packets per second
-        self.flows = 100000      # ENI flows
-        self.admin_state = True  # ENI admin state
-        self.vm_vni = 0          # ENI VM VNI (increments during ENIs creation)
+        self.MIN_ENI = 64  # Expected min number of ENI entries per card
+        self.vm_vni = 0    # ENI VM VNI (increments during ENIs creation)
         self.vm_underlay_dip = sai_ipaddress("10.10.0.1")
 
-        # Create list with MAX_ENI + 1 number of unique MAC addresses for ENI creation
+        # Create list with MIN_ENI number of unique MAC addresses for ENI creation
         self.eni_mac_list = []
         i = 0
         for last_octet in range(0, 256):
             self.eni_mac_list.append('01:01:01:00:00:' +
                                      ('%02x' % last_octet))
             i += 1
-            if i == self.MAX_ENI + 1:
+            if i == self.MIN_ENI:
                 break
 
     def runTest(self):
         self.eniScaleTest()
-        self.destroy_teardown_obj()  # remove all created entries
-        # clear teardown_objects not to remove all entries again in tearDown
-        self.teardown_objects.clear()
-        self.eniScaleTest()  # verify that max number on ENI entries can be created again
+        self.destroy_teardown_obj()    # remove all created entries
+        self.teardown_objects.clear()  # clear teardown_objects to not remove all entries again in tearDown
+        self.vm_vni = 0                # reset value
+        self.eniScaleTest()            # verify that the min required number on ENI entries can be created again
 
     def eniScaleTest(self):
         """
-        Verifies creating and deleting a max number of ENI entries.
+        Verifies creating and deleting a min required number of ENI entries.
         Also creates: vnet, inbound and outbound dash acl groups, eni ether address map entries,
-                      pa validation and inbound routing entries.
+                      outbound and inbound routing entries.
 
-        Max number of ENI entries hardcoded in MAX_ENI value.
+        Min required number of ENI entries hardcoded in MIN_ENI value.
         """
 
-        for indx in range(self.MAX_ENI + 1):
+        for indx in range(self.MIN_ENI):
             # create ACL groups for ENI
             in_acl_group_id = self.dash_acl_group_create()
             out_acl_group_id = self.dash_acl_group_create()
@@ -1028,11 +1030,7 @@ class EniScaleTest(VnetAPI):
 
             # create ENI
             try:
-                eni = self.eni_create(cps=self.cps,
-                                      pps=self.pps,
-                                      flows=self.flows,
-                                      admin_state=self.admin_state,
-                                      vm_underlay_dip=self.vm_underlay_dip,
+                eni = self.eni_create(vm_underlay_dip=self.vm_underlay_dip,
                                       vm_vni=self.vm_vni,
                                       vnet_id=vm_vnet,
                                       inbound_v4_stage1_dash_acl_group_id=in_acl_group_id,
@@ -1044,24 +1042,11 @@ class EniScaleTest(VnetAPI):
                                       outbound_v4_stage2_dash_acl_group_id=out_acl_group_id,
                                       outbound_v4_stage3_dash_acl_group_id=out_acl_group_id,
                                       outbound_v4_stage4_dash_acl_group_id=out_acl_group_id,
-                                      outbound_v4_stage5_dash_acl_group_id=out_acl_group_id,
-                                      inbound_v6_stage1_dash_acl_group_id=0,
-                                      inbound_v6_stage2_dash_acl_group_id=0,
-                                      inbound_v6_stage3_dash_acl_group_id=0,
-                                      inbound_v6_stage4_dash_acl_group_id=0,
-                                      inbound_v6_stage5_dash_acl_group_id=0,
-                                      outbound_v6_stage1_dash_acl_group_id=0,
-                                      outbound_v6_stage2_dash_acl_group_id=0,
-                                      outbound_v6_stage3_dash_acl_group_id=0,
-                                      outbound_v6_stage4_dash_acl_group_id=0,
-                                      outbound_v6_stage5_dash_acl_group_id=0)
+                                      outbound_v4_stage5_dash_acl_group_id=out_acl_group_id)
             except AssertionError as ae:
                 if self.status() == SAI_STATUS_INSUFFICIENT_RESOURCES:
-                    print(f'ENI entries created: {indx}')
-                    error_msg = f'Not expected number of ENI entries are created.' \
-                                f'Created: {indx}, Expected: {self.MAX_ENI}'
-                    self.assertEqual(indx, self.MAX_ENI, error_msg)
-                    break
+                    print(f"SAI_STATUS_INSUFFICIENT_RESOURCES: failed on {self.vm_vni} creation")
+                    raise ae
                 else:
                     raise ae
 
