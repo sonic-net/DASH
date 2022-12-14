@@ -584,7 +584,7 @@ SAI_CHALLENGER_SETUP_FILE := sai_dpu_client_server_snappi.json
 endif
 # If test's name isn't passed, set it to the default.
 ifeq ($(SAI_CHALLENGER_TEST),)
-SAI_CHALLENGER_TEST := test_sai_vnet_*.py
+SAI_CHALLENGER_TEST := .
 endif
 
 DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.saichallenger-client-bldr | sha1sum | awk '{print substr($$1,0,11);}')
@@ -647,7 +647,7 @@ run-saichallenger-tests: deploy-ixiac
 	-w /sai-challenger/dash_tests \
 	$(DOCKER_FLAGS) \
 	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
-	./run_vnet_tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
+	./run_tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
 
 ###############################
 # ENVIRONMENT SETUP TARGETS
