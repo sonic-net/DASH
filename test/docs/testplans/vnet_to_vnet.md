@@ -43,7 +43,7 @@ Following test methodologies will be utilized to verify and validate the behavio
 - Depending on the test cases, a combination of UDP traffic for IPv4, IPv6 addresses will be generated
 
 ### Test Cases
-[TODO: Update Table]
+Note: No counters exist to date. Once counters are defined, the test-cases will be refined to incorporate them.
 
 | Test Description                                             | Expected Result               |
 | :----------------------------------------------------------- | :------------------------ |
