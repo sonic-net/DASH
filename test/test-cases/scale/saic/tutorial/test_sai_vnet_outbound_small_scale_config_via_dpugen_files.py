@@ -37,5 +37,7 @@ def test_sai_vnet_outbound_small_scale_config_remove_file(dpu):
 
     with (current_file_dir / f'test_sai_vnet_outbound_small_scale_config_via_dpugen_remove.json').open(mode='r') as config_file:
         teardown_commands = json.load(config_file)
-        result = [*dpu.process_commands(teardown_commands)]
-        pprint(result)
+        results = [*dpu.process_commands(teardown_commands)]
+        print("\n======= SAI commands RETURN values =======")
+        assert (all( [result == 0 for result in results]), "Remove error")
+        pprint(results)

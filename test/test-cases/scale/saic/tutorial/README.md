@@ -143,7 +143,7 @@ def make_create_cmds():
 
 It is applied to the device using this simple technique:
 ```
-result = [*dpu.process_commands( (make_create_cmds()) )]
+results = [*dpu.process_commands( (make_create_cmds()) )]
 ```
 See [Pattern: The magic of dpu.process\_commands()](#pattern-the-magic-of-dpuprocess_commands) to understand how the commands are applied to the DUT.
 
@@ -153,7 +153,7 @@ The helper method `make_remove_cmds()` makes a list of commands to teardown the 
 
 We then apply the remove commands the same way as create commands:
 ```
-result = [*dpu.process_commands(make_remove_cmds())]
+results = [*dpu.process_commands(make_remove_cmds())]
 ```
 ### [test_sai_vnet_vips_config_via_list_comprehension.py](test_sai_vnet_vips_config_via_list_comprehension.py)
 This test case shows how to easily generate an array of similar "config" commands by using Python list-comprehension syntax. It's not unique to this framework but it fits in nicely for some cases, like making many iterations of an object with concise code.
@@ -186,7 +186,7 @@ This generates a list where the VIP IPv4 address cycles through values from `192
 
 The create commands are applied to the device using this simple technique:
 ```
-result = [*dpu.process_commands( (make_create_cmds()) )]
+results = [*dpu.process_commands( (make_create_cmds()) )]
 ```
 See [Pattern: The magic of dpu.process\_commands()](#pattern-the-magic-of-dpuprocess_commands) to understand how the commands are applied to the DUT.
 
@@ -194,7 +194,7 @@ The helper method `make_remove_cmds()` makes a list of commands to teardown the 
 
 We then apply the remove commands the same way as create commands:
 ```
-result = [*dpu.process_commands(make_remove_cmds())]
+results = [*dpu.process_commands(make_remove_cmds())]
 ```
 
 ### [test_sai_vnet_vips_config_via_list_comprehension_files.py](test_sai_vnet_vips_config_via_list_comprehension_files.py)
@@ -219,7 +219,7 @@ This case is conceptually similar to [test_sai_vnet_vips_config_via_list_compreh
 
 As mentioned, these config entries are applied to the DUT using the SAI Challenger `dpu.process_commands()` method to read the commands one at a time in "streaming" mode.  This one line of code illustrates the simplicity:
 ```
-result = [*dpu.process_commands( (make_create_cmds()) )]
+results = [*dpu.process_commands( (make_create_cmds()) )]
 ```
 where `make_create_cmds()` is a wrapper around our custom generator. `make_create_cmds()` returns an iterator which emits items from the generator.
 
@@ -227,7 +227,7 @@ See [Pattern: The magic of dpu.process\_commands()](#pattern-the-magic-of-dpupro
 
 Likewise, removing the config is equally simple:
 ```
-result = [*dpu.process_commands( (make_remove_cmds()) )]
+results = [*dpu.process_commands( (make_remove_cmds()) )]
 ```
 where `make_remove_cmds()` again is a simple method which we explain in [Pattern: `make_remove_cmds()` helper](#pattern-make_remove_cmds-helper). Unfortunately, because we chose to reverse the output of `make_create_cmds()`, we need to build the list in-place, which temporarily consumes memory store the entire list. (One *could* make a generator to produce reversed records on the fly.)
 ### [test_sai_vnet_vips_config_via_custom_gen_files.py](test_sai_vnet_vips_config_via_custom_gen_files.py)
@@ -433,6 +433,7 @@ Here's how this works:
 * Reverse the order of the array
 * Provide an iterator (generator) to this array as return value
 
+
 ### Pattern: reading JSON config files and applying them
 One technique is to create static JSON files representing create and remove commands, reading them in a test-case and applying them to the DUT.
 
@@ -449,14 +450,14 @@ current_file_dir = Path(__file__).parent
 def test_sai_vnet_vips_config_create_file(dpu):
     with (current_file_dir / f'test_sai_vnet_vips_config_via_list_comprehension_create.json').open(mode='r') as config_file:
         setup_commands = json.load(config_file)
-        result = [*dpu.process_commands(setup_commands)]
-        # pprint(result)
+        results = [*dpu.process_commands(setup_commands)]
+        # pprint(results)
 
 def test_sai_vnet_outbound_small_scale_config_remove_file(dpu):
     with (current_file_dir / f'test_sai_vnet_vips_config_via_list_comprehension_remove.json').open(mode='r') as config_file:
         teardown_commands = json.load(config_file)
-        result = [*dpu.process_commands(teardown_commands)]
-        # pprint(result)
+        results = [*dpu.process_commands(teardown_commands)]
+        # pprint(results)
 ```
 
 The behavior of `process_commands()` is described in [Pattern: The magic of dpu.process\_commands()](#pattern-the-magic-of-dpuprocess_commands).

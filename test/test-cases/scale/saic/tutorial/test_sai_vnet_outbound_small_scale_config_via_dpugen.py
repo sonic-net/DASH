@@ -27,15 +27,12 @@
 import json, argparse
 from pathlib import Path
 from pprint import pprint
-
 import pytest
-import saichallenger.dataplane.snappi.snappi_traffic_utils as stu
-import dash_helper.vnet2vnet_helper as dh
-
-current_file_dir = Path(__file__).parent
 import dpugen
 from saigen.confbase import *
 from saigen.confutils import *
+
+current_file_dir = Path(__file__).parent
 
 # Constants for scale VNET outbound routing configuration
 NUMBER_OF_VIP = 1
@@ -119,6 +116,9 @@ class TestSaiVnetOutbound:
     def test_create_vnet_scale_config_generated(self, dpu):
         """Generate and apply configuration"""
         results = [*dpu.process_commands( (self.make_create_commands()) )]
+        print("\n======= SAI commands RETURN values =======")
+        pprint.pprint(results)
+        assert (all(results), "Create error")
 
 
     @pytest.mark.ptf
@@ -129,6 +129,9 @@ class TestSaiVnetOutbound:
         We generate configuration on remove stage as well to avoid storing giant objects in memory.
         """
         results = [*dpu.process_commands( (self.make_remove_commands()) )]
+        print("\n======= SAI commands RETURN values =======")
+        assert (all( [result == 0 for result in results]), "Remove error")
+        pprint.pprint(results)
 
 
 if __name__ == '__main__':

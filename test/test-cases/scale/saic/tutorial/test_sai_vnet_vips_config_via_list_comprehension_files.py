@@ -29,11 +29,15 @@ current_file_dir = Path(__file__).parent
 def test_sai_vnet_vips_config_create_file(dpu):
     with (current_file_dir / f'test_sai_vnet_vips_config_via_list_comprehension_create.json').open(mode='r') as config_file:
         setup_commands = json.load(config_file)
-        result = [*dpu.process_commands(setup_commands)]
-        # pprint(result)
+        results = [*dpu.process_commands(setup_commands)]
+        print("\n======= SAI commands RETURN values =======")
+        pprint(results)
+        assert (all(results), "Create error")
 
 def test_sai_vnet_outbound_small_scale_config_remove_file(dpu):
     with (current_file_dir / f'test_sai_vnet_vips_config_via_list_comprehension_remove.json').open(mode='r') as config_file:
         teardown_commands = json.load(config_file)
-        result = [*dpu.process_commands(teardown_commands)]
-        # pprint(result)
+        results = [*dpu.process_commands(teardown_commands)]
+        print("\n======= SAI commands RETURN values =======")
+        assert (all( [result == 0 for result in results]), "Remove error")
+        pprint(results)

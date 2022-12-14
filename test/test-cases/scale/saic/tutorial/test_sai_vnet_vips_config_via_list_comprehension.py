@@ -54,18 +54,20 @@ class TestSaiDashVipsListComprehension:
     def test_many_vips_create_via_list_comprehension(self, dpu):
         """Verify VIP configuration create
         """
-        result = [*dpu.process_commands( (make_create_cmds()) )]
+        results = [*dpu.process_commands( (make_create_cmds()) )]
         print("\n======= SAI commands RETURN values =======")
-        pprint(result)
+        pprint(results)
+        assert (all(results), "Create error")
 
     @pytest.mark.ptf
     @pytest.mark.snappi
     def test_many_vips_remove_via_list_comprehension(self, dpu):
         """Verify VIP configuration removal
         """
-        result = [*dpu.process_commands(make_remove_cmds())]
-        # print("\n======= SAI commands RETURN values =======")
-        # pprint(result)
+        results = [*dpu.process_commands(make_remove_cmds())]
+        print("\n======= SAI commands RETURN values =======")
+        assert (all( [result == 0 for result in results]), "Remove error")
+        pprint(results)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='DASH SAI Config Generator for vip table entries')
