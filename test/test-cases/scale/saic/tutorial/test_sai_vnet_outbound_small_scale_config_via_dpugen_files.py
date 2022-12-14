@@ -40,4 +40,4 @@ def test_sai_vnet_outbound_small_scale_config_remove_file(dpu):
         results = [*dpu.process_commands(teardown_commands)]
         print("\n======= SAI commands RETURN values =======")
         assert all( [result == 0 for result in results]), "Remove error"
-        pprint(results)
+        print(results)

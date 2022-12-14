@@ -451,16 +451,21 @@ def test_sai_vnet_vips_config_create_file(dpu):
     with (current_file_dir / f'test_sai_vnet_vips_config_via_list_comprehension_create.json').open(mode='r') as config_file:
         setup_commands = json.load(config_file)
         results = [*dpu.process_commands(setup_commands)]
-        # pprint(results)
+        print("\n======= SAI commands RETURN values =======")
+        pprint(results)
+        assert all(results), "Create error"
 
 def test_sai_vnet_outbound_small_scale_config_remove_file(dpu):
     with (current_file_dir / f'test_sai_vnet_vips_config_via_list_comprehension_remove.json').open(mode='r') as config_file:
         teardown_commands = json.load(config_file)
         results = [*dpu.process_commands(teardown_commands)]
-        # pprint(results)
+        print("\n======= SAI commands RETURN values =======")
+        print(results)
+        assert all(results), "Create error"
 ```
 
 The behavior of `process_commands()` is described in [Pattern: The magic of dpu.process\_commands()](#pattern-the-magic-of-dpuprocess_commands).
+
 ### Pattern: The magic of dpu.process_commands()
 The `process_commands()` method which is in the SAI Challenger framework performs a lot of magic under the hood, including:
 * Reading through the entries one by one

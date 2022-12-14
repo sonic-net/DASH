@@ -131,7 +131,7 @@ class TestSaiVnetOutbound:
         results = [*dpu.process_commands( (self.make_remove_commands()) )]
         print("\n======= SAI commands RETURN values =======")
         assert all( [result == 0 for result in results]), "Remove error"
-        pprint.pprint(results)
+        print(results)
 
 
 if __name__ == '__main__':
