@@ -91,3 +91,4 @@ Or in SAI configuration format:
 pytest -sv --setup=sai_dpu_client_server_snappi.json test_vnet_inbound.py
 pytest -sv --setup=sai_dpu_client_server_snappi.json test_vnet_outbound.py
 ```
+>**NOTE:** Feel free to use other Pytest flags. In particular, `-k <filter expression>` and `-m <mark expression>` can select tests based on a string pattern expression to filter by test-case name or `@pytest.mark` annotations, respectively. Refer to [Pytest documentation](https://docs.pytest.org/en/7.2.x/contents.html) for more info. Use `pytest -h` for help.
