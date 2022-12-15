@@ -1,16 +1,18 @@
-# General changes
-* Added [SAI-Challenger](https://github.com/opencomputeproject/SAI-Challenger.OCP) submodule by path: `DASH/test/SAI-Challenger`.
-* Added test cases for SAI-Challenger by path: `DASH/test/test-cases/scale/saic`
-
-# New make targets:
+# SAI-Challenger Test Workflows
+# Relevant make targets:
 **`docker-saichallenger-client`**: Build SAI-Challenger docker image and docker image based on SAI-Challenger client docker image with sai_thrift, saigen and DASH files.
 
-**`run-saichallenger-client`**: Start Ixia-C and docker container `sc-client-thrift-run` from image built on `docker-saichallenger-client` target. To the original SAI-Challenger tests (`DASH/test/SAI-Challenger/tests`) folder a new folder `dash_tests` mounted from `DASH/test/test-cases/scale/saic` folder inside of container. Bound mount volume with DASH folder.
+**`run-saichallenger-client`**: Start Ixia-C and docker container `dash-saichallenger-client-$(USER)` from image built in `docker-saichallenger-client` target.
 
-**`kill-saichallenger-client`**: Stop Ixia-C and `sc-client-thrift-run` container.
+**`kill-saichallenger-client`**: Stop `dash-saichallenger-client-$(USER)` container.
 
-**`run-saichallenger-tests`**: Run test manually. This target may be triggered with passing parameters, or with default parameters.
-Run with default parameters(Setup file: `sai_dpu_client_server_snappi.json`; Test: `test_sai_vnet_*.py`):
+**`run-saichallenger-tests`**: Run test manually. This target may be triggered with passing parameters, or with default parameters:
+
+Defaults:
+* Setup file: `sai_dpu_client_server_snappi.json`
+* Test folder: `DASH/test/test-cases/scale/saic`
+
+Run SAI Challenger tests using defaults listed above:
 ```
 make run-saichallenger-tests
 ```
@@ -22,7 +24,11 @@ make run-saichallenger-tests <setup_file>
 
 Run with setup parameter and test parameter:
 ```
-make run-saichallenger-tests <setup_file> <test_name>
+make run-saichallenger-tests <setup_file> <test_file-or-directory>
+```
+Run SAI Challenger tutorial test cases. See also [SAI Challenger Tutorials](../test-cases/scale/saic/tutorial/README.md).
+```
+make run-saichallenger-tutorials
 ```
 
 # How to start
@@ -30,17 +36,11 @@ make run-saichallenger-tests <setup_file> <test_name>
 ## Environment
 Install dependencies listed [**here**](../../dash-pipeline/README.md#prerequisites).
 
-## Prepare repository
+## Install and build
 ```
-git clone https://github.com/PLVision/DASH.git
-cd DASH && git checkout test-framework-extension
-git submodule update --init --recursive
-```
-
-## Build environment
-```
-cd dash-pipeline
-make clean ;# skip on a fresh setup as it will fail
+git clone https://github.com/Azure/DASH.git
+cd DASH/dash-pipeline
+make clean
 make all
 
 pwd
@@ -51,7 +51,8 @@ Run in the 3 separate windows/tabs.
 - take the output of `pwd` from previous step and do `cd <that location from pwd>` in each window
 - window 1: `make run-switch`
 - window 2: `make run-saithrift-server`
-- window 3: will be used to run the test as per instructions bellow
+- window 3: will be used to run the test as per instructions below<br>
+Stop all daemons: `make kill-all` (from Window 3)
 
 ## Run tests manually
 
@@ -90,5 +91,3 @@ Or in SAI configuration format:
 pytest -sv --setup=sai_dpu_client_server_snappi.json test_vnet_inbound.py
 pytest -sv --setup=sai_dpu_client_server_snappi.json test_vnet_outbound.py
 ```
-
-# Known issues
