@@ -243,33 +243,16 @@ The following commands were used to generate 256 unique vip entries. See the cod
 ```
 We used the technique described in [Pattern: reading JSON config files and applying them](#pattern-reading-json-config-files-and-applying-them) to read the JSON files and apply them to the DUT.
 ### [test_sai_vnet_outbound_small_scale_config_via_dpugen.py](test_sai_vnet_outbound_small_scale_config_via_dpugen.py)
-This test builds upon earlier lessons. It demonstrates the use of [dpugen](https://pypi.org/project/dpugen/) for generating a small-scale, yet complete DASH VNET service configuration. Several high-level scaling parameters are fed to dpugen and it emits a sequence of SAI records corresponding to the requested configuration. We then apply these records using SAI Challenger.
+This test builds upon earlier lessons. It demonstrates the use of [dpugen](https://pypi.org/project/dpugen/) for generating a small-scale, yet complete DASH VNET service configuration. In this example we're using default scaling parameters built-in to `dpugen`. We then apply these records using SAI Challenger.
 
-Looking at the code, we see some high-level scaling parameters such as:
-```
-NUMBER_OF_VIP = 1
-NUMBER_OF_DLE = 1
-NUMBER_OF_ENI = 1
-...etc
-```
 
-These are then referenced in a more detailed configuration structure which is used by the generator, e.g.:
-```
-TEST_VNET_OUTBOUND_CONFIG_SCALE = {
-    'DASH_VIP':                 {'vpe': {'count': NUMBER_OF_VIP,'SWITCH_ID': '$SWITCH_ID','IPV4': 	{'count': NUMBER_OF_VIP,'start': '221.0.0.2','step': '0.1.0.0'}}},
-    'DASH_DIRECTION_LOOKUP':    {'dle': {'count': NUMBER_OF_DLE,'SWITCH_ID': '$SWITCH_ID','VNI': 	{'count': NUMBER_OF_DLE,'start': 5000,'step': 1000},'ACTION': 'SET_OUTBOUND_DIRECTION'}},
-    
-...etc.
-```
-This structure gives you fine-grained control over such things as starting addresses, increment values, etc. Most of the time you can just copy this boilerplate and change the high-level scale parameters to achieve different-sized configurations.
-
-To "generate" the configuration, we instantiate a generator initialized with the parameters:
+To "generate" the configuration, we instantiate a generator:
 ```
 def make_create_commands(self):
     """ Generate a configuration
         returns iterator (generator) of SAI records
     """
-    conf = dpugen.sai.SaiConfig(params=TEST_VNET_OUTBOUND_CONFIG_SCALE)
+    conf = dpugen.sai.SaiConfig()
     conf.generate()
     return conf.items()
 ```
