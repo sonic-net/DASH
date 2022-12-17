@@ -10,22 +10,20 @@ See also:
     - [Running tests from inside the container](#running-tests-from-inside-the-container)
 - [Device Configuration Tutorials](#device-configuration-tutorials)
   - [Configuration Tutorial Overview](#configuration-tutorial-overview)
-  - [Device Configuration Test Case Walk-through](#device-configuration-test-case-walk-through)
-    - [test\_sai\_vnet\_vips\_config\_via\_literal.py](#test_sai_vnet_vips_config_via_literalpy)
-    - [test\_sai\_vnet\_vips\_config\_via\_list\_comprehension.py](#test_sai_vnet_vips_config_via_list_comprehensionpy)
-    - [test\_sai\_vnet\_vips\_config\_via\_list\_comprehension\_files.py](#test_sai_vnet_vips_config_via_list_comprehension_filespy)
-    - [test\_sai\_vnet\_vips\_config\_via\_custom\_gen.py](#test_sai_vnet_vips_config_via_custom_genpy)
-    - [test\_sai\_vnet\_vips\_config\_via\_custom\_gen\_files.py](#test_sai_vnet_vips_config_via_custom_gen_filespy)
-    - [test\_sai\_vnet\_outbound\_small\_scale\_config\_via\_dpugen.py](#test_sai_vnet_outbound_small_scale_config_via_dpugenpy)
-    - [test\_sai\_vnet\_outbound\_small\_scale\_config\_via\_dpugen\_files.py](#test_sai_vnet_outbound_small_scale_config_via_dpugen_filespy)
+  - [test\_sai\_vnet\_vips\_config\_via\_literal.py](#test_sai_vnet_vips_config_via_literalpy)
+  - [test\_sai\_vnet\_vips\_config\_via\_list\_comprehension.py](#test_sai_vnet_vips_config_via_list_comprehensionpy)
+  - [test\_sai\_vnet\_vips\_config\_via\_list\_comprehension\_files.py](#test_sai_vnet_vips_config_via_list_comprehension_filespy)
+  - [test\_sai\_vnet\_vips\_config\_via\_custom\_gen.py](#test_sai_vnet_vips_config_via_custom_genpy)
+  - [test\_sai\_vnet\_vips\_config\_via\_custom\_gen\_files.py](#test_sai_vnet_vips_config_via_custom_gen_filespy)
+  - [test\_sai\_vnet\_outbound\_small\_scale\_config\_via\_dpugen.py](#test_sai_vnet_outbound_small_scale_config_via_dpugenpy)
+  - [test\_sai\_vnet\_outbound\_small\_scale\_config\_via\_dpugen\_files.py](#test_sai_vnet_outbound_small_scale_config_via_dpugen_filespy)
 - [Traffic Generation Tutorials - TODO](#traffic-generation-tutorials---todo)
-- [Appendix - Common Themes and design patterns](#appendix---common-themes-and-design-patterns)
-  - [Common Design Patterns for Device Configuration](#common-design-patterns-for-device-configuration)
-    - [Pattern: Command-line mode to create JSON files for select test-cases](#pattern-command-line-mode-to-create-json-files-for-select-test-cases)
-    - [Pattern: `make_create_cmds()` helper](#pattern-make_create_cmds-helper)
-    - [Pattern: `make_remove_cmds()` helper](#pattern-make_remove_cmds-helper)
-    - [Pattern: reading JSON config files and applying them](#pattern-reading-json-config-files-and-applying-them)
-    - [Pattern: The magic of dpu.process\_commands()](#pattern-the-magic-of-dpuprocess_commands)
+- [Appendix - Common Themes and Design Patterns For DUT Configuration](#appendix---common-themes-and-design-patterns-for-dut-configuration)
+  - [Pattern: Command-line mode to create JSON files for select test-cases](#pattern-command-line-mode-to-create-json-files-for-select-test-cases)
+  - [Pattern: `make_create_cmds()` helper](#pattern-make_create_cmds-helper)
+  - [Pattern: `make_remove_cmds()` helper](#pattern-make_remove_cmds-helper)
+  - [Pattern: reading JSON config files and applying them](#pattern-reading-json-config-files-and-applying-them)
+  - [Pattern: The magic of dpu.process\_commands()](#pattern-the-magic-of-dpuprocess_commands)
 
 # Tutorial - Writing DASH Pytests using SAI Challenger and `dpugen`
 ## Overview
@@ -111,13 +109,15 @@ We'll show how to configure devices using the following techniques. Traffic test
 * Simple example using a custom generator with streaming records
 * Complex configuration generated using [dpugen](https://pypi.org/project/dpugen/) with streaming records.
 
-Along the way we're refer to some common design patterns and themes which we've collected in an [Appendix](#appendix---common-themes-and-design-patterns). You can jump ahead and read that now, or refer to it as you walk through examples.
-
-## Device Configuration Test Case Walk-through
+Along the way we're refer to some common design patterns and themes which we've collected in an [Appendix](#appendix---common-themes-and-design-patterns). You can jump ahead and read that now, or refer to it as you walk through examples. 
 A variety of techniques are illustrated by a series of test files.
-### [test_sai_vnet_vips_config_via_literal.py](test_sai_vnet_vips_config_via_literal.py)
 
-This very simple test-case shows how to define a configuration using the "DASH Config" format expressed as an array of Python dictionaries, each one corresponding to one SAI "record."
+>**NOTE:** the section headings are links to the test programs for easy navigation.
+## [test_sai_vnet_vips_config_via_literal.py](test_sai_vnet_vips_config_via_literal.py)
+
+This very simple test-case shows how to define a configuration using the "DASH Config" format expressed as an array of Python dictionaries, each one corresponding to one SAI "record." This use-case is illustrated below:
+
+![dut-config-literal.svg](images/dut-config-literal.svg)
 
 The simple helper method `make_create_cmds()` returns a hard-coded array of records:
 ```
@@ -155,10 +155,16 @@ We then apply the remove commands the same way as create commands:
 ```
 results = [*dpu.process_commands(make_remove_cmds())]
 ```
-### [test_sai_vnet_vips_config_via_list_comprehension.py](test_sai_vnet_vips_config_via_list_comprehension.py)
-This test case shows how to easily generate an array of similar "config" commands by using Python list-comprehension syntax. It's not unique to this framework but it fits in nicely for some cases, like making many iterations of an object with concise code.
+## [test_sai_vnet_vips_config_via_list_comprehension.py](test_sai_vnet_vips_config_via_list_comprehension.py)
+This test case shows how to easily generate an array of similar "config" commands by using Python list-comprehension syntax, which is a Python nicety. It's usage is not unique to this framework, but it fits in nicely for some cases, like making many iterations of basic objects. (Deeply-nested object expressions are best implemented using custom generators. For example, see [test\_sai\_vnet\_vips\_config\_via\_custom\_gen.py](#test_sai_vnet_vips_config_via_custom_genpy)).
 
-This example builds on [test_sai_vnet_vips_config_via_literal.py](test_sai_vnet_vips_config_via_literal.py) but replaces a statically-defined list of SAI records with a list-comprehension expression, e.g.:
+This example builds on [test_sai_vnet_vips_config_via_literal.py](test_sai_vnet_vips_config_via_literal.py). However, instead of a statically-defined list of SAI records, we built a list containing a list-comprehension expression.
+
+ See the figure below.
+
+![dut-config-list-comprehension.svg](images/dut-config-list-comprehension.svg)
+
+Here's the code which builds the list:
 ```
 def make_create_cmds(vip_start=1,d1=1,d2=1):
     """
@@ -180,7 +186,7 @@ def make_create_cmds(vip_start=1,d1=1,d2=1):
             ]
         } for x in range (d1,d2+1)]
 ```
-This generates a list where the VIP IPv4 address cycles through values from `192.168.0.<d1>` through `192.168.0.<d2>`, where d1 and d2 are parameters.
+This generates a list, where the VIP IPv4 address cycles through values from `192.168.0.<d1>` through `192.168.0.<d2>`, where d1 and d2 are parameters. This is somewhat in-between a literal expression and a "custom generator" as described in the next example.
 
 >**NOTE:** While generating many VIPs may not be very useful, it's a simple test-case to teach some techniques.
 
@@ -197,8 +203,12 @@ We then apply the remove commands the same way as create commands:
 results = [*dpu.process_commands(make_remove_cmds())]
 ```
 
-### [test_sai_vnet_vips_config_via_list_comprehension_files.py](test_sai_vnet_vips_config_via_list_comprehension_files.py)
-This test case uses JSON files created by [test_sai_vnet_vips_config_via_list_comprehension.py](test_sai_vnet_vips_config_via_list_comprehension.py) used in command-line mode. Using static JSON files can be useful for using fixed configurations which are also easy to read for reference, edit manually, etc. This technique is not recommended for extremely large configurations, which might be better served using a streaming generator technique.
+## [test_sai_vnet_vips_config_via_list_comprehension_files.py](test_sai_vnet_vips_config_via_list_comprehension_files.py)
+This test case uses JSON files created by [test_sai_vnet_vips_config_via_list_comprehension.py](test_sai_vnet_vips_config_via_list_comprehension.py) used in command-line mode. Using static JSON files can be useful for testing fixed configurations which are also easy to read for reference, edit manually, etc. This technique is not recommended for extremely large configurations, which might be better served using a streaming generator technique.
+
+See the figure below:
+
+![dut-config-list-comprehension-files.svg](images/dut-config-list-comprehension-files.svg)
 
 The commands used to create the files are as follows:
 ```
@@ -209,13 +219,17 @@ The commands used to create the files are as follows:
 
 The test case code to apply the create and remove commands consists merely of reading JSON into a variable, and feeding that variable (an array of SAI records) to the `process_commands()` method. We explain this technique in [Pattern: reading JSON config files and applying them](#pattern-reading-json-config-files-and-applying-them).
 
-### [test_sai_vnet_vips_config_via_custom_gen.py](test_sai_vnet_vips_config_via_custom_gen.py)
+## [test_sai_vnet_vips_config_via_custom_gen.py](test_sai_vnet_vips_config_via_custom_gen.py)
 This test-case illustrates how to write a custom config "generator" which uses the Python `yield` command to emit a series of "SAI records" via an iterator. The custom config generator uses a series of nested loops to cycle through all four octets of a VIP IPv4 address.
+
+See the figure below:
+
+![dut-config-custom-gen.svg](images/dut-config-custom-gen.svg)
 
 This case is conceptually similar to [test_sai_vnet_vips_config_via_list_comprehension.py](test_sai_vnet_vips_config_via_list_comprehension.py) but differs in a few ways:
 * There are four nested loops, one per octet in the IPv4 address
 * The nested loops are easier to read than a complex nested list comprehension expression would be
-* The use of `yield` instead of an expanded array "saves memory" because only one element of the array (a dictionary) exists at a time; it is fed ("streamed") to the `dpu.process-commands()` method; and is applied to the device. In contrast, the list comprehension technique, or other non-generator technique, expands the entire array in-memory before it is consumed. This can have a profound effect upon memory consumption for huge configurations with potentially millions of entries! (This generator technique is used extensively in `dpugen`.)
+* The use of `yield` instead of an expanded array "saves memory" because only one element of the array (a dictionary) exists at a time; it is fed ("streamed") to the `dpu.process_commands()` method; and is applied to the device. In contrast, the list comprehension technique, or other non-generator technique, expands the entire array in-memory before it is consumed. This can have a profound effect upon memory consumption for huge configurations with potentially millions of entries! (This generator technique is used extensively in `dpugen`.)
 
 As mentioned, these config entries are applied to the DUT using the SAI Challenger `dpu.process_commands()` method to read the commands one at a time in "streaming" mode.  This one line of code illustrates the simplicity:
 ```
@@ -230,9 +244,15 @@ Likewise, removing the config is equally simple:
 results = [*dpu.process_commands( (make_remove_cmds()) )]
 ```
 where `make_remove_cmds()` again is a simple method which we explain in [Pattern: `make_remove_cmds()` helper](#pattern-make_remove_cmds-helper). Unfortunately, because we chose to reverse the output of `make_create_cmds()`, we need to build the list in-place, which temporarily consumes memory store the entire list. (One *could* make a generator to produce reversed records on the fly.)
-### [test_sai_vnet_vips_config_via_custom_gen_files.py](test_sai_vnet_vips_config_via_custom_gen_files.py)
+
+## [test_sai_vnet_vips_config_via_custom_gen_files.py](test_sai_vnet_vips_config_via_custom_gen_files.py)
 This test-case illustrates reading previously-stored JSON files and applying them to the DUT.
 The [test_sai_vnet_vips_config_via_custom_gen_files.py](test_sai_vnet_vips_config_via_custom_gen_files.py) test case was run in command-line mode to emit JSON to stdout and store into files, as follows. The create and remove commands were stored in separate files to be used by this test-case.
+
+See the figure below:
+
+![dut-config-custom-gen-files.svg](images/dut-config-custom-gen-files.svg)
+
 
 The following commands were used to generate 256 unique vip entries. See the code or run the file in command-line mode to understand the parameters.
 
@@ -242,9 +262,12 @@ The following commands were used to generate 256 unique vip entries. See the cod
 ./test_sai_vnet_vips_config_via_custom_gen.py -r -a1 192 -a2 193 -b1 168 -b2 169 -c1 1 -c2 2 -d1 1 -d2 32 > test_sai_vnet_vips_config_via_custom_gen_remove.json
 ```
 We used the technique described in [Pattern: reading JSON config files and applying them](#pattern-reading-json-config-files-and-applying-them) to read the JSON files and apply them to the DUT.
-### [test_sai_vnet_outbound_small_scale_config_via_dpugen.py](test_sai_vnet_outbound_small_scale_config_via_dpugen.py)
-This test builds upon earlier lessons. It demonstrates the use of [dpugen](https://pypi.org/project/dpugen/) for generating a small-scale, yet complete DASH VNET service configuration. In this example we're using default scaling parameters built-in to `dpugen`. We then apply these records using SAI Challenger.
+## [test_sai_vnet_outbound_small_scale_config_via_dpugen.py](test_sai_vnet_outbound_small_scale_config_via_dpugen.py)
+This test demonstrates the use of [dpugen](https://pypi.org/project/dpugen/) for generating a small-scale, yet complete DASH VNET service configuration. In this example we're using default scaling parameters built-in to `dpugen`. We then apply these records using SAI Challenger.
 
+ See the figure below.
+
+![dut-config-dpugen.svg](images/dut-config-dpugen.svg)
 
 To "generate" the configuration, we instantiate a generator:
 ```
@@ -318,10 +341,12 @@ A list of remove records, taken from [test_sai_vnet_outbound_small_scale_config_
 
 SAI Challenger looks up the OIDs it received from the DUT when it created the objects and performs a `remove()` request one at a time.
 
-### [test_sai_vnet_outbound_small_scale_config_via_dpugen_files.py](test_sai_vnet_outbound_small_scale_config_via_dpugen_files.py)
+## [test_sai_vnet_outbound_small_scale_config_via_dpugen_files.py](test_sai_vnet_outbound_small_scale_config_via_dpugen_files.py)
 
 This test-case illustrates reading previously-stored JSON files and applying them to the DUT.
-The [test_sai_vnet_outbound_small_scale_config_via_dpugen.py](test_sai_vnet_outbound_small_scale_config_via_dpugen.py) test case was run in command-line mode to emit JSON to stdout and store into files, as follows. The create and remove commands were stored in separate files to be used by this test-case.
+The [test_sai_vnet_outbound_small_scale_config_via_dpugen.py](test_sai_vnet_outbound_small_scale_config_via_dpugen.py) test case was run in command-line mode to emit JSON to stdout and store into files, as follows. The create and remove commands were stored in separate files to be used by this test-case. See the figure below.
+
+![dut-config-dpugen-files.svg](images/dut-config-dpugen-files.svg)
 
 The following commands were used to generate the configuration. See the code or run the file in command-line mode to understand the parameters.
 
@@ -335,10 +360,9 @@ PYTHONPATH=.. ./test_sai_vnet_outbound_small_scale_config_via_dpugen.py -r  > te
 We describe how to read and apply JSON files in [Pattern: reading JSON config files and applying them](#pattern-reading-json-config-files-and-applying-them).
 # Traffic Generation Tutorials - TODO
 To be added in the future...
-# Appendix - Common Themes and design patterns
-## Common Design Patterns for Device Configuration
+# Appendix - Common Themes and Design Patterns For DUT Configuration
 Here we present some recurring themes used not only in our in tutorial examples, but in "real" test cases elsewhere in this repo.
-### Pattern: Command-line mode to create JSON files for select test-cases
+## Pattern: Command-line mode to create JSON files for select test-cases
 This pattern was developed to make the tutorials more useful, but is equally applicable for production tests.
 
 Some of the examples use DUT configuration files containing SAI records in JSON format, which are loaded and applied to the device via a  SAI-Challenger DUT API driver, e.g. SAI-thrift. Some of these JSON files were themselves generated  using one of the example `.py` files, some of which are dual-purpose Pytest scripts:
@@ -389,12 +413,12 @@ To generate JSON containing SAI records to **remove** the vnet config and redire
 PYTHONPATH=.. ./test_sai_vnet_outbound_small_scale_config_via_dpugen.py -r > test_sai_vnet_outbound_small_scale_config_via_dpugen_create.json
 ```
 
-### Pattern: `make_create_cmds()` helper
+## Pattern: `make_create_cmds()` helper
 Generating device setup commands can be simple or complex, as the tutorials and production test cases illustrate. These are run at the start of a test case.
 
 In our tutorials, we use a wrapper method to get the configuration as a list or an iterator. This allows us to make a corresponding `remove()` helper as described ahead, in a consistent and concise way. It also makes it easy to implement the command-line mode which prints the configurations in JSON format.
 >**NOTE:** Some of the examples have parameterized `make_create_cmds()` 
-### Pattern: `make_remove_cmds()` helper
+## Pattern: `make_remove_cmds()` helper
 
 At the end of a test, device configuration is "torn down" to prepare for a subsequent test, leaving the DUT in a clean, known state. It is advisable to remove the config entries in the exact reverse order of their creation, in order to avoid dependency errors in the device. For example, some items are contained in other items, and the proper removal order might be enforced.
 
@@ -417,7 +441,7 @@ Here's how this works:
 * Provide an iterator (generator) to this array as return value
 
 
-### Pattern: reading JSON config files and applying them
+## Pattern: reading JSON config files and applying them
 One technique is to create static JSON files representing create and remove commands, reading them in a test-case and applying them to the DUT.
 
 For example, here is the complete code from a test-case which does this. We  read create (setup) and remove (teardown) commands stored in separate files and apply them. Another possibility would be to store only the create commands as a file, and generate the remove commands from the create commands at runtime, using techniques described in [Pattern: `make_remove_cmds()` helper](#pattern-make_remove_cmds-helper).
@@ -449,7 +473,7 @@ def test_sai_vnet_outbound_small_scale_config_remove_file(dpu):
 
 The behavior of `process_commands()` is described in [Pattern: The magic of dpu.process\_commands()](#pattern-the-magic-of-dpuprocess_commands).
 
-### Pattern: The magic of dpu.process_commands()
+## Pattern: The magic of dpu.process_commands()
 The `process_commands()` method which is in the SAI Challenger framework performs a lot of magic under the hood, including:
 * Reading through the entries one by one
 * Translating into the appropriate device API calls, in this case sai-thrift RPC calls.
