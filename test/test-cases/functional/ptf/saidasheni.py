@@ -991,6 +991,7 @@ class EniScaleTest(VnetAPI):
 
         self.MIN_ENI = 64  # Expected min number of ENI entries per card
         self.vm_vni = 0    # ENI VM VNI (increments during ENIs creation)
+        self.outbound_vni = 100  # VNI for inbound/outbound routing entries creation
         self.vm_underlay_dip = sai_ipaddress("10.10.0.1")
 
         # Create list with MIN_ENI number of unique MAC addresses for ENI creation
@@ -1005,9 +1006,15 @@ class EniScaleTest(VnetAPI):
 
     def runTest(self):
         self.eniScaleTest()
+
+        print("\n\tClear configuration")
         self.destroy_teardown_obj()    # remove all created entries
         self.teardown_objects.clear()  # clear teardown_objects to not remove all entries again in tearDown
-        self.vm_vni = 0                # reset value
+        print("PASS")
+
+        self.vm_vni = 0                # reset values
+        self.outbound_vni = 100
+
         self.eniScaleTest()            # verify that the min required number on ENI entries can be created again
 
     def eniScaleTest(self):
@@ -1019,17 +1026,19 @@ class EniScaleTest(VnetAPI):
         Min required number of ENI entries hardcoded in MIN_ENI value.
         """
 
+        print(f"\n\tEni Scale Test")
+
         for indx in range(self.MIN_ENI):
-            # create ACL groups for ENI
-            in_acl_group_id = self.dash_acl_group_create()
-            out_acl_group_id = self.dash_acl_group_create()
-
-            # create VNET
-            self.vm_vni += 1
-            vm_vnet = self.vnet_create(vni=self.vm_vni)
-
-            # create ENI
             try:
+                # create ACL groups for ENI
+                in_acl_group_id = self.dash_acl_group_create()
+                out_acl_group_id = self.dash_acl_group_create()
+
+                # create VNET
+                self.vm_vni += 1
+                vm_vnet = self.vnet_create(vni=self.vm_vni)
+
+                # create ENI
                 eni = self.eni_create(vm_underlay_dip=self.vm_underlay_dip,
                                       vm_vni=self.vm_vni,
                                       vnet_id=vm_vnet,
@@ -1043,25 +1052,34 @@ class EniScaleTest(VnetAPI):
                                       outbound_v4_stage3_dash_acl_group_id=out_acl_group_id,
                                       outbound_v4_stage4_dash_acl_group_id=out_acl_group_id,
                                       outbound_v4_stage5_dash_acl_group_id=out_acl_group_id)
+
+                # create eni_ether_address_map_entry
+                self.eni_mac_map_create(eni_id=eni, mac=self.eni_mac_list[indx])
+
+                self.outbound_vni += 1
+                outbound_vnet = self.vnet_create(vni=self.outbound_vni)
+
+                # create inbound_routing_entry
+                self.inbound_routing_decap_create(eni_id=eni,
+                                                  vni=self.outbound_vni,
+                                                  sip="10.10.2.0",
+                                                  sip_mask="255.255.255.0")
+
+                # create outbound_routing_entry
+                self.outbound_routing_vnet_direct_create(eni_id=eni,
+                                                         lpm="192.168.1.0/24",
+                                                         dst_vnet_id=outbound_vnet,
+                                                         overlay_ip="192.168.1.10")
+
             except AssertionError as ae:
                 if self.status() == SAI_STATUS_INSUFFICIENT_RESOURCES:
-                    print(f"SAI_STATUS_INSUFFICIENT_RESOURCES: failed on {self.vm_vni} creation")
+                    print(f"\nSAI_STATUS_INSUFFICIENT_RESOURCES: failed on iteration # {self.vm_vni}\n")
                     raise ae
                 else:
+                    print(f"\nFailed on iteration # {self.vm_vni}\n")
                     raise ae
 
-            # create eni_ether_address_map_entry
-            self.eni_mac_map_create(eni_id=eni, mac=self.eni_mac_list[indx])
-
-            # create inbound_routing_entry
-            self.inbound_routing_decap_create(eni_id=eni,
-                                              vni=self.vm_vni,
-                                              sip="10.10.2.0",
-                                              sip_mask="255.255.255.0")
-
-            # create outbound_routing_entry
-            self.outbound_routing_direct_create(eni_id=eni,
-                                                lpm="192.168.1.0/24")
+        print("PASS")
 
 
 @skipIf(test_param_get('bmv2'), "Blocked by Issue #233. Inbound Routing is not supported in BMv2.")
