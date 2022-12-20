@@ -41,7 +41,7 @@ def dataplane_session(exec_params):
 @pytest.fixture(scope="session")
 def confgen():
     return dpugen.sai.SaiConfig()
-    
+
 @pytest.fixture(scope="function")
 def dataplane(dataplane_session):
     dataplane_session.setUp()
