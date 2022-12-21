@@ -22,9 +22,7 @@ In this specifc testbed setup we will use [Ixia-c](https://github.com/open-traff
 
 ### Testbed Topology 
 
-The tesbed is setup to emulate a VNET to VNET scenario and to test the mechanisms of VM to VM communication in VNET as shown below.
-
-![VM-VM-in-VNET](../../images/vm-to-vm-communication-vnet.svg)
+The tesbed is setup to emulate a VNET to VNET scenario and to test the mechanisms of VM to VM communication in VNET as outlined [here](https://github.com/PLVision/DASH/blob/test-framework-extension/documentation/vnet2vnet-service/vnet-to-vnet-service.md).
 
 
 
