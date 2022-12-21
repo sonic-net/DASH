@@ -584,7 +584,7 @@ SAI_CHALLENGER_SETUP_FILE := sai_dpu_client_server_snappi.json
 endif
 # If test's name isn't passed, set it to the default.
 ifeq ($(SAI_CHALLENGER_TEST),)
-SAI_CHALLENGER_TEST := test_sai_vnet_*.py
+SAI_CHALLENGER_TEST := .
 endif
 
 DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.saichallenger-client-bldr | sha1sum | awk '{print substr($$1,0,11);}')
@@ -618,7 +618,9 @@ docker-saichallenger-client:
 
 DOCKER_RUN_SAI_CHALLENGER_CLIENT=docker run \
 	-v $(SAI_CHALLENGER_PATH):/sai-challenger \
-	-v $(SAI_CHALLENGER_PATH)/../test-cases/scale/saic/:/sai-challenger/dash_tests \
+	-v $(SAI_CHALLENGER_PATH)/../test-cases/scale/saic/:/sai-challenger/dash_tests/scale \
+	-v $(SAI_CHALLENGER_PATH)/../test-cases/functional/saic/:/sai-challenger/dash_tests/functional \
+	-v $(SAI_CHALLENGER_PATH)/../test-cases/utils/:/sai-challenger/dash_tests/utils \
 	-v $(PWD)/../:/dash \
 	--cap-add=NET_ADMIN \
 	--device /dev/net/tun:/dev/net/tun \
@@ -642,12 +644,21 @@ run-saichallenger-client-bash: deploy-ixiac
 kill-saichallenger-client:
 	-docker kill $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
 
-run-saichallenger-tests: deploy-ixiac
+run-saichallenger-tests: run-saichallenger-functional-tests run-saichallenger-scale-tests
+
+run-saichallenger-functional-tests: deploy-ixiac
 	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
-	-w /sai-challenger/dash_tests \
+	-w /sai-challenger/dash_tests/functional \
 	$(DOCKER_FLAGS) \
 	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
-	./run_vnet_tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
+	./run-tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
+
+run-saichallenger-scale-tests: deploy-ixiac
+	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
+	-w /sai-challenger/dash_tests/scale \
+	$(DOCKER_FLAGS) \
+	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
+	./run-tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
 
 ###############################
 # ENVIRONMENT SETUP TARGETS
