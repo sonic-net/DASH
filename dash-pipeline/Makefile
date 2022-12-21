@@ -429,7 +429,7 @@ run-saithrift-ptftests: disable-ipv6
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
 	-w /tests/ \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
-	./run-functional-tests.sh
+	./functional/ptf/run-tests.sh
 
 # Run "dev" PTF tests mounted from host
 # Note - if add ixia-c usage to PTF tests, add dependency deploy-ixiac
@@ -438,7 +438,7 @@ run-saithrift-dev-ptftests: disable-ipv6
 	-v $(PWD)/../test/test-cases/:/tests-dev/ \
 	-w /tests-dev/ \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
-	./run-functional-tests.sh
+	./functional/ptf/run-tests.sh
 
 run-saithrift-client-bash:
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \

@@ -47,7 +47,7 @@ while getopts "h?UHI:s:p:c:e:t:" opt; do
             show_help_and_exit 0
             ;;
         U )
-            TEST_DIR="SAI/ptf"
+            TEST_DIR="/SAI/ptf"
             ;;
         H )
             BMV2="False"
