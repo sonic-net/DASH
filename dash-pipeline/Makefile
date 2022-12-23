@@ -662,10 +662,10 @@ run-saichallenger-scale-tests: deploy-ixiac
 
 run-saichallenger-tutorials: deploy-ixiac
 	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
-	-w /sai-challenger/dash_tests \
+	-w /sai-challenger/dash_tests/functional \
 	$(DOCKER_FLAGS) \
 	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
-	./run_tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) tutorial
+	./run-tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) tutorial
 
 ###############################
 # ENVIRONMENT SETUP TARGETS

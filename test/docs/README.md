@@ -12,5 +12,5 @@
 | [DASH PTF Testbed](dash-ptf-testbed.md) | Describes the integration of [SAI PTF](https://github.com/opencomputeproject/SAI/tree/master/ptf) into a DASH Test Framework
 | [DASH SAI Challenger Testbed](dash-saichallenger-testbed.md) | Describes the integration of [SAI Challenger](https://github.com/opencomputeproject/SAI-Challenger) and [dpugen](https://pypi.org/project/dpugen/) into a DASH Test Framework |
 | [SAI Challenger DASH Schema](README-SAIC-DASH-config-spec.md) | High-level schema to generate scaled configurations (e.g. via [dpugen](https://pypi.org/project/dpugen/)) as well as the DASH "SAI Record" format which comprises SAI "CRUD" operations.
-| [SAI Challenger Tutorials](../test-cases/scale/saic/tutorial/README.md) | Guided tour of SAI Challenger for DASH
+| [SAI Challenger Tutorials](../test-cases/functional/saic/tutorial/README.md) | Guided tour of SAI Challenger for DASH
 | [SAI Challenger Test Workflows](dash-test-sai-challenger.md) | How to run scalable tests using SAI-Challenger and snappi. |
