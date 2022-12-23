@@ -429,7 +429,7 @@ run-saithrift-ptftests: disable-ipv6
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
 	-w /tests/ \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
-	./run-functional-tests.sh
+	./functional/ptf/run-tests.sh
 
 # Run "dev" PTF tests mounted from host
 # Note - if add ixia-c usage to PTF tests, add dependency deploy-ixiac
@@ -438,7 +438,7 @@ run-saithrift-dev-ptftests: disable-ipv6
 	-v $(PWD)/../test/test-cases/:/tests-dev/ \
 	-w /tests-dev/ \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
-	./run-functional-tests.sh
+	./functional/ptf/run-tests.sh
 
 run-saithrift-client-bash:
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
@@ -618,7 +618,9 @@ docker-saichallenger-client:
 
 DOCKER_RUN_SAI_CHALLENGER_CLIENT=docker run \
 	-v $(SAI_CHALLENGER_PATH):/sai-challenger \
-	-v $(SAI_CHALLENGER_PATH)/../test-cases/scale/saic/:/sai-challenger/dash_tests \
+	-v $(SAI_CHALLENGER_PATH)/../test-cases/scale/saic/:/sai-challenger/dash_tests/scale \
+	-v $(SAI_CHALLENGER_PATH)/../test-cases/functional/saic/:/sai-challenger/dash_tests/functional \
+	-v $(SAI_CHALLENGER_PATH)/../test-cases/utils/:/sai-challenger/dash_tests/utils \
 	-v $(PWD)/../:/dash \
 	--cap-add=NET_ADMIN \
 	--device /dev/net/tun:/dev/net/tun \
@@ -642,12 +644,21 @@ run-saichallenger-client-bash: deploy-ixiac
 kill-saichallenger-client:
 	-docker kill $(CONTAINER_SAI_CHALLENGER_CLIENT_NAME)
 
-run-saichallenger-tests: deploy-ixiac
+run-saichallenger-tests: run-saichallenger-functional-tests run-saichallenger-scale-tests
+
+run-saichallenger-functional-tests: deploy-ixiac
 	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
-	-w /sai-challenger/dash_tests \
+	-w /sai-challenger/dash_tests/functional \
 	$(DOCKER_FLAGS) \
 	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
-	./run_tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
+	./run-tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
+
+run-saichallenger-scale-tests: deploy-ixiac
+	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
+	-w /sai-challenger/dash_tests/scale \
+	$(DOCKER_FLAGS) \
+	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
+	./run-tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
 
 run-saichallenger-tutorials: deploy-ixiac
 	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
