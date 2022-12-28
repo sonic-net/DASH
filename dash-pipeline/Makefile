@@ -610,7 +610,6 @@ docker-pull-saichallenger-client-bldr:
 	docker pull $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG)
 
 docker-saichallenger-client:
-	cd $(SAI_CHALLENGER_PATH) && ./build.sh -i client
 	docker build \
 		-f dockerfiles/Dockerfile.saichallenger-client \
 		-t $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
