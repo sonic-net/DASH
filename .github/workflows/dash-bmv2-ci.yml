@@ -54,8 +54,8 @@ jobs:
       run:  make docker-dash-p4c
     - name: Build P4 software switch (bmv2) and P4Info
       run:  DOCKER_FLAGS=$docker_fg_flags make p4
-    - name: Install SAI submodule
-      run:  git submodule update --init
+    - name: Install DASH submodules recursively
+      run:  git submodule update --init --recursive
     - name: Pull/Build docker saithrift-bldr image
       run:  make docker-saithrift-bldr
     - name: Pull/Build docker bmv2-bldr image
