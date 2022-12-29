@@ -4,6 +4,7 @@
 #include "dash_metadata.p4"
 #include "dash_parser.p4"
 #include "dash_vxlan.p4"
+#include "dash_nvgre.p4"
 #include "dash_outbound.p4"
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"

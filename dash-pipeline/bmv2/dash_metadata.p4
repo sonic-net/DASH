@@ -11,6 +11,8 @@ struct encap_data_t {
     EthernetAddress underlay_smac;
     EthernetAddress underlay_dmac;
     EthernetAddress overlay_dmac;
+    dash_encapsulation_t encap_type;
+    bit<24> service_tunnel_id;
 }
 
 enum bit<16> direction_t {

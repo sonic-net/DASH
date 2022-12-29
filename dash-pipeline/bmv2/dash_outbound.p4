@@ -4,6 +4,7 @@
 #include "dash_headers.p4"
 #include "dash_acl.p4"
 #include "dash_conntrack.p4"
+#include "dash_service_tunnel.p4"
 
 control outbound(inout headers_t hdr,
                  inout metadata_t meta,
@@ -29,6 +30,32 @@ control outbound(inout headers_t hdr,
         meta.dropped = true;
     }
 
+    action route_service_tunnel(bit<1> is_overlay_dip_v4_or_v6,
+                                IPv4ORv6Address overlay_dip,
+                                bit<1> is_overlay_sip_v4_or_v6,
+                                IPv4ORv6Address overlay_sip,
+                                bit<1> is_underlay_dip_v4_or_v6,
+                                IPv4ORv6Address underlay_dip,
+                                bit<1> is_underlay_sip_v4_or_v6,
+                                IPv4ORv6Address underlay_sip,
+                                dash_encapsulation_t encap_type,
+                                bit<24> tunnel_id) {
+        /* Assume the overlay addresses provided are always IPv6 and the original are IPv4 */
+        assert(is_overlay_dip_v4_or_v6 == 1 && is_overlay_sip_v4_or_v6 == 1);
+        assert(is_underlay_dip_v4_or_v6 != 1 && is_underlay_sip_v4_or_v6 != 1);
+        IPv4Address original_overly_dip = hdr.ipv4.src_addr;
+        IPv4Address original_overly_sip = hdr.ipv4.dst_addr;
+
+        service_tunnel_encode(hdr, overlay_dip, overlay_sip);
+
+        /* encapsulation will be done in apply block based on encap_type */
+        meta.encap_data.underlay_dip = underlay_dip == 0 ? original_overly_dip : (IPv4Address)underlay_dip;
+        meta.encap_data.underlay_sip = underlay_sip == 0 ? original_overly_sip : (IPv4Address)underlay_sip;
+        meta.encap_data.overlay_dmac = hdr.ethernet.dst_addr;
+        meta.encap_data.encap_type = encap_type;
+        meta.encap_data.service_tunnel_id = tunnel_id;
+    }
+
     direct_counter(CounterType.packets_and_bytes) routing_counter;
 
     @name("outbound_routing|dash_outbound_routing")
@@ -43,6 +70,7 @@ control outbound(inout headers_t hdr,
             route_vnet; /* for expressroute - ecmp of overlay */
             route_vnet_direct;
             route_direct;
+            route_service_tunnel;
             drop;
         }
         const default_action = drop;
@@ -132,6 +160,27 @@ control outbound(inout headers_t hdr,
                             meta.encap_data.underlay_sip,
                             meta.encap_data.overlay_dmac,
                             meta.encap_data.vni);
+             }
+           route_service_tunnel: {
+                if (meta.encap_data.encap_type == dash_encapsulation_t.VXLAN) {
+                    vxlan_encap(hdr,
+                                meta.encap_data.underlay_dmac,
+                                meta.encap_data.underlay_smac,
+                                meta.encap_data.underlay_dip,
+                                meta.encap_data.underlay_sip,
+                                meta.encap_data.overlay_dmac,
+                                meta.encap_data.service_tunnel_id);
+                } else if (meta.encap_data.encap_type == dash_encapsulation_t.NVGRE) {
+                    nvgre_encap(hdr,
+                                meta.encap_data.underlay_dmac,
+                                meta.encap_data.underlay_smac,
+                                meta.encap_data.underlay_dip,
+                                meta.encap_data.underlay_sip,
+                                meta.encap_data.overlay_dmac,
+                                meta.encap_data.service_tunnel_id);
+                } else {
+                    drop();
+                }
              }
          }
     }
