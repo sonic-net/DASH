@@ -606,7 +606,7 @@ SONiC for DASH shall have a lite swss initialization without the heavy-lift of e
 
 ### 3.3.5 Underlay Routing
 DASH Appliance shall establish BGP session with the connected ToR and advertise the prefixes (VIP PA). In turn, the ToR shall advertise default route to appliance. With two ToRs connected, the appliance shall have route with gateway towards both ToRs and does ECMP routing. Orchagent install the route and resolves the neighbor (GW) mac and programs the underlay route/nexthop and neighbor.
-Underlay attributes on a DASH appliance shall be programmed similar to Sonic switch. RIF entries shall be created first using SAI_ROUTER_INTERFACE APIs with IP2ME routes installed using SAI_ROUTE_ENTRY APIs. Based on neighbor learned from peer(e.g, ToR), neighbor and next-hop entries shall be programmed using SAI_NEIGHBOR_ENTRY and SAI_NEXT_HOP APIs. Finally underlay routes learned via BGP shall be programmed with regular or ECMP nexthops and appliance shall use such underlay routes for packet forwarding
+Underlay attributes on a DASH appliance shall be programmed similar to Sonic switch. RIF entries shall be created first using SAI_ROUTER_INTERFACE APIs with IP2ME routes installed using SAI_ROUTE_ENTRY APIs. Based on neighbor learned from peer(e.g, ToR), neighbor and next-hop entries shall be programmed using SAI_NEIGHBOR_ENTRY and SAI_NEXT_HOP APIs. Finally underlay routes learned via BGP shall be programmed with regular or ECMP next-hops and appliance shall use such underlay routes for packet forwarding
 
 ### 3.3.6 Memory footprints
 
