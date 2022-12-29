@@ -94,14 +94,19 @@ Warm-restart support is not considered in Phase 1. TBD
 Following are the minimal scaling requirements
 | Item                     | Expected value              |
 |--------------------------|-----------------------------|
-| VNETs                    | 1024                     |
+| VNETs                    | 1024*                    |
 | ENI                      | 64 Per Card              |
-| Routes per ENI           | 100k                     |
+| Outbound Routes per ENI  | 100k                     |
+| Inbound Routes per ENI   | 10k**                    |
 | NSGs per ENI             | 6                        |
 | ACLs per ENI             | 6x100K prefixes          |
 | ACLs per ENI             | 6x10K SRC/DST ports      |
-| CA-PA Mappings           | 10M                      |
+| CA-PA Mappings           | 10M Per Card             |
 | Active Connections/ENI   | 1M (Bidirectional TCP or UDP)       |
+
+\* Number of VNET is a software limit as VNET by itself does not take hardware resources. This shall be limited to number of VNIs hardware can support
+
+\** Support 10K peering in-region/cross-region
 
 ## 1.5 Design Considerations
 
@@ -543,6 +548,9 @@ SONiC for DASH shall have a lite swss initialization without the heavy-lift of e
 | Nexthop                  | SAI_NEXT_HOP_ATTR_IP  | 
 |                          | SAI_NEXT_HOP_ATTR_ROUTER_INTERFACE_ID  | 
 |                          | SAI_NEXT_HOP_ATTR_TYPE  |
+| Nexthop Group            | SAI_NEXT_HOP_GROUP_TYPE_ECMP |
+|                          | SAI_NEXT_HOP_GROUP_MEMBER_ATTR_NEXT_HOP_ID  | 
+|                          | SAI_NEXT_HOP_GROUP_MEMBER_ATTR_NEXT_HOP_GROUP_ID   |
 | Packet                   | SAI_PACKET_ACTION_FORWARD  | 
 |                          | SAI_PACKET_ACTION_TRAP  | 
 |                          | SAI_PACKET_ACTION_DROP  | 
@@ -597,7 +605,8 @@ SONiC for DASH shall have a lite swss initialization without the heavy-lift of e
 |                          | SAI_SWITCH_ATTR_VXLAN_DEFAULT_ROUTER_MAC |  
 
 ### 3.3.5 Underlay Routing
-DASH Appliance shall establish BGP session with the connected ToR and advertise the prefixes (VIP PA). In turn, the ToR shall advertise default route to appliance. With two ToRs connected, the appliance shall have route with gateway towards both ToRs and does ECMP routing. Orchagent install the route and resolves the neighbor (GW) mac and programs the underlay route/nexthop and neighbor. In the absence of a default-route, appliance shall send the packet back on the same port towards the receiving ToR and can derive the underlay dst mac from the src mac of the received packet or from the neighbor entry (IP/MAC) associated with the port. 
+DASH Appliance shall establish BGP session with the connected ToR and advertise the prefixes (VIP PA). In turn, the ToR shall advertise default route to appliance. With two ToRs connected, the appliance shall have route with gateway towards both ToRs and does ECMP routing. Orchagent install the route and resolves the neighbor (GW) mac and programs the underlay route/nexthop and neighbor.
+Underlay attributes on a DASH appliance shall be programmed similar to Sonic switch. RIFs shall be created first using SAI_ROUTER_INTERFACE APIs with IP2ME routes installed using SAI_ROUTE_ENTRY APIs. Based on neighbor learnt from peer(e.g, ToR), neighbor and nexthop entries shall be programmed using SAI_NEIGHBOR_ENTRY and SAI_NEXT_HOP APIs. Finally underlay routes learnt via BGP shall be programmed with regular or ECMP nexthops and appliance shall use such underlay routes for packet forwarding
 
 ### 3.3.6 Memory footprints
 
