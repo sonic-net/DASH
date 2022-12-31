@@ -5,4 +5,4 @@
 [submodule "test/SAI-Challenger"]
 	path = test/SAI-Challenger
 	url = https://github.com/opencomputeproject/SAI-Challenger
-	branch = multi-api-support-crud
+	branch = main
