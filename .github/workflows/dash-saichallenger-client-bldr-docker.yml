@@ -37,8 +37,8 @@ jobs:
       run:  make docker-pull-dash-p4c
     - name: Build P4 software switch (bmv2) and P4Info
       run:  DOCKER_FLAGS=$docker_fg_flags make p4
-    - name: Install DASH submodules recursively
-      run:  git submodule update --init --recursive
+    - name: Install SAI submodule
+      run:  git submodule update --init
     - name: Generate SAI API
       run:  DOCKER_FLAGS=$docker_fg_flags make sai
     - name: Generate SAI-Thrift client and server code and libs
