@@ -7,10 +7,10 @@ from pathlib import Path
 from pprint import pprint
 
 import pytest
-from saichallenger.dataplane.ptf_testutils import (send_packet,
-                                                   simple_udp_packet,
-                                                   simple_vxlan_packet,
-                                                   verify_packet)
+from saichallenger.common.sai_dataplane.utils.ptf_testutils import (send_packet,
+                                                                    simple_udp_packet,
+                                                                    simple_vxlan_packet,
+                                                                    verify_packet)
 
 current_file_dir = Path(__file__).parent
 
@@ -114,7 +114,7 @@ TEST_VNET_INBOUND_CONFIG = {
 
 class TestSaiVnetInbound:
 
-    def test_vnet_inbound_create(self, confgen, dpu):
+    def test_vnet_inbound_create(self, dpu):
         """Test configuration create"""
 
         # confgen.mergeParams(TEST_VNET_INBOUND_CONFIG)
@@ -173,7 +173,7 @@ class TestSaiVnetInbound:
         print("\nVerifying packet...\n", vxlan_exp_pkt.__repr__())
         verify_packet(dataplane, vxlan_exp_pkt, 1)
 
-    def test_vnet_inbound_remove(self, confgen, dpu):
+    def test_vnet_inbound_remove(self, dpu):
         """Test configuration remove"""
 
         # confgen.mergeParams(TEST_VNET_INBOUND_CONFIG)
