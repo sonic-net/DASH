@@ -18,7 +18,6 @@ Thrift SAI interface ENI tests
 
 from unittest import skipIf
 
-from ptf.testutils import test_param_get
 from sai_dash_utils import *
 from sai_thrift.sai_headers import *
 
@@ -54,7 +53,7 @@ class CreateDeleteEniTest(VnetAPI):
         self.createDirectionLookupTest()
         self.createEniTest()
         self.createEniEtherAddressMapTest()
-        if not test_param_get('bmv2'):
+        if not test_param_get('target') == 'bmv2':
             # Issue #233
             self.createInboundRoutingEntryTest()
             self.createPaValidationTest()
@@ -62,7 +61,7 @@ class CreateDeleteEniTest(VnetAPI):
         self.createCa2PaEntryTest()
 
         # Attributes verification
-        if not test_param_get('bmv2'):
+        if not test_param_get('target') == 'bmv2':
             # TODO: add issue
             self.dashAclGroupAttributesTest()
             self.vnetAttributesTest()
@@ -76,7 +75,7 @@ class CreateDeleteEniTest(VnetAPI):
             self.outboundCa2PaEntryAttributesTest()
 
         # Remove verification
-        if not test_param_get('bmv2'):
+        if not test_param_get('target') == 'bmv2':
             # TODO: add issue
             self.deleteVnetWhenMapExistTest()
             self.deleteEniWhenMapExistTest()
@@ -976,7 +975,7 @@ class CreateDeleteEniTest(VnetAPI):
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
 
 
-@skipIf(test_param_get('bmv2'), "Blocked by Issue #233. Inbound Routing is not supported in BMv2.")
+@skipIf(test_param_get('target') == 'bmv2', "Blocked by Issue #233. Inbound Routing is not supported in BMv2.")
 class EniScaleTest(VnetAPI):
     """
     Verifies ENI scaling:
@@ -1082,7 +1081,7 @@ class EniScaleTest(VnetAPI):
         print("PASS")
 
 
-@skipIf(test_param_get('bmv2'), "Blocked by Issue #233. Inbound Routing is not supported in BMv2.")
+@skipIf(test_param_get('target') == 'bmv2', "Blocked by Issue #233. Inbound Routing is not supported in BMv2.")
 class CreateTwoSameEnisNegativeTest(VnetAPI):
     """
     Verifies failure in case of creation the same ENIs in one VNET
