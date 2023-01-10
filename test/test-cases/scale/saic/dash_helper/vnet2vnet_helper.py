@@ -1,5 +1,5 @@
 import snappi
-import saichallenger.dataplane.traffic_utils as tu
+import saichallenger.common.sai_dataplane.utils.traffic_utils as tu
 from collections import namedtuple
 
 
