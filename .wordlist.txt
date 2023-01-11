@@ -309,6 +309,7 @@ LOOKUPs
 loopback
 LPM
 lts
+MACs
 Macsec
 makefile
 Makefile
@@ -636,6 +637,7 @@ Vnic
 vnic
 vnics
 VNID
+VNIs
 VPC
 vpc
 vport
