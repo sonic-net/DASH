@@ -113,7 +113,7 @@ Metering is essential for billing the customers and below are the high-level req
 	- Route table based metering - E.g. For Vnet peering cases.
 	- Mapping table based metering - E.g For specific destinations within mapping table that must be billed separately     
 - If packet flow hits multiple metering buckets, order of priority shall be **Policy->Route->Mapping**
-- User shall be able to override the precedence between Routing and Mapping buckets by setting an _override_ flag. When policy is enabled for a route, it takes higher precendence than routing and mapping metering bucket. 
+- User shall be able to override the precedence between Routing and Mapping buckets by setting an _override_ flag. When policy is enabled for a route, it takes higher precedence than routing and mapping metering bucket. 
 - Implementation shall aggregate the counters on an "_ENI+Metering Bucket_" combination for billing:
 	- 	All traffic from an ENI to a Peered VNET
 	- 	All traffic from an ENI to a Private Link destination
@@ -123,7 +123,7 @@ Metering is essential for billing the customers and below are the high-level req
 	- 	All outbound metered traffic from an ENI
 	- 	All inbound metered traffic towards an ENI
 - Customer is billed based on number of bytes sent/received separately. A distinct counter must be supported for outbound vs inbound traffic of each category.
-- Application shall utilize the metering hardware resource in an optimized manner by allocating meter id and de-allocating when not-in-use
+- Application shall utilize the metering hardware resource in an optimized manner by allocating meter id and deallocating when not-in-use
 - Application shall bind all associated metering buckets to an ENI. During ENI deletion, all associated metering bucket binding should be auto-removed.
 - Inbound billing - Route rule table shall have metering bucket association for inbound traffic. Different inbound scenarios are TBD. 
 
