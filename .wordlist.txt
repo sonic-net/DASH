@@ -126,6 +126,7 @@ dataplanes
 datastore
 DBs
 DDoS
+deallocating
 Decap
 decap
 deliverables
@@ -395,7 +396,6 @@ pps
 PPSRule
 pptx
 Prabhat
-precedence
 pre
 prebuilt
 Prem
