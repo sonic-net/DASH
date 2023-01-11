@@ -15,7 +15,8 @@
     * [1.2 CLI requirements](#12-cli-requirements)
     * [1.3 Warm Restart requirements ](#13-warm-restart-requirements)
     * [1.4 Scaling requirements ](#14-scaling-requirements)
-    * [1.5 Design considerations ](#15-design-considerations)
+    * [1.5 Metering requirements ](#15-metering-requirements)
+    * [1.6 Design considerations ](#16-design-considerations)
   * [2 Packet Flows](#2-packet-flows)
   * [3 Modules Design](#3-modules-design)
     * [3.1 Config DB](#31-config-db)
@@ -103,7 +104,34 @@ Following are the minimal scaling requirements
 | CA-PA Mappings           | 10M                      |
 | Active Connections/ENI   | 1M (Bidirectional TCP or UDP)       |
 
-## 1.5 Design Considerations
+## 1.5 Metering requirements
+Metering is essential for billing the customers and below are the high-level requirements
+- Billing shall be at per ENI level and shall be able to query metering packet bytes per ENI
+- All buckets must be UINT64 size and start from value 0 and shall be counting number of bytes
+- Implementation must support metering at the following levels:
+	- Policy based metering - E.g. For specific destinations (prefix) that must be billed separately, say action_type 'direct'
+	- Route table based metering - E.g. For Vnet peering cases.
+	- Mapping table based metering - E.g For specific destinations within mapping table that must be billed separately     
+- If packet flow hits multiple metering buckets, order of priority shall be **Policy->Route->Mapping**
+- User shall be able to override the precedence between Routing and Mapping buckets by setting an _override_ flag. When policy is enabled for a route, it takes higher precendence than routing and mapping metering bucket. 
+- Implementation shall aggregate the counters on an "_ENI+Metering Bucket_" combination for billing:
+	- 	All traffic from an ENI to a Peered VNET
+	- 	All traffic from an ENI to a Private Link destination
+	- 	All traffic from an ENI to an internet destination
+	- 	All traffic from an ENI to cross-AZ destination (within the same VNET)
+	- 	All traffic from an ENI to cross-region destination (towards the peer VNET)
+	- 	All outbound metered traffic from an ENI
+	- 	All inbound metered traffic towards an ENI
+- Customer is billed based on number of bytes sent/received separately. A distinct counter must be supported for outbound vs inbound traffic of each category.
+- Application shall utilize the metering hardware resource in an optimized manner by allocating meter id and de-allocating when not-in-use
+- Application shall bind all associated metering buckets to an ENI. During ENI deletion, all associated metering bucket binding should be auto-removed.
+- Inbound billing - Route rule table shall have metering bucket association for inbound traffic. Different inbound scenarios are TBD. 
+
+_Open Items_
+- Can we avoid explicit dependency between ENI's and mappings? 
+- Bucket id integer to be associated to an optional metadata string?
+
+## 1.6 Design Considerations
 
 DASH Sonic implementation is targeted for appliance scenarios and must handles millions of updates. As such, the implementation is performance and scale focussed as compared to traditional switching and routing based solutions. The following are the design considerations.
 
