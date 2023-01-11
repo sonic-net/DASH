@@ -28,9 +28,11 @@ The testbed is setup to emulate a VNET to VNET scenario and to test the mechanis
 
 To emulate each VM in a VNET an Ixia-c port will be utilized. The BMv2 will be the DUT (This can later be replaced by a hardware-based appliance that connects to physical ports of a traffic generator)
 
-![ixia-c.drawio](../../images/ixia-c.drawio.svg)
+![ixia-c.DUT](../../images/ixia-c.dut.svg)
 
-
+In the above diagram:
+- Ixia-C can be replaced by a hardware-based OTG
+- BMv2 switch can be replaced with another software-based or a hardware-based switch
 
 ### Test Methodology
 
@@ -53,6 +55,6 @@ Note: No counters exist to date. Once counters are defined, the test-cases will 
 | UDP IPv6 bidirectional  | Verify traffic originating from one VNET simulated terminates on another simulated VNET. <br><br> Verify counters in DUT in the inbound direction are accurately incremented. <br><br> Verify latency measurements <br> Verify packet loss is 0 (Tx frames - Rx frames = 0) <br><br> Verify configured throughput rate is achieved in traffic statistics  |                                                 
 |  ACL inbound | Verify data traffic is allowed and unwanted traffic based on ACL is dropped. <br><br>Verify ACL inbound counters on DUT are incremented
 | ACL outbound  | Verify data traffic is allowed and unwanted traffic based on ACL is dropped. <br><br>Verify ACL outbound counters on DUT are incremented
-| BGP underlay | Verify BGP neighborship is established. <br><br>Verify BGP counters on DUT are incremented
+| BGP underlay | Verify BGP adjacency is established. <br><br>Verify BGP counters on DUT are incremented
 
 
