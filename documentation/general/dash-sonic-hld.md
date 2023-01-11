@@ -128,7 +128,7 @@ Metering is essential for billing the customers and below are the high-level req
 - For outbound flow and associated metering bucket, created as part of VM initiated traffic, the metering bucket shall account for outbound (Tx) bytes. Based on this outbound flow, pipeline shall also create a unified inbound flow. The same metering bucket shall account for the inbound (Rx) bytes for the return traffic to VM that matches this flow. 
 - Application shall utilize the metering hardware resource in an optimized manner by allocating meter id and deallocating when not-in-use
 - Application shall bind all associated metering buckets to an ENI. During ENI deletion, all associated metering bucket binding should be auto-removed.
-- A route rule table can also have a metering bucket association for explictly accounting the inbound traffic for an ENI. 
+- A route rule table can also have a metering bucket association for explicitly accounting the inbound traffic for an ENI. 
 
 _Open Items_
 - Can we avoid explicit dependency between ENI's and mappings? 
