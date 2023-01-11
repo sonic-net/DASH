@@ -103,15 +103,17 @@ Following are the minimal scaling requirements
 | ACLs per ENI             | 6x10K SRC/DST ports      |
 | CA-PA Mappings           | 10M                      |
 | Active Connections/ENI   | 1M (Bidirectional TCP or UDP)       |
+| Metering Buckets per ENI | 4000                     |
 
 ## 1.5 Metering requirements
-Metering is essential for billing the customers and below are the high-level requirements
+Metering is essential for billing the customers and below are the high-level requirements. Metering in this context is packet counts for billing purposes and not related to traffic policer or shaping. 
 - Billing shall be at per ENI level and shall be able to query metering packet bytes per ENI
-- All buckets must be UINT64 size and start from value 0 and shall be counting number of bytes
+- All metering buckets must be UINT64 size and start from value 0 and shall be counting number of bytes. A bucket contains 2 counters; 1 inbound (Rx) and 1 outbound (Tx).  
 - Implementation must support metering at the following levels:
-	- Policy based metering - E.g. For specific destinations (prefix) that must be billed separately, say action_type 'direct'
+	- Policy* based metering. - E.g. For specific destinations (prefix) that must be billed separately, say action_type 'direct'
 	- Route table based metering - E.g. For Vnet peering cases.
 	- Mapping table based metering - E.g For specific destinations within mapping table that must be billed separately     
+    *Policy refers to metering policy associated to Route tables. This is not related to ACL policy or any ACL packet counters.  
 - If packet flow hits multiple metering buckets, order of priority shall be **Policy->Route->Mapping**
 - User shall be able to override the precedence between Routing and Mapping buckets by setting an _override_ flag. When policy is enabled for a route, it takes higher precedence than routing and mapping metering bucket. 
 - Implementation shall aggregate the counters on an "_ENI+Metering Bucket_" combination for billing:
