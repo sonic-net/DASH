@@ -193,6 +193,7 @@ ENI
 eni
 Eni
 ENIs
+ENI's
 entrypoints
 enum
 EPUs
@@ -394,6 +395,7 @@ pps
 PPSRule
 pptx
 Prabhat
+precedence
 pre
 prebuilt
 Prem
@@ -578,6 +580,7 @@ UF
 UFID
 Ufs
 UI
+UINT
 undeploy
 unpair
 Unpair
