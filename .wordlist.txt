@@ -14,6 +14,7 @@ adaptor
 adaptors
 ADDR
 addr
+ageing
 agnostically
 amd
 apache
@@ -305,6 +306,7 @@ LOOKUPs
 loopback
 LPM
 lts
+MACs
 Macsec
 makefile
 Makefile
@@ -323,6 +325,7 @@ MaxTcpFlow
 MaxTotalFlowEntry
 MaxUdpFlow
 md
+mgmt
 microsoft
 misorder
 MSFT
@@ -631,6 +634,7 @@ Vnic
 vnic
 vnics
 VNID
+VNIs
 VPC
 vpc
 vport

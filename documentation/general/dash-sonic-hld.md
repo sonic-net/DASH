@@ -643,7 +643,13 @@ The following commands shall be added :
 
 ## 3.5 Test Plan
 
-Refer DASH documentation for the test plan. 
+DASH testing shall include at least two test levels:
+1. SAI-level testing
+1. SONiC-level testing
+
+SAI-level testing includes:
+- SAI underlay API verification (to add test plan)
+- DASH Overlay API verification - [Overlay test plan](https://github.com/Azure/DASH/tree/main/test/docs/testplans/overlay.md)
 
 ## 3.6 Example configuration
 

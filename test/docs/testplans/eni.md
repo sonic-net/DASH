@@ -55,7 +55,7 @@ Verifies create operations, an association with VNI, MAC.
 | 16  | verify PA validation entry attributes getting/setting         | `CreateDeleteEniTest.paValidationEntryAttributesTest`                                             |
 | 17  | verify Outbound routing entry attributes getting/setting      | `CreateDeleteEniTest.outboundRoutingEntryAttributesTest`                                          |
 | 18  | verify Outbound CA to PA entry attributes getting/setting     | `CreateDeleteEniTest.outboundCa2PaEntryAttributesTest`                                            |
-    
+
 ## ENI removal
 
 Verifies remove operations.
@@ -69,7 +69,7 @@ Verifies remove operations.
 | 5   | normal bulk delete                                                                                                                                                  | -                                                       |
 | 6   | bulk delete does not remove any if there is a mapping for some ENI                                                                                                  | -                                                       |
 
-## ENI scale. 
+## ENI scale.
 
 Verifies basic ENI scale, create/remove/recreate maximum number of ENIs .
 
