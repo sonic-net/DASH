@@ -205,3 +205,5 @@ See also [A collection of .gitignore templates](https://github.com/github/gitign
   - [Gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens). Supercharge the Git capabilities. 
   - [Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one). Create the ToC for an article.
 - [Drawing tool: diagrams.net](https://www.diagrams.net/)
+
+
