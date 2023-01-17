@@ -338,6 +338,8 @@ corresponding flow is created in the flow table.
 
 ### VM to VM (in VNET) communication
 
+Please note that VNET to VNET is seen below.  VNET Peering is identical and no datapath changes are needed.  VNET Global Peering uses IPv6 as the tunnel and uses the same tunnel format.  
+
 ![VMtoVM](./images/sdn/sdn-packet-transforms-vm-to-vm.svg)
 
 ### Internal Load balancer (in VNET) communication

@@ -7,10 +7,10 @@ from pathlib import Path
 from pprint import pprint
 
 import pytest
-from saichallenger.dataplane.ptf_testutils import (send_packet,
-                                                   simple_udp_packet,
-                                                   simple_vxlan_packet,
-                                                   verify_packet)
+from saichallenger.common.sai_dataplane.utils.ptf_testutils import (send_packet,
+                                                                    simple_udp_packet,
+                                                                    simple_vxlan_packet,
+                                                                    verify_packet)
 
 current_file_dir = Path(__file__).parent
 
