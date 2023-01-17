@@ -64,7 +64,7 @@ This stage tests integration with the "lower SONiC stack" which consists of the 
 
 This stage is distinguished by:
 * `syncd`, `redis` and sairedis thrift endpoint running on DUT. Note, the thrift-sairedis server is not a production component, it is used only for this test stage.
-* Test scripts configure the DUT via saithrift
+* Test scripts configure the DUT via sai-redis
 ### Data plane Testing Stage 5: DUT configuration via SONiC Northbound API
 
 ![dash-test-maturity-stages-dut-config-north](../images/dash-test-maturity-stages-dut-config-north.png) 
@@ -72,8 +72,8 @@ This stage is distinguished by:
 This stage is the culmination of DUT data plane integrated with the SONiC stack and is distinguished by:
 
 * Full SONiC stack integration of the [Switch State Services/SWSS](https://github.com/Azure/sonic-swss) (Redis, orchd, syncd, etc.)
-* Northbound API endpoint such as gNMI or other TBD-API with defined schema and backend
-* Test scripts control the DUT via the northbound API
+* Northbound API endpoint such as gNMI with defined schema and backend
+* Test scripts control the DUT via the northbound gNMI API
 
 ## SONiC-DASH Top-Down Testing Stages
 This section describes a progressive series of top-down testing stages, starting from the SONiC-DASH northbound management interface and working its way down to the final DASH-SAI API which controls the data plane. These stages may or may not be exercised in the community tests. Nevertheless, they provide a vocabulary and reference diagrams to discuss the scenarios.

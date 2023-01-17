@@ -19,7 +19,6 @@ Thrift SAI interface VNet tests
 from copy import copy
 from unittest import skipIf
 
-from ptf.testutils import test_param_get
 from sai_base_test import *
 from sai_thrift.sai_headers import *
 from sai_dash_utils import *
@@ -65,7 +64,7 @@ class Vnet2VnetCTTest(VnetAPI):
 
 
 @group("draft")
-@skipIf(test_param_get('bmv2'), "Blocked by Issue #233. Inbound Routing is not supported in BMv2.")
+@skipIf(test_param_get('target') == 'bmv2', "Blocked by Issue #233. Inbound Routing is not supported in BMv2.")
 class Vnet2VnetInboundTest(VnetAPI):
     """
     Inbound Vnet to Vnet scenario test case
@@ -239,7 +238,7 @@ class Vnet2VnetInboundTest(VnetAPI):
 
 
 @group("draft")
-@skipIf(test_param_get('bmv2'), "Blocked on BMv2 by Issue #236")
+@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetOutboundRouteVnetDirectTest(VnetAPI):
     """
     Outbound VNet to VNet test scenario with Outbound routing entry
@@ -343,7 +342,7 @@ class Vnet2VnetOutboundRouteVnetDirectTest(VnetAPI):
 
 
 @group("draft")
-@skipIf(test_param_get('bmv2'), "Blocked on BMv2 by Issue #236")
+@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetOutboundRouteDirectTest(VnetAPI):
     """
     Outbound VNet to VNet test scenario with Outbound routing entry
@@ -434,7 +433,7 @@ class Vnet2VnetOutboundRouteDirectTest(VnetAPI):
         verify_packet(self, direct_pkt, self.dev_port0)
 
 @group("draft")
-@skipIf(test_param_get('bmv2'), "Blocked on BMv2 by Issue #236")
+@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class VnetRouteTest(VnetAPI):
     """
     Vnet to Vnet scenario test case Outbound

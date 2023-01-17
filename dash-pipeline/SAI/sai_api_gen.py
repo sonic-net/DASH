@@ -184,6 +184,7 @@ def generate_sai_apis(program, ignore_tables):
     for table in tables:
         sai_table_data = dict()
         sai_table_data['keys'] = []
+        sai_table_data['ipaddr_family_attr'] = 'false'
         sai_table_data[ACTIONS_TAG] = []
         sai_table_data[ACTION_PARAMS_TAG] = []
 
@@ -220,6 +221,13 @@ def generate_sai_apis(program, ignore_tables):
                     if "is_" + key2['sai_key_name'] + "_v4_or_v6" == v4_or_v6_key_name:
                         key2["v4_or_v6_id"] = key['id']
                         break
+
+        for key in sai_table_data['keys']:
+            if (key['match_type'] == 'exact' and key['sai_key_type'] == 'sai_ip_address_t') or \
+                (key['match_type'] == 'ternary' and key['sai_key_type'] == 'sai_ip_address_t') or \
+                (key['match_type'] == 'lpm' and key['sai_lpm_type'] == 'sai_ip_prefix_t') or \
+                (key['match_type'] == 'list' and key['sai_list_type'] == 'sai_ip_prefix_list_t'):
+                    sai_table_data['ipaddr_family_attr'] = 'true'
 
         param_names = []
         for action in table[ACTION_REFS_TAG]:
