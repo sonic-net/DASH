@@ -5,4 +5,5 @@ Tests with high-rate traffic and complex configuration to verify scaling real-wo
 
 | Folder/File | Description |
 | --- | --- |
-| [vnet2vnet](vnet2vnet/README.md) | Scale DASH vnet2vnet Tests
+| [saic/](saic/README.md) | Scale tests using SAI Challenger test framework
+| [vnet2vnet/](vnet2vnet/README.md) | Scale DASH vnet2vnet Tests
