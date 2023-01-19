@@ -4,7 +4,7 @@ Documentation comprises system descriptions, High-level design (HLD) documents a
 
 The testing framework, methodology, documentation and testing artifacts are stored in the [DASH/test](../test) directory
 
-See also DASH [FAQ](https://github.com/Azure/DASH/wiki/FAQ) and [Glossary](https://github.com/Azure/DASH/wiki/Glossary). 
+See also DASH [FAQ](https://github.com/sonic-net/DASH/wiki/FAQ) and [Glossary](https://github.com/sonic-net/DASH/wiki/Glossary). 
 
 # Contents
 
@@ -63,7 +63,7 @@ Some of the guiding principles for this approach are:
 
 ## References
 
-- [Glossary](https://github.com/Azure/DASH/wiki/Glossary)
-- [FAQ](https://github.com/Azure/DASH/wiki/FAQ)
+- [Glossary](https://github.com/sonic-net/DASH/wiki/Glossary)
+- [FAQ](https://github.com/sonic-net/DASH/wiki/FAQ)
 
 

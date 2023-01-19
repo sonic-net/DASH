@@ -26,7 +26,7 @@ INBOUND_ROUTING_VNI = 2
 INNER_VM_IP = "172.19.1.100"
 INNER_REMOTE_IP = "172.19.1.1"
 
-# TODO: Fix configuration once issue is addressed: https://github.com/Azure/DASH/issues/233
+# TODO: Fix configuration once issue is addressed: https://github.com/sonic-net/DASH/issues/233
 TEST_VNET_INBOUND_CONFIG = {
 
     'ACL_TABLE_COUNT':                  1,
@@ -129,7 +129,7 @@ class TestSaiVnetInbound:
         pprint(result)
 
     @pytest.mark.ptf
-    @pytest.mark.xfail(reason="https://github.com/Azure/DASH/issues/233")
+    @pytest.mark.xfail(reason="https://github.com/sonic-net/DASH/issues/233")
     def test_vnet_inbound_traffic_check(self, dpu, dataplane):
         """Verify traffic forwarding in PTF style"""
 

@@ -39,7 +39,7 @@ All tests must be run from within a `dash-saichallenger-client` container. You c
 ### Preparation: Build and Run bmv2 and saithrift-server
 Fetch and build bmv2 and collaterals. You may skip if you've already done this.
 ```
-git clone https://github.com/Azure/DASH.git
+git clone https://github.com/sonic-net/DASH.git
 cd dash-pipeline
 make clean && make all
 ```
