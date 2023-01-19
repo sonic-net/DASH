@@ -38,7 +38,7 @@ Install dependencies listed [**here**](../../dash-pipeline/README.md#prerequisit
 
 ## Install and build
 ```
-git clone https://github.com/Azure/DASH.git
+git clone https://github.com/sonic-net/DASH.git
 cd DASH/dash-pipeline
 make clean
 make all
