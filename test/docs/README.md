@@ -14,3 +14,6 @@
 | [SAI Challenger DASH Schema](README-SAIC-DASH-config-spec.md) | High-level schema to generate scaled configurations (e.g. via [dpugen](https://pypi.org/project/dpugen/)) as well as the DASH "SAI Record" format which comprises SAI "CRUD" operations.
 | [SAI Challenger Tutorials](../test-cases/functional/saic/tutorial/README.md) | Guided tour of SAI Challenger for DASH
 | [SAI Challenger Test Workflows](dash-test-sai-challenger.md) | How to run scalable tests using SAI-Challenger and snappi. |
+| [Testbed](testbed/README.md) | Describes the setup and configuration of a DASH testbed.|
+| [snappi and SAI-Challenger based tests](dash-test-sai-challenger.md) | How to run scalable tests using SAI-Challenger and snappi. The scalability is achieved with additional DASH/SAI abstraction level in test code to simplify high scale DUT configuration. |
+| [Test Plans](testplans/README.md) |  Home of DASH features test plans including test plan template |
