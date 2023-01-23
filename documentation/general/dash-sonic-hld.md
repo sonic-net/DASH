@@ -15,7 +15,8 @@
     * [1.2 CLI requirements](#12-cli-requirements)
     * [1.3 Warm Restart requirements ](#13-warm-restart-requirements)
     * [1.4 Scaling requirements ](#14-scaling-requirements)
-    * [1.5 Design considerations ](#15-design-considerations)
+    * [1.5 Metering requirements ](#15-metering-requirements)
+    * [1.6 Design considerations ](#16-design-considerations)
   * [2 Packet Flows](#2-packet-flows)
   * [3 Modules Design](#3-modules-design)
     * [3.1 Config DB](#31-config-db)
@@ -104,12 +105,42 @@ Following are the minimal scaling requirements
 | ACLs per ENI             | 6x10K SRC/DST ports      |
 | CA-PA Mappings           | 10M Per Card             |
 | Active Connections/ENI   | 1M (Bidirectional TCP or UDP)       |
+| Metering Buckets per ENI | 4000                     |
 
 \* Number of VNET is a software limit as VNET by itself does not take hardware resources. This shall be limited to number of VNI hardware can support
 
 \** Support 10K peering in-region/cross-region
 
-## 1.5 Design Considerations
+## 1.5 Metering requirements
+Metering is essential for billing the customers and below are the high-level requirements. Metering/Bucket in this context is related to byte counting for billing purposes and not related to traffic policer or shaping. 
+- Billing shall be at per ENI level and shall be able to query metering packet bytes per ENI
+- All metering buckets must be UINT64 size and start from value 0 and shall be counting number of bytes. A bucket contains 2 counters; 1 inbound (Rx) and 1 outbound (Tx).  
+- Implementation (a.k.a H/W pipeline implementation) must support metering at the following levels:
+	- Policy based metering. - E.g. For specific destinations (prefix) that must be billed separately, say action_type 'direct'
+	- Route table based metering - E.g. For Vnet peering cases.
+	- Mapping table based metering - E.g For specific destinations within the mapping table that must be billed separately     
+- Policy in the metering context refers to metering policy associated to Route tables. This is not related to ACL policy or any ACL packet counters.  
+- If packet flow hits multiple metering buckets, order of priority shall be **Policy->Route->Mapping**
+- User shall be able to override the precedence between Routing and Mapping buckets by setting an _override_ flag. When policy is enabled for a route, it takes higher precedence than routing and mapping metering bucket. 
+- Implementation shall aggregate the counters on an "_ENI+Metering Bucket_" combination for billing:
+	- 	All traffic from an ENI to a Peered VNET
+	- 	All traffic from an ENI to a Private Link destination
+	- 	All traffic from an ENI to an internet destination
+	- 	All traffic from an ENI to cross-AZ destination (within the same VNET)
+	- 	All traffic from an ENI to cross-region destination (towards the peer VNET)
+	- 	All outbound metered traffic from an ENI
+	- 	All inbound metered traffic towards an ENI
+- Customer is billed based on number of bytes sent/received separately. A distinct counter must be supported for outbound vs inbound traffic of each category.
+- For outbound flow and associated metering bucket, created as part of VM initiated traffic, the metering bucket shall account for outbound (Tx) bytes. Based on this outbound flow, pipeline shall also create a unified inbound flow. The same metering bucket shall account for the inbound (Rx) bytes for the return traffic to VM that matches this flow. 
+- Application shall utilize the metering hardware resource in an optimized manner by allocating meter id and deallocating when not-in-use
+- Application shall bind all associated metering buckets to an ENI. During ENI deletion, all associated metering bucket binding should be auto-removed.
+- A route rule table can also have a metering bucket association for explicitly accounting the inbound traffic for an ENI. 
+
+_Open Items_
+- Can we avoid explicit dependency between ENI's and mappings? 
+- Bucket id integer to be associated to an optional metadata string?
+
+## 1.6 Design Considerations
 
 DASH Sonic implementation is targeted for appliance scenarios and must handles millions of updates. As such, the implementation is performance and scale focussed as compared to traditional switching and routing based solutions. The following are the design considerations.
 
@@ -496,7 +527,7 @@ The [figure below](#schema_relationships) illustrates the various schema and the
 * gNMI northbound API, which uses YANG to specify schema
 * Redis APP_DB, which uses [ABNF](https://github.com/Azure/SONiC/blob/master/doc/mgmt/Management%20Framework.md#12-design-overview) schema definition language. Redis objects can be directly manipulated using [SAI-redis](https://github.com/Azure/sonic-sairedis) clients.
 * JSON import/export formats
-* [SAI](https://github.com/Azure/DASH/tree/main/SAI) table and attribute objects
+* [SAI](https://github.com/sonic-net/DASH/tree/main/SAI) table and attribute objects
 
 #### Canonical Test Data and schema transformations
 For testing purposes, it is convenient to express test configurations in a single canonical format, and use this to drive the different API layers to verify correct behavior. A tentative JSON format for representing DASH service configurations is described in [Reference configuration example (JSON)](../gnmi/dash-reference-config-example.md). Test drivers can accept this input, transform it into different schemas and drive the associated interfaces. For example, a JSON representation of an ACL rule can be transformed into gNMI API calls, SAI-redis calls, SAI-thrift calls, etc.

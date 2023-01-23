@@ -119,22 +119,22 @@ networking services for the cloud. The 7 initial services (in draft) describe
 this in more detail. We will also work with cloud and enterprise providers to
 further extend DASH to meet their specific needs.
 
-1. [VNET-to-VNET](https://github.com/Azure/DASH/tree/main/documentation/vnet2vnet-service).
+1. [VNET-to-VNET](https://github.com/sonic-net/DASH/tree/main/documentation/vnet2vnet-service).
 This scenario is the starting point to design, implement and test the core DASH
 mechanisms. In particular it allows the following features: VM to VM
 communication in VNET, route support, LPM support, ACL support. This is to
 verify the following performance properties: CPS, flow, PPS, and rule scale. 
 1. [VNET
-   Peering](https://github.com/Azure/DASH/tree/main/documentation/vnet-peering-service).
+   Peering](https://github.com/sonic-net/DASH/tree/main/documentation/vnet-peering-service).
    Virtual network peering connects two virtual networks
    seamlessly. Once peered, for connectivity purposes, the virtual networks
    appear as one. For background information, see [Virtual network
    peering](https://docs.microsoft.com/en-us/windows-server/networking/sdn/vnet-peering/sdn-vnet-peering).
 1. [High Availability
-   (HA)](https://github.com/Azure/DASH/tree/main/documentation/high-avail).
+   (HA)](https://github.com/sonic-net/DASH/tree/main/documentation/high-avail).
    Useful for failure and failover events
 1. [Load
-   Balancer](https://github.com/Azure/DASH/tree/main/documentation/load-bal-service).
+   Balancer](https://github.com/sonic-net/DASH/tree/main/documentation/load-bal-service).
    The feature that switches traffic from using VIP-to-VIP connectivity (which
    involves transiting SLB MUXes), into using a direct path between VMs (direct
    PA to PA path).
@@ -146,9 +146,9 @@ verify the following performance properties: CPS, flow, PPS, and rule scale.
    public facing shared services via their private IP addresses within their
    VNET.
 1. [Encryption
-   Gateway](https://github.com/Azure/DASH/tree/main/documentation/encrypt-gw-service).
+   Gateway](https://github.com/sonic-net/DASH/tree/main/documentation/encrypt-gw-service).
 1. [Express Route
-   Gateway](https://github.com/Azure/DASH/tree/main/documentation/express-route-service).
+   Gateway](https://github.com/sonic-net/DASH/tree/main/documentation/express-route-service).
 
 ## Azure provisioning example
 
@@ -163,7 +163,7 @@ directed to our Appliance, which processes the first packet in hardware.
 
 In parallel, from a DASH perspective we are developing a common programming
 interface to agnostically configure hardware for the scenarios outlined in the
-[Documentation folder](https://github.com/Azure/DASH/tree/main/documentation):
+[Documentation folder](https://github.com/sonic-net/DASH/tree/main/documentation):
 
 > [!NOTES] We just capture the gist of these scenarios and then we link to the
 > related documentation.
@@ -205,7 +205,7 @@ section.
   describe the behaviors per scenario and document them in a repeatable format.
   From there we will be able to auto-generate the APIs. The implementation
   itself is not required to be P4. For more information, see the [Behavioral
-  model](https://github.com/Azure/DASH/tree/main/dash-pipeline/bmv2) section.
+  model](https://github.com/sonic-net/DASH/tree/main/dash-pipeline/bmv2) section.
 - **DASH programmable hardware**. With the help of network hardware technology
 providers, we are collaborating to create an open forum capitalizing on the use
 of programmable hardware including **SmartNICs**, **SmartSwitches**, and
@@ -221,7 +221,7 @@ For more information,see the [Scenarios](#scenarios) section.
   requirements. For more information about test documentation, test scripts,
   test configurations and other artifacts required to test a DASH device or
   devices, see [Performance
-  testing](https://github.com/Azure/DASH/tree/main/test). 
+  testing](https://github.com/sonic-net/DASH/tree/main/test). 
 
 ## Logical architecture (software stack) 
 
@@ -274,7 +274,7 @@ Scale](../high-avail/high-availability-and-scale.md) document.
 ### gNMI container
 
 The SDN controller communicates with a DASH device through a
-**[gNMI](https://github.com/Azure/DASH/wiki/Glossary#gnmi) endpoint** served by
+**[gNMI](https://github.com/sonic-net/DASH/wiki/Glossary#gnmi) endpoint** served by
 a new DASH SDN agent **running inside a new SONiC DASH container**.  
 
 In summary:
@@ -297,7 +297,7 @@ A **gNMI schema** will manage the following DASH components:
 - Other  
 
 > [!NOTE] See also work in progress PR [doc-ref-config-example
-> #93](https://github.com/Azure/DASH/pull/93).
+> #93](https://github.com/sonic-net/DASH/pull/93).
 
 #### Multiple DPUs device
 
@@ -342,7 +342,7 @@ combination of traditional SAI headers and new DASH pipeline-specific *extension
 Technology suppliers must implement this interface for their DASH devices. This
 is the primary integration point of DASH devices and the SONiC stack. It will be
 rigorously tested for performance and conformance. See [DASH Testing
-documentation](https://github.com/Azure/DASH/tree/main/test).
+documentation](https://github.com/sonic-net/DASH/tree/main/test).
 
 SAI "schema" are represented as fixed c-language header files and derived
 metadata header files. The **underlay** and **overlay** schema have different origins:
@@ -352,7 +352,7 @@ metadata header files. The **underlay** and **overlay** schema have different or
   **hand-generated** and **maintained**. DASH uses a subset of these to manage "**underlay**"
   functions, e.g. device management, Layer 3 routing and so forth. For more information, see [SWSS Lite (Underlay)](dash-sonic-hld.md#333-swss-lite-underlay). 
 - DASH SAI **overlay** objects. They are derived from a [P4 Behavioral
-  Model](https://github.com/Azure/DASH/tree/main/dash-pipeline). A script
+  Model](https://github.com/sonic-net/DASH/tree/main/dash-pipeline). A script
   reads the P4 model and generates SAI header files. For more information, see [DASHOrch (Overlay)](dash-sonic-hld.md#332-dashorch-overlay).
 
 For more information see the [SAI README](../../../SAI/README.md) file.
@@ -541,23 +541,23 @@ DASH devices satisfy the standard **DASH conformance and performance
 requirements**. For more information about test documentation, test scripts,
 test configurations and other artifacts required to test a DASH device, see
 [DASH conformance and performance
-testing](https://github.com/Azure/DASH/tree/main/test). 
+testing](https://github.com/sonic-net/DASH/tree/main/test). 
 
 > [!NOTE] TBD - We just capture he basic info and then link to the related
 > test area. 
 
 - [High-Level Description (HLD) Test
-  Specification](https://github.com/Azure/DASH/blob/main/test/docs/dash-test-HLD.md).
+  Specification](https://github.com/sonic-net/DASH/blob/main/test/docs/dash-test-HLD.md).
   High-level design for the testing of devices which conform to the DASH
   requirements.
 - [Dash Test Maturity
-  Stages](https://github.com/Azure/DASH/blob/main/test/docs/dash-test-maturity-stages.md).
+  Stages](https://github.com/sonic-net/DASH/blob/main/test/docs/dash-test-maturity-stages.md).
   Describes a progressive approach to DASH testing.
 - [DASH SAI-Thrift Test
-  Workflow](https://github.com/Azure/DASH/blob/main/test/docs/dash-test-workflow-saithrift.md).
+  Workflow](https://github.com/sonic-net/DASH/blob/main/test/docs/dash-test-workflow-saithrift.md).
   DASH test workflow with SAI-thrift.
 - [DASH P4 SAI-Thrift Test
-  Workflow](https://github.com/Azure/DASH/blob/main/test/docs/dash-test-workflow-p4-saithrift.md).
+  Workflow](https://github.com/sonic-net/DASH/blob/main/test/docs/dash-test-workflow-p4-saithrift.md).
   Use of P4-based simulators or SW data planes to verify DASH behavior, using
   saithrift API.
 
@@ -566,7 +566,7 @@ testing](https://github.com/Azure/DASH/tree/main/test).
 ### A day in the life of a DASH packet
 
 > [!NOTE] TBD - Engineering help needed. 
-> Add link to the SDN packet pipeline document when ready. See PR [dash-sdn-and-packet-transform-documentation-update](https://github.com/Azure/DASH/pull/125).
+> Add link to the SDN packet pipeline document when ready. See PR [dash-sdn-and-packet-transform-documentation-update](https://github.com/sonic-net/DASH/pull/125).
 
 ### A day in the life of a DASH SDN controller
 
@@ -578,11 +578,11 @@ testing](https://github.com/Azure/DASH/tree/main/test).
 
 ## References
 
-- [FAQ](https://github.com/Azure/DASH/wiki/FAQ)
-- [Glossary](https://github.com/Azure/DASH/wiki/Glossary)
+- [FAQ](https://github.com/sonic-net/DASH/wiki/FAQ)
+- [Glossary](https://github.com/sonic-net/DASH/wiki/Glossary)
 - [SAI headers](../sai/README.md)
 - [DASH pipeline](../../dash-pipeline/README.md)
-- [DASH conformance and performance testing](https://github.com/Azure/DASH/tree/main/test)
+- [DASH conformance and performance testing](https://github.com/sonic-net/DASH/tree/main/test)
 - [SONiC DASH HLD](dash-sonic-hld.md)
 - [SONiC System Architecture](https://github.com/Azure/SONiC/wiki/Architecture#sonic-system-architecture)
 - [P4 as a Single Source of Truth for SONiC DASH -  2022 P4 Workshop](https://www.youtube.com/watch?v=mT7-t_aDozM)

@@ -592,7 +592,7 @@ DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG = $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_
 
 docker-saichallenger-client-bldr:
 	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG); } || \
-		{ pushd $(SAI_CHALLENGER_PATH) && ./build.sh -i client && popd; \
+		{ pushd $(SAI_CHALLENGER_PATH) && git submodule update --init && ./build.sh -i client && popd; \
 		docker build \
 			-f dockerfiles/Dockerfile.saichallenger-client-bldr \
 			-t $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG) \
@@ -609,8 +609,7 @@ docker-publish-saichallenger-client-bldr:
 docker-pull-saichallenger-client-bldr:
 	docker pull $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG)
 
-docker-saichallenger-client:
-	cd $(SAI_CHALLENGER_PATH) && ./build.sh -i client
+docker-saichallenger-client: docker-saichallenger-client-bldr
 	docker build \
 		-f dockerfiles/Dockerfile.saichallenger-client \
 		-t $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
@@ -659,6 +658,13 @@ run-saichallenger-scale-tests: deploy-ixiac
 	$(DOCKER_FLAGS) \
 	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
 	./run-tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
+
+run-saichallenger-tutorials: deploy-ixiac
+	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
+	-w /sai-challenger/dash_tests/functional \
+	$(DOCKER_FLAGS) \
+	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
+	./run-tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) tutorial
 
 ###############################
 # ENVIRONMENT SETUP TARGETS
