@@ -963,10 +963,9 @@ For the example configuration above, the following is a brief explanation of loo
         "OP": "SET"
     },
     {
-        "DASH_ROUTE_TABLE:F4939FEFC47E:10.2.0.0/16": {
-            "action_type":"vnet_direct",
-            "vnet":"Vnet1",
-            "overlay_ip":"10.2.0.6"
+        "DASH_ROUTE_TABLE:F4939FEFC47E:10.2.0.6/32": {
+            "action_type":"vnet",
+            "vnet":"Vnet1"
         },
         "OP": "SET"
     },
@@ -999,9 +998,9 @@ For the example configuration above, the following is a brief explanation of loo
 		f. Second Action is Static NVGRE encap with GRE key '100'. 
 		g. Underlay DIP shall be 50.1.2.3 (from mapping), Underlay SIP shall be 55.1.2.3 (from ENI)
 
-	2. Packet destined to 10.2.0.8 from 10.1.1.2:
-		a. LPM lookup hits for entry 10.2.0.0/16
-		b. The action in this case is "vnet_direct" with mapping lookup key as 10.2.0.6
+	2. Packet destined to 10.2.0.6 from 10.1.1.2:
+		a. LPM lookup hits for entry 10.2.0.6/32
+		b. The action in this case is "vnet"
 		c. Next lookup is in the mapping table and mapping table action here is "privatelink"
 		d. First Action for "privatelink" is 4to6 transposition
 		e. Packet gets transformed as: 
