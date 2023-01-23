@@ -38,6 +38,9 @@ bit<16> directionNeutralPort (
 control ConntrackIn(inout headers_t hdr,
                 inout metadata_t meta)
 {
+Register<IPv4Address> original_overlay_sip(1024);
+Register<IPv4Address> original_overlay_dip(1024);
+
   action conntrackIn_allow () {
   /* Invalidate entry based on TCP flags */
           if (hdr.tcp.flags & 0x101 /* FIN/RST */) {
@@ -46,12 +49,16 @@ control ConntrackIn(inout headers_t hdr,
           }
           restart_expire_timer(); // reset expiration timer for entry
           meta.conntrack_data.allow_in = true;
+          meta.encap_data.original_overly_sip = original_overly_sip.read(get_rule_prio();
+          meta.encap_data.original_overly_dip = original_overly_dip.read(get_rule_prio();
   }
 
   action conntrackIn_miss() {
           if (hdr.tcp.flags == 0x2 /* SYN */) {
             if (meta.direction == direction_t.OUTBOUND) {
                add_entry("conntrackIn_allow"); // New PNA Extern
+               original_overly_sip.write(meta.encap_data.original_overly_sip);
+               original_overly_dip.write(meta.encap_data.original_overly_dip);
                //adding failiure to be eventually handled
                set_entry_expire_time(EXPIRE_TIME_PROFILE_LONG);
             }

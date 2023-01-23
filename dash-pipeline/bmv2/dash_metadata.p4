@@ -13,6 +13,8 @@ struct encap_data_t {
     EthernetAddress overlay_dmac;
     dash_encapsulation_t encap_type;
     bit<24> service_tunnel_id;
+    IPv4Address original_overlay_sip;
+    IPv4Address original_overlay_dip;
 }
 
 enum bit<16> direction_t {

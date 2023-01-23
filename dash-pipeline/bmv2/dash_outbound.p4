@@ -48,8 +48,8 @@ control outbound(inout headers_t hdr,
         assert(is_overlay_dip_v4_or_v6 == 1 && is_overlay_sip_v4_or_v6 == 1);
         assert(is_overlay_dip_mask_v4_or_v6 == 1 && is_overlay_sip_mask_v4_or_v6 == 1);
         assert(is_underlay_dip_v4_or_v6 != 1 && is_underlay_sip_v4_or_v6 != 1);
-        IPv4Address original_overly_dip = hdr.ipv4.src_addr;
-        IPv4Address original_overly_sip = hdr.ipv4.dst_addr;
+        meta.encap_data.original_overlay_dip = hdr.ipv4.src_addr;
+        meta.encap_data.original_overlay_sip = hdr.ipv4.dst_addr;
 
         service_tunnel_encode(hdr,
                               overlay_dip,
@@ -58,8 +58,8 @@ control outbound(inout headers_t hdr,
                               overlay_sip_mask);
 
         /* encapsulation will be done in apply block based on encap_type */
-        meta.encap_data.underlay_dip = underlay_dip == 0 ? original_overly_dip : (IPv4Address)underlay_dip;
-        meta.encap_data.underlay_sip = underlay_sip == 0 ? original_overly_sip : (IPv4Address)underlay_sip;
+        meta.encap_data.underlay_dip = underlay_dip == 0 ? meta.encap_data.original_overlay_dip : (IPv4Address)underlay_dip;
+        meta.encap_data.underlay_sip = underlay_sip == 0 ? meta.encap_data.original_overlay_sip : (IPv4Address)underlay_sip;
         meta.encap_data.overlay_dmac = hdr.ethernet.dst_addr;
         meta.encap_data.encap_type = encap_type;
         meta.encap_data.service_tunnel_id = tunnel_id;

@@ -24,7 +24,9 @@ action service_tunnel_encode(inout headers_t hdr,
 }
 
 /* Decodes V4 from V6 */
-action service_tunnel_decode(inout headers_t hdr) {
+action service_tunnel_decode(inout headers_t hdr,
+                             in IPv4Address src,
+                             in IPv4Address dst) {
     hdr.ipv4.setValid();
     hdr.ipv4.version = 4;
     hdr.ipv4.ihl = 5;
@@ -36,6 +38,8 @@ action service_tunnel_decode(inout headers_t hdr) {
     hdr.ipv4.protocol = hdr.ipv6.next_header;
     hdr.ipv4.ttl = hdr.ipv6.hop_limit;
     hdr.ipv4.hdr_checksum = 0;
+    hdr.ipv4.dst_addr = dst;
+    hdr.ipv4.src_addr = src;
 
     hdr.ipv6.setInvalid();
     hdr.ethernet.ether_type = IPV4_ETHTYPE;

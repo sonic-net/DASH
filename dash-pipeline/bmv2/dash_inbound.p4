@@ -17,6 +17,12 @@ control inbound(inout headers_t hdr,
 #endif /* STATEFUL_P4 */
 #ifdef PNA_CONNTRACK
         ConntrackIn.apply(hdr, meta);
+
+        if (meta.encap_data.original_overly_sip != 0) {
+            service_tunnel_decode(hdr,
+                                  meta.encap_data.original_overly_sip,
+                                  meta.encap_data.original_overly_dip);
+        }
 #endif // PNA_CONNTRACK
 
         /* ACL */
