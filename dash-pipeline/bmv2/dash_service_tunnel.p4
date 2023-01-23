@@ -5,8 +5,10 @@
 
 /* Encodes V4 in V6 */
 action service_tunnel_encode(inout headers_t hdr,
-                             in IPv6Address st_dst_prefix,
-                             in IPv6Address st_src_prefix) {
+                             in IPv6Address st_dst,
+                             in IPv6Address st_dst_mask,
+                             in IPv6Address st_src,
+                             in IPv6Address st_src_mask) {
     hdr.ipv6.setValid();
     hdr.ipv6.version = 6;
     hdr.ipv6.traffic_class = 0;
@@ -14,8 +16,8 @@ action service_tunnel_encode(inout headers_t hdr,
     hdr.ipv6.payload_length = hdr.ipv4.total_len - IPV4_HDR_SIZE;
     hdr.ipv6.next_header = hdr.ipv4.protocol;
     hdr.ipv6.hop_limit = hdr.ipv4.ttl;
-    hdr.ipv6.dst_addr = (IPv6Address)hdr.ipv4.dst_addr + st_dst_prefix;
-    hdr.ipv6.src_addr = (IPv6Address)hdr.ipv4.src_addr + st_src_prefix;
+    hdr.ipv6.dst_addr = ((IPv6Address)hdr.ipv4.dst_addr & ~st_dst_mask) | (st_dst & st_dst_mask);
+    hdr.ipv6.src_addr = ((IPv6Address)hdr.ipv4.src_addr & ~st_src_mask) | (st_src & st_src_mask);
     
     hdr.ipv4.setInvalid();
     hdr.ethernet.ether_type = IPV6_ETHTYPE;
