@@ -9,7 +9,7 @@ import pytest
 SWITCH_ID = 5
 
 
-class TestSaiVnetVni:
+class TestSaiVnetEniAddr:
 
     def test_vnet_eni_ether_address_create(self, dpu):
 

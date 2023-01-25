@@ -85,9 +85,6 @@ class TestSaiVnetVni:
 
         assert all( [result == 0 for result in results]), "SAI_OBJECT_TYPE_VNET Get error"
 
-    #@pytest.mark.dependency(depends=['test_sai_api_vnet_002_eni.py::test_vnet_eni_create'], scope='session')
-    #@pytest.mark.dependency(depends=['test_sai_api_vnet_009_out_route.py::test_vnet_outbound_routing_entry_create'], scope='session')
-    #@pytest.mark.dependency(depends=['test_sai_api_vnet_010_pa_entry.py::test_vnet_pa_validation_entry_create'], scope='session')
     def test_vnet_vni_remove(self, dpu):
 
         commands = [

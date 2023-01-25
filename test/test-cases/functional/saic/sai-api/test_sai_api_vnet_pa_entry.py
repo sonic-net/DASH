@@ -9,7 +9,7 @@ import pytest
 SWITCH_ID = 5
 
 
-class TestSaiVnetVni:
+class TestSaiVnetPaEntry:
 
     def test_vnet_pa_validation_entry_create(self, dpu):
 

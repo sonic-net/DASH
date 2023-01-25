@@ -152,7 +152,6 @@ class TestSaiVnetEni:
 
         assert all( [result == 0 for result in results]), "20.10.2.10"
 
-    #@pytest.mark.dependency(depends=['test_sai_api_vnet_007_in_route.py::test_vnet_inbound_routing_entry_create'], scope='session')
     def test_vnet_eni_remove(self, dpu):
 
         commands = [
