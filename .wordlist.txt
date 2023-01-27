@@ -192,6 +192,7 @@ dut
 DUTs
 DUTS
 DUT's
+EasyCLA
 ECMP
 encap
 ENI
@@ -246,6 +247,7 @@ HSL
 https
 hw
 HW
+ICLA
 ICMP
 idempotency
 IDL
