@@ -51,7 +51,7 @@ control outbound(inout headers_t hdr,
 
 #ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
         // See the #ifdef with same preprocessor symbol in dash_pipeline.p4
-        pna_direct_counter = routing_counter;
+        DIRECT_COUNTER_TABLE_PROPERTY = routing_counter;
 #endif  // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
     }
 
@@ -86,7 +86,7 @@ control outbound(inout headers_t hdr,
 
 #ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
         // See the #ifdef with same preprocessor symbol in dash_pipeline.p4
-        pna_direct_counter = ca_to_pa_counter;
+        DIRECT_COUNTER_TABLE_PROPERTY = ca_to_pa_counter;
 #endif  // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
     }
 

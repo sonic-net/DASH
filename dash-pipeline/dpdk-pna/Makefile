@@ -10,4 +10,4 @@ DSTDIR=out
 
 dpdk-pna:
 	mkdir -p $(DSTDIR)
-	p4c-dpdk -DPNA_CONNTRACK --dump ./$(DSTDIR) --pp ./$(DSTDIR)/dash_pipeline.pp.p4 -o ./$(DSTDIR)/dash_pipeline.spec --arch pna --bf-rt-schema ./$(DSTDIR)/dash_pipeline.p4.bfrt.json --p4runtime-files ./$(DSTDIR)/dash_pipeline.p4.p4info.txt dash_pipeline.p4
+	p4c-dpdk -DDPDK_PNA -DPNA_CONNTRACK --dump ./$(DSTDIR) --pp ./$(DSTDIR)/dash_pipeline.pp.p4 -o ./$(DSTDIR)/dash_pipeline.spec --arch pna --bf-rt-schema ./$(DSTDIR)/dash_pipeline.p4.bfrt.json --p4runtime-files ./$(DSTDIR)/dash_pipeline.p4.p4info.txt dash_pipeline.p4

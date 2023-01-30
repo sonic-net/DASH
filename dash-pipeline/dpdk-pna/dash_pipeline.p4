@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <pna.p4>
+#include "arch_specific.p4"
 
 #include "dash_headers.p4"
 #include "dash_metadata.p4"
@@ -164,7 +164,7 @@ control dash_ingress(
 
 #ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
         // See the #ifdef with same preprocessor symbol elsewhere in this file
-        pna_direct_counter = eni_counter;
+        DIRECT_COUNTER_TABLE_PROPERTY = eni_counter;
 #endif  // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
     }
 

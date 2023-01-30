@@ -17,8 +17,14 @@ match_kind {
 #define LIST_MATCH list
 #define RANGE_LIST_MATCH range_list
 #else
+#ifdef BMV2_V1MODEL
+#define LIST_MATCH optional
+#define RANGE_LIST_MATCH optional
+#endif // BMV2_V1MODEL
+#ifdef DPDK_PNA
 #define LIST_MATCH ternary
 #define RANGE_LIST_MATCH range
+#endif // DPDK_PNA
 #endif
 
 #define str(name) #name
@@ -45,7 +51,7 @@ match_kind {
             deny_and_continue; \
         } \
         default_action = deny; \
-        pna_direct_counter = ## table_name ##_counter; \
+        DIRECT_COUNTER_TABLE_PROPERTY = ## table_name ##_counter; \
     }
 
 #else   // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
@@ -85,8 +91,13 @@ match_kind {
  * it is applied, i. e. inbound ACL tables are different
  * from outbound, and API will be generated for each of them
  */
-control acl(inout headers_t hdr,
-            inout metadata_t meta)
+control acl(
+      inout headers_t hdr
+    , inout metadata_t meta
+#ifdef BMV2_V1MODEL
+    , inout standard_metadata_t standard_metadata
+#endif // BMV2_V1MODEL
+    )
 {
     action permit() {}
     action permit_and_continue() {}
