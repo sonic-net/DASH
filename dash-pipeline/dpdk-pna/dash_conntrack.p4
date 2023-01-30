@@ -40,7 +40,7 @@ control ConntrackIn(inout headers_t hdr,
 {
   action conntrackIn_allow () {
   /* Invalidate entry based on TCP flags */
-        // If FIN is 1 (0b000001), or if RST is 1 (0b000100):
+          // If FIN is 1 (0b000001), or if RST is 1 (0b000100):
           if ((hdr.tcp.flags & 0b000101 /* FIN/RST */) != 0) {
             set_entry_expire_time(EXPIRE_TIME_PROFILE_NOW); // New PNA extern
             /* set entry to be purged */
@@ -50,7 +50,7 @@ control ConntrackIn(inout headers_t hdr,
   }
 
   action conntrackIn_miss() {
-        // TODO: Should this be ((hdr.tcp.flags & 0x2) != 0) instead?
+          // TODO: Should this be ((hdr.tcp.flags & 0x2) != 0) instead?
           if (hdr.tcp.flags == 0x2 /* SYN */) {
             if (meta.direction == direction_t.OUTBOUND) {
                // New PNA Extern
@@ -93,7 +93,7 @@ control ConntrackOut(inout headers_t hdr,
 {
   action conntrackOut_allow () {
   /* Invalidate entry based on TCP flags */
-        // If FIN is 1 (0b000001), or if RST is 1 (0b000100):
+          // If FIN is 1 (0b000001), or if RST is 1 (0b000100):
           if ((hdr.tcp.flags & 0b000101 /* FIN/RST */) != 0) {
             set_entry_expire_time(EXPIRE_TIME_PROFILE_NOW); // New PNA extern
             /* set entry to be purged */
@@ -103,7 +103,7 @@ control ConntrackOut(inout headers_t hdr,
   }
 
   action conntrackOut_miss() {
-        // TODO: Should this be ((hdr.tcp.flags & 0x2) != 0) instead?
+          // TODO: Should this be ((hdr.tcp.flags & 0x2) != 0) instead?
           if (hdr.tcp.flags == 0x2 /* SYN */) {
             if (meta.direction == direction_t.INBOUND) {
                // New PNA Extern
