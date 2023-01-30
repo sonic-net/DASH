@@ -32,6 +32,10 @@ include dockerfiles/DOCKER_GRPC_IMG.env
 # include file defines DOCKER_P4C_BMV2_IMG
 include dockerfiles/DOCKER_P4C_BMV2_IMG.env
 
+# Slimmed-down version dpdk backend only
+# include file defines DOCKER_P4C_DPDK_IMG
+include dockerfiles/DOCKER_P4C_DPDK_IMG.env
+
 # Builds sai-P4rt clients to run inside bmv2 process
 # include file defines DOCKER_BMV2_BLDR_IMG_NAME and DOCKER_BMV2_BLDR_IMG_CTAG
 include dockerfiles/DOCKER_BMV2_BLDR_IMG.env
@@ -94,7 +98,7 @@ p4-clean:
 	-rm -rf $(P4_OUTDIR)
 # Compile P4 into bmv2 .json fle and P4info for SAI header autogeneration
 $(P4_ARTIFACTS): $(P4_SRC)
-	@echo "Compile P4 program $(P4_MAIN) ..."
+	@echo "Compile P4 program $(P4_MAIN) for bmv2 ..."
 	mkdir -p $(P4_OUTDIR) && \
 	chmod o+w $(P4_OUTDIR) && \
 	docker run \
@@ -110,6 +114,35 @@ $(P4_ARTIFACTS): $(P4_SRC)
 		-b bmv2 \
 		-o $(P4_OUTDIR) \
 	    --p4runtime-files $(P4_OUTDIR)/dash_pipeline_p4rt.json,$(P4_OUTDIR)/dash_pipeline_p4rt.txt
+
+# DPDK - experimental/WIP
+
+P4_DPDK_OUTDIR=dpdk-pna/dash_pipeline.dpdk
+
+# These command line options can be added if/when p4c-dpdk is enhanced
+# to support the code that is #ifdef'd out when these symbols are not
+# defined.  Search for these symbols in dash_pipeline.p4 for more
+# details.
+
+# -DDPDK_PNA_SEND_TO_PORT_FIX_MERGED
+# -DDPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
+
+p4c-dpdk-pna:
+	@echo "Compile P4 program $(P4_MAIN) for dpdk-pna ..."
+	mkdir -p $(P4_DPDK_OUTDIR) && \
+	chmod o+w $(P4_DPDK_OUTDIR) && \
+	docker run \
+	--rm \
+	--name dash-p4c-$(USER) \
+	-u $(DASH_USER) \
+	$(DOCKER_FLAGS) \
+	-v $(PWD)/bmv2:/bmv2 \
+	-v $(PWD)/dpdk-pna:/dpdk-pna \
+	-w / \
+	$(DOCKER_P4C_DPDK_IMG)  \
+	p4c-dpdk -DDPDK_PNA -DPNA_CONNTRACK --dump $(P4_DPDK_OUTDIR) --pp $(P4_DPDK_OUTDIR)/dash_pipeline.pp.p4 \
+	-o $(P4_DPDK_OUTDIR)/dash_pipeline.spec --arch pna --bf-rt-schema $(P4_DPDK_OUTDIR)/dash_pipeline.p4.bfrt.json \
+	--p4runtime-files $(P4_DPDK_OUTDIR)/dash_pipeline.p4.p4info.txt $(P4_MAIN)
 
 ######################################
 # DASH SAI HEADER & libsai.so TARGETS
@@ -450,16 +483,6 @@ run-saithrift-client-bash:
 
 ###############################
 
-# docker-dash-p4c:
-# 	docker build \
-# 		-f dockerfiles/Dockerfile.p4c-bmv2 \
-# 	    -t $(DOCKER_P4C_BMV2_IMG) \
-# 	    --build-arg user=$(USER) \
-# 	    --build-arg uid=$(shell id -u) \
-# 	    --build-arg guid=$(shell id -g) \
-# 	    --build-arg hostname=$(shell echo $$HOSTNAME) \
-# 	    --build-arg available_processors=$(shell nproc) \
-# 		dockerfiles
 
 DOCKER_P4C_BMV2_IMG_TAG = $(shell cat dockerfiles/Dockerfile.p4c-bmv2 | sha1sum | awk '{print substr($$1,0,11);}')
 DOCKER_P4C_BMV2_IMG = $(DOCKER_P4C_BMV2_IMG_NAME):$(DOCKER_P4C_BMV2_IMG_TAG)
@@ -487,6 +510,35 @@ docker-publish-dash-p4c:
 	docker push $(DOCKER_P4C_BMV2_IMG)
 	[ -n $(DOCKER_P4C_BMV2_IMG_CTAG) ] && \
 		docker push $(DOCKER_P4C_BMV2_IMG_NAME):$(DOCKER_P4C_BMV2_IMG_CTAG)
+
+###############################
+
+DOCKER_P4C_DPDK_IMG_TAG = $(shell cat dockerfiles/Dockerfile.p4c-dpdk | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_P4C_DPDK_IMG = $(DOCKER_P4C_DPDK_IMG_NAME):$(DOCKER_P4C_DPDK_IMG_TAG)
+
+docker-dash-p4c-dpdk:
+	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_P4C_DPDK_IMG); } || \
+	docker build \
+		-f dockerfiles/Dockerfile.p4c-dpdk \
+	    -t $(DOCKER_P4C_DPDK_IMG) \
+	    --build-arg user=$(DASH_USER) \
+	    --build-arg group=$(DASH_GROUP) \
+	    --build-arg uid=$(DASH_UID) \
+	    --build-arg guid=$(DASH_GUID) \
+	    --build-arg hostname=$(DASH_HOST) \
+	    --build-arg available_processors=$(shell nproc) \
+		dockerfiles
+	[ -n $(DOCKER_P4C_DPDK_IMG_CTAG) ] && \
+		docker tag $(DOCKER_P4C_DPDK_IMG) $(DOCKER_P4C_DPDK_IMG_NAME):$(DOCKER_P4C_DPDK_IMG_CTAG)
+
+docker-pull-dash-p4c-dpdk:
+	docker pull $(DOCKER_P4C_DPDK_IMG)
+
+docker-publish-dash-p4c-dpdk:
+	@echo "Publish $(DOCKER_P4C_DPDK_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_P4C_DPDK_IMG)
+	[ -n $(DOCKER_P4C_DPDK_IMG_CTAG) ] && \
+		docker push $(DOCKER_P4C_DPDK_IMG_NAME):$(DOCKER_P4C_DPDK_IMG_CTAG)
 
 ###############################
 
