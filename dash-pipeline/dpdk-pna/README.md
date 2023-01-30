@@ -18,7 +18,7 @@ The good news is that with only a few changes in the code, it
 compiles.
 
 There are several warning messages output by p4c-dpdk that are
-currently normal and exepcted.  These are warnings about the DPDK
+currently normal and expected.  These are warnings about the DPDK
 implementation of this P4 program that causes extra data copies during
 packet processing, with a minor effect on the packet processing
 performance.
