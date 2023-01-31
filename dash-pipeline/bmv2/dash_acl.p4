@@ -13,7 +13,6 @@ match_kind {
     range_list
 }
 
-#define DASH_MATCH
 #ifdef DASH_MATCH
 #define LIST_MATCH list
 #define RANGE_LIST_MATCH range_list
