@@ -128,6 +128,7 @@ dataplanes
 datastore
 DBs
 DDoS
+deallocating
 Decap
 decap
 deliverables
@@ -191,12 +192,14 @@ dut
 DUTs
 DUTS
 DUT's
+EasyCLA
 ECMP
 encap
 ENI
 eni
 Eni
 ENIs
+ENI's
 entrypoints
 enum
 EPUs
@@ -244,6 +247,7 @@ HSL
 https
 hw
 HW
+ICLA
 ICMP
 idempotency
 IDL
@@ -594,6 +598,7 @@ UF
 UFID
 Ufs
 UI
+UINT
 undeploy
 unpair
 Unpair
