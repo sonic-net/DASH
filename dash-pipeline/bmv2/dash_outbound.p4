@@ -59,6 +59,27 @@ control outbound(inout headers_t hdr,
         meta.encap_data.underlay_dip = underlay_dip;
     }
 
+    action set_private_link_mapping(IPv4Address underlay_dip,
+                                    EthernetAddress overlay_dmac,
+                                    bit<1> use_dst_vnet_vni,
+                                    IPv6Address overlay_sip,
+                                    IPv6Address overlay_dip,
+                                    dash_encapsulation_t encap_type,
+                                    bit<24> tunnel_id) {
+        meta.encap_data.encap_type = encap_type;
+        meta.encap_data.service_tunnel_id = tunnel_id;
+
+        service_tunnel_encode(hdr,
+                              overlay_dip,
+                              0xffffffffffffffffffffffff,
+                              (overlay_sip & ~meta.eni_data.pl_sip_mask) | meta.eni_data.pl_sip | (IPv6Address)hdr.ipv4.dst_addr,
+                              0xffffffffffffffffffffffff);
+
+        set_tunnel_mapping(underlay_dip,
+                           overlay_dmac,
+                           use_dst_vnet_vni);
+    }
+
     direct_counter(CounterType.packets_and_bytes) ca_to_pa_counter;
 
     @name("outbound_ca_to_pa|dash_outbound_ca_to_pa")
@@ -72,6 +93,7 @@ control outbound(inout headers_t hdr,
 
         actions = {
             set_tunnel_mapping;
+            set_private_link_mapping;
             @defaultonly drop;
         }
         const default_action = drop;
@@ -125,13 +147,25 @@ control outbound(inout headers_t hdr,
                 ca_to_pa.apply();
                 vnet.apply();
 
-                vxlan_encap(hdr,
-                            meta.encap_data.underlay_dmac,
-                            meta.encap_data.underlay_smac,
-                            meta.encap_data.underlay_dip,
-                            meta.encap_data.underlay_sip,
-                            meta.encap_data.overlay_dmac,
-                            meta.encap_data.vni);
+                if (meta.encap_data.encap_type == dash_encapsulation_t.VXLAN) {
+                    vxlan_encap(hdr,
+                                meta.encap_data.underlay_dmac,
+                                meta.encap_data.underlay_smac,
+                                meta.encap_data.underlay_dip,
+                                meta.encap_data.underlay_sip,
+                                meta.encap_data.overlay_dmac,
+                                meta.encap_data.service_tunnel_id);
+                } else if (meta.encap_data.encap_type == dash_encapsulation_t.NVGRE) {
+                    nvgre_encap(hdr,
+                                meta.encap_data.underlay_dmac,
+                                meta.encap_data.underlay_smac,
+                                meta.encap_data.underlay_dip,
+                                meta.encap_data.underlay_sip,
+                                meta.encap_data.overlay_dmac,
+                                meta.encap_data.service_tunnel_id);
+                } else {
+                    drop();
+                }
              }
          }
     }
