@@ -102,7 +102,7 @@ Following are the minimal scaling requirements
 | Inbound Routes per ENI   | 10k**                    |
 | NSGs per ENI             | 10***                    |
 | ACL rules per NSG        | 1000                     |
-| ACL perfixes per ENI     | 10x100k                  |
+| ACL prefixes per ENI     | 10x100k                  |
 | Max prefixes per rule    | 8k                       |
 | ACL ports per ENI        | 10x10k SRC/DST ports     |
 | CA-PA Mappings           | 10M Per Card             |
