@@ -105,6 +105,7 @@ $(P4_ARTIFACTS): $(P4_SRC)
 	-v $(PWD)/bmv2:/bmv2 \
 	-w / \
 	$(DOCKER_P4C_BMV2_IMG) p4c \
+		-DARCH_BMV2_V1MODEL \
 	    $(P4_MAIN) \
 		-b bmv2 \
 		-o $(P4_OUTDIR) \
