@@ -119,30 +119,29 @@ $(P4_ARTIFACTS): $(P4_SRC)
 
 P4_DPDK_OUTDIR=dpdk-pna/dash_pipeline.dpdk
 
-# These command line options can be added if/when p4c-dpdk is enhanced
-# to support the code that is #ifdef'd out when these symbols are not
-# defined.  Search for these symbols in dash_pipeline.p4 for more
-# details.
-
-# -DDPDK_PNA_SEND_TO_PORT_FIX_MERGED
-# -DDPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
-
 p4c-dpdk-pna:
 	@echo "Compile P4 program $(P4_MAIN) for dpdk-pna ..."
 	mkdir -p $(P4_DPDK_OUTDIR) && \
 	chmod o+w $(P4_DPDK_OUTDIR) && \
 	docker run \
 	--rm \
-	--name dash-p4c-$(USER) \
+	--name dash-p4c-dpdk-$(USER) \
 	-u $(DASH_USER) \
 	$(DOCKER_FLAGS) \
 	-v $(PWD)/bmv2:/bmv2 \
 	-v $(PWD)/dpdk-pna:/dpdk-pna \
 	-w / \
 	$(DOCKER_P4C_DPDK_IMG)  \
-	p4c-dpdk -DDPDK_PNA -DPNA_CONNTRACK --dump $(P4_DPDK_OUTDIR) --pp $(P4_DPDK_OUTDIR)/dash_pipeline.pp.p4 \
-	-o $(P4_DPDK_OUTDIR)/dash_pipeline.spec --arch pna --bf-rt-schema $(P4_DPDK_OUTDIR)/dash_pipeline.p4.bfrt.json \
-	--p4runtime-files $(P4_DPDK_OUTDIR)/dash_pipeline.p4.p4info.txt $(P4_MAIN)
+	p4c-dpdk -DARCH_DPDK_PNA -DPNA_CONNTRACK --pp $(P4_DPDK_OUTDIR)/dash_pipeline.pp.p4 \
+		-o $(P4_DPDK_OUTDIR)/dash_pipeline.spec --arch pna \
+		--bf-rt-schema $(P4_DPDK_OUTDIR)/dash_pipeline.p4.bfrt.json \
+		--p4runtime-files $(P4_DPDK_OUTDIR)/dash_pipeline.p4.p4info.txt \
+		$(P4_MAIN)
+
+
+	# p4c-dpdk -DDPDK_PNA -DPNA_CONNTRACK --dump $(P4_DPDK_OUTDIR) --pp $(P4_DPDK_OUTDIR)/dash_pipeline.pp.p4 \
+	# -o $(P4_DPDK_OUTDIR)/dash_pipeline.spec --arch pna --bf-rt-schema $(P4_DPDK_OUTDIR)/dash_pipeline.p4.bfrt.json \
+	# --p4runtime-files $(P4_DPDK_OUTDIR)/dash_pipeline.p4.p4info.txt $(P4_MAIN)
 
 ######################################
 # DASH SAI HEADER & libsai.so TARGETS
