@@ -15,10 +15,17 @@ error {
 #define IPV4_ETHTYPE 0x0800
 #define IPV6_ETHTYPE 0x86dd
 
-parser dash_parser(packet_in packet,
-                out headers_t hd,
-                inout metadata_t meta,
-                inout standard_metadata_t standard_meta)
+parser dash_parser(
+    packet_in packet
+    , out headers_t hd
+    , inout metadata_t meta
+#ifdef ARCH_BMV2_V1MODEL
+    , inout standard_metadata_t standard_meta
+#endif // ARCH_BMV2_V1MODEL
+#ifdef ARCH_DPDK_PNA
+    , in pna_main_parser_input_metadata_t istd
+#endif // ARCH_DPDK_PNA
+    )
 {
     state start {
         packet.extract(hd.ethernet);
@@ -120,8 +127,14 @@ parser dash_parser(packet_in packet,
     }
 }
 
-control dash_deparser(packet_out packet,
-                   in headers_t hdr)
+control dash_deparser(
+      packet_out packet
+    , in headers_t hdr
+#ifdef ARCH_DPDK_PNA
+    , in metadata_t meta
+    , in pna_main_output_metadata_t ostd
+#endif // ARCH_DPDK_PNA
+    )
 {
     apply {
 	packet.emit(hdr.ethernet);

@@ -32,6 +32,7 @@ action vxlan_encap(inout headers_t hdr,
     hdr.ipv4.version = 4;
     hdr.ipv4.ihl = 5;
     hdr.ipv4.diffserv = 0;
+#ifdef ARCH_BMV2_V1MODEL
     hdr.ipv4.total_len = hdr.inner_ipv4.total_len*(bit<16>)(bit<1>)hdr.inner_ipv4.isValid() + \
                          hdr.inner_ipv6.payload_length*(bit<16>)(bit<1>)hdr.inner_ipv6.isValid() + \
                          IPV6_HDR_SIZE*(bit<16>)(bit<1>)hdr.inner_ipv6.isValid() + \
@@ -39,6 +40,22 @@ action vxlan_encap(inout headers_t hdr,
                          IPV4_HDR_SIZE + \
                          UDP_HDR_SIZE + \
                          VXLAN_HDR_SIZE;
+#endif // ARCH_BMV2_V1MODEL
+#ifdef ARCH_DPDK_PNA
+    // p4c-dpdk as of 2023-Jan-26 does not support multplication of
+    // run-time variable values.  It does support 'if' statements
+    // inside of P4 action bodies.
+    bit<16> inner_ip_len = 0;
+    if (hdr.inner_ipv4.isValid()) {
+        inner_ip_len = inner_ip_len + hdr.inner_ipv4.total_len;
+    }
+    if (hdr.inner_ipv6.isValid()) {
+        inner_ip_len = (inner_ip_len + IPV6_HDR_SIZE +
+            hdr.inner_ipv6.payload_length);
+    }
+    hdr.ipv4.total_len = (ETHER_HDR_SIZE + IPV4_HDR_SIZE + UDP_HDR_SIZE +
+        VXLAN_HDR_SIZE + inner_ip_len);
+#endif // ARCH_DPDK_PNA
     hdr.ipv4.identification = 1;
     hdr.ipv4.flags = 0;
     hdr.ipv4.frag_offset = 0;
@@ -51,12 +68,18 @@ action vxlan_encap(inout headers_t hdr,
     hdr.udp.setValid();
     hdr.udp.src_port = 0;
     hdr.udp.dst_port = UDP_PORT_VXLAN;
+#ifdef ARCH_BMV2_V1MODEL
     hdr.udp.length = hdr.inner_ipv4.total_len*(bit<16>)(bit<1>)hdr.inner_ipv4.isValid() + \
                      hdr.inner_ipv6.payload_length*(bit<16>)(bit<1>)hdr.inner_ipv6.isValid() + \
                      IPV6_HDR_SIZE*(bit<16>)(bit<1>)hdr.inner_ipv6.isValid() + \
                      UDP_HDR_SIZE + \
                      VXLAN_HDR_SIZE + \
                      ETHER_HDR_SIZE;
+#endif // ARCH_BMV2_V1MODEL
+#ifdef ARCH_DPDK_PNA
+    hdr.udp.length = (UDP_HDR_SIZE + VXLAN_HDR_SIZE + ETHER_HDR_SIZE +
+        inner_ip_len);
+#endif // ARCH_DPDK_PNA
     hdr.udp.checksum = 0;
     
     hdr.vxlan.setValid();

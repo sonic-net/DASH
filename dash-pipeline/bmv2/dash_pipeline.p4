@@ -1,5 +1,6 @@
 #include <core.p4>
-#include <v1model.p4>
+#include "dash_arch_specific.p4"
+
 #include "dash_headers.p4"
 #include "dash_metadata.p4"
 #include "dash_parser.p4"
@@ -8,24 +9,25 @@
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"
 
-control dash_verify_checksum(inout headers_t hdr,
-                         inout metadata_t meta)
-{
-    apply { }
-}
-
-control dash_compute_checksum(inout headers_t hdr,
-                          inout metadata_t meta)
-{
-    apply { }
-}
-
-control dash_ingress(inout headers_t hdr,
-                  inout metadata_t meta,
-                  inout standard_metadata_t standard_metadata)
+control dash_ingress(
+      inout headers_t hdr
+    , inout metadata_t meta
+#ifdef ARCH_BMV2_V1MODEL
+    , inout standard_metadata_t standard_metadata
+#endif // ARCH_BMV2_V1MODEL
+#ifdef ARCH_DPDK_PNA
+    , in    pna_main_input_metadata_t  istd
+    , inout pna_main_output_metadata_t ostd
+#endif // ARCH_DPDK_PNA
+    )
 {
     action drop_action() {
+#ifdef ARCH_BMV2_V1MODEL
         mark_to_drop(standard_metadata);
+#endif // ARCH_BMV2_V1MODEL
+#ifdef ARCH_DPDK_PNA
+        drop_packet();
+#endif // ARCH_DPDK_PNA
     }
 
     action deny() {
@@ -151,7 +153,24 @@ control dash_ingress(inout headers_t hdr,
         const default_action = deny;
     }
 
+#ifdef ARCH_BMV2_V1MODEL
     direct_counter(CounterType.packets_and_bytes) eni_counter;
+#endif // ARCH_BMV2_V1MODEL
+#ifdef ARCH_DPDK_PNA
+#ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
+    // Omit all direct counters for tables with ternary match keys,
+    // because the latest version of p4c-dpdk as of 2023-Jan-26 does
+    // not support this combination of features.  If you try to
+    // compile it with this code enabled, the error message looks like
+    // this:
+    //
+    // [--Werror=target-error] error: Direct counters and direct meters are unsupported for wildcard match table outbound_acl_stage1:dash_acl_rule|dash_acl
+    //
+    // This p4c issue is tracking this feature gap in p4c-dpdk:
+    // https://github.com/p4lang/p4c/issues/3868
+    DirectCounter<bit<64>>(PNA_CounterType_t.PACKETS_AND_BYTES) eni_counter;
+#endif // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
+#endif // ARCH_DPDK_PNA
 
     table eni_meter {
         key = {
@@ -162,7 +181,14 @@ control dash_ingress(inout headers_t hdr,
 
         actions = { NoAction; }
 
+#ifdef ARCH_BMV2_V1MODEL
         counters = eni_counter;
+#endif // ARCH_BMV2_V1MODEL
+#ifdef ARCH_DPDK_PNA
+#ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
+        pna_direct_counter = eni_counter;
+#endif // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
+#endif // ARCH_DPDK_PNA
     }
 
     action permit() {
@@ -245,7 +271,22 @@ control dash_ingress(inout headers_t hdr,
     apply {
 
         /* Send packet on same port it arrived (echo) by default */
+#ifdef ARCH_BMV2_V1MODEL
         standard_metadata.egress_spec = standard_metadata.ingress_port;
+#endif // ARCH_BMV2_V1MODEL
+#ifdef ARCH_DPDK_PNA
+#ifdef DPDK_PNA_SEND_TO_PORT_FIX_MERGED
+        // As of 2023-Jan-26, the version of the pna.p4 header file
+        // included with p4c defines send_to_port with a parameter
+        // that has no 'in' direction.  The following commit in the
+        // public pna repo fixes this, but this fix has not yet been
+        // copied into the p4c repo.
+        // https://github.com/p4lang/pna/commit/b9fdfb888e5385472c34ff773914c72b78b63058
+        // Until p4c is updated with this fix, the following line will
+        // give a compile-time error.
+        send_to_port(istd.input_port);
+#endif  // DPDK_PNA_SEND_TO_PORT_FIX_MERGED
+#endif // ARCH_DPDK_PNA
 
         if (vip.apply().hit) {
             /* Use the same VIP that was in packet's destination if it's
@@ -308,9 +349,9 @@ control dash_ingress(inout headers_t hdr,
         acl_group.apply();
 
         if (meta.direction == direction_t.OUTBOUND) {
-            outbound.apply(hdr, meta, standard_metadata);
+            outbound.apply(hdr, meta);
         } else if (meta.direction == direction_t.INBOUND) {
-            inbound.apply(hdr, meta, standard_metadata);
+            inbound.apply(hdr, meta);
         }
 
         eni_meter.apply();
@@ -321,16 +362,9 @@ control dash_ingress(inout headers_t hdr,
     }
 }
 
-control dash_egress(inout headers_t hdr,
-                 inout metadata_t meta,
-                 inout standard_metadata_t standard_metadata)
-{
-    apply { }
-}
-
-V1Switch(dash_parser(),
-         dash_verify_checksum(),
-         dash_ingress(),
-         dash_egress(),
-         dash_compute_checksum(),
-         dash_deparser()) main;
+#ifdef ARCH_BMV2_V1MODEL
+#include "dash_bmv2_v1model.p4"
+#endif // ARCH_BMV2_V1MODEL
+#ifdef ARCH_DPDK_PNA
+#include "dash_dpdk_pna.p4"
+#endif // ARCH_DPDK_PNA
