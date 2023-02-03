@@ -1,0 +1,61 @@
+# This Dockerfile builds an image used to compile P4 programs for the bmv2 backend only
+# It's based on public p4lang/p4c docker but strips out uneeded backends.
+# See https://docs.docker.com/develop/develop-images/multistage-build/
+FROM p4lang/p4c:latest as p4lang-p4c
+# :latest on 2023-01-30:
+#FROM p4lang/p4c@sha256:<TODO-need SHA> as p4lang-p4c
+LABEL maintainer="SONIC-DASH Community"
+LABEL description="DASH p4c-dpdk compiler, minimal"
+
+# Configure make to run as many parallel jobs as cores available
+ARG available_processors
+ARG MAKEFLAGS=-j$available_processors
+
+ARG CC=gcc
+ARG CXX=g++
+# Set TZ to avoid interactive installer
+ENV TZ=America/Los_Angeles
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ENV GIT_SSL_NO_VERIFY=true
+
+# Just copy minimal p4c bins & libs for bm2 backends
+# ~632 MB vs. 971MB for unmodifed p4lang/p4c:stable
+FROM amd64/ubuntu:20.04
+# Need python for "p4c" wrapper &  gcc for the C preprocessor
+RUN apt update && apt install -y python3 gcc
+
+COPY --from=p4lang-p4c /usr/local/lib/* /usr/local/lib/
+
+COPY --from=p4lang-p4c \
+        /usr/lib/x86_64-linux-gnu/libboost_*so* \
+        /usr/lib/x86_64-linux-gnu/libgc*so* \
+        /usr/lib/x86_64-linux-gnu/libisl*so* \
+        /usr/lib/x86_64-linux-gnu/libmpc*so* \
+        /usr/lib/x86_64-linux-gnu/libmpfr*so* \
+        /usr/lib/x86_64-linux-gnu/
+
+COPY --from=p4lang-p4c /usr/lib/gcc/x86_64-linux-gnu /usr/lib/gcc/x86_64-linux-gnu/
+COPY --from=p4lang-p4c /usr/bin/cpp /usr/bin/
+COPY --from=p4lang-p4c /usr/local/share/p4c/ /usr/local/share/p4c/
+
+WORKDIR /usr/local/bin
+
+COPY --from=p4lang-p4c \
+        /usr/local/bin/p4c \
+        /usr/local/bin/p4c-dpdk \
+        /usr/local/bin/
+
+
+ARG user
+ARG uid
+ARG group
+ARG guid
+ARG hostname
+
+ENV BUILD_HOSTNAME $hostname
+ENV USER $user
+
+RUN groupadd -f -r -g $guid $group
+
+RUN useradd $user -l -u $uid -g $guid -d /var/$user -m -s /bin/bash
+CMD bash
