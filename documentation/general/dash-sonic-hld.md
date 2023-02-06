@@ -100,16 +100,24 @@ Following are the minimal scaling requirements
 | ENI                      | 64 Per Card              |
 | Outbound Routes per ENI  | 100k                     |
 | Inbound Routes per ENI   | 10k**                    |
-| NSGs per ENI             | 6                        |
-| ACLs per ENI             | 6x100K prefixes          |
-| ACLs per ENI             | 6x10K SRC/DST ports      |
+| NSGs per ENI             | 10***                    |
+| ACL rules per NSG        | 1000                     |
+| ACL prefixes per ENI     | 10x100k                  |
+| Max prefixes per rule    | 8k                       |
+| ACL ports per ENI        | 10x10k SRC/DST ports     |
 | CA-PA Mappings           | 10M Per Card             |
 | Active Connections/ENI   | 1M (Bidirectional TCP or UDP)       |
+| Total active connections | 32M (Bidirectional)      |
 | Metering Buckets per ENI | 4000                     |
+| CPS                      | 1.5M                     |
 
 \* Number of VNET is a software limit as VNET by itself does not take hardware resources. This shall be limited to number of VNI hardware can support
 
 \** Support 10K peering in-region/cross-region
+
+\*** 10 stages per ENI, prefix list can be optimized by tagging or other similar approach and reuse it for multiple ACLs/stages within the card thereby optimizing memory usage
+
+Detailed scaling requirements can be found [here](https://github.com/sonic-net/DASH/blob/main/documentation/general/program-scale-testing-requirements-draft.md)
 
 ## 1.5 Metering requirements
 Metering is essential for billing the customers and below are the high-level requirements. Metering/Bucket in this context is related to byte counting for billing purposes and not related to traffic policer or shaping. 
