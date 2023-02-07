@@ -11,7 +11,8 @@ from saichallenger.common.sai_dataplane.utils.ptf_testutils import (send_packet,
                                                                     verify_no_other_packets,
                                                                     verify_packet)
 
-import dash_helper.vnet2vnet_helper as dh
+sys.path.append("../utils")
+import vnet2vnet_helper as dh
 
 current_file_dir = Path(__file__).parent
 
