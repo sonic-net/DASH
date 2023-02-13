@@ -81,12 +81,14 @@ CLI
 CloudStorm
 CNIP
 codebase
+collaterals
 compat
 Compat
 conf
 CONFDB
 confgen
 config
+configs
 Containerlab
 CP
 CreatedHalfOpenFlow
@@ -126,6 +128,7 @@ dataplanes
 datastore
 DBs
 DDoS
+deallocating
 Decap
 decap
 deliverables
@@ -157,6 +160,8 @@ downcasting
 DPDK
 DPU
 dpu
+dpugen
+DPUGEN
 DPUControlMsgs
 DPUs
 drawio
@@ -187,12 +192,14 @@ dut
 DUTs
 DUTS
 DUT's
+EasyCLA
 ECMP
 encap
 ENI
 eni
 Eni
 ENIs
+ENI's
 entrypoints
 enum
 EPUs
@@ -240,12 +247,14 @@ HSL
 https
 hw
 HW
+ICLA
 ICMP
 idempotency
 IDL
 iface
 iflow
 impactful
+incrementing
 inband
 InbfromLB
 INIT
@@ -350,6 +359,8 @@ NVidia
 NVMe
 observability
 OCP
+OID
+OIDs
 ok
 Oleksandr
 onboardsupport
@@ -383,6 +394,7 @@ Pensando
 performant
 pingmesh
 PIR
+pluggable
 PLVision's
 pmon
 PNA
@@ -403,6 +415,7 @@ prereq
 Pritsak
 PrivateAddress
 programmability
+programmatically
 protobuf
 provids
 PRs
@@ -413,6 +426,7 @@ py
 PyPi
 pytest
 PyTest
+PyTests
 pytests
 Pytest's
 Pyunit
@@ -455,6 +469,9 @@ runtime
 rx
 SAI
 sai
+saic
+SAIC
+saichallenger
 saigen
 sairedis
 SAIRPC
@@ -495,12 +512,14 @@ SoC
 SoCs
 Sommers
 SONiC
+SONiC's
 SpoofingPacket
 SRC
 src
 STATEDB
 stateful
 statemachine
+stdout
 struct
 subclassed
 subdirectories
@@ -552,6 +571,7 @@ TGen
 Tgen
 Tgens
 th
+throughs
 ToC
 TODO
 TODOs
@@ -578,6 +598,7 @@ UF
 UFID
 Ufs
 UI
+UINT
 undeploy
 unpair
 Unpair
@@ -589,6 +610,7 @@ vcpus
 veth
 VFP
 vip
+vips
 VIP
 virsh
 virt

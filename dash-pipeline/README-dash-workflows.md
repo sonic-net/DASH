@@ -433,7 +433,7 @@ Since we haven't gone through this process yet, it is subject to more clarificat
 
 The sections below discuss version control of critical components.
 ## DASH Repository Versioning
-The DASH GitHub repo, i.e. [https://github.com/Azure/DASH](https://github.com/Azure/DASH) is controlled by Git source-code control, tracked by commit SHA, tag, branch, etc. This is the main project and its components should also be controlled.
+The DASH GitHub repo, i.e. [https://github.com/sonic-net/DASH](https://github.com/sonic-net/DASH) is controlled by Git source-code control, tracked by commit SHA, tag, branch, etc. This is the main project and its components should also be controlled.
 ## Submodules
 As discussed in [About Git Submodules](#about-git-submodules), submodules are controlled by the SHA commit of the submodule, which is "committed" to the top level project (see [About Git Submodules](#about-git-submodules). The versions are always known and explicitly specified.
 ## Docker Image Versioning

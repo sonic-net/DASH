@@ -198,7 +198,7 @@ sai_status_t sai_create_{{ table.name }}(
     return 0;
 ErrRet:
     delete matchActionEntry;
-    RemoveFromTable({{ table.name }}_id);
+    RemoveFromTable(*{{ table.name }}_id);
     return -1;
 }
 

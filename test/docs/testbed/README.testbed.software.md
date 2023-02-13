@@ -86,7 +86,7 @@
 
 - clone the `DASH` repository into your working directory:
     ```
-    git clone https://github.com/Azure/DASH
+    git clone https://github.com/sonic-net/DASH
     ```
 
 - build container
