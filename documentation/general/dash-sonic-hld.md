@@ -256,13 +256,30 @@ DASH_ACL_GROUP_TABLE:{{group_id}}
 ```
 
 ```
+DASH_ACL_SRC_TAG_TABLE:{{tag_name}}
+    "addresses": {{list of prefix}}
+```
+
+```
+DASH_ACL_DST_TAG_TABLE:{{tag_name}}
+    "addresses": {{list of prefix}}
+```
+
+```
+tag_name                  = STRING; unique tag name
+addresses                 = list of ip prefixes ',' separated
+```
+
+```
 DASH_ACL_RULE_TABLE:{{group_id}}:{{rule_num}}
     "priority": {{priority}}
     "action": {{action}}
     "terminating": {{bool}}
     "protocol": {{list of protocols}}
-    "src_addr": {{list of address}}
-    "dst_addr": {{list of address}}
+    "src_tag_map": {{list of tag name}}
+    "dst_tag_map": {{list of tag name}}
+    "src_addr": {{list of prefix}}
+    "dst_addr": {{list of prefix}}
     "src_port": {{list of range of ports}}
     "dst_port": {{list of range of ports}}
     
@@ -275,6 +292,8 @@ priority                 = INT32 value  ; priority of the rule, lower the value,
 action                   = allow/deny
 terminating              = true/false   ; if true, stop processing further rules
 protocols                = list of INT ',' separated; E.g. 6-tcp, 17-udp; if not provided, match on all protocols
+src_tag_map              = list of source tag name ',' separated
+dst_tag_map              = list of destination tag name ',' separated
 src_addr                 = list of source ip prefixes ',' separated
 dst_addr                 = list of destination ip prefixes ',' separated
 src_port                 = list of range of source ports ',' separated

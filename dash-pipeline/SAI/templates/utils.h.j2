@@ -218,6 +218,55 @@ void ipaddrrangelistSetVal(const sai_attribute_value_t &value, T &t, int bits = 
     assert (0 && "NYI");
 }
 
+const sai_attribute_t *getMaskAttr(sai_attr_id_t id, uint32_t attr_count, const sai_attribute_t *attr_list);
+
+template<typename T>
+void u32SetMask(const sai_attribute_value_t &value, T &t, int bits = 32){
+    assert(bits <= 32);
+    uint32_t val = value.u32;
+    val = htonl(val);
+    val = val >> (32 - bits);
+    int bytes = (bits + 7) / 8;
+    t->set_mask(&val, bytes);
+}
+
+template<typename T>
+void u32SetMask(const sai_uint32_t &value, T &t, int bits = 32){
+    assert(bits <= 32);
+    uint32_t val = value;
+    val = htonl(val);
+    val = val >> (32 - bits);
+    int bytes = (bits + 7) / 8;
+    t->set_mask(&val, bytes);
+}
+
+template<typename T>
+void u64SetMask(const sai_attribute_value_t &value, T &t, int bits = 64){
+    assert(bits <= 64);
+    uint64_t val = value.u64;
+    if (*reinterpret_cast<const char*>("\0\x01") == 0) { // Little Endian
+        const uint32_t high_part = htonl(static_cast<uint32_t>(val >> 32));
+        const uint32_t low_part = htonl(static_cast<uint32_t>(val & 0xFFFFFFFFLL));
+        val = (static_cast<uint64_t>(low_part) << 32) | high_part;
+        val = val >> (64-bits);
+    }
+    int bytes = (bits + 7) / 8;
+    t->set_value(&val, bytes);}
+
+template<typename T>
+void u64SetMask(const sai_uint64_t &value, T &t, int bits = 64) {
+    assert(bits <= 64);
+    uint64_t val = value;
+    if (*reinterpret_cast<const char*>("\0\x01") == 0) { // Little Endian
+        const uint32_t high_part = htonl(static_cast<uint32_t>(val >> 32));
+        const uint32_t low_part = htonl(static_cast<uint32_t>(val & 0xFFFFFFFFLL));
+        val = (static_cast<uint64_t>(low_part) << 32) | high_part;
+        val = val >> (64-bits);
+    }
+    int bytes = (bits + 7) / 8;
+    t->set_mask(&val, bytes);
+}
+
 grpc::StatusCode MutateTableEntry(p4::v1::TableEntry *entry, p4::v1::Update_Type updateType);
 
 sai_object_id_t NextObjIndex();
