@@ -306,14 +306,10 @@ DASH_ACL_GROUP_TABLE:{{group_id}}
 ```
 
 ```
-DASH_ACL_SRC_TAG_TABLE:{{tag_name}}
-    "addresses": {{list of prefix}}
+DASH_PREFIX_TAG_TABLE:{{tag_name}}
+    "prefix_list": {{list of prefix}}
 ```
 
-```
-DASH_ACL_DST_TAG_TABLE:{{tag_name}}
-    "addresses": {{list of prefix}}
-```
 
 ```
 tag_name                  = STRING; unique tag name
@@ -326,8 +322,8 @@ DASH_ACL_RULE_TABLE:{{group_id}}:{{rule_num}}
     "action": {{action}}
     "terminating": {{bool}}
     "protocol": {{list of protocols}}
-    "src_tag_map": {{list of tag name}}
-    "dst_tag_map": {{list of tag name}}
+    "src_tag": {{list of tag name}}
+    "dst_tag": {{list of tag name}}
     "src_addr": {{list of prefix}}
     "dst_addr": {{list of prefix}}
     "src_port": {{list of range of ports}}

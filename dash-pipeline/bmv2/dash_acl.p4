@@ -2,7 +2,6 @@
 #define _SIRIUS_ACL_P4_
 
 #include "dash_headers.p4"
-#include "dash_metadata.p4"
 
 match_kind {
     /* list of ternary values
@@ -71,43 +70,11 @@ control acl(inout headers_t hdr,
     action deny() {meta.dropped = true;}
     action deny_and_continue() {meta.dropped = true;}
 
-    action set_src_tag(tag_map_t tag_map) {
-        meta.src_tag_map = tag_map;
-    }
-
-    @name("acl_src_tag|dash_acl")
-    table acl_src_tag {
-        key = {
-            meta.src_ip_addr : lpm @name("meta.src_ip_addr:sip");
-        }
-        actions = {
-            set_src_tag;
-        }
-    }
-
-    action set_dst_tag(tag_map_t tag_map) {
-        meta.dst_tag_map = tag_map;
-    }
-
-    @name("acl_dst_tag|dash_acl")
-    table acl_dst_tag {
-        key = {
-            meta.dst_ip_addr : lpm @name("meta.dst_ip_addr:dip");
-        }
-        actions = {
-            set_dst_tag;
-        }
-    }
-
 ACL_STAGE(stage1)
 ACL_STAGE(stage2)
 ACL_STAGE(stage3)
 
     apply {
-
-    acl_src_tag.apply();
-    acl_dst_tag.apply();
-
 ACL_STAGE_APPLY(stage1)
 ACL_STAGE_APPLY(stage2)
 ACL_STAGE_APPLY(stage3)
