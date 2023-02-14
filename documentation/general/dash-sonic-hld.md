@@ -368,7 +368,7 @@ pa_validation            = true/false                ; perform PA validation in 
 metering_bucket          = bucket_id                 ; metering and counter
 ```
 
-### 3.2.9 VNET MAPPING TABLE 
+### 3.2.9 VNET MAPPING TABLE
 
 ``` 
 DASH_VNET_MAPPING_TABLE:{{vnet}}:{{ip_address}} 
