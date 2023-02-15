@@ -1,4 +1,4 @@
-# This Dockerfile builds an image used to compile P4 programs for the bmv2 backend only
+# This Dockerfile builds an image used to compile P4 programs for the DPDK backend only
 # It's based on public p4lang/p4c docker but strips out uneeded backends.
 # See https://docs.docker.com/develop/develop-images/multistage-build/
 FROM p4lang/p4c:latest as p4lang-p4c
