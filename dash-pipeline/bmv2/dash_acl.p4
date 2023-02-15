@@ -17,19 +17,19 @@ match_kind {
 #define LIST_MATCH list
 #define RANGE_LIST_MATCH range_list
 #else
-#ifdef ARCH_BMV2_V1MODEL
+#ifdef TARGET_BMV2_V1MODEL
 #define LIST_MATCH optional
 #define RANGE_LIST_MATCH optional
-#endif // ARCH_BMV2_V1MODEL
-#ifdef ARCH_DPDK_PNA
+#endif // TARGET_BMV2_V1MODEL
+#ifdef TARGET_DPDK_PNA
 #define LIST_MATCH ternary
 #define RANGE_LIST_MATCH range
-#endif // ARCH_DPDK_PNA
+#endif // TARGET_DPDK_PNA
 #endif
 
 #define str(name) #name
 
-#ifdef ARCH_BMV2_V1MODEL
+#ifdef TARGET_BMV2_V1MODEL
 #define ACL_STAGE(table_name) \
     direct_counter(CounterType.packets_and_bytes) ## table_name ##_counter; \
     @name(str(table_name##:dash_acl_rule|dash_acl)) \
@@ -51,8 +51,8 @@ match_kind {
         default_action = deny; \
         counters = ## table_name ##_counter; \
     }
-#endif // ARCH_BMV2_V1MODEL
-#ifdef ARCH_DPDK_PNA
+#endif // TARGET_BMV2_V1MODEL
+#ifdef TARGET_DPDK_PNA
 #ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
 #error "See comments in dash_acl.p4 for code changes to make"
 #endif
@@ -86,7 +86,7 @@ match_kind {
         } \
         default_action = deny; \
     }
-#endif // ARCH_DPDK_PNA
+#endif // TARGET_DPDK_PNA
 
 #define ACL_STAGE_APPLY(table_name) \
         if ( meta. ## table_name ##_dash_acl_group_id  != 0) { \

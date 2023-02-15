@@ -109,7 +109,7 @@ $(P4_ARTIFACTS): $(P4_SRC)
 	-v $(PWD)/bmv2:/bmv2 \
 	-w / \
 	$(DOCKER_P4C_BMV2_IMG) p4c \
-		-DARCH_BMV2_V1MODEL \
+		-DTARGET_BMV2_V1MODEL \
 	    $(P4_MAIN) \
 		-b bmv2 \
 		-o $(P4_OUTDIR) \
@@ -132,7 +132,7 @@ p4c-dpdk-pna:
 	-v $(PWD)/dpdk-pna:/dpdk-pna \
 	-w / \
 	$(DOCKER_P4C_DPDK_IMG)  \
-	p4c-dpdk -DARCH_DPDK_PNA -DPNA_CONNTRACK --pp $(P4_DPDK_OUTDIR)/dash_pipeline.pp.p4 \
+	p4c-dpdk -DTARGET_DPDK_PNA -DPNA_CONNTRACK --pp $(P4_DPDK_OUTDIR)/dash_pipeline.pp.p4 \
 		-o $(P4_DPDK_OUTDIR)/dash_pipeline.spec --arch pna \
 		--bf-rt-schema $(P4_DPDK_OUTDIR)/dash_pipeline.p4.bfrt.json \
 		--p4runtime-files $(P4_DPDK_OUTDIR)/dash_pipeline.p4.p4info.txt \

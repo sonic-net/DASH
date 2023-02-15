@@ -1,18 +1,18 @@
-#ifndef __DASH_ARCH_SPECIFIC__
-#define __DASH_ARCH_SPECIFIC__
+#ifndef __DASH_TARGET_SPECIFIC__
+#define __DASH_TARGET_SPECIFIC__
 
-#ifdef ARCH_BMV2_V1MODEL
+#ifdef TARGET_BMV2_V1MODEL
 
 #include <v1model.p4>
 #define DIRECT_COUNTER_TABLE_PROPERTY counters
 
-#endif // ARCH_BMV2_V1MODEL
+#endif // TARGET_BMV2_V1MODEL
 
-#ifdef ARCH_DPDK_PNA
+#ifdef TARGET_DPDK_PNA
 
 #include <pna.p4>
 #define DIRECT_COUNTER_TABLE_PROPERTY pna_direct_counter
 
-#endif // ARCH_DPDK_PNA
+#endif // TARGET_DPDK_PNA
 
-#endif // __DASH_ARCH_SPECIFIC__
+#endif // __DASH_TARGET_SPECIFIC__
