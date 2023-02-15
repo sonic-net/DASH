@@ -40,6 +40,16 @@ static std::mutex tableLock;
 static atomic<sai_object_id_t> nextId;
 static std::unique_ptr<p4::v1::P4Runtime::Stub> stub;
 
+void correctIpPrefix(void *ip, const void *mask, size_t length)
+{
+    auto _ip = reinterpret_cast<uint8_t *>(ip);
+    auto _mask = reinterpret_cast<const uint8_t *>(mask);
+    for (size_t i = 0; i < length; i++)
+    {
+        _ip[i] = _ip[i] & _mask[i];
+    }
+}
+
 int leadingNonZeroBits(const uint32_t ipv4) {
     auto firstSetBit  = __builtin_ffs(ipv4);
     if (0==firstSetBit) {

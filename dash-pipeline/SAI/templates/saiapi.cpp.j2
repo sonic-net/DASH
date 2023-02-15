@@ -104,7 +104,8 @@ sai_status_t sai_create_{{ table.name }}(
                 auto mf_ternary = mf->mutable_ternary();
                 {{key.sai_key_field}}SetVal(attr_list[i].value, mf_ternary, {{key.bitwidth}});
                 auto mask = getMaskAttr(SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}_MASK, attr_count, attr_list);
-                {{key.sai_key_field}}SetMask(attr_list[i].value, mf_ternary, {{key.bitwidth}});
+                assert(mask && "SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}_MASK isn't provided");
+                {{key.sai_key_field}}SetMask(mask->value, mf_ternary, {{key.bitwidth}});
                 {% endif %}
                 {% if 'v4_or_v6_id' in key %}
                 {

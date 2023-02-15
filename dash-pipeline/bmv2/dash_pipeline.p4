@@ -246,8 +246,8 @@ control dash_ingress(inout headers_t hdr,
         meta.src_tag_map = tag_map;
     }
 
-    @name("acl_src_tag|dash_tag")
-    table acl_src_tag {
+    @name("src_tag|dash_tag")
+    table src_tag {
         key = {
             meta.src_ip_addr : lpm @name("meta.src_ip_addr:sip");
         }
@@ -260,8 +260,8 @@ control dash_ingress(inout headers_t hdr,
         meta.dst_tag_map = tag_map;
     }
 
-    @name("acl_dst_tag|dash_tag")
-    table acl_dst_tag {
+    @name("dst_tag|dash_tag")
+    table dst_tag {
         key = {
             meta.dst_ip_addr : lpm @name("meta.dst_ip_addr:dip");
         }
@@ -334,8 +334,9 @@ control dash_ingress(inout headers_t hdr,
             deny();
         }
         acl_group.apply();
-        acl_src_tag.apply();
-        acl_dst_tag.apply();
+
+        src_tag.apply();
+        dst_tag.apply();
 
 
         if (meta.direction == direction_t.OUTBOUND) {
