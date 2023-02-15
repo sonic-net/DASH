@@ -283,7 +283,17 @@ pl_sip_encoding          = Private Link encoding for IPv6 SIP transpositions; Fo
 pl_underlay_sip          = Underlay SIP (ST GW VIP) to be used for all private link transformation for this ENI
 ```
 ### 3.2.4 ACL
-  
+
+```
+DASH_PREFIX_TAG_TABLE:{{tag_name}}
+    "prefix_list": {{list of prefix}}
+```
+
+```
+tag_name                  = STRING; unique tag name
+addresses                 = list of ip prefixes ',' separated
+```
+
 ```
 DASH_ACL_IN_TABLE:{{eni}}:{{stage}}
     "acl_group_id": {{group_id}} 
@@ -303,17 +313,6 @@ acl_group_id             = ACL group ID
 DASH_ACL_GROUP_TABLE:{{group_id}}
     "ip_version": {{ipv4/ipv6}}
     "guid": {{string}}
-```
-
-```
-DASH_PREFIX_TAG_TABLE:{{tag_name}}
-    "prefix_list": {{list of prefix}}
-```
-
-
-```
-tag_name                  = STRING; unique tag name
-addresses                 = list of ip prefixes ',' separated
 ```
 
 ```
