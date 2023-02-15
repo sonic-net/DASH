@@ -420,7 +420,7 @@ metering_bucket          = bucket_id                 ; metering and counter
 region                   = region_id                 ; optional region_id which the vni/prefix belongs to as a string for any vendor optimizations
 ```
 
-### 3.2.8 VNET MAPPING TABLE
+### 3.2.9 VNET MAPPING TABLE
 
 ``` 
 DASH_VNET_MAPPING_TABLE:{{vnet}}:{{ip_address}} 
@@ -445,7 +445,7 @@ overlay_sip              = ip_address                ; overlay src ip if routing
 overlay_dip              = ip_address                ; overlay dst ip if routing_type is {privatelink} 
 ```
 
-### 3.2.9 DASH orchagent (Overlay)
+### 3.2.10 DASH orchagent (Overlay)
 
 |     APP_DB Table      |      Key      |       Field      |             SAI Attributes/*objects*              |                     Comment                     |
 |-----------------------|---------------|------------------|---------------------------------------------------|-------------------------------------------------|
