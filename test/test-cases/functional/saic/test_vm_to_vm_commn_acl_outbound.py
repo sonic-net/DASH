@@ -66,12 +66,14 @@ class TestAclOutbound:
             setup_commands = json.load(config_file)
         return setup_commands
 
+    @pytest.mark.dependency()
     def test_setup(self, dpu, setup_config):
         results = [*dpu.process_commands(setup_config)]
         print("\n======= SAI setup commands RETURN values =======")
         pprint(results)
         assert all(results), "Setup error"
 
+    @pytest.mark.dependency(depends=['TestAclOutbound::test_setup'])
     def test_vm_to_vm_commn_acl_outbound(self, dataplane):
 
         # Configure TGEN
@@ -165,6 +167,7 @@ class TestAclOutbound:
         # Validate test result
         assert acl_traffic_result==False, "Traffic test Deny failure"   
 
+    @pytest.mark.dependency(depends=['TestAclOutbound::test_setup'])
     def test_cleanup(self, dpu, setup_config):
 
         cleanup_commands = []
@@ -172,8 +175,6 @@ class TestAclOutbound:
             command['op'] = 'remove'
             cleanup_commands.append(command)
 
-        # Another example of applying commands one by one.
-        # Extremely useful when you have a generator instead of the list
         results = []
         for command in cleanup_commands:
             results.append(dpu.command_processor.process_command(command))
