@@ -78,6 +78,7 @@ class TestUdpOutbound:
         assert all(results), "Setup error"
                
     @pytest.mark.dependency(depends=['TestUdpOutbound::test_setup'])
+    @pytest.mark.xfail(reason="https://github.com/sonic-net/DASH/issues/236")
     def test_vm_to_vm_commn_udp_outbound(self, dataplane):
         # Configure TGEN
         

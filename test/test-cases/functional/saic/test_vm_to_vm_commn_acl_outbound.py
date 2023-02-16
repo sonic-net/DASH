@@ -73,7 +73,9 @@ class TestAclOutbound:
         pprint(results)
         assert all(results), "Setup error"
 
+
     @pytest.mark.dependency(depends=['TestAclOutbound::test_setup'])
+    @pytest.mark.xfail(reason="https://github.com/sonic-net/DASH/issues/236")
     def test_vm_to_vm_commn_acl_outbound(self, dataplane):
 
         # Configure TGEN
