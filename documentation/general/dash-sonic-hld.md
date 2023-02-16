@@ -320,13 +320,13 @@ DASH_ACL_RULE_TABLE:{{group_id}}:{{rule_num}}
     "priority": {{priority}}
     "action": {{action}}
     "terminating": {{bool}}
-    "protocol": {{list of protocols}}
-    "src_tag": {{list of tag name}}
-    "dst_tag": {{list of tag name}}
-    "src_addr": {{list of prefix}}
-    "dst_addr": {{list of prefix}}
-    "src_port": {{list of range of ports}}
-    "dst_port": {{list of range of ports}}
+    "protocol": {{list of protocols}} (OPTIONAL)
+    "src_tag": {{list of tag name}} (OPTIONAL)
+    "dst_tag": {{list of tag name}} (OPTIONAL)
+    "src_addr": {{list of prefix}} (OPTIONAL)
+    "dst_addr": {{list of prefix}} (OPTIONAL)
+    "src_port": {{list of range of ports}} (OPTIONAL)
+    "dst_port": {{list of range of ports}} (OPTIONAL)
     
 ```
 
@@ -337,12 +337,12 @@ priority                 = INT32 value  ; priority of the rule, lower the value,
 action                   = allow/deny
 terminating              = true/false   ; if true, stop processing further rules
 protocols                = list of INT ',' separated; E.g. 6-tcp, 17-udp; if not provided, match on all protocols
-src_tag_map              = list of source tag name ',' separated
-dst_tag_map              = list of destination tag name ',' separated
-src_addr                 = list of source ip prefixes ',' separated
-dst_addr                 = list of destination ip prefixes ',' separated
-src_port                 = list of range of source ports ',' separated
-dst_port                 = list of range of destination ports ',' separated
+src_tag_map              = list of source tag name ',' separated; if not provided, match on all source TAGs.
+dst_tag_map              = list of destination tag name ',' separated; if not provided, match on all destination TAGs.
+src_addr                 = list of source ip prefixes ',' separated; if not provided, match on all source IPs.
+dst_addr                 = list of destination ip prefixes ',' separated; if not provided, match on all destination IPs.
+src_port                 = list of range of source ports ',' separated;  if not provided, match on all source ports.
+dst_port                 = list of range of destination ports ',' separated;  if not provided, match on all destination ports.
 ```
 
 ### 3.2.5 ROUTING TYPE
