@@ -197,10 +197,10 @@ DASH_NAT_GW_VTEP_TABLE{
 
 * Subsequent processing flow of inbound packet
 
-![dnat-subsequent-processing-inbound-packet-flow](images/Figure10-dnat-subsequent-inbound-packet-flow.jpg)
+![dnat-subsequent-processing-inbound-packet-flow](images/Figure10-dnat-subsequent-inbound-packet-flow.png)
 *Figure 10 - DNAT subsequent processing inbound packet flow*
 
 * Subsequent processing flow of outbound packet
 
-![dnat-subsequent-processing-outbound-packet-flow](images/Figure11-dnat-subsequent-outbound-packet-flow.jpg)
+![dnat-subsequent-processing-outbound-packet-flow](images/Figure11-dnat-subsequent-outbound-packet-flow.png)
 *Figure 11 - DNAT subsequent processing outbound packet flow*
