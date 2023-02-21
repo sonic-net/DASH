@@ -59,7 +59,8 @@ OUTER_DST_MAC_F2 = "c8:2c:2b:00:d1:34"
 #                  Start of the testcase
 ###############################################################
 
-@pytest.mark.xfail(reason="https://github.com/sonic-net/DASH/issues/233")
+
+@pytest.mark.xfail(reason="https://github.com/sonic-net/DASH/issues/345")
 class TestUdpBidir:
 
     @pytest.fixture(scope="class")
