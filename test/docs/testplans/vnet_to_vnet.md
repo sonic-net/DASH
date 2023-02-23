@@ -22,7 +22,7 @@ In this specific testbed setup we will use [Ixia-c](https://github.com/open-traf
 
 ### Testbed Topology 
 
-The testbed is setup to emulate a VNET to VNET scenario and to test the mechanisms of VM to VM communication in VNET as outlined [here](https://github.com/Azure/DASH/blob/main/documentation/vnet2vnet-service/vnet-to-vnet-service.md).
+The testbed is setup to emulate a VNET to VNET scenario and to test the mechanisms of VM to VM communication in VNET as outlined [here](https://github.com/sonic-net/DASH/blob/main/documentation/vnet2vnet-service/vnet-to-vnet-service.md).
 
 
 
