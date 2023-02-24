@@ -286,12 +286,14 @@ pl_underlay_sip          = Underlay SIP (ST GW VIP) to be used for all private l
 
 ```
 DASH_PREFIX_TAG_TABLE:{{tag_name}}
+    "ip_version": {{ipv4/ipv6}}
     "prefix_list": {{list of prefix}}
 ```
 
 ```
 tag_name                  = STRING; unique tag name
-addresses                 = list of ip prefixes ',' separated
+addresses                 = list of ip prefixes ',' separated. valid to have empty list of prefixes.
+                            If the prefix is empty, no packet will be assigned to this TAG.
 ```
 
 ```
@@ -337,8 +339,8 @@ priority                 = INT32 value  ; priority of the rule, lower the value,
 action                   = allow/deny
 terminating              = true/false   ; if true, stop processing further rules
 protocols                = list of INT ',' separated; E.g. 6-tcp, 17-udp; if not provided, match on all protocols
-src_tag_map              = list of source tag name ',' separated; if not provided, match on all source TAGs.
-dst_tag_map              = list of destination tag name ',' separated; if not provided, match on all destination TAGs.
+src_tag                  = list of source tag name ',' separated; if not provided, match on all source TAGs.
+dst_tag                  = list of destination tag name ',' separated; if not provided, match on all destination TAGs.
 src_addr                 = list of source ip prefixes ',' separated; if not provided, match on all source IPs.
 dst_addr                 = list of destination ip prefixes ',' separated; if not provided, match on all destination IPs.
 src_port                 = list of range of source ports ',' separated;  if not provided, match on all source ports.
