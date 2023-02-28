@@ -12,8 +12,8 @@ current_file_dir = Path(__file__).parent
 """
 This covers following scenario :
 vnet to vnet communication with UDP traffic flow with inbound direction :
-Configure DUT 
-Configure TGEN UDP traffic flow as one vnet to another vnet of two OpenTrafficGenerator ports
+Configure DUT on inbound routing direction
+Configure TGEN vxlan UDP traffic flow as one vnet to another vnet of two OpenTrafficGenerator ports
 Verify Traffic flow between vnet to vnet through DUT  
 
 Topology Used :
@@ -33,7 +33,6 @@ Topology Used :
 
 TOTALPACKETS = 1000
 PPS = 100
-TRAFFIC_SLEEP_TIME = (TOTALPACKETS / PPS) + 2 
 PACKET_LENGTH = 128
 ENI_IP = "1.1.0.1"
 NETWORK_IP1 = "1.128.0.1"
@@ -161,13 +160,17 @@ class TestUdpInbound:
         su.start_traffic(dataplane, f2.name)
         time.sleep(0.5)
         su.start_traffic(dataplane, f1.name)
-        time.sleep(TRAFFIC_SLEEP_TIME)    
+        flow_names=[f1.name, f2.name]
+        while(True):
+            if (dataplane.is_traffic_stopped(flow_names)):
+                break 
         dataplane.stop_traffic()
         
         res1 = su.check_flow_tx_rx_frames_stats(dataplane, f1.name)
         res2 = su.check_flow_tx_rx_frames_stats(dataplane, f2.name)
-        print("res1 and res2 is {} {}".format(res1, res2))
-
+        print("Tx and Rx packet match result of flow {} is {}".format(f1.name, res1))
+        print("Tx and Rx packet match result of flow {} is {}".format(f2.name, res2))
+        
         dataplane.teardown()
         
         # Validate test result

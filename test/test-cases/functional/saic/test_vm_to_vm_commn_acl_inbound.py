@@ -13,8 +13,8 @@ current_file_dir = Path(__file__).parent
 This covers following scenario :
 
 Test vnet to vnet communication with ACL on inbound direction:
-1. Configure DUT to deny and allow traffic
-2. Configure TGEN traffic flow as one vnet to another vnet of two OpenTrafficGenerator ports
+1. Configure DUT on inbound routing direction to deny and allow traffic
+2. Configure TGEN vxlan traffic flow as one vnet to another vnet of two OpenTrafficGenerator ports
 3. Verify Traffic denied through deny IPs
 
 
@@ -36,7 +36,6 @@ Topology Used :
 
 TOTALPACKETS = 1000
 PPS = 100
-TRAFFIC_SLEEP_TIME = (TOTALPACKETS / PPS) + 2 
 PACKET_LENGTH = 128
 ENI_IP = "1.1.0.1"
 NETWORK_IP2 = "1.128.0.2"
@@ -121,7 +120,10 @@ class TestAclInbound:
         print("\n======= Verify traffic with allowed packets passing =======")
         print("\n======= Start traffic =======")
         su.start_traffic(dataplane, f2.name)
-        time.sleep(TRAFFIC_SLEEP_TIME)
+        flow_names=[f2.name]
+        while(True):
+            if (dataplane.is_traffic_stopped(flow_names)):
+                break
         print("\n======= Stop traffic =======")
         dataplane.stop_traffic()
 
@@ -129,8 +131,8 @@ class TestAclInbound:
         print("\n======= Verify packet TX and RX matching =======")
         acl_traffic_result1 = su.check_flow_tx_rx_frames_stats(dataplane, f2.name)
         # Print Result of the test
-        print("Final Result : {}".format(acl_traffic_result1))
-
+        print("Tx and Rx packet match result of flow {} is {}".format(f2.name, acl_traffic_result1))
+        
         inner_ip.src.value = NETWORK_IP2 #world
         inner_ip.dst.value = ENI_IP   # ENI
 
@@ -143,7 +145,10 @@ class TestAclInbound:
         print("\n======= Verify traffic with denied packets failing =======")
         print("\n======= Start traffic =======")
         su.start_traffic(dataplane, f2.name)
-        time.sleep(TRAFFIC_SLEEP_TIME)
+        flow_names=[f1.name, f2.name, f3.name, f4.name]
+        while(True):
+            if (dataplane.is_traffic_stopped(flow_names)):
+                break
         print("\n======= Stop traffic =======")
         dataplane.stop_traffic()
         
@@ -151,7 +156,7 @@ class TestAclInbound:
         print("\n======= Verify packet TX and RX not matching =======")
         acl_traffic_result2 = su.check_flow_tx_rx_frames_stats(dataplane, f2.name)
         # Print Result of the test
-        print("Final Result : {}".format(acl_traffic_result2))
+        print("Tx and Rx packet match result of flow {} is {}".format(f2.name, acl_traffic_result2))
 
         dataplane.teardown()
 

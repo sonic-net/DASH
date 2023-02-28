@@ -14,8 +14,8 @@ This covers following scenario :
 
 vnet to vnet communication with UDP traffic flow on bidirectional traffic :
 
-Configure DUT 
-Configure TGEN UDP traffic flow as one vnet to another vnet of two OpenTrafficGenerator ports
+Configure DUT on bidirectional routing direction
+Configure TGEN vxlan UDP traffic flow as one vnet to another vnet of two OpenTrafficGenerator ports
 Verify Traffic flow between vnet to vnet through DPU  
 
 
@@ -37,7 +37,6 @@ Topology Used :
 
 TOTALPACKETS = 1000
 PPS = 100
-TRAFFIC_SLEEP_TIME = (TOTALPACKETS / PPS) + 2 
 PACKET_LENGTH = 128
 ENI_IP = "1.1.0.1"
 NETWORK_IP1 = "1.128.0.1"
@@ -257,7 +256,10 @@ class TestUdpBidir:
         time.sleep(0.5)
         su.start_traffic(dataplane, f2.name)
         su.start_traffic(dataplane, f4.name)
-        time.sleep(TRAFFIC_SLEEP_TIME)
+        flow_names=[f1.name, f2.name, f3.name, f4.name]
+        while(True):
+            if (dataplane.is_traffic_stopped(flow_names)):
+                break
         print("\n======= Stop Traffic  =======")                    
         dataplane.stop_traffic()
 
@@ -270,13 +272,15 @@ class TestUdpBidir:
         dataplane.teardown()
 
         # Validate test result  
-        print("\n======= Print Test Results  =======")        
-        print("res1 and res2 and res3 and res4 is {} {} {} {}".format(res1, res2, res3, res4))
+        print("\n======= Print Test Results  =======")     
+        print("Tx and Rx packet match result of flow {} is {}".format(f1.name, res1))
+        print("Tx and Rx packet match result of flow {} is {}".format(f2.name, res2))
+        print("Tx and Rx packet match result of flow {} is {}".format(f3.name, res3))
+        print("Tx and Rx packet match result of flow {} is {}".format(f4.name, res4))
         assert res1, "Traffic test failure"
         assert res2, "Traffic test failure"
         assert res3, "Traffic test failure"
         assert res4, "Traffic test failure"
-
 
     @pytest.mark.dependency(depends=['TestUdpBidir::test_setup'])
     def test_cleanup(self, dpu, setup_config):
