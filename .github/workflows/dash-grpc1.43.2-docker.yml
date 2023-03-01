@@ -34,11 +34,11 @@ jobs:
       run: make docker-dash-grpc
 
     - uses: azure/docker-login@v1
-      if: ${{ github.event_name != 'pull_request' && github.repository == 'Azure/DASH' }}
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'sonic-net/DASH' }}
       with:
         login-server: sonicdash.azurecr.io
         username: ${{ secrets.DASH_ACR_USERNAME }}
         password: ${{ secrets.DASH_ACR_PASSWORD }}
     - name: Publish dash-grpc1.43.2 image
-      if: ${{ github.event_name != 'pull_request' && github.repository == 'Azure/DASH' }}
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'sonic-net/DASH' }}
       run: make docker-publish-dash-grpc
