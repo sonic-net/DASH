@@ -1,7 +1,7 @@
 def config_l1_properties(dataplane, usd_speed):
     """
     This function used to configure L1 properties such as speed of the ports
-    Sometimes enabling auto negotiation would fail to bring the port the ports up
+    Sometimes enabling auto_negotiation would fail to bring the ports up
     So we are disabling auto_nagotiation when setting speed
     """
     ly = dataplane.configuration.layer1.layer1(name="ly")[-1]
@@ -57,6 +57,9 @@ def check_bgp_neighborship_established(dataplane):
 def check_ping(dataplane, ip_obj_name, ip, addr_family="ipv4"):
     """
     This function will verify ping connectivity between TGEN and DUT
+    Ping request would be sent from TGEN
+    ip_obj_name is source ip stack name from where we wanted to send ping
+    ip is DUT ip address which connectivity to be tested from TGEN
     """
     req = dataplane.api.ping_request()
     if addr_family == "ipv4":
