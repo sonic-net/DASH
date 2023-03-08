@@ -30,7 +30,9 @@ from pprint import pprint
 
 import pytest
 import saichallenger.common.sai_dataplane.snappi.snappi_traffic_utils as stu
-import dash_helper.vnet2vnet_helper as dh
+import sys
+sys.path.append("../utils")
+import vnet2vnet_helper as dh
 
 current_file_dir = Path(__file__).parent
 import dpugen
