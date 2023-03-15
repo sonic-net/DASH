@@ -24,7 +24,7 @@ The goal is to test the following properties:
 
 ## NAT scenario architecture
 
-![nat-architecture](images/Figure1-dash-nat-topo.png)
+![nat-architecture](images/Figure1-dash-nat-topo.svg)
 *Figure 1 - NAT scenario architecture*
 
 Tenant1 access Internet service, with VM1 in VNET1 through NAT gateway running on a smart switch. Tenant2 provide service to the public, hosted on VM2 in VNET2, Internet user access this service through NAT gateway running on a smart switch.
