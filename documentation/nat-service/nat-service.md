@@ -117,12 +117,12 @@ DASH_ROUTING_TYPE:vnet_encap: [
 ]
 
 /* Define Overlay routing tables */
-DASH_OVERLAY_ROUTING_TABLE:Vnet1:10.1.0.10 {
+DASH_VNET_ROUTE_TABLE:Vnet1:10.1.0.10 {
     "routing_type":"vnet_encap", 
     "dst_vtep":[30.0.0.22]
     "mac_address":002244AABBCC
 },
-DASH_OVERLAY_ROUTING_TABLE:Vnet1:10.1.0.2 {
+DASH_VNET_ROUTE_TABLE:Vnet1:10.1.0.2 {
     "routing_type":"vnet_encap", 
     "dst_vtep":[30.0.0.23]
     "mac_address":002244AABBDD
@@ -150,24 +150,35 @@ DASH_SNAT_RULE_TABLE:Vnet2:10.1.0.0/24 {
 }
 
 /* Define DNAT rules */
-DASH_DNAT_RULE_TABLE:Vnet1:10.1.0.2:80 {
-    "mapping_list": [111.2.190.195:80, 114.66.253.4:8080]
+DASH_DNAT_RULE_TABLE:111.2.190.195:80 {
+    "mapping_vnet": Vnet1,
+    "mapping_address": 10.1.0.2:80
 },
-DASH_DNAT_RULE_TABLE:Vnet1:10.1.0.3 {
-    "mapping_list": [111.2.190.196:80, 114.66.253.5]
+DASH_DNAT_RULE_TABLE:114.66.253.4:8080 {
+    "mapping_vnet": Vnet1,
+    "mapping_address": 10.1.0.2:80
+},
+DASH_DNAT_RULE_TABLE:111.2.190.196 {
+    "mapping_vnet": Vnet1,
+    "mapping_address": 10.1.0.3
+},
+DASH_DNAT_RULE_TABLE:114.66.253.5 {
+    "mapping_vnet": Vnet1,
+    "mapping_address": 10.1.0.3
 },
 
 /* Define NAT gateway vtep ip */
 DASH_NAT_GW_VTEP_TABLE{
     "vtep_ip": [30.0.0.250]
 }
+
 ```
 
 ## Packet flow example
 
 ### SNAT packet flow
 
-`Source: VM in Vnet1, VNI 12345, SIP 10.1.10.10`
+`Source: VM in Vnet1, VNI 12345, SIP 10.1.0.10`
 `Destination: IP 8.8.8.8, port 53, protocol UDP`
 
 * **first packet** processing flow of outbound packet
@@ -204,3 +215,11 @@ DASH_NAT_GW_VTEP_TABLE{
 
 ![dnat-subsequent-processing-outbound-packet-flow](images/Figure11-dnat-subsequent-outbound-packet-flow.png)
 *Figure 11 - DNAT subsequent processing outbound packet flow*
+
+* Generic NAT outbound packet processing pipeline
+![generic-nat-outbound-packet-processing-pipeline](images/Figure12-generic-nat-outbound-packet-flow.svg)
+*Figure 12 - Generic NAT processing outbound packet flow*
+
+* Generic NAT inbound packet processing pipeline
+![generic-nat-inbound-packet-processing-pipeline](images/Figure13-generic-nat-inbound-packet-flow.svg)
+*Figure 13 - Generic NAT processing inbound packet flow*
