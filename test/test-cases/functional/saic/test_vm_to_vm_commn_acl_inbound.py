@@ -9,6 +9,9 @@ import snappi_utils as su
 
 current_file_dir = Path(__file__).parent
 
+#import global variables and dpu config
+from config_inbound_setup_commands import *
+
 """
 This covers following scenario :
 
@@ -31,21 +34,6 @@ Topology Used :
 """
 
 ###############################################################
-#                  Declaring Global variables
-###############################################################
-
-TOTALPACKETS = 1000
-PPS = 100
-PACKET_LENGTH = 128
-ENI_IP = "1.1.0.1"
-NETWORK_IP2 = "1.128.0.2"
-NETWORK_IP1 = "1.128.0.1"
-
-DPU_VTEP_IP = "221.0.0.2"
-ENI_VTEP_IP = "221.0.1.11"
-NETWORK_VTEP_IP = "221.0.2.101"
-
-###############################################################
 #                  Start of the testcase
 ###############################################################
 
@@ -58,10 +46,7 @@ class TestAclInbound:
         Fixture returns the content of the file with SAI configuration commands.
         scope=class - The file is loaded once for the whole test class
         """
-        current_file_dir = Path(__file__).parent
-        with (current_file_dir / 'config_inbound_setup_commands.json').open(mode='r') as config_file:
-            setup_commands = json.load(config_file)
-        return setup_commands
+        return dpu_config
 
     @pytest.mark.dependency()
     def test_setup(self, dpu, setup_config):

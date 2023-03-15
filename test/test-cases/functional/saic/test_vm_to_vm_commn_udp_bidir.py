@@ -9,6 +9,9 @@ import snappi_utils as su
 
 current_file_dir = Path(__file__).parent
 
+#import global variables and dpu config
+from config_bidir_setup_commands import *
+
 """
 This covers following scenario :
 
@@ -31,28 +34,6 @@ Topology Used :
        
 """
 
-###############################################################
-#                  Declaring Global variables
-###############################################################
-
-TOTALPACKETS = 1000
-PPS = 100
-PACKET_LENGTH = 128
-ENI_IP = "1.1.0.1"
-NETWORK_IP1 = "1.128.0.1"
-NETWORK_IP2 = "1.128.0.3"
-
-DPU_VTEP_IP = "221.0.0.2"
-ENI_VTEP_IP = "221.0.1.11"
-NETWORK_VTEP_IP = "221.0.2.101"
-
-OUTER_SRC_MAC = "80:09:02:01:00:01"
-OUTER_DST_MAC = "c8:2c:2b:00:d1:30" 
-INNER_SRC_MAC = "00:1A:C5:00:00:01"
-INNER_DST_MAC = "00:1b:6e:00:00:01"
-INNER_DST_MAC2= "00:1b:6e:00:00:03"
-OUTER_SRC_MAC_F2 = "80:09:02:02:00:01"
-OUTER_DST_MAC_F2 = "c8:2c:2b:00:d1:34"  
 
 ###############################################################
 #                  Start of the testcase
@@ -68,10 +49,7 @@ class TestUdpBidir:
         Fixture returns the content of the file with SAI configuration commands.
         scope=class - The file is loaded once for the whole test class
         """
-        current_file_dir = Path(__file__).parent
-        with (current_file_dir / 'config_bidir_setup_commands.json').open(mode='r') as config_file:
-            setup_commands = json.load(config_file)
-        return setup_commands
+        return dpu_config
 
     @pytest.mark.dependency()
     def test_setup(self, dpu, setup_config):

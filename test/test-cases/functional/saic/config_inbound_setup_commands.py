@@ -1,11 +1,36 @@
-[
+###############################################################
+#                  Declaring Global variables
+###############################################################
+
+TOTALPACKETS = 1000
+PPS = 100
+PACKET_LENGTH = 128
+ENI_IP = "1.1.0.1"
+NETWORK_IP1 = "1.128.0.1"
+NETWORK_IP2 = "1.128.0.2"
+
+DPU_VTEP_IP = "221.0.0.2"
+ENI_VTEP_IP = "221.0.1.11"
+NETWORK_VTEP_IP = "221.0.2.101"
+OUTER_SRC_MAC = "80:09:02:01:00:01"
+OUTER_DST_MAC = "c8:2c:2b:00:d1:30" #MAC from DUT
+INNER_SRC_MAC = "00:1A:C5:00:00:01"
+INNER_DST_MAC = "00:1b:6e:00:00:01"
+OUTER_SRC_MAC_F2 = "80:09:02:02:00:01"
+OUTER_DST_MAC_F2 = "c8:2c:2b:00:d1:34"  
+
+
+###############################################################
+#                  DPU Config
+###############################################################
+dpu_config = [
   {
     "name": "vip_entry",
     "op": "create",
     "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
-      "vip": "221.0.0.2"
+      "vip": DPU_VTEP_IP
     },
     "attributes": [
       "SAI_VIP_ENTRY_ATTR_ACTION",
@@ -79,7 +104,7 @@
       "SAI_ENI_ATTR_ADMIN_STATE",
       "True",
       "SAI_ENI_ATTR_VM_UNDERLAY_DIP",
-      "221.0.1.11",
+      ENI_VTEP_IP,
       "SAI_ENI_ATTR_VM_VNI",
       "9",
       "SAI_ENI_ATTR_VNET_ID",
@@ -140,7 +165,7 @@
       "SAI_ENI_ATTR_ADMIN_STATE",
       "True",
       "SAI_ENI_ATTR_VM_UNDERLAY_DIP",
-      "221.0.2.101",
+      NETWORK_VTEP_IP,
       "SAI_ENI_ATTR_VM_VNI",
       "9",
       "SAI_ENI_ATTR_VNET_ID",
@@ -194,7 +219,7 @@
     "type": "SAI_OBJECT_TYPE_ENI_ETHER_ADDRESS_MAP_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
-      "address": "00:1A:C5:00:00:01"
+      "address": INNER_SRC_MAC
     },
     "attributes": [
       "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID",
@@ -207,7 +232,7 @@
     "type": "SAI_OBJECT_TYPE_ENI_ETHER_ADDRESS_MAP_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
-      "address": "00:1b:6e:00:00:01"
+      "address": INNER_DST_MAC
     },
     "attributes": [
       "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID",
@@ -258,7 +283,7 @@
     "type": "SAI_OBJECT_TYPE_PA_VALIDATION_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
-      "sip": "1.1.0.1",
+      "sip": ENI_IP,
       "vnet_id": "$vnet_#1"
     },
     "attributes": [
@@ -272,7 +297,7 @@
     "type": "SAI_OBJECT_TYPE_PA_VALIDATION_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
-      "sip": "1.128.0.1",
+      "sip": NETWORK_IP1,
       "vnet_id": "$vnet_#1"
     },
     "attributes": [

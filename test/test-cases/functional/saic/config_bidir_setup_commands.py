@@ -1,11 +1,34 @@
-[
+###############################################################
+#                  Declaring Global variables
+###############################################################
+
+TOTALPACKETS = 1000
+PPS = 100
+PACKET_LENGTH = 128
+ENI_IP = "1.1.0.1"
+NETWORK_IP1 = "1.128.0.1"
+NETWORK_IP2 = "1.128.0.3"
+
+DPU_VTEP_IP = "221.0.0.2"
+ENI_VTEP_IP = "221.0.1.11"
+NETWORK_VTEP_IP = "221.0.2.101"
+
+OUTER_SRC_MAC = "80:09:02:01:00:01"
+OUTER_DST_MAC = "c8:2c:2b:00:d1:30" 
+INNER_SRC_MAC = "00:1A:C5:00:00:01"
+INNER_DST_MAC = "00:1b:6e:00:00:01"
+INNER_DST_MAC2= "00:1b:6e:00:00:03"
+OUTER_SRC_MAC_F2 = "80:09:02:02:00:01"
+OUTER_DST_MAC_F2 = "c8:2c:2b:00:d1:34"  
+
+dpu_config = [
   {
     "name": "vpe_#1",
     "op": "create",
     "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
-      "vip": "221.0.0.2"
+      "vip": DPU_VTEP_IP
     },
     "attributes": [
       "SAI_VIP_ENTRY_ATTR_ACTION", "SAI_VIP_ENTRY_ACTION_ACCEPT"
@@ -69,7 +92,7 @@
       "SAI_ENI_ATTR_PPS", "100000",
       "SAI_ENI_ATTR_FLOWS", "100000",
       "SAI_ENI_ATTR_ADMIN_STATE", "True",
-      "SAI_ENI_ATTR_VM_UNDERLAY_DIP", "221.0.1.11",
+      "SAI_ENI_ATTR_VM_UNDERLAY_DIP", ENI_VTEP_IP,
       "SAI_ENI_ATTR_VM_VNI", "9",
       "SAI_ENI_ATTR_VNET_ID", "$vnet",
       "SAI_ENI_ATTR_INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID", "0",
@@ -103,7 +126,7 @@
       "SAI_ENI_ATTR_PPS", "100000",
       "SAI_ENI_ATTR_FLOWS", "100000",
       "SAI_ENI_ATTR_ADMIN_STATE", "True",
-      "SAI_ENI_ATTR_VM_UNDERLAY_DIP", "221.0.2.101",
+      "SAI_ENI_ATTR_VM_UNDERLAY_DIP", NETWORK_VTEP_IP,
       "SAI_ENI_ATTR_VM_VNI", "9",
       "SAI_ENI_ATTR_VNET_ID", "$vnet",
       "SAI_ENI_ATTR_INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID", "0",
@@ -137,7 +160,7 @@
       "SAI_ENI_ATTR_PPS", "100000",
       "SAI_ENI_ATTR_FLOWS", "100000",
       "SAI_ENI_ATTR_ADMIN_STATE", "True",
-      "SAI_ENI_ATTR_VM_UNDERLAY_DIP", "221.0.2.101",
+      "SAI_ENI_ATTR_VM_UNDERLAY_DIP", NETWORK_VTEP_IP,
       "SAI_ENI_ATTR_VM_VNI", "9",
       "SAI_ENI_ATTR_VNET_ID", "$vnet",
       "SAI_ENI_ATTR_INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID", "0",
@@ -169,7 +192,7 @@
     "type": "SAI_OBJECT_TYPE_ENI_ETHER_ADDRESS_MAP_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
-      "address": "00:1A:C5:00:00:01"
+      "address": INNER_SRC_MAC
     },
     "attributes": [
       "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID", "$eni_#1"
@@ -181,7 +204,7 @@
     "type": "SAI_OBJECT_TYPE_ENI_ETHER_ADDRESS_MAP_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
-      "address": "00:1b:6e:00:00:01"
+      "address": INNER_DST_MAC
     },
     "attributes": [
       "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID", "$eni_#2"
@@ -193,7 +216,7 @@
     "type": "SAI_OBJECT_TYPE_ENI_ETHER_ADDRESS_MAP_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
-      "address": "00:1b:6e:00:00:03"
+      "address": INNER_DST_MAC2
     },
     "attributes": [
       "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID", "$eni_#3"
@@ -305,11 +328,11 @@
     "key": {
       "switch_id": "$SWITCH_ID",
       "dst_vnet_id": "$vnet",
-      "dip": "1.128.0.1"
+      "dip": NETWORK_IP1
     },
     "attributes": [
-      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP", "221.0.2.101",
-      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC", "00:1b:6e:00:00:01",
+      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP", NETWORK_VTEP_IP,
+      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC", INNER_DST_MAC,
       "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_USE_DST_VNET_VNI", "True"
     ]
   },
@@ -320,11 +343,11 @@
     "key": {
       "switch_id": "$SWITCH_ID",
       "dst_vnet_id": "$vnet",
-      "dip": "1.128.0.3"
+      "dip": NETWORK_IP2
     },
     "attributes": [
-      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP", "221.0.2.101",
-      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC", "00:1b:6e:00:00:03",
+      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP", NETWORK_VTEP_IP,
+      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC", INNER_DST_MAC2,
       "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_USE_DST_VNET_VNI", "True"
     ]
   },
@@ -335,14 +358,13 @@
     "key": {
       "switch_id": "$SWITCH_ID",
       "dst_vnet_id": "$vnet",
-      "dip": "1.1.0.1"
+      "dip": ENI_IP
     },
     "attributes": [
-      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP", "221.0.1.11",
-      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC", "00:1A:C5:00:00:01",
+      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP", ENI_VTEP_IP,
+      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC", INNER_SRC_MAC,
       "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_USE_DST_VNET_VNI", "True"
     ]
   }
 ]
-
 
