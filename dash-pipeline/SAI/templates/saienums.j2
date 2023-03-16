@@ -1,0 +1,10 @@
+{% for enum in sai_enums %}
+typedef enum _sai_{{ enum.name }}_t
+{
+{% for member in enum.members %}
+    SAI_{{ enum.name | upper }}_{{ member.sai_name | upper }},
+
+{% endfor %}
+} sai_{{ enum.name }}_t;
+
+{% endfor %}
