@@ -2,18 +2,18 @@
 
 ## Overview
 
-NAT scenario decribes 2 NAT use cases:
+NAT scenario describes 2 NAT use cases:
 
 * VMs in VNET access Internet, aka SNAT.
-* Users from Internet access servcies hosted on the cloud VMs in VNET, aka DNAT.
+* Users from Internet access services hosted on the cloud VMs in VNET, aka DNAT.
 
 We use network appliance in this HLD, acting the role of NAT gateway as well as underlay router.
-This scenario provides the following capabilites:
+This scenario provides the following capabilities:
 
 * SNAT service for TCP, UDP and ICMP packets.
 * DNAT service for TCP, UDP and ICMP packets.
 * Routing service for underlay forwarding.
-* Billing service(by traffic volumn and by commited traffic rate).
+* Billing service(by traffic volume and by committed traffic rate).
 
 The goal is to test the following properties:
 
@@ -31,7 +31,7 @@ Tenant1 access Internet service, with VM1 in VNET1 through NAT gateway running o
 
 For both case, VMs in different VNET connects to Internet through a NAT gateway.
 
-## Packet proccessing pipeline in NAT scenario
+## Packet processing pipeline in NAT scenario
 
 ### 1. SNAT scenario
 
@@ -44,13 +44,13 @@ For both case, VMs in different VNET connects to Internet through a NAT gateway.
 
 * An outbound flow table lookup is launched. If a match is found, the packet is processed through the **fast path**(H/W table processing).  If a match is not found, the packet is handled through the **slow path** processing, also referred as the **first packet** processing. A search for an SNAT rule table is then initiated to select a new public source IP address and port number.
 
-* The pipeline lanuch a VTEP lookup to retrieve the VTEP IP of the VM from which the incoming packet originates(i.e VM's SIP to VTEP mapping). This VTEP IP is used to create an inbound flow table entry(for the responding traffic).
+* The pipeline launches a VTEP lookup to retrieve the VTEP IP of the VM from which the incoming packet originates (i.e. VM's SIP to VTEP mapping). This VTEP IP is used to create an inbound flow table entry (for the responding traffic).
 
-* Both an outbound flow table entry and an inbound flow table entry are added to their respective flow tables(H/W tables).
+* Both an outbound flow table entry and an inbound flow table entry are added to their respective flow tables (H/W tables).
 
-* A search of the outbound flow table is triggered once the packet is re-inserted. The packet will match the outbound flow table entry created(with previouse **slow path** processing), and the flow action will be applied to the packet, including the replacement of the source IP address/port number and the decapsulation of the VXLAN header.
+* A search of the outbound flow table is triggered once the packet is re-inserted. The packet will match the outbound flow table entry created (with previous **slow path** processing), and the flow action will be applied to the packet, including the replacement of the source IP address/port number and the decapsulation of the VXLAN header.
 
-* A routing lookup is performed based on destination IP address in order to retrieve the nexthop. This nexthop is used rewrite destination MAC address and determine egress interface.
+* A routing lookup is performed based on destination IP address in order to retrieve the next-hop. This next-hop is used rewrite destination MAC address and determine egress interface.
 
 * Metering and counting are performed for billing purposes before the packet is sent to the Internet.
 
@@ -59,11 +59,11 @@ For both case, VMs in different VNET connects to Internet through a NAT gateway.
 ![snat-inbound-packet-processing-pipeline](images/Figure3-snat-inbound-pipeline.png)
 *Figure 3 - SNAT inbound packet processing pipeline*
 
-* As desribed in section 1.1, during the handling of the **first packet** processing, the inbound flow table entry has been created in the H/W table. So the incoming packet from Internet(the responding packet) will result in a match during the inbound flow lookup. Then action will be applied, replacing the destination IP address/port number, encapsulating the VXLAN header, performing a routing lookup with DIP(the VTEP IP) obtained from inbound flow table, and finally sends the packet to the destionation VM.
+* As described in section 1.1, during the handling of the **first packet** processing, the inbound flow table entry has been created in the H/W table. So the incoming packet from Internet (the responding packet) will result in a match during the inbound flow lookup. Then action will be applied, replacing the destination IP address/port number, encapsulating the VXLAN header, performing a routing lookup with DIP (the VTEP IP) obtained from inbound flow table, and finally sends the packet to the destination VM.
 
 ### 2. DNAT scenario
 
-#### 2.1 Inbound packet proccessing pipeline
+#### 2.1 Inbound packet processing pipeline
 
 ![dnat-inbound-packet-processing-pipe](images/Figure4-dnat-inbound-pipeline.png)
 *Figure 4 - DNAT inbound packet processing pipeline*
@@ -89,7 +89,7 @@ For both case, VMs in different VNET connects to Internet through a NAT gateway.
 
 * Then it routes the packet based on DIP of the decapsulated packet.
 
-* Counting and/or metering is done, and they are optional based on the Vnet user's billing mode.
+* Counting and/or metering is done, and they are optional based on the VNET user's billing mode.
 
 ● The packet is sent to Internet via the selected interface.
 
