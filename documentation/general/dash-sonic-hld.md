@@ -282,7 +282,8 @@ pl_sip_encoding          = Private Link encoding for IPv6 SIP transpositions; Fo
 			   first len(full_mask) bits of pl_sip. Last 32 bits are reserved for the IPv4 CA. Logic: ((pl_sip & !full_mask) | field_value).
 pl_underlay_sip          = Underlay SIP (ST GW VIP) to be used for all private link transformation for this ENI
 ```
-### 3.2.4 ACL
+
+### 3.2.4 TAG
 
 ```
 DASH_PREFIX_TAG_TABLE:{{tag_name}}
@@ -295,6 +296,8 @@ tag_name                  = STRING; unique tag name
 addresses                 = list of ip prefixes ',' separated. valid to have empty list of prefixes.
                             If the prefix is empty, no packet will be assigned to this TAG.
 ```
+
+### 3.2.5 ACL
 
 ```
 DASH_ACL_IN_TABLE:{{eni}}:{{stage}}
@@ -338,7 +341,7 @@ key                      = DASH_ACL_RULE_TABLE:group_id:rule_num ; unique rule n
 priority                 = INT32 value  ; priority of the rule, lower the value, higher the priority
 action                   = allow/deny
 terminating              = true/false   ; if true, stop processing further rules
-protocols                = list of INT ',' separated; E.g. 6-tcp, 17-udp; if not provided, match on all protocols
+protocol                 = list of INT ',' separated; E.g. 6-tcp, 17-udp; if not provided, match on all protocols
 src_tag                  = list of source tag name ',' separated; if not provided, match on all source TAGs.
 dst_tag                  = list of destination tag name ',' separated; if not provided, match on all destination TAGs.
 src_addr                 = list of source ip prefixes ',' separated; if not provided, match on all source IPs.
@@ -347,7 +350,7 @@ src_port                 = list of range of source ports ',' separated;  if not 
 dst_port                 = list of range of destination ports ',' separated;  if not provided, match on all destination ports.
 ```
 
-### 3.2.5 ROUTING TYPE
+### 3.2.6 ROUTING TYPE
 	
 ```
 DASH_ROUTING_TYPE_TABLE:{{routing_type}}: [
@@ -367,7 +370,7 @@ encap_type               = encap type depends on the action_type - {vxlan, nvgre
 vni                      = vni value associated with the corresponding action. Applicable if encap_type is specified. 
 ```
 
-### 3.2.6 APPLIANCE
+### 3.2.7 APPLIANCE
 	
 ```
 DASH_APPLIANCE_TABLE:{{appliance_id}}
@@ -382,7 +385,7 @@ sip                      = source ip address, to be used in encap
 vm_vni                   = VM VNI that is used for setting direction. Also used for inbound encap to VM
 ```
 
-### 3.2.7 ROUTE LPM TABLE - OUTBOUND
+### 3.2.8 ROUTE LPM TABLE - OUTBOUND
 
 ``` 
 DASH_ROUTE_TABLE:{{eni}}:{{prefix}} 
@@ -411,7 +414,7 @@ underlay_dip             = ip_address                ; underlay ipv4 dst ip to o
 metering_bucket          = bucket_id                 ; metering and counter
 ```
 
-### 3.2.8 ROUTE RULE TABLE - INBOUND
+### 3.2.9 ROUTE RULE TABLE - INBOUND
 
 ``` 
 DASH_ROUTE_RULE_TABLE:{{eni}}:{{vni}}:{{prefix}} 
@@ -436,7 +439,7 @@ metering_bucket          = bucket_id                 ; metering and counter
 region                   = region_id                 ; optional region_id which the vni/prefix belongs to as a string for any vendor optimizations
 ```
 
-### 3.2.8 VNET MAPPING TABLE
+### 3.2.10 VNET MAPPING TABLE
 
 ``` 
 DASH_VNET_MAPPING_TABLE:{{vnet}}:{{ip_address}} 
@@ -461,7 +464,7 @@ overlay_sip              = ip_address                ; overlay src ip if routing
 overlay_dip              = ip_address                ; overlay dst ip if routing_type is {privatelink} 
 ```
 
-### 3.2.9 DASH orchagent (Overlay)
+### 3.2.11 DASH orchagent (Overlay)
 
 |     APP_DB Table      |      Key      |       Field      |             SAI Attributes/*objects*              |                     Comment                     |
 |-----------------------|---------------|------------------|---------------------------------------------------|-------------------------------------------------|
