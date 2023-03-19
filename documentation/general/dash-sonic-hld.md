@@ -41,6 +41,7 @@
 |  0.8  | 09/30/2022 |   Prabhat Aravind   | Update APP_DB table names                 |
 |  1.0  | 10/10/2022 |    Prince Sunny     | ST and PL scenarios                       |
 |  1.1  | 01/09/2023 |    Prince Sunny     | Underlay Routing and ST/PL clarifications |
+|  1.2  | 02/12/2023 |  Vijay Srinivasan   | Metering schema and description           |
 
 # About this Manual
 This document provides more detailed design of DASH APIs, DASH orchestration agent, Config and APP DB Schemas and other SONiC buildimage changes required to bring up SONiC image on an appliance card. General DASH HLD can be found at [dash_hld](./dash-high-level-design.md).
@@ -106,7 +107,7 @@ Following are the minimal scaling requirements
 | Max prefixes per rule         | 8k                            |
 | ACL ports per ENI             | 10x10k SRC/DST ports          |
 | Total tags per ENI            | 4k                            |
-| Max prefies per tag           | 24k                           |
+| Max prefixes per tag          | 24k                           |
 | Max tags one prefix belong to | 512                           |
 | CA-PA Mappings                | 10M Per Card                  |
 | Active Connections/ENI        | 1M (Bidirectional TCP or UDP) |
@@ -179,7 +180,7 @@ The following section captures at a high-level on the VNET packet flow. Detailed
 
 ## 2.1 Outbound packet processing pipeline
 	
-  ![dash-outbound](./images/dash-hld-outbound-packet-processing-pipeline.svg)
+  ![dash-outbound](./images/dash-hld-outbound-packet-processing-pipeline.png)
 	
 Based on the incoming packet's VNI matched against the reserved VNI assigned for VM->Appliance, the pipeline shall set the direction as TX(Outbound) and using the inner src-mac, maps to the corresponding ENI.The incoming packet will always be VXLAN encapsulated and outer dst-ip is the appliance VIP. The pipeline shall parse the VNI, and for VM traffic, the VNI shall be a special reserved VNI. Everything else shall be treated as as network traffic(RX). Pipeline shall use VNI to differentiate the traffic to be VM (Inbound) or Network (Outbound).
 
@@ -204,6 +205,32 @@ It is worth noting that CA-PA mapping table shall be used for both encap and dec
 ST/PL is employed for scenarios like multiple different customers want to access a common shared resource (e.g storage). This shall not fall into the regular Vnet packet path or Vnet peering path and hence a Private Endpoint is assigned for such accesses, as part of ENI routing or VNET's mapping tables. The lookup happens as described in the above sections, but actions are different. For ST/PL, actions include IPv4 to IPv6 transpositions and special routing/mapping lookups for encapsulation. By having packet transpositions, Service Tunnel feature provides the capability of encoding “region id”, “vnet id”, “subnet id” etc via packet transformation. IPv6 transformation includes last 32 bits of the IPv6 packet as IPv4 address, while the remaining 96 bits of the IPv6 packet is used for encoding. Private Link feature is an extension to Service Tunnel feature and enables customers to access public facing shared services via their private IP addresses within their vnet. More details on traffic flow is captured in the example section.
 **ST/PL Inbound flow**: Using the outbound unified flow, the reverse transposition (inbound unified flow) is created. If no inbound flow is created, the packet shall be dropped if it does not match any existing inbound routing rule. There is no inbound policy based lookup expected for ST/PL scenarios. When FastPath kicks in, the respective outbound and inbound unified flows shall be modified accordingly. 
 	
+## 2.4 Metering
+
+- Network traffic is metered through configuration of route table entries, mapping entries, and meter policy rules with metering class IDs
+- An (ENI, meter-class-id) entry is created to associate a specific ENI with a meter class ID
+- The (ENI, meter-class-id) entry must be deleted when traffic is no longer metered OR the ENI is deleted
+- Meter statistics for each ENI can be obtained through GET request on (ENI, meter-class-id) or (ENI, *)
+- Each (ENI, meter-class-id) is mapped to a meter bucket counter in the pipeline
+- The meter bucket counter tracks the number of transmitted and received bytes (number of packets is optional)
+
+### 2.4.1 Meter Policy
+
+- A meter policy consists of a set of metering rules
+- Each meter rule consists of an IP prefix mapped to meter-class-id
+- Each meter rule can have a priority configured and the priority will be used to break the tie in case of prefix overlap across the rules
+- Meter policy is applied to an ENI and can be shared across ENIs
+
+### 2.4.2 Outbound Traffic metering behavior
+
+It is possible that a given packet can get a hit in route table and/or mapping table and/or meter policy. Described below is the scheme to pick the final metering class:
+- If the route table entry has the metering policy lookup enabled and if an entry in meter policy is a hit (based on priority of the rule), then the corresponding policy metering class is picked over the route table entry's. If subsequent mapping lookup also gives a metering class then the mapping metering class takes precedence ONLY if the override flag is set on the mapping entry.
+- If the route table entry has the metering policy lookup disabled then the metering policy lookup is skipped and the route table entry metering class is picked. If subsequent mapping lookup also gives a metering class then the mapping metering class takes precedence ONLY if the override flag is set on the mapping entry.
+
+
+  ![dash-outbound-meter](./images/dash-hld-outbound-meter-pipeline.png)
+
+
 # 3 Modules Design
 
 The following are the schema changes. The NorthBound APIs shall be defined as sonic-yang in compliance to [yang-guideline](https://github.com/Azure/SONiC/blob/master/doc/mgmt/SONiC_YANG_Model_Guidelines.md).
@@ -272,6 +299,8 @@ DASH_ENI_TABLE:{{eni}}
     "vnet": {{vnet_name}}
     "pl_sip_encoding": {{string}} (OPTIONAL)
     "pl_underlay_sip": {{ip_addr}} (OPTIONAL)
+    "v4_meter_policy_id": {{string}} (OPTIONAL)
+    "v6_meter_policy_id": {{string}} (OPTIONAL)
 ```
 ```
 key                      = DASH_ENI_TABLE:eni ; ENI MAC as key
@@ -284,7 +313,10 @@ vnet                     = Vnet that ENI belongs to
 pl_sip_encoding          = Private Link encoding for IPv6 SIP transpositions; Format "0xfield_value/0xfull_mask". field_value must be used as a replacement to the
 			   first len(full_mask) bits of pl_sip. Last 32 bits are reserved for the IPv4 CA. Logic: ((pl_sip & !full_mask) | field_value).
 pl_underlay_sip          = Underlay SIP (ST GW VIP) to be used for all private link transformation for this ENI
+v4_meter_policy_id	 = IPv4 meter policy ID
+v6_meter_policy_id	 = IPv6 meter policy ID
 ```
+
 ### 3.2.4 ACL
 
 ```
@@ -397,7 +429,8 @@ DASH_ROUTE_TABLE:{{eni}}:{{prefix}}
     "overlay_dip":{{ip_address}} (OPTIONAL)
     "underlay_sip":{{ip_address}} (OPTIONAL)
     "underlay_dip":{{ip_address}} (OPTIONAL)
-    "metering_bucket": {{bucket_id}} (OPTIONAL) 
+    "metering_policy_en": {{bool}} (OPTIONAL)
+    "metering_class": {{class_id}} (OPTIONAL)
 ```
   
 ```
@@ -411,7 +444,8 @@ overlay_sip              = ip_address                ; overlay ipv6 src ip if ro
 overlay_dip              = ip_address                ; overlay ipv6 dst ip if routing_type is {servicetunnel}, transform last 32 bits from packet (dst ip) 
 underlay_sip             = ip_address                ; underlay ipv4 src ip if routing_type is {servicetunnel}; this is the ST GW VIP (for ST traffic) or custom VIP
 underlay_dip             = ip_address                ; underlay ipv4 dst ip to override if routing_type is {servicetunnel}, use dst ip from packet if not specified
-metering_bucket          = bucket_id                 ; metering and counter
+metering_policy_en	 = bool                      ; Metering policy lookup enable (optional), default = false
+metering_class           = class_id                  ; Metering class-id, used if metering policy lookup is not enabled
 ```
 
 ### 3.2.8 ROUTE RULE TABLE - INBOUND
@@ -423,7 +457,7 @@ DASH_ROUTE_RULE_TABLE:{{eni}}:{{vni}}:{{prefix}}
     "protocol": {{protocol_value}} (OPTIONAL)
     "vnet":{{vnet_name}} (OPTIONAL)
     "pa_validation": {{bool}} (OPTIONAL)
-    "metering_bucket": {{bucket_id}} (OPTIONAL) 
+    "metering_class": {{class_id}} (OPTIONAL) 
     "region": {{region_id}} (OPTIONAL)
 ```
   
@@ -435,18 +469,19 @@ priority                 = INT32 value               ; priority of the rule, low
 protocol                 = INT32 value               ; protocol value of incoming packet to match; 0 (any)
 vnet                     = vnet name                 ; mapped VNET for the key vni/pa
 pa_validation            = true/false                ; perform PA validation in the mapping table belonging to vnet_name. Default is set to true 
-metering_bucket          = bucket_id                 ; metering and counter
+metering_class           = class_id                  ; Metering class-id
 region                   = region_id                 ; optional region_id which the vni/prefix belongs to as a string for any vendor optimizations
 ```
 
-### 3.2.8 VNET MAPPING TABLE
+### 3.2.9 VNET MAPPING TABLE
 
 ``` 
 DASH_VNET_MAPPING_TABLE:{{vnet}}:{{ip_address}} 
     "routing_type": {{routing_type}} 
     "underlay_ip":{{ip_address}}
     "mac_address":{{mac_address}} (OPTIONAL) 
-    "metering_bucket": {{bucket_id}} (OPTIONAL)
+    "metering_class": {{class_id}} (OPTIONAL)
+    "override_meter": {{bool}} (OPTIONAL)
     "use_dst_vni": {{bool}} (OPTIONAL)
     "use_pl_sip_eni": {{bool}} (OPTIONAL)
     "overlay_sip":{{ip_address}} (OPTIONAL)
@@ -458,13 +493,59 @@ key                      = DASH_VNET_MAPPING_TABLE:vnet:ip_address ; CA-PA mappi
 action_type              = routing_type              ; reference to routing type
 underlay_ip              = ip_address                ; PA address for the CA
 mac_address              = MAC address as string     ; Inner dst mac
-metering_bucket          = bucket_id                 ; metering and counter
+metering_class           = class_id                  ; metering class-id
+override_meter           = bool                      ; override the metering class-id coming from the route table
 use_dst_vni              = bool                      ; if true, use the destination VNET VNI for encap. If false or not specified, use source VNET's VNI
 overlay_sip              = ip_address                ; overlay src ip if routing_type is {privatelink}, transform last 32 bits from packet 
 overlay_dip              = ip_address                ; overlay dst ip if routing_type is {privatelink} 
 ```
 
-### 3.2.9 DASH orchagent (Overlay)
+### 3.2.10 METER
+
+```
+DASH_METER_POLICY:{{meter_policy_id}} 
+    "ip_version": {{ipv4/ipv6}}
+```
+
+```
+key                      = DASH_METER_POLICY:meter_policy_id ; policy_id as key
+; field                  = value 
+ip_version               = IP version (IPv4/IPv6)
+```
+
+
+```
+DASH_METER_RULE:{{meter_policy_id}}:{{rule_num}}
+    "priority": {{priority}}
+    "ip_prefix":{{ip_prefix}}
+    "metering_class": {{class_id}}
+```
+
+```
+key                      = DASH_METER_RULE:meter_policy_id:rule_num ; unique rule num within the policy.
+; field                  = value 
+priority                 = INT32 value  ; priority of the rule: lower the value, higher the priority
+ip_prefix                = ip_prefix    ; ip prefix for matching
+metering_class           = class_id     ; metering class-id
+```
+
+
+```
+DASH_METER:{{eni}}:{{metering_class_id}}
+    “metadata”: {{string}} (OPTIONAL)
+    "tx_counter": {{bytes}}
+    "rx_counter": {{bytes}} 
+```
+
+```
+key                = DASH_METER:eni:metering_class_id ; metering class id table per (ENI)
+; field            = value
+metadata           = string   ; Optional metadata string
+tx_counter         = bytes    ; Number of transmitted bytes (read-only)
+rx_counter         = bytes    ; Number of received bytes (read-only)
+```
+
+### 3.2.11 DASH orchagent (Overlay)
 
 | APP_DB Table          | Key          | Field           | SAI Attributes/*objects*                        | Comment                                       |
 | --------------------- | ------------ | --------------- | ----------------------------------------------- | --------------------------------------------- |
@@ -742,7 +823,8 @@ Refer DASH documentation for the test plan.
 	    "mac_address": "F4-93-9F-EF-C4-7E",
 	    "underlay_ip": "25.1.1.1",
 	    "admin_state": "enabled",
-	    "vnet": "Vnet1"
+	    "vnet": "Vnet1",
+	    "v4_meter_policy_id": "245bea34-1000-0000-0000-0000082764ac"
         },
         "OP": "SET"
     },
@@ -770,6 +852,7 @@ Refer DASH documentation for the test plan.
     },
     {
         "DASH_ROUTE_TABLE:F4939FEFC47E:10.1.0.0/16": {
+	    "prefix":"10.1.0.0/16",
             "action_type":"vnet",
             "vnet":"Vnet1"
         },
@@ -784,6 +867,24 @@ Refer DASH documentation for the test plan.
         "OP": "SET"
     },
     {
+        "DASH_ROUTE_TABLE:F4939FEFC47E:30.0.0.0/16": {
+            "action_type":"direct",
+            "vnet":"Vnet1",
+	    "metering_policy_en":"false",
+	    "metering_class":"1000"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTE_TABLE:F4939FEFC47E:40.0.0.0/16": {
+            "action_type":"direct",
+            "vnet":"Vnet1",
+	    "metering_policy_en":"true",
+	    "metering_class":"1000"
+        },
+        "OP": "SET"
+    },
+    {
         "DASH_ROUTE_TABLE:F4939FEFC47E:10.2.5.0/24": {
             "action_type":"drop"
         },
@@ -794,6 +895,7 @@ Refer DASH documentation for the test plan.
             "routing_type":"vnet_encap",
             "underlay_ip":"2601:12:7a:1::1234",
             "mac_address":"F9-22-83-99-22-A2"
+	    "metering_class":"1002"
         },
         "OP": "SET"
     },
@@ -809,7 +911,8 @@ Refer DASH documentation for the test plan.
         "DASH_VNET_MAPPING_TABLE:Vnet1:10.1.1.1": {
             "routing_type":"vnet_encap",
             "underlay_ip":"101.1.2.3",
-            "mac_address":"F9-22-83-99-22-A2"
+            "mac_address":"F9-22-83-99-22-A2",
+	    "metering_class":"1001"
         },
         "OP": "SET"
     },
@@ -830,7 +933,55 @@ Refer DASH documentation for the test plan.
             "vnet":"Vnet2",
             "pa_validation": true
 	}
-    }
+    },
+    {
+        "DASH_METER_POLICY: {
+        "meter_policy_id": "245bea34-1000-0000-0000-0000082764ac",
+	    "ip_version": "ipv4"
+	}
+    },
+    {
+        "DASH_METER_RULE: {
+            "meter_policy_id": "245bea34-1000-0000-0000-0000082764ac",
+	    "rule_num": "1",
+	    "prioirty": "0",
+	    "ip_prefix": "40.0.0.1/32",
+	    "metering_class":"20000"
+	}
+        "OP": "SET"
+    },
+    {
+        "DASH_METER: {
+            "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
+	    "metadata":"ROUTE_DIRECT_VNET1",
+	    "metering_class": "1000"
+	}
+        "OP": "SET"
+    },
+    {
+        "DASH_METER: {
+            "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
+	    "metadata":"MAPPING_VNET1_10010101",
+	    "metering_class": "1001"
+	}
+        "OP": "SET"
+    },
+    {
+        "DASH_METER: {
+            "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
+	    "metadata":"MAPPING_VNET1_10000006",
+	    "metering_class": "1002"
+	}
+        "OP": "SET"
+    },
+    {
+        "DASH_METER: {
+            "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
+	    "metadata":"ROUTE_DIRECT_POLICY_40000001",
+	    "metering_class": "20000"
+	}
+        "OP": "SET"
+    },
 ]
 
 ```
@@ -842,21 +993,42 @@ For the example configuration above, the following is a brief explanation of loo
 		b. The action in this case is "vnet" and the routing type for "vnet" is "maprouting"
 		c. Next lookup shall happen on the "mapping" table for Vnet "Vnet1"
 		d. Mapping table for 10.1.1.1 shall be hit and it takes the action "vnet_encap". 
-		e. Encap action shall be performed and use PA address as specified by "underlay_ip"
+		e. Encap action shall be performed and use PA address as specified by "underlay_ip
+		f. Metering:
+                    - LPM route does not have a metering bucket configured
+                    - Metering policy lookup is not enabled
+                    - Metering class 1001 from mapping entry 10.1.1.1 is used for accounting the traffic
 	2. Packet destined to 10.1.0.1:
 		a. LPM lookup hits for entry 10.1.0.0/24
 		b. The action in this case is "vnet_direct" and the routing type for "vnet" is "maprouting", with overlay_ip specified
 		c. Next lookup shall happen on the "mapping" table for Vnet "Vnet1", but for overlay_ip 10.0.0.6
 		d. Mapping table for 10.0.0.6 shall be hit and it takes the action "vnet_encap". 
 		e. Encap action shall be performed and use PA address as specified by "underlay_ip"
+		f. Metering:
+                    - LPM route does not have a metering bucket configured
+                    - Metering policy lookup is not enabled
+                    - Metering class 1002 from mapping entry 10.0.0.6 is used for accounting the traffic
 	3. Packet destined to 30.0.0.1
 		a. LPM lookup hits for entry 30.0.0.0/16
 		b. The action in this case is "direct". 
 		c. Direct routing happens without any further encapsulation
+		d. Metering:
+                    - LPM route has metering class 1000 configured
+                    - Metering policy lookup is not enabled
+                    - Metering class 1000 from routing entry 30.0.0.0/16 is used for accounting the traffic
 	4. Packet destined to 10.2.5.1
 		a. LPM lookup hits for entry 10.2.5.0/24
 		b. The action in this case is "drop". 
 		c. Packets gets dropped
+	5. Packet destined to 40.0.0.1
+		a. LPM lookup hits for entry 40.0.0.0/16
+		b. The action in this case is "direct"
+		c. Direct routing happens without any further encapsulation
+		d. Metering:
+                    - LPM route has metering class 1000 configured
+                    - Metering policy lookup is enabled
+                    - Metering policy 245bea34-1000-0000-0000-0000082764ac is looked up. Metering rule_num 1 is hit
+                    - Metering class 20000 from metering rule_num 1 is used for accounting the traffic
 
 For the inbound direction, after Route/ACL lookup, pipeline shall use the "underlay_ip" as specified in the ENI table to VXLAN encapsulate the packet and VNI shall be the ```vm_vni``` specified in the APPLIANCE table 
 	
@@ -891,6 +1063,8 @@ For the inbound direction, after Route/ACL lookup, pipeline shall use the "under
             "overlay_sip":"fd00:108:0:d204:0:200::0",
 	    "overlay_dip":"2603:10e1:100:2::0",
 	    "underlay_sip":"40.1.2.1"
+	    "metering_policy_en":"false",
+	    "metering_class":"50000"
         },
         "OP": "SET"
     },
@@ -913,6 +1087,14 @@ For the inbound direction, after Route/ACL lookup, pipeline shall use the "under
         },
         "OP": "SET"
     },
+    {
+        "DASH_METER: {
+            "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
+	    "metadata":"SERVICE_TUNNEL_ROUTE_50010200",
+	    "metering_class": "50000"
+	}
+	"OP": "SET"
+    },
 ]
 ```
 
@@ -926,6 +1108,10 @@ For the example configuration above, the following is a brief explanation of loo
 		d. Packet gets transformed as: Overlay SIP fd00:108:0:d204:0:200::a01:101, Overlay DIP 2603:10e1:100:2::3201:201
 		e. Second Action is Static NVGRE encap. 
 		f. Since underlay dip is not specified in the LPM table, It shall use Dst IP (overlay) from packet, i.e 50.1.2.1 and underlay Src IP as 40.1.2.1
+		g. Metering:
+                    - LPM route has metering bucket 50000 configured
+                    - Metering policy lookup is not enabled
+                    - Metering class 50000 from the route entry is used for accounting the traffic
 	
 	2. Packet destined to 60.1.2.1 from 10.1.1.1:
 		a. LPM lookup hits for entry 60.1.2.1/32
@@ -977,6 +1163,8 @@ For the example configuration above, the following is a brief explanation of loo
         "DASH_ROUTE_TABLE:F4939FEFC47E:10.1.0.8/32": {
             "action_type":"vnet",
 	    "vnet":"Vnet1"
+	    "metering_policy_en":"false",
+	    "metering_class":"60000"
         },
         "OP": "SET"
     },
@@ -987,6 +1175,8 @@ For the example configuration above, the following is a brief explanation of loo
             "underlay_ip":"50.1.2.3",
 	    "overlay_sip":"fd40:108:0:d204:0:200::0",
 	    "overlay_dip":"2603:10e1:100:2::3401:203",
+	    "metering_class":"60001",
+	    "override_meter":"true"
         },
         "OP": "SET"
     },
@@ -1006,7 +1196,23 @@ For the example configuration above, the following is a brief explanation of loo
 	    "overlay_dip":"2603:10e1:100:2::3402:206",
         },
         "OP": "SET"
-    }
+    },
+    {
+        "DASH_METER: {
+            "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
+	    "metadata":"ROUTE_VNET1_10010008",
+	    "metering_class": "60000"
+	}
+	"OP": "SET"
+    },
+    {
+        "DASH_METER: {
+            "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
+	    "metadata":"PRIVATE_LINK_VNET1_10010008",
+	    "metering_class": "60001"
+	}
+	"OP": "SET"
+    },
 ]
 ```
     
@@ -1025,6 +1231,11 @@ For the example configuration above, the following is a brief explanation of loo
 			Overlay DIP 2603:10e1:100:2::3401:203 (No transformation, provided as part of mapping)
 		f. Second Action is Static NVGRE encap with GRE key '100'. 
 		g. Underlay DIP shall be 50.1.2.3 (from mapping), Underlay SIP shall be 55.1.2.3 (from ENI)
+		h. Metering:
+                    - LPM route has metering bucket 60000 configured
+                    - Metering policy lookup is not enabled
+                    - Override meter is enabled for the mapping entry 10.1.0.8
+                    - Metering class 60001 from mapping entry 10.1.0.8 is used for accounting the traffic
 
 	2. Packet destined to 10.2.0.6 from 10.1.1.2:
 		a. LPM lookup hits for entry 10.2.0.6/32
@@ -1036,4 +1247,3 @@ For the example configuration above, the following is a brief explanation of loo
 			Overlay DIP 2603:10e1:100:2::3402:206 (No transformation, provided as part of mapping)
 		f. Second Action is Static NVGRE encap with GRE key '100'. 
 		g. Underlay DIP shall be 50.2.2.6 (from mapping), Underlay SIP shall be 55.1.2.3 (from ENI)
-	

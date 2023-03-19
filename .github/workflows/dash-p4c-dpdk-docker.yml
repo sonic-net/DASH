@@ -1,37 +1,35 @@
-name: DASH-docker-grpc1.43.2-build-image
+name: DASH-docker-p4c-dpdk-build-image
 
 on:
   push:
     branches: [ "**" ]
     paths:
-      - '.github/workflows/dash-grpc1.43.2-docker.yml'
-      - 'dash-pipeline/Makefile'
-      - 'dash-pipeline/dockerfiles/Dockerfile.grpc1.43.2'
-      - 'dash-pipeline/dockerfiles/DOCKER_GRPC_IMG.env'
+      - '.github/workflows/dash-p4c-dpdk-docker.yml'
+      - 'dash-pipeline/dockerfiles/Dockerfile.p4c-dpdk'
+      - 'dash-pipeline/dockerfiles/DOCKER_P4C_DPDK_IMG.env'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
     branches: [ "**" ]
     paths:
-      - '.github/workflows/dash-grpc1.43.2-docker.yml'
-      - 'dash-pipeline/Makefile'
-      - 'dash-pipeline/dockerfiles/Dockerfile.grpc1.43.2'
-      - 'dash-pipeline/dockerfiles/DOCKER_GRPC_IMG.env'
+      - '.github/workflows/dash-p4c-dpdk-docker.yml'
+      - 'dash-pipeline/dockerfiles/Dockerfile.p4c-dpdk'
+      - 'dash-pipeline/dockerfiles/DOCKER_P4C_DPDK_IMG.env'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build docker dash-grpc1.43.2 image
+    name: Build docker dash-p4c-dpdk image
     runs-on: ubuntu-20.04
     defaults:
       run:
         working-directory: ./dash-pipeline
     steps:
     - uses: actions/checkout@v3
-    - name: Build dash-grpc1.43.2 docker image
-      run: make docker-dash-grpc
+    - name: Build dash-p4c-dpdk docker image
+      run: make docker-dash-p4c-dpdk
 
     - uses: azure/docker-login@v1
       if: ${{ github.event_name != 'pull_request' && github.repository == 'sonic-net/DASH' }}
@@ -39,6 +37,6 @@ jobs:
         login-server: sonicdash.azurecr.io
         username: ${{ secrets.DASH_ACR_USERNAME }}
         password: ${{ secrets.DASH_ACR_PASSWORD }}
-    - name: Publish dash-grpc1.43.2 image
+    - name: Publish dash-p4c-dpdk docker image to ACR
+      run: make docker-publish-dash-p4c-dpdk
       if: ${{ github.event_name != 'pull_request' && github.repository == 'sonic-net/DASH' }}
-      run: make docker-publish-dash-grpc
