@@ -60,7 +60,7 @@ The scenario allows the following:
 9. Implementation must have flexible memory allocation for ENI and not reserve max scale during initial create (e.g 100k routes). This is to allow oversubscription.
 10. Implementation must not have silent failures for APIs.
 
-More details may be found in [DASH SONiC HLD](https://github.com/Azure/DASH/blob/main/documentation/general/design/dash-sonic-hld.md#15-design-considerations).
+More details may be found in [DASH SONiC HLD](https://github.com/sonic-net/DASH/blob/main/documentation/general/dash-sonic-hld.md#16-design-considerations).
 
 
 # Automation
@@ -82,7 +82,7 @@ Scale and performance tests automation approach - to be defined.
     - IPv4 underlay + IPv6 overlay
 
 ### **Outbound VNET routing**
-|  #  | Test case purpose | Test Class.Method                                                                                                                                                                                                                                                                                                                        | Test description |                                                 
+|  #  | Test case purpose | Test Class.Method                                                                                                                                                                                                                                                                                                                        | Test description |
 |:---:|:---|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---|
 |  1-2  | Verify route action ROUTE_VNET | `Vnet2VnetOutboundRouteVnetSinglePortTest.`<br/>`vnet2VnetOutboundRoutingTest`<br><br>`Vnet2VnetOutboundRouteVnetTwoPortsTest.`<br/> `vnet2VnetOutboundRoutingTest`                                                                                                                                                                      | Creates single ENI outbound (SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET) overlay configuration.<br/> Verifies configuration with bidirectional VXLAN TCP traffic.<br/>1. With underlay route<br/>2. Without underlay route  |
 |  3-4  | Verify route action ROUTE_VNET_DIRECT | `Vnet2VnetOutboundRouteVnetDirectSinglePortTest.`<br/>`vnet2VnetOutboundRoutingTest`<br><br>`Vnet2VnetOutboundRouteVnetDirectTwoPortsTest.`<br/> `vnet2VnetOutboundRoutingTest`                                                                                                                                                          | Creates single ENI outbound (SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT) overlay configuration.<br/> Verifies configuration with bidirectional VXLAN TCP traffic.<br/>1. With underlay route<br/>2. Without underlay route |
@@ -95,7 +95,7 @@ Scale and performance tests automation approach - to be defined.
 | 13-14 | Use same prefixes in CA and PA networks. | `Vnet2VnetOutboundSameCaPaIpPrefixesSinglePortTest.`<br/> `vnet2VnetOutboundRouteVnetTest`<br><br>`Vnet2VnetOutboundSameCaPaIpPrefixesTwoPortsTest.`<br/> `vnet2VnetOutboundRouteVnetTest`                                                                                                                                               | Creates single ENI with the same Customer and Physical IP address outbound configuration.<br/> Verifies configuration with bidirectional VXLAN TCP traffic.<br/>1. With underlay route<br/>2. Without underlay route |
 
 
-Original table [link](https://github.com/Azure/DASH/blob/main/documentation/general/design/sdn-features-packet-transforms.md#routing-routes-and-route-action).
+Original table [link](https://github.com/sonic-net/DASH/blob/main/documentation/general/sdn-features-packet-transforms.md#routing-routes-and-route-action).
 
 ### **Inbound VNET routing**
 
@@ -107,7 +107,7 @@ Original table [link](https://github.com/Azure/DASH/blob/main/documentation/gene
 
 ### **Integration**
 
-|  #  | Test case purpose | Test Class.Method                                                                                                                                                                                                                                                                                                                                                                  | Test description |                                                 
+|  #  | Test case purpose | Test Class.Method                                                                                                                                                                                                                                                                                                                                                                  | Test description |
 |:---:|:---|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---|
 |  1-2  | Multiple inbound and outbound configurations at the same time. Send multiple allowed and forbidden traffic types. | `Vnet2VnetInboundOutboundMultipleConfigsSinglePortTest.`<br/> `outboundHost0toHost2Test`<br/> `inboundHost2toHost0Test`<br/> `outboundHost3toHost1Test`<br/> `inboundHost1toHost3Test`<br><br>`Vnet2VnetInboundOutboundMultipleConfigsTwoPortsTest.`<br/> `outboundHost0toHost2Test`<br/> `inboundHost2toHost0Test`<br/> `outboundHost3toHost1Test`<br/> `inboundHost1toHost3Test` | Creates two ENIs, each with Inbound and Outbound configuration.<br/> Verifies configurations with bidirectional VXLAN TCP traffic.<br/>1. With underlay route<br/>2. Without underlay route |
 |  3  | Send non VXLAN traffic. | `UnderlayRouteTest.`<br/> `l3UnderlayHost1toHost2RoutingTest`<br/> `l3UnderlayHost2toHost1RoutingTest`                                                                                                                                                                                                                                                                             | Creates single ENI with outbound configuration and underlay configuration.<br/> Verifies regular L3 Underlay routing with bidirectional simple TCP packets sending. |
@@ -147,7 +147,7 @@ Question: What is static rule and calculated values?
     - Most Outer Source IP Prefix
     - Most Outer Destination IP Prefix
     - VXLAN/GRE key
-6. Need examples: Transpositions. 
+6. Need examples: Transpositions.
     - Direct traffic – pass through with static SNAT/DNAT (IP, IP+Port)
     - Packet upcasting (IPv4 -> IPv6 packet transformation)
     - Packet downcasting (IPv6 -> IPv4 packet transformation)
