@@ -181,6 +181,18 @@ class TestSaiVnetOutboundRoutingEntry:
         assert all( [result == 0 for result in results]), "SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET Get error"
 
     def test_vnet_outbound_routing_entry_remove(self, dpu):
+        commands = [
+            {
+                "name": "ore",
+                "op": "remove",
+                "type": "SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY",
+            },
+        ]
+        results = [*dpu.process_commands(commands)]
+        print("\n======= SAI commands RETURN values create =======")
+        pprint(results)
+
+        assert all( [result == 0 for result in results]), "SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY Remove error"
 
         # Remove ENI
         commands = [
@@ -212,15 +224,3 @@ class TestSaiVnetOutboundRoutingEntry:
 
         assert all( [result == 0 for result in results]), "SAI_OBJECT_TYPE_VNET Remove error"
         
-        commands = [
-            {
-                "name": "ore",
-                "op": "remove",
-                "type": "SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY",
-            },
-        ]
-        results = [*dpu.process_commands(commands)]
-        print("\n======= SAI commands RETURN values create =======")
-        pprint(results)
-
-        assert all( [result == 0 for result in results]), "SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY Remove error"
