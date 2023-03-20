@@ -124,7 +124,7 @@ As stated in [Docker Overview](#docker-overview), to save time, for normal artif
 * Submitting a Pull Request to the main DASH branch and eventually merging it following the customary review process.
 
 The following factors complicate the workflow a little bit:
-* Images can only be published to ACR via a CI runner launched by the `Azure/DASH` parent project's Git actions, because the credentials allowing writes to ACR are stored in this repository as "secrets." These secrets are not available in forks.
+* Images can only be published to ACR via a CI runner launched by the `sonic-net/DASH` parent project's Git actions, because the credentials allowing writes to ACR are stored in this repository as "secrets." These secrets are not available in forks.
 * Changes to Makefiles, Dockerfiles or GitHub Actions in [.github/workflows](../.github/workflows) are used to trigger various rebuilds, test suites and docker image publishing in the cloud.
 * The order of these triggers is not sequential, they can be triggered in parallel depending upon what changed. For example, pushing a change to a Dockerfile's tag definition (any file named `DOCKER_XXX_IMG.env` under [dockerfiles/](dockerfiles/)) will initiate building and publishing the Docker image *and* trigger a new run of the main dash-pipeline CI action ([dash-bmv2-ci.yml](../.github/workflows/dash-bmv2-ci.yml))
 * A make target requiring a new Docker image version might run before the new image has been built and published to ACR.
@@ -133,18 +133,18 @@ The net result is that a CI build or test step might initially fail after a Git 
 
 ## Separate CI scripts for forks vs. main repo
 As explained above, credentials are required to push docker images to ACR. Therefore, two different CI scripts exist for each Dockerfile. Each Docker CI script has two variants, for example `dash-xxx-docker.yml` and `dash-xxx-docker-acr.yml`. The first variant only builds the docker image to catch regressions. The second variant also publishes to ACR.
-* Forked projects (forks of `Azure/DASH`) will execute a build of any changed Dockerfile to verify correctness, but will not attempt to publish.
-* Non-forked projects (branches of `Azure/DASH`) will execute a docker build and publish the images to ACR.
+* Forked projects (forks of `sonic-net/DASH`) will execute a build of any changed Dockerfile to verify correctness, but will not attempt to publish.
+* Non-forked projects (branches of `sonic-net/DASH`) will execute a docker build and publish the images to ACR.
 
 Conditionals are used in the CI jobs to gate their execution.
 
-For example, this snippet containing an `if:` clause ensures we only push an image if we are running in the context of the `Azure/DASH` project (any branch), not in a fork. Similarly, the same expression but with the `!=` operator, is used in CI action scripts which should only run in a fork, *not* the main repo. 
+For example, this snippet containing an `if:` clause ensures we only push an image if we are running in the context of the `sonic-net/DASH` project (any branch), not in a fork. Similarly, the same expression but with the `!=` operator, is used in CI action scripts which should only run in a fork, *not* the main repo. 
 ```
 jobs:
   build:
     name: Build and publish docker dash-bmv2-bldr image
     # Can only publish from within DASH repo (need credentials from secrets)
-    if: github.repository == 'Azure/DASH'
+    if: github.repository == 'sonic-net/DASH'
 ```
 >**Note:** Experienced GitHub Action developers might wonder why a single CI script couldn't combine the behavior of both scripts by making only the publish part conditional. It was tried per the advice [here](https://emmer.dev/blog/publishing-docker-images-with-github-actions/) but the saved docker file in the build job failed to upload to make it available to the publish job. So, two scripts are used.
 
@@ -163,7 +163,7 @@ See the figure and descriptions below.
 
 ![dash-docker-branch-workflow](images/dash-docker-branch-workflow.svg)
 
-1. Create a development branch in `Azure/DASH`, e.g. named `featureX`. This requires write-access to the project, typically confined to a few core maintainers.
+1. Create a development branch in `sonic-net/DASH`, e.g. named `featureX`. This requires write-access to the project, typically confined to a few core maintainers.
 2. Create or modify Dockerfiles, associated `.env` files containing image names and tags, Makefiles, etc. Build and test this new work in your development machine. All Docker images are stored to and retrieved from the host machine's docker environment.
 3. Perform `git commit` and `git push` to upload changes to GitHub. This will trigger CI actions, at a minimum to build/publish the docker images and run the main build/test CI actions. These run in parallel, which can lead to a race condition. If the main CI job tries to pull a new docker image which hasn't yet been published, it will fail the first time only.
 4. Manually re-run failed job(s) as needed, which should now pass, since the docker images should have successfully published. (If not, fix the Dockerfiles or CI action files which control these steps). Steps 2-4 can be repeated as needed.
@@ -173,7 +173,7 @@ This workflow does most of the work in a fork of the DASH repo. A branch of the 
 
 A concise description of this workflow is: make a feature branch in the main project (needs write access); check out this branch in a fork, then make a dev branch of the feature branch. Make code changes, create/modify docker images etc. and submit a pull request from dev branch to feature branch. The feature branch CI pipeline can push new images to ACR. Finally, submit a PR from the feature branch to main.
 
-This workflow is appropriate for project developers who lack write access and thus can't create a branch in the `Azure/DASH` project. A maintainer with write access can first create a branch which developers can then submit pull requests against (for the primary purpose of making changes to docker images). The instructions below will make this clearer.
+This workflow is appropriate for project developers who lack write access and thus can't create a branch in the `sonic-net/DASH` project. A maintainer with write access can first create a branch which developers can then submit pull requests against (for the primary purpose of making changes to docker images). The instructions below will make this clearer.
 
 Oftentimes, a new docker image is created and doesn't change much thereafter, but other project content evolves significantly during the development of a feature. This workflow gets the needed docker image into ACR using a combination of a fork (for the brunt of the work) and a branch (to get the docker image into ACR for subsequent development).
 
@@ -182,7 +182,7 @@ Once the docker image is available in ACR, all further work can be done in the f
 See the figure and descriptions below.
 
 ![dash-docker-fork-workflow](images/dash-docker-fork-workflow.svg)
-1. Create (or ask a maintainer to create) a branch in the `Azure/DASH` project. This will be used for publishing new docker images and perform the final pull-request into `main`. For this example we'll call the branch `featureX`.
+1. Create (or ask a maintainer to create) a branch in the `sonic-net/DASH` project. This will be used for publishing new docker images and perform the final pull-request into `main`. For this example we'll call the branch `featureX`.
 2. Create a fork, or update an existing one (`git pull`), and `git checkout featureX`.
 3. Create a new branch of this one, e.g. `git checkout -b featureX-dev`. This will be used to push changes to the `featureX` branch to effect docker image publishing. (Make sure you begin from the `featureX` branch before making the new one!)
 4. Create or modify Dockerfiles, associated `.env` files containing image names and tags, Makefiles, etc. Build and test this new work in your development machine. All Docker images are stored to and retrieved from the host machine's docker environment.
@@ -207,7 +207,7 @@ See the detailed steps and a diagram below.
 5. Push this branch to the forked repo. It should build successfully, pulling the new image from the Dockerhub account which was manually pushed in the previous step.  The CI pipeline will *not* push the image since it's a fork; see [Separate CI scripts for forks vs. main repo](#separate-ci-scripts-for-forks-vs-main-repo).
 6. When all development and testing are complete, change the docker image to use the ACR registry.
 7. Push this change to the development repo. CI builds will fail because you cannot read the image from the new location; it hasn't been published to ACR yet!
-8. Submit a pull request to the main project `Azure/DASH`. The first run of the main CI pipeline will fail because the initial push of the new image to ACR is being published in a parallel CI pipeline and won't be ready in time.
+8. Submit a pull request to the main project `sonic-net/DASH`. The first run of the main CI pipeline will fail because the initial push of the new image to ACR is being published in a parallel CI pipeline and won't be ready in time.
 9. Re-run the failed job, it should pass since the image was published.
 10. Review and accept the Pull Request. CI pipelines should again pass.
 ## Publishing Docker Images to Azure Container Registry Using Secrets
