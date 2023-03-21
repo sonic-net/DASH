@@ -438,7 +438,7 @@ class VnetApiEndpoints(VnetAPI):
     +------------------------------+        +------------------------------+
     |         host1                |        |         host2                |
     | port: dev_port0              |        | port: dev_port1              |
-    | mac: 11:22:33:aa:bb:cc       |        | mac: aa:bb:cc:11:22:33       |
+    | mac: 10:22:33:aa:bb:cc       |        | mac: aa:bb:cc:11:22:33       |
     | ip: 10.10.1.10/2000:cafe::20 |        | ip: 10.10.2.10/3000:cafe::30 |
     | ip_prefix: 10.10.1.0/24 /    |        | ip_prefix: 10.10.2.0/24 /    |
     |            2000:cafe::0/112  |        |            3000:cafe::0/112  |
@@ -482,7 +482,7 @@ class VnetApiEndpoints(VnetAPI):
             rx_host_client_ip = "192.168.1.1"
 
         self.tx_host = self.define_neighbor_network(port=self.dev_port0,
-                                                    mac="11:22:33:aa:bb:cc",
+                                                    mac="10:22:33:aa:bb:cc",
                                                     ip=tx_host_ip,
                                                     ip_prefix=tx_host_ip_prefix,
                                                     peer_port=self.port0,
@@ -775,15 +775,7 @@ class VnetTrafficMixin:
         send_packet(self, client.port, send_pkt)
 
         if pkt_drop:
-            inner_eth_packet = simple_eth_packet(eth_dst=exp_pkt.getlayer('VXLAN').getlayer('Ether').dst,
-                                                 eth_src=exp_pkt.getlayer('VXLAN').getlayer('Ether').src,
-                                                 eth_type=0x800)
-            outer_eth_packet = simple_eth_packet(eth_dst=exp_pkt.getlayer('Ether').dst,
-                                                 eth_src=exp_pkt.getlayer('Ether').src,
-                                                 eth_type=0x800)
-
-            verify_no_packet(self, inner_eth_packet, server.port, timeout=1)
-            verify_no_packet(self, outer_eth_packet, server.port, timeout=1)
+            verify_no_other_packets(self, timeout=1)
 
         else:
             print(f"Verifying VxLAN {connection.lower()} packet on {server.port}")
@@ -793,6 +785,7 @@ class VnetTrafficMixin:
     def verify_negative_traffic_scenario(self,
                                          client: DutNeighborNetworkParameters,
                                          server: DutNeighborNetworkParameters,
+                                         fake_mac=True,
                                          udp: bool = False,
                                          invalid_vni=None,
                                          invalid_vip=None,
@@ -810,29 +803,18 @@ class VnetTrafficMixin:
             send_packets, exp_client_packets, _ = \
                 self.create_vxlan_udp_session_packets(client=client,
                                                       server=server,
-                                                      fake_mac=False)
+                                                      fake_mac=fake_mac)
             vxlan_pkt = send_packets["client_udp_vxlan_pkt"]
-            exp_vxlan_pkt = exp_client_packets["exp_client_udp_vxlan_pkt"]
         else:
             send_packets, exp_client_packets, _ = \
                 self.create_vxlan_tcp_session_packets(client=client,
                                                       server=server,
-                                                      fake_mac=False)
+                                                      fake_mac=fake_mac)
             vxlan_pkt = send_packets["client_syn_pkt"]
-            exp_vxlan_pkt = exp_client_packets["exp_client_syn_pkt"]
-
-        # Create Eth packets for verify_no_packet method
-        inner_eth_packet = simple_eth_packet(eth_dst=exp_vxlan_pkt.getlayer('VXLAN').getlayer('Ether').dst,
-                                             eth_src=exp_vxlan_pkt.getlayer('VXLAN').getlayer('Ether').src,
-                                             eth_type=0x800)
-        outer_eth_packet = simple_eth_packet(eth_dst=exp_vxlan_pkt.getlayer('Ether').dst,
-                                             eth_src=exp_vxlan_pkt.getlayer('Ether').src,
-                                             eth_type=0x800)
 
         def send_verify(pkt):
             send_packet(self, client.port, pkt)
-            verify_no_packet(self, inner_eth_packet, server.port, timeout=1)
-            verify_no_packet(self, outer_eth_packet, server.port, timeout=1)
+            verify_no_other_packets(self, timeout=1)
 
         if invalid_vni is not None:
             # Verify drop with invalid VNI
