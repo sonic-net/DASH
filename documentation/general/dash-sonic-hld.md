@@ -1129,9 +1129,9 @@ For the example configuration above, the following is a brief explanation of loo
 			h.1 The return packet for the above flow shall land on an SLB MUX (30.1.2.1) as NVGRE packet
 			h.2 SLB MUX (30.1.2.1) shall encapsulate this to another header with standard GRE key, say 100 and forwards to Appliance PA
 			h.3 Appliance PA is the unique IP advertised by the Appliance card, say via BGP for reachability. 
-			h.3 Appliance shall first decapsulate the outer header and map it to a flow
-			h.4 Second header's dst mac shall correspond to ENI MAC, as overwritten by SLB MUX
-			h.5 Third header shall be the transpositioned IPv6 header
+			h.4 Appliance shall first decapsulate the outer header and map it to a flow
+			h.5 Second header's dst mac shall correspond to ENI MAC, as overwritten by SLB MUX
+			h.6 Third header shall be the transpositioned IPv6 header
 		i. Note: This flow fixup shall be done when Fastpath kicks in with ICMP Redirect, and packets ingress with two headers. 		
 
 	3. Packet destined to 70.1.2.1 from 10.1.1.1:
