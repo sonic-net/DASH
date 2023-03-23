@@ -109,7 +109,7 @@ struct headers_t {
     tcp_t      inner_tcp;
 }
 
-enum bit<16> dash_encapsulation {
+enum bit<16> dash_encapsulation_t {
     INVALID = 0,
     VXLAN = 1,
     NVGRE = 2

@@ -73,6 +73,16 @@ void u32SetVal(const sai_attribute_value_t &value, T &t, int bits = 32){
 }
 
 template<typename T>
+void s32SetVal(const sai_attribute_value_t &value, T &t, int bits = 32){
+    assert(bits <= 32);
+    uint32_t val = value.u32;
+    val = htonl(val);
+    val = val >> (32 - bits);
+    int bytes = (bits + 7) / 8;
+    t->set_value(&val, bytes);
+}
+
+template<typename T>
 void u32SetVal(const sai_uint32_t &value, T &t, int bits = 32){
     assert(bits <= 32);
     uint32_t val = value;

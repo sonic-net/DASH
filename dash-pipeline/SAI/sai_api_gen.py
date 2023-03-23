@@ -144,9 +144,10 @@ def extract_action_data(program):
                 param[NAME_TAG] = p[NAME_TAG]
                 param['type'], param['field'] = get_sai_key_type(int(p[BITWIDTH_TAG]), p[NAME_TAG], p[NAME_TAG])
                 for sai_enum in sai_enums:
-                    if 'dash_' + param[NAME_TAG] == sai_enum['name']:
-                        param['type'] = 'sai_dash_' + param[NAME_TAG] + '_t'
+                    if param[NAME_TAG] == sai_enum['name']:
+                        param['type'] = 'sai_' + param[NAME_TAG] + '_t'
                         param['field'] = 's32'
+                        param['default'] = 'SAI_' + param[NAME_TAG].upper() + '_INVALID'
                 param['bitwidth'] = p[BITWIDTH_TAG]
                 params.append(param)
         action_data[id] = {'id': id, NAME_TAG: name, PARAMS_TAG: params}
@@ -190,7 +191,7 @@ def get_sai_enums(program):
     sai_enums = []
     for enum_name in all_enums:
         sai_enum = dict()
-        sai_enum['name'] = enum_name
+        sai_enum['name'] = enum_name[:-2]
         sai_enum['members'] = []
         print(enum_name)
         for enum_member in all_enums[enum_name][MEMBERS_TAG]:
@@ -464,6 +465,7 @@ for line in lines:
     if '/* __SAITYPESEXTENSIONS_H_ */' in line:
         for enum_line in sai_enums_lines:
             new_lines.append(enum_line + '\n')
+        new_lines = new_lines[:-1]
     new_lines.append(line)
 
 with open('./SAI/experimental/saitypesextensions.h', 'w') as f:

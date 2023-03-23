@@ -51,11 +51,11 @@ control dash_ingress(inout headers_t hdr,
     }
 
     action set_outbound_direction() {
-        meta.direction = dash_direction.OUTBOUND;
+        meta.direction = dash_direction_t.OUTBOUND;
     }
 
     action set_inbound_direction() {
-        meta.direction = dash_direction.INBOUND;
+        meta.direction = dash_direction_t.INBOUND;
     }
 
     @name("direction_lookup|dash_direction_lookup")
@@ -125,13 +125,13 @@ control dash_ingress(inout headers_t hdr,
         meta.vnet_id                 = vnet_id;
 
         if (meta.is_overlay_ip_v6 == 1) {
-            if (meta.direction == dash_direction.OUTBOUND) {
+            if (meta.direction == dash_direction_t.OUTBOUND) {
                 ACL_GROUPS_COPY_TO_META(outbound_v6);
             } else {
                 ACL_GROUPS_COPY_TO_META(inbound_v6);
             }
         } else {
-            if (meta.direction == dash_direction.OUTBOUND) {
+            if (meta.direction == dash_direction_t.OUTBOUND) {
                 ACL_GROUPS_COPY_TO_META(outbound_v4);
             } else {
                 ACL_GROUPS_COPY_TO_META(inbound_v4);
@@ -261,9 +261,9 @@ control dash_ingress(inout headers_t hdr,
 
         /* Outer header processing */
 
-        if (meta.direction == dash_direction.OUTBOUND) {
+        if (meta.direction == dash_direction_t.OUTBOUND) {
             vxlan_decap(hdr);
-        } else if (meta.direction == dash_direction.INBOUND) {
+        } else if (meta.direction == dash_direction_t.INBOUND) {
             switch (inbound_routing.apply().action_run) {
                 vxlan_decap_pa_validate: {
                     pa_validation.apply();
@@ -298,7 +298,7 @@ control dash_ingress(inout headers_t hdr,
         /* At this point the processing is done on customer headers */
 
         /* Put VM's MAC in the direction agnostic metadata field */
-        meta.eni_addr = meta.direction == dash_direction.OUTBOUND  ?
+        meta.eni_addr = meta.direction == dash_direction_t.OUTBOUND  ?
                                           hdr.ethernet.src_addr :
                                           hdr.ethernet.dst_addr;
         eni_ether_address_map.apply();
@@ -308,9 +308,9 @@ control dash_ingress(inout headers_t hdr,
         }
         acl_group.apply();
 
-        if (meta.direction == dash_direction.OUTBOUND) {
+        if (meta.direction == dash_direction_t.OUTBOUND) {
             outbound.apply(hdr, meta, standard_metadata);
-        } else if (meta.direction == dash_direction.INBOUND) {
+        } else if (meta.direction == dash_direction_t.INBOUND) {
             inbound.apply(hdr, meta, standard_metadata);
         }
 

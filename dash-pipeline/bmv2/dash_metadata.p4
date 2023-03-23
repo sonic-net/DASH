@@ -11,13 +11,13 @@ struct encap_data_t {
     EthernetAddress underlay_smac;
     EthernetAddress underlay_dmac;
     EthernetAddress overlay_dmac;
-    dash_encapsulation dash_encapsulation;
+    dash_encapsulation_t dash_encapsulation;
     bit<24> service_tunnel_key;
     IPv4Address original_overlay_sip;
     IPv4Address original_overlay_dip;
 }
 
-enum bit<16> dash_direction {
+enum bit<16> dash_direction_t {
     INVALID = 0,
     OUTBOUND = 1,
     INBOUND = 2
@@ -37,7 +37,7 @@ struct eni_data_t {
 
 struct metadata_t {
     bool dropped;
-    dash_direction direction;
+    dash_direction_t direction;
     encap_data_t encap_data;
     EthernetAddress eni_addr;
     bit<16> vnet_id;

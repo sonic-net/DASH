@@ -42,7 +42,7 @@ control outbound(inout headers_t hdr,
                                 IPv4ORv6Address underlay_dip,
                                 bit<1> is_underlay_sip_v4_or_v6,
                                 IPv4ORv6Address underlay_sip,
-                                dash_encapsulation encapsulation,
+                                dash_encapsulation_t dash_encapsulation,
                                 bit<24> tunnel_key) {
         /* Assume the overlay addresses provided are always IPv6 and the original are IPv4 */
         assert(is_overlay_dip_v4_or_v6 == 1 && is_overlay_sip_v4_or_v6 == 1);
@@ -61,7 +61,7 @@ control outbound(inout headers_t hdr,
         meta.encap_data.underlay_dip = underlay_dip == 0 ? meta.encap_data.original_overlay_dip : (IPv4Address)underlay_dip;
         meta.encap_data.underlay_sip = underlay_sip == 0 ? meta.encap_data.original_overlay_sip : (IPv4Address)underlay_sip;
         meta.encap_data.overlay_dmac = hdr.ethernet.dst_addr;
-        meta.encap_data.dash_encapsulation = encapsulation;
+        meta.encap_data.dash_encapsulation = dash_encapsulation;
         meta.encap_data.service_tunnel_key = tunnel_key;
     }
 
@@ -171,7 +171,7 @@ control outbound(inout headers_t hdr,
                             meta.encap_data.vni);
              }
            route_service_tunnel: {
-                if (meta.encap_data.dash_encapsulation == dash_encapsulation.VXLAN) {
+                if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {
                     vxlan_encap(hdr,
                                 meta.encap_data.underlay_dmac,
                                 meta.encap_data.underlay_smac,
@@ -179,7 +179,7 @@ control outbound(inout headers_t hdr,
                                 meta.encap_data.underlay_sip,
                                 meta.encap_data.overlay_dmac,
                                 meta.encap_data.service_tunnel_key);
-                } else if (meta.encap_data.dash_encapsulation == dash_encapsulation.NVGRE) {
+                } else if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
                     nvgre_encap(hdr,
                                 meta.encap_data.underlay_dmac,
                                 meta.encap_data.underlay_smac,
