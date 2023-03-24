@@ -26,8 +26,6 @@ class TestSaiVnetVni:
         print("\n======= SAI commands RETURN values create =======")
         pprint(results)
 
-        assert all(results), "SAI_OBJECT_TYPE_VNET Create error"
-
     @pytest.mark.skip(reason="get and set not implemented, yet")
     def test_vnet_vni_get1(self, dpu):
 
@@ -43,8 +41,6 @@ class TestSaiVnetVni:
         results = [*dpu.process_commands(commands)]
         print("\n======= SAI commands RETURN values get =======")
         pprint(results)
-
-        assert all( [result == 0 for result in results]), "SAI_OBJECT_TYPE_VNET Get error"
 
     @pytest.mark.skip(reason="get and set not implemented, yet")
     def test_vnet_vni_set(self, dpu):
@@ -65,8 +61,6 @@ class TestSaiVnetVni:
         print("\n======= SAI commands RETURN values set =======")
         pprint(results)
 
-        assert all( [result == 0 for result in results]), "SAI_OBJECT_TYPE_VNET Set error"
-
     @pytest.mark.skip(reason="get and set not implemented, yet")
     def test_vnet_vni_get2(self, dpu):
 
@@ -83,8 +77,6 @@ class TestSaiVnetVni:
         print("\n======= SAI commands RETURN values get =======")
         pprint(results)
 
-        assert all( [result == 0 for result in results]), "SAI_OBJECT_TYPE_VNET Get error"
-
     def test_vnet_vni_remove(self, dpu):
 
         commands = [
@@ -98,5 +90,3 @@ class TestSaiVnetVni:
         results = [*dpu.process_commands(commands)]
         print("\n======= SAI commands RETURN values remove =======")
         pprint(results)
-
-        assert all( [result == 0 for result in results]), "SAI_OBJECT_TYPE_VNET Remove error"

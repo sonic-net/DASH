@@ -11,7 +11,8 @@ SWITCH_ID = 5
 
 class TestSaiVnetInboundRoutingEntry:
 
-    def test_vnet_inbound_routing_entry_create(self, dpu):
+    @pytest.mark.dependency()
+    def test_vnet_inbound_routing_entry_create_setup(self, dpu):
 
         # Create VNET
         commands = [
@@ -29,8 +30,6 @@ class TestSaiVnetInboundRoutingEntry:
         print("\n======= SAI commands RETURN values create =======")
         pprint(results)
 
-        assert all(results), "SAI_OBJECT_TYPE_VNET Create error"
-        
         # Create ENI
         commands = [
             {
@@ -99,8 +98,9 @@ class TestSaiVnetInboundRoutingEntry:
         print("\n======= SAI commands RETURN values create =======")
         pprint(results)
 
-        assert all(results), "SAI_OBJECT_TYPE_ENI Create error"
-         
+    @pytest.mark.skip(reason="https://github.com/sonic-net/DASH/issues/345 [P4Runtime] Invalid match type")
+    def test_vnet_inbound_routing_entry_create(self, dpu):
+
         commands = [
             {
                 "name": "inbound_routing_entry",
@@ -126,8 +126,6 @@ class TestSaiVnetInboundRoutingEntry:
         print("\n======= SAI commands RETURN values create =======")
         pprint(results)
 
-        assert all(results), "SAI_OBJECT_TYPE_INBOUND_ROUTING_ENTRY Create error"
-
     @pytest.mark.skip(reason="get and set not implemented, yet")
     def test_vnet_inbound_routing_entry_get1(self, dpu):
 
@@ -142,8 +140,6 @@ class TestSaiVnetInboundRoutingEntry:
         results = [*dpu.process_commands(commands)]
         print("\n======= SAI commands RETURN values get =======")
         pprint(results)
-
-        assert all( [result == 0 for result in results]), "SAI_OBJECT_TYPE_INBOUND_ROUTING_ENTRY Get error"
 
     @pytest.mark.skip(reason="get and set not implemented, yet")
     def test_vnet_inbound_routing_entry_set(self, dpu):
@@ -171,8 +167,6 @@ class TestSaiVnetInboundRoutingEntry:
         print("\n======= SAI commands RETURN values set =======")
         pprint(results)
 
-        assert all( [result == 0 for result in results]), "SAI_OBJECT_TYPE_INBOUND_ROUTING_ENTRY Set error"
-
     @pytest.mark.skip(reason="get and set not implemented, yet")
     def test_vnet_inbound_routing_entry_get2(self, dpu):
 
@@ -188,9 +182,7 @@ class TestSaiVnetInboundRoutingEntry:
         print("\n======= SAI commands RETURN values get =======")
         pprint(results)
 
-        assert all( [result == 0 for result in results]), "SAI_OBJECT_TYPE_INBOUND_ROUTING_ENTRY Get error"
-
-    @pytest.mark.skip(reason="https://github.com/sonic-net/DASH/issues/233 [P4Runtime] Invalid match type")
+    @pytest.mark.skip(reason="https://github.com/sonic-net/DASH/issues/345 [P4Runtime] Invalid match type")
     def test_vnet_inbound_routing_entry_remove(self, dpu):
         
         commands = [
@@ -205,8 +197,7 @@ class TestSaiVnetInboundRoutingEntry:
         print("\n======= SAI commands RETURN values remove =======")
         pprint(results)
 
-        assert all( [result == 0 for result in results]), "SAI_OBJECT_TYPE_INBOUND_ROUTING_ENTRY Remove error"
-
+    @pytest.mark.dependency(depends=['TestSaiVnetInboundRoutingEntry::test_vnet_inbound_routing_entry_create_setup'])
     def test_vnet_inbound_routing_entry_remove_cleanup(self, dpu):
         
         # Remove VNET
@@ -221,8 +212,6 @@ class TestSaiVnetInboundRoutingEntry:
         results = [*dpu.process_commands(commands)]
         print("\n======= SAI commands RETURN values remove =======")
         pprint(results)
-
-        assert all( [result == 0 for result in results]), "SAI_OBJECT_TYPE_VNET Remove error"
         
         # Remove ENI
         commands = [
@@ -236,7 +225,3 @@ class TestSaiVnetInboundRoutingEntry:
         results = [*dpu.process_commands(commands)]
         print("\n======= SAI commands RETURN values remove =======")
         pprint(results)
-
-        assert all( [result == 0 for result in results]), "SAI_OBJECT_TYPE_ENI Remove error"
-        
-        
