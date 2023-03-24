@@ -350,9 +350,9 @@ control dash_ingress(
         acl_group.apply();
 
         if (meta.direction == dash_direction_t.OUTBOUND) {
-            outbound.apply(hdr, meta, standard_metadata);
+            outbound.apply(hdr, meta);
         } else if (meta.direction == dash_direction_t.INBOUND) {
-            inbound.apply(hdr, meta, standard_metadata);
+            inbound.apply(hdr, meta);
         }
 
         eni_meter.apply();
