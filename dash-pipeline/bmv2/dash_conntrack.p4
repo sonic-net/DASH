@@ -11,11 +11,11 @@ const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_NOW    = (ExpireTimeProfileId_t)
 const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_LONG   = (ExpireTimeProfileId_t) 2;
 
 IPv4Address directionNeutralAddr (
-    in direction_t direction,
+    in dash_direction_t direction,
     in IPv4Address outbound_address,
     in IPv4Address inbound_address)
 {
-    if (direction == direction_t.OUTBOUND) {
+    if (direction == dash_direction_t.OUTBOUND) {
         return outbound_address;
     } else {
         return inbound_address;
@@ -23,11 +23,11 @@ IPv4Address directionNeutralAddr (
 }
 
 bit<16> directionNeutralPort (
-    in direction_t direction,
+    in dash_direction_t direction,
     in bit<16> outbound_port,
     in bit<16> inbound_port)
 {
-    if (direction == direction_t.OUTBOUND) {
+    if (direction == dash_direction_t.OUTBOUND) {
         return outbound_port;
     } else {
         return inbound_port;
@@ -57,7 +57,7 @@ Register<IPv4Address> original_overlay_dip(1024);
   action conntrackIn_miss() {
           // TODO: Should this be ((hdr.tcp.flags & 0x2) != 0) instead?
           if (hdr.tcp.flags == 0x2 /* SYN */) {
-            if (meta.direction == direction_t.OUTBOUND) {
+            if (meta.direction == dash_direction_t.OUTBOUND) {
                // New PNA Extern
                add_entry("conntrackIn_allow", {}, EXPIRE_TIME_PROFILE_LONG);
                original_overly_sip.write(meta.encap_data.original_overly_sip);
@@ -112,7 +112,7 @@ control ConntrackOut(inout headers_t hdr,
   action conntrackOut_miss() {
           // TODO: Should this be ((hdr.tcp.flags & 0x2) != 0) instead?
           if (hdr.tcp.flags == 0x2 /* SYN */) {
-            if (meta.direction == direction_t.INBOUND) {
+            if (meta.direction == dash_direction_t.INBOUND) {
                // New PNA Extern
                add_entry("conntrackOut_allow", {}, EXPIRE_TIME_PROFILE_LONG);
                //adding failure to be eventually handled
@@ -165,7 +165,7 @@ state_graph ConnGraphOut(inout state_context flow_ctx,
             return;
         }
 
-        if (meta.direction == direction_t.INBOUND) {
+        if (meta.direction == dash_direction_t.INBOUND) {
             transition ALLOW;
         }
     }
@@ -191,7 +191,7 @@ state_graph ConnGraphIn(inout state_context flow_ctx,
             return;
         }
 
-        if (meta.direction == direction_t.OUTBOUND) {
+        if (meta.direction == dash_direction_t.OUTBOUND) {
             transition ALLOW;
         }
     }
