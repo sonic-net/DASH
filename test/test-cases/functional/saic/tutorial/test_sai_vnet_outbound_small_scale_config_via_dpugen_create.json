@@ -1,0 +1,293 @@
+[
+  {
+    "name": "vip_#1",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vip": "221.0.0.2"
+    },
+    "attributes": [
+      "SAI_VIP_ENTRY_ATTR_ACTION",
+      "SAI_VIP_ENTRY_ACTION_ACCEPT"
+    ]
+  },
+  {
+    "name": "direction_lookup_entry_#5000",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_DIRECTION_LOOKUP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vni": "5000"
+    },
+    "attributes": [
+      "SAI_DIRECTION_LOOKUP_ENTRY_ATTR_ACTION",
+      "SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION"
+    ]
+  },
+  {
+    "name": "direction_lookup_entry_#6000",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_DIRECTION_LOOKUP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vni": "6000"
+    },
+    "attributes": [
+      "SAI_DIRECTION_LOOKUP_ENTRY_ATTR_ACTION",
+      "SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION"
+    ]
+  },
+  {
+    "name": "vnet_#5000",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VNET",
+    "attributes": [
+      "SAI_VNET_ATTR_VNI",
+      "5000"
+    ]
+  },
+  {
+    "name": "vnet_#5001",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VNET",
+    "attributes": [
+      "SAI_VNET_ATTR_VNI",
+      "5000"
+    ]
+  },
+  {
+    "name": "vnet_#6000",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VNET",
+    "attributes": [
+      "SAI_VNET_ATTR_VNI",
+      "6000"
+    ]
+  },
+  {
+    "name": "vnet_#6001",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VNET",
+    "attributes": [
+      "SAI_VNET_ATTR_VNI",
+      "6000"
+    ]
+  },
+  {
+    "name": "eni_#5000",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_ENI",
+    "attributes": [
+      "SAI_ENI_ATTR_CPS",
+      "10000",
+      "SAI_ENI_ATTR_PPS",
+      "100000",
+      "SAI_ENI_ATTR_FLOWS",
+      "100000",
+      "SAI_ENI_ATTR_ADMIN_STATE",
+      "True",
+      "SAI_ENI_ATTR_VM_UNDERLAY_DIP",
+      "221.0.1.1",
+      "SAI_ENI_ATTR_VM_VNI",
+      "5000",
+      "SAI_ENI_ATTR_VNET_ID",
+      "$vnet_#5000",
+      "SAI_ENI_ATTR_INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_INBOUND_V4_STAGE2_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_INBOUND_V4_STAGE3_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_INBOUND_V4_STAGE4_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_INBOUND_V4_STAGE5_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_INBOUND_V6_STAGE1_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_INBOUND_V6_STAGE2_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_INBOUND_V6_STAGE3_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_INBOUND_V6_STAGE4_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_INBOUND_V6_STAGE5_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V4_STAGE1_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V4_STAGE2_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V4_STAGE3_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V4_STAGE4_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V4_STAGE5_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V6_STAGE1_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V6_STAGE2_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V6_STAGE3_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V6_STAGE4_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V6_STAGE5_DASH_ACL_GROUP_ID",
+      "0"
+    ]
+  },
+  {
+    "name": "eni_#6000",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_ENI",
+    "attributes": [
+      "SAI_ENI_ATTR_CPS",
+      "10000",
+      "SAI_ENI_ATTR_PPS",
+      "100000",
+      "SAI_ENI_ATTR_FLOWS",
+      "100000",
+      "SAI_ENI_ATTR_ADMIN_STATE",
+      "True",
+      "SAI_ENI_ATTR_VM_UNDERLAY_DIP",
+      "221.0.1.2",
+      "SAI_ENI_ATTR_VM_VNI",
+      "6000",
+      "SAI_ENI_ATTR_VNET_ID",
+      "$vnet_#6000",
+      "SAI_ENI_ATTR_INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_INBOUND_V4_STAGE2_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_INBOUND_V4_STAGE3_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_INBOUND_V4_STAGE4_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_INBOUND_V4_STAGE5_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_INBOUND_V6_STAGE1_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_INBOUND_V6_STAGE2_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_INBOUND_V6_STAGE3_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_INBOUND_V6_STAGE4_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_INBOUND_V6_STAGE5_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V4_STAGE1_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V4_STAGE2_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V4_STAGE3_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V4_STAGE4_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V4_STAGE5_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V6_STAGE1_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V6_STAGE2_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V6_STAGE3_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V6_STAGE4_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_OUTBOUND_V6_STAGE5_DASH_ACL_GROUP_ID",
+      "0"
+    ]
+  },
+  {
+    "name": "eni_ether_address_map_#1",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_ENI_ETHER_ADDRESS_MAP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "address": "00:1A:C5:00:00:01"
+    },
+    "attributes": [
+      "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID",
+      "$eni_#5000"
+    ]
+  },
+  {
+    "name": "eni_ether_address_map_#2",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_ENI_ETHER_ADDRESS_MAP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "address": "00:1A:C5:18:00:01"
+    },
+    "attributes": [
+      "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID",
+      "$eni_#6000"
+    ]
+  },
+  {
+    "name": "outbound_routing_#5000",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "eni_id": "$eni_#5000",
+      "destination": "1.128.0.1/9"
+    },
+    "attributes": [
+      "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION",
+      "SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET",
+      "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID",
+      "$vnet_#5000"
+    ]
+  },
+  {
+    "name": "outbound_routing_#6000",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "eni_id": "$eni_#6000",
+      "destination": "2.128.0.1/9"
+    },
+    "attributes": [
+      "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION",
+      "SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET",
+      "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID",
+      "$vnet_#6000"
+    ]
+  },
+  {
+    "name": "outbound_ca_to_pa_#1",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_OUTBOUND_CA_TO_PA_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "dst_vnet_id": "$vnet_#5000",
+      "dip": "1.128.0.1"
+    },
+    "attributes": [
+      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP",
+      "221.0.2.100",
+      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC",
+      "00:1B:6E:00:00:01",
+      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_USE_DST_VNET_VNI",
+      "True"
+    ]
+  },
+  {
+    "name": "outbound_ca_to_pa_#2",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_OUTBOUND_CA_TO_PA_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "dst_vnet_id": "$vnet_#6000",
+      "dip": "2.128.0.1"
+    },
+    "attributes": [
+      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP",
+      "221.0.2.101",
+      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC",
+      "00:1B:6E:18:00:01",
+      "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_USE_DST_VNET_VNI",
+      "True"
+    ]
+  }
+]

@@ -1,4 +1,4 @@
-FROM sonicdash.azurecr.io/dash-saichallenger-client-bldr:221109
+FROM sonicdash.azurecr.io/dash-saichallenger-client-bldr:230216
 
 ENV SAI_CHALLENGER_PATH /sai-challenger
 ENV DASH_PATH /dash
@@ -20,7 +20,6 @@ RUN cd /saithrift-0.9 && \
         rm -rf thrift-0.11.0 && \
     cd /SAI/test/ptf && \
         python3 setup.py install && \
-    ln -s ${SAI_CHALLENGER_PATH} /usr/local/lib/python3.7/dist-packages/saichallenger && \
     ln -s ${DASH_PATH}/test/test-cases/scale/saic ${SAI_CHALLENGER_PATH}/dash_tests
 
 CMD ["/usr/bin/supervisord"]

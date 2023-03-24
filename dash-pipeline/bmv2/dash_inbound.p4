@@ -8,8 +8,7 @@
 #include "dash_conntrack.p4"
 
 control inbound(inout headers_t hdr,
-                inout metadata_t meta,
-                inout standard_metadata_t standard_metadata)
+                inout metadata_t meta)
 {
     apply {
 #ifdef STATEFUL_P4
@@ -27,7 +26,7 @@ control inbound(inout headers_t hdr,
 
         /* ACL */
         if (!meta.conntrack_data.allow_in) {
-            acl.apply(hdr, meta, standard_metadata);
+            acl.apply(hdr, meta);
         }
 
 #ifdef STATEFUL_P4

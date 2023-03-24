@@ -7,8 +7,7 @@
 #include "dash_service_tunnel.p4"
 
 control outbound(inout headers_t hdr,
-                 inout metadata_t meta,
-                 inout standard_metadata_t standard_metadata)
+                 inout metadata_t meta)
 {
     action route_vnet(bit<16> dst_vnet_id) {
         meta.dst_vnet_id = dst_vnet_id;
@@ -65,7 +64,16 @@ control outbound(inout headers_t hdr,
         meta.encap_data.service_tunnel_key = tunnel_key;
     }
 
+#ifdef TARGET_BMV2_V1MODEL
+
     direct_counter(CounterType.packets_and_bytes) routing_counter;
+#endif // TARGET_BMV2_V1MODEL
+#ifdef TARGET_DPDK_PNA
+#ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
+    // See the #ifdef with same preprocessor symbol in dash_pipeline.p4
+    DirectCounter<bit<64>>(PNA_CounterType_t.PACKETS_AND_BYTES) routing_counter;
+#endif  // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
+#endif  // TARGET_DPDK_PNA
 
     @name("outbound_routing|dash_outbound_routing")
     table routing {
@@ -84,7 +92,14 @@ control outbound(inout headers_t hdr,
         }
         const default_action = drop;
 
+#ifdef TARGET_BMV2_V1MODEL
         counters = routing_counter;
+#endif // TARGET_BMV2_V1MODEL
+#ifdef TARGET_DPDK_PNA
+#ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
+        pna_direct_counter = routing_counter;
+#endif // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
+#endif // TARGET_DPDK_PNA
     }
 
     action set_tunnel_mapping(IPv4Address underlay_dip,
@@ -96,7 +111,14 @@ control outbound(inout headers_t hdr,
         meta.encap_data.underlay_dip = underlay_dip;
     }
 
+#ifdef TARGET_BMV2_V1MODEL
     direct_counter(CounterType.packets_and_bytes) ca_to_pa_counter;
+#endif // TARGET_BMV2_V1MODEL
+#ifdef TARGET_DPDK_PNA
+#ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
+    DirectCounter<bit<64>>(PNA_CounterType_t.PACKETS_AND_BYTES) ca_to_pa_counter;
+#endif  // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
+#endif  // TARGET_DPDK_PNA
 
     @name("outbound_ca_to_pa|dash_outbound_ca_to_pa")
     table ca_to_pa {
@@ -113,7 +135,14 @@ control outbound(inout headers_t hdr,
         }
         const default_action = drop;
 
+#ifdef TARGET_BMV2_V1MODEL
         counters = ca_to_pa_counter;
+#endif // TARGET_BMV2_V1MODEL
+#ifdef TARGET_DPDK_PNA
+#ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
+        pna_direct_counter = ca_to_pa_counter;
+#endif // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
+#endif // TARGET_DPDK_PNA
     }
 
     action set_vnet_attrs(bit<24> vni) {
@@ -142,7 +171,7 @@ control outbound(inout headers_t hdr,
 
         /* ACL */
         if (!meta.conntrack_data.allow_out) {
-            acl.apply(hdr, meta, standard_metadata);
+            acl.apply(hdr, meta);
         }
 
 #ifdef STATEFUL_P4

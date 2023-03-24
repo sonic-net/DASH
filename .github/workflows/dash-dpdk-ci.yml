@@ -1,0 +1,57 @@
+name: DASH-DPDK-CI
+
+on:
+  push:
+    branches: [ "**" ]
+    paths:
+      - '.gitmodules'
+      - '.github/workflows/dash-dpdk-ci.yml'
+      - 'test/**.py'
+      - 'test/**requirements.txt'
+      - 'test/**.sh'
+      - 'test/**.yml'
+      - 'dash-pipeline/**'
+      - '!dash-pipeline/dockerfiles/Dockerfile.*'
+      - 'dash-pipeline/dockerfiles/DOCKER_P4C_DPDK_IMG.env'
+      - '!dash-pipeline/.dockerignore'
+      - '!dash-pipeline/**.md'
+      - '!dash-pipeline/**.svg'
+      - '!dash-pipeline/**.png'
+      - '!dash-pipeline/**.txt'
+  pull_request:
+    branches: [ "**" ]
+    paths:
+      - '.gitmodules'
+      - '.github/workflows/dash-bmv2-ci.yml'
+      - 'test/**.py'
+      - 'test/**requirements.txt'
+      - 'test/**.sh'
+      - 'test/**.yml'
+      - 'dash-pipeline/**'
+      - '!dash-pipeline/dockerfiles/Dockerfile.*'
+      - 'dash-pipeline/dockerfiles/DOCKER_P4C_DPDK_IMG.env'
+      - '!dash-pipeline/.dockerignore'
+      - '!dash-pipeline/**.md'
+      - '!dash-pipeline/**.svg'
+      - '!dash-pipeline/**.png'
+      - '!dash-pipeline/**.txt'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build DASH Pipeline for P4-DPDK
+    runs-on: ubuntu-20.04
+    env:
+      docker_fg_flags: --privileged
+      docker_fg_root_flags: --privileged -u root
+      docker_bg_flags: -d --privileged
+    defaults:
+      run:
+        working-directory: ./dash-pipeline
+    steps:
+    - uses: actions/checkout@v3
+    - name: Pull/Build docker p4c-dpdk image
+      run:  make docker-dash-p4c-dpdk
+    - name: Build P4 software switch (dpdk) and P4Info
+      run:  DOCKER_FLAGS=$docker_fg_flags make p4c-dpdk-pna
+      

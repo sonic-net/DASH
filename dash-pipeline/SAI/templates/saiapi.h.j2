@@ -228,6 +228,17 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% endif %}
 {% endif %}
 {% endif %}
+{% if table.ipaddr_family_attr == 'true' %}
+    /**
+     * @brief IP address family for resource accounting
+     *
+     * @type sai_ip_addr_family_t
+     * @flags READ_ONLY
+     * @isresourcetype true
+     */
+    SAI_{{ table.name | upper }}_ATTR_IP_ADDR_FAMILY,
+
+{% endif %}
     /**
      * @brief End of attributes
      */

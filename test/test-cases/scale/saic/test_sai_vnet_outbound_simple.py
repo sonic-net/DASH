@@ -4,14 +4,16 @@ from pathlib import Path
 from pprint import pprint
 
 import pytest
-import saichallenger.dataplane.snappi.snappi_traffic_utils as stu
-from saichallenger.dataplane.ptf_testutils import (send_packet,
-                                                   simple_udp_packet,
-                                                   simple_vxlan_packet,
-                                                   verify_no_other_packets,
-                                                   verify_packet)
+import saichallenger.common.sai_dataplane.snappi.snappi_traffic_utils as stu
+from saichallenger.common.sai_dataplane.utils.ptf_testutils import (send_packet,
+                                                                    simple_udp_packet,
+                                                                    simple_vxlan_packet,
+                                                                    verify_no_other_packets,
+                                                                    verify_packet)
 
-import dash_helper.vnet2vnet_helper as dh
+import sys
+sys.path.append("../utils")
+import vnet2vnet_helper as dh
 
 current_file_dir = Path(__file__).parent
 

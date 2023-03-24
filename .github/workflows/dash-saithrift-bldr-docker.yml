@@ -38,11 +38,11 @@ jobs:
 
     # Can only publish from within DASH repo (need credentials from secrets)
     - uses: azure/docker-login@v1
-      if: ${{ github.event_name != 'pull_request' && github.repository == 'Azure/DASH' }}
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'sonic-net/DASH' }}
       with:
         login-server: sonicdash.azurecr.io
         username: ${{ secrets.DASH_ACR_USERNAME }}
         password: ${{ secrets.DASH_ACR_PASSWORD }}
     - name: Publish dash-saithrift-bldr docker image
-      if: ${{ github.event_name != 'pull_request' && github.repository == 'Azure/DASH' }}
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'sonic-net/DASH' }}
       run: make docker-publish-saithrift-bldr
