@@ -356,6 +356,8 @@ num
 NumberOfFlowResimulated
 NVA
 NVidia
+nvgre
+Nvgre
 NVMe
 observability
 OCP
