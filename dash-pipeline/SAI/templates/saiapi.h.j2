@@ -118,7 +118,7 @@ typedef enum _sai_{{ table.name }}_attr_t
      * @brief Action
      *
      * @type sai_{{ table.name }}_action_t
-     * @flags CREATE_AND_SET
+     * @flags CREATE_ONLY
      * @default SAI_{{ table.name | upper }}_ACTION_{{ table.actions[0].name | upper }}
      */
     SAI_{{ table.name | upper }}_ATTR_ACTION = SAI_{{ table.name | upper }}_ATTR_START,
@@ -163,10 +163,21 @@ typedef enum _sai_{{ table.name }}_attr_t
      * @brief Action {% for action in param.paramActions %}{{ action }}{{ ", " if not loop.last else "" }}{% endfor %} parameter {{ param.name | upper }}
      *
      * @type {{ param.type }}
+{% if param.mandatory == 'true' %}
+     * @flags MANDATORY_ON_CREATE | CREATE_AND_SET
+{% else %}
      * @flags CREATE_AND_SET
+{% endif %}
 {% if param.type == 'sai_uint16_t' %}
      * @isvlan false
 {% endif %}
+{% if param.type == 'sai_object_id_t' %}
+     * @objects SAI_OBJECT_TYPE_{{ param.objectName | upper }}
+{% if param.mandatory != 'true' %}
+     * @allownull true
+{% endif %}
+{% endif %}
+{% if param.mandatory != 'true' %}
 {% if param.type == 'sai_ip_address_t' %}
      * @default 0.0.0.0
 {% elif param.type == 'sai_ip_addr_family_t' %}
@@ -176,15 +187,14 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% elif param.type == 'bool' %}
      * @default false
 {% elif param.type == 'sai_object_id_t' %}
-     * @objects SAI_OBJECT_TYPE_{{ param.objectName | upper }}
-     * @allownull true
      * @default SAI_NULL_OBJECT_ID
 {% else %}
      * @default 0
 {% endif %}
+{% endif %}
 {% if table.actions | length > 1 %}
 {% if param.paramActions | length > 0 %}
-     * @validonly {% for action in param.paramActions %}SAI_{{ table.name | upper }}_ATTR_ACTION == SAI_{{ table.name | upper }}_ACTION_{{ action | upper }}{{ " or " if not loop.last else "" }}{% endfor %}
+     * {% if param.mandatory == 'true' %}@condition{% else %}@validonly{% endif %} {% for action in param.paramActions %}SAI_{{ table.name | upper }}_ATTR_ACTION == SAI_{{ table.name | upper }}_ACTION_{{ action | upper }}{{ " or " if not loop.last else "" }}{% endfor %}
 
 {% endif %}
 {% endif %}

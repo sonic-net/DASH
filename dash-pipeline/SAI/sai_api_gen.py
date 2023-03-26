@@ -230,11 +230,21 @@ def generate_sai_apis(program, ignore_tables):
                     sai_table_data['ipaddr_family_attr'] = 'true'
 
         param_names = []
+        deny_on_miss = False
         for action in table[ACTION_REFS_TAG]:
             action_id = action["id"]
-            if all_actions[action_id][NAME_TAG] != NOACTION and not (SCOPE_TAG in action and action[SCOPE_TAG] == 'DEFAULT_ONLY'):
-                fill_action_params(sai_table_data[ACTION_PARAMS_TAG], param_names, all_actions[action_id])
-                sai_table_data[ACTIONS_TAG].append(all_actions[action_id])
+            if all_actions[action_id][NAME_TAG] == NOACTION:
+                continue
+
+            if (SCOPE_TAG in action and action[SCOPE_TAG] == 'DEFAULT_ONLY'):
+                if all_actions[action_id][NAME_TAG] == 'deny':
+                    deny_on_miss = True
+                continue
+
+            fill_action_params(sai_table_data[ACTION_PARAMS_TAG], param_names, all_actions[action_id])
+            sai_table_data[ACTIONS_TAG].append(all_actions[action_id])
+
+        sai_table_data['deny_on_miss'] = 'true' if deny_on_miss else 'false'
 
         if len(sai_table_data['keys']) == 1 and sai_table_data['keys'][0]['sai_key_name'].endswith(table_name.split('.')[-1] + '_id'):
             sai_table_data['is_object'] = 'true'
@@ -383,6 +393,15 @@ def write_sai_files(sai_api):
         f.write(''.join(new_lines))
 
 
+def is_table_deny_on_miss(sai_apis, table_name):
+    for sai_api in sai_apis:
+        for table in sai_api[TABLES_TAG]:
+            if table[NAME_TAG] == table_name:
+                print(table_name, table['deny_on_miss'])
+                return table['deny_on_miss'] == 'true'
+    return False
+
+
 
 # CLI
 parser = argparse.ArgumentParser(description='P4 SAI API generator')
@@ -415,6 +434,8 @@ for sai_api in sai_apis:
                 for table_name in all_table_names:
                     if table_ref.endswith(table_name):
                         param[OBJECT_NAME_TAG] = table_name
+                        if is_table_deny_on_miss(sai_apis, table_name):
+                            param['mandatory'] = 'true'
     # Update object name reference for keys
     for table in sai_api[TABLES_TAG]:
         for key in table['keys']:
@@ -424,6 +445,8 @@ for sai_api in sai_apis:
                     for table_name in all_table_names:
                         if table_ref.endswith(table_name):
                             key[OBJECT_NAME_TAG] = table_name
+                            if is_table_deny_on_miss(sai_apis, table_name):
+                                key['mandatory'] = 'true'
     # Write SAI dictionary into SAI API headers
     write_sai_files(get_uniq_sai_api(sai_api))
     write_sai_impl_files(sai_api)
