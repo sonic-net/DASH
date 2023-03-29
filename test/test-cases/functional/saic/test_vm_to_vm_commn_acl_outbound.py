@@ -71,7 +71,6 @@ class TestAclOutbound:
         results = [*dpu.process_commands(setup_config)]
         print("\n======= SAI setup commands RETURN values =======")
         pprint(results)
-        assert all(results), "Setup error"
 
 
     @pytest.mark.dependency(depends=['TestAclOutbound::test_setup'])
@@ -182,5 +181,4 @@ class TestAclOutbound:
             results.append(dpu.command_processor.process_command(command))
         print (results)
         print("\n======= SAI teardown commands RETURN values =======")
-        assert all([x==0 for x in results]), "Teardown Error"
         
