@@ -15,7 +15,7 @@ Both host server and DPU card are running SONiC image. GNMI server is on host se
 * Need to configure huge DASH table entries to APPL_DB, with high speed.
 * Minimal redis table scaling requirements:
 
-|Item |Expected vlaue |
+|Item |Expected value |
 |--|--|
 |VNETs|1024|
 |ENI|64 per card|
