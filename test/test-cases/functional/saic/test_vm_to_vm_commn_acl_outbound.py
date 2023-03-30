@@ -181,4 +181,4 @@ class TestAclOutbound:
             results.append(dpu.command_processor.process_command(command))
         print (results)
         print("\n======= SAI teardown commands RETURN values =======")
-        
+
