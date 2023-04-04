@@ -92,5 +92,5 @@ ptf \
     --interface 0@${iface_array[0]} \
     --interface 1@${iface_array[1]} \
     --test-case-timeout=${TIMEOUT} \
-    --test-params="test_reboot_mode=cold;target='${TARGET}';traffic_check='${TRAFFIC}';${TEST_PARAMS}" \
+    --test-params="test_reboot_mode='cold';target='${TARGET}';traffic_check='${TRAFFIC}';${TEST_PARAMS}" \
     ${EXTRA_PARAMETERS}
