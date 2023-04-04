@@ -526,7 +526,7 @@ overlay_dip              = ip_address                ; overlay dst ip if routing
 
 ### 3.2.11 Protobuf encoding
 
-For saving memory consumption, the DASH table of APP_DB could be encoded as protobuf
+For saving memory consumption, the DASH table of APP_DB could be encoded as protobuf.
 
 ``` text
 key: text, Same as the original design
@@ -545,27 +545,33 @@ E.G.
 ```protobuf
 message IpAddress {
   oneof ip {
-    fixed32 ipv4 = 1;
-    bytes ipv6 = 2;
+    fixed32 ipv4 = 1; // Network byte order (big-endian)
+    bytes ipv6 = 2; // Network byte order (big-endian)
   }
 }
 
 message IpPrefix {
   IpAddress ip = 1;
-  uint32 prefix_len = 2;
+  IpAddress mask = 2;
 }
 
 message Range {
-    uint32 min = 1;
-    uint32 max = 2;
+  uint32 min = 1;
+  uint32 max = 2;
 }
 
-message RangeOrValue {
-  oneof range_or_value {
-    Range range = 1;
-    uint32 value = 2;
-  }
+message ValueOrRange {
+oneof value_or_range {
+  uint32 value = 1;
+  Range range = 2;
 }
+}
+
+enum IpVersion {
+  IP_VERSION_IPV4 = 0;
+  IP_VERSION_IPV6 = 1;
+}
+
 ```
 
 * Type mapping
@@ -579,6 +585,7 @@ message RangeOrValue {
 | mac address  | bytes         |
 | ip address   | IpAddress     |
 | ip prefix    | IpPrefix      |
+| vni          | uint32        |
 | l4 protocol  | RangeOrValue  |
 | l4 port      | RangeOrValue  |
 | Enumerations | enum          |
@@ -588,16 +595,16 @@ message RangeOrValue {
 
 ```protobuf
 message AclRule {
-  uint32 priority = 1;
-  string action = 2;
-  bool terminating = 3;
-  repeated uint32 protocol = 4;
-  repeated IpPrefix src_addr  = 5;
-  repeated IpPrefix dst_addr  = 6;
-  repeated uint32 src_port = 7;
-  repeated uint32 dst_port = 8;
-  repeated string src_tag = 9;
-  repeated string dst_tag = 10;
+    uint32 priority = 1;
+    acl.Action action = 2;
+    bool terminating = 3;
+    repeated uint32 protocol = 4;
+    repeated string src_tag = 9;
+    repeated string dst_tag = 10;
+    repeated types.IpPrefix src_addr  = 5;
+    repeated types.IpPrefix dst_addr  = 6;
+    repeated types.ValueOrRange src_port = 7;
+    repeated types.ValueOrRange dst_port = 8;
 }
 ```
 
