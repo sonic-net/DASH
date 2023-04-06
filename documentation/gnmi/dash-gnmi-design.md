@@ -47,6 +47,9 @@ And proto message for DASH_VNET_TABLE is:
 > &ensp;repeated string peer_list = 4;<br>
 > }
 
+Protobuf encoding message would be: "\n\x010\x12$b6d54023-5d24-47de-ae94-8afe693dd1fc…"
+IETF JSON encoding message would be: "{'vni':'1000', 'guid':'b6d54023-5d24-47de-ae94-8afe693dd1fc'}"
+
 * GNMI would not run Yang validation for protobuf encoding data.
   * GNMI server can check ENI and VNET if necessary.
 
