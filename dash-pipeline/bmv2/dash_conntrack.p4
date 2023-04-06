@@ -48,8 +48,8 @@ control ConntrackIn(inout headers_t hdr,
           }
           restart_expire_timer(); // reset expiration timer for entry
           meta.conntrack_data.allow_in = true;
-          meta.encap_data.original_overly_sip = original_overly_sip;
-          meta.encap_data.original_overly_dip = original_overly_dip;
+          meta.encap_data.original_overlay_sip = original_overlay_sip;
+          meta.encap_data.original_overlay_dip = original_overlay_dip;
   }
 
   action conntrackIn_miss() {
@@ -58,7 +58,7 @@ control ConntrackIn(inout headers_t hdr,
             if (meta.direction == dash_direction_t.OUTBOUND) {
                // New PNA Extern
                add_entry("conntrackIn_allow",
-                         {meta.encap_data.original_overly_sip, meta.encap_data.original_overly_dip},
+                         {meta.encap_data.original_overlay_sip, meta.encap_data.original_overlay_dip},
                          EXPIRE_TIME_PROFILE_LONG);
                //adding failure to be eventually handled
             }
