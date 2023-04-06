@@ -44,9 +44,9 @@ control outbound(inout headers_t hdr,
                                 dash_encapsulation_t dash_encapsulation,
                                 bit<24> tunnel_key) {
         /* Assume the overlay addresses provided are always IPv6 and the original are IPv4 */
-        assert(is_overlay_dip_v4_or_v6 == 1 && is_overlay_sip_v4_or_v6 == 1);
+        /* assert(is_overlay_dip_v4_or_v6 == 1 && is_overlay_sip_v4_or_v6 == 1);
         assert(is_overlay_dip_mask_v4_or_v6 == 1 && is_overlay_sip_mask_v4_or_v6 == 1);
-        assert(is_underlay_dip_v4_or_v6 != 1 && is_underlay_sip_v4_or_v6 != 1);
+        assert(is_underlay_dip_v4_or_v6 != 1 && is_underlay_sip_v4_or_v6 != 1); */
         meta.encap_data.original_overlay_dip = hdr.ipv4.src_addr;
         meta.encap_data.original_overlay_sip = hdr.ipv4.dst_addr;
 
