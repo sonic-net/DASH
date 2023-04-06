@@ -38,10 +38,8 @@ bit<16> directionNeutralPort (
 control ConntrackIn(inout headers_t hdr,
                 inout metadata_t meta)
 {
-Register<IPv4Address> original_overlay_sip(1024);
-Register<IPv4Address> original_overlay_dip(1024);
 
-  action conntrackIn_allow () {
+  action conntrackIn_allow (IPv4Address original_overlay_sip, IPv4Address original_overlay_dip) {
   /* Invalidate entry based on TCP flags */
           // If FIN is 1 (0b000001), or if RST is 1 (0b000100):
           if ((hdr.tcp.flags & 0b000101 /* FIN/RST */) != 0) {
@@ -50,8 +48,8 @@ Register<IPv4Address> original_overlay_dip(1024);
           }
           restart_expire_timer(); // reset expiration timer for entry
           meta.conntrack_data.allow_in = true;
-          meta.encap_data.original_overly_sip = original_overly_sip.read(get_rule_prio();
-          meta.encap_data.original_overly_dip = original_overly_dip.read(get_rule_prio();
+          meta.encap_data.original_overly_sip = original_overly_sip;
+          meta.encap_data.original_overly_dip = original_overly_dip;
   }
 
   action conntrackIn_miss() {
@@ -59,9 +57,9 @@ Register<IPv4Address> original_overlay_dip(1024);
           if (hdr.tcp.flags == 0x2 /* SYN */) {
             if (meta.direction == dash_direction_t.OUTBOUND) {
                // New PNA Extern
-               add_entry("conntrackIn_allow", {}, EXPIRE_TIME_PROFILE_LONG);
-               original_overly_sip.write(meta.encap_data.original_overly_sip);
-               original_overly_dip.write(meta.encap_data.original_overly_dip);
+               add_entry("conntrackIn_allow",
+                         {meta.encap_data.original_overly_sip, meta.encap_data.original_overly_dip},
+                         EXPIRE_TIME_PROFILE_LONG);
                //adding failure to be eventually handled
             }
           }
