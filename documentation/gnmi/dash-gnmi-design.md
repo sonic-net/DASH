@@ -7,7 +7,7 @@ Below diagram shows the architecture of the DASH project, the host server and DP
 
 ![dash-arch](./images/gnmi-arch.svg)
 
-Both host server and DPU card are running SONiC image. GNMI server is on host server, orchagent and redis are on DPU card, GNMI server will use ZMQ over TCP to communicate with orchagent and redis.
+Both host server and DPU card are running SONiC image. GNMI server and redis for APPL_DB are on host server, orchagent is on DPU card, GNMI server will use ZMQ over TCP to communicate with orchagent and redis.
 
 ### Requirements
 

@@ -85,7 +85,7 @@
 			<v:textRect cx="36.8504" cy="142.799" width="73.71" height="22.6772"/>
 			<rect x="0" y="131.461" width="73.7008" height="22.6772" class="st6"/>
 			<text x="15.52" y="145.8" class="st2" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>Orchagent</text>		</g>
-		<g id="group1006-19" transform="translate(235.526,-71.1161)" v:mID="1006" v:groupContext="group">
+		<g id="group1006-19" transform="translate(28.5965,-71.1161)" v:mID="1006" v:groupContext="group">
 			<v:userDefs>
 				<v:ud v:nameU="visVersion" v:prompt="" v:val="VT0(15):26"/>
 			</v:userDefs>
@@ -95,7 +95,7 @@
 				<title>Sheet.1007</title>
 				<v:userDefs>
 					<v:ud v:nameU="ControlHalfHeight" v:prompt="" v:val="VT0(0.11811023622047):24"/>
-					<v:ud v:nameU="FillForegnd" v:prompt="" v:val="VT5(1)"/>
+					<v:ud v:nameU="FillForegnd" v:prompt="" v:val="VT0(1):26"/>
 					<v:ud v:nameU="ControlHalfHeight" v:prompt="" v:val="VT0(0.031496062992126):1"/>
 					<v:ud v:nameU="FillForegnd" v:prompt="" v:val="VT5(#ffffff)"/>
 				</v:userDefs>
@@ -119,14 +119,13 @@
 			<path d="M0 154.14 L11.34 142.8 L11.34 148.47 L121.22 148.47 L121.22 142.8 L132.56 154.14 L121.22 165.48 L121.22 159.81
 						 L11.34 159.81 L11.34 165.48 L0 154.14 Z" class="st7"/>
 			<text x="37.23" y="157.14" class="st2" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>ZMQ over TCP</text>		</g>
-		<g id="shape1009-28" v:mID="1009" v:groupContext="shape" transform="translate(325.884,42.2028) rotate(90)">
-			<title>Sharp Bent Arrow.1009</title>
+		<g id="shape1009-28" v:mID="1009" v:groupContext="shape" transform="translate(178.833,196.057) rotate(180)">
+			<title>Bent Arrow.1009</title>
 			<v:userDefs>
-				<v:ud v:nameU="DblArrow" v:prompt="" v:val="VT0(0):5"/>
 				<v:ud v:nameU="visVersion" v:prompt="" v:val="VT0(15):26"/>
 			</v:userDefs>
-			<path d="M0 154.14 L31.89 154.14 L31.89 102.83 L34.58 102.83 L26.93 90.36 L19.28 102.83 L21.97 102.83 L21.97 144.22 L0
-						 144.22 L0 149.18 L0 154.14 Z" class="st7"/>
+			<path d="M0 154.14 L14.17 154.14 L14.17 131.46 L62.93 131.46 L62.93 138.55 L77.1 124.37 L62.93 110.2 L62.93 117.29 L9.35
+						 117.29 A9.35136 9.35136 -180 0 0 -0 126.64 L0 154.14 Z" class="st7"/>
 		</g>
 	</g>
 </svg>
