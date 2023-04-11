@@ -309,6 +309,7 @@ LOOKUPs
 loopback
 LPM
 lts
+MACs
 Macsec
 makefile
 Makefile
@@ -356,6 +357,8 @@ num
 NumberOfFlowResimulated
 NVA
 NVidia
+nvgre
+Nvgre
 NVMe
 observability
 OCP
@@ -636,6 +639,7 @@ Vnic
 vnic
 vnics
 VNID
+VNIs
 VPC
 vpc
 vport
