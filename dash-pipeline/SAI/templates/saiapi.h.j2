@@ -144,13 +144,7 @@ typedef enum _sai_{{ table.name }}_attr_t
     /**
      * @brief Ternary matched mask {{ key.sai_key_name }}
      *
-{% if key.match_type == 'list' %}
-     * @type {{ key.sai_list_type }}
-{% elif key.match_type == 'range_list' %}
-     * @type {{ key.sai_range_list_type }}
-{% else %}
-     * @type {{ key.sai_key_type }}
-{% endif %}
+     * @type {{ key.type }}
      * @flags MANDATORY_ON_CREATE | CREATE_ONLY
      */
     SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}_MASK,
