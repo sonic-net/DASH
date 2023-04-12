@@ -30,6 +30,36 @@ SCOPE_TAG = 'scope'
 TYPE_INFO_TAG = 'typeInfo'
 SERIALIZABLE_ENUMS_TAG = 'serializableEnums'
 MEMBERS_TAG = 'members'
+STRUCTURED_ANNOTATIONS_TAG = 'structuredAnnotations'
+KV_PAIRS_TAG = 'kvPairs'
+KV_PAIR_LIST_TAG = 'kvPairList'
+SAI_TAG = 'Sai'
+
+sai_type_to_field = {
+    'bool': 'booldata',
+    'sai_uint8_t': 'u8',
+    'sai_object_id_t': 'u16',
+    'sai_uint16_t': 'u16',
+    'sai_ip_address_t': 'ipaddr',
+    'sai_ip_addr_family_t': 'u32',
+    'sai_uint32_t': 'u32',
+    'sai_mac_t': 'mac'
+}
+
+def p4_annotation_to_sai_attr(p4rt, sai_attr):
+    for anno in p4rt[STRUCTURED_ANNOTATIONS_TAG]:
+        if anno[NAME_TAG] == SAI_TAG:
+            for kv in anno[KV_PAIR_LIST_TAG][KV_PAIRS_TAG]:
+                if kv['key'] == 'type':
+                    sai_attr['type'] = kv['value']['stringValue']
+                elif kv['key'] == 'isresourcetype':
+                    sai_attr['isresourcetype'] = kv['value']['stringValue']
+                elif kv['key'] == 'objects':
+                    sai_attr['objectName'] = kv['value']['stringValue']
+                else:
+                    print("Unknown attr annotation " + kv['key'])
+                    exit(1)
+    sai_attr['field'] = sai_type_to_field[sai_attr['type']]
 
 def get_sai_key_type(key_size, key_header, key_field):
     if key_size == 1:
@@ -114,16 +144,19 @@ def get_sai_key_data(key):
     else:
         raise ValueError(f'No valid match tag found')
 
-    if sai_key_data['match_type'] == 'exact' or  sai_key_data['match_type'] == 'optional' or sai_key_data['match_type'] == 'ternary':
-        sai_key_data['sai_key_type'], sai_key_data['sai_key_field'] = get_sai_key_type(key_size, key_header, key_field)
-    elif sai_key_data['match_type'] == 'lpm':
-        sai_key_data['sai_lpm_type'], sai_key_data['sai_lpm_field'] = get_sai_lpm_type(key_size, key_header, key_field)
-    elif sai_key_data['match_type'] == 'list':
-        sai_key_data['sai_list_type'], sai_key_data['sai_list_field']  = get_sai_list_type(key_size, key_header, key_field)
-    elif sai_key_data['match_type'] == 'range_list':
-        sai_key_data['sai_range_list_type'], sai_key_data['sai_range_list_field'] = get_sai_range_list_type(key_size, key_header, key_field)
+    if STRUCTURED_ANNOTATIONS_TAG in key:
+        p4_annotation_to_sai_attr(key, sai_key_data)
     else:
-        raise ValueError(f"match_type={sai_key_data['match_type']} is not supported")
+        if sai_key_data['match_type'] == 'exact' or  sai_key_data['match_type'] == 'optional' or sai_key_data['match_type'] == 'ternary':
+            sai_key_data['type'], sai_key_data['field'] = get_sai_key_type(key_size, key_header, key_field)
+        elif sai_key_data['match_type'] == 'lpm':
+            sai_key_data['type'], sai_key_data['field'] = get_sai_lpm_type(key_size, key_header, key_field)
+        elif sai_key_data['match_type'] == 'list':
+            sai_key_data['type'], sai_key_data['field']  = get_sai_list_type(key_size, key_header, key_field)
+        elif sai_key_data['match_type'] == 'range_list':
+            sai_key_data['type'], sai_key_data['field'] = get_sai_range_list_type(key_size, key_header, key_field)
+        else:
+            raise ValueError(f"match_type={sai_key_data['match_type']} is not supported")
 
     sai_key_data['bitwidth'] = key_size
     return sai_key_data
@@ -142,12 +175,15 @@ def extract_action_data(program):
                 param = dict()
                 param['id'] = p['id']
                 param[NAME_TAG] = p[NAME_TAG]
-                param['type'], param['field'] = get_sai_key_type(int(p[BITWIDTH_TAG]), p[NAME_TAG], p[NAME_TAG])
-                for sai_enum in sai_enums:
-                    if param[NAME_TAG] == sai_enum['name']:
-                        param['type'] = 'sai_' + param[NAME_TAG] + '_t'
-                        param['field'] = 's32'
-                        param['default'] = 'SAI_' + param[NAME_TAG].upper() + '_INVALID'
+                if STRUCTURED_ANNOTATIONS_TAG in p:
+                    p4_annotation_to_sai_attr(p, param)
+                else:
+                    param['type'], param['field'] = get_sai_key_type(int(p[BITWIDTH_TAG]), p[NAME_TAG], p[NAME_TAG])
+                    for sai_enum in sai_enums:
+                        if param[NAME_TAG] == sai_enum['name']:
+                            param['type'] = 'sai_' + param[NAME_TAG] + '_t'
+                            param['field'] = 's32'
+                            param['default'] = 'SAI_' + param[NAME_TAG].upper() + '_INVALID'
                 param['bitwidth'] = p[BITWIDTH_TAG]
                 params.append(param)
         action_data[id] = {'id': id, NAME_TAG: name, PARAMS_TAG: params}
@@ -251,10 +287,10 @@ def generate_sai_apis(program, ignore_tables):
                         break
 
         for key in sai_table_data['keys']:
-            if (key['match_type'] == 'exact' and key['sai_key_type'] == 'sai_ip_address_t') or \
-                (key['match_type'] == 'ternary' and key['sai_key_type'] == 'sai_ip_address_t') or \
-                (key['match_type'] == 'lpm' and key['sai_lpm_type'] == 'sai_ip_prefix_t') or \
-                (key['match_type'] == 'list' and key['sai_list_type'] == 'sai_ip_prefix_list_t'):
+            if (key['match_type'] == 'exact' and key['type'] == 'sai_ip_address_t') or \
+                (key['match_type'] == 'ternary' and key['type'] == 'sai_ip_address_t') or \
+                (key['match_type'] == 'lpm' and key['type'] == 'sai_ip_prefix_t') or \
+                (key['match_type'] == 'list' and key['type'] == 'sai_ip_prefix_list_t'):
                     sai_table_data['ipaddr_family_attr'] = 'true'
 
         param_names = []
@@ -445,8 +481,8 @@ for sai_api in sai_apis:
     # Update object name reference for keys
     for table in sai_api[TABLES_TAG]:
         for key in table['keys']:
-            if 'sai_key_type' in key:
-                if key['sai_key_type'] == 'sai_object_id_t':
+            if 'type' in key:
+                if key['type'] == 'sai_object_id_t':
                     table_ref = key['sai_key_name'][:-len("_id")]
                     for table_name in all_table_names:
                         if table_ref.endswith(table_name):

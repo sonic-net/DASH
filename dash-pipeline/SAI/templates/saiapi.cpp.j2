@@ -70,7 +70,7 @@ sai_status_t sai_create_{{ table.name }}(
     mf->set_field_id({{table['keys'][0].id}});
     objId = NextObjIndex();
     auto mf_exact = mf->mutable_exact();
-    {{table['keys'][0].sai_key_field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
+    {{table['keys'][0].field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
     {% else %}
     // SAI object table with multiple P4 table keys
     // Copy P4 table keys from appropriate SAI attributes
@@ -82,30 +82,30 @@ sai_status_t sai_create_{{ table.name }}(
                 mf->set_field_id({{key.id}});
                 {% if key.match_type == 'exact' %}
                 auto mf_exact = mf->mutable_exact();
-                {{key.sai_key_field}}SetVal(attr_list[i].value, mf_exact, {{key.bitwidth}});
+                {{key.field}}SetVal(attr_list[i].value, mf_exact, {{key.bitwidth}});
                 {% elif key.match_type == 'lpm' %}
                 auto mf_lpm = mf->mutable_lpm();
-                {{key.sai_lpm_field}}SetVal(attr_list[i].value, mf_lpm, {{key.bitwidth}});
+                {{key.field}}SetVal(attr_list[i].value, mf_lpm, {{key.bitwidth}});
                 {% elif key.match_type == 'list' %}
                 assert(0 && "mutable_list is not supported");
                 goto ErrRet;
                 // auto mf1_list = mf1->mutable_xxx();
-                //{{key.sai_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+                //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
                 {% elif key.match_type == 'range_list' %}
                 goto ErrRet;
                 assert(0 && "range_list is not supported");
                 // TODO: if it is ternary, need to set the mask
                 // auto mf1_list = mf1->mutable_xxx();
-                //{{key.sai_range_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+                //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
                 {% elif key.match_type == 'optional' %}
                 auto mf_optional = mf->mutable_optional();
-                {{key.sai_key_field}}SetVal(attr_list[i].value, mf_optional, {{key.bitwidth}});
+                {{key.field}}SetVal(attr_list[i].value, mf_optional, {{key.bitwidth}});
                 {% elif key.match_type == 'ternary' %}
                 auto mf_ternary = mf->mutable_ternary();
-                {{key.sai_key_field}}SetVal(attr_list[i].value, mf_ternary, {{key.bitwidth}});
+                {{key.field}}SetVal(attr_list[i].value, mf_ternary, {{key.bitwidth}});
                 auto mask = getMaskAttr(SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}_MASK, attr_count, attr_list);
                 assert(mask && "SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}_MASK isn't provided");
-                {{key.sai_key_field}}SetMask(mask->value, mf_ternary, {{key.bitwidth}});
+                {{key.field}}SetMask(mask->value, mf_ternary, {{key.bitwidth}});
                 {% endif %}
                 {% if 'v4_or_v6_id' in key %}
                 {
@@ -247,21 +247,21 @@ sai_status_t sai_create_{{ table.name }}(
         mf->set_field_id({{key.id}});
         {% if key.match_type == 'exact' %}
         auto mf_exact = mf->mutable_exact();
-        {{key.sai_key_field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
+        {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
         {% elif key.match_type == 'lpm' %}
         auto mf_lpm = mf->mutable_lpm();
-        {{key.sai_lpm_field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_lpm, {{key.bitwidth}});
+        {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_lpm, {{key.bitwidth}});
         {% elif key.match_type == 'list' %}
         assert(0 && "mutable_list is not supported");
         goto ErrRet;
         // auto mf1_list = mf1->mutable_xxx();
-        //{{key.sai_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+        //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
         {% elif key.match_type == 'range_list' %}
         assert(0 && "range_list is not supported");
         goto ErrRet;
         // TODO: if it is ternary, need to set the mask
         // auto mf1_list = mf1->mutable_xxx();
-        //{{key.sai_range_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+        //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
         {% endif %}
     }
     {% if 'v4_or_v6_id' in key %}
@@ -352,20 +352,20 @@ sai_status_t sai_remove_{{ table.name }}(
         mf->set_field_id({{key.id}});
         {% if key.match_type == 'exact' %}
         auto mf_exact = mf->mutable_exact();
-        {{key.sai_key_field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
+        {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
         {% elif key.match_type == 'lpm' %}
         auto mf_lpm = mf->mutable_lpm();
-        {{key.sai_lpm_field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_lpm, {{key.bitwidth}});
+        {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_lpm, {{key.bitwidth}});
         {% elif key.match_type == 'list' %}
         assert(0 && "mutable_list is not supported");
         goto ErrRet;
         // auto mf1_list = mf1->mutable_xxx();
-        //{{key.sai_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+        //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
         {% elif key.match_type == 'range_list' %}
         assert(0 && "range_list is not supported");
         goto ErrRet;
         // auto mf1_list = mf1->mutable_xxx();
-        //{{key.sai_range_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+        //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
         {% endif %}
     }
     {% if 'v4_or_v6_id' in key %}
