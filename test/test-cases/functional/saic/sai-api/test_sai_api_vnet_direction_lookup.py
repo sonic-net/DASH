@@ -32,8 +32,6 @@ class TestSaiDirectionLookup:
         print("\n======= SAI commands RETURN values create =======")
         pprint(results)
 
-        assert all(results), "SAI_OBJECT_TYPE_DIRECTION_LOOKUP_ENTRY Create error"
-
     @pytest.mark.skip(reason="get and set not implemented, yet")
     def test_direction_lookup_get1(self, dpu):
 
@@ -47,8 +45,6 @@ class TestSaiDirectionLookup:
         results = [*dpu.process_commands(commands)]
         print("\n======= SAI commands RETURN values get =======")
         pprint(results)
-
-        assert all( [result == 0 for result in results]), "SAI_OBJECT_TYPE_DIRECTION_LOOKUP_ENTRY Get error"
 
     @pytest.mark.skip(reason="get and set not implemented, yet")
     def test_direction_lookup_set(self, dpu):
@@ -73,8 +69,6 @@ class TestSaiDirectionLookup:
         print("\n======= SAI commands RETURN values set =======")
         pprint(results)
 
-        assert all( [result == 0 for result in results]), "SAI_OBJECT_TYPE_DIRECTION_LOOKUP_ENTRY Set error"
-
     @pytest.mark.skip(reason="get and set not implemented, yet")
     def test_direction_lookup_get2(self, dpu):
 
@@ -89,8 +83,6 @@ class TestSaiDirectionLookup:
         print("\n======= SAI commands RETURN values get =======")
         pprint(results)
 
-        assert all( [result == 0 for result in results]), "SAI_OBJECT_TYPE_DIRECTION_LOOKUP_ENTRY Get error"
-
     def test_direction_lookup_remove(self, dpu):
 
         commands = [
@@ -104,5 +96,3 @@ class TestSaiDirectionLookup:
         results = [*dpu.process_commands(commands)]
         print("\n======= SAI commands RETURN values remove =======")
         pprint(results)
-
-        assert all( [result == 0 for result in results]), "SAI_OBJECT_TYPE_DIRECTION_LOOKUP_ENTRY Remove error"

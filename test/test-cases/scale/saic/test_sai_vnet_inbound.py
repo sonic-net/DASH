@@ -112,6 +112,7 @@ TEST_VNET_INBOUND_CONFIG = {
 }
 
 
+@pytest.mark.skip(reason="https://github.com/sonic-net/DASH/issues/345 [P4Runtime] Invalid match type")
 class TestSaiVnetInbound:
 
     def test_vnet_inbound_create(self, dpu):

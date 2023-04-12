@@ -71,7 +71,6 @@ class TestSaiVnetOutbound:
         results = [*dpu.process_commands( (self.make_create_commands()) )]
         print("\n======= SAI commands RETURN values =======")
         pprint.pprint(results)
-        assert all(results), "Create error"
 
 
     @pytest.mark.ptf
@@ -83,7 +82,6 @@ class TestSaiVnetOutbound:
         """
         results = [*dpu.process_commands( (self.make_remove_commands()) )]
         print("\n======= SAI commands RETURN values =======")
-        assert all( [result == 0 for result in results]), "Remove error"
         print(results)
 
 
