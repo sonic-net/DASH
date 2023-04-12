@@ -9,18 +9,17 @@ import snappi_utils as su
 
 current_file_dir = Path(__file__).parent
 
+#import global variables and dpu config
+from config_inbound_setup_commands import *
+
 """
 This covers following scenario :
-
-vnet to vnet communication with UDP traffic flow :
-
-Configure DUT 
-Configure TGEN UDP traffic flow as one vnet to another vnet of two OpenTrafficGenerator ports
+vnet to vnet communication with UDP traffic flow with inbound direction :
+Configure DUT on inbound routing direction
+Configure TGEN vxlan UDP traffic flow as one vnet to another vnet of two OpenTrafficGenerator ports
 Verify Traffic flow between vnet to vnet through DUT  
 
-
 Topology Used :
-
        --------          -------          -------- 
       |        |        |       |        |        |
       |        |        |       |        |        |
@@ -31,56 +30,31 @@ Topology Used :
        
 """
 
-###############################################################
-#                  Declaring Global variables
-###############################################################
-
-TOTALPACKETS = 1000
-PPS = 100
-TRAFFIC_SLEEP_TIME = (TOTALPACKETS / PPS) + 2 
-PACKET_LENGTH = 128
-ENI_IP = "1.1.0.1"
-NETWORK_IP1 = "1.128.0.1"
-NETWORK_IP2 = "1.128.0.3"
-DPU_VTEP_IP = "221.0.0.2"
-ENI_VTEP_IP = "221.0.1.11"
-NETWORK_VTEP_IP = "221.0.2.101"
-
-OUTER_SRC_MAC = "80:09:02:01:00:01"
-OUTER_DST_MAC = "c8:2c:2b:00:d1:30" 
-INNER_SRC_MAC = "00:1A:C5:00:00:01"
-INNER_DST_MAC = "00:1b:6e:00:00:01"
-OUTER_SRC_MAC_F2 = "80:09:02:02:00:01"
-OUTER_DST_MAC_F2 = "c8:2c:2b:00:d1:34"  
 
 ###############################################################
 #                  Start of the testcase
 ###############################################################
 
-class TestUdpOutbound:
 
+@pytest.mark.skip(reason="https://github.com/sonic-net/DASH/issues/345")
+class TestUdpInbound:
     @pytest.fixture(scope="class")
     def setup_config(self):
         """
         Fixture returns the content of the file with SAI configuration commands.
         scope=class - The file is loaded once for the whole test class
         """
-        current_file_dir = Path(__file__).parent
-        with (current_file_dir / 'config_outbound_setup_commands.json').open(mode='r') as config_file:
-            setup_commands = json.load(config_file)
-        return setup_commands
+        return dpu_config
 
     @pytest.mark.dependency()
     def test_setup(self, dpu, setup_config):
         results = [*dpu.process_commands(setup_config)]
         print("\n======= SAI setup commands RETURN values =======")
         pprint(results)
-               
-    @pytest.mark.dependency(depends=['TestUdpOutbound::test_setup'])
-    @pytest.mark.xfail(reason="https://github.com/sonic-net/DASH/issues/236")
-    def test_vm_to_vm_commn_udp_outbound(self, dataplane):
-        # Configure TGEN
-        
+
+    @pytest.mark.dependency(depends=['TestUdpInbound::test_setup'])
+    def test_vm_to_vm_commn_udp_inbound(self, dataplane):
+        # Configure TGEN      
         # Flow1 settings
         f1 = dataplane.configuration.flows.flow(name="ENI_TO_NETWORK")[-1]
         f1.tx_rx.port.tx_name = dataplane.configuration.ports[0].name
@@ -136,7 +110,7 @@ class TestUdpOutbound:
         )
         
         outer_eth.src.value = OUTER_SRC_MAC_F2
-        outer_eth.dst.value = OUTER_DST_MAC_F2  
+        outer_eth.dst.value = OUTER_DST_MAC_F2   
         outer_eth.ether_type.value = 2048
 
         ip.src.value = NETWORK_VTEP_IP
@@ -161,27 +135,28 @@ class TestUdpOutbound:
 
         dataplane.set_config()
 
-        # Verify Traffic flow
-        print("\n======= Start traffic =======")
-        su.start_traffic(dataplane, f1.name)
-        time.sleep(0.5)
+        # Verify Traffic
         su.start_traffic(dataplane, f2.name)
-        time.sleep(TRAFFIC_SLEEP_TIME) 
-        print("\n======= Stop traffic =======")           
+        time.sleep(0.5)
+        su.start_traffic(dataplane, f1.name)
+        flow_names=[f1.name, f2.name]
+        while(True):
+            if (dataplane.is_traffic_stopped(flow_names)):
+                break 
         dataplane.stop_traffic()
-      
-        print("\n======= Verify traffic TX and RX packets matching =======")
+        
         res1 = su.check_flow_tx_rx_frames_stats(dataplane, f1.name)
         res2 = su.check_flow_tx_rx_frames_stats(dataplane, f2.name)
-
+        print("Tx and Rx packet match result of flow {} is {}".format(f1.name, res1))
+        print("Tx and Rx packet match result of flow {} is {}".format(f2.name, res2))
+        
         dataplane.teardown()
-
-        # Validate test result  
-        print("\n======= Assert if traffic fails =======")
+        
+        # Validate test result
         assert res1, "Traffic test failure"
         assert res2, "Traffic test failure"
 
-    @pytest.mark.dependency(depends=['TestUdpOutbound::test_setup'])
+    @pytest.mark.dependency(depends=['TestUdpInbound::test_setup'])
     def test_cleanup(self, dpu, setup_config):
 
         cleanup_commands = []
@@ -194,3 +169,4 @@ class TestUdpOutbound:
             results.append(dpu.command_processor.process_command(command))
         print (results)
         print("\n======= SAI teardown commands RETURN values =======")
+

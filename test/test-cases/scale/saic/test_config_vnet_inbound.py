@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 
+@pytest.mark.skip(reason="https://github.com/sonic-net/DASH/issues/345 [P4Runtime] Invalid match type")
 class TestConfigVnetInboundRouting:
 
     @pytest.fixture(scope="class")
