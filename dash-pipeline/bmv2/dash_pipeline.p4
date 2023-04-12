@@ -269,6 +269,34 @@ control dash_ingress(
         }
     }
 
+    action set_src_tag(tag_map_t tag_map) {
+        meta.src_tag_map = tag_map;
+    }
+
+    @name("src_tag|dash_tag")
+    table src_tag {
+        key = {
+            meta.src_ip_addr : lpm @name("meta.src_ip_addr:sip");
+        }
+        actions = {
+            set_src_tag;
+        }
+    }
+
+    action set_dst_tag(tag_map_t tag_map) {
+        meta.dst_tag_map = tag_map;
+    }
+
+    @name("dst_tag|dash_tag")
+    table dst_tag {
+        key = {
+            meta.dst_ip_addr : lpm @name("meta.dst_ip_addr:dip");
+        }
+        actions = {
+            set_dst_tag;
+        }
+    }
+
     apply {
 
         /* Send packet on same port it arrived (echo) by default */
@@ -348,6 +376,10 @@ control dash_ingress(
             deny();
         }
         acl_group.apply();
+
+        src_tag.apply();
+        dst_tag.apply();
+
 
         if (meta.direction == dash_direction_t.OUTBOUND) {
             outbound.apply(hdr, meta);

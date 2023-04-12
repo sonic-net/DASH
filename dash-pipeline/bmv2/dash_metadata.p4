@@ -3,6 +3,8 @@
 
 #include "dash_headers.p4"
 
+typedef bit<32>  tag_map_t;
+
 struct encap_data_t {
     bit<24> vni;
     bit<24> dest_vnet_vni;
@@ -60,6 +62,8 @@ struct metadata_t {
     bit<16> stage3_dash_acl_group_id;
     bit<16> stage4_dash_acl_group_id;
     bit<16> stage5_dash_acl_group_id;
+    tag_map_t src_tag_map;
+    tag_map_t dst_tag_map;
 }
 
 #endif /* _SIRIUS_METADATA_P4_ */
