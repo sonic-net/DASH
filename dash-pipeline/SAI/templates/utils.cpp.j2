@@ -40,6 +40,16 @@ static std::mutex tableLock;
 static atomic<sai_object_id_t> nextId;
 static std::unique_ptr<p4::v1::P4Runtime::Stub> stub;
 
+void correctIpPrefix(void *ip, const void *mask, size_t length)
+{
+    auto _ip = reinterpret_cast<uint8_t *>(ip);
+    auto _mask = reinterpret_cast<const uint8_t *>(mask);
+    for (size_t i = 0; i < length; i++)
+    {
+        _ip[i] = _ip[i] & _mask[i];
+    }
+}
+
 int leadingNonZeroBits(const uint32_t ipv4) {
     auto firstSetBit  = __builtin_ffs(ipv4);
     if (0==firstSetBit) {
@@ -135,6 +145,15 @@ int GetDeviceId() {
 string updateTypeStr(p4::v1::Update_Type updateType) {
     const google::protobuf::EnumDescriptor *descriptor = p4::v1::Update_Type_descriptor();
     return descriptor->FindValueByNumber(updateType)->name();
+}
+
+const sai_attribute_t *getMaskAttr(sai_attr_id_t id, uint32_t attr_count, const sai_attribute_t *attr_list) {
+    for (uint32_t i = 0; i < attr_count; i++) {
+        if (attr_list[i].id == id) {
+            return &attr_list[i];
+        }
+    }
+    return nullptr;
 }
 
 grpc::StatusCode MutateTableEntry(p4::v1::TableEntry *entry, p4::v1::Update_Type updateType) {

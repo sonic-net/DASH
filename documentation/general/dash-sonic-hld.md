@@ -28,21 +28,21 @@
 
 ###### Revision
 
-| Rev |     Date    |       Author          | Change Description                  |
-|:---:|:-----------:|:---------------------:|:------------------------------------|
-| 0.1 | 02/01/2022  |     Prince Sunny      | Initial version                     |
-| 0.2 | 03/09/2022  |     Prince Sunny      | Packet Flows/DB Objects             |
-| 0.3 | 05/24/2022  |      Oleksandr        | Memory Footprints                   |
-| 0.4 | 06/01/2022  |     Prince Sunny      | Design Considerations               |
-| 0.5 | 06/13/2022  |     Chris Sommers     | Schema Relationships                |
-| 0.6 | 08/05/2022  |  Mukesh M Velayudhan  | Outbound VNI derivation in pipeline |
-| 0.7 | 08/09/2022  |     Prince Sunny      | Add Inbound Routing rules           |
-| 0.6 | 04/20/2022  |     Marian Pritsak    | APP_DB to SAI mapping               |
-| 0.8 | 09/30/2022  |     Prabhat Aravind   | Update APP_DB table names           |
-| 1.0 | 10/10/2022  |     Prince Sunny      | ST and PL scenarios                 |
-| 1.1 | 01/09/2023  |     Prince Sunny      | Underlay Routing and ST/PL clarifications  |
-| 1.2 | 02/12/2023  |     Vijay Srinivasan  | Metering schema and description     |
-| 1.3 | 04/12/2023  |     Ze Gan            | AppDB protobuf design               |
+|  Rev  |    Date    |       Author        | Change Description                        |
+| :---: | :--------: | :-----------------: | :---------------------------------------- |
+|  0.1  | 02/01/2022 |    Prince Sunny     | Initial version                           |
+|  0.2  | 03/09/2022 |    Prince Sunny     | Packet Flows/DB Objects                   |
+|  0.3  | 05/24/2022 |      Oleksandr      | Memory Footprints                         |
+|  0.4  | 06/01/2022 |    Prince Sunny     | Design Considerations                     |
+|  0.5  | 06/13/2022 |    Chris Sommers    | Schema Relationships                      |
+|  0.6  | 08/05/2022 | Mukesh M Velayudhan | Outbound VNI derivation in pipeline       |
+|  0.7  | 08/09/2022 |    Prince Sunny     | Add Inbound Routing rules                 |
+|  0.6  | 04/20/2022 |   Marian Pritsak    | APP_DB to SAI mapping                     |
+|  0.8  | 09/30/2022 |   Prabhat Aravind   | Update APP_DB table names                 |
+|  1.0  | 10/10/2022 |    Prince Sunny     | ST and PL scenarios                       |
+|  1.1  | 01/09/2023 |    Prince Sunny     | Underlay Routing and ST/PL clarifications |
+|  1.2  | 02/12/2023 |  Vijay Srinivasan   | Metering schema and description           |
+|  1.3  | 04/12/2023 |     Ze Gan          | AppDB protobuf design                     |
 
 # About this Manual
 This document provides more detailed design of DASH APIs, DASH orchestration agent, Config and APP DB Schemas and other SONiC buildimage changes required to bring up SONiC image on an appliance card. General DASH HLD can be found at [dash_hld](./dash-high-level-design.md).
@@ -96,22 +96,26 @@ Warm-restart support is not considered in Phase 1. TBD
 
 ## 1.4 Scaling requirements
 Following are the minimal scaling requirements
-| Item                     | Expected value                |
-| ------------------------ | ----------------------------- |
-| VNETs                    | 1024*                         |
-| ENI                      | 64 Per Card                   |
-| Outbound Routes per ENI  | 100k                          |
-| Inbound Routes per ENI   | 10k**                         |
-| NSGs per ENI             | 10***                         |
-| ACL rules per NSG        | 1000                          |
-| ACL prefixes per ENI     | 10x100k                       |
-| Max prefixes per rule    | 8k                            |
-| ACL ports per ENI        | 10x10k SRC/DST ports          |
-| CA-PA Mappings           | 10M Per Card                  |
-| Active Connections/ENI   | 1M (Bidirectional TCP or UDP) |
-| Total active connections | 32M (Bidirectional)           |
-| Metering Buckets per ENI | 4000                          |
-| CPS                      | 1.5M                          |
+
+| Item                          | Expected value                |
+| ----------------------------- | ----------------------------- |
+| VNETs                         | 1024*                         |
+| ENI                           | 64 Per Card                   |
+| Outbound Routes per ENI       | 100k                          |
+| Inbound Routes per ENI        | 10k**                         |
+| NSGs per ENI                  | 10***                         |
+| ACL rules per NSG             | 1000                          |
+| ACL prefixes per ENI          | 10x100k                       |
+| Max prefixes per rule         | 8k                            |
+| ACL ports per ENI             | 10x10k SRC/DST ports          |
+| Total tags per ENI            | 4k                            |
+| Max prefixes per tag          | 24k                           |
+| Max tags one prefix belong to | 512                           |
+| CA-PA Mappings                | 10M Per Card                  |
+| Active Connections/ENI        | 1M (Bidirectional TCP or UDP) |
+| Total active connections      | 32M (Bidirectional)           |
+| Metering Buckets per ENI      | 4000                          |
+| CPS                           | 1.5M                          |
 
 \* Number of VNET is a software limit as VNET by itself does not take hardware resources. This shall be limited to number of VNI hardware can support
 
@@ -317,8 +321,22 @@ v4_meter_policy_id	 = IPv4 meter policy ID
 v6_meter_policy_id	 = IPv6 meter policy ID
 ```
 
-### 3.2.4 ACL
-  
+### 3.2.4 TAG
+
+```
+DASH_PREFIX_TAG_TABLE:{{tag_name}}
+    "ip_version": {{ipv4/ipv6}}
+    "prefix_list": {{list of prefix}}
+```
+
+```
+tag_name                  = STRING; unique tag name
+addresses                 = list of ip prefixes ',' separated. valid to have empty list of prefixes.
+                            If the prefix is empty, no packet will be assigned to this TAG.
+```
+
+### 3.2.5 ACL
+
 ```
 DASH_ACL_IN_TABLE:{{eni}}:{{stage}}
     "acl_group_id": {{group_id}} 
@@ -345,11 +363,13 @@ DASH_ACL_RULE_TABLE:{{group_id}}:{{rule_num}}
     "priority": {{priority}}
     "action": {{action}}
     "terminating": {{bool}}
-    "protocol": {{list of protocols}}
-    "src_addr": {{list of address}}
-    "dst_addr": {{list of address}}
-    "src_port": {{list of range of ports}}
-    "dst_port": {{list of range of ports}}
+    "protocol": {{list of protocols}} (OPTIONAL)
+    "src_tag": {{list of tag name}} (OPTIONAL)
+    "dst_tag": {{list of tag name}} (OPTIONAL)
+    "src_addr": {{list of prefix}} (OPTIONAL)
+    "dst_addr": {{list of prefix}} (OPTIONAL)
+    "src_port": {{list of range of ports}} (OPTIONAL)
+    "dst_port": {{list of range of ports}} (OPTIONAL)
     
 ```
 
@@ -360,13 +380,15 @@ priority                 = INT32 value  ; priority of the rule, lower the value,
 action                   = allow/deny
 terminating              = true/false   ; if true, stop processing further rules
 protocols                = list of INT ',' separated; E.g. 6-tcp, 17-udp; if not provided, match on all protocols
-src_addr                 = list of source ip prefixes ',' separated
-dst_addr                 = list of destination ip prefixes ',' separated
-src_port                 = list of range of source ports ',' separated
-dst_port                 = list of range of destination ports ',' separated
+src_tag                  = list of source tag name ',' separated; if not provided, match on all source TAGs or no TAG.
+dst_tag                  = list of destination tag name ',' separated; if not provided, match on all destination TAGs or no TAG.
+src_addr                 = list of source ip prefixes ',' separated; if not provided, match on all source IPs.
+dst_addr                 = list of destination ip prefixes ',' separated; if not provided, match on all destination IPs.
+src_port                 = list of range of source ports ',' separated;  if not provided, match on all source ports.
+dst_port                 = list of range of destination ports ',' separated;  if not provided, match on all destination ports.
 ```
 
-### 3.2.5 ROUTING TYPE
+### 3.2.6 ROUTING TYPE
 	
 ```
 DASH_ROUTING_TYPE_TABLE:{{routing_type}}: [
@@ -419,7 +441,7 @@ sip                      = source ip address, to be used in encap
 vm_vni                   = VM VNI that is used for setting direction. Also used for inbound encap to VM
 ```
 
-### 3.2.7 ROUTE LPM TABLE - OUTBOUND
+### 3.2.8 ROUTE LPM TABLE - OUTBOUND
 
 ``` 
 DASH_ROUTE_TABLE:{{eni}}:{{prefix}} 
@@ -450,7 +472,7 @@ metering_policy_en	 = bool                      ; Metering policy lookup enable 
 metering_class           = class_id                  ; Metering class-id, used if metering policy lookup is not enabled
 ```
 
-### 3.2.8 ROUTE RULE TABLE - INBOUND
+### 3.2.9 ROUTE RULE TABLE - INBOUND
 
 ``` 
 DASH_ROUTE_RULE_TABLE:{{eni}}:{{vni}}:{{prefix}} 
@@ -475,7 +497,7 @@ metering_class           = class_id                  ; Metering class-id
 region                   = region_id                 ; optional region_id which the vni/prefix belongs to as a string for any vendor optimizations
 ```
 
-### 3.2.9 VNET MAPPING TABLE
+### 3.2.10 VNET MAPPING TABLE
 
 ``` 
 DASH_VNET_MAPPING_TABLE:{{vnet}}:{{ip_address}} 
@@ -625,7 +647,6 @@ rx_counter         = bytes    ; Number of received bytes (read-only)
 |                       |              | pa_validation   | SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION           | use PA_VALIDATE if true                       |
 |                       |              | metering_bucket |                                                 |                                               |
 
-
 ### 3.2.11 Protobuf encoding
 
 For saving memory consumption([AppDBMemoryEstimation.xlsx](data/AppDBMemoryEstimation.xlsx)), the DASH table of APP_DB could be encoded as protobuf.
@@ -673,7 +694,6 @@ enum IpVersion {
   IP_VERSION_IPV4 = 0;
   IP_VERSION_IPV6 = 1;
 }
-
 ```
 
 * Type mapping
