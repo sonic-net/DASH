@@ -109,6 +109,7 @@ control dash_ingress(
                          bit<32> flows,
                          bit<1> admin_state,
                          IPv4Address vm_underlay_dip,
+                         @Sai[type="sai_uint32_t"]
                          bit<24> vm_vni,
                          bit<16> vnet_id,
                          ACL_GROUPS_PARAM(inbound_v4),
@@ -246,7 +247,7 @@ control dash_ingress(
         const default_action = deny;
     }
 
-    action set_acl_group_attrs(bit<32> ip_addr_family) {
+    action set_acl_group_attrs(@Sai[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
         if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
             if (meta.is_overlay_ip_v6 == 1) {
                 meta.dropped = true;
