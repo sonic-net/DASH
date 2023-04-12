@@ -526,7 +526,7 @@ overlay_dip              = ip_address                ; overlay dst ip if routing
 
 ### 3.2.11 Protobuf encoding
 
-For saving memory consumption, the DASH table of APP_DB could be encoded as protobuf.
+For saving memory consumption([AppDBMemoryEstimation.xlsx](data/AppDBMemoryEstimation.xlsx)), the DASH table of APP_DB could be encoded as protobuf.
 
 ``` text
 key: text, Same as the original design
