@@ -114,7 +114,7 @@ class CreateDeleteEniTest(VnetAPI):
         """
         Verifies Direction Lookup creation
         """
-        self.dir_lookup = self.direction_lookup_create(vni=self.outbound_vnet)
+        self.dir_lookup = self.direction_lookup_create(vni=self.vm_vni)
 
     def createEniTest(self):
         """

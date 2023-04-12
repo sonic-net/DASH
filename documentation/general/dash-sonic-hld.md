@@ -204,6 +204,8 @@ It is worth noting that CA-PA mapping table shall be used for both encap and dec
 
 ST/PL is employed for scenarios like multiple different customers want to access a common shared resource (e.g storage). This shall not fall into the regular Vnet packet path or Vnet peering path and hence a Private Endpoint is assigned for such accesses, as part of ENI routing or VNET's mapping tables. The lookup happens as described in the above sections, but actions are different. For ST/PL, actions include IPv4 to IPv6 transpositions and special routing/mapping lookups for encapsulation. By having packet transpositions, Service Tunnel feature provides the capability of encoding “region id”, “vnet id”, “subnet id” etc via packet transformation. IPv6 transformation includes last 32 bits of the IPv6 packet as IPv4 address, while the remaining 96 bits of the IPv6 packet is used for encoding. Private Link feature is an extension to Service Tunnel feature and enables customers to access public facing shared services via their private IP addresses within their vnet. More details on traffic flow is captured in the example section.
 **ST/PL Inbound flow**: Using the outbound unified flow, the reverse transposition (inbound unified flow) is created. If no inbound flow is created, the packet shall be dropped if it does not match any existing inbound routing rule. There is no inbound policy based lookup expected for ST/PL scenarios. When FastPath kicks in, the respective outbound and inbound unified flows shall be modified accordingly. 
+
+ST encap shall be either nvgre or vxlan. The same encapsulation is expected on the inbound flow. 
 	
 ## 2.4 Metering
 
@@ -404,7 +406,25 @@ encap_type               = encap type depends on the action_type - {vxlan, nvgre
 vni                      = vni value associated with the corresponding action. Applicable if encap_type is specified. 
 ```
 
-### 3.2.7 APPLIANCE
+### 3.2.5.1 ROUTING APPLIANCE
+	
+```
+DASH_ROUTING_APPLIANCE_TABLE:{{appliance_id}}:
+        "appliance_guid":{{string}}
+        "addresses": {{list of addresses}} 
+        "encap_type": {{encap type}}
+        "vni": {{vni}}
+```
+
+```
+key                      = DASH_ROUTING_APPLIANCE_TABLE:appliance_id; Used for PL NSG
+; field                  = value
+addresses                = list of addresses used for ECMP across appliances
+encap_type               = encap type depends on the action_type - {vxlan, nvgre}
+vni                      = vni value associated with the corresponding action.
+```
+
+### 3.2.6 APPLIANCE
 	
 ```
 DASH_APPLIANCE_TABLE:{{appliance_id}}
@@ -760,16 +780,19 @@ Underlay attributes on a DASH appliance shall be programmed similar to Sonic swi
 
 Note that *only* default route is expected from the peer BGP and appliance is _not_ expected to allocate an LPM resource for underlay. Implementation can choose whether to forward the packet on the same port it is received or do forwarding based on route and next-hop entry. Same is applicable for ECMP where the implementation can perform 5-tuple hashing or forward the "return" traffic on the same port it has received the original packet. 
 
-### 3.3.6 Memory footprints
+### 3.3.6 Encap behavior
+Default DSCP behavior for vxlan or nvgre encap shall be "uniform" model (similar to SAI_TUNNEL_DSCP_MODE_UNIFORM_MODEL) and TTL behavior for encap shall be "pipe" model (similar to SAI_TUNNEL_TTL_MODE_PIPE_MODEL). However for DSCP, pipeline must copy the DSCP value to the new encap outer header from the original incoming packet *before* decap was done and not from the customer packet header. Appliance shall not modify the DSCP or TTL values in the inner packet (customer packet) during an encap and shall ensure outer header values are independent of the customer generated headers. Similarly, for routing action type "direct", for e.g internet traffic, the DSCP value shall be reset to original header's DSCP value even-if original packet arrives with a non-zero value effectively ensuring all outbound traffic from the appliance is transmitted with same value that is received in the original outer header. Outer TTL value shall be default set to 64. 
 
-#### 3.3.6.1 SONiC  memory usage
+### 3.3.7 Memory footprints
+
+#### 3.3.7.1 SONiC  memory usage
 
 | Running components                 | Memory usage |
 | ---------------------------------- | ------------ |
 | Base Debian OS                     | 159MB        |
 | Base Debian OS + docker containers | 1.3GB        |
 
-#### 3.3.6.2 SONiC docker containers memory usage
+#### 3.3.7.2 SONiC docker containers memory usage
 
 | Container | Memory usage |
 | --------- | ------------ |
@@ -1122,6 +1145,15 @@ For the example configuration above, the following is a brief explanation of loo
 		d. Packet gets transformed as: Overlay SIP fd00:108:0:d204:0:200::0a01:101, Overlay DIP 2603:10e1:100:2::3c01:201
 		e. Second Action is Static NVGRE encap. 
 		f. Since underlay sip/dip is specified in the LPM table, It shall use Dst IP (25.1.2.1), Src IP (30.1.2.1)
+		g. Thus the packet is sent with two headers - One Inner IPv6 and another Outer IPv4
+		h. Inbound packet for this flow:
+			h.1 The return packet for the above flow shall land on an SLB MUX (30.1.2.1) as NVGRE packet
+			h.2 SLB MUX (30.1.2.1) shall encapsulate this to another header with standard GRE key, say 100 and forwards to Appliance PA
+			h.3 Appliance PA is the unique IP advertised by the Appliance card, say via BGP for reachability. 
+			h.4 Appliance shall first decapsulate the outer header and map it to a flow
+			h.5 Second header's dst mac shall correspond to ENI MAC, as overwritten by SLB MUX
+			h.6 Third header shall be the transpositioned IPv6 header
+		i. Note: This flow fixup shall be done when Fastpath kicks in with ICMP Redirect, and packets ingress with two headers. 		
 
 	3. Packet destined to 70.1.2.1 from 10.1.1.1:
 		a. LPM lookup hits for entry 70.1.2.0/24
@@ -1147,7 +1179,32 @@ For the example configuration above, the following is a brief explanation of loo
              "encap_type": "nvgre"
 	     "key":"100"
         } ],         
+        "OP": "SET",
+	"DASH_ROUTING_TYPE_TABLE:privatelinknsg": [ 
+	{
+	     "name": "action1",
+             "action_type": "4to6",
+	},
+	{ 
+             "name": "action2",
+             "action_type": "staticencap",
+             "encap_type": "nvgre"
+	     "key":"100"
+        },
+	{ 
+             "name": "action3",
+             "action_type": "appliance",
+        } ], 
         "OP": "SET"
+    },
+    {
+        DASH_ROUTING_APPLIANCE_TABLE:22: {
+            "appliance_guid":"497f23d7-f0ac-4c99",
+            "addresses": "100.8.1.2", 
+            "encap_type": "vxlan",
+            "vni": 101
+	},
+	"OP": "SET"
     },
     {
         "DASH_ENI_TABLE:F4939FEFC47E": {
@@ -1183,7 +1240,7 @@ For the example configuration above, the following is a brief explanation of loo
         "OP": "SET"
     },
     {
-        "DASH_ROUTE_TABLE:F4939FEFC47E:10.2.0.6/32": {
+        "DASH_ROUTE_TABLE:F4939FEFC47E:10.2.0.6/24": {
             "action_type":"vnet",
             "vnet":"Vnet1"
         },
@@ -1200,6 +1257,16 @@ For the example configuration above, the following is a brief explanation of loo
         "OP": "SET"
     },
     {
+        "DASH_VNET_MAPPING_TABLE:Vnet1:10.2.0.9": {
+            "routing_type":"privatelinknsg",
+            "mac_address":"F9-22-83-99-22-A2",
+            "underlay_ip":"50.2.2.6",
+	    "overlay_sip":"fd40:108:0:d204:0:200::0",
+	    "overlay_dip":"2603:10e1:100:2::3402:206",
+	    "routing_appliance_id":22
+        },
+        "OP": "SET"
+    },
         "DASH_METER: {
             "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
 	    "metadata":"ROUTE_VNET1_10010008",
@@ -1229,7 +1296,7 @@ For the example configuration above, the following is a brief explanation of loo
 		 	For Overlay SIP, using ENI's "pl_sip_encoding": "0x0020000000000a0b0c0d0a0b/0x002000000000ffffffffffff" -> Overlay SIP fd30:108:0:0a0b:0c0d:0a0b:a01:101 using the following logic:
 			1. fv = (fd40:108:0:d204:0:200::0 & !0x002000000000ffffffffffff) (first 96 bits based on provided mask length)
 			2. result = fv | 0x0020000000000a0b0c0d0a0b (first 96 bits based on the provided mask length)
-			3. result = result | ca (last 32 bits if its set to 0 in mapping, implicit conversion)
+			3. result = result | source CA (last 32 bits if its set to 0 in mapping, implicit conversion)
 			Overlay DIP 2603:10e1:100:2::3401:203 (No transformation, provided as part of mapping)
 		f. Second Action is Static NVGRE encap with GRE key '100'. 
 		g. Underlay DIP shall be 50.1.2.3 (from mapping), Underlay SIP shall be 55.1.2.3 (from ENI)
@@ -1240,7 +1307,7 @@ For the example configuration above, the following is a brief explanation of loo
                     - Metering class 60001 from mapping entry 10.1.0.8 is used for accounting the traffic
 
 	2. Packet destined to 10.2.0.6 from 10.1.1.2:
-		a. LPM lookup hits for entry 10.2.0.6/32
+		a. LPM lookup hits for entry 10.2.0.6/24
 		b. The action in this case is "vnet"
 		c. Next lookup is in the mapping table and mapping table action here is "privatelink"
 		d. First Action for "privatelink" is 4to6 transposition
@@ -1249,3 +1316,17 @@ For the example configuration above, the following is a brief explanation of loo
 			Overlay DIP 2603:10e1:100:2::3402:206 (No transformation, provided as part of mapping)
 		f. Second Action is Static NVGRE encap with GRE key '100'. 
 		g. Underlay DIP shall be 50.2.2.6 (from mapping), Underlay SIP shall be 55.1.2.3 (from ENI)
+
+	3. Packet destined to 10.2.0.9 from 10.1.1.2:
+		a. LPM lookup hits for entry 10.2.0.6/24
+		b. The action in this case is "vnet"
+		c. Next lookup is in the mapping table and mapping table action here is "privatelinknsg"
+		d. First Action for "privatelink" is 4to6 transposition
+		e. Packet gets transformed as: 
+		 	For Overlay SIP, using ENI's "pl_sip_encoding": "0x0020000000000a0b0c0d0a0b/0x002000000000ffffffffffff" -> Overlay SIP fd30:108:0:0a0b:0c0d:0a0b:a01:102;	
+			Overlay DIP 2603:10e1:100:2::3402:206 (No transformation, provided as part of mapping)
+		f. Second Action is Static NVGRE encap with GRE key '100'. 
+		g. Underlay DIP shall be 50.2.2.6 (from mapping), Underlay SIP shall be 55.1.2.3 (from ENI)
+		h. Third Action is Appliance Encap for id 22
+		i. Packet shall be encapsulated with Outer DIP as 100.8.1.2 and SIP as VIP of this originating appliance card with VNI of 101. 
+		j. Inbound flow shall be similar to PL and outer encap shall be of the SLB MUX and not of the NSG appliance.
