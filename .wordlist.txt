@@ -276,6 +276,7 @@ IPv
 irrespectively
 ish
 iso
+isresourcetype
 ISSU
 iteratively
 IxExplorer
