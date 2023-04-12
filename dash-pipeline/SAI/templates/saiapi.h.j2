@@ -174,6 +174,8 @@ typedef enum _sai_{{ table.name }}_attr_t
      * @objects SAI_OBJECT_TYPE_{{ param.objectName | upper }}
      * @allownull true
      * @default SAI_NULL_OBJECT_ID
+{% elif param.field == 's32' %}
+     * @default {{ param.default }}
 {% else %}
      * @default 0
 {% endif %}

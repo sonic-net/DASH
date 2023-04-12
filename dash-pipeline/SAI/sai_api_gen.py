@@ -27,6 +27,9 @@ STAGE_TAG = 'stage'
 PARAM_ACTIONS = 'paramActions'
 OBJECT_NAME_TAG = 'objectName'
 SCOPE_TAG = 'scope'
+TYPE_INFO_TAG = 'typeInfo'
+SERIALIZABLE_ENUMS_TAG = 'serializableEnums'
+MEMBERS_TAG = 'members'
 STRUCTURED_ANNOTATIONS_TAG = 'structuredAnnotations'
 KV_PAIRS_TAG = 'kvPairs'
 KV_PAIR_LIST_TAG = 'kvPairList'
@@ -161,6 +164,7 @@ def get_sai_key_data(key):
 
 def extract_action_data(program):
     action_data = {}
+    sai_enums = get_sai_enums(program)
     for action in program[ACTIONS_TAG]:
         preable = action[PREAMBLE_TAG]
         id = preable['id']
@@ -175,6 +179,11 @@ def extract_action_data(program):
                     p4_annotation_to_sai_attr(p, param)
                 else:
                     param['type'], param['field'] = get_sai_key_type(int(p[BITWIDTH_TAG]), p[NAME_TAG], p[NAME_TAG])
+                    for sai_enum in sai_enums:
+                        if param[NAME_TAG] == sai_enum['name']:
+                            param['type'] = 'sai_' + param[NAME_TAG] + '_t'
+                            param['field'] = 's32'
+                            param['default'] = 'SAI_' + param[NAME_TAG].upper() + '_INVALID'
                 param['bitwidth'] = p[BITWIDTH_TAG]
                 params.append(param)
         action_data[id] = {'id': id, NAME_TAG: name, PARAMS_TAG: params}
@@ -212,10 +221,29 @@ def fill_action_params(table_params, param_names, action):
                     param2["v4_or_v6_id"] = param['id']
                     break
 
+
+def get_sai_enums(program):
+    all_enums = program[TYPE_INFO_TAG][SERIALIZABLE_ENUMS_TAG]
+    sai_enums = []
+    for enum_name in all_enums:
+        sai_enum = dict()
+        sai_enum['name'] = enum_name[:-2]
+        sai_enum['members'] = []
+        print(enum_name)
+        for enum_member in all_enums[enum_name][MEMBERS_TAG]:
+            member = dict()
+            member['sai_name'] = enum_member['name']
+            member['p4rt_value'] = enum_member['value']
+            sai_enum['members'].append(member)
+        sai_enums.append(sai_enum)
+
+    return sai_enums
+
 def generate_sai_apis(program, ignore_tables):
     sai_apis = []
     table_names = []
     all_actions = extract_action_data(program)
+    sai_enums = get_sai_enums(program)
     tables = sorted(program[TABLES_TAG], key=lambda k: k[PREAMBLE_TAG][NAME_TAG])
     for table in tables:
         sai_table_data = dict()
@@ -294,7 +322,7 @@ def generate_sai_apis(program, ignore_tables):
             new_api[TABLES_TAG] = [sai_table_data]
             sai_apis.append(new_api)
 
-    return sai_apis, table_names
+    return sai_apis, table_names, sai_enums
 
 def get_uniq_sai_api(sai_api):
     """ Only keep one table per group(with same table name) """
@@ -419,7 +447,6 @@ def write_sai_files(sai_api):
         f.write(''.join(new_lines))
 
 
-
 # CLI
 parser = argparse.ArgumentParser(description='P4 SAI API generator')
 parser.add_argument('filepath', type=str, help='Path to P4 program RUNTIME JSON file')
@@ -438,7 +465,7 @@ print("Generating SAI API...")
 with open(args.filepath) as json_program_file:
     json_program = json.load(json_program_file)
 
-sai_apis, all_table_names = generate_sai_apis(json_program, args.ignore_tables.split(','))
+sai_apis, all_table_names, sai_enums = generate_sai_apis(json_program, args.ignore_tables.split(','))
 
 sai_api_name_list = []
 sai_api_full_name_list = []
@@ -465,6 +492,29 @@ for sai_api in sai_apis:
     write_sai_impl_files(sai_api)
     sai_api_name_list.append(sai_api['app_name'].replace('_', ''))
     sai_api_full_name_list.append(sai_api['app_name'])
+
+env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
+env.add_extension('jinja2.ext.loopcontrols')
+env.add_extension('jinja2.ext.do')
+sai_enums_tm = env.get_template('templates/saienums.j2')
+sai_enums_str = sai_enums_tm.render(sai_enums = sai_enums)
+sai_enums_lines = sai_enums_str.split('\n')
+
+# The SAI object struct for entries
+with open('./SAI/experimental/saitypesextensions.h', 'r') as f:
+    lines = f.readlines()
+
+new_lines = []
+for line in lines:
+    if '/* __SAITYPESEXTENSIONS_H_ */' in line:
+        for enum_line in sai_enums_lines:
+            new_lines.append(enum_line + '\n')
+        new_lines = new_lines[:-1]
+    new_lines.append(line)
+
+with open('./SAI/experimental/saitypesextensions.h', 'w') as f:
+    f.write(''.join(new_lines))
+
 
 write_sai_makefile(sai_api_name_list, sai_api_full_name_list)
 write_sai_fixed_api_files(sai_api_full_name_list)
