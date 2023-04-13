@@ -378,8 +378,8 @@ priority                 = INT32 value  ; priority of the rule, lower the value,
 action                   = allow/deny
 terminating              = true/false   ; if true, stop processing further rules
 protocols                = list of INT ',' separated; E.g. 6-tcp, 17-udp; if not provided, match on all protocols
-src_tag                  = list of source tag name ',' separated; if not provided, match on all source TAGs or no TAG.
-dst_tag                  = list of destination tag name ',' separated; if not provided, match on all destination TAGs or no TAG.
+src_tag                  = list of source tag name ',' separated; if not provided, match on ANY tag or NO tag.
+dst_tag                  = list of destination tag name ',' separated; if not provided, match on ANY tag or NO tag.
 src_addr                 = list of source ip prefixes ',' separated; if not provided, match on all source IPs.
 dst_addr                 = list of destination ip prefixes ',' separated; if not provided, match on all destination IPs.
 src_port                 = list of range of source ports ',' separated;  if not provided, match on all source ports.
@@ -398,7 +398,7 @@ DASH_ROUTING_TYPE_TABLE:{{routing_type}}: [
 ```
 
 ```
-key                      = DASH_ROUTING_TYPE_TABLE:routing_type; routing type can be {direct, vnet, vnet_direct, vnet_encap, appliance, privatelink, privatelinknsg, servicetunnel}; actions can be a list of action_types
+key                      = DASH_ROUTING_TYPE_TABLE:routing_type; routing type can be {direct, vnet, vnet_direct, vnet_encap, appliance, privatelink, privatelinknsg, servicetunnel, drop}; actions can be a list of action_types
 ; field                  = value
 action_name              = action name as string
 action_type              = action_type can be {maprouting, direct, staticencap, appliance, 4to6, mapdecap, decap, drop}
