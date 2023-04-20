@@ -34,18 +34,22 @@ Both host server and DPU card are running SONiC image. GNMI server and redis for
 * For get RPC, GNMI reads from redis db directly.
 * The DASH table of APPL_DB would be encoded as protobuf to save memory consumption, and then GNMI needs to support protobuf encoding for DASH table.
 
-> 127.0.0.1:6379> hgetall "DASH_VNET_TABLE:vnet1"<br>
-> 1\) "pb"<br>
-> 2\) "\n\x010\x12$b6d54023-5d24-47de-ae94-8afe693dd1fc…"
+```
+127.0.0.1:6379> hgetall "DASH_VNET_TABLE:vnet1"
+1\) "pb"
+2\) "\n\x010\x12$b6d54023-5d24-47de-ae94-8afe693dd1fc…"
+```
 
 And proto message for DASH_VNET_TABLE is:
 
-> message Vnet {<br>
-> &ensp;string vni = 1;<br>
-> &ensp;string guid = 2;<br>
-> &ensp;repeated types.IpPrefix address_space = 3;<br>
-> &ensp;repeated string peer_list = 4;<br>
-> }
+```
+message Vnet {
+    string vni = 1;
+    string guid = 2;
+    repeated types.IpPrefix address_space = 3;
+    repeated string peer_list = 4;
+}
+```
 
 Protobuf encoding message would be: "\n\x010\x12$b6d54023-5d24-47de-ae94-8afe693dd1fc…"
 IETF JSON encoding message would be: "{'vni':'1000', 'guid':'b6d54023-5d24-47de-ae94-8afe693dd1fc'}"
@@ -63,36 +67,38 @@ ZMQ would update APPL_DB asynchronously, so client needs to wait for a few secon
 ### Message schema
 Below table shows message example for SetRequest, including delete operation, replace operation and update operation:
 SetRequest Message:
-> delete {<br>
-> &ensp;path {<br>
-> &ensp;&ensp;origin: "sonic_db"<br>
-> &ensp;&ensp;elem {name: “APPL_DB”} elem {name: “DASH_VNET_TABLE”} elem {name: “vnet1”}<br>
-> &ensp;}<br>
-> }<br>
-> replace {<br>
-> &ensp;path {<br>
-> &ensp;&ensp;origin: "sonic_db"<br>
-> &ensp;&ensp;elem {name: “APPL_DB”} elem {name: “DASH_VNET_TABLE”} elem {name: “vnet2”}<br>
-> &ensp;}<br>
-> }<br>
-> replace {<br>
-> &ensp;path {<br>
-> &ensp;&ensp;origin: “sonic_db"<br>
-> &ensp;&ensp;elem {name: “APPL_DB”} elem {name: “DASH_VNET_TABLE”} elem {name: “vnet3”}<br>
-> &ensp;}<br>
-> &ensp;val {<br>
-> &ensp;&ensp;proto_bytes: “\n\x010\x12$b6d54023-5d24-47de-ae94-8afe693dd1fc…”<br>
-> &ensp;}<br>
-> }<br>
-> update {<br>
-> &ensp;path {<br>
-> &ensp;&ensp;origin: "sonic_db"<br>
-> &ensp;&ensp;elem {name: “APPL_DB”} elem {name: “DASH_VNET_TABLE”} elem {name: “vnet4”}<br>
-> &ensp;}<br>
-> &ensp;val {<br>
-> &ensp;&ensp;proto_bytes: “\n\x010\x12$b6d54023-5d24-47de-ae94-8afe693dd1fc…”<br>
-> &ensp;}<br>
-> }
+```
+delete {
+    path {
+        origin: "sonic_db"
+        elem {name: “APPL_DB”} elem {name: “DASH_VNET_TABLE”} elem {name: “vnet1”}
+    }
+}
+replace {
+    path {
+        origin: "sonic_db"
+        elem {name: “APPL_DB”} elem {name: “DASH_VNET_TABLE”} elem {name: “vnet2”}
+    }
+}
+replace {
+    path {
+        origin: “sonic_db"
+        elem {name: “APPL_DB”} elem {name: “DASH_VNET_TABLE”} elem {name: “vnet3”}
+    }
+    val {
+        proto_bytes: “\n\x010\x12$b6d54023-5d24-47de-ae94-8afe693dd1fc…”
+    }
+}
+update {
+    path {
+        origin: "sonic_db"
+        elem {name: “APPL_DB”} elem {name: “DASH_VNET_TABLE”} elem {name: “vnet4”}
+    }
+    val {
+        proto_bytes: “\n\x010\x12$b6d54023-5d24-47de-ae94-8afe693dd1fc…”
+    }
+}
+```
 
 GNMI message has below constraints for DASH table:
 * Path origin must be “sonic_db”.
@@ -106,24 +112,26 @@ GNMI message has below constraints for DASH table:
 GNMI reads from APPL_DB directly.
 ### Message schema
 
-> ++++++++ Sending get request: ++++++++<br>
-> path {<br>
-> &ensp;origin: "sonic_db"<br>
-> &ensp;elem {name: "APPL_DB"} elem {name: "DASH_VNET_TABLE"} elem {name: "vnet1"}<br>
-> }<br>
-> encoding: PROTO<br>
-> ++++++++ Recevied get response: ++++++++<br>
-> notification {<br>
-> &ensp;update {<br>
-> &ensp;&ensp;path {<br>
-> &ensp;&ensp;&ensp;origin: "sonic_db"<br>
-> &ensp;&ensp;&ensp;elem {name: "APPL_DB"} elem {name: "DASH_VNET_TABLE"} elem {name: "vnet1"}<br>
-> &ensp;&ensp;}<br>
-> &ensp;&ensp;val {<br>
-> &ensp;&ensp;&ensp;proto_bytes: "\n\x010\x12$b6d54023-5d24-47de-ae94-8afe693dd1fc…"<br>
-> &ensp;&ensp;}<br>
-> &ensp;}<br>
-> }<br>
+```
+++++++++ Sending get request: ++++++++
+path {
+    origin: "sonic_db"
+    elem {name: "APPL_DB"} elem {name: "DASH_VNET_TABLE"} elem {name: "vnet1"}
+}
+encoding: PROTO
+++++++++ Recevied get response: ++++++++
+notification {
+    update {
+        path {
+            origin: "sonic_db"
+            elem {name: "APPL_DB"} elem {name: "DASH_VNET_TABLE"} elem {name: "vnet1"}
+        }
+        val {
+            proto_bytes: "\n\x010\x12$b6d54023-5d24-47de-ae94-8afe693dd1fc…"
+        }
+    }
+}
+```
 
 
 # References
