@@ -13,20 +13,7 @@ Both host server and DPU card are running SONiC image. GNMI server and redis for
 
 * Set and get RPCs must be supported. Customers will use get RPC to retrieve DASH configurations and use set PRC to apply new DASH configurations.
 * Need to configure huge DASH table entries to APPL_DB, with high speed.
-* Minimal redis table scaling requirements:
-
-|Item |Expected value |
-|--|--|
-|VNETs|1024|
-|ENI|64 per card|
-|Outbound Routes per ENI|100K|
-|Inbound Routes per ENI|10K|
-|NSGs per ENI|10|
-|ACL rules per NSG|1000|
-|ACL prefixed per ENI|10*100K|
-|Max prefixed per rule|8K|
-|ACL ports per ENI|10*10K SRC/DST ports|
-|CA-PA mapping|10M per card|
+* Minimal redis table scaling requirements: https://github.com/sonic-net/DASH/blob/main/documentation/general/dash-sonic-hld.md#14-scaling-requirements
 
 ### Design considerations
 
@@ -44,7 +31,7 @@ And proto message for DASH_VNET_TABLE is:
 
 ```
 message Vnet {
-    string vni = 1;
+    uint32 vni = 1;
     string guid = 2;
     repeated types.IpPrefix address_space = 3;
     repeated string peer_list = 4;
