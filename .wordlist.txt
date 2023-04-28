@@ -675,5 +675,15 @@ Velayudhan
 deparsing
 testability
 autogeneration
+IpAddress
+IpPrefix
+bool
+uint
+AclRule
+RangeOrValue
 Srinivasan
 Vijay
+AppDB
+Gan
+Ze
+AppDBMemoryEstimation

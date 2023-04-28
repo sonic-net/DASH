@@ -42,6 +42,7 @@
 |  1.0  | 10/10/2022 |    Prince Sunny     | ST and PL scenarios                       |
 |  1.1  | 01/09/2023 |    Prince Sunny     | Underlay Routing and ST/PL clarifications |
 |  1.2  | 02/12/2023 |  Vijay Srinivasan   | Metering schema and description           |
+|  1.3  | 04/12/2023 |     Ze Gan          | AppDB protobuf design                     |
 
 # About this Manual
 This document provides more detailed design of DASH APIs, DASH orchestration agent, Config and APP DB Schemas and other SONiC buildimage changes required to bring up SONiC image on an appliance card. General DASH HLD can be found at [dash_hld](./dash-high-level-design.md).
@@ -95,6 +96,7 @@ Warm-restart support is not considered in Phase 1. TBD
 
 ## 1.4 Scaling requirements
 Following are the minimal scaling requirements
+
 | Item                          | Expected value                |
 | ----------------------------- | ----------------------------- |
 | VNETs                         | 1024*                         |
@@ -645,6 +647,88 @@ rx_counter         = bytes    ; Number of received bytes (read-only)
 |                       |              | pa_validation   | SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION           | use PA_VALIDATE if true                       |
 |                       |              | metering_bucket |                                                 |                                               |
 
+### 3.2.11 Protobuf encoding
+
+For saving memory consumption([AppDBMemoryEstimation.xlsx](data/AppDBMemoryEstimation.xlsx)), the DASH table of APP_DB could be encoded as protobuf.
+
+``` text
+key: text, Same as the original design
+field_name: fixed text "pb"
+field_value: binary array of protobuf message
+
+E.G.
+
+127.0.0.1:6379> hgetall "DASH_VNET_TABLE:vnet1"
+1) "pb"
+2) "\n\x010\x12$b6d54023-5d24-47de-ae94-8afe693dd1fc\x1a\x17\n\x12\x12\x10\r\xc0-\xdd\x82\xa3\x88;\x0fP\x84<\xaakc\x16\x10\x80\x01\x1a\x17\n\x12\x12\x10-\x0e\xf2\x7f\n~c_\xd8\xb7\x10\x84\x81\xd6'|\x10\x80\x01\x1a\x17\n\x12\x12\x10\x1bV\x89\xc8JW\x06\xfb\xad\b*fN\x9e(\x17\x10\x80\x01\x1a\x17\n\x12\x12\x107\xf9\xbc\xc0\x8d!s\xccVT\x88\x00\xf8\x9c\xce\x90\x10\x80\x01\x1a\x17\n\x12\x12\x10\tEb\x11Mf]\x12\x17x\x99\x80\xea\xd1u\xb4\x10\x80\x01\x1a\x17\n\x12\x12\x10\x1f\xd3\x1c\x89\x99\x16\xe7\x18\x91^0\x81\xb1\x04\x8c\x1e\x10\x80\x01\x1a\x17\n\x12\x12\x10\x06\x9e55\xdb\xb5&\x93\x99\xfaC\x81\x16P\xdc\x1d\x10\x80\x01\x1a\x17\n\x12\x12\x10&]U\x96e4\xf4\xd2'&\x04i\xdf\x8dA\x9f\x10\x80\x01\x1a\x17\n\x12\x12\x108\xd5\xa3*\xe7\x80\xdc\x1e\x80f\x94\xb7\xb6\x86~\xcd\x10\x80\x01\x1a\x17\n\x12\x12\x101\xf0@F\nu+}\x1e\"\\\\\xdb\x01\xe3\x82\x10\x80\x01\"\x05vnet1\"\x05vnet2\"\x05vnet1\"\x05vnet2\"\x05vnet2\"\x05vnet1\"\x05vnet2\"\x05vnet2\"\x05vnet1\"\x05vnet1"
+```
+
+* Pre-defined Type
+
+```protobuf
+message IpAddress {
+  oneof ip {
+    fixed32 ipv4 = 1; // Network byte order (big-endian)
+    bytes ipv6 = 2; // Network byte order (big-endian)
+  }
+}
+
+message IpPrefix {
+  IpAddress ip = 1;
+  IpAddress mask = 2;
+}
+
+message Range {
+  uint32 min = 1;
+  uint32 max = 2;
+}
+
+message ValueOrRange {
+oneof value_or_range {
+  uint32 value = 1;
+  Range range = 2;
+}
+}
+
+enum IpVersion {
+  IP_VERSION_IPV4 = 0;
+  IP_VERSION_IPV6 = 1;
+}
+```
+
+* Type mapping
+
+| Table type   | Protobuf type |
+| ------------ | ------------- |
+| bool         | bool          |
+| string       | string        |
+| int          | uint32        |
+| object id    | string        |
+| mac address  | bytes         |
+| ip address   | IpAddress     |
+| ip prefix    | IpPrefix      |
+| vni          | uint32        |
+| l4 protocol  | RangeOrValue  |
+| l4 port      | RangeOrValue  |
+| Enumerations | enum          |
+| list *       | repeated *    |
+
+* Here is an example for AclRule
+
+```protobuf
+message AclRule {
+    uint32 priority = 1;
+    acl.Action action = 2;
+    bool terminating = 3;
+    repeated uint32 protocol = 4;
+    repeated string src_tag = 9;
+    repeated string dst_tag = 10;
+    repeated types.IpPrefix src_addr  = 5;
+    repeated types.IpPrefix dst_addr  = 6;
+    repeated types.ValueOrRange src_port = 7;
+    repeated types.ValueOrRange dst_port = 8;
+}
+```
 
 ## 3.3 Module Interaction
 
