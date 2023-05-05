@@ -1,6 +1,6 @@
 # SONiC-DASH HLD
 ## High Level Design Document
-### Rev 1.1
+### Rev 1.4
 
 # Table of Contents
 
@@ -44,7 +44,7 @@
 |  1.1  | 01/09/2023 |    Prince Sunny     | Underlay Routing and ST/PL clarifications |
 |  1.2  | 02/12/2023 |  Vijay Srinivasan   | Metering schema and description           |
 |  1.3  | 04/12/2023 |     Ze Gan          | AppDB protobuf design                     |
-|  1.4  | 05/03/2023 |    Prince Sunny     | ACL Tagging, ACL behavior                 |
+|  1.4  | 05/03/2023 |    Prince Sunny     | ACL Tagging, ACL Requirements             |
 
 # About this Manual
 This document provides more detailed design of DASH APIs, DASH orchestration agent, Config and APP DB Schemas and other SONiC buildimage changes required to bring up SONiC image on an appliance card. General DASH HLD can be found at [dash_hld](./dash-high-level-design.md).
@@ -113,7 +113,7 @@ Following are the minimal scaling requirements
 | Total tags per ENI            | 4k                            |
 | Max prefixes per tag          | 24k                           |
 | Max tags one prefix belong to | 512                           |
-| Max tags in an ACL rule       | bitmap size                   |
+| Max tags in an ACL rule       | 4k                            |
 | CA-PA Mappings                | 10M Per Card                  |
 | Active Connections/ENI        | 1M (Bidirectional TCP or UDP) |
 | Total active connections      | 32M (Bidirectional)           |
@@ -187,7 +187,7 @@ ACL is essential for NSGs and have different stages. In the current model, there
 - It is not permitted to modify rules within a group that is currently bound to an ENI. For such scenario, a new group shall be created by application with the modified set of rules which could then be bind to ENI. An exception is if tags are expanded to individual prefixes in an ACL rule. In such cases, if tags are modified, application shall update the corresponding rule by adding/removing a prefix. 
 - No requirement to modify an existing rule except for the case above. For e.g change action of a rule from permit to deny or vice-versa
 - ACL Tagging
-	- Mapping a prefix to a tag can reduce the repetation of prefixes across different ACL rules and optimize memory usage
+	- Mapping a prefix to a tag can reduce the repetition of prefixes across different ACL rules and optimize memory usage
 	- Tagging is implemented as a bitmap in Orchagent and SAI layers
 	- A prefix can belong to multiple tags
 	- Prefixes can be added or removed from a tag at any time 
@@ -195,11 +195,12 @@ ACL is essential for NSGs and have different stages. In the current model, there
 		-  Tag1 - 10.1.1.0/24, 20.1.1.0/24
 		-  Tag2 - 10.1.0.0/8, 20.1.1.0/24, 50.1.1.1/32 
 		-  Tag8 - Empty
-		-  SAI_SRC_TAG_ENTRY_ATTR_TAG_MAP: 10.1.1.0/24 -> "0000 0001", 20.1.1.0/24 -> "0000 0011", 10.1.0.0/8 -> "0000 0010"
-		-  SAI_DASH_ACL_RULE_ATTR_SRC_TAG: Assume there is a rule with src tag bitmap as "0001 0010", it is a rule hit if the derived tag has atleast 1 bit that matches the bitmap in the rule. 
-		-  If a packet arrives with src ip of 10.1.1.1, the corresponding derived src tag shall be "0000 0011" (HW_DERIVED_TAG_MAP)
-		-  Ternary operation shall be => HW_DERIVED_TAG_MAP | (SAI_DASH_ACL_RULE_ATTR_SRC_TAG & SAI_DASH_ACL_RULE_ATTR_SRC_TAG_MASK). If any bit is set, it is treated as a match. Inorder to achieve this functionality, SAI implementation can expand the ACL rules to multiple rules that has only ONE tag set.
-	- The bitmap size depends on the SAI implementation capability. It is fixed during initialization based on the capability value returned by SAI implementation. This same bitmap size shall be later used for ACL rules and prefix-tag mapping
+		-  SAI_SRC_TAG_ENTRY_ATTR_TAG_MAP: 10.1.1.0/24 -> "0000 0011", 20.1.1.0/24 -> "0000 0011", 10.1.0.0/8 -> "0000 0010". Note that orchagent shall extend the tag map to include all subnets to allow an LPM based lookup. In this case, tags for 10.1.1.0/24 shall also include the tag for 10.1.0.0/8.  
+		-  SAI_DASH_ACL_RULE_ATTR_SRC_TAG: Assume there is a rule with src tag bitmap as "0001 0010", it is a rule hit if the derived tag has at least 1 bit that matches the bitmap in the rule. 
+		-  If a packet arrives with src ip of 10.1.1.1, the corresponding derived src tag shall be "0000 0011" (say HW_DERIVED_TAG_MAP, matching entry for 10.1.1.0/24)
+		-  Ternary operation shall be => HW_DERIVED_TAG_MAP | (SAI_DASH_ACL_RULE_ATTR_SRC_TAG & SAI_DASH_ACL_RULE_ATTR_SRC_TAG_MASK). If any bit is set, it is treated as a match. In order to achieve this functionality, SAI implementation can expand the ACL rules to multiple rules that has only ONE tag set.
+		-  If the tag field is empty, ACL rule must match ANY tag or NO tag. 
+	- The bitmap size depends on the SAI implementation capability. It is fixed during initialization based on the capability value returned by SAI implementation. This same bitmap size shall be later used for ACL rules and prefix-tag mapping. Orchagent shall implement the logic to chose the tags with largest number of prefixes, based on the capability value. Say 8 biggest tags in the above example. Rest of the tags shall be expanded to include prefixes in the ACL rules.
 - Deleting ACL group is permitted as long as it is not bind to an ENI. It is not expected for application to delete individual rules prior to deleting a group. Implementation is expected to delete/free all resources when application triggers an ACL group delete.
 - ACL rules are not expected to have both tags and prefixes configured in the same rule. In case NorthBound configures with both tags and prefix, orchagent shall split this to separate rules. At high-level, requirement is an `OR` operation when there is both tag and prefix. 
 - Counters can be attached to ACL rules optionally for retrieving the number of connections/flows. It is not required to get the packet/byte counter as in the traditional model. A new SAI counter type shall be required for this.
