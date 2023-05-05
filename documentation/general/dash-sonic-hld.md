@@ -195,7 +195,7 @@ ACL is essential for NSGs and have different stages. In the current model, there
 		-  Tag1 - 10.1.1.0/24, 20.1.1.0/24
 		-  Tag2 - 10.1.0.0/8, 20.1.1.0/24, 50.1.1.1/32 
 		-  Tag8 - Empty
-		-  SAI_SRC_TAG_ENTRY_ATTR_TAG_MAP: 10.1.1.0/24 -> "0000 0011", 20.1.1.0/24 -> "0000 0011", 10.1.0.0/8 -> "0000 0010". Note that orchagent shall extend the tag map to include all subnets to allow an LPM based lookup. In this case, tags for 10.1.1.0/24 shall also include the tag for 10.1.0.0/8.  
+		-  SAI_SRC_TAG_ENTRY_ATTR_TAG_MAP: 10.1.1.0/24 -> "0000 0011", 20.1.1.0/24 -> "0000 0011", 10.1.0.0/8 -> "0000 0010". Note that orchagent shall extend the tag map to include all subnet to allow an LPM based lookup. In this case, tags for 10.1.1.0/24 shall also include the tag for 10.1.0.0/8.  
 		-  SAI_DASH_ACL_RULE_ATTR_SRC_TAG: Assume there is a rule with src tag bitmap as "0001 0010", it is a rule hit if the derived tag has at least 1 bit that matches the bitmap in the rule. 
 		-  If a packet arrives with src ip of 10.1.1.1, the corresponding derived src tag shall be "0000 0011" (say HW_DERIVED_TAG_MAP, matching entry for 10.1.1.0/24)
 		-  Ternary operation shall be => HW_DERIVED_TAG_MAP | (SAI_DASH_ACL_RULE_ATTR_SRC_TAG & SAI_DASH_ACL_RULE_ATTR_SRC_TAG_MASK). If any bit is set, it is treated as a match. In order to achieve this functionality, SAI implementation can expand the ACL rules to multiple rules that has only ONE tag set.
