@@ -120,10 +120,10 @@ notification {
 }
 ```
 
-## GNMI Server Reboot
+## GNMI Server Restart
 
 DASH configuration is not persistent, if device rebooted, GNMI client needs to reconfigure DASH tables.
-GNMI will add DASH_RESET_STATUS table to detect reboot.
+GNMI will add DASH_RESET_STATUS table to detect GNMI server restart.
 
 ![gnmi-reboot](./images/gnmi-reboot.svg)
 
