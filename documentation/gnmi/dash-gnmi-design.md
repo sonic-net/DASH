@@ -13,7 +13,7 @@ Both host server and DPU card are running SONiC image. GNMI server and redis for
 
 * Set and get RPCs must be supported. Customers will use get RPC to retrieve DASH configurations and use set PRC to apply new DASH configurations.
 * Need to configure huge DASH table entries to APPL_DB, with high speed.
-* Minimal redis table scaling requirements: https://github.com/sonic-net/DASH/blob/main/documentation/general/dash-sonic-hld.md#14-scaling-requirements
+* Minimal redis table scaling requirements: [scaling requirement](../general/dash-sonic-hld.md#14-scaling-requirements)
 
 ### Design considerations
 
@@ -119,6 +119,15 @@ notification {
     }
 }
 ```
+
+## GNMI Server Reboot
+
+DASH configuration is not persistent, if device rebooted, GNMI client needs to reconfigure DASH tables.
+GNMI will add DASH_RESET_STATUS table to detect reboot.
+
+![gnmi-reboot](./images/gnmi-reboot.svg)
+
+GNMI client must write DASH_RESET_STATUS before any other DASH configurations, and GNMI client should periodically check the DASH_RESET_STATUS table. If DASH_RESET_STATUS table does not exist, GNMI client needs to reprogram all the DASH tables.
 
 
 # References
