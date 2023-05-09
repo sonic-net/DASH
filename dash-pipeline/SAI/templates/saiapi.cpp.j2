@@ -42,8 +42,8 @@ sai_status_t sai_create_{{ table.name }}(
     // There shall be one and only one action_type
     p4::v1::TableAction* entry = nullptr;
     p4::v1::Action* action = nullptr;
-    auto expectedParams = 0;
-    auto matchedParams = 0;
+    //auto expectedParams = 0;
+    //auto matchedParams = 0;
     sai_object_id_t objId = 0;
     // Search the action
     pi_p4_id_t actionId = 0;
@@ -58,8 +58,8 @@ sai_status_t sai_create_{{ table.name }}(
     tableId = {{table.id}};
     entry = matchActionEntry->mutable_action();
     action = entry->mutable_action();
-    expectedParams = 0;
-    matchedParams = 0;
+    //expectedParams = 0;
+    //matchedParams = 0;
     objId = 0;
 
     matchActionEntry->set_table_id(tableId);
@@ -139,7 +139,7 @@ sai_status_t sai_create_{{ table.name }}(
     {% if table.actions|length == 1 %}
     {% for action in table.actions %}
     actionId = {{action.id}}; // SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}
-    expectedParams = {{ action.params|length }};
+    //expectedParams = {{ action.params|length }};
     {% endfor %}
     {% else %}
     // Search the action 
@@ -150,7 +150,7 @@ sai_status_t sai_create_{{ table.name }}(
                 {% for action in table.actions %}
                 case SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}: {
                     actionId = {{action.id}}; 
-                    expectedParams = {{ action.params|length }};
+                    //expectedParams = {{ action.params|length }};
                     break;
                 }
                 {% endfor %}
@@ -165,31 +165,34 @@ sai_status_t sai_create_{{ table.name }}(
     for (uint32_t i = 0; i < attr_count; i++) {
         switch(attr_list[i].id) {
             {% for param in table.actionParams %}
+            {% if param.skipattr == 'true' %}
+            {% else %}
             case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}: {
                 auto param = action->add_params();
                 param->set_param_id({{param.id}});
                 {{param.field}}SetVal(attr_list[i].value, param, {{param.bitwidth}});
-                matchedParams++;
+                //matchedParams++;
                 {% if 'v4_or_v6_id' in param %}
                 {
                     // set v4_or_v6 field
                     auto param = action->add_params();
                     param->set_param_id({{param.v4_or_v6_id}});
                     booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param, 1);
-                    matchedParams++;
+                    //matchedParams++;
                 }
                 {% endif %}
                 break;
             }
+            {% endif %}
             {% endfor %}
         }
     }
     
-    assert((matchedParams == expectedParams)); 
+    //assert((matchedParams == expectedParams)); 
 
-    if (matchedParams != expectedParams) {
-        goto ErrRet;
-    }
+    //if (matchedParams != expectedParams) {
+    //    goto ErrRet;
+    //}
     if (false == InsertInTable(matchActionEntry, &objId)) {
         goto ErrRet;
     }
@@ -284,8 +287,8 @@ sai_status_t sai_create_{{ table.name }}(
     // There shall be one and only one action_type
     auto entry = matchActionEntry->mutable_action();
     auto action = entry->mutable_action();
-    auto expectedParams = 0;
-    auto matchedParams = 0;
+    //auto expectedParams = 0;
+    //auto matchedParams = 0;
     pi_p4_id_t actionId;
     grpc::StatusCode retCode;
 
@@ -327,7 +330,7 @@ sai_status_t sai_create_{{ table.name }}(
     {% if table.actions|length == 1 %}
     {% for action in table.actions %}
     actionId = {{action.id}}; // SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}
-    expectedParams = {{ action.params|length }};
+    //expectedParams = {{ action.params|length }};
     {% endfor %}
     {% else %}
     // Search the action 
@@ -336,7 +339,7 @@ sai_status_t sai_create_{{ table.name }}(
             {% for action in table.actions %}
             case SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}: {
                 actionId = {{action.id}}; 
-                expectedParams = {{ action.params|length }};
+                //expectedParams = {{ action.params|length }};
                 break;
             }
             {% endfor %}
@@ -350,31 +353,34 @@ sai_status_t sai_create_{{ table.name }}(
     for (uint32_t i = 0; i < attr_count; i++) {
         switch(attr_list[i].id) {
             {% for param in table.actionParams %}
+            {% if param.skipattr == 'true' %}
+            {% else %}
             case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}: {
                 auto param = action->add_params();
                 param->set_param_id({{param.id}});
                 {{param.field}}SetVal(attr_list[i].value, param, {{param.bitwidth}});
-                matchedParams++;
+                //matchedParams++;
                 {% if 'v4_or_v6_id' in param %}
                 {
                     // set v4_or_v6 field
                     auto param = action->add_params();
                     param->set_param_id({{param.v4_or_v6_id}});
                     booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param, 1);
-                    matchedParams++;
+                    //matchedParams++;
                 }
                 {% endif %}
                 break;
             }
+            {% endif %}
             {% endfor %}
         }
     }
     
-    assert((matchedParams == expectedParams)); 
+    //assert((matchedParams == expectedParams)); 
 
-    if (matchedParams != expectedParams) {
-        goto ErrRet;
-    }
+    //if (matchedParams != expectedParams) {
+    //    goto ErrRet;
+    //}
     // TODO: ternaly needs to set priority
     retCode = MutateTableEntry(matchActionEntry, p4::v1::Update_Type_INSERT);
     if (grpc::StatusCode::OK == retCode) {

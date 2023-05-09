@@ -141,6 +141,14 @@ int main(int argc, char **argv)
     attr.value.u32 = vnet_id;
     attrs.push_back(attr);
 
+    attr.id = SAI_ENI_ATTR_V4_METER_POLICY_ID;
+    attr.value.oid = SAI_NULL_OBJECT_ID;
+    attrs.push_back(attr);
+
+    attr.id = SAI_ENI_ATTR_V6_METER_POLICY_ID;
+    attr.value.oid = SAI_NULL_OBJECT_ID;
+    attrs.push_back(attr);
+
     std::unordered_map<uint32_t, uint16_t> acl_group_ids = {
       {SAI_ENI_ATTR_INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID, in_acl_group_id},
       {SAI_ENI_ATTR_INBOUND_V4_STAGE2_DASH_ACL_GROUP_ID, in_acl_group_id},

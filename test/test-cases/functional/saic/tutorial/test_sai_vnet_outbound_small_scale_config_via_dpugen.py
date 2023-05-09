@@ -45,6 +45,13 @@ NUMBER_OF_VNET = NUMBER_OF_ENI + (NUMBER_OF_ORE * NUMBER_OF_ENI)  # So far per O
 NUMBER_OF_IN_ACL_GROUP = 0
 NUMBER_OF_OUT_ACL_GROUP = 0
 
+def add_meter_attrs(attr_type, attrs, ext):
+    i = 0
+    for item in attrs:
+        if item['type'] == attr_type:
+            attrs[i]['attributes'].extend(ext)
+        i += 1
+    return attrs
 class TestSaiVnetOutbound:
     def make_create_commands(self):
         """ Generate a configuration
@@ -52,7 +59,14 @@ class TestSaiVnetOutbound:
         """
         conf = dpugen.sai.SaiConfig()
         conf.generate()
-        return conf.items()
+        ret = add_meter_attrs('SAI_OBJECT_TYPE_ENI', conf.items(), ["SAI_ENI_ATTR_V4_METER_POLICY_ID", "0", "SAI_ENI_ATTR_V6_METER_POLICY_ID", "0"])
+
+        ret = add_meter_attrs('SAI_OBJECT_TYPE_OUTBOUND_CA_TO_PA_ENTRY', ret, [ 'SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS', '0',
+                              'SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS_OVERRIDE', 'True' ])
+
+        ret = add_meter_attrs('SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY', ret, [ 'SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_POLICY_EN', 'True',
+                              'SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS', '0' ])
+        return ret
 
     def make_remove_commands(self):
         """ Generate a configuration to remove entries

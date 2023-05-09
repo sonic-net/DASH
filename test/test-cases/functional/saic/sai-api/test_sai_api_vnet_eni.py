@@ -7,7 +7,6 @@ import pytest
 
 
 class TestSaiVnetEni:
-
     def test_vnet_eni_create(self, dpu):
 
         commands = [
@@ -84,6 +83,10 @@ class TestSaiVnetEni:
                     "SAI_ENI_ATTR_OUTBOUND_V6_STAGE4_DASH_ACL_GROUP_ID",
                     "0",
                     "SAI_ENI_ATTR_OUTBOUND_V6_STAGE5_DASH_ACL_GROUP_ID",
+                    "0",
+                    "SAI_ENI_ATTR_V4_METER_POLICY_ID",
+                    "0",
+                    "SAI_ENI_ATTR_V6_METER_POLICY_ID",
                     "0"
                 ]
             },

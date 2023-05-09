@@ -113,6 +113,8 @@ control dash_ingress(
                          @Sai[type="sai_uint32_t"]
                          bit<24> vm_vni,
                          bit<16> vnet_id,
+                         bit<16> v4_meter_policy_id,
+                         bit<16> v6_meter_policy_id,
                          ACL_GROUPS_PARAM(inbound_v4),
                          ACL_GROUPS_PARAM(inbound_v6),
                          ACL_GROUPS_PARAM(outbound_v4),
@@ -133,12 +135,14 @@ control dash_ingress(
             } else {
                 ACL_GROUPS_COPY_TO_META(inbound_v6);
             }
+            meta.meter_policy_id = v6_meter_policy_id;
         } else {
             if (meta.direction == dash_direction_t.OUTBOUND) {
                 ACL_GROUPS_COPY_TO_META(outbound_v4);
             } else {
                 ACL_GROUPS_COPY_TO_META(inbound_v4);
             }
+            meta.meter_policy_id = v4_meter_policy_id;
         }
     }
 
@@ -229,6 +233,76 @@ control dash_ingress(
         }
 
         const default_action = deny;
+    }
+
+    action check_ip_addr_family(@Sai[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
+        if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
+            if (meta.is_overlay_ip_v6 == 1) {
+                meta.dropped = true;
+            }
+        } else {
+            if (meta.is_overlay_ip_v6 == 0) {
+                meta.dropped = true;
+            }
+        }
+    }
+
+    @name("meter_policy|dash_meter")
+    @Sai[isobject="true"]
+    table meter_policy {
+        key = {
+            meta.meter_policy_id : exact @name("meta.meter_policy_id:meter_policy_id");
+        }
+        actions = {
+            check_ip_addr_family;
+        }
+    }
+
+    action set_policy_meter_class(bit<16> meter_class) {
+        meta.policy_meter_class = meter_class;
+    }
+
+    @name("meter_rule|dash_meter")
+    @Sai[isobject="true"]
+    table meter_rule {
+        key = {
+            meta.meter_policy_id: exact @name("meta.meter_policy_id:meter_policy_id") @Sai[type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
+            hdr.ipv4.dst_addr : ternary @name("hdr.ipv4.dst_addr:dip");
+        }
+
+     actions = {
+            set_policy_meter_class;
+            @defaultonly NoAction;
+        }
+        const default_action = NoAction();
+    }
+    
+    // MAX_METER_BUCKET = MAX_ENI(64) * NUM_BUCKETS_PER_ENI(4096)
+    #define MAX_METER_BUCKETS 262144
+#ifdef TARGET_BMV2_V1MODEL
+    counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_inbound;
+    counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_outbound;
+#endif // TARGET_BMV2_V1MODEL
+    action meter_bucket_action(
+            @Sai[type="sai_uint64_t", isreadonly="true"] bit<64> outbound_bytes_counter,
+            @Sai[type="sai_uint64_t", isreadonly="true"] bit<64> inbound_bytes_counter,
+            @Sai[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index) {
+        // read only counters for SAI api generation only
+        meta.meter_bucket_index = meter_bucket_index;
+    }
+
+    @name("meter_bucket|dash_meter")
+    @Sai[isobject="true"]
+    table meter_bucket {
+        key = {
+            meta.eni_id: exact @name("meta.eni_id:eni_id");
+            meta.meter_class: exact @name("meta.meter_class:meter_class");
+        }
+        actions = {
+            meter_bucket_action;
+            @defaultonly NoAction;
+        }
+        const default_action = NoAction();
     }
 
     action set_eni(bit<16> eni_id) {
@@ -386,6 +460,33 @@ control dash_ingress(
             outbound.apply(hdr, meta);
         } else if (meta.direction == dash_direction_t.INBOUND) {
             inbound.apply(hdr, meta);
+        }
+
+        if (meta.meter_policy_en == 1) {
+            meter_policy.apply();
+            meter_rule.apply();
+        }
+
+        {
+            if (meta.meter_policy_en == 1) {
+                meta.meter_class = meta.policy_meter_class;
+            } else {
+                meta.meter_class = meta.route_meter_class;
+            }
+            if ((meta.meter_class == 0) || (meta.mapping_meter_class_override == 1)) {
+                meta.meter_class = meta.mapping_meter_class;
+            }
+        }
+
+        meter_bucket.apply();
+        if (meta.direction == dash_direction_t.OUTBOUND) {
+#ifdef TARGET_BMV2_V1MODEL
+            meter_bucket_outbound.count(meta.meter_bucket_index);
+#endif
+        } else if (meta.direction == dash_direction_t.INBOUND) {
+#ifdef TARGET_BMV2_V1MODEL
+            meter_bucket_inbound.count(meta.meter_bucket_index);
+#endif
         }
 
         eni_meter.apply();

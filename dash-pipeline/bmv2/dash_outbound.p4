@@ -9,19 +9,32 @@
 control outbound(inout headers_t hdr,
                  inout metadata_t meta)
 {
-    action route_vnet(bit<16> dst_vnet_id) {
+    action set_route_meter_attrs(bit<1> meter_policy_en,
+                                 bit<16> meter_class) {
+        meta.meter_policy_en = meter_policy_en;
+        meta.route_meter_class = meter_class;
+    }
+    action route_vnet(bit<16> dst_vnet_id,
+                      bit<1> meter_policy_en,
+                      bit<16> meter_class) {
         meta.dst_vnet_id = dst_vnet_id;
+        set_route_meter_attrs(meter_policy_en, meter_class);
     }
 
     action route_vnet_direct(bit<16> dst_vnet_id,
                              bit<1> is_overlay_ip_v4_or_v6,
-                             IPv4ORv6Address overlay_ip) {
+                             IPv4ORv6Address overlay_ip,
+                             bit<1> meter_policy_en,
+                             bit<16> meter_class) {
         meta.dst_vnet_id = dst_vnet_id;
         meta.lkup_dst_ip_addr = overlay_ip;
         meta.is_lkup_dst_ip_v6 = is_overlay_ip_v4_or_v6;
+        set_route_meter_attrs(meter_policy_en, meter_class);
     }
 
-    action route_direct() {
+    action route_direct(bit<1> meter_policy_en,
+                        bit<16> meter_class) {
+        set_route_meter_attrs(meter_policy_en, meter_class);
         /* send to underlay router without any encap */
     }
 
@@ -42,7 +55,9 @@ control outbound(inout headers_t hdr,
                                 bit<1> is_underlay_sip_v4_or_v6,
                                 IPv4ORv6Address underlay_sip,
                                 dash_encapsulation_t dash_encapsulation,
-                                bit<24> tunnel_key) {
+                                bit<24> tunnel_key,
+                                bit<1> meter_policy_en,
+                                bit<16> meter_class) {
         /* Assume the overlay addresses provided are always IPv6 and the original are IPv4 */
         /* assert(is_overlay_dip_v4_or_v6 == 1 && is_overlay_sip_v4_or_v6 == 1);
         assert(is_overlay_dip_mask_v4_or_v6 == 1 && is_overlay_sip_mask_v4_or_v6 == 1);
@@ -62,6 +77,7 @@ control outbound(inout headers_t hdr,
         meta.encap_data.overlay_dmac = hdr.ethernet.dst_addr;
         meta.encap_data.dash_encapsulation = dash_encapsulation;
         meta.encap_data.service_tunnel_key = tunnel_key;
+        set_route_meter_attrs(meter_policy_en, meter_class);
     }
 
 #ifdef TARGET_BMV2_V1MODEL
@@ -102,13 +118,18 @@ control outbound(inout headers_t hdr,
 #endif // TARGET_DPDK_PNA
     }
 
+
     action set_tunnel_mapping(IPv4Address underlay_dip,
                               EthernetAddress overlay_dmac,
-                              bit<1> use_dst_vnet_vni) {
+                              bit<1> use_dst_vnet_vni,
+                              bit<16> meter_class,
+                              bit<1> meter_class_override) {
         if (use_dst_vnet_vni == 1)
             meta.vnet_id = meta.dst_vnet_id;
         meta.encap_data.overlay_dmac = overlay_dmac;
         meta.encap_data.underlay_dip = underlay_dip;
+        meta.mapping_meter_class = meter_class;
+        meta.mapping_meter_class_override = meter_class_override;
     }
 
 #ifdef TARGET_BMV2_V1MODEL

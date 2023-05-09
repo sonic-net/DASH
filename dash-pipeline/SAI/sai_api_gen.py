@@ -43,6 +43,7 @@ sai_type_to_field = {
     'sai_ip_address_t': 'ipaddr',
     'sai_ip_addr_family_t': 'u32',
     'sai_uint32_t': 'u32',
+    'sai_uint64_t': 'u64',
     'sai_mac_t': 'mac'
 }
 
@@ -54,12 +55,25 @@ def p4_annotation_to_sai_attr(p4rt, sai_attr):
                     sai_attr['type'] = kv['value']['stringValue']
                 elif kv['key'] == 'isresourcetype':
                     sai_attr['isresourcetype'] = kv['value']['stringValue']
+                elif kv['key'] == 'isreadonly':
+                    sai_attr['isreadonly'] = kv['value']['stringValue']
                 elif kv['key'] == 'objects':
                     sai_attr['objectName'] = kv['value']['stringValue']
+                elif kv['key'] == 'skipattr':
+                    sai_attr['skipattr'] = kv['value']['stringValue']
                 else:
                     print("Unknown attr annotation " + kv['key'])
                     exit(1)
     sai_attr['field'] = sai_type_to_field[sai_attr['type']]
+
+def p4_annotation_to_sai_table(p4rt, sai_table):
+    for anno in p4rt[STRUCTURED_ANNOTATIONS_TAG]:
+        if anno[NAME_TAG] == SAI_TAG:
+            for kv in anno[KV_PAIR_LIST_TAG][KV_PAIRS_TAG]:
+                if kv['key'] == 'isobject':
+                    sai_table['is_object'] = kv['value']['stringValue']
+                if kv['key'] == 'ignoretable':
+                    sai_table['ignore_table'] = kv['value']['stringValue']
 
 def get_sai_key_type(key_size, key_header, key_field):
     if key_size == 1:
@@ -252,7 +266,11 @@ def generate_sai_apis(program, ignore_tables):
         sai_table_data[ACTIONS_TAG] = []
         sai_table_data[ACTION_PARAMS_TAG] = []
 
+        if STRUCTURED_ANNOTATIONS_TAG in table['preamble']:
+            p4_annotation_to_sai_table(table['preamble'], sai_table_data)
         table_control, table_name = table[PREAMBLE_TAG][NAME_TAG].split('.', 1)
+        if 'ignore_table' in sai_table_data.keys():
+            ignore_tables.append(table_name)
         if table_name in ignore_tables:
             continue
 
@@ -300,13 +318,14 @@ def generate_sai_apis(program, ignore_tables):
                 fill_action_params(sai_table_data[ACTION_PARAMS_TAG], param_names, all_actions[action_id])
                 sai_table_data[ACTIONS_TAG].append(all_actions[action_id])
 
-        if len(sai_table_data['keys']) == 1 and sai_table_data['keys'][0]['sai_key_name'].endswith(table_name.split('.')[-1] + '_id'):
-            sai_table_data['is_object'] = 'true'
-        elif len(sai_table_data['keys']) > 5:
-            sai_table_data['is_object'] = 'true'
-        else:
-            sai_table_data['is_object'] = 'false'
-            sai_table_data['name'] = sai_table_data['name'] + '_entry'
+        if 'is_object' not in sai_table_data.keys():
+            if len(sai_table_data['keys']) == 1 and sai_table_data['keys'][0]['sai_key_name'].endswith(table_name.split('.')[-1] + '_id'):
+                sai_table_data['is_object'] = 'true'
+            elif len(sai_table_data['keys']) > 5:
+                sai_table_data['is_object'] = 'true'
+            else:
+                sai_table_data['is_object'] = 'false'
+                sai_table_data['name'] = sai_table_data['name'] + '_entry'
 
         table_names.append(sai_table_data[NAME_TAG])
         is_new_api = True

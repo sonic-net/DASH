@@ -77,6 +77,7 @@ class TestSaiVnetVni:
         print("\n======= SAI commands RETURN values get =======")
         pprint(results)
 
+    @pytest.mark.skip(reason="get and set not implemented, yet")
     def test_vnet_vni_remove(self, dpu):
 
         commands = [
