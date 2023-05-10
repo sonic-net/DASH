@@ -339,17 +339,20 @@ addresses                 = list of ip prefixes ',' separated. valid to have emp
 
 ```
 DASH_ACL_IN_TABLE:{{eni}}:{{stage}}
-    "acl_group_id": {{group_id}} 
+    "ipv4_acl_group_id": {{group_id}} (OPTIONAL)
+    "ipv6_acl_group_id": {{group_id}} (OPTIONAL)
 ```
 ```
 DASH_ACL_OUT_TABLE:{{eni}}:{{stage}}
-    "acl_group_id": {{group_id}} 
+    "ipv4_acl_group_id": {{group_id}} (OPTIONAL)
+    "ipv6_acl_group_id": {{group_id}} (OPTIONAL)
 ```
 
 ```
 key                      = DASH_ACL_IN_TABLE:eni:stage ; ENI name and stage as key; ACL stage can be {1, 2, 3 ..}
-; field                  = value 
-acl_group_id             = ACL group ID
+; field                  = value
+ipv4_acl_group_id             = IPv4 ACL group ID
+ipv6_acl_group_id             = IPv6 ACL group ID
 ```
 
 ```
