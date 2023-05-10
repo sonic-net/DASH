@@ -247,6 +247,7 @@ HSL
 https
 hw
 HW
+IETF
 ICLA
 ICMP
 idempotency
@@ -419,6 +420,7 @@ Pritsak
 PrivateAddress
 programmability
 programmatically
+proto
 protobuf
 provids
 PRs
@@ -668,6 +670,7 @@ xsight
 YAML
 yaml
 yml
+ZMQ
 ZTVN
 Mukesh
 Velayudhan
