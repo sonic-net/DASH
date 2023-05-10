@@ -14,6 +14,8 @@ adaptor
 adaptors
 ADDR
 addr
+ae
+afe
 agnostically
 amd
 apache
@@ -128,6 +130,7 @@ dataplanes
 datastore
 DBs
 DDoS
+de
 deallocating
 Decap
 decap
@@ -210,6 +213,7 @@ failover
 failovers
 fakesai
 FastPath
+fc
 FEC
 ffe
 FINPackets
@@ -247,6 +251,7 @@ HSL
 https
 hw
 HW
+IETF
 ICLA
 ICMP
 idempotency
@@ -420,6 +425,7 @@ Pritsak
 PrivateAddress
 programmability
 programmatically
+proto
 protobuf
 provids
 PRs
@@ -494,6 +500,7 @@ SDK
 SDKs
 SDN
 sdn
+SetRequest
 Sflow
 SHA
 sharding
@@ -669,6 +676,7 @@ xsight
 YAML
 yaml
 yml
+ZMQ
 ZTVN
 Mukesh
 Velayudhan
