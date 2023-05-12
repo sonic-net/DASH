@@ -139,6 +139,7 @@ DemoDays
 designator
 DEST
 dest
+DestinationPort
 dev
 DHCP
 dir
@@ -500,6 +501,7 @@ SDK
 SDKs
 SDN
 sdn
+SequenceNumber
 SetRequest
 Sflow
 SHA
@@ -524,6 +526,7 @@ SoCs
 Sommers
 SONiC
 SONiC's
+SourcePort
 SpoofingPacket
 SRC
 src
