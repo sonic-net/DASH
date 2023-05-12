@@ -1,5 +1,5 @@
 # Requires <url of sai-challenger branch> <commit sha> or something
-# sc-client:230216
+# sc-client:230515
 FROM sc-client
 
 ADD tests/ /tests/
