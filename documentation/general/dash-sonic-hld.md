@@ -234,14 +234,14 @@ It is possible that a given packet can get a hit in route table and/or mapping t
 
   ![dash-outbound-meter](./images/dash-hld-outbound-meter-pipeline.png)
 
-## 2.5 Fastpath
+## 2.5 FastPath
 
-This section captures the Sonic-Dash specifics of Fastpath use-case. Detailed document on Fastpath is captured here (![Fastpath](https://github.com/sonic-net/DASH/blob/main/documentation/load-bal-service/load-balancer-v3.md))
+This section captures the Sonic-Dash specifics of FastPath use-case. Detailed document on FastPath is captured here (![FastPath](https://github.com/sonic-net/DASH/blob/main/documentation/load-bal-service/load-balancer-v3.md))
 The following are the salient points and requirements:
-- Fastpath kicks in when appliance receives an ICMP redirect that matches an existing unified flow
+- FastPath kicks in when appliance receives an ICMP redirect that matches an existing unified flow
 - ICMP redirects are expected to be received from source and destination MUXes separately
 - Each ICMP redirect shall only update one side of the flow. (Src or Dst depending on the originating MUX)
-- Fastpath example for Service Tunnels:
+- FastPath example for Service Tunnels:
 	- After the first SYN pkt, appliance shall create two flows (one Outbound and another Inbound)
 	- Original Outbound packet shall have an inner IPv6 header and outer IPv4 (Src VIP-A and Dst VIP-B)
 	- After an ICMP redirect is received from VIP-B hosting MUX, the Outbound flow shall be fixed-up to have outer IPV4 dst address to use the Redirect IP of VIP-B. Same fixup for Inbound flow to change VIP-B
@@ -249,7 +249,6 @@ The following are the salient points and requirements:
 	- ICMP redirect shall have the original inner IPv6 address as the IP header's src and dst address. 
 	- Redirect info shall contain the transposed IPv6 address, src and dst ports, sequence number and the encap type (NVGRE in this case) in addition to redirect address. 
 		```
-		  
 			struct 
 			{
 		            uint32 Reserved;
@@ -1285,7 +1284,7 @@ For the example configuration above, the following is a brief explanation of loo
 			h.4 Appliance shall first decapsulate the outer header and map it to a flow
 			h.5 Second header's dst mac shall correspond to ENI MAC, as overwritten by SLB MUX
 			h.6 Third header shall be the transpositioned IPv6 header
-		i. Note: This flow fixup shall be done when Fastpath kicks in with ICMP Redirect, and packets ingress with two headers. 		
+		i. Note: This flow fixup shall be done when FastPath kicks in with ICMP Redirect, and packets ingress with two headers. 		
 
 	3. Packet destined to 70.1.2.1 from 10.1.1.1:
 		a. LPM lookup hits for entry 70.1.2.0/24
