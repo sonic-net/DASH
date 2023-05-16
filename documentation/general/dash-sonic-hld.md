@@ -241,11 +241,12 @@ The following are the salient points and requirements:
 - FastPath kicks in when appliance receives an ICMP redirect that matches an existing unified flow
 - ICMP redirects are expected to be received from source and destination MUXes separately
 - Each ICMP redirect shall only update one side of the flow. (Src or Dst depending on the originating MUX)
+- ICMP packet is generated only for TCP. It is not generated for UDP traffic. 
 - FastPath example for Service Tunnels:
 	- After the first SYN pkt, appliance shall create two flows (one Outbound and another Inbound)
 	- Original Outbound packet shall have an inner IPv6 header and outer IPv4 (Src VIP-A and Dst VIP-B)
-	- After an ICMP redirect is received from VIP-B hosting MUX, the Outbound flow shall be fixed-up to have outer IPV4 dst address to use the Redirect IP of VIP-B. Same fixup for Inbound flow to change VIP-B
-	- After an ICMP redirect is received from VIP-A hosting MUX, the Outbound flow shall be fixed-up to have outer IPV4 src address to use the Redirect IP of VIP-A. Same fixup for Inbound flow to change VIP-B
+	- After an ICMP redirect is received from VIP-B hosting MUX, the Outbound flow shall be fixed-up to have outer IPV4 dst address to use the Redirect IP of VIP-B. Same fixup for Inbound flow to change VIP-B to Redirect IP
+	- After an ICMP redirect is received from VIP-A hosting MUX, the Outbound flow shall be fixed-up to have outer IPV4 src address to use the Redirect IP of VIP-A. Same fixup for Inbound flow to change VIP-A to Redirect IP
 	- ICMP redirect shall have the original inner IPv6 address as the IP header's src and dst address. 
 	- Redirect info shall contain the transposed IPv6 address, src and dst ports, sequence number and the encap type (NVGRE in this case) in addition to redirect address. 
 		```
@@ -268,7 +269,7 @@ The following are the salient points and requirements:
 			    uint32 Version; 
 			    uint16 AddrFamily; 
 			    uint16 EncapType; 
-			    uint32 Vsid; 
+			    uint32 Vnid; 
 			    union { 
 			        struct { 
 			            in_addr DipPAv4; 
