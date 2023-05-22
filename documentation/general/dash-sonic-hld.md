@@ -191,6 +191,7 @@ ACL is essential for NSGs and have different stages. In the current model, there
 	- Tagging is implemented as a bitmap in Orchagent and SAI layers
 	- A prefix can belong to multiple tags
 	- Prefixes can be added or removed from a tag at any time 
+	- SAI implementation shall return a capability for the bitmap size. A '0' return value shall be treated as no-tag support. 
 	- An example tag bitmap is as below. Assume tag bitmap size of 8 (a capability returned by SAI implementation).
 		-  Tag1 - 10.1.1.0/24, 20.1.1.0/24
 		-  Tag2 - 10.1.0.0/8, 20.1.1.0/24, 50.1.1.1/32 
