@@ -43,6 +43,7 @@
 |  1.1  | 01/09/2023 |    Prince Sunny     | Underlay Routing and ST/PL clarifications |
 |  1.2  | 02/12/2023 |  Vijay Srinivasan   | Metering schema and description           |
 |  1.3  | 04/12/2023 |     Ze Gan          | AppDB protobuf design                     |
+|  1.4  | 05/22/2023 | Oleksandr Ivantsiv  | Update configuration examples             |
 
 # About this Manual
 This document provides more detailed design of DASH APIs, DASH orchestration agent, Config and APP DB Schemas and other SONiC buildimage changes required to bring up SONiC image on an appliance card. General DASH HLD can be found at [dash_hld](./dash-high-level-design.md).
@@ -981,18 +982,16 @@ Refer DASH documentation for the test plan.
     {
         "DASH_ROUTE_TABLE:F4939FEFC47E:30.0.0.0/16": {
             "action_type":"direct",
-            "vnet":"Vnet1",
-	    "metering_policy_en":"false",
-	    "metering_class":"1000"
+            "metering_policy_en":"false",
+            "metering_class":"1000"
         },
         "OP": "SET"
     },
     {
         "DASH_ROUTE_TABLE:F4939FEFC47E:40.0.0.0/16": {
             "action_type":"direct",
-            "vnet":"Vnet1",
-	    "metering_policy_en":"true",
-	    "metering_class":"1000"
+            "metering_policy_en":"true",
+            "metering_class":"1000"
         },
         "OP": "SET"
     },
