@@ -65,28 +65,18 @@ typedef struct _sai_{{ table.name }}_t
 {% for key in table['keys'] %}
     /**
      * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.sai_key_name }}
-{% if key.sai_key_type == 'sai_object_id_t' %}
+{% if key.type == 'sai_object_id_t' %}
      *
      * @objects SAI_OBJECT_TYPE_{{ key.objectName | upper }}
 {% endif %}
      */
-{% if key.match_type == 'lpm' %}
-    {{ key.sai_lpm_type }} {{ key.sai_key_name | lower }};
-{% elif key.match_type == 'list' %}
-    {{ key.sai_list_type }} {{ key.sai_key_name | lower }};
-{% elif key.match_type == 'range_list' %}
-    {{ key.sai_range_list_type }} {{ key.sai_key_name | lower }};
-{% elif key.match_type == 'optional' %}
-    {{ key.sai_key_type }} {{ key.sai_key_name | lower }};
-{% else %}
-    {{ key.sai_key_type }} {{ key.sai_key_name | lower }};
-{% endif %}
+    {{ key.type }} {{ key.sai_key_name | lower }};
 
 {% if key.match_type == 'ternary' %}
     /**
      * @brief Ternary key {{ key.sai_key_name }} mask
      */
-    {{ key.sai_key_type }} {{ key.sai_key_name | lower }}_mask;
+    {{ key.type }} {{ key.sai_key_name | lower }}_mask;
 
 {% endif %}
 {% endfor %}
@@ -131,21 +121,16 @@ typedef enum _sai_{{ table.name }}_attr_t
     /**
      * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.sai_key_name }}
      *
-{% if key.match_type == 'lpm' %}
-     * @type {{ key.sai_lpm_type }}
-{% elif key.match_type == 'list' %}
-     * @type {{ key.sai_list_type }}
-{% elif key.match_type == 'range_list' %}
-     * @type {{ key.sai_range_list_type }}
-{% else %}
-     * @type {{ key.sai_key_type }}
-{% endif %}
+     * @type {{ key.type }}
      * @flags MANDATORY_ON_CREATE | CREATE_ONLY
-{% if key.sai_key_type == 'sai_uint16_t' %}
+{% if key.type == 'sai_uint16_t' %}
      * @isvlan false
 {% endif %}
-{% if key.sai_key_type == 'sai_object_id_t' %}
+{% if key.type == 'sai_object_id_t' %}
      * @objects SAI_OBJECT_TYPE_{{ key.sai_key_name | replace('_id', '') | upper }}
+{% endif %}
+{% if key.isresourcetype == 'true' %}
+     * @isresourcetype true
 {% endif %}
      */
 {% if not ns.firstattr %}
@@ -155,6 +140,16 @@ typedef enum _sai_{{ table.name }}_attr_t
     SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }},
 {% endif %}
 
+{% if key.match_type == 'ternary' %}
+    /**
+     * @brief Ternary matched mask {{ key.sai_key_name }}
+     *
+     * @type {{ key.type }}
+     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
+     */
+    SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}_MASK,
+
+{% endif %}
 {% endfor %}
 {% endif %}
 {% endif %}
@@ -179,6 +174,8 @@ typedef enum _sai_{{ table.name }}_attr_t
      * @objects SAI_OBJECT_TYPE_{{ param.objectName | upper }}
      * @allownull true
      * @default SAI_NULL_OBJECT_ID
+{% elif param.field == 's32' %}
+     * @default {{ param.default }}
 {% else %}
      * @default 0
 {% endif %}
@@ -187,6 +184,9 @@ typedef enum _sai_{{ table.name }}_attr_t
      * @validonly {% for action in param.paramActions %}SAI_{{ table.name | upper }}_ATTR_ACTION == SAI_{{ table.name | upper }}_ACTION_{{ action | upper }}{{ " or " if not loop.last else "" }}{% endfor %}
 
 {% endif %}
+{% endif %}
+{% if param.isresourcetype == 'true' %}
+     * @isresourcetype true
 {% endif %}
      */
 {% if not ns.firstattr %}

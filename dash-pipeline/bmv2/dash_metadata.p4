@@ -3,6 +3,8 @@
 
 #include "dash_headers.p4"
 
+typedef bit<32>  tag_map_t;
+
 struct encap_data_t {
     bit<24> vni;
     bit<24> dest_vnet_vni;
@@ -11,9 +13,13 @@ struct encap_data_t {
     EthernetAddress underlay_smac;
     EthernetAddress underlay_dmac;
     EthernetAddress overlay_dmac;
+    dash_encapsulation_t dash_encapsulation;
+    bit<24> service_tunnel_key;
+    IPv4Address original_overlay_sip;
+    IPv4Address original_overlay_dip;
 }
 
-enum bit<16> direction_t {
+enum bit<16> dash_direction_t {
     INVALID = 0,
     OUTBOUND = 1,
     INBOUND = 2
@@ -33,7 +39,7 @@ struct eni_data_t {
 
 struct metadata_t {
     bool dropped;
-    direction_t direction;
+    dash_direction_t direction;
     encap_data_t encap_data;
     EthernetAddress eni_addr;
     bit<16> vnet_id;
@@ -56,6 +62,8 @@ struct metadata_t {
     bit<16> stage3_dash_acl_group_id;
     bit<16> stage4_dash_acl_group_id;
     bit<16> stage5_dash_acl_group_id;
+    tag_map_t src_tag_map;
+    tag_map_t dst_tag_map;
 }
 
 #endif /* _SIRIUS_METADATA_P4_ */

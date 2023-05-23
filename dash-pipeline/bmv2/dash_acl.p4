@@ -13,6 +13,7 @@ match_kind {
     range_list
 }
 
+/* #define DASH_MATCH */
 #ifdef DASH_MATCH
 #define LIST_MATCH list
 #define RANGE_LIST_MATCH range_list
@@ -35,7 +36,10 @@ match_kind {
     @name(str(table_name##:dash_acl_rule|dash_acl)) \
     table table_name { \
         key = { \
-            meta. ## table_name ##_dash_acl_group_id : exact @name("meta.dash_acl_group_id:dash_acl_group_id"); \
+            meta. ## table_name ##_dash_acl_group_id : exact @name("meta.dash_acl_group_id:dash_acl_group_id") \
+            @Sai[type="sai_object_id_t", isresourcetype="true", objects="SAI_OBJECT_TYPE_DASH_ACL_GROUP"]; \
+            meta.dst_tag_map : ternary @name("meta.dst_tag_map:dst_tag"); \
+            meta.src_tag_map : ternary @name("meta.src_tag_map:src_tag"); \
             meta.dst_ip_addr : LIST_MATCH @name("meta.dst_ip_addr:dip"); \
             meta.src_ip_addr : LIST_MATCH @name("meta.src_ip_addr:sip"); \
             meta.ip_protocol : LIST_MATCH @name("meta.ip_protocol:protocol"); \

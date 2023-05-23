@@ -53,6 +53,17 @@ header vxlan_t {
 
 const bit<16> VXLAN_HDR_SIZE=64/8;
 
+header nvgre_t {
+    bit<4>  flags;
+    bit<9>  reserved;
+    bit<3>  version;
+    bit<16> protocol_type;
+    bit<24> vsid;
+    bit<8>  flow_id;
+}
+
+const bit<16> NVGRE_HDR_SIZE=64/8;
+
 header tcp_t {
     bit<16> src_port;
     bit<16> dst_port;
@@ -90,11 +101,18 @@ struct headers_t {
     udp_t      udp;
     tcp_t      tcp;
     vxlan_t    vxlan;
+    nvgre_t    nvgre;
     ethernet_t inner_ethernet;
     ipv4_t     inner_ipv4;
     ipv6_t     inner_ipv6;
     udp_t      inner_udp;
     tcp_t      inner_tcp;
+}
+
+enum bit<16> dash_encapsulation_t {
+    INVALID = 0,
+    VXLAN = 1,
+    NVGRE = 2
 }
 
 #endif /* _SIRIUS_HEADERS_P4_ */

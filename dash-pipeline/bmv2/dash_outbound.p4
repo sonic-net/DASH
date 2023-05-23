@@ -4,6 +4,7 @@
 #include "dash_headers.p4"
 #include "dash_acl.p4"
 #include "dash_conntrack.p4"
+#include "dash_service_tunnel.p4"
 
 control outbound(inout headers_t hdr,
                  inout metadata_t meta)
@@ -28,7 +29,43 @@ control outbound(inout headers_t hdr,
         meta.dropped = true;
     }
 
+    action route_service_tunnel(bit<1> is_overlay_dip_v4_or_v6,
+                                IPv4ORv6Address overlay_dip,
+                                bit<1> is_overlay_dip_mask_v4_or_v6,
+                                IPv4ORv6Address overlay_dip_mask,
+                                bit<1> is_overlay_sip_v4_or_v6,
+                                IPv4ORv6Address overlay_sip,
+                                bit<1> is_overlay_sip_mask_v4_or_v6,
+                                IPv4ORv6Address overlay_sip_mask,
+                                bit<1> is_underlay_dip_v4_or_v6,
+                                IPv4ORv6Address underlay_dip,
+                                bit<1> is_underlay_sip_v4_or_v6,
+                                IPv4ORv6Address underlay_sip,
+                                dash_encapsulation_t dash_encapsulation,
+                                bit<24> tunnel_key) {
+        /* Assume the overlay addresses provided are always IPv6 and the original are IPv4 */
+        /* assert(is_overlay_dip_v4_or_v6 == 1 && is_overlay_sip_v4_or_v6 == 1);
+        assert(is_overlay_dip_mask_v4_or_v6 == 1 && is_overlay_sip_mask_v4_or_v6 == 1);
+        assert(is_underlay_dip_v4_or_v6 != 1 && is_underlay_sip_v4_or_v6 != 1); */
+        meta.encap_data.original_overlay_dip = hdr.ipv4.src_addr;
+        meta.encap_data.original_overlay_sip = hdr.ipv4.dst_addr;
+
+        service_tunnel_encode(hdr,
+                              overlay_dip,
+                              overlay_dip_mask,
+                              overlay_sip,
+                              overlay_sip_mask);
+
+        /* encapsulation will be done in apply block based on dash_encapsulation */
+        meta.encap_data.underlay_dip = underlay_dip == 0 ? meta.encap_data.original_overlay_dip : (IPv4Address)underlay_dip;
+        meta.encap_data.underlay_sip = underlay_sip == 0 ? meta.encap_data.original_overlay_sip : (IPv4Address)underlay_sip;
+        meta.encap_data.overlay_dmac = hdr.ethernet.dst_addr;
+        meta.encap_data.dash_encapsulation = dash_encapsulation;
+        meta.encap_data.service_tunnel_key = tunnel_key;
+    }
+
 #ifdef TARGET_BMV2_V1MODEL
+
     direct_counter(CounterType.packets_and_bytes) routing_counter;
 #endif // TARGET_BMV2_V1MODEL
 #ifdef TARGET_DPDK_PNA
@@ -50,6 +87,7 @@ control outbound(inout headers_t hdr,
             route_vnet; /* for expressroute - ecmp of overlay */
             route_vnet_direct;
             route_direct;
+            route_service_tunnel;
             drop;
         }
         const default_action = drop;
@@ -160,6 +198,27 @@ control outbound(inout headers_t hdr,
                             meta.encap_data.underlay_sip,
                             meta.encap_data.overlay_dmac,
                             meta.encap_data.vni);
+             }
+           route_service_tunnel: {
+                if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {
+                    vxlan_encap(hdr,
+                                meta.encap_data.underlay_dmac,
+                                meta.encap_data.underlay_smac,
+                                meta.encap_data.underlay_dip,
+                                meta.encap_data.underlay_sip,
+                                meta.encap_data.overlay_dmac,
+                                meta.encap_data.service_tunnel_key);
+                } else if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
+                    nvgre_encap(hdr,
+                                meta.encap_data.underlay_dmac,
+                                meta.encap_data.underlay_smac,
+                                meta.encap_data.underlay_dip,
+                                meta.encap_data.underlay_sip,
+                                meta.encap_data.overlay_dmac,
+                                meta.encap_data.service_tunnel_key);
+                } else {
+                    drop();
+                }
              }
          }
     }

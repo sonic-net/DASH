@@ -5,6 +5,7 @@
 #include "dash_metadata.p4"
 #include "dash_parser.p4"
 #include "dash_vxlan.p4"
+#include "dash_nvgre.p4"
 #include "dash_outbound.p4"
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"
@@ -52,11 +53,11 @@ control dash_ingress(
     }
 
     action set_outbound_direction() {
-        meta.direction = direction_t.OUTBOUND;
+        meta.direction = dash_direction_t.OUTBOUND;
     }
 
     action set_inbound_direction() {
-        meta.direction = direction_t.INBOUND;
+        meta.direction = dash_direction_t.INBOUND;
     }
 
     @name("direction_lookup|dash_direction_lookup")
@@ -109,6 +110,7 @@ control dash_ingress(
                          bit<32> flows,
                          bit<1> admin_state,
                          IPv4Address vm_underlay_dip,
+                         @Sai[type="sai_uint32_t"]
                          bit<24> vm_vni,
                          bit<16> vnet_id,
                          ACL_GROUPS_PARAM(inbound_v4),
@@ -126,13 +128,13 @@ control dash_ingress(
         meta.vnet_id                 = vnet_id;
 
         if (meta.is_overlay_ip_v6 == 1) {
-            if (meta.direction == direction_t.OUTBOUND) {
+            if (meta.direction == dash_direction_t.OUTBOUND) {
                 ACL_GROUPS_COPY_TO_META(outbound_v6);
             } else {
                 ACL_GROUPS_COPY_TO_META(inbound_v6);
             }
         } else {
-            if (meta.direction == direction_t.OUTBOUND) {
+            if (meta.direction == dash_direction_t.OUTBOUND) {
                 ACL_GROUPS_COPY_TO_META(outbound_v4);
             } else {
                 ACL_GROUPS_COPY_TO_META(inbound_v4);
@@ -246,7 +248,7 @@ control dash_ingress(
         const default_action = deny;
     }
 
-    action set_acl_group_attrs(bit<32> ip_addr_family) {
+    action set_acl_group_attrs(@Sai[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
         if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
             if (meta.is_overlay_ip_v6 == 1) {
                 meta.dropped = true;
@@ -265,6 +267,34 @@ control dash_ingress(
         }
         actions = {
             set_acl_group_attrs();
+        }
+    }
+
+    action set_src_tag(tag_map_t tag_map) {
+        meta.src_tag_map = tag_map;
+    }
+
+    @name("src_tag|dash_tag")
+    table src_tag {
+        key = {
+            meta.src_ip_addr : lpm @name("meta.src_ip_addr:sip");
+        }
+        actions = {
+            set_src_tag;
+        }
+    }
+
+    action set_dst_tag(tag_map_t tag_map) {
+        meta.dst_tag_map = tag_map;
+    }
+
+    @name("dst_tag|dash_tag")
+    table dst_tag {
+        key = {
+            meta.dst_ip_addr : lpm @name("meta.dst_ip_addr:dip");
+        }
+        actions = {
+            set_dst_tag;
         }
     }
 
@@ -301,9 +331,9 @@ control dash_ingress(
 
         /* Outer header processing */
 
-        if (meta.direction == direction_t.OUTBOUND) {
+        if (meta.direction == dash_direction_t.OUTBOUND) {
             vxlan_decap(hdr);
-        } else if (meta.direction == direction_t.INBOUND) {
+        } else if (meta.direction == dash_direction_t.INBOUND) {
             switch (inbound_routing.apply().action_run) {
                 vxlan_decap_pa_validate: {
                     pa_validation.apply();
@@ -338,7 +368,7 @@ control dash_ingress(
         /* At this point the processing is done on customer headers */
 
         /* Put VM's MAC in the direction agnostic metadata field */
-        meta.eni_addr = meta.direction == direction_t.OUTBOUND  ?
+        meta.eni_addr = meta.direction == dash_direction_t.OUTBOUND  ?
                                           hdr.ethernet.src_addr :
                                           hdr.ethernet.dst_addr;
         eni_ether_address_map.apply();
@@ -348,9 +378,13 @@ control dash_ingress(
         }
         acl_group.apply();
 
-        if (meta.direction == direction_t.OUTBOUND) {
+        src_tag.apply();
+        dst_tag.apply();
+
+
+        if (meta.direction == dash_direction_t.OUTBOUND) {
             outbound.apply(hdr, meta);
-        } else if (meta.direction == direction_t.INBOUND) {
+        } else if (meta.direction == dash_direction_t.INBOUND) {
             inbound.apply(hdr, meta);
         }
 
