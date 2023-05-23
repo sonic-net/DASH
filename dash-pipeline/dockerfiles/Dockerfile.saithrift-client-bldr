@@ -6,6 +6,7 @@ LABEL maintainer="SONiC-DASH Community "
 LABEL description="This Docker image contains the toolchain to build and install \
 the saithrift client and test programs for DASH. It does not contain thrift/saithrift libraries"
 ADD requirements.txt /tests/
+# ctag 230523
 
 # Below we build the baseline set of tools to run saithrift client tests
 # Contents do not include the thrift and saithrift client libraries, which need

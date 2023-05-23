@@ -1,5 +1,5 @@
 
-FROM sonicdash.azurecr.io/dash-saithrift-client-bldr:220819
+FROM sonicdash.azurecr.io/dash-saithrift-client-bldr:230523
 LABEL maintainer="SONiC-DASH Community "
 LABEL description="This Docker image contains the toolchain to run\
 the saithrift client and test programs for DASH."
