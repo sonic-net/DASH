@@ -185,9 +185,9 @@ integrators to track and test the designs in a common manner.
 
 -   **Performance Testing Methodology**:
 
-    -   2M TCP background connections setup before testing.
+    -   15M TCP background connections setup before testing.
 
-    -   2M UDP background bi-directional flows setup before testing.
+    -   15M UDP background bi-directional flows setup before testing.
 
     -   We use an equal mix of TCP and UDP although in the real world we
         expect more TCP and in fact in some cases we meter UDP as a
@@ -220,8 +220,8 @@ integrators to track and test the designs in a common manner.
         packets.
         -   Real use case
         -   6 packets: SYN, SYN-ACK, ACK, FIN, FIN-ACK, ACK
-        -   Flow Table Size: (2 \* CPS) + 2M + 2M
-            //For 5M CPS, Flow Table Size: (2 \* 5M) +2M +2M = 14M
+        -   Flow Table Size: (2 \* CPS) + 15M + 15M
+            //For 5M CPS, Flow Table Size: (2 \* 1000) + 15M + 15M = ~30M
         -   Effective PPS: Sustained CPS \* 6 + PPS for background flows.
 
 -   CPS and flow results will be measured while channel bandwidth is
@@ -294,8 +294,6 @@ The following scale of policies and routes are at minimum required to be
 configured during validation and test plan needs to be executed covering
 both scenarios:
 
-**NEW Values Start** ###################################################
-
 |               | per ENI    | 200G (DPU)   | 400G  | 800G  | 1.6T (smart switch) |
 |---------------|------------|--------------|-------|-------|-------|
 | VNETs         |            | 1024         | 2048  | 4096  |  8192 |
@@ -305,10 +303,10 @@ both scenarios:
 | ACLs prefixes | 10x100K    | 64M          | 128M  | 256M  | 512M  |
 | ACLs Ports    | 10x10K     | 6.4M         | 12.8M | 25.6M | 51.2M |
 | Mappings (CA to PA)     | 160K       | 10M          | 20M   | 40M   | 80M   |
-| Act Con       | 1M (bidir w/ connection pool capable of oversubscription) | 64M          | 128M  | 256M  | 512M  |
+| Act Con       | 500K (bidir w/ connection pool capable of oversubscription) | 32M          | 64M  | 128M  | 256M  |
 | CPS           |            | 3.75M        | 7.5M  | 15M   | 30M   |
-| bg flows TCP  |            | 1M  (bidir w/ connection pool capable of oversubscription)  |  2M   | 4M    |  8M   |
-| bg flows UDP  |            | 1M  (bidir w/ connection pool capable of oversubscription)  | 2M    | 4M    | 8M    |
+| bg flows TCP  |            | 15M  (bidir w/ connection pool capable of oversubscription)  |  30M   | 60M    |  120M   |
+| bg flows UDP  |            | 15M  (bidir w/ connection pool capable of oversubscription)  | 30M    | 60M    | 120M    |
 
 - ACL rules per NSG = 1000
 - Prefixes per ACL rule = 100
@@ -317,24 +315,6 @@ both scenarios:
 - Routes per ACL rule = 10
 - -> Change Above:  NSG per ENI changed since 5 Inbound & 5 Outbound stages are required
 
-**NEW Values End** ####################################################
-<!--Comment Out 
-1. &nbsp; 8 ENI Scenario
-    - 8 ENIs/VPorts
-    - 200k \* 8 = 1.6M routes
-    - 8 \* 6 = 48 NSGs
-    - 48 \* 1000 rules = 48000 ACL rules
-    - 48 \* 200k prefixes per NSG = 9.6M Prefixes
-    - 2M Mapping Table
-
-2. &nbsp; 1 ENI Scenario
-    - 1 ENI/VPort
-    - 1.6M routes
-    - 48 NSGs
-    - 48000 ACL rules
-    - 9.6M Prefixes (upper limit per DPU - sum of the above)
-    - 2M Mapping Table
--->
 
 ## MSFT LAB IXIA Configuration
 
@@ -354,9 +334,9 @@ RX: Remote vnic to local vnic
 
 #### Learning Streams
 
-Learning Streams will be used to establish 2M CPS connections and 2M UDP
-background bi-directional flows prior to test execution. These 2M flows
-will be split across 8 vnics that are pre-configured.
+Learning Streams will be used to establish 15M CPS connections and 15M UDP
+background bi-directional flows prior to test execution. These 15M flows
+will be split across 64 vnics that are pre-configured.
 
 ![learning-streams](images/req/learning-streams.png)
 
@@ -436,7 +416,7 @@ need to be created individually.
 
 #### Bandwidth Streams
 
-Bandwidth streams runs with a higher packet size -- 1500 byte -- and
+Bandwidth streams runs with a higher packet size -- 500 byte -- and
 will be used to verify the total 100Gbps bandwidth.
 
 - MSFT-8V-1M-TX-BW-Port1-100Sec
