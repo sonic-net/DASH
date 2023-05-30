@@ -1,4 +1,4 @@
-FROM sonicdash.azurecr.io/dash-saichallenger-client-bldr:230515
+FROM sonicdash.azurecr.io/dash-saichallenger-client-bldr:230530
 
 ENV SAI_CHALLENGER_PATH /sai-challenger
 ENV DASH_PATH /dash
