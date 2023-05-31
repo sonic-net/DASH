@@ -75,7 +75,7 @@ class UnderlayRouteTest(VnetApiEndpoints, VnetTrafficMixin):
     def verifyOverlayOutboundConfigTest(self):
 
         self.verify_traffic_scenario(client=self.tx_host, server=self.rx_host,
-                                     connection='tcp', fake_mac=False, tx_equal_to_rx=False)
+                                     connection=self.connection, fake_mac=False, tx_equal_to_rx=False)
         print("Overlay config OK\n")
 
     def l3UnderlayHost1toHost2RoutingTest(self):
@@ -168,7 +168,7 @@ class Vnet2VnetInboundDecapPaValidateSinglePortTest(VnetApiEndpoints, VnetTraffi
         """
 
         self.verify_traffic_scenario(client=self.tx_host, server=self.rx_host,
-                                     connection='tcp', fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
 
         print('\n', self.vnet2VnetInboundRoutingTest.__name__, ' OK')
 
@@ -234,6 +234,7 @@ class Vnet2VnetInboundDecapPaValidateTwoPortsTest(Vnet2VnetInboundDecapPaValidat
         self.configure_underlay(self.tx_host, self.rx_host)
 
         self.vnet2VnetInboundRoutingTest(tx_equal_to_rx=False)
+        self.vnet2VnetInboundNegativeTest()
 
 
 @group("draft")
@@ -344,6 +345,7 @@ class Vnet2VnetInboundDecapTwoPortsTest(Vnet2VnetInboundDecapSinglePortTest):
         self.configure_underlay(self.tx_host, self.rx_host)
 
         self.vnet2VnetInboundRoutingTest(tx_equal_to_rx=False)
+        self.vnet2VnetInboundNegativeTest()
 
 
 @group("draft")
@@ -488,22 +490,22 @@ class Vnet2VnetInboundMultiplePaValidatesSingleEniSinglePortTest(VnetApiEndpoint
 
         print("\nVerifying Inbound pkt send tx_host_0 -> rx_host ...")
         self.verify_traffic_scenario(client=self.tx_host_0, server=self.rx_host,
-                                     connection='tcp', fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
         print("OK")
 
         print("\nVerifying Inbound pkt send tx_host_1 -> rx_host ...")
         self.verify_traffic_scenario(client=self.tx_host_1, server=self.rx_host,
-                                     connection='tcp', fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
         print("OK")
 
         print("\nVerifying Inbound pkt send tx_host_2 -> rx_host ...")
         self.verify_traffic_scenario(client=self.tx_host_2, server=self.rx_host,
-                                     connection='tcp', fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
         print("OK")
 
         print("\nVerifying Inbound pkt send tx_host_3 -> rx_host ...")
         self.verify_traffic_scenario(client=self.tx_host_3, server=self.rx_host,
-                                     connection='tcp', fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
         print("OK")
 
         print('\n', self.vnet2VnetInboundRoutingPositiveTest.__name__, ' OK')
@@ -865,17 +867,17 @@ class Vnet2VnetInboundMultiplePaValidatesMultipleEniSinglePortTest(VnetApiEndpoi
 
         print("\nVerifying Inbound pkt send tx_host_0 -> rx_host_0 ...")
         self.verify_traffic_scenario(client=self.tx_host_0, server=self.rx_host_0,
-                                     connection='tcp', fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
         print("OK")
 
         print("\nVerifying Inbound pkt send tx_host_1 -> rx_host_1 ...")
         self.verify_traffic_scenario(client=self.tx_host_1, server=self.rx_host_1,
-                                     connection='tcp', fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
         print("OK")
 
         print("\nVerifying Inbound pkt send tx_host_2 -> rx_host_0 ...")
         self.verify_traffic_scenario(client=self.tx_host_2, server=self.rx_host_0,
-                                     connection='tcp', fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
         print("OK")
 
 
@@ -1197,15 +1199,15 @@ class Vnet2VnetSingleInboundRouteMultiplePaValidateSinglePortTest(VnetApiEndpoin
 
         print(f"\nPA validate {self.tx_host_0.ip} verification, expect pass")
         self.verify_traffic_scenario(client=self.tx_host_0, server=self.rx_host,
-                                     connection='tcp', fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
 
         print(f"\nPA validate {self.tx_host_1.ip} verification, expect pass")
         self.verify_traffic_scenario(client=self.tx_host_1, server=self.rx_host,
-                                     connection='tcp', fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
 
         print(f"\nPA validate {self.tx_host_2.ip} verification, expect pass")
         self.verify_traffic_scenario(client=self.tx_host_2, server=self.rx_host,
-                                     connection='tcp', fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
 
         print(f"\nPA validate {self.tx_host_3.ip} verification, expect drop - PA validation missmatch")
         self.verify_negative_traffic_scenario(client=self.tx_host_3, server=self.rx_host,
@@ -1365,9 +1367,9 @@ class Vnet2VnetInboundEniSetUpDownSinglePortTest(VnetApiEndpoints, VnetTrafficMi
         self.configure_underlay(self.tx_host, add_routes=False)
 
         self.vnet2VnetEniUpTrafficTest(tx_equal_to_rx=True)
-        self.setEniStateTest(state="down")
+        self.eni_set_admin_state(self.eni_id, "down")
         self.vnet2VnetEniDownTrafficTest()
-        self.setEniStateTest(state="up")
+        self.eni_set_admin_state(self.eni_id, "up")
         self.vnet2VnetEniUpTrafficTest(tx_equal_to_rx=True)
 
     def configureTest(self):
@@ -1382,14 +1384,14 @@ class Vnet2VnetInboundEniSetUpDownSinglePortTest(VnetApiEndpoints, VnetTrafficMi
 
         dst_vnet = self.vnet_create(vni=self.rx_host.client.vni)
 
-        eni_id = self.eni_create(admin_state=True,
-                                 vm_underlay_dip=sai_ipaddress(self.rx_host.ip),
-                                 vm_vni=self.rx_host.client.vni,
-                                 vnet_id=dst_vnet)
-        self.eni_mac_map_create(eni_id, self.rx_host.client.mac)  # ENI MAC
+        self.eni_id = self.eni_create(admin_state=True,
+                                      vm_underlay_dip=sai_ipaddress(self.rx_host.ip),
+                                      vm_vni=self.rx_host.client.vni,
+                                      vnet_id=dst_vnet)
+        self.eni_mac_map_create(self.eni_id, self.rx_host.client.mac)  # ENI MAC
 
         # Inbound routing PA Validate
-        self.inbound_routing_decap_create(eni_id, vni=self.tx_host.client.vni,
+        self.inbound_routing_decap_create(self.eni_id, vni=self.tx_host.client.vni,
                                           sip=self.tx_host.ip, sip_mask="255.255.255.0")
 
     def vnet2VnetEniUpTrafficTest(self, tx_equal_to_rx):
@@ -1398,22 +1400,9 @@ class Vnet2VnetInboundEniSetUpDownSinglePortTest(VnetApiEndpoints, VnetTrafficMi
         """
 
         self.verify_traffic_scenario(client=self.tx_host, server=self.rx_host,
-                                     connection='tcp', fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=False, tx_equal_to_rx=tx_equal_to_rx)
 
         print('\n', self.vnet2VnetEniUpTrafficTest.__name__, ' OK')
-
-    def setEniStateTest(self, state):
-        """
-        Verifies ENI admin state setting
-        """
-        if state == "up":
-            sai_thrift_set_eni_attribute(self.client, self.eni_id, admin_state=True)
-        else:  # down
-            sai_thrift_set_eni_attribute(self.client, self.eni_id, admin_state=False)
-
-        self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
-
-        print('\n', self.setEniStateTest.__name__, state, ' OK')
 
     def vnet2VnetEniDownTrafficTest(self):
         """
@@ -1439,9 +1428,9 @@ class Vnet2VnetInboundEniSetUpDownTwoPortsTest(Vnet2VnetInboundEniSetUpDownSingl
         self.configure_underlay(self.tx_host, self.rx_host)
 
         self.vnet2VnetEniUpTrafficTest(tx_equal_to_rx=True)
-        self.setEniStateTest(state="down")
+        self.eni_set_admin_state(self.eni_id, "down")
         self.vnet2VnetEniDownTrafficTest()
-        self.setEniStateTest(state="up")
+        self.eni_set_admin_state(self.eni_id, "up")
         self.vnet2VnetEniUpTrafficTest(tx_equal_to_rx=True)
 
 
@@ -1496,7 +1485,7 @@ class Vnet2VnetOutboundRouteVnetDirectSinglePortTest(VnetApiEndpoints, VnetTraff
         """
 
         self.verify_traffic_scenario(client=self.tx_host, server=self.rx_host,
-                                     connection='tcp', fake_mac=True, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=True, tx_equal_to_rx=tx_equal_to_rx)
 
         print('\n', self.vnet2VnetOutboundRoutingTest.__name__, ' OK')
 
@@ -1581,7 +1570,7 @@ class Vnet2VnetOutboundRouteVnetDirectSinglePortOverlayIpv6Test(Vnet2VnetOutboun
 
 @group("draft")
 @skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
-class Vnet2VnetOutboundRouteVnetDirectWithTwoPortsTest(Vnet2VnetOutboundRouteVnetDirectSinglePortTest):
+class Vnet2VnetOutboundRouteVnetDirectTwoPortsTest(Vnet2VnetOutboundRouteVnetDirectSinglePortTest):
     """
     Outbound Vnet to Vnet test scenario with Outbound routing entry
     SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT action
@@ -1593,11 +1582,12 @@ class Vnet2VnetOutboundRouteVnetDirectWithTwoPortsTest(Vnet2VnetOutboundRouteVne
         self.configure_underlay(self.tx_host, self.rx_host)
 
         self.vnet2VnetOutboundRoutingTest(tx_equal_to_rx=False)
+        self.vnet2VnetOutboundNegativeTest()
 
 
 @group("draft")
 @skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
-class Vnet2VnetOutboundRouteVnetDirectWithTwoPortsOverlayIpv6Test(Vnet2VnetOutboundRouteVnetDirectSinglePortOverlayIpv6Test):
+class Vnet2VnetOutboundRouteVnetDirectTwoPortsOverlayIpv6Test(Vnet2VnetOutboundRouteVnetDirectSinglePortOverlayIpv6Test):
     """
     Underlay IPv4 and Overlay IPv6 configs
     Outbound Vnet to Vnet test scenario with Outbound routing entry
@@ -1664,7 +1654,7 @@ class Vnet2VnetOutboundRouteVnetSinglePortTest(VnetApiEndpoints, VnetTrafficMixi
         """
 
         self.verify_traffic_scenario(client=self.tx_host, server=self.rx_host,
-                                     connection='tcp', fake_mac=True, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=True, tx_equal_to_rx=tx_equal_to_rx)
 
         print('\n', self.vnet2VnetOutboundRoutingTest.__name__, ' OK')
 
@@ -1773,7 +1763,7 @@ class Vnet2VnetOutboundRouteVnetTwoPortsTest(Vnet2VnetOutboundRouteVnetSinglePor
         self.configure_underlay(self.tx_host, self.rx_host)
 
         self.vnet2VnetOutboundRoutingTest(tx_equal_to_rx=False)
-
+        self.vnet2VnetOutboundNegativeTest()
 
 
 @group("draft")
@@ -1808,9 +1798,9 @@ class Vnet2VnetOutboundEniSetUpDownSinglePortTest(VnetApiEndpoints, VnetTrafficM
         self.configure_underlay(self.tx_host, add_routes=False)
 
         self.vnet2VnetEniUpTrafficTest(tx_equal_to_rx=True)
-        self.setEniStateTest(state="down")
+        self.eni_set_admin_state(self.eni_id, "down")
         self.vnet2VnetEniDownTrafficTest()
-        self.setEniStateTest(state="up")
+        self.eni_set_admin_state(self.eni_id, "up")
         self.vnet2VnetEniUpTrafficTest(tx_equal_to_rx=True)
 
     def configureTest(self):
@@ -1846,22 +1836,9 @@ class Vnet2VnetOutboundEniSetUpDownSinglePortTest(VnetApiEndpoints, VnetTrafficM
         """
 
         self.verify_traffic_scenario(client=self.tx_host, server=self.rx_host,
-                                     connection='tcp', fake_mac=True, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=True, tx_equal_to_rx=tx_equal_to_rx)
 
         print('\n', self.vnet2VnetEniUpTrafficTest.__name__, ' OK')
-
-    def setEniStateTest(self, state):
-        """
-        Verifies ENI admin state setting
-        """
-        if state == "up":
-            sai_thrift_set_eni_attribute(self.client, self.eni_id, admin_state=True)
-        else:  # down
-            sai_thrift_set_eni_attribute(self.client, self.eni_id, admin_state=False)
-
-        self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
-
-        print('\n', self.setEniStateTest.__name__, state, ' OK')
 
     def vnet2VnetEniDownTrafficTest(self):
         """
@@ -1887,9 +1864,9 @@ class Vnet2VnetOutboundEniSetUpDownTwoPortsTest(Vnet2VnetOutboundEniSetUpDownSin
         self.configure_underlay(self.tx_host, self.rx_host)
 
         self.vnet2VnetEniUpTrafficTest(tx_equal_to_rx=True)
-        self.setEniStateTest(state="down")
+        self.eni_set_admin_state(self.eni_id, "down")
         self.vnet2VnetEniDownTrafficTest()
-        self.setEniStateTest(state="up")
+        self.eni_set_admin_state(self.eni_id, "up")
         self.vnet2VnetEniUpTrafficTest(tx_equal_to_rx=True)
 
 
@@ -1935,7 +1912,7 @@ class Vnet2VnetOutboundRouteDirectSinglePortTest(VnetApiEndpoints, VnetTrafficMi
     def outboundRouteDirectTest(self, tx_equal_to_rx):
 
         self.verify_traffic_scenario(client=self.tx_host, server=self.rx_host,
-                                     connection='tcp', fake_mac=True,
+                                     connection=self.connection, fake_mac=True,
                                      tx_equal_to_rx=tx_equal_to_rx,
                                      route_direct=True)
 
@@ -2161,20 +2138,20 @@ class Vnet2VnetSingleOutboundRouteMultipleCa2PaSinglePortTest(VnetApiEndpoints, 
 
         print(f"\nVerify outbound route to CA {self.rx_host_0.client.ip}, expect pass")
         self.verify_traffic_scenario(client=self.tx_host, server=self.rx_host_0,
-                                     connection='tcp', fake_mac=True, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=True, tx_equal_to_rx=tx_equal_to_rx)
 
         print(f"\nVerify outbound route to CA {self.rx_host_1.client.ip}, expect pass")
         self.verify_traffic_scenario(client=self.tx_host, server=self.rx_host_1,
-                                     connection='tcp', fake_mac=True, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=True, tx_equal_to_rx=tx_equal_to_rx)
 
         print(f"\nVerify outbound route to CA {self.rx_host_2.client.ip}, expect pass")
         self.verify_traffic_scenario(client=self.tx_host, server=self.rx_host_2,
-                                     connection='tcp', fake_mac=True, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=True, tx_equal_to_rx=tx_equal_to_rx)
 
         print(f"\nVerify outbound route to CA {self.rx_host_3.client.ip} and use_dst_vnet=False, expect pass")
         self.rx_host_3.client.vni = self.tx_host.client.vni
         self.verify_traffic_scenario(client=self.tx_host, server=self.rx_host_3,
-                                     connection='tcp', fake_mac=True, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=True, tx_equal_to_rx=tx_equal_to_rx)
 
         print('\n', self.vnet2VnetOutboundRoutingTest.__name__, ' OK')
 
@@ -2424,7 +2401,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortTest(VnetApiEndpoints, VnetTr
     def vnet2VnetOutboundDstVnetIdTrueTest(self, tx_equal_to_rx):
 
         self.verify_traffic_scenario(client=self.tx_host, server=self.rx_host_0,
-                                     connection="tcp", fake_mac=True, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=True, tx_equal_to_rx=tx_equal_to_rx)
 
         print('\n', self.vnet2VnetOutboundDstVnetIdTrueTest.__name__, ' OK')
 
@@ -2434,7 +2411,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortTest(VnetApiEndpoints, VnetTr
         self.rx_host_1.client.vni = self.tx_host.client.vni
 
         self.verify_traffic_scenario(client=self.tx_host, server=self.rx_host_1,
-                                     connection="tcp", fake_mac=True, tx_equal_to_rx=tx_equal_to_rx)
+                                     connection=self.connection, fake_mac=True, tx_equal_to_rx=tx_equal_to_rx)
 
         print('\n', self.vnet2VnetOutboundDstVnetIdFalseTest.__name__, ' OK')
 
@@ -2834,7 +2811,7 @@ class Vnet2VnetInboundOutboundMultipleConfigsSinglePortTest(VnetApiEndpoints, Vn
 
         self.verify_traffic_scenario(client=self.host_0,
                                      server=self.host_2,
-                                     connection='tcp',
+                                     connection=self.connection,
                                      fake_mac=True,
                                      tx_equal_to_rx=tx_equal_to_rx)
 
@@ -2844,7 +2821,7 @@ class Vnet2VnetInboundOutboundMultipleConfigsSinglePortTest(VnetApiEndpoints, Vn
 
         self.verify_traffic_scenario(client=self.host_2,
                                      server=self.host_0,
-                                     connection='tcp',
+                                     connection=self.connection,
                                      fake_mac=False,
                                      tx_equal_to_rx=tx_equal_to_rx)
 
@@ -2854,7 +2831,7 @@ class Vnet2VnetInboundOutboundMultipleConfigsSinglePortTest(VnetApiEndpoints, Vn
 
         self.verify_traffic_scenario(client=self.host_3,
                                      server=self.host_1,
-                                     connection='tcp',
+                                     connection=self.connection,
                                      fake_mac=True,
                                      tx_equal_to_rx=tx_equal_to_rx)
 
@@ -2864,7 +2841,7 @@ class Vnet2VnetInboundOutboundMultipleConfigsSinglePortTest(VnetApiEndpoints, Vn
 
         self.verify_traffic_scenario(client=self.host_1,
                                      server=self.host_3,
-                                     connection='tcp',
+                                     connection=self.connection,
                                      fake_mac=False,
                                      tx_equal_to_rx=tx_equal_to_rx)
 
@@ -3152,7 +3129,7 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortTest(VnetApiEndpoints, V
 
         self.verify_traffic_scenario(client=self.tx_host_0,
                                      server=self.rx_host_0,
-                                     connection='tcp',
+                                     connection=self.connection,
                                      fake_mac=True,
                                      tx_equal_to_rx=tx_equal_to_rx)
 
@@ -3165,7 +3142,7 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortTest(VnetApiEndpoints, V
 
         self.verify_traffic_scenario(client=self.tx_host_1,
                                      server=self.rx_host_1,
-                                     connection='tcp',
+                                     connection=self.connection,
                                      fake_mac=True,
                                      tx_equal_to_rx=tx_equal_to_rx)
 
@@ -3175,7 +3152,7 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortTest(VnetApiEndpoints, V
 
         self.verify_traffic_scenario(client=self.tx_host_2,
                                      server=self.rx_host_2,
-                                     connection='tcp',
+                                     connection=self.connection,
                                      fake_mac=True,
                                      tx_equal_to_rx=tx_equal_to_rx)
 
@@ -3474,7 +3451,7 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortTest(VnetApiEndpoints,
 
         self.verify_traffic_scenario(client=self.tx_host,
                                      server=self.rx_host_0,
-                                     connection="tcp",
+                                     connection=self.connection,
                                      fake_mac=True,
                                      tx_equal_to_rx=tx_equal_to_rx)
 
@@ -3489,7 +3466,7 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortTest(VnetApiEndpoints,
 
         self.verify_traffic_scenario(client=self.tx_host,
                                      server=self.rx_host_1,
-                                     connection="tcp",
+                                     connection=self.connection,
                                      fake_mac=True,
                                      tx_equal_to_rx=tx_equal_to_rx)
 
@@ -3504,7 +3481,7 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortTest(VnetApiEndpoints,
 
         self.verify_traffic_scenario(client=self.tx_host,
                                      server=self.rx_host_2,
-                                     connection="tcp",
+                                     connection=self.connection,
                                      fake_mac=True,
                                      tx_equal_to_rx=tx_equal_to_rx)
 
@@ -3710,7 +3687,7 @@ class Vnet2VnetOutboundSameCaPaIpPrefixesSinglePortTest(VnetApiEndpoints, VnetTr
 
         self.verify_traffic_scenario(client=self.tx_host,
                                      server=self.rx_host,
-                                     connection="tcp",
+                                     connection=self.connection,
                                      fake_mac=True,
                                      tx_equal_to_rx=tx_equal_to_rx)
 
