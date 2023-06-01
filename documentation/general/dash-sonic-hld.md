@@ -282,6 +282,25 @@ The following are the salient points and requirements:
 		   	} Redirect_Info; 
 		```
 - Implementation can type-cast the Redirect packet and map it to a flow
+- Redirect packet format is as below:
+
+
+  |SLB IP|APPL IP|GRE|SLB MAC|VM MAC|IP|Inner Src IP|Inner Dst IP|ICMP|Target Addr|Dst Addr|Redirect Header|Custom format|
+  |------|-------|---|-------|------|--|------------|------------|----|-----------|--------|---------------|-------------|
+ 
+- The following shall be used for translations
+
+| Field                         | Mapping                       |
+| ----------------------------- | ----------------------------- |
+| VM Mac                        | Source ENI                    |
+| Inner Src IP                  | Original Src IP               |
+| Inner Dst IP                  | Original Dst IP               |
+| Target Address                | Original Dst IP               |
+| Redirect Header               | Original IPv6 Hdr + TCP ports (5 tuple) |
+| Addr Family                   | AF_INET/AF_INET6              |
+| Encap Type                    | NVGRE 1/VXLAN 2               |
+| Vnid                          | Redirect Gre Key/ Vxlan Id    |
+| Custom Redirect Info          | Redirect DIP and Dst Mac      |
 
 # 3 Modules Design
 
