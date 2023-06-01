@@ -6,6 +6,13 @@ curdir = os.path.dirname(os.path.realpath(__file__))
 
 from saichallenger.common.sai_dpu import SaiDpu
 from saichallenger.common.sai_testbed import SaiTestbed
+from saichallenger.common.sai_data import SaiObjType
+
+
+def pytest_sessionstart(session):
+    SaiObjType.generate_from_thrift()
+    SaiObjType.generate_from_json()
+
 
 def pytest_addoption(parser):
     parser.addoption("--traffic", action="store_true", default=False, help="run tests with traffic")

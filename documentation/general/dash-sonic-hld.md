@@ -1,6 +1,6 @@
 # SONiC-DASH HLD
 ## High Level Design Document
-### Rev 1.1
+### Rev 1.4
 
 # Table of Contents
 
@@ -17,6 +17,7 @@
     * [1.4 Scaling requirements ](#14-scaling-requirements)
     * [1.5 Metering requirements ](#15-metering-requirements)
     * [1.6 Design considerations ](#16-design-considerations)
+    * [1.7 ACL requirements ](#17-acl-requirements)
   * [2 Packet Flows](#2-packet-flows)
   * [3 Modules Design](#3-modules-design)
     * [3.1 Config DB](#31-config-db)
@@ -114,6 +115,7 @@ Following are the minimal scaling requirements
 | Total tags per ENI            | 4k                            |
 | Max prefixes per tag          | 24k                           |
 | Max tags one prefix belong to | 512                           |
+| Max tags in an ACL rule       | 4k                            |
 | CA-PA Mappings                | 10M Per Card                  |
 | Active Connections/ENI        | 1M (Bidirectional TCP or UDP) |
 | Total active connections      | 32M (Bidirectional)           |
@@ -178,6 +180,33 @@ DASH Sonic implementation is targeted for appliance scenarios and must handles m
 14. During a bulk operation, if any part/subset of API fails, implementation shall return *error* for the entire API. Sonic implementation shall validate the entire API as pre-checks before applying and return accordingly.
 15. Implementation must have flexible memory allocation for ENI and not reserve max scale during initial create (e.g 100k routes). This is to allow oversubscription.
 16. Implementation must not have silent failures for APIs. E.g accepting an API from controller, returning success and failing in the backend. This is orthogonal to the idempotency of APIs described above for ADD and Delete operations. Intent is to ensure SDN controller and Sonic implementation is in-sync
+
+## 1.7 ACL requirements
+
+ACL is essential for NSGs and have different stages. In the current model, there are two stages for Azure and VNET level and another three stages for customer. The following are some of the key requirements and considerations:
+- ACL binding to ENI must be atomic. 
+- User can add/remove rules in a group as long as it is not currently bound to an ENI
+- It is not permitted to modify rules within a group that is currently bound to an ENI. For such scenario, a new group shall be created by application with the modified set of rules which could then be bind to ENI. An exception is if tags are expanded to individual prefixes in an ACL rule. In such cases, if tags are modified, application shall update the corresponding rule by adding/removing a prefix. 
+- No requirement to modify an existing rule except for the case above. For e.g change action of a rule from permit to deny or vice-versa
+- ACL Tagging
+	- Mapping a prefix to a tag can reduce the repetition of prefixes across different ACL rules and optimize memory usage
+	- Tagging is implemented as a bitmap in Orchagent and SAI layers
+	- A prefix can belong to multiple tags
+	- Prefixes can be added or removed from a tag at any time 
+	- SAI implementation shall return a capability for the bitmap size. A '0' return value shall be treated as no-tag support. 
+	- An example tag bitmap is as below. Assume tag bitmap size of 8 (a capability returned by SAI implementation).
+		-  Tag1 - 10.1.1.0/24, 20.1.1.0/24
+		-  Tag2 - 10.1.0.0/8, 20.1.1.0/24, 50.1.1.1/32 
+		-  Tag8 - Empty
+		-  SAI_SRC_TAG_ENTRY_ATTR_TAG_MAP: 10.1.1.0/24 -> "0000 0011", 20.1.1.0/24 -> "0000 0011", 10.1.0.0/8 -> "0000 0010". Note that orchagent shall extend the tag map to include all subnet to allow an LPM based lookup. In this case, tags for 10.1.1.0/24 shall also include the tag for 10.1.0.0/8.  
+		-  SAI_DASH_ACL_RULE_ATTR_SRC_TAG: Assume there is a rule with src tag bitmap as "0001 0010", it is a rule hit if the derived tag has at least 1 bit that matches the bitmap in the rule. 
+		-  If a packet arrives with src ip of 10.1.1.1, the corresponding derived src tag shall be "0000 0011" (say HW_DERIVED_TAG_MAP, matching entry for 10.1.1.0/24)
+		-  Ternary operation shall be => HW_DERIVED_TAG_MAP | (SAI_DASH_ACL_RULE_ATTR_SRC_TAG & SAI_DASH_ACL_RULE_ATTR_SRC_TAG_MASK). If any bit is set, it is treated as a match. In order to achieve this functionality, SAI implementation can expand the ACL rules to multiple rules that has only ONE tag set.
+		-  If the tag field is empty, ACL rule must match ANY tag or NO tag. 
+	- The bitmap size depends on the SAI implementation capability. It is fixed during initialization based on the capability value returned by SAI implementation. This same bitmap size shall be later used for ACL rules and prefix-tag mapping. Orchagent shall implement the logic to chose the tags with largest number of prefixes, based on the capability value. Say 8 biggest tags in the above example. Rest of the tags shall be expanded to include prefixes in the ACL rules.
+- Deleting ACL group is permitted as long as it is not bind to an ENI. It is not expected for application to delete individual rules prior to deleting a group. Implementation is expected to delete/free all resources when application triggers an ACL group delete.
+- ACL rules are not expected to have both tags and prefixes configured in the same rule. In case NorthBound configures with both tags and prefix, orchagent shall split this to separate rules. At high-level, requirement is an `OR` operation when there is both tag and prefix. 
+- Counters can be attached to ACL rules optionally for retrieving the number of connections/flows. It is not required to get the packet/byte counter as in the traditional model. A new SAI counter type shall be required for this.
 
 # 2 Packet Flows
 	
@@ -409,17 +438,20 @@ addresses                 = list of ip prefixes ',' separated. valid to have emp
 
 ```
 DASH_ACL_IN_TABLE:{{eni}}:{{stage}}
-    "acl_group_id": {{group_id}} 
+    "v4_acl_group_id": {{group_id}} (OPTIONAL)
+    "v6_acl_group_id": {{group_id}} (OPTIONAL)
 ```
 ```
 DASH_ACL_OUT_TABLE:{{eni}}:{{stage}}
-    "acl_group_id": {{group_id}} 
+    "v4_acl_group_id": {{group_id}} (OPTIONAL)
+    "v6_acl_group_id": {{group_id}} (OPTIONAL)
 ```
 
 ```
 key                      = DASH_ACL_IN_TABLE:eni:stage ; ENI name and stage as key; ACL stage can be {1, 2, 3 ..}
-; field                  = value 
-acl_group_id             = ACL group ID
+; field                  = value
+v4_acl_group_id             = IPv4 ACL group ID
+v6_acl_group_id             = IPv6 ACL group ID
 ```
 
 ```
@@ -1048,18 +1080,16 @@ Refer DASH documentation for the test plan.
     {
         "DASH_ROUTE_TABLE:F4939FEFC47E:30.0.0.0/16": {
             "action_type":"direct",
-            "vnet":"Vnet1",
-	    "metering_policy_en":"false",
-	    "metering_class":"1000"
+            "metering_policy_en":"false",
+            "metering_class":"1000"
         },
         "OP": "SET"
     },
     {
         "DASH_ROUTE_TABLE:F4939FEFC47E:40.0.0.0/16": {
             "action_type":"direct",
-            "vnet":"Vnet1",
-	    "metering_policy_en":"true",
-	    "metering_class":"1000"
+            "metering_policy_en":"true",
+            "metering_class":"1000"
         },
         "OP": "SET"
     },
