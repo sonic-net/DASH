@@ -269,7 +269,7 @@ The following are the salient points and requirements:
 			    uint32 Version; 
 			    uint16 AddrFamily; 
 			    uint16 EncapType; 
-			    uint32 Vnid; 
+			    uint32 EncapId; 
 			    union { 
 			        struct { 
 			            in_addr DipPAv4; 
@@ -296,10 +296,10 @@ The following are the salient points and requirements:
 | Inner Src IP                  | Original Src IP               |
 | Inner Dst IP                  | Original Dst IP               |
 | Target Address                | Original Dst IP               |
-| Redirect Header               | Original IPv6 Hdr + TCP ports (5 tuple) |
+| Redirect Header               | Original IPv6 Header + TCP ports (5 tuple) |
 | Addr Family                   | AF_INET/AF_INET6              |
 | Encap Type                    | NVGRE 1/VXLAN 2               |
-| Vnid                          | Redirect Gre Key/ Vxlan Id    |
+| Encap Id                      | Redirect GRE Key/ VXLAN Id    |
 | Custom Redirect Info          | Redirect DIP and Dst Mac      |
 
 # 3 Modules Design
