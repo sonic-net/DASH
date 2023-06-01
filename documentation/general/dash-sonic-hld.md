@@ -46,7 +46,7 @@
 |  1.3  | 04/12/2023 |     Ze Gan          | AppDB protobuf design                     |
 |  1.4  | 05/03/2023 |    Prince Sunny     | ACL Tagging, ACL Requirements             |
 |  1.5  | 05/22/2023 | Oleksandr Ivantsiv  | Update configuration examples             |
-|  1.6  | 06/01/2023 |    Prince Sunny     | Added Fastpath                            |
+|  1.6  | 06/01/2023 |    Prince Sunny     | Added FastPath                            |
 
 # About this Manual
 This document provides more detailed design of DASH APIs, DASH orchestration agent, Config and APP DB Schemas and other SONiC buildimage changes required to bring up SONiC image on an appliance card. General DASH HLD can be found at [dash_hld](./dash-high-level-design.md).
