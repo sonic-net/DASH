@@ -120,6 +120,7 @@ Following are the minimal scaling requirements
 | Total active connections      | 32M (Bidirectional)           |
 | Metering Buckets per ENI      | 4000                          |
 | CPS                           | 1.5M                          |
+| Tunnel Support                | 2M                          |
 
 \* Number of VNET is a software limit as VNET by itself does not take hardware resources. This shall be limited to number of VNI hardware can support
 
