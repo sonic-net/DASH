@@ -173,6 +173,12 @@ class VnetAPI(VnetObjects):
         self.add_teardown_obj(self.eni_remove, eni_id)
 
         return eni_id
+    
+    def eni_set_admin_state(self, eni_oid, state):
+        sai_thrift_set_eni_attribute(self.client, eni_oid, admin_state=(state == "up"))
+        self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
+
+        print(f"ENI oid: {eni_oid} setting admin state {state} - OK")
 
     def eni_remove(self, eni_id):
         sai_thrift_remove_eni(self.client, eni_id)
@@ -458,6 +464,12 @@ class VnetApiEndpoints(VnetAPI):
     def setUp(self, underlay_ipv6=False, overlay_ipv6=False):
         super(VnetApiEndpoints, self).setUp()
 
+        # Set connection type for traffic verification methods
+        self.assertTrue(test_param_get("connection").lower() in ["tcp", "udp", "icmp"],
+                        "Unknown connection protocol! Supported protocols: tcp|udp|icmp")
+        self.connection = test_param_get("connection").lower()
+        print(f"{self.connection.upper()} protocol is used for traffic verification.")
+        
         self.underlay_ipv6 = underlay_ipv6
         self.overlay_ipv6 = overlay_ipv6
 
@@ -512,8 +524,6 @@ class VnetApiEndpoints(VnetAPI):
 
         self.rx_host.port = self.tx_host.port
         self.rx_host.mac = self.tx_host.mac
-        self.rx_host.ip = self.tx_host.ip
-        self.rx_host.ip_prefix = self.tx_host.ip_prefix
 
         self.rx_host.peer.port = self.tx_host.peer.port
         self.rx_host.peer.mac = self.tx_host.peer.mac

@@ -4,6 +4,7 @@
 SCRIPT=$(basename $0)
 TARGET="bmv2"  # TODO: add no target by default and remove -H
 TRAFFIC="bidir"
+CONNECTION="tcp"
 TEST_DIR="$(dirname $0)"
 EXTRA_PARAMETERS=""
 INTERFACES="veth1,veth3"
@@ -23,6 +24,7 @@ function show_help_and_exit()
     echo "    -H                      : specify if tests are run on real hardware"
     echo "    -T <target>             : specify any specific target platform (default: bmv2)"
     echo "    -b <traffic type>       : specify traffic type for verification: bidir|monodir|no (default: bidir)"
+    echo "    -C <connection type>    : specify connection type protocol for traffic verification: tcp|udp|icmp"
     echo "    -e <parameters>         : specify extra parameter(s) (default: none)"
     echo -e "    -t <timeout>            : specify timeout for test case execution\n"
 
@@ -44,7 +46,7 @@ function validate_parameters()
     fi
 }
 
-while getopts "h?UHT:I:s:p:c:b:e:t:" opt; do
+while getopts "h?UHT:I:s:p:c:b:C:e:t:" opt; do
     case ${opt} in
         h|\? )
             show_help_and_exit 0
@@ -73,6 +75,9 @@ while getopts "h?UHT:I:s:p:c:b:e:t:" opt; do
         b )
             TRAFFIC=${OPTARG}
             ;;
+        C )
+            CONNECTION=${OPTARG}
+            ;;
         e )
             EXTRA_PARAMETERS="${EXTRA_PARAMETERS} ${OPTARG}"
             ;;
@@ -92,5 +97,5 @@ ptf \
     --interface 0@${iface_array[0]} \
     --interface 1@${iface_array[1]} \
     --test-case-timeout=${TIMEOUT} \
-    --test-params="target='${TARGET}';traffic_check='${TRAFFIC}';${TEST_PARAMS}" \
+    --test-params="connection='${CONNECTION}';target='${TARGET}';traffic_check='${TRAFFIC}';${TEST_PARAMS}" \
     ${EXTRA_PARAMETERS}
