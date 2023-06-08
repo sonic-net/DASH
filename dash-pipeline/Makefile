@@ -411,6 +411,9 @@ docker-publish-saithrift-bldr:
 DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.saithrift-client-bldr | $(SHA1SUM))
 DOCKER_SAITHRIFT_CLIENT_BLDR_IMG = $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_NAME):$(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_TAG)
 
+docker-saithrift-client-bldr-image-exists:
+	docker images --format "{{.Repository}}:{{.Tag}}" |grep $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG) || make docker-saithrift-client-bldr
+
 docker-saithrift-client-bldr:
 	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG); } || \
 	docker build \
@@ -440,7 +443,7 @@ docker-publish-saithrift-client-bldr:
 
 # Client image, rebuild any time SAI interface changes
 # TODO - add sai header (inc/ and experimental) dependencies
-docker-saithrift-client:
+docker-saithrift-client: docker-saithrift-client-bldr-image-exists
 	docker build \
 		-f dockerfiles/Dockerfile.saithrift-client \
 	    -t $(DOCKER_SAITHRIFT_CLIENT_IMG) \
@@ -655,6 +658,10 @@ endif
 DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.saichallenger-client-bldr | $(SHA1SUM))
 DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG = $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_NAME):$(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_TAG)
 
+
+docker-saichallenger-client-bldr-image-exists:
+	docker images --format "{{.Repository}}:{{.Tag}}" |grep $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG) || make docker-saichallenger-client-bldr
+
 docker-saichallenger-client-bldr:
 	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG); } || \
 		{ pushd $(SAI_CHALLENGER_PATH) && git submodule update --init && ./build.sh -i client && popd; \
@@ -674,7 +681,7 @@ docker-publish-saichallenger-client-bldr:
 docker-pull-saichallenger-client-bldr:
 	docker pull $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG)
 
-docker-saichallenger-client: docker-saichallenger-client-bldr
+docker-saichallenger-client: docker-saichallenger-client-bldr-image-exists
 	docker build \
 		-f dockerfiles/Dockerfile.saichallenger-client \
 		-t $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \

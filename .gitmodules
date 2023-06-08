@@ -4,5 +4,5 @@
 	branch = dash-ptf-ci
 [submodule "test/SAI-Challenger"]
 	path = test/SAI-Challenger
-	url = https://github.com/opencomputeproject/SAI-Challenger
+	url = https://github.com/opencomputeproject/SAI-Challenger.git
 	branch = main
