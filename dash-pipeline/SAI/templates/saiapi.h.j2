@@ -118,6 +118,7 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% if table.is_object == 'true' %}
 {% if table['keys'] | length > 1 %}
 {% for key in table['keys'] %}
+{% if key.isattribute != 'false' %}
     /**
      * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.sai_key_name }}
      *
@@ -150,15 +151,22 @@ typedef enum _sai_{{ table.name }}_attr_t
     SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}_MASK,
 
 {% endif %}
+{% endif %}
 {% endfor %}
 {% endif %}
 {% endif %}
 {% for param in table.actionParams %}
+{% if param.skipattr == 'true' %}
+{% else %}
     /**
      * @brief Action {% for action in param.paramActions %}{{ action }}{{ ", " if not loop.last else "" }}{% endfor %} parameter {{ param.name | upper }}
      *
      * @type {{ param.type }}
+{% if param.isreadonly == 'true' %}
+     * @flags READ_ONLY
+{% else %}
      * @flags CREATE_AND_SET
+{% endif %}
 {% if param.type == 'sai_uint16_t' %}
      * @isvlan false
 {% endif %}
@@ -177,7 +185,9 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% elif param.field == 's32' %}
      * @default {{ param.default }}
 {% else %}
+{% if param.isreadonly != 'true' %}
      * @default 0
+{% endif %}
 {% endif %}
 {% if table.actions | length > 1 %}
 {% if param.paramActions | length > 0 %}
@@ -196,6 +206,7 @@ typedef enum _sai_{{ table.name }}_attr_t
     SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }},
 {% endif %}
 
+{% endif %}
 {% endfor %}
 {% if table.with_counters == 'true' %}
     /**

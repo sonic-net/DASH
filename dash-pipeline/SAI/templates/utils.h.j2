@@ -141,6 +141,27 @@ void ipaddrSetVal(const sai_ip_address_t &value, T &t, int bits = -1){
 }
 
 template<typename T>
+void ipaddrSetMask(const sai_attribute_value_t &value, T &t, int bits = -1){
+    ipaddrSetMask(value.ipaddr, t);
+}
+
+template<typename T>
+void ipaddrSetMask(const sai_ip_address_t &value, T &t, int bits = -1){
+    switch(value.addr_family) {
+        case SAI_IP_ADDR_FAMILY_IPV4: {
+            uint32_t mask = value.addr.ip4;
+            t->set_mask(&mask, 4);
+        }
+        break;
+        case SAI_IP_ADDR_FAMILY_IPV6: {
+            t->set_mask(const_cast<uint8_t*>(&value.addr.ip6[0]), 16);
+        }
+        break;
+        default: assert(0 && "unrecognzed value.ipaddr.addr_family");
+    }
+}
+
+template<typename T>
 void macSetVal(const sai_attribute_value_t &value, T &t, int bits = -1){
     t->set_value(const_cast<uint8_t*>(&value.mac[0]), 6);
 }

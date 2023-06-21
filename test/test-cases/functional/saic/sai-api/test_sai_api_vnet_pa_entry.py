@@ -10,7 +10,7 @@ SWITCH_ID = 5
 
 
 class TestSaiVnetPaEntry:
-
+    
     def test_vnet_pa_validation_entry_create(self, dpu):
 
         # Create VNET

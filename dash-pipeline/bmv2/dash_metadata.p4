@@ -62,6 +62,14 @@ struct metadata_t {
     bit<16> stage3_dash_acl_group_id;
     bit<16> stage4_dash_acl_group_id;
     bit<16> stage5_dash_acl_group_id;
+    bit<1> meter_policy_en;
+    bit<1> mapping_meter_class_override;
+    bit<16> meter_policy_id;
+    bit<16> policy_meter_class;
+    bit<16> route_meter_class;
+    bit<16> mapping_meter_class;
+    bit<16> meter_class;
+    bit<32> meter_bucket_index;
     tag_map_t src_tag_map;
     tag_map_t dst_tag_map;
 }

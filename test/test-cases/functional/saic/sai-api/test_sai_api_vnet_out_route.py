@@ -89,6 +89,10 @@ class TestSaiVnetOutboundRoutingEntry:
                     "SAI_ENI_ATTR_OUTBOUND_V6_STAGE4_DASH_ACL_GROUP_ID",
                     "0",
                     "SAI_ENI_ATTR_OUTBOUND_V6_STAGE5_DASH_ACL_GROUP_ID",
+                    "0",
+                    "SAI_ENI_ATTR_V4_METER_POLICY_ID",
+                    "0",
+                    "SAI_ENI_ATTR_V6_METER_POLICY_ID",
                     "0"
                 ]
             },
@@ -109,7 +113,9 @@ class TestSaiVnetOutboundRoutingEntry:
                 },
                 "attributes": [
                     "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION", "SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET",
-                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID", "$vnet"
+                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID", "$vnet",
+                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_POLICY_EN", "False",
+                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS", "0"
                 ]
             },
         ]
@@ -146,7 +152,9 @@ class TestSaiVnetOutboundRoutingEntry:
                 },
                 "attributes": [
                     "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION", "SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET",
-                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID", "$vnet"
+                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID", "$vnet",
+                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_POLICY_EN", "False",
+                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS", "0"
                 ]
             },
         ]

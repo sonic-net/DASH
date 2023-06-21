@@ -130,6 +130,8 @@ class CreateDeleteEniTest(VnetAPI):
                                    vm_underlay_dip=self.vm_underlay_dip,
                                    vm_vni=self.vm_vni,
                                    vnet_id=self.vm_vnet,
+                                   v4_meter_policy_id=0,
+                                   v6_meter_policy_id=0,
                                    inbound_v4_stage1_dash_acl_group_id=self.in_acl_group_id,
                                    inbound_v4_stage2_dash_acl_group_id=self.in_acl_group_id,
                                    inbound_v4_stage3_dash_acl_group_id=self.in_acl_group_id,

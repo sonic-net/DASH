@@ -208,6 +208,8 @@ class SaiThriftDashAclTest(VnetAPI):
                                    vm_underlay_dip=vm_underlay_dip,
                                    vm_vni=9,
                                    vnet_id=self.vnet,
+                                   v4_meter_policy_id=0,
+                                   v6_meter_policy_id=0,
                                    inbound_v4_stage1_dash_acl_group_id=self.in_v4_stage1_acl_group_id,
                                    inbound_v4_stage2_dash_acl_group_id=self.in_v4_stage2_acl_group_id,
                                    inbound_v4_stage3_dash_acl_group_id=self.in_v4_stage3_acl_group_id,
@@ -223,7 +225,6 @@ class SaiThriftDashAclTest(VnetAPI):
                                    inbound_v6_stage3_dash_acl_group_id=self.in_v6_stage3_acl_group_id,
                                    inbound_v6_stage4_dash_acl_group_id=0,
                                    inbound_v6_stage5_dash_acl_group_id=0,
-
                                    outbound_v6_stage1_dash_acl_group_id=self.out_v6_stage1_acl_group_id,
                                    outbound_v6_stage2_dash_acl_group_id=self.out_v6_stage2_acl_group_id,
                                    outbound_v6_stage3_dash_acl_group_id=self.out_v6_stage3_acl_group_id,
@@ -247,7 +248,8 @@ class SaiThriftDashAclTest(VnetAPI):
             switch_id=self.switch_id, eni_id=self.eni, destination=ca_prefix)
 
         self.create_entry(sai_thrift_create_outbound_routing_entry, sai_thrift_remove_outbound_routing_entry,
-                          self.ore, action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET, dst_vnet_id=self.vnet)
+                          self.ore, action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET, dst_vnet_id=self.vnet,
+                          meter_policy_en=False, meter_class=0)
 
         underlay_dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
                                                addr=sai_thrift_ip_addr_t(ip4=self.dst_pa_ip))
@@ -255,7 +257,8 @@ class SaiThriftDashAclTest(VnetAPI):
             switch_id=self.switch_id, dst_vnet_id=self.vnet, dip=dip)
 
         self.create_entry(sai_thrift_create_outbound_ca_to_pa_entry, sai_thrift_remove_outbound_ca_to_pa_entry,
-                          self.ocpe, underlay_dip=underlay_dip, overlay_dmac=self.dst_ca_mac, use_dst_vnet_vni=True)
+                          self.ocpe, underlay_dip=underlay_dip, overlay_dmac=self.dst_ca_mac, use_dst_vnet_vni=True,
+                          meter_class=0, meter_class_override=False)
 
     def setupTest(self):
         self.tests.append(AclRuleTest(self,

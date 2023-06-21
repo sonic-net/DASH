@@ -62,6 +62,8 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
                                          vm_underlay_dip=vm_underlay_dip,
                                          vm_vni=9,
                                          vnet_id=self.vnet,
+                                         v4_meter_policy_id = 0,
+                                         v6_meter_policy_id = 0,
                                          # TODO: Enable ACL rule
                                          #inbound_v4_stage1_dash_acl_group_id = self.in_acl_group_id,
                                          #inbound_v4_stage2_dash_acl_group_id = self.in_acl_group_id,
@@ -115,14 +117,16 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         self.ore = sai_thrift_outbound_routing_entry_t(switch_id=self.switch_id, eni_id=self.eni, destination=ca_prefix)
         status = sai_thrift_create_outbound_routing_entry(self.client, self.ore,
                                                           action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET,
-                                                          dst_vnet_id=self.vnet)
+                                                          dst_vnet_id=self.vnet,
+                                                          meter_policy_en=False, meter_class=0)
         assert(status == SAI_STATUS_SUCCESS)
 
         underlay_dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
                                                addr=sai_thrift_ip_addr_t(ip4=self.dst_pa_ip))
         self.ocpe = sai_thrift_outbound_ca_to_pa_entry_t(switch_id=self.switch_id, dst_vnet_id=self.vnet, dip=dip)
         status = sai_thrift_create_outbound_ca_to_pa_entry(self.client, self.ocpe, underlay_dip = underlay_dip,
-                                                           overlay_dmac=self.dst_ca_mac, use_dst_vnet_vni = True)
+                                                           overlay_dmac=self.dst_ca_mac, use_dst_vnet_vni = True,
+                                                           meter_class=0, meter_class_override=False)
         assert(status == SAI_STATUS_SUCCESS)
 
         print(f"\n{self.__class__.__name__} configureVnet OK")
