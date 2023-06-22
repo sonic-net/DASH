@@ -196,6 +196,7 @@ class VnetAPI(VnetObjects):
         sai_thrift_create_direction_lookup_entry(self.client, direction_lookup_entry, action=act)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.direction_lookup_remove, direction_lookup_entry)
+        return direction_lookup_entry
 
     def direction_lookup_remove(self, direction_lookup_entry):
         sai_thrift_remove_direction_lookup_entry(self.client, direction_lookup_entry)
@@ -209,6 +210,7 @@ class VnetAPI(VnetObjects):
         sai_thrift_create_eni_ether_address_map_entry(self.client, eni_ether_address_map_entry, eni_id=eni_id)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.eni_mac_map_remove, eni_ether_address_map_entry)
+        return eni_ether_address_map_entry
 
     def eni_mac_map_remove(self, eni_ether_address_map_entry):
         sai_thrift_remove_eni_ether_address_map_entry(self.client, eni_ether_address_map_entry)
@@ -243,6 +245,7 @@ class VnetAPI(VnetObjects):
                                                 src_vnet_id=src_vnet_id)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.inbound_routing_remove, inbound_routing_entry)
+        return inbound_routing_entry
 
     def inbound_routing_decap_create(self, eni_id, vni, sip, sip_mask):
         """
@@ -258,6 +261,7 @@ class VnetAPI(VnetObjects):
                                                 action=SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.inbound_routing_remove, inbound_routing_entry)
+        return inbound_routing_entry
 
     def inbound_routing_remove(self, inbound_routing_entry):
         sai_thrift_remove_inbound_routing_entry(self.client, inbound_routing_entry)
@@ -275,6 +279,8 @@ class VnetAPI(VnetObjects):
                                               action=SAI_PA_VALIDATION_ENTRY_ACTION_PERMIT)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.pa_validation_remove, pa_validation_entry)
+
+        return pa_validation_entry
 
     def pa_validation_remove(self, pa_validation_entry):
         sai_thrift_remove_pa_validation_entry(self.client, pa_validation_entry)
@@ -296,6 +302,8 @@ class VnetAPI(VnetObjects):
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_routing_vnet_direct_remove, outbound_routing_entry)
 
+        return outbound_routing_entry
+
     def outbound_routing_direct_create(self, eni_id, lpm, counter_id=None):
         """
         Create outband vnet direct routing entry
@@ -309,6 +317,8 @@ class VnetAPI(VnetObjects):
                                                  meter_policy_en=False, meter_class=0)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_routing_vnet_direct_remove, outbound_routing_entry)
+
+        return outbound_routing_entry
 
     def outbound_routing_vnet_create(self, eni_id, lpm, dst_vnet_id, counter_id=None):
         """
@@ -345,6 +355,8 @@ class VnetAPI(VnetObjects):
                                                   meter_class=0, meter_class_override=False)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_ca_to_pa_remove, ca_to_pa_entry)
+
+        return ca_to_pa_entry
 
     def outbound_ca_to_pa_remove(self, ca_to_pa_entry):
         sai_thrift_remove_outbound_ca_to_pa_entry(self.client, ca_to_pa_entry)
@@ -871,7 +883,10 @@ class VnetTrafficMixin:
         if invalid_inner_dst_ip is not None:
             # Verify drop with invalid inner Dst IP
             vxlan_pkt_invalid_inner_dst_ip = deepcopy(vxlan_pkt)
-            vxlan_pkt_invalid_inner_dst_ip.getlayer('VXLAN').getlayer('IP').dst = invalid_inner_dst_ip
+            if vxlan_pkt_invalid_inner_dst_ip.getlayer('VXLAN').haslayer('IP'):
+                vxlan_pkt_invalid_inner_dst_ip.getlayer('VXLAN').getlayer('IP').dst = invalid_inner_dst_ip
+            else:
+                vxlan_pkt_invalid_inner_dst_ip.getlayer('VXLAN').getlayer('IPv6').dst = invalid_inner_dst_ip
 
             print("Sending VxLAN IPv4 packet with invalid Inner Dst MAC, expect drop")
             send_verify(vxlan_pkt_invalid_inner_dst_ip)

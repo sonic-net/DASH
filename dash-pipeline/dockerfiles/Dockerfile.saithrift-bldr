@@ -25,7 +25,7 @@ ENV SAI_PTF_DEPS    sudo git python3 wget doxygen graphviz aspell-en \
 
 ENV DASH_SAIGEN_DEPS python3 python3-pip
 
-RUN apt-get update -qq && \
+RUN apt-get update -q && \
     apt-get install -y --no-install-recommends $SAI_PTF_DEPS $DASH_SAIGEN_DEPS && \
     pip3 install ctypesgen jinja2
 

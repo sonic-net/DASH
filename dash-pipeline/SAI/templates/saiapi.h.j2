@@ -184,6 +184,8 @@ typedef enum _sai_{{ table.name }}_attr_t
      * @default SAI_NULL_OBJECT_ID
 {% elif param.field == 's32' %}
      * @default {{ param.default }}
+{% elif param.type == 'sai_ip_prefix_list_t' %}
+     * @default empty
 {% else %}
 {% if param.isreadonly != 'true' %}
      * @default 0

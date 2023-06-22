@@ -44,7 +44,8 @@ sai_type_to_field = {
     'sai_ip_addr_family_t': 'u32',
     'sai_uint32_t': 'u32',
     'sai_uint64_t': 'u64',
-    'sai_mac_t': 'mac'
+    'sai_mac_t': 'mac',
+    'sai_ip_prefix_list_t': 'ipprefixlist'
 }
 
 def p4_annotation_to_sai_attr(p4rt, sai_attr):
