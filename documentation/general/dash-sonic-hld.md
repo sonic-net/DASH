@@ -268,11 +268,10 @@ It is possible that a given packet can get a hit in route table and/or mapping t
 
 ## 2.5 FastPath
 
-This section captures the Sonic-Dash specifics of FastPath use-case. Detailed document on FastPath is captured here (![FastPath](https://github.com/sonic-net/DASH/blob/main/documentation/load-bal-service/load-balancer-v3.md))
+This section captures the Sonic-Dash specifics of FastPath use-case. Detailed document on FastPath is captured here ([FastPath](https://github.com/sonic-net/DASH/blob/main/documentation/load-bal-service/load-balancer-v3.md))
 The following are the salient points and requirements:
 - FastPath kicks in when appliance receives an ICMP redirect that matches an existing unified flow
-- ICMP redirects are expected to be received from source and destination MUXes separately
-- Each ICMP redirect shall only update one side of the flow. (Src or Dst depending on the originating MUX)
+- Each ICMP redirect shall only update one side of the flow.
 - ICMP packet is generated only for TCP. It is not generated for UDP traffic. 
 - FastPath example for Service Tunnels:
 	- After the first SYN pkt, appliance shall create two flows (one Outbound and another Inbound)
@@ -313,7 +312,7 @@ The following are the salient points and requirements:
 			        } Info6; 
 		   	} Redirect_Info; 
 		```
-- Implementation can type-cast the Redirect packet and map it to a flow
+- Implementation can use the above struct as a type-cast reference (packed as metadata in the redirect packet) and map it to a flow
 - Redirect packet format is as below:
 
 
