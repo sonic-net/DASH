@@ -269,11 +269,12 @@ It is possible that a given packet can get a hit in route table and/or mapping t
 ## 2.5 FastPath
 
 This section captures the Sonic-Dash specifics of FastPath use-case. Detailed document on FastPath is captured here ([FastPath](https://github.com/sonic-net/DASH/blob/main/documentation/load-bal-service/load-balancer-v3.md))
-The following are the salient points and requirements:
+
+The following are the salient points and requirements. Detailed design for FastPath feature shall come as a separate PR. FastPath redirect packets shall be handled by a standalone application and use SAI APIs to update the appliance/dpu flows. 
 - FastPath kicks in when appliance receives an ICMP redirect that matches an existing unified flow
 - Each ICMP redirect shall only update one side of the flow.
 - ICMP packet is generated only for TCP. It is not generated for UDP traffic. 
-- FastPath example for Service Tunnels:
+- FastPath example for Service Tunnel. *Notice that this is an example scenario and can be extended later for other packet formats*
 	- After the first SYN pkt, appliance shall create two flows (one Outbound and another Inbound)
 	- Original Outbound packet shall have an inner IPv6 header and outer IPv4 (Src VIP-A and Dst VIP-B)
 	- After an ICMP redirect is received from VIP-B hosting MUX, the Outbound flow shall be fixed-up to have outer IPV4 dst address to use the Redirect IP of VIP-B. Same fixup for Inbound flow to change VIP-B to Redirect IP
@@ -312,7 +313,7 @@ The following are the salient points and requirements:
 			        } Info6; 
 		   	} Redirect_Info; 
 		```
-- Implementation can use the above struct as a type-cast reference (packed as metadata in the redirect packet) and map it to a flow
+- Implementation can use the above struct as a type-cast reference (packed as metadata in the redirect packet) and map it to a flow. Full packet capture is available in this ([doc](https://github.com/sonic-net/DASH/blob/main/documentation/load-bal-service/load-balancer-v3.md)) 
 - Redirect packet format is as below:
 
 
