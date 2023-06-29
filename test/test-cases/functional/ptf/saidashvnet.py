@@ -607,7 +607,7 @@ class Vnet2VnetInboundMultiplePaValidatesSingleEniSinglePortOverlayIpv6Test(Vnet
                                                       client_ip="dddd::14",
                                                       client_vni=30)
 
-        self.tx_host_2 = self.define_neighbor_network(port=self.tx_host_0.port,
+        self.tx_host_3 = self.define_neighbor_network(port=self.tx_host_0.port,
                                                       mac=self.tx_host_0.mac,
                                                       ip="11.0.0.1",
                                                       ip_prefix="11.0.0.1/24",
@@ -736,11 +736,11 @@ class Vnet2VnetInboundMultiplePaValidatesSingleEniTwoPortsOverlayIpv6Test(Vnet2V
         self.route_create(self.tx_host_2.ip_prefix, nhop_0)
         self.route_create(self.tx_host_3.ip_prefix, nhop_0)
 
-        rif_1 = self.router_interface_create(self.rx_host_0.peer.port,
-                                             src_mac=self.rx_host_0.peer.mac)
-        nhop_1 = self.nexthop_create(rif_1, self.rx_host_0.ip)
-        self.neighbor_create(rif_1, self.rx_host_0.ip, self.rx_host_0.mac)
-        self.route_create(self.rx_host_1.ip_prefix, nhop_1)
+        rif_1 = self.router_interface_create(self.rx_host.peer.port,
+                                             src_mac=self.rx_host.peer.mac)
+        nhop_1 = self.nexthop_create(rif_1, self.rx_host.ip)
+        self.neighbor_create(rif_1, self.rx_host.ip, self.rx_host.mac)
+        self.route_create(self.rx_host.ip_prefix, nhop_1)
 
 
 @group("draft")

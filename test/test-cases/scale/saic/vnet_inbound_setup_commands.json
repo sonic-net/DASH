@@ -140,7 +140,7 @@
       "vni": "1000",
       "sip": "10.10.2.0",
       "sip_mask": "255.255.255.0",
-      "priority": 0
+      "priority": "0"
     },
     "attributes": [
       "SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION",

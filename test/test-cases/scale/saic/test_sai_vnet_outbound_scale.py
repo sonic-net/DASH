@@ -125,9 +125,9 @@ class TestSaiVnetOutbound:
         """ Generate a configuration to remove entries
             returns iterator (generator) of SAI records
         """
-        cleanup_commands = [{'name': cmd['name'], 'op': 'remove'} for cmd in self.make_create_vnet_config()]
-        cleanup_commands = reversed(cleanup_commands)
+        cleanup_commands = reversed(self.make_create_vnet_config())
         for cmd in cleanup_commands:
+            cmd['op'] = 'remove'
             yield cmd
         return
 
