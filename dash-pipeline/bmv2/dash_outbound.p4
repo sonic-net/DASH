@@ -138,7 +138,9 @@ control outbound(inout headers_t hdr,
                                     IPv6Address overlay_sip,
                                     IPv6Address overlay_dip,
                                     dash_encapsulation_t dash_encapsulation,
-                                    bit<24> tunnel_key) {
+                                    bit<24> tunnel_key,
+                                    bit<16> meter_class,
+                                    bit<1> meter_class_override) {
         meta.encap_data.dash_encapsulation = dash_encapsulation;
         meta.encap_data.service_tunnel_key = tunnel_key;
 
@@ -150,7 +152,9 @@ control outbound(inout headers_t hdr,
 
         set_tunnel_mapping(underlay_dip,
                            overlay_dmac,
-                           use_dst_vnet_vni);
+                           use_dst_vnet_vni,
+                           meter_class,
+                           meter_class_override);
     }
 
 #ifdef TARGET_BMV2_V1MODEL
