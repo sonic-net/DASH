@@ -8,8 +8,7 @@
 #include "dash_conntrack.p4"
 
 control inbound(inout headers_t hdr,
-                inout metadata_t meta,
-                inout standard_metadata_t standard_metadata)
+                inout metadata_t meta)
 {
     apply {
 #ifdef STATEFUL_P4
@@ -17,11 +16,17 @@ control inbound(inout headers_t hdr,
 #endif /* STATEFUL_P4 */
 #ifdef PNA_CONNTRACK
         ConntrackIn.apply(hdr, meta);
+
+        if (meta.encap_data.original_overlay_sip != 0) {
+            service_tunnel_decode(hdr,
+                                  meta.encap_data.original_overlay_sip,
+                                  meta.encap_data.original_overlay_dip);
+        }
 #endif // PNA_CONNTRACK
 
         /* ACL */
         if (!meta.conntrack_data.allow_in) {
-            acl.apply(hdr, meta, standard_metadata);
+            acl.apply(hdr, meta);
         }
 
 #ifdef STATEFUL_P4

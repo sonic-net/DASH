@@ -14,6 +14,8 @@ adaptor
 adaptors
 ADDR
 addr
+ae
+afe
 agnostically
 amd
 apache
@@ -128,6 +130,7 @@ dataplanes
 datastore
 DBs
 DDoS
+de
 deallocating
 Decap
 decap
@@ -210,6 +213,7 @@ failover
 failovers
 fakesai
 FastPath
+fc
 FEC
 ffe
 FINPackets
@@ -247,6 +251,7 @@ HSL
 https
 hw
 HW
+IETF
 ICLA
 ICMP
 idempotency
@@ -276,6 +281,7 @@ IPv
 irrespectively
 ish
 iso
+isresourcetype
 ISSU
 iteratively
 IxExplorer
@@ -309,6 +315,7 @@ LOOKUPs
 loopback
 LPM
 lts
+MACs
 Macsec
 makefile
 Makefile
@@ -356,6 +363,8 @@ num
 NumberOfFlowResimulated
 NVA
 NVidia
+nvgre
+Nvgre
 NVMe
 observability
 OCP
@@ -416,6 +425,7 @@ Pritsak
 PrivateAddress
 programmability
 programmatically
+proto
 protobuf
 provids
 PRs
@@ -490,6 +500,7 @@ SDK
 SDKs
 SDN
 sdn
+SetRequest
 Sflow
 SHA
 sharding
@@ -636,6 +647,7 @@ Vnic
 vnic
 vnics
 VNID
+VNIs
 VPC
 vpc
 vport
@@ -664,9 +676,23 @@ xsight
 YAML
 yaml
 yml
+ZMQ
 ZTVN
 Mukesh
 Velayudhan
 deparsing
 testability
 autogeneration
+IpAddress
+IpPrefix
+bool
+uint
+AclRule
+RangeOrValue
+Srinivasan
+Vijay
+AppDB
+Gan
+Ze
+AppDBMemoryEstimation
+Ivantsiv

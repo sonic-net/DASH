@@ -11,7 +11,9 @@ from saichallenger.common.sai_dataplane.utils.ptf_testutils import (send_packet,
                                                                     verify_no_other_packets,
                                                                     verify_packet)
 
-import dash_helper.vnet2vnet_helper as dh
+import sys
+sys.path.append("../utils")
+import vnet2vnet_helper as dh
 
 current_file_dir = Path(__file__).parent
 
@@ -136,6 +138,8 @@ class TestSaiVnetOutbound:
     @pytest.mark.ptf
     def test_vnet_inbound_simple_packet_modification(self, dpu, dataplane):
         """Verify proper packet transformation."""
+
+        dataplane.set_config()
 
         SRC_VM_IP = "10.1.1.10"
         OUTER_SMAC = "00:00:05:06:06:06"

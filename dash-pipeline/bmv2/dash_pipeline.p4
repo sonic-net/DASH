@@ -1,31 +1,34 @@
 #include <core.p4>
-#include <v1model.p4>
+#include "dash_arch_specific.p4"
+
 #include "dash_headers.p4"
 #include "dash_metadata.p4"
 #include "dash_parser.p4"
 #include "dash_vxlan.p4"
+#include "dash_nvgre.p4"
 #include "dash_outbound.p4"
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"
 
-control dash_verify_checksum(inout headers_t hdr,
-                         inout metadata_t meta)
-{
-    apply { }
-}
-
-control dash_compute_checksum(inout headers_t hdr,
-                          inout metadata_t meta)
-{
-    apply { }
-}
-
-control dash_ingress(inout headers_t hdr,
-                  inout metadata_t meta,
-                  inout standard_metadata_t standard_metadata)
+control dash_ingress(
+      inout headers_t hdr
+    , inout metadata_t meta
+#ifdef TARGET_BMV2_V1MODEL
+    , inout standard_metadata_t standard_metadata
+#endif // TARGET_BMV2_V1MODEL
+#ifdef TARGET_DPDK_PNA
+    , in    pna_main_input_metadata_t  istd
+    , inout pna_main_output_metadata_t ostd
+#endif // TARGET_DPDK_PNA
+    )
 {
     action drop_action() {
+#ifdef TARGET_BMV2_V1MODEL
         mark_to_drop(standard_metadata);
+#endif // TARGET_BMV2_V1MODEL
+#ifdef TARGET_DPDK_PNA
+        drop_packet();
+#endif // TARGET_DPDK_PNA
     }
 
     action deny() {
@@ -50,11 +53,11 @@ control dash_ingress(inout headers_t hdr,
     }
 
     action set_outbound_direction() {
-        meta.direction = direction_t.OUTBOUND;
+        meta.direction = dash_direction_t.OUTBOUND;
     }
 
     action set_inbound_direction() {
-        meta.direction = direction_t.INBOUND;
+        meta.direction = dash_direction_t.INBOUND;
     }
 
     @name("direction_lookup|dash_direction_lookup")
@@ -107,11 +110,14 @@ control dash_ingress(inout headers_t hdr,
                          bit<32> flows,
                          bit<1> admin_state,
                          IPv4Address vm_underlay_dip,
+                         @Sai[type="sai_uint32_t"]
                          bit<24> vm_vni,
                          bit<16> vnet_id,
                          IPv6Address pl_sip,
                          IPv6Address pl_sip_mask,
                          IPv4Address pl_underlay_sip,
+                         bit<16> v4_meter_policy_id,
+                         bit<16> v6_meter_policy_id,
                          ACL_GROUPS_PARAM(inbound_v4),
                          ACL_GROUPS_PARAM(inbound_v6),
                          ACL_GROUPS_PARAM(outbound_v4),
@@ -130,17 +136,19 @@ control dash_ingress(inout headers_t hdr,
         meta.vnet_id                  = vnet_id;
 
         if (meta.is_overlay_ip_v6 == 1) {
-            if (meta.direction == direction_t.OUTBOUND) {
+            if (meta.direction == dash_direction_t.OUTBOUND) {
                 ACL_GROUPS_COPY_TO_META(outbound_v6);
             } else {
                 ACL_GROUPS_COPY_TO_META(inbound_v6);
             }
+            meta.meter_policy_id = v6_meter_policy_id;
         } else {
-            if (meta.direction == direction_t.OUTBOUND) {
+            if (meta.direction == dash_direction_t.OUTBOUND) {
                 ACL_GROUPS_COPY_TO_META(outbound_v4);
             } else {
                 ACL_GROUPS_COPY_TO_META(inbound_v4);
             }
+            meta.meter_policy_id = v4_meter_policy_id;
         }
     }
 
@@ -157,7 +165,24 @@ control dash_ingress(inout headers_t hdr,
         const default_action = deny;
     }
 
+#ifdef TARGET_BMV2_V1MODEL
     direct_counter(CounterType.packets_and_bytes) eni_counter;
+#endif // TARGET_BMV2_V1MODEL
+#ifdef TARGET_DPDK_PNA
+#ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
+    // Omit all direct counters for tables with ternary match keys,
+    // because the latest version of p4c-dpdk as of 2023-Jan-26 does
+    // not support this combination of features.  If you try to
+    // compile it with this code enabled, the error message looks like
+    // this:
+    //
+    // [--Werror=target-error] error: Direct counters and direct meters are unsupported for wildcard match table outbound_acl_stage1:dash_acl_rule|dash_acl
+    //
+    // This p4c issue is tracking this feature gap in p4c-dpdk:
+    // https://github.com/p4lang/p4c/issues/3868
+    DirectCounter<bit<64>>(PNA_CounterType_t.PACKETS_AND_BYTES) eni_counter;
+#endif // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
+#endif // TARGET_DPDK_PNA
 
     table eni_meter {
         key = {
@@ -168,7 +193,14 @@ control dash_ingress(inout headers_t hdr,
 
         actions = { NoAction; }
 
+#ifdef TARGET_BMV2_V1MODEL
         counters = eni_counter;
+#endif // TARGET_BMV2_V1MODEL
+#ifdef TARGET_DPDK_PNA
+#ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
+        pna_direct_counter = eni_counter;
+#endif // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
+#endif // TARGET_DPDK_PNA
     }
 
     action permit() {
@@ -209,6 +241,76 @@ control dash_ingress(inout headers_t hdr,
         const default_action = deny;
     }
 
+    action check_ip_addr_family(@Sai[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
+        if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
+            if (meta.is_overlay_ip_v6 == 1) {
+                meta.dropped = true;
+            }
+        } else {
+            if (meta.is_overlay_ip_v6 == 0) {
+                meta.dropped = true;
+            }
+        }
+    }
+
+    @name("meter_policy|dash_meter")
+    @Sai[isobject="true"]
+    table meter_policy {
+        key = {
+            meta.meter_policy_id : exact @name("meta.meter_policy_id:meter_policy_id");
+        }
+        actions = {
+            check_ip_addr_family;
+        }
+    }
+
+    action set_policy_meter_class(bit<16> meter_class) {
+        meta.policy_meter_class = meter_class;
+    }
+
+    @name("meter_rule|dash_meter")
+    @Sai[isobject="true"]
+    table meter_rule {
+        key = {
+            meta.meter_policy_id: exact @name("meta.meter_policy_id:meter_policy_id") @Sai[type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
+            hdr.ipv4.dst_addr : ternary @name("hdr.ipv4.dst_addr:dip");
+        }
+
+     actions = {
+            set_policy_meter_class;
+            @defaultonly NoAction;
+        }
+        const default_action = NoAction();
+    }
+    
+    // MAX_METER_BUCKET = MAX_ENI(64) * NUM_BUCKETS_PER_ENI(4096)
+    #define MAX_METER_BUCKETS 262144
+#ifdef TARGET_BMV2_V1MODEL
+    counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_inbound;
+    counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_outbound;
+#endif // TARGET_BMV2_V1MODEL
+    action meter_bucket_action(
+            @Sai[type="sai_uint64_t", isreadonly="true"] bit<64> outbound_bytes_counter,
+            @Sai[type="sai_uint64_t", isreadonly="true"] bit<64> inbound_bytes_counter,
+            @Sai[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index) {
+        // read only counters for SAI api generation only
+        meta.meter_bucket_index = meter_bucket_index;
+    }
+
+    @name("meter_bucket|dash_meter")
+    @Sai[isobject="true"]
+    table meter_bucket {
+        key = {
+            meta.eni_id: exact @name("meta.eni_id:eni_id");
+            meta.meter_class: exact @name("meta.meter_class:meter_class");
+        }
+        actions = {
+            meter_bucket_action;
+            @defaultonly NoAction;
+        }
+        const default_action = NoAction();
+    }
+
     action set_eni(bit<16> eni_id) {
         meta.eni_id = eni_id;
     }
@@ -226,7 +328,7 @@ control dash_ingress(inout headers_t hdr,
         const default_action = deny;
     }
 
-    action set_acl_group_attrs(bit<32> ip_addr_family) {
+    action set_acl_group_attrs(@Sai[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
         if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
             if (meta.is_overlay_ip_v6 == 1) {
                 meta.dropped = true;
@@ -248,10 +350,53 @@ control dash_ingress(inout headers_t hdr,
         }
     }
 
+    action set_src_tag(tag_map_t tag_map) {
+        meta.src_tag_map = tag_map;
+    }
+
+    @name("src_tag|dash_tag")
+    table src_tag {
+        key = {
+            meta.src_ip_addr : lpm @name("meta.src_ip_addr:sip");
+        }
+        actions = {
+            set_src_tag;
+        }
+    }
+
+    action set_dst_tag(tag_map_t tag_map) {
+        meta.dst_tag_map = tag_map;
+    }
+
+    @name("dst_tag|dash_tag")
+    table dst_tag {
+        key = {
+            meta.dst_ip_addr : lpm @name("meta.dst_ip_addr:dip");
+        }
+        actions = {
+            set_dst_tag;
+        }
+    }
+
     apply {
 
         /* Send packet on same port it arrived (echo) by default */
+#ifdef TARGET_BMV2_V1MODEL
         standard_metadata.egress_spec = standard_metadata.ingress_port;
+#endif // TARGET_BMV2_V1MODEL
+#ifdef TARGET_DPDK_PNA
+#ifdef DPDK_PNA_SEND_TO_PORT_FIX_MERGED
+        // As of 2023-Jan-26, the version of the pna.p4 header file
+        // included with p4c defines send_to_port with a parameter
+        // that has no 'in' direction.  The following commit in the
+        // public pna repo fixes this, but this fix has not yet been
+        // copied into the p4c repo.
+        // https://github.com/p4lang/pna/commit/b9fdfb888e5385472c34ff773914c72b78b63058
+        // Until p4c is updated with this fix, the following line will
+        // give a compile-time error.
+        send_to_port(istd.input_port);
+#endif  // DPDK_PNA_SEND_TO_PORT_FIX_MERGED
+#endif // TARGET_DPDK_PNA
 
         if (vip.apply().hit) {
             /* Use the same VIP that was in packet's destination if it's
@@ -266,9 +411,9 @@ control dash_ingress(inout headers_t hdr,
 
         /* Outer header processing */
 
-        if (meta.direction == direction_t.OUTBOUND) {
+        if (meta.direction == dash_direction_t.OUTBOUND) {
             vxlan_decap(hdr);
-        } else if (meta.direction == direction_t.INBOUND) {
+        } else if (meta.direction == dash_direction_t.INBOUND) {
             switch (inbound_routing.apply().action_run) {
                 vxlan_decap_pa_validate: {
                     pa_validation.apply();
@@ -303,7 +448,7 @@ control dash_ingress(inout headers_t hdr,
         /* At this point the processing is done on customer headers */
 
         /* Put VM's MAC in the direction agnostic metadata field */
-        meta.eni_addr = meta.direction == direction_t.OUTBOUND  ?
+        meta.eni_addr = meta.direction == dash_direction_t.OUTBOUND  ?
                                           hdr.ethernet.src_addr :
                                           hdr.ethernet.dst_addr;
         eni_ether_address_map.apply();
@@ -313,10 +458,41 @@ control dash_ingress(inout headers_t hdr,
         }
         acl_group.apply();
 
-        if (meta.direction == direction_t.OUTBOUND) {
-            outbound.apply(hdr, meta, standard_metadata);
-        } else if (meta.direction == direction_t.INBOUND) {
-            inbound.apply(hdr, meta, standard_metadata);
+        src_tag.apply();
+        dst_tag.apply();
+
+
+        if (meta.direction == dash_direction_t.OUTBOUND) {
+            outbound.apply(hdr, meta);
+        } else if (meta.direction == dash_direction_t.INBOUND) {
+            inbound.apply(hdr, meta);
+        }
+
+        if (meta.meter_policy_en == 1) {
+            meter_policy.apply();
+            meter_rule.apply();
+        }
+
+        {
+            if (meta.meter_policy_en == 1) {
+                meta.meter_class = meta.policy_meter_class;
+            } else {
+                meta.meter_class = meta.route_meter_class;
+            }
+            if ((meta.meter_class == 0) || (meta.mapping_meter_class_override == 1)) {
+                meta.meter_class = meta.mapping_meter_class;
+            }
+        }
+
+        meter_bucket.apply();
+        if (meta.direction == dash_direction_t.OUTBOUND) {
+#ifdef TARGET_BMV2_V1MODEL
+            meter_bucket_outbound.count(meta.meter_bucket_index);
+#endif
+        } else if (meta.direction == dash_direction_t.INBOUND) {
+#ifdef TARGET_BMV2_V1MODEL
+            meter_bucket_inbound.count(meta.meter_bucket_index);
+#endif
         }
 
         eni_meter.apply();
@@ -327,16 +503,9 @@ control dash_ingress(inout headers_t hdr,
     }
 }
 
-control dash_egress(inout headers_t hdr,
-                 inout metadata_t meta,
-                 inout standard_metadata_t standard_metadata)
-{
-    apply { }
-}
-
-V1Switch(dash_parser(),
-         dash_verify_checksum(),
-         dash_ingress(),
-         dash_egress(),
-         dash_compute_checksum(),
-         dash_deparser()) main;
+#ifdef TARGET_BMV2_V1MODEL
+#include "dash_bmv2_v1model.p4"
+#endif // TARGET_BMV2_V1MODEL
+#ifdef TARGET_DPDK_PNA
+#include "dash_dpdk_pna.p4"
+#endif // TARGET_DPDK_PNA

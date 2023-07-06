@@ -1,0 +1,19 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.4.0
+  hooks:
+  - id: mixed-line-ending
+    args: [--fix=lf]
+  # - id: trailing-whitespace
+# - id: end-of-file-fixer
+# - id: check-case-conflict
+# - id: check-ast
+# - id: check-json
+#  - id: double-quote-string-fixer
+# - repo: https://github.com/PyCQA/flake8
+#   rev: 6.0.0
+#   hooks:
+#   - id: flake8
+#     args: ["--max-line-length=201", "--extend-ignore=F601,F821"]

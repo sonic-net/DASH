@@ -36,6 +36,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
 * P4 code doesn't loop packets back to same port.
 * P4 code mark-to-drop not set when meta.drop is set.
 * Permission and ownership issues in Docker images, permanent fix is needed.
+* Link to article describing gaps in BMv2 and P4-DPDK; targets that they are missing in order to be a good DASH P4 reference model: [Draft Gap Analysis](https://github.com/jafingerhut/p4-guide/tree/master/dash)
 # TODOs
 ## Loose Ends
 Small items to complete given the existing features and state, e.g. excluding major roadmap items.

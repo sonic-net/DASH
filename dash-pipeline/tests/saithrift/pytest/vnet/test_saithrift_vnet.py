@@ -41,6 +41,8 @@ def test_sai_thrift_create_eni(saithrift_client):
                                     vm_underlay_dip=vm_underlay_dip,
                                     vm_vni=9,
                                     vnet_id=vnet,
+                                    v4_meter_policy_id = 0,
+                                    v6_meter_policy_id = 0,
                                     inbound_v4_stage1_dash_acl_group_id = in_acl_group_id,
                                     inbound_v4_stage2_dash_acl_group_id = in_acl_group_id,
                                     inbound_v4_stage3_dash_acl_group_id = in_acl_group_id,

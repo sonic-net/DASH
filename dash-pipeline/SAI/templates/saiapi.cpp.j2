@@ -9,6 +9,7 @@
 #include "utils.h"
 #include "saiexperimental{{ app_name | replace('_', '') }}.h"
 #include "saitypes.h"
+#include "saistatus.h"
 #include <fstream>
 #include <google/protobuf/text_format.h>
 #include <google/rpc/code.pb.h>
@@ -41,8 +42,8 @@ sai_status_t sai_create_{{ table.name }}(
     // There shall be one and only one action_type
     p4::v1::TableAction* entry = nullptr;
     p4::v1::Action* action = nullptr;
-    auto expectedParams = 0;
-    auto matchedParams = 0;
+    //auto expectedParams = 0;
+    //auto matchedParams = 0;
     sai_object_id_t objId = 0;
     // Search the action
     pi_p4_id_t actionId = 0;
@@ -57,8 +58,8 @@ sai_status_t sai_create_{{ table.name }}(
     tableId = {{table.id}};
     entry = matchActionEntry->mutable_action();
     action = entry->mutable_action();
-    expectedParams = 0;
-    matchedParams = 0;
+    //expectedParams = 0;
+    //matchedParams = 0;
     objId = 0;
 
     matchActionEntry->set_table_id(tableId);
@@ -70,7 +71,7 @@ sai_status_t sai_create_{{ table.name }}(
     mf->set_field_id({{table['keys'][0].id}});
     objId = NextObjIndex();
     auto mf_exact = mf->mutable_exact();
-    {{table['keys'][0].sai_key_field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
+    {{table['keys'][0].field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
     {% else %}
     // SAI object table with multiple P4 table keys
     // Copy P4 table keys from appropriate SAI attributes
@@ -82,24 +83,30 @@ sai_status_t sai_create_{{ table.name }}(
                 mf->set_field_id({{key.id}});
                 {% if key.match_type == 'exact' %}
                 auto mf_exact = mf->mutable_exact();
-                {{key.sai_key_field}}SetVal(attr_list[i].value, mf_exact, {{key.bitwidth}});
+                {{key.field}}SetVal(attr_list[i].value, mf_exact, {{key.bitwidth}});
                 {% elif key.match_type == 'lpm' %}
                 auto mf_lpm = mf->mutable_lpm();
-                {{key.sai_lpm_field}}SetVal(attr_list[i].value, mf_lpm, {{key.bitwidth}});
+                {{key.field}}SetVal(attr_list[i].value, mf_lpm, {{key.bitwidth}});
                 {% elif key.match_type == 'list' %}
                 assert(0 && "mutable_list is not supported");
                 goto ErrRet;
                 // auto mf1_list = mf1->mutable_xxx();
-                //{{key.sai_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+                //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
                 {% elif key.match_type == 'range_list' %}
                 goto ErrRet;
                 assert(0 && "range_list is not supported");
                 // TODO: if it is ternary, need to set the mask
                 // auto mf1_list = mf1->mutable_xxx();
-                //{{key.sai_range_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+                //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
                 {% elif key.match_type == 'optional' %}
                 auto mf_optional = mf->mutable_optional();
-                {{key.sai_key_field}}SetVal(attr_list[i].value, mf_optional, {{key.bitwidth}});
+                {{key.field}}SetVal(attr_list[i].value, mf_optional, {{key.bitwidth}});
+                {% elif key.match_type == 'ternary' %}
+                auto mf_ternary = mf->mutable_ternary();
+                {{key.field}}SetVal(attr_list[i].value, mf_ternary, {{key.bitwidth}});
+                auto mask = getMaskAttr(SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}_MASK, attr_count, attr_list);
+                assert(mask && "SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}_MASK isn't provided");
+                {{key.field}}SetMask(mask->value, mf_ternary, {{key.bitwidth}});
                 {% endif %}
                 {% if 'v4_or_v6_id' in key %}
                 {
@@ -132,7 +139,7 @@ sai_status_t sai_create_{{ table.name }}(
     {% if table.actions|length == 1 %}
     {% for action in table.actions %}
     actionId = {{action.id}}; // SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}
-    expectedParams = {{ action.params|length }};
+    //expectedParams = {{ action.params|length }};
     {% endfor %}
     {% else %}
     // Search the action 
@@ -143,7 +150,7 @@ sai_status_t sai_create_{{ table.name }}(
                 {% for action in table.actions %}
                 case SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}: {
                     actionId = {{action.id}}; 
-                    expectedParams = {{ action.params|length }};
+                    //expectedParams = {{ action.params|length }};
                     break;
                 }
                 {% endfor %}
@@ -158,31 +165,34 @@ sai_status_t sai_create_{{ table.name }}(
     for (uint32_t i = 0; i < attr_count; i++) {
         switch(attr_list[i].id) {
             {% for param in table.actionParams %}
+            {% if param.skipattr == 'true' %}
+            {% else %}
             case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}: {
                 auto param = action->add_params();
                 param->set_param_id({{param.id}});
                 {{param.field}}SetVal(attr_list[i].value, param, {{param.bitwidth}});
-                matchedParams++;
+                //matchedParams++;
                 {% if 'v4_or_v6_id' in param %}
                 {
                     // set v4_or_v6 field
                     auto param = action->add_params();
                     param->set_param_id({{param.v4_or_v6_id}});
                     booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param, 1);
-                    matchedParams++;
+                    //matchedParams++;
                 }
                 {% endif %}
                 break;
             }
+            {% endif %}
             {% endfor %}
         }
     }
     
-    assert((matchedParams == expectedParams)); 
+    //assert((matchedParams == expectedParams)); 
 
-    if (matchedParams != expectedParams) {
-        goto ErrRet;
-    }
+    //if (matchedParams != expectedParams) {
+    //    goto ErrRet;
+    //}
     if (false == InsertInTable(matchActionEntry, &objId)) {
         goto ErrRet;
     }
@@ -197,11 +207,58 @@ ErrRet:
     return -1;
 }
 
+sai_status_t sai_create_{{ table.name }}s(
+        _In_ sai_object_id_t switch_id,
+        _In_ uint32_t object_count,
+        _In_ const uint32_t *attr_count,
+        _In_ const sai_attribute_t **attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_object_id_t *object_id,
+        _Out_ sai_status_t *object_statuses) {
+    sai_status_t agg_status = SAI_STATUS_SUCCESS;
+
+    for (uint32_t i = 0; i < object_count; i++) {
+        object_statuses[i] = sai_create_{{ table.name }}(&object_id[i], switch_id, attr_count[i], attr_list[i]);
+
+        if (object_statuses[i] != SAI_STATUS_SUCCESS) {
+            agg_status = SAI_STATUS_FAILURE;
+        }
+
+        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR) {
+            return agg_status;
+        }
+    }
+
+    return agg_status;
+}
+
 sai_status_t sai_remove_{{ table.name }}(_In_ sai_object_id_t {{ table.name }}_id) {
     if (RemoveFromTable({{ table.name }}_id)) {
         return 0;
     }
     return -1;
+}
+
+sai_status_t sai_remove_{{ table.name }}s(
+        _In_ uint32_t object_count,
+        _In_ const sai_object_id_t *object_id,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses) {
+    sai_status_t agg_status = SAI_STATUS_SUCCESS;
+
+    for (uint32_t i = 0; i < object_count; i++) {
+        object_statuses[i] = sai_remove_{{ table.name }}(object_id[i]);
+
+        if (object_statuses[i] != SAI_STATUS_SUCCESS) {
+            agg_status = SAI_STATUS_FAILURE;
+        }
+
+        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR) {
+            return agg_status;
+        }
+    }
+
+    return agg_status;
 }
 
 sai_status_t sai_set_{{ table.name }}_attribute (
@@ -230,8 +287,8 @@ sai_status_t sai_create_{{ table.name }}(
     // There shall be one and only one action_type
     auto entry = matchActionEntry->mutable_action();
     auto action = entry->mutable_action();
-    auto expectedParams = 0;
-    auto matchedParams = 0;
+    //auto expectedParams = 0;
+    //auto matchedParams = 0;
     pi_p4_id_t actionId;
     grpc::StatusCode retCode;
 
@@ -241,21 +298,21 @@ sai_status_t sai_create_{{ table.name }}(
         mf->set_field_id({{key.id}});
         {% if key.match_type == 'exact' %}
         auto mf_exact = mf->mutable_exact();
-        {{key.sai_key_field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
+        {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
         {% elif key.match_type == 'lpm' %}
         auto mf_lpm = mf->mutable_lpm();
-        {{key.sai_lpm_field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_lpm, {{key.bitwidth}});
+        {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_lpm, {{key.bitwidth}});
         {% elif key.match_type == 'list' %}
         assert(0 && "mutable_list is not supported");
         goto ErrRet;
         // auto mf1_list = mf1->mutable_xxx();
-        //{{key.sai_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+        //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
         {% elif key.match_type == 'range_list' %}
         assert(0 && "range_list is not supported");
         goto ErrRet;
         // TODO: if it is ternary, need to set the mask
         // auto mf1_list = mf1->mutable_xxx();
-        //{{key.sai_range_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+        //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
         {% endif %}
     }
     {% if 'v4_or_v6_id' in key %}
@@ -273,7 +330,7 @@ sai_status_t sai_create_{{ table.name }}(
     {% if table.actions|length == 1 %}
     {% for action in table.actions %}
     actionId = {{action.id}}; // SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}
-    expectedParams = {{ action.params|length }};
+    //expectedParams = {{ action.params|length }};
     {% endfor %}
     {% else %}
     // Search the action 
@@ -282,7 +339,7 @@ sai_status_t sai_create_{{ table.name }}(
             {% for action in table.actions %}
             case SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}: {
                 actionId = {{action.id}}; 
-                expectedParams = {{ action.params|length }};
+                //expectedParams = {{ action.params|length }};
                 break;
             }
             {% endfor %}
@@ -296,31 +353,34 @@ sai_status_t sai_create_{{ table.name }}(
     for (uint32_t i = 0; i < attr_count; i++) {
         switch(attr_list[i].id) {
             {% for param in table.actionParams %}
+            {% if param.skipattr == 'true' %}
+            {% else %}
             case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}: {
                 auto param = action->add_params();
                 param->set_param_id({{param.id}});
                 {{param.field}}SetVal(attr_list[i].value, param, {{param.bitwidth}});
-                matchedParams++;
+                //matchedParams++;
                 {% if 'v4_or_v6_id' in param %}
                 {
                     // set v4_or_v6 field
                     auto param = action->add_params();
                     param->set_param_id({{param.v4_or_v6_id}});
                     booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param, 1);
-                    matchedParams++;
+                    //matchedParams++;
                 }
                 {% endif %}
                 break;
             }
+            {% endif %}
             {% endfor %}
         }
     }
     
-    assert((matchedParams == expectedParams)); 
+    //assert((matchedParams == expectedParams)); 
 
-    if (matchedParams != expectedParams) {
-        goto ErrRet;
-    }
+    //if (matchedParams != expectedParams) {
+    //    goto ErrRet;
+    //}
     // TODO: ternaly needs to set priority
     retCode = MutateTableEntry(matchActionEntry, p4::v1::Update_Type_INSERT);
     if (grpc::StatusCode::OK == retCode) {
@@ -330,6 +390,31 @@ sai_status_t sai_create_{{ table.name }}(
 ErrRet:
     delete matchActionEntry;
     return -1;
+}
+
+sai_status_t sai_create_{{ table.name | replace("entry", "entries") }}(
+        _In_ uint32_t object_count,
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+        _In_ const uint32_t *attr_count,
+        _In_ const sai_attribute_t **attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses) {
+    sai_status_t agg_status = SAI_STATUS_SUCCESS;
+
+    for (uint32_t i = 0; i < object_count; i++) {
+        object_statuses[i] = sai_create_{{ table.name }}(&{{ table.name }}[i], attr_count[i], attr_list[i]);
+
+        if (object_statuses[i] != SAI_STATUS_SUCCESS) {
+            agg_status = SAI_STATUS_FAILURE;
+        }
+
+        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR) {
+            return agg_status;
+        }
+    }
+
+    return agg_status;
+
 }
 
 sai_status_t sai_remove_{{ table.name }}(
@@ -346,20 +431,20 @@ sai_status_t sai_remove_{{ table.name }}(
         mf->set_field_id({{key.id}});
         {% if key.match_type == 'exact' %}
         auto mf_exact = mf->mutable_exact();
-        {{key.sai_key_field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
+        {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
         {% elif key.match_type == 'lpm' %}
         auto mf_lpm = mf->mutable_lpm();
-        {{key.sai_lpm_field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_lpm, {{key.bitwidth}});
+        {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_lpm, {{key.bitwidth}});
         {% elif key.match_type == 'list' %}
         assert(0 && "mutable_list is not supported");
         goto ErrRet;
         // auto mf1_list = mf1->mutable_xxx();
-        //{{key.sai_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+        //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
         {% elif key.match_type == 'range_list' %}
         assert(0 && "range_list is not supported");
         goto ErrRet;
         // auto mf1_list = mf1->mutable_xxx();
-        //{{key.sai_range_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+        //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
         {% endif %}
     }
     {% if 'v4_or_v6_id' in key %}
@@ -383,6 +468,28 @@ ErrRet:
 
     delete matchActionEntry;
     return -1;
+}
+
+sai_status_t sai_remove_{{ table.name | replace("entry", "entries") }}(
+        _In_ uint32_t object_count,
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses) {
+    sai_status_t agg_status = SAI_STATUS_SUCCESS;
+
+    for (uint32_t i = 0; i < object_count; i++) {
+        object_statuses[i] = sai_remove_{{ table.name }}(&{{ table.name }}[i]);
+
+        if (object_statuses[i] != SAI_STATUS_SUCCESS) {
+            agg_status = SAI_STATUS_FAILURE;
+        }
+
+        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR) {
+            return agg_status;
+        }
+    }
+
+    return agg_status;
 }
 
 sai_status_t sai_set_{{ table.name }}_attribute(
@@ -412,5 +519,12 @@ sai_{{ app_name }}_api_t sai_{{app_name }}_api_impl = {
     .remove_{{ table.name }} = sai_remove_{{ table.name }},
     .set_{{ table.name }}_attribute = sai_set_{{ table.name }}_attribute,
     .get_{{ table.name }}_attribute = sai_get_{{ table.name }}_attribute,
+{% if table.is_object == 'true' %}
+    .create_{{ table.name }}s = sai_create_{{ table.name }}s,
+    .remove_{{ table.name }}s = sai_remove_{{ table.name }}s,
+{% else %}
+    .create_{{ table.name | replace("entry", "entries") }} = sai_create_{{ table.name | replace("entry", "entries") }},
+    .remove_{{ table.name | replace("entry", "entries") }} = sai_remove_{{ table.name | replace("entry", "entries") }},
+{% endif %}
 {% endfor %}
 };

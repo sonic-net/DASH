@@ -12,13 +12,21 @@ error {
 #define UDP_PORT_VXLAN 4789
 #define UDP_PROTO 17
 #define TCP_PROTO 6
+#define NVGRE_PROTO 0x2f
 #define IPV4_ETHTYPE 0x0800
 #define IPV6_ETHTYPE 0x86dd
 
-parser dash_parser(packet_in packet,
-                out headers_t hd,
-                inout metadata_t meta,
-                inout standard_metadata_t standard_meta)
+parser dash_parser(
+    packet_in packet
+    , out headers_t hd
+    , inout metadata_t meta
+#ifdef TARGET_BMV2_V1MODEL
+    , inout standard_metadata_t standard_meta
+#endif // TARGET_BMV2_V1MODEL
+#ifdef TARGET_DPDK_PNA
+    , in pna_main_parser_input_metadata_t istd
+#endif // TARGET_DPDK_PNA
+    )
 {
     state start {
         packet.extract(hd.ethernet);
@@ -120,8 +128,14 @@ parser dash_parser(packet_in packet,
     }
 }
 
-control dash_deparser(packet_out packet,
-                   in headers_t hdr)
+control dash_deparser(
+      packet_out packet
+    , in headers_t hdr
+#ifdef TARGET_DPDK_PNA
+    , in metadata_t meta
+    , in pna_main_output_metadata_t ostd
+#endif // TARGET_DPDK_PNA
+    )
 {
     apply {
 	packet.emit(hdr.ethernet);
@@ -131,6 +145,7 @@ control dash_deparser(packet_out packet,
         packet.emit(hdr.udp);
         packet.emit(hdr.tcp);
         packet.emit(hdr.vxlan);
+        packet.emit(hdr.nvgre);
         packet.emit(hdr.inner_ethernet);
         packet.emit(hdr.inner_ipv4);
         packet.emit(hdr.inner_ipv6);
