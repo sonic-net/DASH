@@ -137,10 +137,10 @@ control outbound(inout headers_t hdr,
                                     bit<1> use_dst_vnet_vni,
                                     IPv6Address overlay_sip,
                                     IPv6Address overlay_dip,
-                                    dash_encapsulation_t encap_type,
-                                    bit<24> tunnel_id) {
-        meta.encap_data.encap_type = encap_type;
-        meta.encap_data.service_tunnel_id = tunnel_id;
+                                    dash_encapsulation_t dash_encapsulation,
+                                    bit<24> tunnel_key) {
+        meta.encap_data.dash_encapsulation = dash_encapsulation;
+        meta.encap_data.service_tunnel_key = tunnel_key;
 
         service_tunnel_encode(hdr,
                               overlay_dip,
@@ -234,22 +234,22 @@ control outbound(inout headers_t hdr,
                 ca_to_pa.apply();
                 vnet.apply();
 
-                if (meta.encap_data.encap_type == dash_encapsulation_t.VXLAN) {
+                if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {
                     vxlan_encap(hdr,
                                 meta.encap_data.underlay_dmac,
                                 meta.encap_data.underlay_smac,
                                 meta.encap_data.underlay_dip,
                                 meta.encap_data.underlay_sip,
                                 meta.encap_data.overlay_dmac,
-                                meta.encap_data.service_tunnel_id);
-                } else if (meta.encap_data.encap_type == dash_encapsulation_t.NVGRE) {
+                                meta.encap_data.service_tunnel_key);
+                } else if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
                     nvgre_encap(hdr,
                                 meta.encap_data.underlay_dmac,
                                 meta.encap_data.underlay_smac,
                                 meta.encap_data.underlay_dip,
                                 meta.encap_data.underlay_sip,
                                 meta.encap_data.overlay_dmac,
-                                meta.encap_data.service_tunnel_id);
+                                meta.encap_data.service_tunnel_key);
                 } else {
                     drop();
                 }
