@@ -516,8 +516,16 @@ for sai_api in sai_apis:
 env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
 env.add_extension('jinja2.ext.loopcontrols')
 env.add_extension('jinja2.ext.do')
+
+final_sai_enums = []
+with open('./SAI/experimental/saitypesextensions.h', 'r') as f:
+    content = f.read()
+    for enum in sai_enums:
+        if enum['name'] not in content:
+            final_sai_enums.append(enum)
+
 sai_enums_tm = env.get_template('templates/saienums.j2')
-sai_enums_str = sai_enums_tm.render(sai_enums = sai_enums)
+sai_enums_str = sai_enums_tm.render(sai_enums = final_sai_enums)
 sai_enums_lines = sai_enums_str.split('\n')
 
 # The SAI object struct for entries
