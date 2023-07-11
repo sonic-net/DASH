@@ -139,7 +139,7 @@ Metering is essential for billing the customers and below are the high-level req
 	- Mapping table based metering - E.g For specific destinations within the mapping table that must be billed separately     
 - Policy in the metering context refers to metering policy associated to Route tables. This is not related to ACL policy or any ACL packet counters.  
 - If packet flow hits multiple metering buckets, order of priority shall be **Policy->Route->Mapping**
-- User shall be able to override the precedence between Routing/Policy and Mapping buckets by setting an _override_ flag. When policy is enabled for a route, it takes higher precedence than routing and mapping metering bucket unless _override_ flag is set wherein Mapping takes precedence
+- User shall be able to override the precedence between Routing/Policy and Mapping buckets by setting an _override_ flag. When policy is enabled for a route, it takes higher precedence than routing and mapping metering bucket unless _override_ flag is set in which case Mapping takes precedence
 - Implementation shall aggregate the counters on an "_ENI+Metering Bucket_" combination for billing:
 	- 	All traffic from an ENI to a Peered VNET
 	- 	All traffic from an ENI to a Private Link destination
@@ -203,7 +203,7 @@ ACL is essential for NSGs and have different stages. In the current model, there
 		-  If the tag field is empty, ACL rule must match ANY tag or NO tag. 
 	- The tag list size depends on the SAI implementation capability. It is fixed during initialization based on the capability value returned by SAI implementation. 
 - Deleting ACL group is permitted as long as it is not bind to an ENI. It is not expected for application to delete individual rules prior to deleting a group. Implementation is expected to delete/free all resources when application triggers an ACL group delete.
-- ACL rules are not expected to have both tags and prefixes of same type configured in the same rule. For e.g, same Rule shall not have both src tag and src prefix configured, but it is possible to have src tag and dst prefix or vice-versa
+- ACL rules are not expected to have both tags and prefixes of same type configured in the same rule. For e.g, same rule shall not have both src tag and src prefix configured, but it is possible to have src tag and dst prefix or vice-versa
 - Counters can be attached to ACL rules optionally for retrieving the number of connections/flows. It is not required to get the packet/byte counter as in the traditional model. A new SAI counter type shall be required for this.
 
 # 2 Packet Flows
@@ -554,7 +554,7 @@ metering_class           = class_id                  ; metering class-id
 override_meter           = bool                      ; override the metering class-id coming from the route table
 use_dst_vni              = bool                      ; if true, use the destination VNET VNI for encap. If false or not specified, use source VNET's VNI
 overlay_sip              = ip_address                ; overlay src ip if routing_type is {privatelink}, transform last 32 bits from packet 
-overlay_dip              = ip_address                ; overlay dst ip if routing_type is {privatelink}
+overlay_dip              = ip_address                ; overlay dst ip if routing_type is {privatelink} 
 ```
 
 ### 3.2.10 METER
