@@ -1,6 +1,6 @@
 # SONiC-DASH HLD
 ## High Level Design Document
-### Rev 1.4
+### Rev 1.6
 
 # Table of Contents
 
@@ -139,7 +139,7 @@ Metering is essential for billing the customers and below are the high-level req
 	- Mapping table based metering - E.g For specific destinations within the mapping table that must be billed separately     
 - Policy in the metering context refers to metering policy associated to Route tables. This is not related to ACL policy or any ACL packet counters.  
 - If packet flow hits multiple metering buckets, order of priority shall be **Policy->Route->Mapping**
-- User shall be able to override the precedence between Routing and Mapping buckets by setting an _override_ flag. When policy is enabled for a route, it takes higher precedence than routing and mapping metering bucket. 
+- User shall be able to override the precedence between Routing/Policy and Mapping buckets by setting an _override_ flag. When policy is enabled for a route, it takes higher precedence than routing and mapping metering bucket unless _override_ flag is set in which case Mapping takes precedence
 - Implementation shall aggregate the counters on an "_ENI+Metering Bucket_" combination for billing:
 	- 	All traffic from an ENI to a Peered VNET
 	- 	All traffic from an ENI to a Private Link destination
@@ -189,22 +189,21 @@ ACL is essential for NSGs and have different stages. In the current model, there
 - No requirement to modify an existing rule except for the case above. For e.g change action of a rule from permit to deny or vice-versa
 - ACL Tagging
 	- Mapping a prefix to a tag can reduce the repetition of prefixes across different ACL rules and optimize memory usage
-	- Tagging is implemented as a bitmap in Orchagent and SAI layers
+	- Tagging is implemented as list in Orchagent and SAI layers
 	- A prefix can belong to multiple tags
 	- Prefixes can be added or removed from a tag at any time 
-	- SAI implementation shall return a capability for the bitmap size. A '0' return value shall be treated as no-tag support. 
-	- An example tag bitmap is as below. Assume tag bitmap size of 8 (a capability returned by SAI implementation).
+	- SAI implementation shall return a capability for the list size. A '0' return value shall be treated as no-tag support. 
+	- An example tag list is as below. 
 		-  Tag1 - 10.1.1.0/24, 20.1.1.0/24
 		-  Tag2 - 10.1.0.0/8, 20.1.1.0/24, 50.1.1.1/32 
 		-  Tag8 - Empty
-		-  SAI_SRC_TAG_ENTRY_ATTR_TAG_MAP: 10.1.1.0/24 -> "0000 0011", 20.1.1.0/24 -> "0000 0011", 10.1.0.0/8 -> "0000 0010". Note that orchagent shall extend the tag map to include all subnet to allow an LPM based lookup. In this case, tags for 10.1.1.0/24 shall also include the tag for 10.1.0.0/8.  
-		-  SAI_DASH_ACL_RULE_ATTR_SRC_TAG: Assume there is a rule with src tag bitmap as "0001 0010", it is a rule hit if the derived tag has at least 1 bit that matches the bitmap in the rule. 
-		-  If a packet arrives with src ip of 10.1.1.1, the corresponding derived src tag shall be "0000 0011" (say HW_DERIVED_TAG_MAP, matching entry for 10.1.1.0/24)
-		-  Ternary operation shall be => HW_DERIVED_TAG_MAP | (SAI_DASH_ACL_RULE_ATTR_SRC_TAG & SAI_DASH_ACL_RULE_ATTR_SRC_TAG_MASK). If any bit is set, it is treated as a match. In order to achieve this functionality, SAI implementation can expand the ACL rules to multiple rules that has only ONE tag set.
+		-  SAI_SRC_TAG_ENTRY_ATTR_TAG_MAP: 10.1.1.0/24 -> "Tag1, Tag2", 20.1.1.0/24 -> "Tag1, Tag2", 10.1.0.0/8 -> "Tag2". Note that orchagent shall extend the tag map to include all subnet to allow an LPM based lookup. In this case, tags for 10.1.1.0/24 shall also include the tag for 10.1.0.0/8.  
+		-  SAI_DASH_ACL_RULE_ATTR_SRC_TAG: This shall be a list of tags to match. 
+		-  If a packet arrives with src ip of 10.1.1.1, the corresponding derived src tag list shall be "Tag1, Tag2". It shall be then matched against the ACL_RULE Tag list
 		-  If the tag field is empty, ACL rule must match ANY tag or NO tag. 
-	- The bitmap size depends on the SAI implementation capability. It is fixed during initialization based on the capability value returned by SAI implementation. This same bitmap size shall be later used for ACL rules and prefix-tag mapping. Orchagent shall implement the logic to chose the tags with largest number of prefixes, based on the capability value. Say 8 biggest tags in the above example. Rest of the tags shall be expanded to include prefixes in the ACL rules.
+	- The tag list size depends on the SAI implementation capability. It is fixed during initialization based on the capability value returned by SAI implementation. 
 - Deleting ACL group is permitted as long as it is not bind to an ENI. It is not expected for application to delete individual rules prior to deleting a group. Implementation is expected to delete/free all resources when application triggers an ACL group delete.
-- ACL rules are not expected to have both tags and prefixes configured in the same rule. In case NorthBound configures with both tags and prefix, orchagent shall split this to separate rules. At high-level, requirement is an `OR` operation when there is both tag and prefix. 
+- ACL rules are not expected to have both tags and prefixes of same type configured in the same rule. For e.g, same rule shall not have both src tag and src prefix configured, but it is possible to have src tag and dst prefix or vice-versa
 - Counters can be attached to ACL rules optionally for retrieving the number of connections/flows. It is not required to get the packet/byte counter as in the traditional model. A new SAI counter type shall be required for this.
 
 # 2 Packet Flows
