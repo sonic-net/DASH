@@ -35,12 +35,21 @@ def test_sai_thrift_create_eni(saithrift_client):
 
         vm_underlay_dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
                                                   addr=sai_thrift_ip_addr_t(ip4="172.16.3.1"))
+        pl_sip_mask = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV6,
+                                              addr=sai_thrift_ip_addr_t(ip6="2001:0db8:85a3:0000:0000:0000:0000:0000"))
+        pl_sip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV6,
+                                         addr=sai_thrift_ip_addr_t(ip6="2001:0db8:85a3:0000:0000:8a2e:0370:7334"))
+        pl_underlay_sip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV6,
+                                                  addr=sai_thrift_ip_addr_t(ip6="2001:0db8:85a3:0000:0000:8a2e:0370:7335"))
         eni = sai_thrift_create_eni(saithrift_client, cps=10000,
                                     pps=100000, flows=100000,
                                     admin_state=True,
                                     vm_underlay_dip=vm_underlay_dip,
                                     vm_vni=9,
                                     vnet_id=vnet,
+                                    pl_sip = pl_sip,
+                                    pl_sip_mask = pl_sip_mask,
+                                    pl_underlay_sip = pl_underlay_sip,
                                     v4_meter_policy_id = 0,
                                     v6_meter_policy_id = 0,
                                     inbound_v4_stage1_dash_acl_group_id = in_acl_group_id,
