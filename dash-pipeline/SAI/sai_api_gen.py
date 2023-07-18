@@ -44,8 +44,7 @@ sai_type_to_field = {
     'sai_ip_addr_family_t': 'u32',
     'sai_uint32_t': 'u32',
     'sai_uint64_t': 'u64',
-    'sai_mac_t': 'mac',
-    'sai_ip_prefix_list_t': 'ipprefixlist'
+    'sai_mac_t': 'mac'
 }
 
 def p4_annotation_to_sai_attr(p4rt, sai_attr):
@@ -244,7 +243,6 @@ def get_sai_enums(program):
         sai_enum = dict()
         sai_enum['name'] = enum_name[:-2]
         sai_enum['members'] = []
-        print(enum_name)
         for enum_member in all_enums[enum_name][MEMBERS_TAG]:
             member = dict()
             member['sai_name'] = enum_member['name']
@@ -362,8 +360,11 @@ def write_sai_impl_files(sai_api):
     env.add_extension('jinja2.ext.loopcontrols')
     env.add_extension('jinja2.ext.do')
     sai_impl_tm = env.get_template('/templates/saiapi.cpp.j2')
-    sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'])
-
+    if "dash" in sai_api['app_name']:
+        header_prefix = "experimental"
+    else:
+        header_prefix = ""
+    sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'], header_prefix = header_prefix)
     with open('./lib/sai' + sai_api['app_name'].replace('_', '') + '.cpp', 'w') as o:
         o.write(sai_impl_str)
 
@@ -507,8 +508,12 @@ for sai_api in sai_apis:
                     for table_name in all_table_names:
                         if table_ref.endswith(table_name):
                             key[OBJECT_NAME_TAG] = table_name
+
     # Write SAI dictionary into SAI API headers
-    write_sai_files(get_uniq_sai_api(sai_api))
+    if "dash" in sai_api['app_name']:
+        write_sai_files(get_uniq_sai_api(sai_api))
+        
+    # Write SAI implementation 
     write_sai_impl_files(sai_api)
     sai_api_name_list.append(sai_api['app_name'].replace('_', ''))
     sai_api_full_name_list.append(sai_api['app_name'])
@@ -516,16 +521,8 @@ for sai_api in sai_apis:
 env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
 env.add_extension('jinja2.ext.loopcontrols')
 env.add_extension('jinja2.ext.do')
-
-final_sai_enums = []
-with open('./SAI/experimental/saitypesextensions.h', 'r') as f:
-    content = f.read()
-    for enum in sai_enums:
-        if enum['name'] not in content:
-            final_sai_enums.append(enum)
-
 sai_enums_tm = env.get_template('templates/saienums.j2')
-sai_enums_str = sai_enums_tm.render(sai_enums = final_sai_enums)
+sai_enums_str = sai_enums_tm.render(sai_enums = sai_enums)
 sai_enums_lines = sai_enums_str.split('\n')
 
 # The SAI object struct for entries
