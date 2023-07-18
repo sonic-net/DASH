@@ -19,6 +19,7 @@ extern "C" {
 #include "saistatus.h"
 #include "saitypes.h"
 #include "saiextensions.h"
+#include "sairoute.h"            // TODO: Change to template generated values
 }
 #include <fstream>
 #include <google/protobuf/text_format.h>
@@ -55,8 +56,8 @@ sai_status_t sai_create_switch_dummy(
 #define DASH_BMV2_DEFAULT_1Q_BRIDGE_ID MAKE_OID(SAI_OBJECT_TYPE_BRIDGE,1)
 
 sai_object_id_t port_list[DASH_BMV2_NUM_PORTS] = {
-    MAKE_OID(SAI_OBJECT_TYPE_PORT,1),
-    MAKE_OID(SAI_OBJECT_TYPE_PORT,2)
+    MAKE_OID(SAI_OBJECT_TYPE_PORT,0),
+    MAKE_OID(SAI_OBJECT_TYPE_PORT,1)
 };
 
 sai_status_t sai_get_switch_attribute(
