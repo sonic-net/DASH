@@ -9,6 +9,7 @@
 #include "dash_outbound.p4"
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"
+#include "underlay.p4"
 
 control dash_ingress(
       inout headers_t hdr
@@ -371,13 +372,8 @@ control dash_ingress(
             set_dst_tag;
         }
     }
-
+    
     apply {
-
-        /* Send packet on same port it arrived (echo) by default */
-#ifdef TARGET_BMV2_V1MODEL
-        standard_metadata.egress_spec = standard_metadata.ingress_port;
-#endif // TARGET_BMV2_V1MODEL
 #ifdef TARGET_DPDK_PNA
 #ifdef DPDK_PNA_SEND_TO_PORT_FIX_MERGED
         // As of 2023-Jan-26, the version of the pna.p4 header file
@@ -454,13 +450,24 @@ control dash_ingress(
 
         src_tag.apply();
         dst_tag.apply();
-
-
         if (meta.direction == dash_direction_t.OUTBOUND) {
             outbound.apply(hdr, meta);
         } else if (meta.direction == dash_direction_t.INBOUND) {
             inbound.apply(hdr, meta);
         }
+
+        /* Underlay routing */
+        meta.dst_ip_addr = (bit<128>)hdr.ipv4.dst_addr;
+        underlay.apply(
+              hdr
+            , meta
+    #ifdef TARGET_BMV2_V1MODEL
+            , standard_metadata
+    #endif // TARGET_BMV2_V1MODEL
+    #ifdef TARGET_DPDK_PNA
+            , istd
+    #endif // TARGET_DPDK_PNA        
+        );
 
         if (meta.meter_policy_en == 1) {
             meter_policy.apply();

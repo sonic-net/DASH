@@ -362,8 +362,11 @@ def write_sai_impl_files(sai_api):
     env.add_extension('jinja2.ext.loopcontrols')
     env.add_extension('jinja2.ext.do')
     sai_impl_tm = env.get_template('/templates/saiapi.cpp.j2')
-    sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'])
-
+    if "dash" in sai_api['app_name']:
+        header_prefix = "experimental"
+    else:
+        header_prefix = ""
+    sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'], header_prefix = header_prefix)
     with open('./lib/sai' + sai_api['app_name'].replace('_', '') + '.cpp', 'w') as o:
         o.write(sai_impl_str)
 
@@ -508,7 +511,10 @@ for sai_api in sai_apis:
                         if table_ref.endswith(table_name):
                             key[OBJECT_NAME_TAG] = table_name
     # Write SAI dictionary into SAI API headers
-    write_sai_files(get_uniq_sai_api(sai_api))
+    if "dash" in sai_api['app_name']:
+        write_sai_files(get_uniq_sai_api(sai_api))
+        
+    # Write SAI implementation 
     write_sai_impl_files(sai_api)
     sai_api_name_list.append(sai_api['app_name'].replace('_', ''))
     sai_api_full_name_list.append(sai_api['app_name'])
