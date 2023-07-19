@@ -28,8 +28,7 @@ control underlay(
         // https://github.com/p4lang/pna/commit/b9fdfb888e5385472c34ff773914c72b78b63058
         // Until p4c is updated with this fix, the following line will
         // give a compile-time error.
-        istd.input_port = next_hop_id;
-        send_to_port(istd.input_port);
+        send_to_port(next_hop_id);
 #endif  // DPDK_PNA_SEND_TO_PORT_FIX_MERGED
 #endif // TARGET_DPDK_PNA  
     }
