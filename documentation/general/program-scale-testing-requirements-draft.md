@@ -194,7 +194,7 @@ integrators to track and test the designs in a common manner.
         potential source of DoS.
 
     -   Connection aging set to 5 sec and requires each connection or
-        bi-directional flow to receive one packet every second in each
+        bi-directional flow to receive one packet every 4.9 seconds in each
         direction at a size that will fill up the links to near 100% in
         conjunction with the dynamically setup connection traffic. For
         this to be run successfully it may take a few runs as each TCP
@@ -206,7 +206,7 @@ integrators to track and test the designs in a common manner.
         packets to match TCP to make things more balanced. UDP
         bi-directional flows will be aged within 5 second after
         receiving the last packet. I would set all UDP bi-directional
-        flows to 0.5 - 1.0 second aging to ensure that we do not inflate
+        flows to 5 seconds aging to ensure that we do not inflate
         the connection table over time.
 
     -   One packet should be sent in each direction to be able to keep
@@ -238,7 +238,7 @@ integrators to track and test the designs in a common manner.
     -   All UDP bi-directional flows need to age out before the 5 second
         interval to allow for new UDP bi-directional flows to be
         established. If everything works as advertised, we should never
-        see the connection table go above the 8M connections. If we do
+        see the connection table go above the 32M connections. If we do
         then it is likely that UDP bi-directional flows were not aged
         within the 5 second interval. To check this, we need to see a
         high water counter for maximum connection table size.
