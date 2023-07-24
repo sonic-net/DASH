@@ -305,7 +305,7 @@ both scenarios:
 | ACLs Ports          | 10x10K     | 3.2M        | 6.4M  | 12.8M | 25.6M |
 | Mappings (CA to PA) | NA[^1]     | 10M         | 20M   | 40M   | 80M   |
 | Act Con             | 1M         | 32M[^2]     | 64M   | 128M  | 256M  |
-| CPS                 |            | 3.75M       | 7.5M  | 15M   | 30M   |
+| CPS                 |            | 3M          | 6M    | 12M   | 24M   |
 | bg flows TCP        |            | 15M[^2]     | 30M   | 60M   | 120M  |
 | bg flows UDP        |            | 15M[^2]     | 30M   | 60M   | 120M  |
 
