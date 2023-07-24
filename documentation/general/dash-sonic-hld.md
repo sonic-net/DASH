@@ -116,7 +116,7 @@ Following are the minimal scaling requirements
 | Max prefixes per tag          | 24k                           |
 | Max tags one prefix belong to | 512                           |
 | Max tags in an ACL rule       | 4k                            |
-| CA-PA Mappings                | 10M Per Card                  |
+| CA-PA Mappings                | 8M Per Card                   |
 | Active Connections/ENI        | 1M (Bidirectional TCP or UDP) |
 | Total active connections      | 32M (Bidirectional)           |
 | Metering Buckets per ENI      | 4000                          |

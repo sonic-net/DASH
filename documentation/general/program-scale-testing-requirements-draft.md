@@ -303,14 +303,14 @@ both scenarios:
 | NSGs                | 5in + 5out | 320         | 640   | 1280  | 2560  |
 | ACLs prefixes       | 10x100K    | 32MM        | 64M   | 128M  | 256M  |
 | ACLs Ports          | 10x10K     | 3.2M        | 6.4M  | 12.8M | 25.6M |
-| Mappings (CA to PA) | NA[^1]     | 10M         | 20M   | 40M   | 80M   |
+| Mappings (CA to PA) | NA[^1]     | 8M          | 16M   | 32M   | 64M   |
 | Act Con             | 1M         | 32M[^2]     | 64M   | 128M  | 256M  |
 | CPS                 |            | 3M          | 6M    | 12M   | 24M   |
 | bg flows TCP        |            | 15M[^2]     | 30M   | 60M   | 120M  |
 | bg flows UDP        |            | 15M[^2]     | 30M   | 60M   | 120M  |
 
 
-[^1]: 128K per VNET
+[^1]: per asic numbers, can be distributed in any way to each ENI
 [^2]: flows are bidir w/ connection pool capable of oversubscription
 
 - ACL rules per NSG = 1000
