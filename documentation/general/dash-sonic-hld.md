@@ -120,7 +120,7 @@ Following are the minimal scaling requirements
 | Active Connections/ENI        | 1M (Bidirectional TCP or UDP) |
 | Total active connections      | 32M (Bidirectional)           |
 | Metering Buckets per ENI      | 4000                          |
-| CPS                           | 3.75M                          |
+| CPS                           | 3M                            |
 
 \* Number of VNET is a software limit as VNET by itself does not take hardware resources. This shall be limited to number of VNI hardware can support
 
