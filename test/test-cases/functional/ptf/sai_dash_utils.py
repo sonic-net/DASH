@@ -130,6 +130,65 @@ class VnetAPI(VnetObjects):
     def dash_acl_group_remove(self, dash_acl_group_id):
         sai_thrift_remove_dash_acl_group(self.client, dash_acl_group_id)
 
+    def dash_meter_policy_create(self):
+        """
+        Create DASH meter policy
+        """
+        ip_addr_family = SAI_IP_ADDR_FAMILY_IPV6 if self.overlay_ipv6 else SAI_IP_ADDR_FAMILY_IPV4
+        dash_meter_policy = sai_thrift_create_meter_policy(self.client, ip_addr_family)
+        self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
+        self.assertNotEqual(dash_meter_policy, SAI_NULL_OBJECT_ID)
+
+        self.add_teardown_obj(self.dash_meter_policy_remove, dash_meter_policy)
+
+        return dash_meter_policy
+
+    def dash_meter_policy_remove(self, meter_policy_oid):
+        sai_thrift_remove_meter_policy(self.client, meter_policy_oid)
+
+    def dash_meter_rule_create(self, meter_policy_id, dip, dip_mask, priority, meter_class):
+        """
+        Create DASH meter rule
+        """
+        dash_meter_rule = sai_thrift_create_meter_rule(
+            self.client, meter_policy_id, sai_ipaddress(dip),
+            sai_ipaddress(dip_mask), priority, meter_class)
+        self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
+        self.assertNotEqual(dash_meter_rule, SAI_NULL_OBJECT_ID)
+
+        self.add_teardown_obj(self.dash_meter_rule_remove, dash_meter_rule)
+
+        return dash_meter_rule
+
+    def dash_meter_rule_remove(self, meter_rule_oid):
+        sai_thrift_remove_meter_rule(self.client, meter_rule_oid)
+
+    def dash_meter_bucket_create(self, eni_id, meter_class):
+        """
+        Create DASH meter bucket
+        """
+        dash_meter_bucket = sai_thrift_create_meter_bucket(
+            self.client, eni_id, meter_class)
+        self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
+        self.assertNotEqual(dash_meter_bucket, SAI_NULL_OBJECT_ID)
+
+        self.add_teardown_obj(self.dash_meter_bucket_remove, dash_meter_bucket)
+
+        return dash_meter_bucket
+
+    def dash_meter_bucket_remove(self, meter_bucket_oid):
+        sai_thrift_remove_meter_bucket(self.client, meter_bucket_oid)
+
+    def dash_read_meter_bucket(self, meter_bucket_oid):
+        """
+        Read DASH meter bucket
+        """
+        attr_bucket = sai_thrift_get_meter_bucket_attribute(
+            self.client, meter_bucket_oid, eni_id=True, meter_class=True,
+            outbound_bytes_counter=True, inbound_bytes_counter=True)
+        self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
+        return attr_bucket
+
     def eni_create(self, **kwargs):
         """
         Create ENI
@@ -286,7 +345,8 @@ class VnetAPI(VnetObjects):
         sai_thrift_remove_pa_validation_entry(self.client, pa_validation_entry)
 
     def outbound_routing_vnet_direct_create(self, eni_id, lpm, dst_vnet_id,
-                                            overlay_ip, counter_id=None):
+                                            overlay_ip, counter_id=None,
+                                            meter_policy_en=0, meter_class=0):
         """
         Create outband vnet direct routing entry
         """
@@ -298,13 +358,14 @@ class VnetAPI(VnetObjects):
                                                  outbound_routing_entry, dst_vnet_id=dst_vnet_id,
                                                  action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT,
                                                  overlay_ip=sai_ipaddress(overlay_ip), counter_id=counter_id,
-                                                 meter_policy_en=False, meter_class=0)
+                                                 meter_policy_en=meter_policy_en, meter_class=meter_class)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_routing_vnet_direct_remove, outbound_routing_entry)
 
         return outbound_routing_entry
 
-    def outbound_routing_direct_create(self, eni_id, lpm, counter_id=None):
+    def outbound_routing_direct_create(self, eni_id, lpm, counter_id=None, meter_policy_en=0,
+                                       meter_class=0):
         """
         Create outband vnet direct routing entry
         """
@@ -314,13 +375,14 @@ class VnetAPI(VnetObjects):
             destination=sai_ipprefix(lpm))
         sai_thrift_create_outbound_routing_entry(self.client, outbound_routing_entry, counter_id=counter_id,
                                                  action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_DIRECT,
-                                                 meter_policy_en=False, meter_class=0)
+                                                 meter_policy_en=meter_policy_en, meter_class=meter_class)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_routing_vnet_direct_remove, outbound_routing_entry)
 
         return outbound_routing_entry
 
-    def outbound_routing_vnet_create(self, eni_id, lpm, dst_vnet_id, counter_id=None):
+    def outbound_routing_vnet_create(self, eni_id, lpm, dst_vnet_id, counter_id=None,
+                                     meter_policy_en=0, meter_class=0):
         """
         Create outbound vnet routing entry
         """
@@ -332,7 +394,7 @@ class VnetAPI(VnetObjects):
                                                  outbound_routing_entry, dst_vnet_id=dst_vnet_id,
                                                  counter_id=counter_id,
                                                  action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET,
-                                                 meter_policy_en=False, meter_class=0)
+                                                 meter_policy_en=meter_policy_en, meter_class=meter_class)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_routing_vnet_direct_remove, outbound_routing_entry)
 
@@ -340,7 +402,8 @@ class VnetAPI(VnetObjects):
         sai_thrift_remove_outbound_routing_entry(self.client, entry)
 
     def outbound_ca_to_pa_create(self, dst_vnet_id, dip, underlay_dip,
-                                 use_dst_vnet_vni=True, overlay_dmac=None):
+                                 use_dst_vnet_vni=True, overlay_dmac=None,
+                                 meter_class_override=False, meter_class=0):
         """
         Create outband CA PA mapping
         """
@@ -352,7 +415,8 @@ class VnetAPI(VnetObjects):
                                                   underlay_dip=sai_ipaddress(underlay_dip),
                                                   use_dst_vnet_vni=use_dst_vnet_vni,
                                                   overlay_dmac=overlay_dmac,
-                                                  meter_class=0, meter_class_override=False)
+                                                  meter_class_override=meter_class_override,
+                                                  meter_class=meter_class)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_ca_to_pa_remove, ca_to_pa_entry)
 
@@ -481,7 +545,6 @@ class VnetApiEndpoints(VnetAPI):
 
     def setUp(self, underlay_ipv6=False, overlay_ipv6=False):
         super(VnetApiEndpoints, self).setUp()
-
         # Set connection type for traffic verification methods
         self.assertTrue(test_param_get("connection").lower() in ["tcp", "udp", "icmp"],
                         "Unknown connection protocol! Supported protocols: tcp|udp|icmp")
@@ -793,14 +856,14 @@ class VnetTrafficMixin:
                              and decapsulated packets expected on the server side
         """
 
-        send_pkt, exp_pkt = self.create_vxlan_oneway_pkts(client=client,
+        self.send_pkt, exp_pkt = self.create_vxlan_oneway_pkts(client=client,
                                                           server=server,
                                                           connection=connection,
                                                           fake_mac=fake_mac,
                                                           route_direct=route_direct)
 
         print(f"\nSending VxLAN {connection.lower()} packet:", client.port, "-->", server.port)
-        send_packet(self, client.port, send_pkt)
+        send_packet(self, client.port, self.send_pkt)
 
         if pkt_drop:
             verify_no_other_packets(self, timeout=1)
