@@ -350,6 +350,7 @@ natted
 nb
 nd
 netdevs
+netmask
 Nexthop
 nexthop
 NIC
