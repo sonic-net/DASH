@@ -310,7 +310,7 @@ both scenarios:
 | bg flows UDP        |            | 15M[^2]     | 30M   | 60M   | 120M  |
 
 
-[^1]: per asic numbers, can be distributed in any way to each ENI
+[^1]: per ASIC numbers, can be distributed in any way to each ENI
 [^2]: flows are bidir w/ connection pool capable of oversubscription
 
 - ACL rules per NSG = 1000
