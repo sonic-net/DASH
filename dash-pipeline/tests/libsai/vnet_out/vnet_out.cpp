@@ -7,6 +7,9 @@ extern "C" {
 #include <sai.h>
 }
 
+// TODO below apis are extern of internal implementation
+// they should not be used by extern, but obtained via
+// sai_api_query function, FIXME
 
 extern sai_status_t sai_create_direction_lookup_entry(
         _In_ const sai_direction_lookup_entry_t *direction_lookup_entry,
