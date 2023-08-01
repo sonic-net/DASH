@@ -459,7 +459,7 @@ def write_sai_files(sai_api):
                         new_lines.append(new_line + '\n')
         if 'new experimental object type includes' in line:
             new_lines.append(line)
-            new_line = '#include "../experimental/saiexperimental' + sai_api['app_name'].replace('_', '') + '.h"\n'
+            new_line = '#include <saiexperimental' + sai_api['app_name'].replace('_', '') + '.h>\n'
             if new_line not in lines:
                 new_lines.append(new_line)
             continue
