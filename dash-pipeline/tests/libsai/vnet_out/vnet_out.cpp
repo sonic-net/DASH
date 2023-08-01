@@ -3,7 +3,9 @@
 #include <unordered_map>
 #include <string.h>
 
+extern "C" {
 #include <sai.h>
+}
 
 
 extern sai_status_t sai_create_direction_lookup_entry(
