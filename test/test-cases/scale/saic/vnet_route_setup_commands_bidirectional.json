@@ -338,7 +338,7 @@
         },
         "attributes": [
             "SAI_ROUTE_ENTRY_ATTR_NEXT_HOP_ID",
-            "0"
+            "1"
         ]
     },
     {
@@ -352,7 +352,7 @@
         },
         "attributes": [
             "SAI_ROUTE_ENTRY_ATTR_NEXT_HOP_ID",
-            "1"
+            "2"
         ]
     }
 ]
