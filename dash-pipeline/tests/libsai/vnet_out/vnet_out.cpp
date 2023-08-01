@@ -59,6 +59,14 @@ int main(int argc, char **argv)
     sai_object_id_t eni_id;
     sai_object_id_t vnet_id;
 
+    sai_status_t status = sai_api_initialize(0, nullptr);
+
+    if (status != SAI_STATUS_SUCCESS)
+    {
+        std::cout << "Failed to initialize SAI api" << std::endl;
+        return 1;
+    }
+
     sai_direction_lookup_entry_t dle = {};
     dle.switch_id = switch_id;
     dle.vni = 60;
@@ -68,7 +76,7 @@ int main(int argc, char **argv)
     attrs.push_back(attr);
     
     /* sai_status_t status = sai_dash_api_impl.create_direction_lookup_entry(&dle, attrs.size(), attrs.data()); */
-    sai_status_t status = sai_create_direction_lookup_entry(&dle, attrs.size(), attrs.data());
+    status = sai_create_direction_lookup_entry(&dle, attrs.size(), attrs.data());
     if (status != SAI_STATUS_SUCCESS)
     {
         std::cout << "Failed to create Direction Lookup Entry" << std::endl;
