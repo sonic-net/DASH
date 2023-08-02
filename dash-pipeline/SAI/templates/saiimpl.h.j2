@@ -1,0 +1,10 @@
+#pragma once
+
+#define DASH_PRIVATE __attribute__((visibility("hidden")))
+
+DASH_PRIVATE extern sai_switch_api_t dash_sai_switch_api_impl;
+DASH_PRIVATE extern sai_port_api_t dash_sai_port_api_impl;
+
+{% for api in api_names %}
+DASH_PRIVATE extern sai_{{ api }}_api_t dash_sai_{{ api }}_api_impl;
+{% endfor %}

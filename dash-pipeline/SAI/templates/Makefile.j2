@@ -2,6 +2,52 @@
 # THIS MAKEFILE IS AUTO-GENERATED FROM templates/Makefile.j2
 # DO NOT MODIFY
 
+CXXFLAGS_COMMON=
+CXXFLAGS_COMMON+= -ansi
+CXXFLAGS_COMMON+= -fPIC
+CXXFLAGS_COMMON+= -pipe
+CXXFLAGS_COMMON+= -std=c++11
+CXXFLAGS_COMMON+= -Wall
+CXXFLAGS_COMMON+= -Wcast-align
+CXXFLAGS_COMMON+= -Wcast-qual
+CXXFLAGS_COMMON+= -Wconversion
+CXXFLAGS_COMMON+= -Wdisabled-optimization
+#CXXFLAGS_COMMON+= -Werror  # disabled until warnings will be fixed
+CXXFLAGS_COMMON+= -Wextra
+CXXFLAGS_COMMON+= -Wfloat-equal
+CXXFLAGS_COMMON+= -Wformat=2
+CXXFLAGS_COMMON+= -Wformat-nonliteral
+CXXFLAGS_COMMON+= -Wformat-security
+CXXFLAGS_COMMON+= -Wformat-y2k
+CXXFLAGS_COMMON+= -Wimport
+CXXFLAGS_COMMON+= -Winit-self
+CXXFLAGS_COMMON+= -Wno-inline
+CXXFLAGS_COMMON+= -Winvalid-pch
+CXXFLAGS_COMMON+= -Wmissing-field-initializers
+CXXFLAGS_COMMON+= -Wmissing-format-attribute
+CXXFLAGS_COMMON+= -Wmissing-include-dirs
+CXXFLAGS_COMMON+= -Wmissing-noreturn
+CXXFLAGS_COMMON+= -Wno-aggregate-return
+CXXFLAGS_COMMON+= -Wno-padded
+CXXFLAGS_COMMON+= -Wno-switch-enum
+CXXFLAGS_COMMON+= -Wno-unused-parameter
+CXXFLAGS_COMMON+= -Wpacked
+CXXFLAGS_COMMON+= -Wpointer-arith
+CXXFLAGS_COMMON+= -Wredundant-decls
+CXXFLAGS_COMMON+= -Wshadow
+CXXFLAGS_COMMON+= -Wstack-protector
+CXXFLAGS_COMMON+= -Wstrict-aliasing=3
+CXXFLAGS_COMMON+= -Wswitch
+CXXFLAGS_COMMON+= -Wswitch-default
+CXXFLAGS_COMMON+= -Wunreachable-code
+CXXFLAGS_COMMON+= -Wunused
+CXXFLAGS_COMMON+= -Wvariadic-macros
+CXXFLAGS_COMMON+= -Wwrite-strings
+CXXFLAGS_COMMON+= -Wno-switch-default
+CXXFLAGS_COMMON+= -Wconversion
+CXXFLAGS_COMMON+= -Wno-psabi
+CXXFLAGS_COMMON+= -Wno-unused-label
+
 # Sources from OCP SAI Repo:
 SAI_DIR=../SAI/meta/
 SAI_SRCS=saimetadatautils.c \
@@ -13,7 +59,8 @@ SAI_OBJS=$(SAI_SRCS:.c=.o)
 
 # DASH libsai "fixed" sources (not generated from P4 code)
 DASH_FIXED_SAI_SRCS=utils.cpp \
-		saifixedapis.cpp
+		saifixedapis.cpp \
+		logger.cpp
 DASH_FIXED_SAI_OBJ=$(DASH_FIXED_SAI_SRCS:.cpp=.o)
 
 # DASH libsai "generated" sources (from P4 code)
@@ -38,6 +85,7 @@ libsai.so: $(DASH_FIXED_SAI_SRCS) $(DASH_GEN_SAI_SRCS)
 	    -I ../SAI/experimental/ \
 	    -fPIC \
 	    -g \
+		$(CXXFLAGS_COMMON) \
 		$(GXX_FLAGS) \
 	    $(DASH_FIXED_SAI_SRCS) \
 	    $(DASH_GEN_SAI_SRCS)
