@@ -33,6 +33,11 @@ extern "C" {
 
 using namespace std;
 
+// TODO to be moved to separate class/namespace
+
+static std::shared_ptr<grpc::Channel> _grpcChannel;
+extern std::unique_ptr<p4::v1::P4Runtime::Stub> stub;
+
 #define DASH_BMV2_NUM_PORTS 2 
 #define DASH_BMV2_CPU_QOS_NUMBER_OF_QUEUES 0
 
@@ -254,9 +259,71 @@ sai_status_t sai_query_attribute_enum_values_capability(
         _In_ sai_attr_id_t attr_id,
         _Inout_ sai_s32_list_t *enum_values_capability) { return SAI_STATUS_SUCCESS; }
 
+static p4::config::v1::P4Info parse_p4info(const char *path)
+{
+    p4::config::v1::P4Info p4info;
+    std::ifstream istream(path);
+    assert(istream.good());
+    google::protobuf::io::IstreamInputStream istream_(&istream);
+    google::protobuf::TextFormat::Parse(&istream_, &p4info);
+    return p4info;
+}
+
 sai_status_t sai_api_initialize(
         _In_ uint64_t flags,
-        _In_ const sai_service_method_table_t *services) { return SAI_STATUS_SUCCESS; }
+        _In_ const sai_service_method_table_t *services)
+{
+    const grpc::string _grpcTarget = "0.0.0.0:9559";
+    char test_json[] = "/etc/dash/dash_pipeline.json";
+    char test_proto_json[] = "/etc/dash/dash_pipeline_p4rt.txt";
+    int dev_id = 0;
+
+    auto p4info = parse_p4info(test_proto_json);
+
+    auto set_election_id = [](p4::v1::Uint128 *election_id) {
+        election_id->set_high(0);
+        election_id->set_low(1);
+    };
+
+    grpc::ClientContext stream_context;
+    _grpcChannel = grpc::CreateChannel(_grpcTarget, grpc::InsecureChannelCredentials());
+    stub = p4::v1::P4Runtime::NewStub(_grpcChannel);
+    auto stream = stub->StreamChannel(&stream_context);
+    {
+        p4::v1::StreamMessageRequest request;
+        auto arbitration = request.mutable_arbitration();
+        arbitration->set_device_id(dev_id);
+        set_election_id(arbitration->mutable_election_id());
+        stream->Write(request);
+        p4::v1::StreamMessageResponse response;
+        stream->Read(&response);
+        assert(response.update_case() == p4::v1::StreamMessageResponse::kArbitration);
+        assert(response.arbitration().status().code() == ::google::rpc::Code::OK);
+    }
+    {
+        p4::v1::SetForwardingPipelineConfigRequest request;
+        request.set_device_id(dev_id);
+        request.set_action(
+                p4::v1::SetForwardingPipelineConfigRequest_Action_VERIFY_AND_COMMIT);
+        set_election_id(request.mutable_election_id());
+        auto config = request.mutable_config();
+        config->set_allocated_p4info(&p4info);
+        std::ifstream istream(test_json);
+        config->mutable_p4_device_config()->assign(
+                (std::istreambuf_iterator<char>(istream)),
+                 std::istreambuf_iterator<char>());
+
+        p4::v1::SetForwardingPipelineConfigResponse rep;
+        grpc::ClientContext context;
+        LOG("GRPC call SetForwardingPipelineConfig " + _grpcTarget + " => " + test_json + ", " + test_proto_json <<endl);
+        auto status = stub->SetForwardingPipelineConfig(
+                &context, request, &rep);
+        assert(status.ok());
+        config->release_p4info();
+    }
+
+    return SAI_STATUS_SUCCESS;
+}
 
 sai_status_t sai_api_uninitialize(void) { return SAI_STATUS_SUCCESS; }
 
