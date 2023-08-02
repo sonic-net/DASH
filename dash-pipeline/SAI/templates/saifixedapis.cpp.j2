@@ -105,9 +105,9 @@ sai_status_t sai_get_switch_attribute(
 
         default:
 
-            DASH_LOG_WARN("attr %d is NOT SUPPORTED", attr->id);
+            DASH_LOG_WARN("attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", attr->id);
 
-            return SAI_STATUS_NOT_SUPPORTED;
+            return SAI_STATUS_SUCCESS;
         }
     }
     return SAI_STATUS_SUCCESS;
@@ -156,9 +156,9 @@ sai_status_t sai_get_port_attribute(
 
             default:
 
-                DASH_LOG_WARN("attr %d is NOT SUPPORTED", attr->id);
+                DASH_LOG_WARN("attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", attr->id);
 
-                return SAI_STATUS_NOT_SUPPORTED;
+                return SAI_STATUS_SUCCESS;
         }
     }
 
@@ -297,6 +297,8 @@ sai_status_t sai_api_initialize(
     char test_json[] = "/etc/dash/dash_pipeline.json";
     char test_proto_json[] = "/etc/dash/dash_pipeline_p4rt.txt";
     int dev_id = 0;
+
+    DASH_LOG_NOTICE("GRPC call SetForwardingPipelineConfig %s => %s, %s", _grpcTarget.c_str(), test_json, test_proto_json);
 
     auto p4info = parse_p4info(test_proto_json);
 
