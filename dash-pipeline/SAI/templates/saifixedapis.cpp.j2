@@ -26,7 +26,7 @@ static sai_object_id_t port_list[DASH_BMV2_NUM_PORTS] = {
     DASH_MAKE_OID(SAI_OBJECT_TYPE_PORT,2)
 };
 
-sai_status_t sai_create_switch_dummy(
+static sai_status_t dash_sai_create_switch(
         _Out_ sai_object_id_t *switch_id,
         _In_ uint32_t attr_count,
         _In_ const sai_attribute_t *attr_list)
@@ -122,7 +122,7 @@ static sai_status_t dash_sai_get_switch_attribute(
 }
 
 sai_switch_api_t dash_sai_switch_api_impl = {
-    .create_switch = sai_create_switch_dummy,
+    .create_switch = dash_sai_create_switch,
     .remove_switch = 0,
     .set_switch_attribute = 0,
     .get_switch_attribute = dash_sai_get_switch_attribute,
