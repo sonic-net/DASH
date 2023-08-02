@@ -152,9 +152,9 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 {% if 'v4_or_v6_id' in param %}
                 {
                     // set v4_or_v6 field
-                    auto param = action->add_params();
-                    param->set_param_id({{param.v4_or_v6_id}});
-                    booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param, 1);
+                    auto param2 = action->add_params();
+                    param2->set_param_id({{param.v4_or_v6_id}});
+                    booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param2, 1);
                     //matchedParams++;
                 }
                 {% endif %}
@@ -358,9 +358,9 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 {% if 'v4_or_v6_id' in param %}
                 {
                     // set v4_or_v6 field
-                    auto param = action->add_params();
-                    param->set_param_id({{param.v4_or_v6_id}});
-                    booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param, 1);
+                    auto param2 = action->add_params();
+                    param2->set_param_id({{param.v4_or_v6_id}});
+                    booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param2, 1);
                     //matchedParams++;
                 }
                 {% endif %}
