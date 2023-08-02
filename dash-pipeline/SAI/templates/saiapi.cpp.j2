@@ -14,7 +14,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
 {
     DASH_LOG_ENTER();
 
-    p4::v1::TableEntry * matchActionEntry = nullptr;
+    std::shared_ptr<p4::v1::TableEntry> matchActionEntry;
     pi_p4_id_t tableId = 0;
     // There shall be one and only one action_type
     p4::v1::TableAction* entry = nullptr;
@@ -31,7 +31,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     {% if 'stage' in table %}
     // For stage {{ table.stage }}
     {% endif %}
-    matchActionEntry = new p4::v1::TableEntry();
+    matchActionEntry = std::make_shared<p4::v1::TableEntry>();
     tableId = {{table.id}};
     entry = matchActionEntry->mutable_action();
     action = entry->mutable_action();
@@ -179,7 +179,6 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     *{{ table.name }}_id = objId;
     return SAI_STATUS_SUCCESS;
 ErrRet:
-    delete matchActionEntry;
     RemoveFromTable(*{{ table.name }}_id);
     return SAI_STATUS_FAILURE;
 }
@@ -275,7 +274,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
 {
     DASH_LOG_ENTER();
 
-    p4::v1::TableEntry * matchActionEntry = new p4::v1::TableEntry();
+    std::shared_ptr<p4::v1::TableEntry> matchActionEntry = std::make_shared<p4::v1::TableEntry>();
     pi_p4_id_t tableId = {{table.id}};
     matchActionEntry->set_table_id(tableId);
     auto tableEntry = {{ table.name }};
@@ -379,11 +378,9 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     // TODO: ternaly needs to set priority
     retCode = MutateTableEntry(matchActionEntry, p4::v1::Update_Type_INSERT);
     if (grpc::StatusCode::OK == retCode) {
-        delete matchActionEntry;
         return SAI_STATUS_SUCCESS;
     }
 ErrRet:
-    delete matchActionEntry;
     return SAI_STATUS_FAILURE;
 }
 
@@ -420,7 +417,7 @@ static sai_status_t dash_sai_remove_{{ table.name }}(
 {
     DASH_LOG_ENTER();
 
-    p4::v1::TableEntry * matchActionEntry = new p4::v1::TableEntry();
+    std::shared_ptr<p4::v1::TableEntry> matchActionEntry = std::make_shared<p4::v1::TableEntry>();
     pi_p4_id_t tableId = {{table.id}};
     matchActionEntry->set_table_id(tableId);
     auto tableEntry =  {{ table.name }};
@@ -461,13 +458,11 @@ static sai_status_t dash_sai_remove_{{ table.name }}(
 
     retCode = MutateTableEntry(matchActionEntry, p4::v1::Update_Type_DELETE);
     if (grpc::StatusCode::OK == retCode) {
-        delete matchActionEntry;
         return SAI_STATUS_SUCCESS;
     }
 
 ErrRet:
 
-    delete matchActionEntry;
     return SAI_STATUS_FAILURE;
 }
 

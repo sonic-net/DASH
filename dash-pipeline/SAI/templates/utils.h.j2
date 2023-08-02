@@ -26,6 +26,7 @@ extern "C"
 #include <atomic>
 #include <limits>
 #include <fstream>
+#include <memory>
 
 template<typename T>
 void booldataSetVal(const sai_attribute_value_t &value, T &t, int bits = 8){
@@ -310,11 +311,11 @@ void u64SetMask(const sai_uint64_t &value, T &t, int bits = 64) {
     t->set_mask(&val, bytes);
 }
 
-grpc::StatusCode MutateTableEntry(p4::v1::TableEntry *entry, p4::v1::Update_Type updateType);
+grpc::StatusCode MutateTableEntry(std::shared_ptr<p4::v1::TableEntry>, p4::v1::Update_Type updateType);
 
 sai_object_id_t NextObjIndex();
 
-bool InsertInTable(p4::v1::TableEntry *entry, sai_object_id_t *objId);
+bool InsertInTable(std::shared_ptr<p4::v1::TableEntry> entry, sai_object_id_t *objId);
 
 bool RemoveFromTable(sai_object_id_t id);
 
