@@ -53,63 +53,71 @@ sai_status_t sai_get_switch_attribute(
 
     for (uint32_t i = 0; i < attr_count ; i++, attr++)
     {
-        switch(attr->id) {
+        switch(attr->id)
+        {
+            case SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS:
 
-        case SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS:
-            attr->value.u32 = DASH_BMV2_NUM_PORTS;
+                attr->value.u32 = DASH_BMV2_NUM_PORTS;
 
-            DASH_LOG_NOTICE("[%d] attr %d SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS = %d", i, attr->id, attr->value.u32);
+                DASH_LOG_NOTICE("[%d] attr %d SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS = %d", i, attr->id, attr->value.u32);
 
-            return SAI_STATUS_SUCCESS;
+                break;
 
-        case SAI_SWITCH_ATTR_PORT_LIST:
+            case SAI_SWITCH_ATTR_PORT_LIST:
 
-            attr->value.objlist.count = DASH_BMV2_NUM_PORTS;
+                attr->value.objlist.count = DASH_BMV2_NUM_PORTS;
 
-            for (uint32_t j = 0; j < DASH_BMV2_NUM_PORTS; j++)
-            {
-                attr->value.objlist.list[j] = port_list[j];
-            }
+                for (uint32_t j = 0; j < DASH_BMV2_NUM_PORTS; j++)
+                {
+                    attr->value.objlist.list[j] = port_list[j];
+                }
 
-            DASH_LOG_NOTICE("[%d] attr %d SAI_SWITCH_ATTR_PORT_LIST = [%d objids]", i, attr->id, DASH_BMV2_NUM_PORTS);
+                DASH_LOG_NOTICE("[%d] attr %d SAI_SWITCH_ATTR_PORT_LIST = [%d objids]", i, attr->id, DASH_BMV2_NUM_PORTS);
 
-            return SAI_STATUS_SUCCESS;
+                break;
 
-        case SAI_SWITCH_ATTR_DEFAULT_VLAN_ID:
-            attr->value.oid = DASH_BMV2_DEFAULT_VLAN_ID;
+            case SAI_SWITCH_ATTR_DEFAULT_VLAN_ID:
 
-            DASH_LOG_NOTICE("[%d] attr %d SAI_SWITCH_ATTR_DEFAULT_VLAN_ID = %lx", i, attr->id, attr->value.oid);
+                attr->value.oid = DASH_BMV2_DEFAULT_VLAN_ID;
 
-            return SAI_STATUS_SUCCESS;
+                DASH_LOG_NOTICE("[%d] attr %d SAI_SWITCH_ATTR_DEFAULT_VLAN_ID = %lx", i, attr->id, attr->value.oid);
 
-        case SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID:
-            attr->value.oid = DASH_BMV2_DEFAULT_VRF_ID;
+                break;
 
-            DASH_LOG_NOTICE("attr %d SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID = %lx", attr->id, attr->value.oid);
+            case SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID:
 
-            return SAI_STATUS_SUCCESS;
+                attr->value.oid = DASH_BMV2_DEFAULT_VRF_ID;
 
-        case SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID:
-            attr->value.oid = DASH_BMV2_DEFAULT_1Q_BRIDGE_ID;
+                DASH_LOG_NOTICE("attr %d SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID = %lx", attr->id, attr->value.oid);
 
-            DASH_LOG_NOTICE("attr %d SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID = %lx", attr->id, attr->value.oid);
+                break;
 
-            return SAI_STATUS_SUCCESS;
+            case SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID:
 
-        case SAI_SWITCH_ATTR_CPU_PORT:
-            attr->value.oid = DASH_BMV2_DEFAULT_CPU_PORT_ID;
+                attr->value.oid = DASH_BMV2_DEFAULT_1Q_BRIDGE_ID;
 
-            DASH_LOG_NOTICE("[%d] attr %d DASH_BMV2_DEFAULT_CPU_PORT_ID = %lx", i, attr->id, attr->value.oid);
+                DASH_LOG_NOTICE("attr %d SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID = %lx", attr->id, attr->value.oid);
 
-            return SAI_STATUS_SUCCESS;
+                break;
 
-        default:
+            case SAI_SWITCH_ATTR_CPU_PORT:
 
-            DASH_LOG_WARN("attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", attr->id);
+                attr->value.oid = DASH_BMV2_DEFAULT_CPU_PORT_ID;
 
-            return SAI_STATUS_SUCCESS; // TODO FIXME should return NOT SUPPORTED
+                DASH_LOG_NOTICE("[%d] attr %d DASH_BMV2_DEFAULT_CPU_PORT_ID = %lx", i, attr->id, attr->value.oid);
+
+                break;
+
+            default:
+
+                DASH_LOG_WARN("attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", attr->id);
+
+                memset(&attr->value, 0, sizeof(attr->value)); // clear potential caller garbage
+
+                break; // TODO FIXME should return NOT SUPPORTED
         }
     }
+
     return SAI_STATUS_SUCCESS;
 }
 
@@ -152,13 +160,15 @@ sai_status_t sai_get_port_attribute(
 
                 DASH_LOG_NOTICE("attr %d SAI_PORT_ATTR_QOS_NUMBER_OF_QUEUES = %d", attr->id, attr->value.u32);
 
-                return SAI_STATUS_SUCCESS;
+                break;
 
             default:
 
                 DASH_LOG_WARN("attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", attr->id);
 
-                return SAI_STATUS_SUCCESS; // TODO FIXME should return NOT SUPPORTED
+                memset(&attr->value, 0, sizeof(attr->value)); // clear potential caller garbage
+
+                break; // TODO FIXME should return NOT SUPPORTED
         }
     }
 
