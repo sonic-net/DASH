@@ -107,7 +107,7 @@ sai_status_t sai_get_switch_attribute(
 
             DASH_LOG_WARN("attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", attr->id);
 
-            return SAI_STATUS_SUCCESS;
+            return SAI_STATUS_SUCCESS; // TODO FIXME should return NOT SUPPORTED
         }
     }
     return SAI_STATUS_SUCCESS;
@@ -158,7 +158,7 @@ sai_status_t sai_get_port_attribute(
 
                 DASH_LOG_WARN("attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", attr->id);
 
-                return SAI_STATUS_SUCCESS;
+                return SAI_STATUS_SUCCESS; // TODO FIXME should return NOT SUPPORTED
         }
     }
 
