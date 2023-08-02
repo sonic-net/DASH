@@ -104,7 +104,7 @@ Following are the minimal scaling requirements
 | Item                          | Expected value                |
 | ----------------------------- | ----------------------------- |
 | VNETs                         | 1024*                         |
-| ENI                           | 64 Per Card                   |
+| ENI                           | 32 Per Card                   |
 | Outbound Routes per ENI       | 100k                          |
 | Inbound Routes per ENI        | 10k**                         |
 | NSGs per ENI                  | 10***                         |
@@ -116,11 +116,11 @@ Following are the minimal scaling requirements
 | Max prefixes per tag          | 24k                           |
 | Max tags one prefix belong to | 512                           |
 | Max tags in an ACL rule       | 4k                            |
-| CA-PA Mappings                | 10M Per Card                  |
+| CA-PA Mappings                | 8M Per Card                   |
 | Active Connections/ENI        | 1M (Bidirectional TCP or UDP) |
 | Total active connections      | 32M (Bidirectional)           |
 | Metering Buckets per ENI      | 4000                          |
-| CPS                           | 1.5M                          |
+| CPS                           | 3M                            |
 
 \* Number of VNET is a software limit as VNET by itself does not take hardware resources. This shall be limited to number of VNI hardware can support
 
