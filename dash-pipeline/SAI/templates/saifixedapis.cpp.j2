@@ -4,13 +4,15 @@
  */
 #include "utils.h"
 #include "saiimpl.h"
+#include "config.h"
+
+#include <vector>
 
 // TODO to be moved to separate class/namespace
 
 static std::shared_ptr<grpc::Channel> _grpcChannel;
 extern std::unique_ptr<p4::v1::P4Runtime::Stub> stub;
 
-#define DASH_BMV2_NUM_PORTS 2
 #define DASH_BMV2_CPU_QOS_NUMBER_OF_QUEUES 0
 
 #define DASH_OBJECT_SHFT 48
@@ -21,10 +23,9 @@ extern std::unique_ptr<p4::v1::P4Runtime::Stub> stub;
 #define DASH_BMV2_DEFAULT_VRF_ID DASH_MAKE_OID(SAI_OBJECT_TYPE_VIRTUAL_ROUTER,1)
 #define DASH_BMV2_DEFAULT_1Q_BRIDGE_ID DASH_MAKE_OID(SAI_OBJECT_TYPE_BRIDGE,1)
 
-static sai_object_id_t port_list[DASH_BMV2_NUM_PORTS] = {
-    DASH_MAKE_OID(SAI_OBJECT_TYPE_PORT,1),
-    DASH_MAKE_OID(SAI_OBJECT_TYPE_PORT,2)
-};
+static std::shared_ptr<dash::Config> cfg;
+
+static std::vector<sai_object_id_t> port_list;
 
 static sai_status_t dash_sai_create_switch(
         _Out_ sai_object_id_t *switch_id,
@@ -57,7 +58,7 @@ static sai_status_t dash_sai_get_switch_attribute(
         {
             case SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS:
 
-                attr->value.u32 = DASH_BMV2_NUM_PORTS;
+                attr->value.u32 = cfg->m_bmv2NumPorts;
 
                 DASH_LOG_NOTICE("[%d] attr %d SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS = %d", i, attr->id, attr->value.u32);
 
@@ -65,14 +66,14 @@ static sai_status_t dash_sai_get_switch_attribute(
 
             case SAI_SWITCH_ATTR_PORT_LIST:
 
-                attr->value.objlist.count = DASH_BMV2_NUM_PORTS;
+                attr->value.objlist.count = cfg->m_bmv2NumPorts;
 
-                for (uint32_t j = 0; j < DASH_BMV2_NUM_PORTS; j++)
+                for (size_t j = 0; j < cfg->m_bmv2NumPorts; j++)
                 {
-                    attr->value.objlist.list[j] = port_list[j];
+                    attr->value.objlist.list[j] = port_list.at(j);
                 }
 
-                DASH_LOG_NOTICE("[%d] attr %d SAI_SWITCH_ATTR_PORT_LIST = [%d objids]", i, attr->id, DASH_BMV2_NUM_PORTS);
+                DASH_LOG_NOTICE("[%d] attr %d SAI_SWITCH_ATTR_PORT_LIST = [%d objids]", i, attr->id, cfg->m_bmv2NumPorts);
 
                 break;
 
@@ -303,10 +304,21 @@ sai_status_t sai_api_initialize(
 {
     DASH_LOG_ENTER();
 
-    const grpc::string _grpcTarget = "0.0.0.0:9559";
-    char test_json[] = "/etc/dash/dash_pipeline.json";
-    char test_proto_json[] = "/etc/dash/dash_pipeline_p4rt.txt";
-    int dev_id = 0;
+    cfg = dash::Config::getConfig(services);
+
+    DASH_LOG_NOTICE("config: %s", cfg->getConfigString().c_str());
+
+    for (uint32_t i = 1; i <= cfg->m_bmv2NumPorts; i++)
+    {
+        port_list.push_back(DASH_MAKE_OID(SAI_OBJECT_TYPE_PORT,i));
+    }
+
+    assert(cfg->m_bmv2NumPorts == (uint32_t)port_list.size());
+
+    const grpc::string _grpcTarget = cfg->m_grpcTarget;
+    const char* test_json = cfg->m_pipelineJson.c_str();
+    const char* test_proto_json = cfg->m_pipelineProto.c_str();
+    int dev_id = cfg->m_deviceId;
 
     DASH_LOG_NOTICE("GRPC call SetForwardingPipelineConfig %s => %s, %s", _grpcTarget.c_str(), test_json, test_proto_json);
 
@@ -361,7 +373,7 @@ sai_status_t sai_api_uninitialize(void)
 {
     DASH_LOG_ENTER();
 
-    // TODO delete stub
+    stub = nullptr;
 
     return SAI_STATUS_SUCCESS;
 }
