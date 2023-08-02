@@ -104,7 +104,7 @@ Following are the minimal scaling requirements
 | Item                          | Expected value                |
 | ----------------------------- | ----------------------------- |
 | VNETs                         | 1024*                         |
-| ENI                           | 64 Per Card                   |
+| ENI                           | 32 Per Card                   |
 | Outbound Routes per ENI       | 100k                          |
 | Inbound Routes per ENI        | 10k**                         |
 | NSGs per ENI                  | 10***                         |
@@ -116,11 +116,11 @@ Following are the minimal scaling requirements
 | Max prefixes per tag          | 24k                           |
 | Max tags one prefix belong to | 512                           |
 | Max tags in an ACL rule       | 4k                            |
-| CA-PA Mappings                | 10M Per Card                  |
+| CA-PA Mappings                | 8M Per Card                   |
 | Active Connections/ENI        | 1M (Bidirectional TCP or UDP) |
 | Total active connections      | 32M (Bidirectional)           |
 | Metering Buckets per ENI      | 4000                          |
-| CPS                           | 1.5M                          |
+| CPS                           | 3M                            |
 
 \* Number of VNET is a software limit as VNET by itself does not take hardware resources. This shall be limited to number of VNI hardware can support
 
@@ -213,13 +213,15 @@ The following section captures at a high-level on the VNET packet flow. Detailed
 
 ## 2.1 Outbound packet processing pipeline
 	
-  ![dash-outbound](./images/dash-hld-outbound-packet-processing-pipeline.png)
+  ![dash-outbound](./images/dash-hld-outbound-packet-processing-pipeline.svg)
 	
 Based on the incoming packet's VNI matched against the reserved VNI assigned for VM->Appliance, the pipeline shall set the direction as TX(Outbound) and using the inner src-mac, maps to the corresponding ENI.The incoming packet will always be VXLAN encapsulated and outer dst-ip is the appliance VIP. The pipeline shall parse the VNI, and for VM traffic, the VNI shall be a special reserved VNI. Everything else shall be treated as as network traffic(RX). Pipeline shall use VNI to differentiate the traffic to be VM (Inbound) or Network (Outbound).
 
 In the outbound flow, the appliance shall assume it is the first appliance to apply policy. It applies the outbound ACLs in three stages (VNIC, Subnet and VNET), processed in order, with the outcome being the most restrictive of the three ACLs combined. 
 
 After the ACL stage, it does LPM routing based on the inner dst-ip and applies the respective action (encap, subsequent CA-PA mapping). Finally, update the connection tracking table for both inbound and outbound.
+
+After the connection tracking update, the packet proceeds to the "underlay routing" stage. Based on the destination IP address (outer dst-ip), the underlay routing block decides how the packet should be forwarded towards its destination.
 
 The figure below shows how the VNI to be encapsulated in the outgoing packet is derived based on the ENI, outbound routing and outbound CA-PA mapping table lookup in the Dash outbound packet processing pipeline.
 
@@ -229,7 +231,7 @@ The figure below shows how the VNI to be encapsulated in the outgoing packet is 
 	
    ![dash-inbound](./images/dash-hld-inbound-packet-processing-pipeline.svg)
 
-Based on the incoming packet's VNI, if it does not match against any reserved VNI, the pipeline shall set the direction as RX(Inbound) and using the inner dst-mac, maps to the corresponding ENI. In the inbound flow, Priority based "Routing Rule" lookup happens based on VNI and optionally SRC PA prefix and maps to a VNET. In other words, the VNET is derived from a VNI key or a combination of VNI key and SRC PA based on the routing rule entry. It is possible that in some cases, two VNETs in different region can have the same VNI key and hence Inbound routing rule shall have both SRC PA prefix and VNI key to uniquely determine the VNET. Using the derived VNET's mapping tables, source PA address is validated against the list of mappings. If the check passes, decap action is performed, else dropped. Note that, PA validation is conditional and routing rule shall specify (say, by a flag) whether to perform PA validation or not as there are some cases like SLB traffic for which PA validation is not required. After route lookup is the three stage ACL, processed in order. ACLs can have multiple src/dst IP ranges or port ranges as match criteria.
+Based on the incoming packet's VNI, if it does not match against any reserved VNI, the pipeline shall set the direction as RX(Inbound) and using the inner dst-mac, maps to the corresponding ENI. In the inbound flow, Priority based "Routing Rule" lookup happens based on VNI and optionally SRC PA prefix and maps to a VNET. In other words, the VNET is derived from a VNI key or a combination of VNI key and SRC PA based on the routing rule entry. It is possible that in some cases, two VNETs in different region can have the same VNI key and hence Inbound routing rule shall have both SRC PA prefix and VNI key to uniquely determine the VNET. Using the derived VNET's mapping tables, source PA address is validated against the list of mappings. If the check passes, decap action is performed, else dropped. Note that, PA validation is conditional and routing rule shall specify (say, by a flag) whether to perform PA validation or not as there are some cases like SLB traffic for which PA validation is not required. After route lookup is the three stage ACL, processed in order. ACLs can have multiple src/dst IP ranges or port ranges as match criteria. After the connection tracking update, the packet proceeds to the "underlay routing" stage. Based on the destination IP address (outer dst-ip), the underlay routing block decides how the packet should be forwarded towards its destination.
 	
 It is worth noting that CA-PA mapping table shall be used for both encap and decap process
 
