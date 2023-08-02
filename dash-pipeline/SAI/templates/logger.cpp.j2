@@ -28,15 +28,26 @@ void Logger::write(Priority prio, const char *fmt, ...)
     if (prio > m_minPrio)
         return;
 
-    va_list ap;
-    va_start(ap, fmt);
+    // print to syslog
+    {
+        va_list ap;
+        va_start(ap, fmt);
 
-    vsyslog(prio, fmt, ap); // print to syslog
+        vsyslog(prio, fmt, ap);
 
-    vfprintf(stderr, fmt, ap); // print to stderr
-    fprintf(stderr, "\n");
+        va_end(ap);
+    }
 
-    va_end(ap);
+    // print to stderr
+    {
+        va_list ap;
+        va_start(ap, fmt);
+
+        vfprintf(stderr, fmt, ap);
+        fprintf(stderr, "\n");
+
+        va_end(ap);
+    }
 }
 
 Logger::ScopeLogger::ScopeLogger(int line, const char *fun) : m_line(line), m_fun(fun)
