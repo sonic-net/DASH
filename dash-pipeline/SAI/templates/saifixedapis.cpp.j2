@@ -40,7 +40,7 @@ sai_status_t sai_create_switch_dummy(
     return SAI_STATUS_SUCCESS;
 }
 
-sai_status_t sai_get_switch_attribute(
+static sai_status_t dash_sai_get_switch_attribute(
         _In_ sai_object_id_t switch_id,
         _In_ uint32_t attr_count,
         _Inout_ sai_attribute_t *attr_list)
@@ -125,7 +125,7 @@ sai_switch_api_t dash_sai_switch_api_impl = {
     .create_switch = sai_create_switch_dummy,
     .remove_switch = 0,
     .set_switch_attribute = 0,
-    .get_switch_attribute = sai_get_switch_attribute,
+    .get_switch_attribute = dash_sai_get_switch_attribute,
     .get_switch_stats = 0,
     .get_switch_stats_ext = 0,
     .clear_switch_stats = 0,
@@ -139,7 +139,7 @@ sai_switch_api_t dash_sai_switch_api_impl = {
     .switch_mdio_cl22_write = 0,
 };
 
-sai_status_t sai_get_port_attribute(
+static sai_status_t dash_sai_get_port_attribute(
         _In_ sai_object_id_t port_id,
         _In_ uint32_t attr_count,
         _Inout_ sai_attribute_t *attr_list)
@@ -179,7 +179,7 @@ sai_port_api_t dash_sai_port_api_impl = {
     .create_port = 0,
     .remove_port = 0,
     .set_port_attribute = 0,
-    .get_port_attribute = sai_get_port_attribute,
+    .get_port_attribute = dash_sai_get_port_attribute,
     .get_port_stats = 0,
     .get_port_stats_ext = 0,
     .clear_port_stats = 0,
