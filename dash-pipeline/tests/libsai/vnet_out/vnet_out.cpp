@@ -5,54 +5,13 @@
 
 extern "C" {
 #include <sai.h>
+#include <saiextensions.h>
 }
 
-// TODO below apis are extern of internal implementation
-// they should not be used by extern, but obtained via
-// sai_api_query function, FIXME
-
-extern sai_status_t sai_create_direction_lookup_entry(
-        _In_ const sai_direction_lookup_entry_t *direction_lookup_entry,
-        _In_ uint32_t attr_count,
-        _In_ const sai_attribute_t *attr_list);
-extern sai_status_t sai_remove_direction_lookup_entry(
-        _In_ const sai_direction_lookup_entry_t *direction_lookup_entry);
-
-extern sai_status_t sai_create_eni_ether_address_map_entry(
-        _In_ const sai_eni_ether_address_map_entry_t *outbound_eni_lookup_from_vm_entry,
-        _In_ uint32_t attr_count,
-        _In_ const sai_attribute_t *attr_list);
-extern sai_status_t sai_remove_eni_ether_address_map_entry(
-        _In_ const sai_eni_ether_address_map_entry_t *outbound_eni_lookup_from_vm_entry);
-
-extern sai_status_t sai_create_vnet(
-        _Out_ sai_object_id_t *vnet_id,
-        _In_ sai_object_id_t switch_id,
-        _In_ uint32_t attr_count,
-        _In_ const sai_attribute_t *attr_list);
-extern sai_status_t sai_remove_vnet(_In_ sai_object_id_t vnet_id);
-
-extern sai_status_t sai_create_eni(
-        _Out_ sai_object_id_t *eni_id,
-        _In_ sai_object_id_t switch_id,
-        _In_ uint32_t attr_count,
-        _In_ const sai_attribute_t *attr_list);
-
-extern sai_status_t sai_create_eni(
-        _Out_ sai_object_id_t *eni_id,
-        _In_ sai_object_id_t switch_id,
-        _In_ uint32_t attr_count,
-        _In_ const sai_attribute_t *attr_list);
-extern sai_status_t sai_remove_eni(
-        _In_ sai_object_id_t eni_id);
-
-extern sai_status_t sai_create_dash_acl_group(
-        _Out_ sai_object_id_t *acl_group_id,
-        _In_ sai_object_id_t switch_id,
-        _In_ uint32_t attr_count,
-        _In_ const sai_attribute_t *attr_list);
-extern sai_status_t sai_remove_dash_acl_group(
-        _In_ sai_object_id_t eni_id);
+#define QUERY_STATUS_CHECK(s,api) \
+    if ((s) != SAI_STATUS_SUCCESS) { \
+        std::cout << "Failed to get api " #api ": " << (s) << std::endl; \
+        exit(1); }
 
 int main(int argc, char **argv)
 {
@@ -72,6 +31,22 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    sai_dash_direction_lookup_api_t *dash_direction_lookup_api;
+    status = sai_api_query((sai_api_t)SAI_API_DASH_DIRECTION_LOOKUP, (void**)&dash_direction_lookup_api);
+    QUERY_STATUS_CHECK(status, SAI_API_DASH_DIRECTION_LOOKUP);
+
+    sai_dash_acl_api_t *dash_acl_api;
+    status = sai_api_query((sai_api_t)SAI_API_DASH_ACL, (void**)&dash_acl_api);
+    QUERY_STATUS_CHECK(status, SAI_API_DASH_ACL);
+
+    sai_dash_vnet_api_t *dash_vnet_api;
+    status = sai_api_query((sai_api_t)SAI_API_DASH_VNET, (void**)&dash_vnet_api);
+    QUERY_STATUS_CHECK(status, SAI_API_DASH_VNET);
+
+    sai_dash_eni_api_t *dash_eni_api;
+    status = sai_api_query((sai_api_t)SAI_API_DASH_ENI, (void**)&dash_eni_api);
+    QUERY_STATUS_CHECK(status, SAI_API_DASH_ENI);
+
     sai_direction_lookup_entry_t dle = {};
     dle.switch_id = switch_id;
     dle.vni = 60;
@@ -81,7 +56,7 @@ int main(int argc, char **argv)
     attrs.push_back(attr);
     
     /* sai_status_t status = sai_dash_api_impl.create_direction_lookup_entry(&dle, attrs.size(), attrs.data()); */
-    status = sai_create_direction_lookup_entry(&dle, attrs.size(), attrs.data());
+    status = dash_direction_lookup_api->create_direction_lookup_entry(&dle, attrs.size(), attrs.data());
     if (status != SAI_STATUS_SUCCESS)
     {
         std::cout << "Failed to create Direction Lookup Entry" << std::endl;
@@ -95,13 +70,13 @@ int main(int argc, char **argv)
     attrs.push_back(attr);
 
     /* status = sai_dash_api_impl.create_dash_acl_group(&group_id, switch_id, attrs.size(), attrs.data()); */
-    status = sai_create_dash_acl_group(&in_acl_group_id, switch_id, attrs.size(), attrs.data());
+    status = dash_acl_api->create_dash_acl_group(&in_acl_group_id, switch_id, attrs.size(), attrs.data());
     if (status != SAI_STATUS_SUCCESS)
     {
         std::cout << "Failed to create inbound Dash ACL group" << std::endl;
         return 1;
     }
-    status = sai_create_dash_acl_group(&out_acl_group_id, switch_id, attrs.size(), attrs.data());
+    status = dash_acl_api->create_dash_acl_group(&out_acl_group_id, switch_id, attrs.size(), attrs.data());
     if (status != SAI_STATUS_SUCCESS)
     {
         std::cout << "Failed to create outbound Dash ACL group" << std::endl;
@@ -114,7 +89,7 @@ int main(int argc, char **argv)
     attr.value.u32 = 9;
     attrs.push_back(attr);
     
-    status = sai_create_vnet(&vnet_id, switch_id, attrs.size(), attrs.data());
+    status = dash_vnet_api->create_vnet(&vnet_id, switch_id, attrs.size(), attrs.data());
     if (status != SAI_STATUS_SUCCESS)
     {
         std::cout << "Failed to create VNET table entry" << std::endl;
@@ -190,7 +165,7 @@ int main(int argc, char **argv)
         attrs.push_back(attr);
     }
 
-    status = sai_create_eni(&eni_id, switch_id, attrs.size(), attrs.data());
+    status = dash_eni_api->create_eni(&eni_id, switch_id, attrs.size(), attrs.data());
     if (status != SAI_STATUS_SUCCESS)
     {
         std::cout << "Failed to create ENI object" << std::endl;
@@ -212,7 +187,7 @@ int main(int argc, char **argv)
     attr.value.u16 = eni_id;
     attrs.push_back(attr);
 
-    status = sai_create_eni_ether_address_map_entry(&eam, attrs.size(), attrs.data());
+    status = dash_eni_api->create_eni_ether_address_map_entry(&eam, attrs.size(), attrs.data());
     if (status != SAI_STATUS_SUCCESS)
     {
         std::cout << "Failed to create ENI Lookup From VM" << std::endl;
@@ -220,28 +195,28 @@ int main(int argc, char **argv)
     }
 
     // Delete everything in reverse order
-    status = sai_remove_eni_ether_address_map_entry(&eam);
+    status = dash_eni_api->remove_eni_ether_address_map_entry(&eam);
     if (status != SAI_STATUS_SUCCESS)
     {
         std::cout << "Failed to remove ENI Lookup From VM" << std::endl;
         return 1;
     }
 
-    status = sai_remove_eni(eni_id);
+    status = dash_eni_api->remove_eni(eni_id);
     if (status != SAI_STATUS_SUCCESS)
     {
         std::cout << "Failed to remove ENI object " << eni_id << std::endl;
         return 1;
     }
 
-    status = sai_remove_vnet(vnet_id);
+    status = dash_vnet_api->remove_vnet(vnet_id);
     if (status != SAI_STATUS_SUCCESS)
     {
         std::cout << "Failed to remove VNET table entry" << std::endl;
         return 1;
     }
 
-    status = sai_remove_dash_acl_group(out_acl_group_id);
+    status = dash_acl_api->remove_dash_acl_group(out_acl_group_id);
     if (status != SAI_STATUS_SUCCESS)
     {
         std::cout << "Failed to remove Outbound ACL group object "
@@ -249,7 +224,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    status = sai_remove_dash_acl_group(in_acl_group_id);
+    status = dash_acl_api->remove_dash_acl_group(in_acl_group_id);
     if (status != SAI_STATUS_SUCCESS)
     {
         std::cout << "Failed to remove Inbound ACL group object "
@@ -257,7 +232,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    status = sai_remove_direction_lookup_entry(&dle);
+    status = dash_direction_lookup_api->remove_direction_lookup_entry(&dle);
     if (status != SAI_STATUS_SUCCESS)
     {
         std::cout << "Failed to remove Direction Lookup Entry" << std::endl;

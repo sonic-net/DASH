@@ -1,42 +1,11 @@
-#include <mutex>
-#include <unordered_map>
-#include <utility>
-#include <atomic>
-#include <limits>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-#include <PI/pi.h>
-#include <grpcpp/grpcpp.h>
-#include "p4/v1/p4runtime.grpc.pb.h"
 #include "utils.h"
-extern "C" {
-#include "sai.h"
-#include "saiobject.h"
-#include "saistatus.h"
-#include "saitypes.h"
-#include "saiextensions.h"
-}
-#include <fstream>
-#include <google/protobuf/text_format.h>
-#include <google/rpc/code.pb.h>
 
-#if __APPLE__
-#include <net/ethernet.h>
-#else
-#include <netinet/ether.h>
-#include <netinet/in.h>
-#endif
+static int deviceId = 0;
 
-#define LOG(x) std::cerr<<x
-
-using namespace std;
-
-static const grpc::string _grpcTarget = "localhost:9876";
-static int deviceId;
-static unordered_multimap<sai_object_id_t, p4::v1::TableEntry *> tableEntryMap;
+static std::unordered_multimap<sai_object_id_t, p4::v1::TableEntry *> tableEntryMap;
 static std::mutex tableLock;
-static atomic<sai_object_id_t> nextId;
+static std::atomic<sai_object_id_t> nextId;
+
 std::unique_ptr<p4::v1::P4Runtime::Stub> stub;
 
 void correctIpPrefix(void *ip, const void *mask, size_t length)
@@ -60,9 +29,9 @@ int leadingNonZeroBits(const uint32_t ipv4) {
 int leadingNonZeroBits(const sai_ip6_t ipv6) {
     int trailingZeros = 0;
     for (int i = 0; i < 16; i+=4) {
-        auto num = static_cast<uint32_t>(ipv6[i]) +  
-        (static_cast<uint32_t>(ipv6[i+1]) << 8) + 
-        (static_cast<uint32_t>(ipv6[i+2]) << 16) + 
+        auto num = static_cast<uint32_t>(ipv6[i]) +
+        (static_cast<uint32_t>(ipv6[i+1]) << 8) +
+        (static_cast<uint32_t>(ipv6[i+2]) << 16) +
         (static_cast<uint32_t>(ipv6[i+3]) << 24);
         auto firstSetBit  = leadingNonZeroBits(num);
         if (firstSetBit > 0) {
@@ -74,11 +43,14 @@ int leadingNonZeroBits(const sai_ip6_t ipv6) {
 }
 
 
-int GetDeviceId() {
+int GetDeviceId()
+{
+    DASH_LOG_ENTER();
+
     return deviceId;
 }
 
-string updateTypeStr(p4::v1::Update_Type updateType) {
+std::string updateTypeStr(p4::v1::Update_Type updateType) {
     const google::protobuf::EnumDescriptor *descriptor = p4::v1::Update_Type_descriptor();
     return descriptor->FindValueByNumber(updateType)->name();
 }
@@ -92,7 +64,9 @@ const sai_attribute_t *getMaskAttr(sai_attr_id_t id, uint32_t attr_count, const 
     return nullptr;
 }
 
-grpc::StatusCode MutateTableEntry(p4::v1::TableEntry *entry, p4::v1::Update_Type updateType) {
+grpc::StatusCode MutateTableEntry(p4::v1::TableEntry *entry, p4::v1::Update_Type updateType)
+{
+    DASH_LOG_ENTER();
 
     p4::v1::WriteRequest request;
     request.set_device_id(GetDeviceId());
@@ -100,47 +74,62 @@ grpc::StatusCode MutateTableEntry(p4::v1::TableEntry *entry, p4::v1::Update_Type
     update->set_type(updateType);
     auto entity = update->mutable_entity();
     entity->set_allocated_table_entry(entry);
-    
+
     p4::v1::WriteResponse rep;
     grpc::ClientContext context;
     grpc::Status status = stub->Write(&context, request, &rep);
-    if (status.ok()) {
-        LOG("GRPC call Write::" << updateTypeStr(updateType) << " OK" << entry->ShortDebugString() << std::endl);
+
+    if (status.ok())
+    {
+        DASH_LOG_NOTICE("GRPC call Write::%s OK %s", updateTypeStr(updateType).c_str(), entry->ShortDebugString().c_str());
     }
-    else {
-        LOG("GRPC ERROR["<< status.error_code() <<"]: " << status.error_message() << ", " << status.error_details() << std::endl);
-        LOG("GRPC call Write::" << updateTypeStr(updateType) << " ERROR: " << std::endl << entry->ShortDebugString() << std::endl);
+    else
+    {
+        DASH_LOG_ERROR("GRPC ERROR[%d]: %s, %s", status.error_code(), status.error_message().c_str(), status.error_details().c_str());
+        DASH_LOG_ERROR("GRPC call Write::%s ERROR: %s", updateTypeStr(updateType).c_str(), entry->ShortDebugString().c_str());
     }
+
     //MILIND?? What is this? reference release? memory release?
     entity->release_table_entry();
     return status.error_code();
 }
 
-bool InsertInTable(p4::v1::TableEntry *entry, sai_object_id_t *objId) {
+bool InsertInTable(p4::v1::TableEntry *entry, sai_object_id_t *objId)
+{
+    DASH_LOG_ENTER();
+
     auto retCode = MutateTableEntry(entry, p4::v1::Update_Type_INSERT);
     if (grpc::StatusCode::OK != retCode) {
         return false;
     }
 
-    tableLock.lock();
-    if (*objId == 0) {
+    std::lock_guard<std::mutex> lock(tableLock);
+
+    if (*objId == 0)
+    {
         *objId = NextObjIndex();
     }
     tableEntryMap.insert(std::make_pair(*objId, entry));
-    tableLock.unlock();
     return true;
 }
 
-sai_object_id_t NextObjIndex() {
+sai_object_id_t NextObjIndex()
+{
+    DASH_LOG_ENTER();
+
     return ++nextId;
 }
 
-bool RemoveFromTable(sai_object_id_t id) {
-    tableLock.lock();
+bool RemoveFromTable(sai_object_id_t id)
+{
+    DASH_LOG_ENTER();
+
+    std::lock_guard<std::mutex> lock(tableLock);
     auto range = tableEntryMap.equal_range(id);
-    if (range.first == range.second) {
-        tableLock.unlock();
-        LOG("id: " << id << " not present in the table for deletion!" <<endl);
+    if (range.first == range.second)
+    {
+        DASH_LOG_ERROR("id: %ld not present in the table for deletion!", id);
+
         return false;
     }
 
@@ -156,6 +145,5 @@ bool RemoveFromTable(sai_object_id_t id) {
     }
 
     tableEntryMap.erase(id);
-    tableLock.unlock();
     return retCode == grpc::StatusCode::OK;
 }

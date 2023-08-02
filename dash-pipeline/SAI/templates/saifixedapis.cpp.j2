@@ -2,136 +2,130 @@
  * Fixed SAI APIs which are not based on P4 pipeline code.
  * Just sufficient to support testing & integrating bmv2's libsai.
  */
-#include <mutex>
-#include <unordered_map>
-#include <atomic>
-#include <limits>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-#include <PI/pi.h>
-#include <grpcpp/grpcpp.h>
-#include "p4/v1/p4runtime.grpc.pb.h"
 #include "utils.h"
-extern "C" {
-#include "sai.h"
-#include "saiobject.h"
-#include "saistatus.h"
-#include "saitypes.h"
-#include "saiextensions.h"
-#include "sairoute.h"            // TODO: Change to template generated values
-}
-#include <fstream>
-#include <google/protobuf/text_format.h>
-#include <google/rpc/code.pb.h>
-
-#if __APPLE__
-#include <net/ethernet.h>
-#else
-#include <netinet/ether.h>
-#include <netinet/in.h>
-#endif
-
-using namespace std;
+#include "saiimpl.h"
 
 // TODO to be moved to separate class/namespace
 
 static std::shared_ptr<grpc::Channel> _grpcChannel;
 extern std::unique_ptr<p4::v1::P4Runtime::Stub> stub;
 
-#define DASH_BMV2_NUM_PORTS 2 
+#define DASH_BMV2_NUM_PORTS 2
 #define DASH_BMV2_CPU_QOS_NUMBER_OF_QUEUES 0
 
-#define OJBTYPE_SHFT 48
-#define MAKE_OID(_objtype, _objval) (sai_object_id_t)(((sai_object_id_t)_objtype<<OJBTYPE_SHFT)+(sai_object_id_t)_objval)
+#define DASH_OBJECT_SHFT 48
+#define DASH_MAKE_OID(_objtype, _objval) (sai_object_id_t)(((sai_object_id_t)_objtype<<DASH_OBJECT_SHFT)+(sai_object_id_t)_objval)
 
-#define DASH_BMV2_DEFAULT_CPU_PORT_ID MAKE_OID(SAI_OBJECT_TYPE_PORT,64)
-#define DASH_BMV2_DEFAULT_VLAN_ID MAKE_OID(SAI_OBJECT_TYPE_VLAN,1)
-#define DASH_BMV2_DEFAULT_VRF_ID MAKE_OID(SAI_OBJECT_TYPE_VIRTUAL_ROUTER,1)
-#define DASH_BMV2_DEFAULT_1Q_BRIDGE_ID MAKE_OID(SAI_OBJECT_TYPE_BRIDGE,1)
+#define DASH_BMV2_DEFAULT_CPU_PORT_ID DASH_MAKE_OID(SAI_OBJECT_TYPE_PORT,64)
+#define DASH_BMV2_DEFAULT_VLAN_ID DASH_MAKE_OID(SAI_OBJECT_TYPE_VLAN,1)
+#define DASH_BMV2_DEFAULT_VRF_ID DASH_MAKE_OID(SAI_OBJECT_TYPE_VIRTUAL_ROUTER,1)
+#define DASH_BMV2_DEFAULT_1Q_BRIDGE_ID DASH_MAKE_OID(SAI_OBJECT_TYPE_BRIDGE,1)
 
-sai_status_t sai_create_switch_dummy(
-        _Out_ sai_object_id_t *switch_id,
-        _In_ uint32_t attr_count,
-        _In_ const sai_attribute_t *attr_list) {
-
-    *switch_id = MAKE_OID(SAI_OBJECT_TYPE_SWITCH,1),
-    fprintf(stderr, "sai_create_switch_dummy()\n");
-    return SAI_STATUS_SUCCESS;
-}
-
-sai_object_id_t port_list[DASH_BMV2_NUM_PORTS] = {
-    MAKE_OID(SAI_OBJECT_TYPE_PORT,1),
-    MAKE_OID(SAI_OBJECT_TYPE_PORT,2)
+static sai_object_id_t port_list[DASH_BMV2_NUM_PORTS] = {
+    DASH_MAKE_OID(SAI_OBJECT_TYPE_PORT,1),
+    DASH_MAKE_OID(SAI_OBJECT_TYPE_PORT,2)
 };
 
-sai_status_t sai_get_switch_attribute(
-        _In_ sai_object_id_t switch_id,
+static sai_status_t dash_sai_create_switch(
+        _Out_ sai_object_id_t *switch_id,
         _In_ uint32_t attr_count,
-        _Inout_ sai_attribute_t *attr_list) {
+        _In_ const sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
 
-    fprintf(stderr, "sai_get_switch_attribute()\n");
-    int i;
-    sai_attribute_t *attr = attr_list;
-    sai_object_list_t port_obj_list;
-    sai_object_id_t *objlist;
-    for (i = 0; i < attr_count ; i++, attr++) {
-        switch(attr->id) {
-        
-        case SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS:
-            attr->value.u32 = DASH_BMV2_NUM_PORTS;
-            fprintf(stderr, "  sai_get_switch_attribute() [%d] attr %d SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS = %d\n",
-                    i, attr->id, attr->value.u32);
-            return SAI_STATUS_SUCCESS;
-        
-        case SAI_SWITCH_ATTR_PORT_LIST:
+    *switch_id = DASH_MAKE_OID(SAI_OBJECT_TYPE_SWITCH,1),
 
-            attr->value.objlist.count = DASH_BMV2_NUM_PORTS;
+    DASH_LOG_NOTICE("created switch id: %ld", *switch_id);
 
-            for (uint32_t i = 0; i < DASH_BMV2_NUM_PORTS; i++)
-            {
-                attr->value.objlist.list[i] = port_list[i];
-            }
-
-            fprintf(stderr, "  sai_get_switch_attribute() [%d] attr %d SAI_SWITCH_ATTR_PORT_LIST = [%d objids]\n",
-                    i, attr->id, DASH_BMV2_NUM_PORTS);
-            return SAI_STATUS_SUCCESS;
-        
-        case SAI_SWITCH_ATTR_DEFAULT_VLAN_ID:
-            attr->value.oid = DASH_BMV2_DEFAULT_VLAN_ID;
-            fprintf(stderr, "  sai_get_switch_attribute() [%d] attr %d SAI_SWITCH_ATTR_DEFAULT_VLAN_ID = %lx\n",
-                    i, attr->id, attr->value.oid);
-            return SAI_STATUS_SUCCESS;
-        
-        case SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID:
-            attr->value.oid = DASH_BMV2_DEFAULT_VRF_ID;
-            fprintf(stderr, "  sai_get_switch_attribute() [0] attr %d SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID = %lx\n", attr->id, attr->value.oid);
-            return SAI_STATUS_SUCCESS;
-        
-        case SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID:
-            attr->value.oid = DASH_BMV2_DEFAULT_1Q_BRIDGE_ID;
-            fprintf(stderr, "  sai_get_switch_attribute() [0] attr %d SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID = %lx\n", attr->id, attr->value.oid);
-            return SAI_STATUS_SUCCESS;
-
-        case SAI_SWITCH_ATTR_CPU_PORT:
-            attr->value.oid = DASH_BMV2_DEFAULT_CPU_PORT_ID;
-            fprintf(stderr, "  sai_get_switch_attribute() [%d] attr %d DASH_BMV2_DEFAULT_CPU_PORT_ID = %lx\n",
-                    i, attr->id, attr->value.oid);
-            return SAI_STATUS_SUCCESS;
-
-        default:
-            fprintf(stderr, "  sai_get_switch_attribute() [0] attr %d is NOT SUPPORTED - returning SAI_STATUS_SUCCESS anyway\n", attr->id);
-            return SAI_STATUS_SUCCESS;
-        }
-    }
     return SAI_STATUS_SUCCESS;
 }
 
-static sai_switch_api_t sai_switch_api_impl = {
-    .create_switch = sai_create_switch_dummy,
+static sai_status_t dash_sai_get_switch_attribute(
+        _In_ sai_object_id_t switch_id,
+        _In_ uint32_t attr_count,
+        _Inout_ sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
+
+    DASH_LOG_NOTICE("dash_get_switch_attribute()");
+
+    sai_attribute_t *attr = attr_list;
+
+    for (uint32_t i = 0; i < attr_count ; i++, attr++)
+    {
+        switch(attr->id)
+        {
+            case SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS:
+
+                attr->value.u32 = DASH_BMV2_NUM_PORTS;
+
+                DASH_LOG_NOTICE("[%d] attr %d SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS = %d", i, attr->id, attr->value.u32);
+
+                break;
+
+            case SAI_SWITCH_ATTR_PORT_LIST:
+
+                attr->value.objlist.count = DASH_BMV2_NUM_PORTS;
+
+                for (uint32_t j = 0; j < DASH_BMV2_NUM_PORTS; j++)
+                {
+                    attr->value.objlist.list[j] = port_list[j];
+                }
+
+                DASH_LOG_NOTICE("[%d] attr %d SAI_SWITCH_ATTR_PORT_LIST = [%d objids]", i, attr->id, DASH_BMV2_NUM_PORTS);
+
+                break;
+
+            case SAI_SWITCH_ATTR_DEFAULT_VLAN_ID:
+
+                attr->value.oid = DASH_BMV2_DEFAULT_VLAN_ID;
+
+                DASH_LOG_NOTICE("[%d] attr %d SAI_SWITCH_ATTR_DEFAULT_VLAN_ID = %lx", i, attr->id, attr->value.oid);
+
+                break;
+
+            case SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID:
+
+                attr->value.oid = DASH_BMV2_DEFAULT_VRF_ID;
+
+                DASH_LOG_NOTICE("attr %d SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID = %lx", attr->id, attr->value.oid);
+
+                break;
+
+            case SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID:
+
+                attr->value.oid = DASH_BMV2_DEFAULT_1Q_BRIDGE_ID;
+
+                DASH_LOG_NOTICE("attr %d SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID = %lx", attr->id, attr->value.oid);
+
+                break;
+
+            case SAI_SWITCH_ATTR_CPU_PORT:
+
+                attr->value.oid = DASH_BMV2_DEFAULT_CPU_PORT_ID;
+
+                DASH_LOG_NOTICE("[%d] attr %d DASH_BMV2_DEFAULT_CPU_PORT_ID = %lx", i, attr->id, attr->value.oid);
+
+                break;
+
+            default:
+
+                DASH_LOG_WARN("attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", attr->id);
+
+                memset(&attr->value, 0, sizeof(attr->value)); // clear potential caller garbage
+
+                break; // TODO FIXME should return NOT SUPPORTED
+        }
+    }
+
+    return SAI_STATUS_SUCCESS;
+}
+
+sai_switch_api_t dash_sai_switch_api_impl = {
+    .create_switch = dash_sai_create_switch,
     .remove_switch = 0,
     .set_switch_attribute = 0,
-    .get_switch_attribute = sai_get_switch_attribute,
+    .get_switch_attribute = dash_sai_get_switch_attribute,
     .get_switch_stats = 0,
     .get_switch_stats_ext = 0,
     .clear_switch_stats = 0,
@@ -140,40 +134,50 @@ static sai_switch_api_t sai_switch_api_impl = {
     .create_switch_tunnel = 0,
     .remove_switch_tunnel = 0,
     .set_switch_tunnel_attribute = 0,
-    .get_switch_tunnel_attribute = 0
+    .get_switch_tunnel_attribute = 0,
 };
 
-
-sai_status_t sai_get_port_attribute(
+static sai_status_t dash_sai_get_port_attribute(
         _In_ sai_object_id_t port_id,
         _In_ uint32_t attr_count,
-        _Inout_ sai_attribute_t *attr_list) {
+        _Inout_ sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
 
-    fprintf(stderr, "sai_get_port_attribute()\n");
-    int i;
+    DASH_LOG_NOTICE("dash_sai_get_port_attribute()");
+
     sai_attribute_t *attr = attr_list;
 
-    for (i = 0; i < attr_count ; i++, attr++) {
-        switch(attr->id) {
-        case SAI_PORT_ATTR_QOS_NUMBER_OF_QUEUES:
-            attr->value.u32 = DASH_BMV2_CPU_QOS_NUMBER_OF_QUEUES;
-            fprintf(stderr, "  sai_get_port_attribute() [0] attr %d SAI_PORT_ATTR_QOS_NUMBER_OF_QUEUES = %d\n", attr->id, attr->value.u32);
-            return SAI_STATUS_SUCCESS;
+    for (uint32_t i = 0; i < attr_count ; i++, attr++)
+    {
+        switch(attr->id)
+        {
+            case SAI_PORT_ATTR_QOS_NUMBER_OF_QUEUES:
 
-        default:
-            fprintf(stderr, "  sai_get_port_attribute() [0] attr %d is NOT SUPPORTED - returning SAI_STATUS_SUCCESS anyway\n", attr->id);
-            return SAI_STATUS_SUCCESS;
+                attr->value.u32 = DASH_BMV2_CPU_QOS_NUMBER_OF_QUEUES;
+
+                DASH_LOG_NOTICE("attr %d SAI_PORT_ATTR_QOS_NUMBER_OF_QUEUES = %d", attr->id, attr->value.u32);
+
+                break;
+
+            default:
+
+                DASH_LOG_WARN("attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", attr->id);
+
+                memset(&attr->value, 0, sizeof(attr->value)); // clear potential caller garbage
+
+                break; // TODO FIXME should return NOT SUPPORTED
         }
     }
 
     return SAI_STATUS_SUCCESS;
 }
 
-static sai_port_api_t sai_port_api_impl = {
+sai_port_api_t dash_sai_port_api_impl = {
     .create_port = 0,
     .remove_port = 0,
     .set_port_attribute = 0,
-    .get_port_attribute = sai_get_port_attribute,
+    .get_port_attribute = dash_sai_get_port_attribute,
     .get_port_stats = 0,
     .get_port_stats_ext = 0,
     .clear_port_stats = 0,
@@ -199,74 +203,95 @@ static sai_port_api_t sai_port_api_impl = {
     .get_ports_attribute = 0
 };
 
-
-{% for api in api_names %}
-extern sai_{{ api }}_api_t sai_{{ api }}_api_impl;
-{% endfor %}
-
-
 sai_status_t sai_api_query(
         _In_ sai_api_t api,
-        _Out_ void **api_method_table) {
+        _Out_ void **api_method_table)
+{
+    DASH_LOG_ENTER();
 
-        switch(api) {
+    switch((int)api) {
         case SAI_API_SWITCH:
-            *api_method_table = (void *)&sai_switch_api_impl;
+            *api_method_table = (void *)&dash_sai_switch_api_impl;
             break;
-        
+
         case SAI_API_PORT:
-            *api_method_table = (void *)&sai_port_api_impl;
+            *api_method_table = (void *)&dash_sai_port_api_impl;
             break;
-        
+
 {% for api in api_names %}
         case SAI_API_{{ api | upper }}:
-            *api_method_table = (void *)&sai_{{ api }}_api_impl;
+            *api_method_table = (void *)&dash_sai_{{ api }}_api_impl;
             break;
-        
+
 {% endfor %}
         default:
+
+            DASH_LOG_WARN("api %d not supported", api);
+
             return SAI_STATUS_NOT_SUPPORTED;
+    }
 
-        }
-        return SAI_STATUS_SUCCESS;
+    return SAI_STATUS_SUCCESS;
 }
-
 
 sai_status_t sai_object_type_get_availability(
         _In_ sai_object_id_t switch_id,
         _In_ sai_object_type_t object_type,
         _In_ uint32_t attr_count,
         _In_ const sai_attribute_t *attr_list,
-        _Out_ uint64_t *count) { return SAI_STATUS_SUCCESS; }
-        
-sai_object_type_t sai_object_type_query(
-        _In_ sai_object_id_t object_id) { return sai_object_type_t(object_id>>OJBTYPE_SHFT); }
+        _Out_ uint64_t *count)
+{
+    DASH_LOG_ENTER();
 
+    DASH_LOG_WARN("not implemented");
+
+    return SAI_STATUS_NOT_IMPLEMENTED;
+}
+
+sai_object_type_t sai_object_type_query(
+        _In_ sai_object_id_t object_id)
+{
+    DASH_LOG_ENTER();
+
+    return sai_object_type_t(object_id>>DASH_OBJECT_SHFT);
+}
 
 sai_object_id_t sai_switch_id_query(
         _In_ sai_object_id_t object_id)
 {
+    DASH_LOG_ENTER();
+
     if (object_id == SAI_NULL_OBJECT_ID)
     {
         return SAI_NULL_OBJECT_ID;
     }
 
-    return MAKE_OID(SAI_OBJECT_TYPE_SWITCH,1);
+    return DASH_MAKE_OID(SAI_OBJECT_TYPE_SWITCH,1);
 }
 
 sai_status_t sai_query_attribute_enum_values_capability(
         _In_ sai_object_id_t switch_id,
         _In_ sai_object_type_t object_type,
         _In_ sai_attr_id_t attr_id,
-        _Inout_ sai_s32_list_t *enum_values_capability) { return SAI_STATUS_SUCCESS; }
+        _Inout_ sai_s32_list_t *enum_values_capability)
+{
+    DASH_LOG_ENTER();
+
+    DASH_LOG_WARN("not implemented");
+
+    return SAI_STATUS_NOT_IMPLEMENTED;
+}
 
 static p4::config::v1::P4Info parse_p4info(const char *path)
 {
+    DASH_LOG_ENTER();
+
     p4::config::v1::P4Info p4info;
     std::ifstream istream(path);
     assert(istream.good());
     google::protobuf::io::IstreamInputStream istream_(&istream);
     google::protobuf::TextFormat::Parse(&istream_, &p4info);
+
     return p4info;
 }
 
@@ -274,10 +299,14 @@ sai_status_t sai_api_initialize(
         _In_ uint64_t flags,
         _In_ const sai_service_method_table_t *services)
 {
+    DASH_LOG_ENTER();
+
     const grpc::string _grpcTarget = "0.0.0.0:9559";
     char test_json[] = "/etc/dash/dash_pipeline.json";
     char test_proto_json[] = "/etc/dash/dash_pipeline_p4rt.txt";
     int dev_id = 0;
+
+    DASH_LOG_NOTICE("GRPC call SetForwardingPipelineConfig %s => %s, %s", _grpcTarget.c_str(), test_json, test_proto_json);
 
     auto p4info = parse_p4info(test_proto_json);
 
@@ -316,7 +345,7 @@ sai_status_t sai_api_initialize(
 
         p4::v1::SetForwardingPipelineConfigResponse rep;
         grpc::ClientContext context;
-        LOG("GRPC call SetForwardingPipelineConfig " + _grpcTarget + " => " + test_json + ", " + test_proto_json <<endl);
+
         auto status = stub->SetForwardingPipelineConfig(
                 &context, request, &rep);
         assert(status.ok());
@@ -326,21 +355,37 @@ sai_status_t sai_api_initialize(
     return SAI_STATUS_SUCCESS;
 }
 
-sai_status_t sai_api_uninitialize(void) { return SAI_STATUS_SUCCESS; }
+sai_status_t sai_api_uninitialize(void)
+{
+    DASH_LOG_ENTER();
+
+    // TODO delete stub
+
+    return SAI_STATUS_SUCCESS;
+}
 
 sai_status_t sai_log_set(
         _In_ sai_api_t api,
-        _In_ sai_log_level_t log_level) { return SAI_STATUS_SUCCESS; }
+        _In_ sai_log_level_t log_level)
+{
+    DASH_LOG_ENTER();
+
+    return SAI_STATUS_SUCCESS;
+}
 
 sai_status_t sai_query_api_version(
         _Out_ sai_api_version_t *version)
 {
+    DASH_LOG_ENTER();
+
     if (version)
     {
         *version = SAI_API_VERSION;
 
         return SAI_STATUS_SUCCESS;
     }
+
+    DASH_LOG_ERROR("version parameter is NULL");
 
     return SAI_STATUS_INVALID_PARAMETER;
 }
@@ -350,6 +395,10 @@ sai_status_t sai_query_stats_capability(
         _In_ sai_object_type_t object_type,
         _Inout_ sai_stat_capability_list_t *stats_capability)
 {
+    DASH_LOG_ENTER();
+
+    DASH_LOG_WARN("not implemented");
+
     return SAI_STATUS_NOT_IMPLEMENTED;
 }
 
@@ -359,11 +408,19 @@ sai_status_t sai_query_attribute_capability(
         _In_ sai_attr_id_t attr_id,
         _Out_ sai_attr_capability_t *attr_capability)
 {
+    DASH_LOG_ENTER();
+
+    DASH_LOG_WARN("not implemented");
+
     return SAI_STATUS_NOT_IMPLEMENTED;
 }
 
 sai_status_t sai_dbg_generate_dump(
         _In_ const char *dump_file_name)
 {
+    DASH_LOG_ENTER();
+
+    DASH_LOG_WARN("not implemented");
+
     return SAI_STATUS_NOT_IMPLEMENTED;
 }

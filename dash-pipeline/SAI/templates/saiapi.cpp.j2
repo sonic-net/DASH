@@ -1,29 +1,4 @@
-#include <mutex>
-#include <unordered_map>
-#include <atomic>
-#include <limits>
-#include <stdint.h>
-#include <PI/pi.h>
-#include <grpcpp/grpcpp.h>
-#include "p4/v1/p4runtime.grpc.pb.h"
 #include "utils.h"
-#include "sai{{ header_prefix }}{{ app_name | replace('_', '') }}.h"
-#include "saitypes.h"
-#include "saistatus.h"
-#include <fstream>
-#include <google/protobuf/text_format.h>
-#include <google/rpc/code.pb.h>
-
-#if __APPLE__
-#include <net/ethernet.h>
-#else
-#include <netinet/ether.h>
-#include <netinet/in.h>
-#endif
-
-#define LOG(x) std::cerr<<x
-
-using namespace std;
 
 {% set registered_group = [] %}
 {% for table in tables %}
@@ -31,11 +6,13 @@ using namespace std;
 {% do registered_group.append( table.name ) %}
 
 {% if table.is_object == 'true' %}
-sai_status_t sai_create_{{ table.name }}(
+static sai_status_t dash_sai_create_{{ table.name }}(
         _Out_ sai_object_id_t *{{ table.name }}_id,
         _In_ sai_object_id_t switch_id,
         _In_ uint32_t attr_count,
-        _In_ const sai_attribute_t *attr_list) {
+        _In_ const sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
 
     p4::v1::TableEntry * matchActionEntry = nullptr;
     pi_p4_id_t tableId = 0;
@@ -142,14 +119,14 @@ sai_status_t sai_create_{{ table.name }}(
     //expectedParams = {{ action.params|length }};
     {% endfor %}
     {% else %}
-    // Search the action 
+    // Search the action
     for (uint32_t i = 0; i < attr_count; i++) {
         if (SAI_{{ table.name | upper }}_ATTR_ACTION == attr_list[i].id)
         {
             switch(attr_list[i].value.s32) {
                 {% for action in table.actions %}
                 case SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}: {
-                    actionId = {{action.id}}; 
+                    actionId = {{action.id}};
                     //expectedParams = {{ action.params|length }};
                     break;
                 }
@@ -175,9 +152,9 @@ sai_status_t sai_create_{{ table.name }}(
                 {% if 'v4_or_v6_id' in param %}
                 {
                     // set v4_or_v6 field
-                    auto param = action->add_params();
-                    param->set_param_id({{param.v4_or_v6_id}});
-                    booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param, 1);
+                    auto param2 = action->add_params();
+                    param2->set_param_id({{param.v4_or_v6_id}});
+                    booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param2, 1);
                     //matchedParams++;
                 }
                 {% endif %}
@@ -187,8 +164,8 @@ sai_status_t sai_create_{{ table.name }}(
             {% endfor %}
         }
     }
-    
-    //assert((matchedParams == expectedParams)); 
+
+    //assert((matchedParams == expectedParams));
 
     //if (matchedParams != expectedParams) {
     //    goto ErrRet;
@@ -200,25 +177,28 @@ sai_status_t sai_create_{{ table.name }}(
     {% endfor %}
 
     *{{ table.name }}_id = objId;
-    return 0;
+    return SAI_STATUS_SUCCESS;
 ErrRet:
     delete matchActionEntry;
     RemoveFromTable(*{{ table.name }}_id);
-    return -1;
+    return SAI_STATUS_FAILURE;
 }
 
-sai_status_t sai_create_{{ table.name }}s(
+static sai_status_t dash_sai_create_{{ table.name }}s(
         _In_ sai_object_id_t switch_id,
         _In_ uint32_t object_count,
         _In_ const uint32_t *attr_count,
         _In_ const sai_attribute_t **attr_list,
         _In_ sai_bulk_op_error_mode_t mode,
         _Out_ sai_object_id_t *object_id,
-        _Out_ sai_status_t *object_statuses) {
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+
     sai_status_t agg_status = SAI_STATUS_SUCCESS;
 
     for (uint32_t i = 0; i < object_count; i++) {
-        object_statuses[i] = sai_create_{{ table.name }}(&object_id[i], switch_id, attr_count[i], attr_list[i]);
+        object_statuses[i] = dash_sai_create_{{ table.name }}(&object_id[i], switch_id, attr_count[i], attr_list[i]);
 
         if (object_statuses[i] != SAI_STATUS_SUCCESS) {
             agg_status = SAI_STATUS_FAILURE;
@@ -232,22 +212,30 @@ sai_status_t sai_create_{{ table.name }}s(
     return agg_status;
 }
 
-sai_status_t sai_remove_{{ table.name }}(_In_ sai_object_id_t {{ table.name }}_id) {
-    if (RemoveFromTable({{ table.name }}_id)) {
-        return 0;
+static sai_status_t dash_sai_remove_{{ table.name }}(_In_ sai_object_id_t {{ table.name }}_id)
+{
+    DASH_LOG_ENTER();
+
+    if (RemoveFromTable({{ table.name }}_id))
+    {
+        return SAI_STATUS_SUCCESS;
     }
-    return -1;
+
+    return SAI_STATUS_FAILURE;
 }
 
-sai_status_t sai_remove_{{ table.name }}s(
+static sai_status_t dash_sai_remove_{{ table.name }}s(
         _In_ uint32_t object_count,
         _In_ const sai_object_id_t *object_id,
         _In_ sai_bulk_op_error_mode_t mode,
-        _Out_ sai_status_t *object_statuses) {
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+
     sai_status_t agg_status = SAI_STATUS_SUCCESS;
 
     for (uint32_t i = 0; i < object_count; i++) {
-        object_statuses[i] = sai_remove_{{ table.name }}(object_id[i]);
+        object_statuses[i] = dash_sai_remove_{{ table.name }}(object_id[i]);
 
         if (object_statuses[i] != SAI_STATUS_SUCCESS) {
             agg_status = SAI_STATUS_FAILURE;
@@ -261,25 +249,32 @@ sai_status_t sai_remove_{{ table.name }}s(
     return agg_status;
 }
 
-sai_status_t sai_set_{{ table.name }}_attribute (
+static sai_status_t dash_sai_set_{{ table.name }}_attribute (
         _In_ sai_object_id_t {{ table.name }}_id,
-        _In_ const sai_attribute_t *attr) {
+        _In_ const sai_attribute_t *attr)
+{
+    DASH_LOG_ENTER();
     assert(0 && "sai_set_{{ table.name }}_attribute NYI");
-    return -1;
+    return SAI_STATUS_FAILURE;
 }
 
-sai_status_t sai_get_{{ table.name }}_attribute(
+static sai_status_t dash_sai_get_{{ table.name }}_attribute(
         _In_ sai_object_id_t {{ table.name }}_id,
         _In_ uint32_t attr_count,
-        _Inout_ sai_attribute_t *attr_list) {
+        _Inout_ sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
     assert(0 && "sai_get_{{ table.name }}_attribute NYI");
-    return -1;
+    return SAI_STATUS_FAILURE;
 }
 {% else %}
-sai_status_t sai_create_{{ table.name }}(
+static sai_status_t dash_sai_create_{{ table.name }}(
         _In_ const sai_{{ table.name }}_t *{{ table.name }},
         _In_ uint32_t attr_count,
-        _In_ const sai_attribute_t *attr_list) { 
+        _In_ const sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
+
     p4::v1::TableEntry * matchActionEntry = new p4::v1::TableEntry();
     pi_p4_id_t tableId = {{table.id}};
     matchActionEntry->set_table_id(tableId);
@@ -333,12 +328,12 @@ sai_status_t sai_create_{{ table.name }}(
     //expectedParams = {{ action.params|length }};
     {% endfor %}
     {% else %}
-    // Search the action 
+    // Search the action
     for (uint32_t i = 0; i < attr_count; i++) {
         switch(attr_list[i].value.s32) {
             {% for action in table.actions %}
             case SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}: {
-                actionId = {{action.id}}; 
+                actionId = {{action.id}};
                 //expectedParams = {{ action.params|length }};
                 break;
             }
@@ -363,9 +358,9 @@ sai_status_t sai_create_{{ table.name }}(
                 {% if 'v4_or_v6_id' in param %}
                 {
                     // set v4_or_v6 field
-                    auto param = action->add_params();
-                    param->set_param_id({{param.v4_or_v6_id}});
-                    booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param, 1);
+                    auto param2 = action->add_params();
+                    param2->set_param_id({{param.v4_or_v6_id}});
+                    booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param2, 1);
                     //matchedParams++;
                 }
                 {% endif %}
@@ -375,8 +370,8 @@ sai_status_t sai_create_{{ table.name }}(
             {% endfor %}
         }
     }
-    
-    //assert((matchedParams == expectedParams)); 
+
+    //assert((matchedParams == expectedParams));
 
     //if (matchedParams != expectedParams) {
     //    goto ErrRet;
@@ -385,24 +380,27 @@ sai_status_t sai_create_{{ table.name }}(
     retCode = MutateTableEntry(matchActionEntry, p4::v1::Update_Type_INSERT);
     if (grpc::StatusCode::OK == retCode) {
         delete matchActionEntry;
-        return 0;
+        return SAI_STATUS_SUCCESS;
     }
 ErrRet:
     delete matchActionEntry;
-    return -1;
+    return SAI_STATUS_FAILURE;
 }
 
-sai_status_t sai_create_{{ table.name | replace("entry", "entries") }}(
+static sai_status_t dash_sai_create_{{ table.name | replace("entry", "entries") }}(
         _In_ uint32_t object_count,
         _In_ const sai_{{ table.name }}_t *{{ table.name }},
         _In_ const uint32_t *attr_count,
         _In_ const sai_attribute_t **attr_list,
         _In_ sai_bulk_op_error_mode_t mode,
-        _Out_ sai_status_t *object_statuses) {
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+
     sai_status_t agg_status = SAI_STATUS_SUCCESS;
 
     for (uint32_t i = 0; i < object_count; i++) {
-        object_statuses[i] = sai_create_{{ table.name }}(&{{ table.name }}[i], attr_count[i], attr_list[i]);
+        object_statuses[i] = dash_sai_create_{{ table.name }}(&{{ table.name }}[i], attr_count[i], attr_list[i]);
 
         if (object_statuses[i] != SAI_STATUS_SUCCESS) {
             agg_status = SAI_STATUS_FAILURE;
@@ -417,8 +415,11 @@ sai_status_t sai_create_{{ table.name | replace("entry", "entries") }}(
 
 }
 
-sai_status_t sai_remove_{{ table.name }}(
-        _In_ const sai_{{ table.name }}_t *{{ table.name }}) { 
+static sai_status_t dash_sai_remove_{{ table.name }}(
+        _In_ const sai_{{ table.name }}_t *{{ table.name }})
+{
+    DASH_LOG_ENTER();
+
     p4::v1::TableEntry * matchActionEntry = new p4::v1::TableEntry();
     pi_p4_id_t tableId = {{table.id}};
     matchActionEntry->set_table_id(tableId);
@@ -461,24 +462,27 @@ sai_status_t sai_remove_{{ table.name }}(
     retCode = MutateTableEntry(matchActionEntry, p4::v1::Update_Type_DELETE);
     if (grpc::StatusCode::OK == retCode) {
         delete matchActionEntry;
-        return 0;
+        return SAI_STATUS_SUCCESS;
     }
 
 ErrRet:
 
     delete matchActionEntry;
-    return -1;
+    return SAI_STATUS_FAILURE;
 }
 
-sai_status_t sai_remove_{{ table.name | replace("entry", "entries") }}(
+static sai_status_t dash_sai_remove_{{ table.name | replace("entry", "entries") }}(
         _In_ uint32_t object_count,
         _In_ const sai_{{ table.name }}_t *{{ table.name }},
         _In_ sai_bulk_op_error_mode_t mode,
-        _Out_ sai_status_t *object_statuses) {
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+
     sai_status_t agg_status = SAI_STATUS_SUCCESS;
 
     for (uint32_t i = 0; i < object_count; i++) {
-        object_statuses[i] = sai_remove_{{ table.name }}(&{{ table.name }}[i]);
+        object_statuses[i] = dash_sai_remove_{{ table.name }}(&{{ table.name }}[i]);
 
         if (object_statuses[i] != SAI_STATUS_SUCCESS) {
             agg_status = SAI_STATUS_FAILURE;
@@ -492,39 +496,43 @@ sai_status_t sai_remove_{{ table.name | replace("entry", "entries") }}(
     return agg_status;
 }
 
-sai_status_t sai_set_{{ table.name }}_attribute(
+static sai_status_t dash_sai_set_{{ table.name }}_attribute(
         _In_ const sai_{{ table.name }}_t *{{ table.name }},
-        _In_ const sai_attribute_t *attr) {
-            assert(0 && "sai_set_{{ table.name }}_attribute NYI");
-            return -1;
+        _In_ const sai_attribute_t *attr)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_set_{{ table.name }}_attribute NYI");
+    return SAI_STATUS_FAILURE;
 }
 
-sai_status_t sai_get_{{ table.name }}_attribute(
+static sai_status_t dash_sai_get_{{ table.name }}_attribute(
         _In_ const sai_{{ table.name }}_t *{{ table.name }},
         _In_ uint32_t attr_count,
-        _Inout_ sai_attribute_t *attr_list) {
-            assert(0 && "sai_get_{{ table.name }}_attribute NYI");
-            return -1;
+        _Inout_ sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_get_{{ table.name }}_attribute NYI");
+    return SAI_STATUS_FAILURE;
 }
 {% endif %}
 {% endfor %}
 
 /* TODO [cs] Generate .h file for _impl to use within sai_api_query() */
-sai_{{ app_name }}_api_t sai_{{app_name }}_api_impl = {
+sai_{{ app_name }}_api_t dash_sai_{{ app_name }}_api_impl = {
 {% set registered_group = [] %}
 {% for table in tables %}
 {% if table.name in registered_group %}{% continue %}{% endif %}
 {% do registered_group.append( table.name ) %}
-    .create_{{ table.name }} =  sai_create_{{ table.name }},
-    .remove_{{ table.name }} = sai_remove_{{ table.name }},
-    .set_{{ table.name }}_attribute = sai_set_{{ table.name }}_attribute,
-    .get_{{ table.name }}_attribute = sai_get_{{ table.name }}_attribute,
+    .create_{{ table.name }} =  dash_sai_create_{{ table.name }},
+    .remove_{{ table.name }} = dash_sai_remove_{{ table.name }},
+    .set_{{ table.name }}_attribute = dash_sai_set_{{ table.name }}_attribute,
+    .get_{{ table.name }}_attribute = dash_sai_get_{{ table.name }}_attribute,
 {% if table.is_object == 'true' %}
-    .create_{{ table.name }}s = sai_create_{{ table.name }}s,
-    .remove_{{ table.name }}s = sai_remove_{{ table.name }}s,
+    .create_{{ table.name }}s = dash_sai_create_{{ table.name }}s,
+    .remove_{{ table.name }}s = dash_sai_remove_{{ table.name }}s,
 {% else %}
-    .create_{{ table.name | replace("entry", "entries") }} = sai_create_{{ table.name | replace("entry", "entries") }},
-    .remove_{{ table.name | replace("entry", "entries") }} = sai_remove_{{ table.name | replace("entry", "entries") }},
+    .create_{{ table.name | replace("entry", "entries") }} = dash_sai_create_{{ table.name | replace("entry", "entries") }},
+    .remove_{{ table.name | replace("entry", "entries") }} = dash_sai_remove_{{ table.name | replace("entry", "entries") }},
 {% endif %}
 {% endfor %}
 };
