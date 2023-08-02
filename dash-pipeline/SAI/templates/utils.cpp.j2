@@ -2,7 +2,7 @@
 
 static int deviceId = 0;
 
-static std::unordered_multimap<sai_object_id_t, p4::v1::TableEntry *> tableEntryMap;
+static std::unordered_multimap<sai_object_id_t, std::shared_ptr<p4::v1::TableEntry> > tableEntryMap;
 static std::mutex tableLock;
 static std::atomic<sai_object_id_t> nextId;
 
@@ -64,7 +64,7 @@ const sai_attribute_t *getMaskAttr(sai_attr_id_t id, uint32_t attr_count, const 
     return nullptr;
 }
 
-grpc::StatusCode MutateTableEntry(p4::v1::TableEntry *entry, p4::v1::Update_Type updateType)
+grpc::StatusCode MutateTableEntry(std::shared_ptr<p4::v1::TableEntry> entry, p4::v1::Update_Type updateType)
 {
     DASH_LOG_ENTER();
 
@@ -73,7 +73,7 @@ grpc::StatusCode MutateTableEntry(p4::v1::TableEntry *entry, p4::v1::Update_Type
     auto update = request.add_updates();
     update->set_type(updateType);
     auto entity = update->mutable_entity();
-    entity->set_allocated_table_entry(entry);
+    entity->set_allocated_table_entry(entry.get());
 
     p4::v1::WriteResponse rep;
     grpc::ClientContext context;
@@ -94,7 +94,7 @@ grpc::StatusCode MutateTableEntry(p4::v1::TableEntry *entry, p4::v1::Update_Type
     return status.error_code();
 }
 
-bool InsertInTable(p4::v1::TableEntry *entry, sai_object_id_t *objId)
+bool InsertInTable(std::shared_ptr<p4::v1::TableEntry> entry, sai_object_id_t *objId)
 {
     DASH_LOG_ENTER();
 
@@ -141,7 +141,6 @@ bool RemoveFromTable(sai_object_id_t id)
         if (grpc::StatusCode::OK != tempRet) {
             retCode = tempRet;
         }
-        delete entry;
     }
 
     tableEntryMap.erase(id);
