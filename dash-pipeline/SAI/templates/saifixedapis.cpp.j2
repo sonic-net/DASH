@@ -47,7 +47,7 @@ static sai_status_t dash_sai_get_switch_attribute(
 {
     DASH_LOG_ENTER();
 
-    DASH_LOG_NOTICE("get_switch_attribute()");
+    DASH_LOG_NOTICE("dash_get_switch_attribute()");
 
     sai_attribute_t *attr = attr_list;
 
@@ -144,7 +144,7 @@ static sai_status_t dash_sai_get_port_attribute(
 {
     DASH_LOG_ENTER();
 
-    DASH_LOG_NOTICE("sai_get_port_attribute()");
+    DASH_LOG_NOTICE("dash_sai_get_port_attribute()");
 
     sai_attribute_t *attr = attr_list;
 
@@ -345,8 +345,6 @@ sai_status_t sai_api_initialize(
 
         p4::v1::SetForwardingPipelineConfigResponse rep;
         grpc::ClientContext context;
-
-        DASH_LOG_NOTICE("GRPC call SetForwardingPipelineConfig %s => %s, %s", _grpcTarget.c_str(), test_json, test_proto_json);
 
         auto status = stub->SetForwardingPipelineConfig(
                 &context, request, &rep);
