@@ -7,7 +7,7 @@
 #include <grpcpp/grpcpp.h>
 #include "p4/v1/p4runtime.grpc.pb.h"
 #include "utils.h"
-#include "saiexperimental{{ app_name | replace('_', '') }}.h"
+#include "sai{{ header_prefix }}{{ app_name | replace('_', '') }}.h"
 #include "saitypes.h"
 #include "saistatus.h"
 #include <fstream>
