@@ -6,7 +6,7 @@
 {% do registered_group.append( table.name ) %}
 
 {% if table.is_object == 'true' %}
-static sai_status_t sai_create_{{ table.name }}(
+static sai_status_t dash_sai_create_{{ table.name }}(
         _Out_ sai_object_id_t *{{ table.name }}_id,
         _In_ sai_object_id_t switch_id,
         _In_ uint32_t attr_count,
@@ -184,7 +184,7 @@ ErrRet:
     return SAI_STATUS_FAILURE;
 }
 
-static sai_status_t sai_create_{{ table.name }}s(
+static sai_status_t dash_sai_create_{{ table.name }}s(
         _In_ sai_object_id_t switch_id,
         _In_ uint32_t object_count,
         _In_ const uint32_t *attr_count,
@@ -198,7 +198,7 @@ static sai_status_t sai_create_{{ table.name }}s(
     sai_status_t agg_status = SAI_STATUS_SUCCESS;
 
     for (uint32_t i = 0; i < object_count; i++) {
-        object_statuses[i] = sai_create_{{ table.name }}(&object_id[i], switch_id, attr_count[i], attr_list[i]);
+        object_statuses[i] = dash_sai_create_{{ table.name }}(&object_id[i], switch_id, attr_count[i], attr_list[i]);
 
         if (object_statuses[i] != SAI_STATUS_SUCCESS) {
             agg_status = SAI_STATUS_FAILURE;
@@ -212,7 +212,7 @@ static sai_status_t sai_create_{{ table.name }}s(
     return agg_status;
 }
 
-static sai_status_t sai_remove_{{ table.name }}(_In_ sai_object_id_t {{ table.name }}_id)
+static sai_status_t dash_sai_remove_{{ table.name }}(_In_ sai_object_id_t {{ table.name }}_id)
 {
     DASH_LOG_ENTER();
 
@@ -224,7 +224,7 @@ static sai_status_t sai_remove_{{ table.name }}(_In_ sai_object_id_t {{ table.na
     return SAI_STATUS_FAILURE;
 }
 
-static sai_status_t sai_remove_{{ table.name }}s(
+static sai_status_t dash_sai_remove_{{ table.name }}s(
         _In_ uint32_t object_count,
         _In_ const sai_object_id_t *object_id,
         _In_ sai_bulk_op_error_mode_t mode,
@@ -235,7 +235,7 @@ static sai_status_t sai_remove_{{ table.name }}s(
     sai_status_t agg_status = SAI_STATUS_SUCCESS;
 
     for (uint32_t i = 0; i < object_count; i++) {
-        object_statuses[i] = sai_remove_{{ table.name }}(object_id[i]);
+        object_statuses[i] = dash_sai_remove_{{ table.name }}(object_id[i]);
 
         if (object_statuses[i] != SAI_STATUS_SUCCESS) {
             agg_status = SAI_STATUS_FAILURE;
@@ -249,7 +249,7 @@ static sai_status_t sai_remove_{{ table.name }}s(
     return agg_status;
 }
 
-static sai_status_t sai_set_{{ table.name }}_attribute (
+static sai_status_t dash_sai_set_{{ table.name }}_attribute (
         _In_ sai_object_id_t {{ table.name }}_id,
         _In_ const sai_attribute_t *attr)
 {
@@ -258,7 +258,7 @@ static sai_status_t sai_set_{{ table.name }}_attribute (
     return SAI_STATUS_FAILURE;
 }
 
-static sai_status_t sai_get_{{ table.name }}_attribute(
+static sai_status_t dash_sai_get_{{ table.name }}_attribute(
         _In_ sai_object_id_t {{ table.name }}_id,
         _In_ uint32_t attr_count,
         _Inout_ sai_attribute_t *attr_list)
@@ -268,7 +268,7 @@ static sai_status_t sai_get_{{ table.name }}_attribute(
     return SAI_STATUS_FAILURE;
 }
 {% else %}
-static sai_status_t sai_create_{{ table.name }}(
+static sai_status_t dash_sai_create_{{ table.name }}(
         _In_ const sai_{{ table.name }}_t *{{ table.name }},
         _In_ uint32_t attr_count,
         _In_ const sai_attribute_t *attr_list)
@@ -387,7 +387,7 @@ ErrRet:
     return SAI_STATUS_FAILURE;
 }
 
-static sai_status_t sai_create_{{ table.name | replace("entry", "entries") }}(
+static sai_status_t dash_sai_create_{{ table.name | replace("entry", "entries") }}(
         _In_ uint32_t object_count,
         _In_ const sai_{{ table.name }}_t *{{ table.name }},
         _In_ const uint32_t *attr_count,
@@ -400,7 +400,7 @@ static sai_status_t sai_create_{{ table.name | replace("entry", "entries") }}(
     sai_status_t agg_status = SAI_STATUS_SUCCESS;
 
     for (uint32_t i = 0; i < object_count; i++) {
-        object_statuses[i] = sai_create_{{ table.name }}(&{{ table.name }}[i], attr_count[i], attr_list[i]);
+        object_statuses[i] = dash_sai_create_{{ table.name }}(&{{ table.name }}[i], attr_count[i], attr_list[i]);
 
         if (object_statuses[i] != SAI_STATUS_SUCCESS) {
             agg_status = SAI_STATUS_FAILURE;
@@ -415,7 +415,7 @@ static sai_status_t sai_create_{{ table.name | replace("entry", "entries") }}(
 
 }
 
-static sai_status_t sai_remove_{{ table.name }}(
+static sai_status_t dash_sai_remove_{{ table.name }}(
         _In_ const sai_{{ table.name }}_t *{{ table.name }})
 {
     DASH_LOG_ENTER();
@@ -471,7 +471,7 @@ ErrRet:
     return SAI_STATUS_FAILURE;
 }
 
-static sai_status_t sai_remove_{{ table.name | replace("entry", "entries") }}(
+static sai_status_t dash_sai_remove_{{ table.name | replace("entry", "entries") }}(
         _In_ uint32_t object_count,
         _In_ const sai_{{ table.name }}_t *{{ table.name }},
         _In_ sai_bulk_op_error_mode_t mode,
@@ -482,7 +482,7 @@ static sai_status_t sai_remove_{{ table.name | replace("entry", "entries") }}(
     sai_status_t agg_status = SAI_STATUS_SUCCESS;
 
     for (uint32_t i = 0; i < object_count; i++) {
-        object_statuses[i] = sai_remove_{{ table.name }}(&{{ table.name }}[i]);
+        object_statuses[i] = dash_sai_remove_{{ table.name }}(&{{ table.name }}[i]);
 
         if (object_statuses[i] != SAI_STATUS_SUCCESS) {
             agg_status = SAI_STATUS_FAILURE;
@@ -496,7 +496,7 @@ static sai_status_t sai_remove_{{ table.name | replace("entry", "entries") }}(
     return agg_status;
 }
 
-static sai_status_t sai_set_{{ table.name }}_attribute(
+static sai_status_t dash_sai_set_{{ table.name }}_attribute(
         _In_ const sai_{{ table.name }}_t *{{ table.name }},
         _In_ const sai_attribute_t *attr)
 {
@@ -505,7 +505,7 @@ static sai_status_t sai_set_{{ table.name }}_attribute(
     return SAI_STATUS_FAILURE;
 }
 
-static sai_status_t sai_get_{{ table.name }}_attribute(
+static sai_status_t dash_sai_get_{{ table.name }}_attribute(
         _In_ const sai_{{ table.name }}_t *{{ table.name }},
         _In_ uint32_t attr_count,
         _Inout_ sai_attribute_t *attr_list)
@@ -523,16 +523,16 @@ sai_{{ app_name }}_api_t dash_sai_{{ app_name }}_api_impl = {
 {% for table in tables %}
 {% if table.name in registered_group %}{% continue %}{% endif %}
 {% do registered_group.append( table.name ) %}
-    .create_{{ table.name }} =  sai_create_{{ table.name }},
-    .remove_{{ table.name }} = sai_remove_{{ table.name }},
-    .set_{{ table.name }}_attribute = sai_set_{{ table.name }}_attribute,
-    .get_{{ table.name }}_attribute = sai_get_{{ table.name }}_attribute,
+    .create_{{ table.name }} =  dash_sai_create_{{ table.name }},
+    .remove_{{ table.name }} = dash_sai_remove_{{ table.name }},
+    .set_{{ table.name }}_attribute = dash_sai_set_{{ table.name }}_attribute,
+    .get_{{ table.name }}_attribute = dash_sai_get_{{ table.name }}_attribute,
 {% if table.is_object == 'true' %}
-    .create_{{ table.name }}s = sai_create_{{ table.name }}s,
-    .remove_{{ table.name }}s = sai_remove_{{ table.name }}s,
+    .create_{{ table.name }}s = dash_sai_create_{{ table.name }}s,
+    .remove_{{ table.name }}s = dash_sai_remove_{{ table.name }}s,
 {% else %}
-    .create_{{ table.name | replace("entry", "entries") }} = sai_create_{{ table.name | replace("entry", "entries") }},
-    .remove_{{ table.name | replace("entry", "entries") }} = sai_remove_{{ table.name | replace("entry", "entries") }},
+    .create_{{ table.name | replace("entry", "entries") }} = dash_sai_create_{{ table.name | replace("entry", "entries") }},
+    .remove_{{ table.name | replace("entry", "entries") }} = dash_sai_remove_{{ table.name | replace("entry", "entries") }},
 {% endif %}
 {% endfor %}
 };
