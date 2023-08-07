@@ -119,13 +119,14 @@ bool InsertInTable(std::shared_ptr<p4::v1::TableEntry> entry, sai_object_type_t 
     return true;
 }
 
+// TODO to be removed and merged
+#define DASH_OBJECT_SHFT 48
+#define DASH_MAKE_OID(_objtype, _objval) (sai_object_id_t)(((sai_object_id_t)_objtype<<DASH_OBJECT_SHFT)+(sai_object_id_t)_objval)
 sai_object_id_t NextObjectId(sai_object_type_t objectType)
 {
     DASH_LOG_ENTER();
 
-    // TODO make proper oid
-
-    return ++nextId;
+    return DASH_MAKE_OID(objectType, ++nextId);
 }
 
 bool RemoveFromTable(sai_object_id_t id)
