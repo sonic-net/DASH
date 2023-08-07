@@ -313,10 +313,8 @@ void u64SetMask(const sai_uint64_t &value, T &t, int bits = 64) {
 
 grpc::StatusCode MutateTableEntry(std::shared_ptr<p4::v1::TableEntry>, p4::v1::Update_Type updateType);
 
-sai_object_id_t NextObjIndex();
+sai_object_id_t NextObjIndex(sai_object_type_t objectType);
 
-bool InsertInTable(std::shared_ptr<p4::v1::TableEntry> entry, sai_object_id_t *objId);
+bool InsertInTable(std::shared_ptr<p4::v1::TableEntry> entry, sai_object_type_t objectType, sai_object_id_t *objId);
 
 bool RemoveFromTable(sai_object_id_t id);
-
-int GetDeviceId();

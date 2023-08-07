@@ -6,6 +6,8 @@ static std::unordered_multimap<sai_object_id_t, std::shared_ptr<p4::v1::TableEnt
 static std::mutex tableLock;
 static std::atomic<sai_object_id_t> nextId;
 
+#define MUTEX std::lock_guard<std::mutex> _lock(tableLock);
+
 std::unique_ptr<p4::v1::P4Runtime::Stub> stub;
 
 void correctIpPrefix(void *ip, const void *mask, size_t length)
@@ -43,7 +45,7 @@ int leadingNonZeroBits(const sai_ip6_t ipv6) {
 }
 
 
-int GetDeviceId()
+static int GetDeviceId()
 {
     DASH_LOG_ENTER();
 
@@ -94,28 +96,34 @@ grpc::StatusCode MutateTableEntry(std::shared_ptr<p4::v1::TableEntry> entry, p4:
     return status.error_code();
 }
 
-bool InsertInTable(std::shared_ptr<p4::v1::TableEntry> entry, sai_object_id_t *objId)
+bool InsertInTable(std::shared_ptr<p4::v1::TableEntry> entry, sai_object_type_t objectType, sai_object_id_t *objId)
 {
     DASH_LOG_ENTER();
 
     auto retCode = MutateTableEntry(entry, p4::v1::Update_Type_INSERT);
-    if (grpc::StatusCode::OK != retCode) {
+
+    if (grpc::StatusCode::OK != retCode)
+    {
         return false;
     }
 
-    std::lock_guard<std::mutex> lock(tableLock);
+    MUTEX;
 
     if (*objId == 0)
     {
-        *objId = NextObjIndex();
+        *objId = NextObjIndex(objectType);
     }
+
     tableEntryMap.insert(std::make_pair(*objId, entry));
+
     return true;
 }
 
-sai_object_id_t NextObjIndex()
+sai_object_id_t NextObjIndex(sai_object_type_t objectType)
 {
     DASH_LOG_ENTER();
+
+    // TODO make proper oid
 
     return ++nextId;
 }
@@ -124,8 +132,10 @@ bool RemoveFromTable(sai_object_id_t id)
 {
     DASH_LOG_ENTER();
 
-    std::lock_guard<std::mutex> lock(tableLock);
+    MUTEX;
+
     auto range = tableEntryMap.equal_range(id);
+
     if (range.first == range.second)
     {
         DASH_LOG_ERROR("id: %ld not present in the table for deletion!", id);
@@ -135,14 +145,18 @@ bool RemoveFromTable(sai_object_id_t id)
 
     grpc::StatusCode retCode = grpc::StatusCode::OK;
 
-    for (auto itr = range.first; itr != range.second; ++itr) {
+    for (auto itr = range.first; itr != range.second; ++itr)
+    {
         auto entry = itr->second;
         auto tempRet = MutateTableEntry(entry, p4::v1::Update_Type_DELETE);
-        if (grpc::StatusCode::OK != tempRet) {
+
+        if (grpc::StatusCode::OK != tempRet)
+        {
             retCode = tempRet;
         }
     }
 
     tableEntryMap.erase(id);
+
     return retCode == grpc::StatusCode::OK;
 }

@@ -60,7 +60,7 @@ static sai_status_t dash_sai_get_switch_attribute(
 
                 attr->value.u32 = cfg->m_bmv2NumPorts;
 
-                DASH_LOG_NOTICE("[%d] attr %d SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS = %d", i, attr->id, attr->value.u32);
+                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS = %d", i, attr->value.u32);
 
                 break;
 
@@ -73,7 +73,7 @@ static sai_status_t dash_sai_get_switch_attribute(
                     attr->value.objlist.list[j] = port_list.at(j);
                 }
 
-                DASH_LOG_NOTICE("[%d] attr %d SAI_SWITCH_ATTR_PORT_LIST = [%d objids]", i, attr->id, cfg->m_bmv2NumPorts);
+                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_PORT_LIST = [%d objids]", i, cfg->m_bmv2NumPorts);
 
                 break;
 
@@ -81,7 +81,7 @@ static sai_status_t dash_sai_get_switch_attribute(
 
                 attr->value.oid = DASH_BMV2_DEFAULT_VLAN_ID;
 
-                DASH_LOG_NOTICE("[%d] attr %d SAI_SWITCH_ATTR_DEFAULT_VLAN_ID = %lx", i, attr->id, attr->value.oid);
+                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_DEFAULT_VLAN_ID = %lx", i, attr->value.oid);
 
                 break;
 
@@ -89,7 +89,7 @@ static sai_status_t dash_sai_get_switch_attribute(
 
                 attr->value.oid = DASH_BMV2_DEFAULT_VRF_ID;
 
-                DASH_LOG_NOTICE("attr %d SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID = %lx", attr->id, attr->value.oid);
+                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID = %lx", i, attr->value.oid);
 
                 break;
 
@@ -97,7 +97,7 @@ static sai_status_t dash_sai_get_switch_attribute(
 
                 attr->value.oid = DASH_BMV2_DEFAULT_1Q_BRIDGE_ID;
 
-                DASH_LOG_NOTICE("attr %d SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID = %lx", attr->id, attr->value.oid);
+                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID = %lx", i, attr->value.oid);
 
                 break;
 
@@ -105,13 +105,13 @@ static sai_status_t dash_sai_get_switch_attribute(
 
                 attr->value.oid = DASH_BMV2_DEFAULT_CPU_PORT_ID;
 
-                DASH_LOG_NOTICE("[%d] attr %d DASH_BMV2_DEFAULT_CPU_PORT_ID = %lx", i, attr->id, attr->value.oid);
+                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_CPU_PORT = %lx", i, attr->value.oid);
 
                 break;
 
             default:
 
-                DASH_LOG_WARN("attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", attr->id);
+                DASH_LOG_WARN("[%d] attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", i, attr->id);
 
                 memset(&attr->value, 0, sizeof(attr->value)); // clear potential caller garbage
 
@@ -159,13 +159,13 @@ static sai_status_t dash_sai_get_port_attribute(
 
                 attr->value.u32 = DASH_BMV2_CPU_QOS_NUMBER_OF_QUEUES;
 
-                DASH_LOG_NOTICE("attr %d SAI_PORT_ATTR_QOS_NUMBER_OF_QUEUES = %d", attr->id, attr->value.u32);
+                DASH_LOG_NOTICE("[%d] SAI_PORT_ATTR_QOS_NUMBER_OF_QUEUES = %d", i, attr->value.u32);
 
                 break;
 
             default:
 
-                DASH_LOG_WARN("attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", attr->id);
+                DASH_LOG_WARN("[%d] attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", i, attr->id);
 
                 memset(&attr->value, 0, sizeof(attr->value)); // clear potential caller garbage
 
