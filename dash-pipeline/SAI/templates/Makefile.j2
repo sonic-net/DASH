@@ -60,7 +60,8 @@ SAI_OBJS=$(SAI_SRCS:.c=.o)
 # DASH libsai "fixed" sources (not generated from P4 code)
 DASH_FIXED_SAI_SRCS=utils.cpp \
 		saifixedapis.cpp \
-		logger.cpp
+		logger.cpp \
+		config.cpp
 DASH_FIXED_SAI_OBJ=$(DASH_FIXED_SAI_SRCS:.cpp=.o)
 
 # DASH libsai "generated" sources (from P4 code)
