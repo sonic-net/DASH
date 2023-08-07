@@ -111,7 +111,7 @@ bool InsertInTable(std::shared_ptr<p4::v1::TableEntry> entry, sai_object_type_t 
 
     if (*objId == 0)
     {
-        *objId = NextObjIndex(objectType);
+        *objId = NextObjectId(objectType);
     }
 
     tableEntryMap.insert(std::make_pair(*objId, entry));
@@ -119,7 +119,7 @@ bool InsertInTable(std::shared_ptr<p4::v1::TableEntry> entry, sai_object_type_t 
     return true;
 }
 
-sai_object_id_t NextObjIndex(sai_object_type_t objectType)
+sai_object_id_t NextObjectId(sai_object_type_t objectType)
 {
     DASH_LOG_ENTER();
 
