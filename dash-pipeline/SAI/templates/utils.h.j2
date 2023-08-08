@@ -400,14 +400,6 @@ namespace dash
                 u64SetMask(value.u64, t, bits);
             }
 
-        const sai_attribute_t* getMaskAttr(sai_attr_id_t id, uint32_t attr_count, const sai_attribute_t *attr_list);
-
-        grpc::StatusCode MutateTableEntry(std::shared_ptr<p4::v1::TableEntry>, p4::v1::Update_Type updateType);
-
-        sai_object_id_t NextObjectId(sai_object_type_t objectType);
-
-        bool InsertInTable(std::shared_ptr<p4::v1::TableEntry> entry, sai_object_type_t objectType, sai_object_id_t *objId);
-
-        bool RemoveFromTable(sai_object_id_t id);
+        const sai_attribute_t* getMaskAttr(sai_attr_id_t id, uint32_t attr_count, const sai_attribute_t* attr_list);
     }
 }

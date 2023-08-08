@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "saiimpl.h"
 
 using namespace dash::utils;
 
@@ -48,7 +49,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     // Generate a SAI object ID and fill it as the P4 table key
     auto mf = matchActionEntry->add_match();
     mf->set_field_id({{table['keys'][0].id}});
-    objId = NextObjectId((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }});
+    objId = dashSai->getNextObjectId((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }});
     auto mf_exact = mf->mutable_exact();
     {{table['keys'][0].field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
     {% else %}
@@ -172,7 +173,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     //if (matchedParams != expectedParams) {
     //    goto ErrRet;
     //}
-    if (false == InsertInTable(matchActionEntry, (sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, &objId)) {
+    if (false == dashSai->insertInTable(matchActionEntry, (sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, &objId)) {
         goto ErrRet;
     }
 
@@ -181,7 +182,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     *{{ table.name }}_id = objId;
     return SAI_STATUS_SUCCESS;
 ErrRet:
-    RemoveFromTable(*{{ table.name }}_id);
+    dashSai->removeFromTable(*{{ table.name }}_id);
     return SAI_STATUS_FAILURE;
 }
 
@@ -217,7 +218,7 @@ static sai_status_t dash_sai_remove_{{ table.name }}(_In_ sai_object_id_t {{ tab
 {
     DASH_LOG_ENTER();
 
-    if (RemoveFromTable({{ table.name }}_id))
+    if (dashSai->removeFromTable({{ table.name }}_id))
     {
         return SAI_STATUS_SUCCESS;
     }
@@ -378,7 +379,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     //    goto ErrRet;
     //}
     // TODO: ternaly needs to set priority
-    retCode = MutateTableEntry(matchActionEntry, p4::v1::Update_Type_INSERT);
+    retCode = dashSai->mutateTableEntry(matchActionEntry, p4::v1::Update_Type_INSERT);
     if (grpc::StatusCode::OK == retCode) {
         return SAI_STATUS_SUCCESS;
     }
@@ -458,8 +459,10 @@ static sai_status_t dash_sai_remove_{{ table.name }}(
     {% endif %}
     {% endfor %}
 
-    retCode = MutateTableEntry(matchActionEntry, p4::v1::Update_Type_DELETE);
-    if (grpc::StatusCode::OK == retCode) {
+    retCode = dashSai->mutateTableEntry(matchActionEntry, p4::v1::Update_Type_DELETE);
+
+    if (grpc::StatusCode::OK == retCode)
+    {
         return SAI_STATUS_SUCCESS;
     }
 
