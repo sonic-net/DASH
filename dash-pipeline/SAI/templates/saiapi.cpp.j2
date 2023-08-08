@@ -1,5 +1,7 @@
 #include "utils.h"
 
+using namespace dash::utils;
+
 {% set registered_group = [] %}
 {% for table in tables %}
 {% if table.name in registered_group %}{% continue %}{% endif %}

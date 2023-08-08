@@ -10,7 +10,7 @@ static std::atomic<sai_object_id_t> nextId;
 
 std::unique_ptr<p4::v1::P4Runtime::Stub> stub;
 
-void correctIpPrefix(void *ip, const void *mask, size_t length)
+void dash::utils::correctIpPrefix(void *ip, const void *mask, size_t length)
 {
     DASH_LOG_ENTER();
 
@@ -23,7 +23,7 @@ void correctIpPrefix(void *ip, const void *mask, size_t length)
     }
 }
 
-int leadingNonZeroBits(const uint32_t ipv4)
+int dash::utils::leadingNonZeroBits(const uint32_t ipv4)
 {
     DASH_LOG_ENTER();
 
@@ -37,7 +37,7 @@ int leadingNonZeroBits(const uint32_t ipv4)
     return 33 - firstSetBit;
 }
 
-int leadingNonZeroBits(const sai_ip6_t& ipv6)
+int dash::utils::leadingNonZeroBits(const sai_ip6_t& ipv6)
 {
     DASH_LOG_ENTER();
 
@@ -70,7 +70,7 @@ static int GetDeviceId()
     return deviceId;
 }
 
-std::string updateTypeStr(p4::v1::Update_Type updateType)
+static std::string updateTypeStr(p4::v1::Update_Type updateType)
 {
     DASH_LOG_ENTER();
 
@@ -79,7 +79,7 @@ std::string updateTypeStr(p4::v1::Update_Type updateType)
     return descriptor->FindValueByNumber(updateType)->name();
 }
 
-const sai_attribute_t *getMaskAttr(sai_attr_id_t id, uint32_t attr_count, const sai_attribute_t *attr_list)
+const sai_attribute_t* dash::utils::getMaskAttr(sai_attr_id_t id, uint32_t attr_count, const sai_attribute_t *attr_list)
 {
     DASH_LOG_ENTER();
 
@@ -94,7 +94,7 @@ const sai_attribute_t *getMaskAttr(sai_attr_id_t id, uint32_t attr_count, const 
     return nullptr;
 }
 
-grpc::StatusCode MutateTableEntry(std::shared_ptr<p4::v1::TableEntry> entry, p4::v1::Update_Type updateType)
+grpc::StatusCode dash::utils::MutateTableEntry(std::shared_ptr<p4::v1::TableEntry> entry, p4::v1::Update_Type updateType)
 {
     DASH_LOG_ENTER();
 
@@ -132,7 +132,7 @@ grpc::StatusCode MutateTableEntry(std::shared_ptr<p4::v1::TableEntry> entry, p4:
     return status.error_code();
 }
 
-bool InsertInTable(std::shared_ptr<p4::v1::TableEntry> entry, sai_object_type_t objectType, sai_object_id_t *objId)
+bool dash::utils::InsertInTable(std::shared_ptr<p4::v1::TableEntry> entry, sai_object_type_t objectType, sai_object_id_t *objId)
 {
     DASH_LOG_ENTER();
 
@@ -159,14 +159,14 @@ bool InsertInTable(std::shared_ptr<p4::v1::TableEntry> entry, sai_object_type_t 
 #define DASH_OBJECT_SHFT 48
 #define DASH_MAKE_OID(_objtype, _objval) (sai_object_id_t)(((sai_object_id_t)_objtype<<DASH_OBJECT_SHFT)+(sai_object_id_t)_objval)
 
-sai_object_id_t NextObjectId(sai_object_type_t objectType)
+sai_object_id_t dash::utils::NextObjectId(sai_object_type_t objectType)
 {
     DASH_LOG_ENTER();
 
     return DASH_MAKE_OID(objectType, ++nextId);
 }
 
-bool RemoveFromTable(sai_object_id_t id)
+bool dash::utils::RemoveFromTable(sai_object_id_t id)
 {
     DASH_LOG_ENTER();
 
