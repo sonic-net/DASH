@@ -12,38 +12,56 @@ std::unique_ptr<p4::v1::P4Runtime::Stub> stub;
 
 void correctIpPrefix(void *ip, const void *mask, size_t length)
 {
+    DASH_LOG_ENTER();
+
     auto _ip = reinterpret_cast<uint8_t *>(ip);
     auto _mask = reinterpret_cast<const uint8_t *>(mask);
+
     for (size_t i = 0; i < length; i++)
     {
         _ip[i] = _ip[i] & _mask[i];
     }
 }
 
-int leadingNonZeroBits(const uint32_t ipv4) {
-    auto firstSetBit  = __builtin_ffs(ipv4);
-    if (0==firstSetBit) {
+int leadingNonZeroBits(const uint32_t ipv4)
+{
+    DASH_LOG_ENTER();
+
+    auto firstSetBit = __builtin_ffs(ipv4);
+
+    if (0==firstSetBit)
+    {
         return 0;
     }
-    return 33 -  firstSetBit;
+
+    return 33 - firstSetBit;
 }
 
-int leadingNonZeroBits(const sai_ip6_t ipv6) {
+int leadingNonZeroBits(const sai_ip6_t& ipv6)
+{
+    DASH_LOG_ENTER();
+
     int trailingZeros = 0;
-    for (int i = 0; i < 16; i+=4) {
+
+    for (int i = 0; i < 16; i+=4)
+    {
         auto num = static_cast<uint32_t>(ipv6[i]) +
-        (static_cast<uint32_t>(ipv6[i+1]) << 8) +
-        (static_cast<uint32_t>(ipv6[i+2]) << 16) +
-        (static_cast<uint32_t>(ipv6[i+3]) << 24);
-        auto firstSetBit  = leadingNonZeroBits(num);
-        if (firstSetBit > 0) {
+            (static_cast<uint32_t>(ipv6[i+1]) << 8) +
+            (static_cast<uint32_t>(ipv6[i+2]) << 16) +
+            (static_cast<uint32_t>(ipv6[i+3]) << 24);
+
+        auto firstSetBit = leadingNonZeroBits(num);
+
+        if (firstSetBit > 0)
+        {
             return 129-trailingZeros-firstSetBit;
         }
+
         trailingZeros += 32;
     }
+
     return 0;
 }
-
 
 static int GetDeviceId()
 {
@@ -52,17 +70,27 @@ static int GetDeviceId()
     return deviceId;
 }
 
-std::string updateTypeStr(p4::v1::Update_Type updateType) {
+std::string updateTypeStr(p4::v1::Update_Type updateType)
+{
+    DASH_LOG_ENTER();
+
     const google::protobuf::EnumDescriptor *descriptor = p4::v1::Update_Type_descriptor();
+
     return descriptor->FindValueByNumber(updateType)->name();
 }
 
-const sai_attribute_t *getMaskAttr(sai_attr_id_t id, uint32_t attr_count, const sai_attribute_t *attr_list) {
-    for (uint32_t i = 0; i < attr_count; i++) {
-        if (attr_list[i].id == id) {
+const sai_attribute_t *getMaskAttr(sai_attr_id_t id, uint32_t attr_count, const sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
+
+    for (uint32_t i = 0; i < attr_count; i++)
+    {
+        if (attr_list[i].id == id)
+        {
             return &attr_list[i];
         }
     }
+
     return nullptr;
 }
 
@@ -71,14 +99,21 @@ grpc::StatusCode MutateTableEntry(std::shared_ptr<p4::v1::TableEntry> entry, p4:
     DASH_LOG_ENTER();
 
     p4::v1::WriteRequest request;
+
     request.set_device_id(GetDeviceId());
+
     auto update = request.add_updates();
+
     update->set_type(updateType);
+
     auto entity = update->mutable_entity();
+
     entity->set_allocated_table_entry(entry.get());
 
     p4::v1::WriteResponse rep;
+
     grpc::ClientContext context;
+
     grpc::Status status = stub->Write(&context, request, &rep);
 
     if (status.ok())
@@ -93,6 +128,7 @@ grpc::StatusCode MutateTableEntry(std::shared_ptr<p4::v1::TableEntry> entry, p4:
 
     //MILIND?? What is this? reference release? memory release?
     entity->release_table_entry();
+
     return status.error_code();
 }
 
@@ -122,6 +158,7 @@ bool InsertInTable(std::shared_ptr<p4::v1::TableEntry> entry, sai_object_type_t 
 // TODO to be removed and merged
 #define DASH_OBJECT_SHFT 48
 #define DASH_MAKE_OID(_objtype, _objval) (sai_object_id_t)(((sai_object_id_t)_objtype<<DASH_OBJECT_SHFT)+(sai_object_id_t)_objval)
+
 sai_object_id_t NextObjectId(sai_object_type_t objectType)
 {
     DASH_LOG_ENTER();
