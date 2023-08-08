@@ -45,11 +45,6 @@ namespace dash
 
         public: // helper methods
 
-            const sai_attribute_t* getMaskAttr(
-                    _In_ sai_attr_id_t id,
-                    _In_ uint32_t attr_count,
-                    _In_ const sai_attribute_t *attr_list);
-
             grpc::StatusCode mutateTableEntry(
                     _In_ std::shared_ptr<p4::v1::TableEntry>,
                     _In_ p4::v1::Update_Type updateType);
