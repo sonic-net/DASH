@@ -62,10 +62,10 @@ namespace dash
 
         private: // private helper methods
 
-            p4::config::v1::P4Info parse_p4info(
+            static p4::config::v1::P4Info parse_p4info(
                     _In_ const char *path);
 
-            std::string updateTypeStr(
+            static std::string updateTypeStr(
                     _In_ p4::v1::Update_Type updateType);
 
         private: // internal sai objects
@@ -83,6 +83,8 @@ namespace dash
         private:
 
             bool m_apiInitialized;
+
+            const sai_service_method_table_t* m_serviceMethodTable;
 
             std::shared_ptr<dash::Config> m_cfg;
 

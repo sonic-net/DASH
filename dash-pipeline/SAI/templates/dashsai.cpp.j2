@@ -1,5 +1,7 @@
 #include "dashsai.h"
 
+#include <cstdlib>
+
 using namespace dash;
 
 #define DASH_BMV2_CPU_QOS_NUMBER_OF_QUEUES 0
@@ -11,6 +13,21 @@ using namespace dash;
     if (!m_apiInitialized) {                                                \
         DASH_LOG_ERROR("%s: api not initialized", __PRETTY_FUNCTION__);     \
         return SAI_STATUS_FAILURE; }
+
+/**
+ * @def DASH_USE_NOT_SUPPORTED
+ *
+ * Name of environment variable, when set to any value, will return proper
+ * SAI_STATUS_NOT_SUPPORTED on switch/port GET api.
+ *
+ * Currently because of limitation of saithrift, GET on switch/port is
+ * returning SAI_STATUS_SUCCESS on not implemented attribute.
+ *
+ * TODO FIXME needs to be addressed in saithrift.
+ *
+ * This is temporary workaround for syncd, it should be removed when fixed in saithrift.
+ */
+#define DASH_USE_NOT_SUPPORTED "DASH_USE_NOT_SUPPORTED"
 
 #define MUTEX std::lock_guard<std::mutex> _lock(m_tableLock);
 
@@ -50,6 +67,8 @@ sai_status_t DashSai::apiInitialize(
 
         return SAI_STATUS_FAILURE;
     }
+
+    m_serviceMethodTable = services;
 
     m_cfg = dash::Config::getConfig(services);
 
@@ -143,6 +162,8 @@ sai_status_t DashSai::apiUninitialize(void)
 
     m_apiInitialized = false;
 
+    m_serviceMethodTable = nullptr;
+
     return SAI_STATUS_SUCCESS;
 }
 
@@ -198,8 +219,6 @@ sai_status_t DashSai::getSwitchAttribute(
 {
     DASH_LOG_ENTER();
     DASH_CHECK_API_INITIALIZED();
-
-    DASH_LOG_NOTICE("dash_get_switch_attribute()");
 
     sai_attribute_t *attr = attr_list;
 
@@ -262,6 +281,13 @@ sai_status_t DashSai::getSwitchAttribute(
 
             default:
 
+                if (getenv(DASH_USE_NOT_SUPPORTED))
+                {
+                    DASH_LOG_WARN("[%d] attr %d is NOT SUPPORTED", i, attr->id);
+
+                    return SAI_STATUS_NOT_SUPPORTED;
+                }
+
                 DASH_LOG_WARN("[%d] attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", i, attr->id);
 
                 memset(&attr->value, 0, sizeof(attr->value)); // clear potential caller garbage
@@ -281,8 +307,6 @@ sai_status_t DashSai::getPortAttribute(
     DASH_LOG_ENTER();
     DASH_CHECK_API_INITIALIZED();
 
-    DASH_LOG_NOTICE("getPortAttribute()");
-
     sai_attribute_t *attr = attr_list;
 
     for (uint32_t i = 0; i < attr_count ; i++, attr++)
@@ -298,6 +322,13 @@ sai_status_t DashSai::getPortAttribute(
                 break;
 
             default:
+
+                if (getenv(DASH_USE_NOT_SUPPORTED))
+                {
+                    DASH_LOG_WARN("[%d] attr %d is NOT SUPPORTED", i, attr->id);
+
+                    return SAI_STATUS_NOT_SUPPORTED;
+                }
 
                 DASH_LOG_WARN("[%d] attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", i, attr->id);
 
