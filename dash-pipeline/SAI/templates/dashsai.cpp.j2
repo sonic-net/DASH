@@ -7,7 +7,7 @@ using namespace dash;
 #define DASH_BMV2_CPU_QOS_NUMBER_OF_QUEUES 0
 
 #define DASH_OBJECT_SHFT 48
-#define DASH_MAKE_OID(_objtype, _objval) (sai_object_id_t)(((sai_object_id_t)_objtype<<DASH_OBJECT_SHFT)+(sai_object_id_t)_objval)
+#define DASH_MAKE_OID(objtype, objval) (sai_object_id_t)(((sai_object_id_t)objtype<<DASH_OBJECT_SHFT)+(sai_object_id_t)objval)
 
 #define DASH_CHECK_API_INITIALIZED()                                        \
     if (!m_apiInitialized) {                                                \
@@ -74,6 +74,8 @@ sai_status_t DashSai::apiInitialize(
 
     DASH_LOG_NOTICE("config: %s", m_cfg->getConfigString().c_str());
 
+    m_portList.clear();
+
     for (uint32_t i = 1; i <= m_cfg->m_bmv2NumPorts; i++)
     {
         m_portList.push_back(DASH_MAKE_OID(SAI_OBJECT_TYPE_PORT,i));
@@ -81,11 +83,11 @@ sai_status_t DashSai::apiInitialize(
 
     assert(m_cfg->m_bmv2NumPorts == (uint32_t)m_portList.size());
 
-    const grpc::string _grpcTarget = m_cfg->m_grpcTarget;
+    const grpc::string grpcTarget = m_cfg->m_grpcTarget;
     const char* test_json = m_cfg->m_pipelineJson.c_str();
     const char* test_proto_json = m_cfg->m_pipelineProto.c_str();
 
-    DASH_LOG_NOTICE("GRPC call SetForwardingPipelineConfig %s => %s, %s", _grpcTarget.c_str(), test_json, test_proto_json);
+    DASH_LOG_NOTICE("GRPC call SetForwardingPipelineConfig %s => %s, %s", grpcTarget.c_str(), test_json, test_proto_json);
 
     auto p4info = parse_p4info(test_proto_json);
 
@@ -97,7 +99,7 @@ sai_status_t DashSai::apiInitialize(
 
     grpc::ClientContext stream_context;
 
-    m_grpcChannel = grpc::CreateChannel(_grpcTarget, grpc::InsecureChannelCredentials());
+    m_grpcChannel = grpc::CreateChannel(grpcTarget, grpc::InsecureChannelCredentials());
 
     m_stub = p4::v1::P4Runtime::NewStub(m_grpcChannel);
 
@@ -351,8 +353,8 @@ p4::config::v1::P4Info DashSai::parse_p4info(
     p4::config::v1::P4Info p4info;
     std::ifstream istream(path);
     assert(istream.good());
-    google::protobuf::io::IstreamInputStream istream_(&istream);
-    google::protobuf::TextFormat::Parse(&istream_, &p4info);
+    google::protobuf::io::IstreamInputStream is(&istream);
+    google::protobuf::TextFormat::Parse(&is, &p4info);
 
     return p4info;
 }
