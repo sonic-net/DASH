@@ -54,8 +54,7 @@ namespace dash
 
             bool insertInTable(
                     _In_ std::shared_ptr<p4::v1::TableEntry> entry,
-                    _In_ sai_object_type_t objectType,
-                    _Out_ sai_object_id_t *objId);
+                    _In_ sai_object_id_t objId);
 
             bool removeFromTable(
                     _In_ sai_object_id_t id);

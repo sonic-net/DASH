@@ -40,7 +40,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     action = entry->mutable_action();
     //expectedParams = 0;
     //matchedParams = 0;
-    objId = 0;
+    objId = dashSai->getNextObjectId((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }});
 
     matchActionEntry->set_table_id(tableId);
 
@@ -49,7 +49,6 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     // Generate a SAI object ID and fill it as the P4 table key
     auto mf = matchActionEntry->add_match();
     mf->set_field_id({{table['keys'][0].id}});
-    objId = dashSai->getNextObjectId((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }});
     auto mf_exact = mf->mutable_exact();
     {{table['keys'][0].field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
     {% else %}
@@ -173,7 +172,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     //if (matchedParams != expectedParams) {
     //    goto ErrRet;
     //}
-    if (false == dashSai->insertInTable(matchActionEntry, (sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, &objId)) {
+    if (false == dashSai->insertInTable(matchActionEntry, objId)) {
         goto ErrRet;
     }
 

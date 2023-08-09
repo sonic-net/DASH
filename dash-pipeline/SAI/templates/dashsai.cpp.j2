@@ -31,6 +31,10 @@ using namespace dash;
 
 #define MUTEX std::lock_guard<std::mutex> _lock(m_tableLock);
 
+// TODO replace assert with if and return error
+// TODO replace DASH_MAKE_OID with ObjectIdManager
+// TODO fix saiapi.cpp use insert/remove mutate getNextObjectId
+
 DashSai::DashSai():
     m_apiInitialized(false)
 {
@@ -179,7 +183,6 @@ sai_object_type_t DashSai::objectTypeQuery(
         DASH_LOG_ERROR("api not initialized");
 
         return SAI_OBJECT_TYPE_NULL;
-
     }
 
     return sai_object_type_t(object_id >> (DASH_OBJECT_SHFT));
@@ -238,9 +241,9 @@ sai_status_t DashSai::getSwitchAttribute(
 
             case SAI_SWITCH_ATTR_PORT_LIST:
 
-                attr->value.objlist.count = m_cfg->m_bmv2NumPorts;
+                attr->value.objlist.count = std::min(m_cfg->m_bmv2NumPorts, attr->value.objlist.count);
 
-                for (size_t j = 0; j < m_cfg->m_bmv2NumPorts; j++)
+                for (size_t j = 0; j < attr->value.objlist.count; j++)
                 {
                     attr->value.objlist.list[j] = m_portList.at(j);
                 }
@@ -420,14 +423,20 @@ grpc::StatusCode DashSai::mutateTableEntry(
 
 bool DashSai::insertInTable(
         _In_ std::shared_ptr<p4::v1::TableEntry> entry,
-        _In_ sai_object_type_t objectType,
-        _Out_ sai_object_id_t *objId)
+        _In_ sai_object_id_t objId)
 {
     DASH_LOG_ENTER();
 
     if (!m_apiInitialized)
     {
         DASH_LOG_ERROR("api not initialized");
+
+        return false;
+    }
+
+    if (objId == SAI_NULL_OBJECT_ID)
+    {
+        DASH_LOG_ERROR("objId is NULL");
 
         return false;
     }
@@ -441,12 +450,7 @@ bool DashSai::insertInTable(
 
     MUTEX;
 
-    if (*objId == 0)
-    {
-        *objId = getNextObjectId(objectType);
-    }
-
-    m_tableEntryMap.insert(std::make_pair(*objId, entry));
+    m_tableEntryMap.insert(std::make_pair(objId, entry));
 
     return true;
 }
