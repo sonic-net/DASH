@@ -337,6 +337,8 @@
             "destination": "10.0.0.20/8"
         },
         "attributes": [
+            "SAI_ROUTE_ENTRY_ATTR_PACKET_ACTION",
+            "SAI_PACKET_ACTION_FORWARD",
             "SAI_ROUTE_ENTRY_ATTR_NEXT_HOP_ID",
             "1"
         ]
@@ -351,6 +353,8 @@
             "destination": "172.0.0.10/8"
         },
         "attributes": [
+            "SAI_ROUTE_ENTRY_ATTR_PACKET_ACTION",
+            "SAI_PACKET_ACTION_DROP",
             "SAI_ROUTE_ENTRY_ATTR_NEXT_HOP_ID",
             "2"
         ]

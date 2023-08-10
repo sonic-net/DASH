@@ -33,6 +33,16 @@ control underlay(
 #endif // TARGET_DPDK_PNA  
     }
 
+    action pkt_act(bit<9> packet_action, bit<9> next_hop_id) {
+        if(packet_action == 0) {
+            /* Drops the packet */
+            meta.dropped = true;
+        } else if (packet_action == 1) {
+            /* Forwards the packet on different/same port it arrived based on routing */
+            set_nhop(next_hop_id);
+        }
+    }
+
     action def_act() {
 #ifdef TARGET_BMV2_V1MODEL
         standard_metadata.egress_spec = standard_metadata.ingress_port;
@@ -61,8 +71,9 @@ control underlay(
         }
 
         actions = {
-            /* Send packet on different/same port it arrived based on routing */
-            set_nhop;
+            // Processes a packet based on the specified packet action.
+            // Depending on the packet action, it either drops the packet or forwards it to the specified next-hop. 
+            pkt_act;
 
             /* Send packet on same port it arrived (echo) by default */
             @defaultonly def_act;
