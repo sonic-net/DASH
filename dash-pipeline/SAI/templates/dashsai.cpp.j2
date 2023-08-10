@@ -271,6 +271,7 @@ sai_status_t DashSai::removeSwitch(
         _In_ sai_object_id_t switch_id)
 {
     DASH_LOG_ENTER();
+    DASH_CHECK_API_INITIALIZED();
 
     if (switch_id != m_switchId)
     {
@@ -291,6 +292,7 @@ sai_status_t DashSai::setSwitchAttribute(
         _In_ const sai_attribute_t *attr)
 {
     DASH_LOG_ENTER();
+    DASH_CHECK_API_INITIALIZED();
 
     switch (attr->id)
     {
