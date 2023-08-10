@@ -8,24 +8,7 @@
 
 #include <vector>
 
-// TODO to be moved to separate class/namespace
-
-static std::shared_ptr<grpc::Channel> _grpcChannel;
-extern std::unique_ptr<p4::v1::P4Runtime::Stub> stub;
-
-#define DASH_BMV2_CPU_QOS_NUMBER_OF_QUEUES 0
-
-#define DASH_OBJECT_SHFT 48
-#define DASH_MAKE_OID(_objtype, _objval) (sai_object_id_t)(((sai_object_id_t)_objtype<<DASH_OBJECT_SHFT)+(sai_object_id_t)_objval)
-
-#define DASH_BMV2_DEFAULT_CPU_PORT_ID DASH_MAKE_OID(SAI_OBJECT_TYPE_PORT,64)
-#define DASH_BMV2_DEFAULT_VLAN_ID DASH_MAKE_OID(SAI_OBJECT_TYPE_VLAN,1)
-#define DASH_BMV2_DEFAULT_VRF_ID DASH_MAKE_OID(SAI_OBJECT_TYPE_VIRTUAL_ROUTER,1)
-#define DASH_BMV2_DEFAULT_1Q_BRIDGE_ID DASH_MAKE_OID(SAI_OBJECT_TYPE_BRIDGE,1)
-
-static std::shared_ptr<dash::Config> cfg;
-
-static std::vector<sai_object_id_t> port_list;
+std::shared_ptr<dash::DashSai> dashSai = std::make_shared<dash::DashSai>();
 
 static sai_status_t dash_sai_create_switch(
         _Out_ sai_object_id_t *switch_id,
@@ -34,11 +17,7 @@ static sai_status_t dash_sai_create_switch(
 {
     DASH_LOG_ENTER();
 
-    *switch_id = DASH_MAKE_OID(SAI_OBJECT_TYPE_SWITCH,1),
-
-    DASH_LOG_NOTICE("created switch id: %ld", *switch_id);
-
-    return SAI_STATUS_SUCCESS;
+    return dashSai->createSwitch(switch_id, attr_count, attr_list);
 }
 
 static sai_status_t dash_sai_get_switch_attribute(
@@ -48,84 +27,30 @@ static sai_status_t dash_sai_get_switch_attribute(
 {
     DASH_LOG_ENTER();
 
-    DASH_LOG_NOTICE("dash_get_switch_attribute()");
+    return dashSai->getSwitchAttribute(switch_id, attr_count, attr_list);
+}
 
-    sai_attribute_t *attr = attr_list;
+static sai_status_t dash_sai_remove_switch(
+        _In_ sai_object_id_t switch_id)
+{
+    DASH_LOG_ENTER();
 
-    for (uint32_t i = 0; i < attr_count ; i++, attr++)
-    {
-        switch(attr->id)
-        {
-            case SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS:
+    return dashSai->removeSwitch(switch_id);
+}
 
-                attr->value.u32 = cfg->m_bmv2NumPorts;
+static sai_status_t dash_sai_set_switch_attribute(
+        _In_ sai_object_id_t switch_id,
+        _In_ const sai_attribute_t *attr)
+{
+    DASH_LOG_ENTER();
 
-                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS = %d", i, attr->value.u32);
-
-                break;
-
-            case SAI_SWITCH_ATTR_PORT_LIST:
-
-                attr->value.objlist.count = cfg->m_bmv2NumPorts;
-
-                for (size_t j = 0; j < cfg->m_bmv2NumPorts; j++)
-                {
-                    attr->value.objlist.list[j] = port_list.at(j);
-                }
-
-                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_PORT_LIST = [%d objids]", i, cfg->m_bmv2NumPorts);
-
-                break;
-
-            case SAI_SWITCH_ATTR_DEFAULT_VLAN_ID:
-
-                attr->value.oid = DASH_BMV2_DEFAULT_VLAN_ID;
-
-                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_DEFAULT_VLAN_ID = %lx", i, attr->value.oid);
-
-                break;
-
-            case SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID:
-
-                attr->value.oid = DASH_BMV2_DEFAULT_VRF_ID;
-
-                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID = %lx", i, attr->value.oid);
-
-                break;
-
-            case SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID:
-
-                attr->value.oid = DASH_BMV2_DEFAULT_1Q_BRIDGE_ID;
-
-                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID = %lx", i, attr->value.oid);
-
-                break;
-
-            case SAI_SWITCH_ATTR_CPU_PORT:
-
-                attr->value.oid = DASH_BMV2_DEFAULT_CPU_PORT_ID;
-
-                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_CPU_PORT = %lx", i, attr->value.oid);
-
-                break;
-
-            default:
-
-                DASH_LOG_WARN("[%d] attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", i, attr->id);
-
-                memset(&attr->value, 0, sizeof(attr->value)); // clear potential caller garbage
-
-                break; // TODO FIXME should return NOT SUPPORTED
-        }
-    }
-
-    return SAI_STATUS_SUCCESS;
+    return dashSai->setSwitchAttribute(switch_id, attr);
 }
 
 sai_switch_api_t dash_sai_switch_api_impl = {
     .create_switch = dash_sai_create_switch,
-    .remove_switch = 0,
-    .set_switch_attribute = 0,
+    .remove_switch = dash_sai_remove_switch,
+    .set_switch_attribute = dash_sai_set_switch_attribute,
     .get_switch_attribute = dash_sai_get_switch_attribute,
     .get_switch_stats = 0,
     .get_switch_stats_ext = 0,
@@ -147,33 +72,7 @@ static sai_status_t dash_sai_get_port_attribute(
 {
     DASH_LOG_ENTER();
 
-    DASH_LOG_NOTICE("dash_sai_get_port_attribute()");
-
-    sai_attribute_t *attr = attr_list;
-
-    for (uint32_t i = 0; i < attr_count ; i++, attr++)
-    {
-        switch(attr->id)
-        {
-            case SAI_PORT_ATTR_QOS_NUMBER_OF_QUEUES:
-
-                attr->value.u32 = DASH_BMV2_CPU_QOS_NUMBER_OF_QUEUES;
-
-                DASH_LOG_NOTICE("[%d] SAI_PORT_ATTR_QOS_NUMBER_OF_QUEUES = %d", i, attr->value.u32);
-
-                break;
-
-            default:
-
-                DASH_LOG_WARN("[%d] attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", i, attr->id);
-
-                memset(&attr->value, 0, sizeof(attr->value)); // clear potential caller garbage
-
-                break; // TODO FIXME should return NOT SUPPORTED
-        }
-    }
-
-    return SAI_STATUS_SUCCESS;
+    return dashSai->getPortAttribute(port_id, attr_count, attr_list);
 }
 
 sai_port_api_t dash_sai_port_api_impl = {
@@ -256,7 +155,7 @@ sai_object_type_t sai_object_type_query(
 {
     DASH_LOG_ENTER();
 
-    return sai_object_type_t(object_id>>DASH_OBJECT_SHFT);
+    return dashSai->objectTypeQuery(object_id);
 }
 
 sai_object_id_t sai_switch_id_query(
@@ -264,12 +163,7 @@ sai_object_id_t sai_switch_id_query(
 {
     DASH_LOG_ENTER();
 
-    if (object_id == SAI_NULL_OBJECT_ID)
-    {
-        return SAI_NULL_OBJECT_ID;
-    }
-
-    return DASH_MAKE_OID(SAI_OBJECT_TYPE_SWITCH,1);
+    return dashSai->switchIdQuery(object_id);
 }
 
 sai_status_t sai_query_attribute_enum_values_capability(
@@ -285,97 +179,20 @@ sai_status_t sai_query_attribute_enum_values_capability(
     return SAI_STATUS_NOT_IMPLEMENTED;
 }
 
-static p4::config::v1::P4Info parse_p4info(const char *path)
-{
-    DASH_LOG_ENTER();
-
-    p4::config::v1::P4Info p4info;
-    std::ifstream istream(path);
-    assert(istream.good());
-    google::protobuf::io::IstreamInputStream istream_(&istream);
-    google::protobuf::TextFormat::Parse(&istream_, &p4info);
-
-    return p4info;
-}
-
 sai_status_t sai_api_initialize(
         _In_ uint64_t flags,
         _In_ const sai_service_method_table_t *services)
 {
     DASH_LOG_ENTER();
 
-    cfg = dash::Config::getConfig(services);
-
-    DASH_LOG_NOTICE("config: %s", cfg->getConfigString().c_str());
-
-    for (uint32_t i = 1; i <= cfg->m_bmv2NumPorts; i++)
-    {
-        port_list.push_back(DASH_MAKE_OID(SAI_OBJECT_TYPE_PORT,i));
-    }
-
-    assert(cfg->m_bmv2NumPorts == (uint32_t)port_list.size());
-
-    const grpc::string _grpcTarget = cfg->m_grpcTarget;
-    const char* test_json = cfg->m_pipelineJson.c_str();
-    const char* test_proto_json = cfg->m_pipelineProto.c_str();
-    int dev_id = cfg->m_deviceId;
-
-    DASH_LOG_NOTICE("GRPC call SetForwardingPipelineConfig %s => %s, %s", _grpcTarget.c_str(), test_json, test_proto_json);
-
-    auto p4info = parse_p4info(test_proto_json);
-
-    auto set_election_id = [](p4::v1::Uint128 *election_id) {
-        election_id->set_high(0);
-        election_id->set_low(1);
-    };
-
-    grpc::ClientContext stream_context;
-    _grpcChannel = grpc::CreateChannel(_grpcTarget, grpc::InsecureChannelCredentials());
-    stub = p4::v1::P4Runtime::NewStub(_grpcChannel);
-    auto stream = stub->StreamChannel(&stream_context);
-    {
-        p4::v1::StreamMessageRequest request;
-        auto arbitration = request.mutable_arbitration();
-        arbitration->set_device_id(dev_id);
-        set_election_id(arbitration->mutable_election_id());
-        stream->Write(request);
-        p4::v1::StreamMessageResponse response;
-        stream->Read(&response);
-        assert(response.update_case() == p4::v1::StreamMessageResponse::kArbitration);
-        assert(response.arbitration().status().code() == ::google::rpc::Code::OK);
-    }
-    {
-        p4::v1::SetForwardingPipelineConfigRequest request;
-        request.set_device_id(dev_id);
-        request.set_action(
-                p4::v1::SetForwardingPipelineConfigRequest_Action_VERIFY_AND_COMMIT);
-        set_election_id(request.mutable_election_id());
-        auto config = request.mutable_config();
-        config->set_allocated_p4info(&p4info);
-        std::ifstream istream(test_json);
-        config->mutable_p4_device_config()->assign(
-                (std::istreambuf_iterator<char>(istream)),
-                 std::istreambuf_iterator<char>());
-
-        p4::v1::SetForwardingPipelineConfigResponse rep;
-        grpc::ClientContext context;
-
-        auto status = stub->SetForwardingPipelineConfig(
-                &context, request, &rep);
-        assert(status.ok());
-        config->release_p4info();
-    }
-
-    return SAI_STATUS_SUCCESS;
+    return dashSai->apiInitialize(flags, services);
 }
 
 sai_status_t sai_api_uninitialize(void)
 {
     DASH_LOG_ENTER();
 
-    stub = nullptr;
-
-    return SAI_STATUS_SUCCESS;
+    return dashSai->apiUninitialize();
 }
 
 sai_status_t sai_log_set(
@@ -395,6 +212,8 @@ sai_status_t sai_query_api_version(
     if (version)
     {
         *version = SAI_API_VERSION;
+
+        DASH_LOG_NOTICE("SAI headers version: %d", SAI_API_VERSION);
 
         return SAI_STATUS_SUCCESS;
     }

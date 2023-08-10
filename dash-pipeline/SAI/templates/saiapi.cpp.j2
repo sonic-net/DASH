@@ -1,4 +1,7 @@
 #include "utils.h"
+#include "saiimpl.h"
+
+using namespace dash::utils;
 
 {% set registered_group = [] %}
 {% for table in tables %}
@@ -37,7 +40,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     action = entry->mutable_action();
     //expectedParams = 0;
     //matchedParams = 0;
-    objId = 0;
+    objId = dashSai->getNextObjectId((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }});
 
     matchActionEntry->set_table_id(tableId);
 
@@ -46,7 +49,6 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     // Generate a SAI object ID and fill it as the P4 table key
     auto mf = matchActionEntry->add_match();
     mf->set_field_id({{table['keys'][0].id}});
-    objId = NextObjectId((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }});
     auto mf_exact = mf->mutable_exact();
     {{table['keys'][0].field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
     {% else %}
@@ -170,7 +172,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     //if (matchedParams != expectedParams) {
     //    goto ErrRet;
     //}
-    if (false == InsertInTable(matchActionEntry, (sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, &objId)) {
+    if (false == dashSai->insertInTable(matchActionEntry, objId)) {
         goto ErrRet;
     }
 
@@ -179,7 +181,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     *{{ table.name }}_id = objId;
     return SAI_STATUS_SUCCESS;
 ErrRet:
-    RemoveFromTable(*{{ table.name }}_id);
+    dashSai->removeFromTable(*{{ table.name }}_id);
     return SAI_STATUS_FAILURE;
 }
 
@@ -215,7 +217,7 @@ static sai_status_t dash_sai_remove_{{ table.name }}(_In_ sai_object_id_t {{ tab
 {
     DASH_LOG_ENTER();
 
-    if (RemoveFromTable({{ table.name }}_id))
+    if (dashSai->removeFromTable({{ table.name }}_id))
     {
         return SAI_STATUS_SUCCESS;
     }
@@ -376,7 +378,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     //    goto ErrRet;
     //}
     // TODO: ternaly needs to set priority
-    retCode = MutateTableEntry(matchActionEntry, p4::v1::Update_Type_INSERT);
+    retCode = dashSai->mutateTableEntry(matchActionEntry, p4::v1::Update_Type_INSERT);
     if (grpc::StatusCode::OK == retCode) {
         return SAI_STATUS_SUCCESS;
     }
@@ -456,8 +458,10 @@ static sai_status_t dash_sai_remove_{{ table.name }}(
     {% endif %}
     {% endfor %}
 
-    retCode = MutateTableEntry(matchActionEntry, p4::v1::Update_Type_DELETE);
-    if (grpc::StatusCode::OK == retCode) {
+    retCode = dashSai->mutateTableEntry(matchActionEntry, p4::v1::Update_Type_DELETE);
+
+    if (grpc::StatusCode::OK == retCode)
+    {
         return SAI_STATUS_SUCCESS;
     }
 
@@ -509,6 +513,35 @@ static sai_status_t dash_sai_get_{{ table.name }}_attribute(
     assert(0 && "sai_get_{{ table.name }}_attribute NYI");
     return SAI_STATUS_FAILURE;
 }
+
+{% if table.name == 'route_entry' %}
+
+static sai_status_t dash_sai_set_{{ table.name | replace("entry", "entries") }}_attribute(
+        _In_ uint32_t object_count,
+        _In_ const sai_route_entry_t *route_entry,
+        _In_ const sai_attribute_t *attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_set_{{ table.name | replace("entry", "entries") }}_attribute NYI");
+    return SAI_STATUS_FAILURE;
+}
+
+static sai_status_t dash_sai_get_{{ table.name | replace("entry", "entries") }}_attribute(
+        _In_ uint32_t object_count,
+        _In_ const sai_route_entry_t *route_entry,
+        _In_ const uint32_t *attr_count,
+        _Inout_ sai_attribute_t **attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_get_{{ table.name | replace("entry", "entries") }}_attribute NYI");
+    return SAI_STATUS_FAILURE;
+}
+
+{% endif %}
 {% endif %}
 {% endfor %}
 
@@ -528,6 +561,10 @@ sai_{{ app_name }}_api_t dash_sai_{{ app_name }}_api_impl = {
 {% else %}
     .create_{{ table.name | replace("entry", "entries") }} = dash_sai_create_{{ table.name | replace("entry", "entries") }},
     .remove_{{ table.name | replace("entry", "entries") }} = dash_sai_remove_{{ table.name | replace("entry", "entries") }},
+{% endif %}
+{% if table.name == 'route_entry' %}
+    .set_{{ table.name | replace("entry", "entries") }}_attribute = dash_sai_set_{{ table.name | replace("entry", "entries") }}_attribute,
+    .get_{{ table.name | replace("entry", "entries") }}_attribute = dash_sai_get_{{ table.name | replace("entry", "entries") }}_attribute,
 {% endif %}
 {% endfor %}
 };
