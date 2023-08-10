@@ -28,15 +28,26 @@ namespace dash
 
         public: // QUAD api implementation
 
+            // switch
+
             sai_status_t createSwitch(
                     _Out_ sai_object_id_t *switch_id,
                     _In_ uint32_t attr_count,
                     _In_ const sai_attribute_t *attr_list);
 
+            sai_status_t removeSwitch(
+                    _In_ sai_object_id_t switch_id);
+
+            sai_status_t setSwitchAttribute(
+                    _In_ sai_object_id_t switch_id,
+                    _In_ const sai_attribute_t *attr);
+
             sai_status_t getSwitchAttribute(
                     _In_ sai_object_id_t switch_id,
                     _In_ uint32_t attr_count,
                     _Inout_ sai_attribute_t *attr_list);
+
+            // port
 
             sai_status_t getPortAttribute(
                     _In_ sai_object_id_t port_id,
@@ -61,7 +72,7 @@ namespace dash
 
         private: // private helper methods
 
-            static p4::config::v1::P4Info parse_p4info(
+            static std::shared_ptr<p4::config::v1::P4Info> parse_p4info(
                     _In_ const char *path);
 
             static std::string updateTypeStr(
@@ -78,6 +89,8 @@ namespace dash
             sai_object_id_t m_defaultVrfId;
 
             sai_object_id_t m_default1QBridgeId;
+
+            sai_object_id_t m_defaultTrapGroup;
 
         private:
 

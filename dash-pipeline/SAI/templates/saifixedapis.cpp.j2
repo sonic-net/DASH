@@ -30,10 +30,27 @@ static sai_status_t dash_sai_get_switch_attribute(
     return dashSai->getSwitchAttribute(switch_id, attr_count, attr_list);
 }
 
+static sai_status_t dash_sai_remove_switch(
+        _In_ sai_object_id_t switch_id)
+{
+    DASH_LOG_ENTER();
+
+    return dashSai->removeSwitch(switch_id);
+}
+
+static sai_status_t dash_sai_set_switch_attribute(
+        _In_ sai_object_id_t switch_id,
+        _In_ const sai_attribute_t *attr)
+{
+    DASH_LOG_ENTER();
+
+    return dashSai->setSwitchAttribute(switch_id, attr);
+}
+
 sai_switch_api_t dash_sai_switch_api_impl = {
     .create_switch = dash_sai_create_switch,
-    .remove_switch = 0,
-    .set_switch_attribute = 0,
+    .remove_switch = dash_sai_remove_switch,
+    .set_switch_attribute = dash_sai_set_switch_attribute,
     .get_switch_attribute = dash_sai_get_switch_attribute,
     .get_switch_stats = 0,
     .get_switch_stats_ext = 0,
