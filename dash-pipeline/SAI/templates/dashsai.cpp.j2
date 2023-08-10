@@ -262,7 +262,7 @@ sai_status_t DashSai::createSwitch(
 
     *switch_id = m_switchId;
 
-    DASH_LOG_NOTICE("created switch id: %ld", *switch_id);
+    DASH_LOG_NOTICE("created switch id: 0x%lx", *switch_id);
 
     return SAI_STATUS_SUCCESS;
 }
@@ -274,14 +274,14 @@ sai_status_t DashSai::removeSwitch(
 
     if (switch_id != m_switchId)
     {
-        DASH_LOG_ERROR("invalid switch_id: %lu, switch_id", switch_id);
+        DASH_LOG_ERROR("invalid switch_id: 0x%lx, switch_id", switch_id);
 
         return SAI_STATUS_INVALID_PARAMETER;
     }
 
     // dummy switch remove
 
-    DASH_LOG_NOTICE("removing switch: %ld", switch_id);
+    DASH_LOG_NOTICE("removing switch: 0x%lx", switch_id);
 
     return SAI_STATUS_SUCCESS;
 }
@@ -353,7 +353,7 @@ sai_status_t DashSai::getSwitchAttribute(
 
                 attr->value.oid = m_defaultVlanId;
 
-                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_DEFAULT_VLAN_ID = %lx", i, attr->value.oid);
+                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_DEFAULT_VLAN_ID = 0x%lx", i, attr->value.oid);
 
                 break;
 
@@ -361,7 +361,7 @@ sai_status_t DashSai::getSwitchAttribute(
 
                 attr->value.oid = m_defaultVrfId;
 
-                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID = %lx", i, attr->value.oid);
+                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_DEFAULT_VIRTUAL_ROUTER_ID = 0x%lx", i, attr->value.oid);
 
                 break;
 
@@ -369,7 +369,7 @@ sai_status_t DashSai::getSwitchAttribute(
 
                 attr->value.oid = m_default1QBridgeId;
 
-                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID = %lx", i, attr->value.oid);
+                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_DEFAULT_1Q_BRIDGE_ID = 0x%lx", i, attr->value.oid);
 
                 break;
 
@@ -377,7 +377,7 @@ sai_status_t DashSai::getSwitchAttribute(
 
                 attr->value.oid = m_defaultCpuPortId;
 
-                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_CPU_PORT = %lx", i, attr->value.oid);
+                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_CPU_PORT = 0x%lx", i, attr->value.oid);
 
                 break;
 
@@ -385,7 +385,7 @@ sai_status_t DashSai::getSwitchAttribute(
 
                 attr->value.oid = m_defaultTrapGroup;
 
-                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_DEFAULT_TRAP_GROUP = %lx", i, attr->value.oid);
+                DASH_LOG_NOTICE("[%d] SAI_SWITCH_ATTR_DEFAULT_TRAP_GROUP = 0x%lx", i, attr->value.oid);
 
                 break;
 
@@ -623,7 +623,7 @@ bool DashSai::removeFromTable(
 
     if (range.first == range.second)
     {
-        DASH_LOG_ERROR("id: %ld not present in the table for deletion!", id);
+        DASH_LOG_ERROR("id: 0x%lx not present in the table for deletion!", id);
 
         return false;
     }
