@@ -205,7 +205,7 @@ class TestSaiVnetRoute:
         send_packet(dataplane, 0, vxlan_pkt, 10)
         time.sleep(0.5)
 
-        # Verify packets from port 1
+        # Verify packets from port 0
         assert verify_packet(dataplane, vxlan_exp_pkt, 0), "Packet not received on port 0"
 
     @pytest.mark.ptf
