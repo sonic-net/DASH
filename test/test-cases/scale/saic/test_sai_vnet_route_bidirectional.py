@@ -118,8 +118,7 @@ class TestSaiVnetRoute:
 
         # Verify no packets received
         print("\nVerifying drop...\n")
-        verify_no_other_packets(dataplane)
-
+        assert verify_no_other_packets(dataplane), "Packet are received"
 
         # Route match. send packets from each port, forward and receive packets on opposite ports
         # Send packet one
