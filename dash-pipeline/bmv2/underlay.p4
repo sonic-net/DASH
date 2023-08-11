@@ -2,6 +2,11 @@
 #include "dash_headers.p4"
 #include "dash_metadata.p4"
 
+// The values in this context have been sourced from the 'saiswitch.h' file and 
+// have been manually designated to maintain alignment with enum values specified in the SAI commit <d8d40b4>.
+#define SAI_PACKET_ACTION_DROP 0
+#define SAI_PACKET_ACTION_FORWARD 1
+
 control underlay(
       inout headers_t hdr
     , inout metadata_t meta
@@ -34,10 +39,10 @@ control underlay(
     }
 
     action pkt_act(bit<9> packet_action, bit<9> next_hop_id) {
-        if(packet_action == 0) {
+        if(packet_action == SAI_PACKET_ACTION_DROP) {
             /* Drops the packet */
             meta.dropped = true;
-        } else if (packet_action == 1) {
+        } else if (packet_action == SAI_PACKET_ACTION_FORWARD) {
             /* Forwards the packet on different/same port it arrived based on routing */
             set_nhop(next_hop_id);
         }

@@ -9,11 +9,12 @@ import time
 import pytest
 from saichallenger.common.sai_dataplane.utils.ptf_testutils import (send_packet,
                                                                     simple_udp_packet,
-                                                                    simple_vxlan_packet)
+                                                                    simple_vxlan_packet,
+                                                                    verify_packet,
+                                                                    verify_no_other_packets)
 
 import sys
 sys.path.append("../utils")
-import vnet2vnet_helper as dh
 current_file_dir = Path(__file__).parent
 
 # Constants
@@ -21,112 +22,6 @@ SWITCH_ID = 5
 
 # Simple, non-scaled configuration.
 # See README.md for details.
-
-TEST_VNET_ROUTE_BIDIRECTIONAL_CONFIG = {
-
-    "ENI_COUNT": 1,
-    "ACL_RULES_NSG": 1,
-    "ACL_TABLE_COUNT": 1,
-    "IP_PER_ACL_RULE": 1,
-    "IP_MAPPED_PER_ACL_RULE": 1,
-    "IP_ROUTE_DIVIDER_PER_ACL_RULE": 1,
-
-    'DASH_VIP': {
-        'vpe': {
-            'SWITCH_ID': '$SWITCH_ID',
-            'IPV4': "172.16.1.100"
-        }
-    },
-
-    'DASH_DIRECTION_LOOKUP': {
-        'dle': {
-            'SWITCH_ID': '$SWITCH_ID',
-            'VNI': 100,
-            'ACTION': 'SET_OUTBOUND_DIRECTION'
-        }
-    },
-
-    'DASH_ACL_GROUP': {
-        'in_acl_group_id': {
-            'ADDR_FAMILY': 'IPv4'
-        },
-        'out_acl_group_id': {
-            'ADDR_FAMILY': 'IPv4'
-        }
-    },
-
-    'DASH_VNET': {
-        'vnet': {
-            'VNI': 1000
-        }
-    },
-
-    'DASH_ENI': {
-        'eni': {
-            'ACL_GROUP': {
-                'INBOUND': {
-                    'STAGE1': '$in_acl_group_id_#{0}',
-                    'STAGE2': '$in_acl_group_id_#{0}',
-                    'STAGE3': '$in_acl_group_id_#{0}}',
-                    'STAGE4': '$in_acl_group_id_#{0}}',
-                    'STAGE5': '$in_acl_group_id_#{0}}'
-                },
-                'OUTBOUND': {
-                    'STAGE1': 0,
-                    'STAGE2': 0,
-                    'STAGE3': 0,
-                    'STAGE4': 0,
-                    'STAGE5': 0
-                }
-            },
-            'ADMIN_STATE': True,
-            'CPS': 10000,
-            'FLOWS': 10000,
-            'PPS': 100000,
-            'VM_UNDERLAY_DIP': "172.16.1.1",
-            'VM_VNI': 9,
-            'VNET_ID': '$vnet_#{0}'
-        }
-    },
-
-    'DASH_ENI_ETHER_ADDRESS_MAP': {
-        'eam': {
-            'SWITCH_ID': '$SWITCH_ID',
-            'MAC': "00:cc:cc:cc:00:00",
-            'ENI_ID': '$eni_#{0}'
-        }
-    },
-
-    'DASH_OUTBOUND_ROUTING': {
-        'ore': {
-            'SWITCH_ID': '$SWITCH_ID',
-            'ENI_ID': '$eni_#{0}',
-            'DESTINATION': "10.1.0.0/16",
-            'ACTION': 'ROUTE_VNET',
-            'DST_VNET_ID': '$vnet_#{0}'
-        }
-    },
-
-    'DASH_OUTBOUND_CA_TO_PA': {
-        'ocpe': {
-            'SWITCH_ID': '$SWITCH_ID',
-            'DST_VNET_ID': '$vnet_#{0}',
-            'DIP': "10.1.2.50",
-            'UNDERLAY_DIP': "172.16.1.20",
-            'OVERLAY_DMAC': "00:DD:DD:DD:00:00",
-            'USE_DST_VNET_VNI': True
-        }
-    },
-
-    'DASH_ACL_GROUP': {
-        'in_acl_group_id': {
-            'ADDR_FAMILY': 'IPv4'
-        },
-        'out_acl_group_id': {
-            'ADDR_FAMILY': 'IPv4'
-        }
-    }
-}
 
 @pytest.mark.ptf
 @pytest.mark.snappi
@@ -152,14 +47,81 @@ class TestSaiVnetRoute:
     @pytest.mark.snappi
     def test_vnet_route_packet_bidirectional_forwarding_with_route_match(self, dpu, dataplane):
         """Verify packet forwarding with route match"""
- 
-        """
-        Verify same config with high-rate traffic.
-        packets_per_flow=10 means that each possible packet path will be verified using 10 packet.
-        NOTE: For BMv2 we keep here PPS limitation
-        """
+
         dataplane.set_config()
 
+        # Route match, send packets from each port and drop packets on both ports.
+        # Send packet one
+        inner_pkt_one = simple_udp_packet(eth_dst = "02:02:02:02:02:02",
+                                      eth_src = "00:cc:cc:cc:00:00",
+                                      ip_dst  = "12.1.2.50",
+                                      ip_src  = "10.1.1.10")
+        vxlan_pkt_one = simple_vxlan_packet(eth_dst         = "00:00:02:03:04:05",
+                                        eth_src         = "00:00:05:06:06:06",
+                                        ip_dst          = "170.16.1.100",
+                                        ip_src          = "170.16.1.1",
+                                        udp_sport       = 11638,
+                                        with_udp_chksum = False,
+                                        vxlan_vni       = 100,
+                                        inner_frame     = inner_pkt_one)
+        
+        # Expected received packet one
+        inner_exp_pkt_one = simple_udp_packet(eth_dst = "00:DD:DD:DD:00:00",
+                                          eth_src = "00:cc:cc:cc:00:00",
+                                          ip_dst  = "12.1.2.50",
+                                          ip_src  = "10.1.1.10")
+        vxlan_exp_pkt_one = simple_vxlan_packet(eth_dst         = "00:00:00:00:00:00",
+                                            eth_src         = "00:00:00:00:00:00",
+                                            ip_dst          = "170.16.1.20",
+                                            ip_src          = "170.16.1.100",
+                                            udp_sport       = 0,
+                                            with_udp_chksum = False,
+                                            vxlan_vni       = 100,
+                                            vxlan_flags     = 0,
+                                            inner_frame     = inner_exp_pkt_one)
+        vxlan_exp_pkt_one['IP'].chksum = 0
+
+        # Send packet two
+        inner_pkt_two = simple_udp_packet(eth_dst = "00:00:00:09:03:14",
+                                      eth_src = "00:0a:04:06:06:06",
+                                      ip_dst  = "171.18.1.100",
+                                      ip_src  = "171.18.1.1")
+        vxlan_pkt_two = simple_vxlan_packet(eth_dst         = "00:0b:05:06:06:06",
+                                        eth_src         = "00:0a:05:06:06:06",
+                                        ip_dst          = "10.11.1.20",
+                                        ip_src          = "10.11.1.10",
+                                        udp_sport       = 11639,
+                                        with_udp_chksum = False,
+                                        vxlan_vni       = 100,
+                                        inner_frame     = inner_pkt_two)
+        
+        # Expected received packet two
+        inner_exp_pkt_two = simple_udp_packet(eth_dst = "00:BB:BB:BB:00:00",
+                                          eth_src = "00:0a:04:06:06:06",
+                                          ip_dst  = "171.18.1.100",
+                                          ip_src  = "171.18.1.1")
+        vxlan_exp_pkt_two = simple_vxlan_packet(eth_dst         = "00:00:00:00:00:00",
+                                            eth_src         = "00:00:00:00:00:00",
+                                            ip_dst          = "10.11.1.15",
+                                            ip_src          = "10.11.1.20",
+                                            udp_sport       = 0,
+                                            with_udp_chksum = False,
+                                            vxlan_vni       = 100,
+                                            vxlan_flags     = 0,
+                                            inner_frame     = inner_exp_pkt_two)
+        vxlan_exp_pkt_two['IP'].chksum = 0
+
+        # Send packets from both ports 
+        send_packet(dataplane, 0, vxlan_pkt_one, 10)
+        # time.sleep(0.5)
+        send_packet(dataplane, 1, vxlan_pkt_two, 20)
+
+        # Verify no packets received
+        print("\nVerifying drop...\n")
+        assert verify_no_other_packets(dataplane), "Packet are received"
+
+        # Route match. send packets from each port, forward and receive packets on opposite ports
+        # Send packet one
         inner_pkt_one = simple_udp_packet(eth_dst = "02:02:02:02:02:02",
                                       eth_src = "00:cc:cc:cc:00:00",
                                       ip_dst  = "10.1.2.50",
@@ -168,12 +130,28 @@ class TestSaiVnetRoute:
                                         eth_src         = "00:00:05:06:06:06",
                                         ip_dst          = "172.16.1.100",
                                         ip_src          = "172.16.1.1",
-                                        udp_sport       = 11639,
+                                        udp_sport       = 11638,
                                         with_udp_chksum = False,
                                         vxlan_vni       = 100,
                                         inner_frame     = inner_pkt_one)
         
-        # send_packet(dataplane, 1, vxlan_pkt, 111)
+        # Expected received packet one
+        inner_exp_pkt_one = simple_udp_packet(eth_dst = "00:DD:DD:DD:00:00",
+                                          eth_src = "00:cc:cc:cc:00:00",
+                                          ip_dst  = "10.1.2.50",
+                                          ip_src  = "10.1.1.10")
+        vxlan_exp_pkt_one = simple_vxlan_packet(eth_dst         = "00:00:00:00:00:00",
+                                            eth_src         = "00:00:00:00:00:00",
+                                            ip_dst          = "172.16.1.20",
+                                            ip_src          = "172.16.1.100",
+                                            udp_sport       = 0,
+                                            with_udp_chksum = False,
+                                            vxlan_vni       = 100,
+                                            vxlan_flags     = 0,
+                                            inner_frame     = inner_exp_pkt_one)
+        vxlan_exp_pkt_one['IP'].chksum = 0
+
+        # Send packet two
         inner_pkt_two = simple_udp_packet(eth_dst = "00:00:00:09:03:14",
                                       eth_src = "00:0a:04:06:06:06",
                                       ip_dst  = "172.19.1.100",
@@ -182,23 +160,36 @@ class TestSaiVnetRoute:
                                         eth_src         = "00:0a:05:06:06:06",
                                         ip_dst          = "10.10.2.20",
                                         ip_src          = "10.10.2.10",
-                                        udp_sport       = 11638,
+                                        udp_sport       = 11639,
                                         with_udp_chksum = False,
                                         vxlan_vni       = 60,
                                         inner_frame     = inner_pkt_two)
         
-        send_packet(dataplane, 0, vxlan_pkt_one, 111)
-        send_packet(dataplane, 1, vxlan_pkt_two, 777)
+        # Expected received packet two
+        inner_exp_pkt_two = simple_udp_packet(eth_dst = "00:BB:BB:BB:00:00",
+                                          eth_src = "00:0a:04:06:06:06",
+                                          ip_dst  = "172.19.1.100",
+                                          ip_src  = "172.19.1.1")
+        vxlan_exp_pkt_two = simple_vxlan_packet(eth_dst         = "00:00:00:00:00:00",
+                                            eth_src         = "00:00:00:00:00:00",
+                                            ip_dst          = "10.10.2.15",
+                                            ip_src          = "10.10.2.20",
+                                            udp_sport       = 0,
+                                            with_udp_chksum = False,
+                                            vxlan_vni       = 100,
+                                            vxlan_flags     = 0,
+                                            inner_frame     = inner_exp_pkt_two)
+        vxlan_exp_pkt_two['IP'].chksum = 0
 
-        time.sleep(10)
-        rows = dataplane.get_all_stats()
-        print("{}".format(rows[0].name))
-        print("Transmission_Frames : {}".format(rows[0].frames_tx))
-        print("Recieved_Frames : {}".format(rows[0].frames_rx))
-        print("{}".format(rows[1].name))
-        print("--------------------------")
-        print("Transmission_Frames : {}".format(rows[1].frames_tx))
-        print("Recieved_Frames : {}".format(rows[1].frames_rx))
+        # Send packets from both ports 
+        send_packet(dataplane, 0, vxlan_pkt_one, 10)
+        time.sleep(0.5)
+        send_packet(dataplane, 1, vxlan_pkt_two, 20)
+
+        # Verify received packets on specific ports
+        print("\nVerifying packets on both ports...\n")
+        assert verify_packet(dataplane, vxlan_exp_pkt_one, 1), "Packet not received on port 1"
+        assert verify_packet(dataplane, vxlan_exp_pkt_two, 0), "Packet not received on port 0"
 
     @pytest.mark.ptf
     @pytest.mark.snappi
