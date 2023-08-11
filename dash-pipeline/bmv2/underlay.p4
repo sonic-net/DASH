@@ -76,8 +76,9 @@ control underlay(
         }
 
         actions = {
-            /* Send packet on different/same port it arrived based on routing */
-            set_nhop;
+            // Processes a packet based on the specified packet action.
+            // Depending on the packet action, it either drops the packet or forwards it to the specified next-hop. 
+            pkt_act;
 
             /* Send packet on same port it arrived (echo) by default */
             @defaultonly def_act;
