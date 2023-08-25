@@ -9,6 +9,7 @@
 #include "dash_outbound.p4"
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"
+#include "underlay.p4"
 
 control dash_ingress(
       inout headers_t hdr
@@ -380,10 +381,6 @@ control dash_ingress(
 
     apply {
 
-        /* Send packet on same port it arrived (echo) by default */
-#ifdef TARGET_BMV2_V1MODEL
-        standard_metadata.egress_spec = standard_metadata.ingress_port;
-#endif // TARGET_BMV2_V1MODEL
 #ifdef TARGET_DPDK_PNA
 #ifdef DPDK_PNA_SEND_TO_PORT_FIX_MERGED
         // As of 2023-Jan-26, the version of the pna.p4 header file
@@ -411,6 +408,12 @@ control dash_ingress(
 
         /* Outer header processing */
 
+        /* Put VM's MAC in the direction agnostic metadata field */
+        meta.eni_addr = meta.direction == dash_direction_t.OUTBOUND  ?
+                                          hdr.inner_ethernet.src_addr :
+                                          hdr.inner_ethernet.dst_addr;
+
+        eni_ether_address_map.apply();
         if (meta.direction == dash_direction_t.OUTBOUND) {
             vxlan_decap(hdr);
         } else if (meta.direction == dash_direction_t.INBOUND) {
@@ -421,6 +424,8 @@ control dash_ingress(
                 }
             }
         }
+
+        /* At this point the processing is done on customer headers */
 
         meta.is_overlay_ip_v6 = 0;
         meta.ip_protocol = 0;
@@ -445,13 +450,6 @@ control dash_ingress(
             meta.dst_l4_port = hdr.udp.dst_port;
         }
 
-        /* At this point the processing is done on customer headers */
-
-        /* Put VM's MAC in the direction agnostic metadata field */
-        meta.eni_addr = meta.direction == dash_direction_t.OUTBOUND  ?
-                                          hdr.ethernet.src_addr :
-                                          hdr.ethernet.dst_addr;
-        eni_ether_address_map.apply();
         eni.apply();
         if (meta.eni_data.admin_state == 0) {
             deny();
@@ -467,6 +465,19 @@ control dash_ingress(
         } else if (meta.direction == dash_direction_t.INBOUND) {
             inbound.apply(hdr, meta);
         }
+
+        /* Underlay routing */
+        meta.dst_ip_addr = (bit<128>)hdr.ipv4.dst_addr;
+        underlay.apply(
+              hdr
+            , meta
+    #ifdef TARGET_BMV2_V1MODEL
+            , standard_metadata
+    #endif // TARGET_BMV2_V1MODEL
+    #ifdef TARGET_DPDK_PNA
+            , istd
+    #endif // TARGET_DPDK_PNA        
+        );
 
         if (meta.meter_policy_en == 1) {
             meter_policy.apply();

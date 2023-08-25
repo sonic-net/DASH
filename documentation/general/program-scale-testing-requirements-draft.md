@@ -193,8 +193,8 @@ integrators to track and test the designs in a common manner.
         expect more TCP and in fact in some cases we meter UDP as a
         potential source of DoS.
 
-    -   Connection aging set to 1 sec and requires each connection or
-        bi-directional flow to receive one packet every second in each
+    -   Connection aging set to 5 sec and requires each connection or
+        bi-directional flow to receive one packet every 4.9 seconds in each
         direction at a size that will fill up the links to near 100% in
         conjunction with the dynamically setup connection traffic. For
         this to be run successfully it may take a few runs as each TCP
@@ -204,9 +204,9 @@ integrators to track and test the designs in a common manner.
         seen that meets the policy for the bi-directional flow setup.
         When using this in CPS testing, we will send a total of 6
         packets to match TCP to make things more balanced. UDP
-        bi-directional flows will be aged within 1 second after
+        bi-directional flows will be aged within 5 second after
         receiving the last packet. I would set all UDP bi-directional
-        flows to 0.5 - 1.0 second aging to ensure that we do not inflate
+        flows to 5 seconds aging to ensure that we do not inflate
         the connection table over time.
 
     -   One packet should be sent in each direction to be able to keep
@@ -214,7 +214,7 @@ integrators to track and test the designs in a common manner.
         to a minimum that allows 6 CPS packets at maximum rate and at
         least one packet on each of the active connections in both
         directions that also allows for close to 100% link utilization
-        while not exceeding the TCP aging time of 1 sec.
+        while not exceeding the TCP aging time of 5 sec.
 
     -   TCP connection is established and terminated without any data
         packets.
@@ -228,19 +228,19 @@ integrators to track and test the designs in a common manner.
     saturated at 100Gbps for the duration of test runtime. At the same
     time we want as close to 100Gbps without losing packets.
 
--   Inactivity based aging timer of 1 second.
+-   Inactivity based aging timer of 5 second.
 
     -   All TCP connections should be deleted from the table after the
         test completes.
 
     -   The connection table should therefore be zero.
 
-    -   All UDP bi-directional flows need to age out before the 1 second
+    -   All UDP bi-directional flows need to age out before the 5 second
         interval to allow for new UDP bi-directional flows to be
         established. If everything works as advertised, we should never
-        see the connection table go above the 8M connections. If we do
+        see the connection table go above the 32M connections. If we do
         then it is likely that UDP bi-directional flows were not aged
-        within the 1 second interval. To check this, we need to see a
+        within the 5 second interval. To check this, we need to see a
         high water counter for maximum connection table size.
 
 ## Feature Requirements
@@ -294,19 +294,24 @@ The following scale of policies and routes are at minimum required to be
 configured during validation and test plan needs to be executed covering
 both scenarios:
 
-|               | per ENI    | 200G (DPU)   | 400G  | 800G  | 1.6T (smart switch) |
-|---------------|------------|--------------|-------|-------|-------|
-| VNETs         |            | 1024         | 2048  | 4096  |  8192 |
-| ENIs          |            | 64           | 128   | 256   |  512  |
-| Routes        | 100K       | 6.4M         | 12.8M | 25.6M | 51.2M |
-| NSGs          | 5in + 5out | 640          | 1280  | 2560  |  5120 |
-| ACLs prefixes | 10x100K    | 64M          | 128M  | 256M  | 512M  |
-| ACLs Ports    | 10x10K     | 6.4M         | 12.8M | 25.6M | 51.2M |
-| Mappings (CA to PA)     | 160K       | 10M          | 20M   | 40M   | 80M   |
-| Act Con       | 500K (bidir w/ connection pool capable of oversubscription) | 32M          | 64M  | 128M  | 256M  |
-| CPS           |            | 3.75M        | 7.5M  | 15M   | 30M   |
-| bg flows TCP  |            | 15M  (bidir w/ connection pool capable of oversubscription)  |  30M   | 60M    |  120M   |
-| bg flows UDP  |            | 15M  (bidir w/ connection pool capable of oversubscription)  | 30M    | 60M    | 120M    |
+|                     | per ENI    | 200G (DPU)  | 400G  | 800G  | 1.6T (smart switch) |
+|---------------------|------------|-------------|-------|-------|-------|
+| VNETs               |            | 1024        | 2048  | 4096  |  8192 |
+| ENIs                |            | 32          | 64    | 128   |  256  |
+| Outbound Routes     | 100K       | 3.2M        | 6.4M  | 12.8M | 25.6M |
+| Inbound Routes      |  10K       | 320K        | 640K  | 1.28M | 2.56M |
+| NSGs                | 5in + 5out | 320         | 640   | 1280  | 2560  |
+| ACLs prefixes       | 10x100K    | 32MM        | 64M   | 128M  | 256M  |
+| ACLs Ports          | 10x10K     | 3.2M        | 6.4M  | 12.8M | 25.6M |
+| Mappings (CA to PA) | NA[^1]     | 8M          | 16M   | 32M   | 64M   |
+| Act Con             | 1M         | 32M[^2]     | 64M   | 128M  | 256M  |
+| CPS                 |            | 3M          | 6M    | 12M   | 24M   |
+| bg flows TCP        |            | 15M[^2]     | 30M   | 60M   | 120M  |
+| bg flows UDP        |            | 15M[^2]     | 30M   | 60M   | 120M  |
+
+
+[^1]: per ASIC numbers, can be distributed in any way to each ENI
+[^2]: flows are bidir w/ connection pool capable of oversubscription
 
 - ACL rules per NSG = 1000
 - Prefixes per ACL rule = 100
