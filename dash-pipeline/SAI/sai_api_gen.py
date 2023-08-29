@@ -357,7 +357,7 @@ def get_uniq_sai_api(sai_api):
     sai_api[TABLES_TAG] = tables
     return sai_api
 
-# don't write content to file if file alreay exists
+# don't write content to file if file already exists
 # and the content is the same, this will not touch
 # the file and let make utilize this
 def write_if_different(file,content):
