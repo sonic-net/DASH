@@ -171,19 +171,5 @@
             "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS_OVERRIDE",
             "False"
         ]
-    },
-    {
-        "name": "route_entry_1",
-        "op": "create",
-        "type": "SAI_OBJECT_TYPE_ROUTE_ENTRY",
-        "key": {
-            "switch_id": "$SWITCH_ID",
-            "vr_id": "10",
-            "destination": "0.0.0.0/0"
-        },
-        "attributes": [
-            "SAI_ROUTE_ENTRY_ATTR_NEXT_HOP_ID",
-            "1"
-        ]
     }
 ]
