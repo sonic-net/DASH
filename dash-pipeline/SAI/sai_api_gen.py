@@ -357,6 +357,19 @@ def get_uniq_sai_api(sai_api):
     sai_api[TABLES_TAG] = tables
     return sai_api
 
+# don't write content to file if file already exists
+# and the content is the same, this will not touch
+# the file and let make utilize this
+def write_if_different(file,content):
+    if os.path.isfile(file) == True:
+        o = open(file, "r")
+        data = o.read()
+        o.close()
+        if data == content:
+            return # nothing to change, file is up to date
+    with open(file, 'w') as o:
+        o.write(content)
+
 def write_sai_impl_files(sai_api):
     env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
     env.add_extension('jinja2.ext.loopcontrols')
@@ -367,16 +380,14 @@ def write_sai_impl_files(sai_api):
     else:
         header_prefix = ""
     sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'], header_prefix = header_prefix)
-    with open('./lib/sai' + sai_api['app_name'].replace('_', '') + '.cpp', 'w') as o:
-        o.write(sai_impl_str)
+    write_if_different('./lib/sai' + sai_api['app_name'].replace('_', '') + '.cpp',sai_impl_str)
 
 def write_sai_makefile(sai_api_name_list, sai_api_full_name_list):
     env = Environment(loader=FileSystemLoader('.'))
     makefile_tm = env.get_template('/templates/Makefile.j2')
     makefile_str = makefile_tm.render(api_names = sai_api_name_list)
 
-    with open('./lib/Makefile', 'w') as o:
-        o.write(makefile_str)
+    write_if_different('./lib/Makefile',makefile_str)
 
 def write_sai_fixed_api_files(sai_api_full_name_list):
     env = Environment(loader=FileSystemLoader('.'))
@@ -386,8 +397,7 @@ def write_sai_fixed_api_files(sai_api_full_name_list):
         sai_impl_tm = env.get_template('/templates/%s.j2' % filename)
         sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'], api_names = sai_api_full_name_list)
 
-        with open('./lib/%s' % filename, 'w') as o:
-            o.write(sai_impl_str)
+        write_if_different('./lib/%s' % filename,sai_impl_str)
 
 
 def write_sai_files(sai_api):
@@ -401,8 +411,7 @@ def write_sai_files(sai_api):
     sai_header_tm = env.get_template('templates/saiapi.h.j2')
     sai_header_str = sai_header_tm.render(sai_api = sai_api)
 
-    with open('./SAI/experimental/saiexperimental' + sai_api['app_name'].replace('_', '') + '.h', 'w') as o:
-        o.write(sai_header_str)
+    write_if_different('./SAI/experimental/saiexperimental' + sai_api['app_name'].replace('_', '') + '.h',sai_header_str)
 
     # The SAI Extensions
     with open('./SAI/experimental/saiextensions.h', 'r') as f:
@@ -423,8 +432,7 @@ def write_sai_files(sai_api):
 
         new_lines.append(line)
 
-    with open('./SAI/experimental/saiextensions.h', 'w') as f:
-        f.write(''.join(new_lines))
+    write_if_different('./SAI/experimental/saiextensions.h',''.join(new_lines))
 
     # The SAI Type Extensions
     with open('./SAI/experimental/saitypesextensions.h', 'r') as f:
@@ -441,8 +449,7 @@ def write_sai_files(sai_api):
 
         new_lines.append(line)
 
-    with open('./SAI/experimental/saitypesextensions.h', 'w') as f:
-        f.write(''.join(new_lines))
+    write_if_different('./SAI/experimental/saitypesextensions.h',''.join(new_lines))
 
     # The SAI object struct for entries
     with open('./SAI/inc/saiobject.h', 'r') as f:
@@ -466,8 +473,7 @@ def write_sai_files(sai_api):
 
         new_lines.append(line)
 
-    with open('./SAI/inc/saiobject.h', 'w') as f:
-        f.write(''.join(new_lines))
+    write_if_different('./SAI/inc/saiobject.h',''.join(new_lines))
 
 
 # CLI
@@ -546,8 +552,7 @@ for line in lines:
         new_lines = new_lines[:-1]
     new_lines.append(line)
 
-with open('./SAI/experimental/saitypesextensions.h', 'w') as f:
-    f.write(''.join(new_lines))
+write_if_different('./SAI/experimental/saitypesextensions.h',''.join(new_lines))
 
 
 write_sai_makefile(sai_api_name_list, sai_api_full_name_list)
