@@ -257,6 +257,30 @@ acl_group = Table(
     ]
 )
 
+def set_src_tag(tag_map: Annotated[int, 32]):
+    meta.src_tag_map = tag_map
+
+src_tag = Table(
+    key = {
+        "meta.src_ip_addr" : LPM
+    },
+    actions = [
+       set_src_tag
+    ]
+)
+
+def set_dst_tag(tag_map: Annotated[int, 32]):
+    meta.dst_tag_map = tag_map
+
+dst_tag = Table(
+    key = {
+        "meta.dst_ip_addr" : LPM
+    },
+    actions = [
+       set_dst_tag
+    ]
+)
+
 def apply():
 
     if vip.apply()["hit"]:
@@ -312,6 +336,9 @@ def apply():
     if meta.eni_data.admin_state == 0:
         deny()
     acl_group.apply()
+
+    src_tag.apply()
+    dst_tag.apply()
 
     if meta.direction == dash_direction_t.OUTBOUND:
         outbound_apply()

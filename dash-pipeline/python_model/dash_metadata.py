@@ -67,6 +67,8 @@ class metadata_t:
     mapping_meter_class          :  Annotated[int, 16]
     meter_class                  :  Annotated[int, 16]
     meter_bucket_index           :  Annotated[int, 32]
+    src_tag_map                  :  Annotated[int, 32]
+    dst_tag_map                  :  Annotated[int, 32]
 
     def __init__(self):
         self.encap_data     = encap_data_t()

@@ -7,6 +7,8 @@ def set_acl_outcome(allow: Annotated[int, 1], terminate: Annotated[int, 1]):
 acl = Table(
     key = {
         "meta.acl_group_id" : EXACT,
+        "meta.dst_tag_map"  : TERNARY,
+        "meta.src_tag_map"  : TERNARY,
         "meta.src_ip_addr"  : TERNARY_LIST,
         "meta.dst_ip_addr"  : TERNARY_LIST,
         "meta.ip_protocol"  : TERNARY_LIST,
