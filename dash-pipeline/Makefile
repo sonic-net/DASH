@@ -169,7 +169,7 @@ DOCKER_RUN_SAITHRIFT_BLDR =\
 .PHONY:sai
 sai: sai-headers sai-meta libsai
 
-sai-headers: p4 docker-saithrift-bldr-image-exists
+sai-headers: p4 docker-saithrift-bldr-image-exists | SAI/SAI
 	@echo "Generate SAI library headers and implementation..."
 	mkdir -p SAI/lib
 	$(DOCKER_RUN) \
@@ -213,7 +213,7 @@ libsai-clean:
 	rm -rf SAI/lib/*
 
 .PHONY:sai-clean
-sai-clean: libsai-clean saithrift-server-clean
+sai-clean: SAI/SAI libsai-clean saithrift-server-clean
 	@echo "Restoring SAI subdirectories to baseline..."
 	rm -rf SAI/SAI/inc SAI/SAI/experimental SAI/SAI/meta
 	cd SAI/SAI && git checkout -- inc experimental meta
