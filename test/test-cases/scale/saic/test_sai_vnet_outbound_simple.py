@@ -139,8 +139,6 @@ class TestSaiVnetOutbound:
     def test_vnet_inbound_simple_packet_modification(self, dpu, dataplane):
         """Verify proper packet transformation."""
 
-        dataplane.set_config()
-
         SRC_VM_IP = "10.1.1.10"
         OUTER_SMAC = "00:00:05:06:06:06"
         OUR_MAC = "00:00:02:03:04:05"
