@@ -73,7 +73,7 @@ def set_eni_attrs(cps                : Annotated[int, 32],
                   flows              : Annotated[int, 32],
                   admin_state        : Annotated[int, 1],
                   vm_underlay_dip    : Annotated[int, 32],
-                  vm_vni             : Annotated[int, 24],
+                  vm_vni             : Annotated[int, 24, {TYPE : "sai_uint32_t"}],
                   vnet_id            : Annotated[int, 16],
                   v4_meter_policy_id : Annotated[int, 16],
                   v6_meter_policy_id : Annotated[int, 16],
@@ -199,7 +199,7 @@ inbound_routing = Table(
     }
 )
 
-def check_ip_addr_family(ip_addr_family: Annotated[int, 32]):
+def check_ip_addr_family(ip_addr_family: Annotated[int, 32, {TYPE : "sai_ip_addr_family_t", ISRESOURCETYPE : True}]):
     if ip_addr_family == 0:
         if meta.is_overlay_ip_v6 == 1:
             meta.dropped = True
@@ -248,9 +248,9 @@ MAX_METER_BUCKETS = 262144
 meter_bucket_inbound  = byte_counter(MAX_METER_BUCKETS)
 meter_bucket_outbound = byte_counter(MAX_METER_BUCKETS)
 
-def meter_bucket_action(outbound_bytes_counter : Annotated[int, 64],
-                        inbound_bytes_counter  : Annotated[int, 64],
-                        meter_bucket_index     : Annotated[int, 32]):
+def meter_bucket_action(outbound_bytes_counter : Annotated[int, 64, {TYPE : "sai_uint64_t", ISREADONLY : True}],
+                        inbound_bytes_counter  : Annotated[int, 64, {TYPE : "sai_uint64_t", ISREADONLY : True}],
+                        meter_bucket_index     : Annotated[int, 32, {TYPE : "sai_uint32_t", SKIPATTR : True}]):
     # read only counters for SAI api generation only
     meta.meter_bucket_index = meter_bucket_index
 
@@ -292,7 +292,7 @@ eni_ether_address_map = Table(
     }
 )
 
-def set_acl_group_attrs(ip_addr_family: Annotated[int, 32]):
+def set_acl_group_attrs(ip_addr_family: Annotated[int, 32, {TYPE : "sai_ip_addr_family_t", ISRESOURCETYPE : True}]):
     if ip_addr_family == 0:
         if meta.is_overlay_ip_v6 == 1:
             meta.dropped = True
