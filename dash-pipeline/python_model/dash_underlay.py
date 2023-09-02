@@ -1,5 +1,6 @@
 from dash_headers import *
 from __table import *
+from dash_api_hints import *
 
 # The values in this context have been sourced from the 'saiswitch.h' file and 
 # have been manually designated to maintain alignment with enum values specified in the SAI commit <d8d40b4>.
@@ -31,7 +32,13 @@ underlay_routing = Table(
         pkt_act,
         def_act
     ],
-    default_action=def_act
+    default_action=def_act,
+
+    api_hints = {
+        API_NAME   : "route",
+        "meta.dip" : {SAI_KEY_NAME : "destination"},
+        def_act    : {DEFAULT_ONLY : True}
+    }
 )
 
 def underlay_apply():
