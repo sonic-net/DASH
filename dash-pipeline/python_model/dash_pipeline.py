@@ -300,7 +300,7 @@ def set_acl_group_attrs(ip_addr_family: Annotated[int, 32, {TYPE : "sai_ip_addr_
         if meta.is_overlay_ip_v6 == 0:
             meta.dropped = True
 
-acl_group = Table(
+dash_acl_group = Table(
     key = {
         "meta.stage1_dash_acl_group_id" : EXACT
     },
@@ -367,7 +367,7 @@ def apply():
     eni.apply()
     if meta.eni_data.admin_state == 0:
         deny()
-    acl_group.apply()
+    dash_acl_group.apply()
 
     if meta.direction == dash_direction_t.OUTBOUND:
         outbound_apply()

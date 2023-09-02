@@ -79,7 +79,7 @@ def route_service_tunnel(is_overlay_dip_v4_or_v6      : Annotated[int, 1],
     meta.encap_data.service_tunnel_key = tunnel_key
     set_route_meter_attrs(meter_policy_en, meter_class)
 
-routing = Table(
+outbound_routing = Table(
     key = {
         "meta.eni_id"           : EXACT,
         "meta.is_overlay_ip_v6" : EXACT,
@@ -113,7 +113,7 @@ def set_tunnel_mapping(underlay_dip         : Annotated[int, 32],
     meta.mapping_meter_class = meter_class
     meta.mapping_meter_class_override = meter_class_override
 
-ca_to_pa = Table(
+outbound_ca_to_pa = Table(
     key = {
         "meta.dst_vnet_id"       : EXACT,
         "meta.is_lkup_dst_ip_v6" : EXACT,
@@ -191,10 +191,10 @@ def outbound_apply():
     meta.lkup_dst_ip_addr = meta.dip
     meta.is_lkup_dst_ip_v6 = meta.is_overlay_ip_v6
 
-    action_run = routing.apply()["action_run"]
+    action_run = outbound_routing.apply()["action_run"]
 
     if action_run == route_vnet_direct or action_run == route_vnet:
-        ca_to_pa.apply()
+        outbound_ca_to_pa.apply()
         vnet.apply()
         vxlan_encap(meta.encap_data.underlay_dmac,
                     meta.encap_data.underlay_smac,

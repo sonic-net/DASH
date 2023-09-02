@@ -17,7 +17,7 @@ def deny_and_continue():
     meta.acl_outcome_allow = 0
     meta.acl_outcome_terminate = 0
 
-acl = Table(
+dash_acl_rule = Table(
     key = {
         "meta.dash_acl_group_id" : EXACT,
         "meta.sip"          : TERNARY_LIST,
@@ -52,7 +52,7 @@ def acl_apply():
     for group_id in group_ids:
         if group_id != 0:
             meta.dash_acl_group_id = group_id
-            acl.apply()
+            dash_acl_rule.apply()
             if meta.acl_outcome_terminate:
                 break
 

@@ -24,7 +24,7 @@ def def_act():
     standard_metadata.egress_spec = standard_metadata.ingress_port
 
 # TODO: To add structural annotations (example: @Sai[skipHeaderGen=true])
-underlay_routing = Table(
+route = Table(
     key = {
         "meta.dip" : LPM
     },
@@ -42,4 +42,4 @@ underlay_routing = Table(
 )
 
 def underlay_apply():
-    underlay_routing.apply()
+    route.apply()
