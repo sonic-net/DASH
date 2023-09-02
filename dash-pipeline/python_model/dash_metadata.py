@@ -44,14 +44,14 @@ class metadata_t:
     appliance_id                 :  Annotated[int, 8]
     is_overlay_ip_v6             :  Annotated[int, 1]
     is_lkup_dst_ip_v6            :  Annotated[int, 1]
-    ip_protocol                  :  Annotated[int, 8]
-    dst_ip_addr                  :  Annotated[int, IPv4ORv6Address_size]
-    src_ip_addr                  :  Annotated[int, IPv4ORv6Address_size]
+    protocol                     :  Annotated[int, 8]
+    dip                          :  Annotated[int, IPv4ORv6Address_size]
+    sip                          :  Annotated[int, IPv4ORv6Address_size]
     lkup_dst_ip_addr             :  Annotated[int, IPv4ORv6Address_size]
     conntrack_data               :  conntrack_data_t
-    src_l4_port                  :  Annotated[int, 16]
-    dst_l4_port                  :  Annotated[int, 16]
-    acl_group_id                 :  Annotated[int, 16]
+    src_port                     :  Annotated[int, 16]
+    dst_port                     :  Annotated[int, 16]
+    dash_acl_group_id            :  Annotated[int, 16]
     acl_outcome_allow            :  Annotated[int, 1]
     acl_outcome_terminate        :  Annotated[int, 1]
     stage1_dash_acl_group_id     :  Annotated[int, 16]
@@ -67,8 +67,6 @@ class metadata_t:
     mapping_meter_class          :  Annotated[int, 16]
     meter_class                  :  Annotated[int, 16]
     meter_bucket_index           :  Annotated[int, 32]
-    src_tag_map                  :  Annotated[int, 32]
-    dst_tag_map                  :  Annotated[int, 32]
 
     def __init__(self):
         self.encap_data     = encap_data_t()

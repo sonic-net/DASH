@@ -41,8 +41,8 @@ def vxlan_encap(underlay_dmac : Annotated[int, 48],
     hdr.ipv4.frag_offset = 0
     hdr.ipv4.ttl = 64
     hdr.ipv4.protocol = UDP_PROTO
-    hdr.ipv4.dst_addr = underlay_dip
-    hdr.ipv4.src_addr = underlay_sip
+    hdr.ipv4.dip = underlay_dip
+    hdr.ipv4.sip = underlay_sip
     hdr.ipv4.hdr_checksum = 0
 
     hdr.udp = udp_t()

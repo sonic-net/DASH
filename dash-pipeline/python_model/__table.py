@@ -45,12 +45,13 @@ def _winning_criteria_PREFIX_LEN(a, b, key):
     return a[lpm_key]["prefix_len"] > b[lpm_key]["prefix_len"]
 
 class Table:
-    def __init__(self, key, actions, default_action=NoAction, default_params=[]):
+    def __init__(self, key, actions, default_action=NoAction, default_params=[], api_hints={}):
         self.entries = []
         self.key = key
         self.actions = actions
         self.default_action = default_action
         self.default_params = default_params
+        self.api_hints = api_hints
         self.lock = Lock()
 
     def insert(self, entry):

@@ -2,7 +2,7 @@ from scapy.all import *
 from __main import *
 
 vip.insert({
-    "hdr.ipv4.dst_addr" : 0xC0A80A0F,
+    "hdr.ipv4.dip" : 0xC0A80A0F,
     "action"            : accept,
     "params"            : []
 })
@@ -28,7 +28,7 @@ eni.insert({
 routing.insert({
     "meta.eni_id"           : 12,
     "meta.is_overlay_ip_v6" : 1,
-    "meta.dst_ip_addr"      : {
+    "meta.dip"      : {
         "value"      : 0xABCD1234123412341234123412341234,
         "prefix_len" : 16
     },
@@ -67,32 +67,32 @@ appliance.insert({
 })
 
 acl.insert({
-    "meta.acl_group_id" : 1,
-    "meta.src_ip_addr"  : [
+    "meta.dash_acl_group_id" : 1,
+    "meta.sip"  : [
         {
             "value" : 0,
             "mask"  : 0
         }
     ],
-    "meta.dst_ip_addr"  : [
+    "meta.dip"  : [
         {
             "value" : 0,
             "mask"  : 0
         }
     ],
-    "meta.src_l4_port"  : [
+    "meta.src_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.dst_l4_port"  : [
+    "meta.dst_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.ip_protocol"  : [
+    "meta.protocol"  : [
         {
             "value" : 0,
             "mask"  : 0
@@ -104,32 +104,32 @@ acl.insert({
 })
 
 acl.insert({
-    "meta.acl_group_id" : 2,
-    "meta.src_ip_addr"  : [
+    "meta.dash_acl_group_id" : 2,
+    "meta.sip"  : [
         {
             "value" : 0,
             "mask"  : 0
         }
     ],
-    "meta.dst_ip_addr"  : [
+    "meta.dip"  : [
         {
             "value" : 0,
             "mask"  : 0
         }
     ],
-    "meta.src_l4_port"  : [
+    "meta.src_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.dst_l4_port"  : [
+    "meta.dst_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.ip_protocol"  : [
+    "meta.protocol"  : [
         {
             "value" : 0,
             "mask"  : 0
@@ -143,7 +143,7 @@ acl.insert({
 inbound_routing.insert({
     "meta.eni_id"       : 12,
     "hdr.vxlan.vni"     : 45,
-    "hdr.ipv4.src_addr" : {
+    "hdr.ipv4.sip" : {
         "value" : 0,
         "mask"  : 0
     },

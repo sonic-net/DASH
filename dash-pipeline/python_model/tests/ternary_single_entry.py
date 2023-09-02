@@ -5,7 +5,7 @@ def default_action():
 
 outbound_routing = Table(
     key = {
-        "meta.ip_protocol" : EXACT,
+        "meta.protocol" : EXACT,
         "hdr.ipv4.ihl"     : TERNARY
     },
     actions = [],
@@ -19,7 +19,7 @@ def action0(a, b):
     print(b)
 
 outbound_routing.insert({
-    "meta.ip_protocol" : 246,
+    "meta.protocol" : 246,
     "hdr.ipv4.ihl"     : {
         "value": 0b0101,
         "mask" : 0b1111
@@ -30,7 +30,7 @@ outbound_routing.insert({
 })
 
 
-meta.ip_protocol = 246
+meta.protocol = 246
 hdr.ipv4.ihl = 0b0101
 
 outbound_routing.apply()

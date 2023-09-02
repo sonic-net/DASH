@@ -25,7 +25,7 @@ def def_act():
 # TODO: To add structural annotations (example: @Sai[skipHeaderGen=true])
 underlay_routing = Table(
     key = {
-        "meta.dst_ip_addr" : LPM
+        "meta.dip" : LPM
     },
     actions = [
         pkt_act,

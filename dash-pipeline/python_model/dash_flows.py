@@ -12,11 +12,11 @@ def flow_action_outbound(timer):
 flows = Table(
     key = {
         "meta.eni_id"       : EXACT,
-        "meta.src_ip_addr"  : EXACT,
-        "meta.dst_ip_addr"  : EXACT,
-        "meta.ip_protocol"  : EXACT,
-        "meta.src_l4_port"  : EXACT,
-        "meta.dst_l4_port"  : EXACT
+        "meta.sip"  : EXACT,
+        "meta.dip"  : EXACT,
+        "meta.protocol"  : EXACT,
+        "meta.src_port"  : EXACT,
+        "meta.dst_port"  : EXACT
     },
     actions = [
         flow_action_inbound,
