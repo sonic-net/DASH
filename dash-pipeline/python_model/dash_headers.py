@@ -1,5 +1,6 @@
 from typing import *
 from enum import Enum
+from inspect import *
 
 EthernetAddress_size = 48
 IPv4Address_size = 32
@@ -90,22 +91,26 @@ class ipv6_t:
 IPV6_HDR_SIZE = 40
 
 class headers_t:
+    ethernet       : ethernet_t
+    ipv4           : ipv4_t
+    ipv6           : ipv6_t
+    udp            : udp_t
+    tcp            : tcp_t
+    vxlan          : vxlan_t
+    nvgre          : nvgre_t
+    inner_ethernet : ethernet_t
+    inner_ipv4     : ipv4_t
+    inner_ipv6     : ipv6_t
+    inner_udp      : udp_t
+    inner_tcp      : tcp_t
+
     def __init__(self):
         self.reset()
 
     def reset(self):
-        self.ethernet       = None
-        self.ipv4           = None
-        self.ipv6           = None
-        self.udp            = None
-        self.tcp            = None
-        self.vxlan          = None
-        self.nvgre          = None
-        self.inner_ethernet = None
-        self.inner_ipv4     = None
-        self.inner_ipv6     = None
-        self.inner_udp      = None
-        self.inner_tcp      = None
+        annotations = get_annotations(type(self))
+        for k in annotations:
+            setattr(self, k, None)
 
 class dash_encapsulation_t(Enum):
     INVALID = 0
