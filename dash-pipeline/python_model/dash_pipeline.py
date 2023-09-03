@@ -174,7 +174,7 @@ pa_validation = Table(
     default_action = deny,
 
     api_hints = {
-        API_NAME : "dash_pa_validation"
+        API_NAME : "dash_pa_validation",
         deny     : {DEFAULT_ONLY : True}
     }
 )
