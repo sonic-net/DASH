@@ -199,7 +199,7 @@ inbound_routing = Table(
     }
 )
 
-def check_ip_addr_family(ip_addr_family: Annotated[int, 32, {TYPE : "sai_ip_addr_family_t", ISRESOURCETYPE : True}]):
+def check_ip_addr_family(ip_addr_family: Annotated[int, 32, {TYPE : "sai_ip_addr_family_t", ISRESOURCETYPE : "true"}]):
     if ip_addr_family == 0:
         if meta.is_overlay_ip_v6 == 1:
             meta.dropped = True
@@ -216,7 +216,7 @@ meter_policy = Table(
     ],
     api_hints = {
         API_NAME : "dash_meter",
-        ISOBJECT : True
+        ISOBJECT : "true"
     }
 )
 
@@ -236,8 +236,8 @@ meter_rule = Table(
 
     api_hints = {
         API_NAME               : "dash_meter",
-        ISOBJECT               : True,
-        "meta.meter_policy_id" : {TYPE : "sai_object_id_t", ISRESOURCETYPE : True, OBJECTS : "METER_POLICY"},
+        ISOBJECT               : "true",
+        "meta.meter_policy_id" : {TYPE : "sai_object_id_t", ISRESOURCETYPE : "true", OBJECTS : "METER_POLICY"},
         NoAction               : {DEFAULT_ONLY : True}
     }
 )
@@ -248,9 +248,9 @@ MAX_METER_BUCKETS = 262144
 meter_bucket_inbound  = byte_counter(MAX_METER_BUCKETS)
 meter_bucket_outbound = byte_counter(MAX_METER_BUCKETS)
 
-def meter_bucket_action(outbound_bytes_counter : Annotated[int, 64, {TYPE : "sai_uint64_t", ISREADONLY : True}],
-                        inbound_bytes_counter  : Annotated[int, 64, {TYPE : "sai_uint64_t", ISREADONLY : True}],
-                        meter_bucket_index     : Annotated[int, 32, {TYPE : "sai_uint32_t", SKIPATTR : True}]):
+def meter_bucket_action(outbound_bytes_counter : Annotated[int, 64, {TYPE : "sai_uint64_t", ISREADONLY : "true"}],
+                        inbound_bytes_counter  : Annotated[int, 64, {TYPE : "sai_uint64_t", ISREADONLY : "true"}],
+                        meter_bucket_index     : Annotated[int, 32, {TYPE : "sai_uint32_t", SKIPATTR : "true"}]):
     # read only counters for SAI api generation only
     meta.meter_bucket_index = meter_bucket_index
 
@@ -267,7 +267,7 @@ meter_bucket = Table(
 
     api_hints = {
         API_NAME : "dash_meter",
-        ISOBJECT : True,
+        ISOBJECT : "true",
         NoAction : {DEFAULT_ONLY : True}
     }
 )
@@ -292,7 +292,7 @@ eni_ether_address_map = Table(
     }
 )
 
-def set_acl_group_attrs(ip_addr_family: Annotated[int, 32, {TYPE : "sai_ip_addr_family_t", ISRESOURCETYPE : True}]):
+def set_acl_group_attrs(ip_addr_family: Annotated[int, 32, {TYPE : "sai_ip_addr_family_t", ISRESOURCETYPE : "true"}]):
     if ip_addr_family == 0:
         if meta.is_overlay_ip_v6 == 1:
             meta.dropped = True

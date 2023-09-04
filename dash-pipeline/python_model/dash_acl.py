@@ -35,7 +35,7 @@ dash_acl_rule = Table(
     default_action = deny,
     api_hints = {
         API_NAME                 : "dash_acl",
-        "meta.dash_acl_group_id" : {TYPE : "sai_object_id_t", ISRESOURCETYPE : True, OBJECTS : "SAI_OBJECT_TYPE_DASH_ACL_GROUP"}
+        "meta.dash_acl_group_id" : {TYPE : "sai_object_id_t", ISRESOURCETYPE : "true", OBJECTS : "SAI_OBJECT_TYPE_DASH_ACL_GROUP"}
     }
 )
 

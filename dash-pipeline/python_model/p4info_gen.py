@@ -64,6 +64,19 @@ def make_action_node(action, id):
         param_id += 1
         param_node["name"] = k
         param_node["bitwidth"] = annotations[k].__metadata__[0]
+        if len(annotations[k].__metadata__) > 1:
+            structured_annotations = annotations[k].__metadata__[1]
+            kvPairs_node = []
+            for s_a in structured_annotations:
+                s_a_node = {}
+                s_a_node["key"] = s_a
+                s_a_node["value"] = {"stringValue" : structured_annotations[s_a]}
+                kvPairs_node.append(s_a_node)
+            structuredAnnotations_node = [{
+                "name"       : "Sai",
+                "kvPairList" : {"kvPairs" : kvPairs_node}
+            }]
+            param_node["structuredAnnotations"] = structuredAnnotations_node
         params_node.append(param_node)
     action_node["params"] = params_node
     return action_node
