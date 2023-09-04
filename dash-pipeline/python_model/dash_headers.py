@@ -1,6 +1,6 @@
 from typing import *
-from enum import Enum
 from inspect import *
+from __dash_enum import *
 
 EthernetAddress_size = 48
 IPv4Address_size = 32
@@ -112,8 +112,7 @@ class headers_t:
         for k in annotations:
             setattr(self, k, None)
 
-class dash_encapsulation_t(Enum):
+class dash_encapsulation_t(dash_enum):
     INVALID = 0
     VXLAN   = 1
     NVGRE   = 2
-dash_encapsulation_t_size = 16

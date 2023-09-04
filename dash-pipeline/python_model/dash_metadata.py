@@ -1,6 +1,6 @@
 from dash_headers import *
 from typing import *
-from enum import Enum
+from __dash_enum import *
 
 class encap_data_t:
     vni                   :  Annotated[int, 24]
@@ -10,16 +10,15 @@ class encap_data_t:
     underlay_smac         :  Annotated[int, EthernetAddress_size]
     underlay_dmac         :  Annotated[int, EthernetAddress_size]
     overlay_dmac          :  Annotated[int, EthernetAddress_size]
-    dash_encapsulation    :  Annotated[int, dash_encapsulation_t_size]
+    dash_encapsulation    :  Annotated[int, 16]
     service_tunnel_key    :  Annotated[int, 24]
     original_overlay_sip  :  Annotated[int, IPv4Address_size]
     original_overlay_dip  :  Annotated[int, IPv4Address_size]
 
-class dash_direction_t(Enum):
+class dash_direction_t(dash_enum):
     INVALID   =  0
     OUTBOUND  =  1
     INBOUND   =  2
-dash_direction_t_size = 16
 
 class conntrack_data_t:
     allow_in  : bool
@@ -33,7 +32,7 @@ class eni_data_t:
 
 class metadata_t:
     dropped                      :  bool
-    direction                    :  Annotated[int, dash_direction_t_size]
+    direction                    :  Annotated[int, 16]
     encap_data                   :  encap_data_t
     eni_addr                     :  Annotated[int, EthernetAddress_size]
     vnet_id                      :  Annotated[int, 16]
