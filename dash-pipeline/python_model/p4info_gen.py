@@ -3,8 +3,7 @@ from __id_map import *
 from dash_api_hints import *
 import sys
 
-
-def get_sai_key_name(api_hints, k, default):
+def _get_sai_key_name(api_hints, k, default):
     sai_key_name: str
     try:
         sai_key_name = api_hints[k][SAI_KEY_NAME]
@@ -21,12 +20,53 @@ def _read_width(k):
         var_name = token
     return (get_annotations(container_type)[var_name].__metadata__)[0]
 
+def _get_str_annos_for_key(api_hints, k):
+    key_hints = api_hints.get(k, None)
+    if key_hints is None:
+        return None
+    str_annos = {}
+
+    for k in key_hints:
+        if k != SAI_KEY_NAME:
+            str_annos[k] = key_hints[k]
+
+    if len(str_annos) > 0:
+        return str_annos
+    else:
+        return None
+
+def _get_str_annos_for_table(table):
+    str_annos = {}
+    for k in table.api_hints:
+        if (k != API_NAME) and (not isfunction(k)) and (not(k in table.key)):
+            str_annos[k] = table.api_hints[k]
+    if len(str_annos) > 0:
+        return str_annos
+    else:
+        return None
+
+def _make_str_annos_node(str_annos):
+    kvPairs_node = []
+    for s_a in str_annos:
+        s_a_node = {}
+        s_a_node["key"] = s_a
+        s_a_node["value"] = {"stringValue" : str_annos[s_a]}
+        kvPairs_node.append(s_a_node)
+    str_annos_node = [{
+        "name"       : "Sai",
+        "kvPairList" : {"kvPairs" : kvPairs_node}
+    }]
+    return str_annos_node
+
 def make_table_node(table: Table, table_name):
     table_node = {}
 
     preamble_node = {}
     preamble_node["id"] = generate_id(table)
     preamble_node["name"] = table_name + "|" + table.api_hints[API_NAME]
+    str_annos = _get_str_annos_for_table(table)
+    if str_annos is not None:
+        preamble_node["structuredAnnotations"] = _make_str_annos_node(str_annos)
     table_node["preamble"] = preamble_node
 
     matchFields_node = []
@@ -35,9 +75,12 @@ def make_table_node(table: Table, table_name):
         match_field_node = {}
         match_field_node["id"] = match_field_id
         match_field_id += 1
-        match_field_node["name"] = k + ":" + get_sai_key_name(table.api_hints, k, k.split(".")[-1])
+        match_field_node["name"] = k + ":" + _get_sai_key_name(table.api_hints, k, k.split(".")[-1])
         match_field_node["bitwidth"] = _read_width(k)
         match_field_node["matchType"] = table.key[k].__name__
+        mf_str_annos = _get_str_annos_for_key(table.api_hints, k)
+        if mf_str_annos is not None:
+            match_field_node["structuredAnnotations"] = _make_str_annos_node(mf_str_annos)
         matchFields_node.append(match_field_node)
     table_node["matchFields"] = matchFields_node
 
@@ -65,18 +108,9 @@ def make_action_node(action, id):
         param_node["name"] = k
         param_node["bitwidth"] = annotations[k].__metadata__[0]
         if len(annotations[k].__metadata__) > 1:
-            structured_annotations = annotations[k].__metadata__[1]
-            kvPairs_node = []
-            for s_a in structured_annotations:
-                s_a_node = {}
-                s_a_node["key"] = s_a
-                s_a_node["value"] = {"stringValue" : structured_annotations[s_a]}
-                kvPairs_node.append(s_a_node)
-            structuredAnnotations_node = [{
-                "name"       : "Sai",
-                "kvPairList" : {"kvPairs" : kvPairs_node}
-            }]
-            param_node["structuredAnnotations"] = structuredAnnotations_node
+            str_annos = annotations[k].__metadata__[1]
+            str_annos_node = _make_str_annos_node(str_annos)
+            param_node["structuredAnnotations"] = str_annos_node
         params_node.append(param_node)
     action_node["params"] = params_node
     return action_node
