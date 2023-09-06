@@ -349,6 +349,7 @@ Please note that VNET to VNET is seen below.  VNET Peering is identical and no d
 ### Private Link
 
 ![PL](./images/sdn/sdn-packet-transforms-private-link.svg)
+> [!NOTE] Could we add the point thtat Inbound should create 2 flow entries, 1 IPv4 and 1 IPv6; how to handle double encap (2 headers) before the flow lookup - what is the logic?
 
 ### Private Link Service
 
