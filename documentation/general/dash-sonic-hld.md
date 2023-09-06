@@ -1514,4 +1514,4 @@ For the example configuration above, the following is a brief explanation of loo
 		g. Underlay DIP shall be 50.2.2.6 (from mapping), Underlay SIP shall be 55.1.2.3 (from ENI)
 		h. Third Action is Appliance Encap for id 22
 		i. Packet shall be encapsulated with Outer DIP as 100.8.1.2 and SIP as VIP of this originating appliance card with VNI of 101. 
-		j. Inbound flow shall be similar to PL and outer encap shall be of the SLB MUX and not of the NSG appliance.
+		j. Inbound flow shall be similar to PL and outer encap shall be of the SLB MUX and not of the NSG appliance.  (Inbound should create 2 flow entries, 1 IPv4 and 1 IPv6.  How to handle double encap (2 headers) before the flow lookup - could we explain the logic?
