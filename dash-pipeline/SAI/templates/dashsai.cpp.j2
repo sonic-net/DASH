@@ -455,6 +455,14 @@ sai_status_t DashSai::getPortAttribute(
 
                 break;
 
+            case SAI_PORT_ATTR_OPER_STATUS:
+
+                attr->value.s32 = SAI_PORT_OPER_STATUS_UP;
+
+                DASH_LOG_NOTICE("[%d] setting SAI_PORT_ATTR_OPER_STATUS=SAI_PORT_OPER_STATUS_UP for port %lx", i, port_id);
+
+                break;
+
             default:
 
                 if (getenv(DASH_USE_NOT_SUPPORTED))
