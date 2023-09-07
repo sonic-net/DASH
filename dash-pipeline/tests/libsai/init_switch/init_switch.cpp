@@ -1,6 +1,8 @@
-#include "utils.h"
-
 #include <iostream>
+
+extern "C" {
+#include <sai.h>
+}
 
 // Run this program to indirectly cause simple_switch_grpc to load its P4 pipeline
 
