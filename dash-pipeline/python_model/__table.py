@@ -1,6 +1,7 @@
 from inspect import *
 from __vars import *
 from threading import Lock
+from dash_api_hints import *
 
 def EXACT(entry_value, match_value, width):
     return entry_value == match_value
@@ -52,6 +53,9 @@ class Table:
         self.default_action = default_action
         self.default_params = default_params
         self.api_hints = api_hints
+        if (default_action is NoAction) and (NoAction not in self.actions):
+            self.actions.append(NoAction)
+            self.api_hints[NoAction] = {DEFAULT_ONLY : True}
         self.lock = Lock()
 
     def insert(self, entry):

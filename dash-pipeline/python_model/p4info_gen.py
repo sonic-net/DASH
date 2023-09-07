@@ -2,6 +2,7 @@ from __main import *
 from __id_map import *
 from dash_api_hints import *
 import sys
+from __jsonize import *
 
 def _get_sai_key_name(api_hints, k, default):
     sai_key_name: str
@@ -86,7 +87,12 @@ def make_table_node(table: Table, table_name):
 
     actionRefs_node = []
     for action in table.actions:
-        actionRefs_node.append({"id" : generate_id(action)})
+        actionRef_node = {}
+        actionRef_node["id"] = generate_id(action)
+        if action in table.api_hints:
+            actionRef_node["annotations"] = ["@defaultonly"]
+            actionRef_node["scope"] = "DEFAULT_ONLY"
+        actionRefs_node.append(actionRef_node)
     table_node["actionRefs"] = actionRefs_node
     return table_node
 
@@ -112,7 +118,8 @@ def make_action_node(action, id):
             str_annos_node = _make_str_annos_node(str_annos)
             param_node["structuredAnnotations"] = str_annos_node
         params_node.append(param_node)
-    action_node["params"] = params_node
+    if len(params_node) > 0:
+        action_node["params"] = params_node
     return action_node
 
 def get_dash_enum_members(e):
@@ -175,4 +182,8 @@ def make_p4info(ignore_tables):
 
 
 p4info = make_p4info([flows, appliance])
+
+
+jsonize("my_p4info.json", p4info)
+
 

@@ -32,8 +32,6 @@ route = Table(
         pkt_act,
         def_act
     ],
-    default_action=def_act,
-
     api_hints = {
         API_NAME   : "route",
         "meta.dip" : {SAI_KEY_NAME : "destination"},
