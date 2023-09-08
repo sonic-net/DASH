@@ -26,6 +26,30 @@ namespace dash
             sai_object_id_t switchIdQuery(
                     _In_ sai_object_id_t object_id);
 
+        public: // QUAD generic api implementation
+
+            sai_status_t create(
+                    _In_ sai_object_type_t objectType,
+                    _Out_ sai_object_id_t* objectId,
+                    _In_ sai_object_id_t switchId,
+                    _In_ uint32_t attr_count,
+                    _In_ const sai_attribute_t *attr_list);
+
+            sai_status_t remove(
+                    _In_ sai_object_type_t objectType,
+                    _In_ sai_object_id_t objectId);
+
+            sai_status_t set(
+                    _In_ sai_object_type_t objectType,
+                    _In_ sai_object_id_t objectId,
+                    _In_ const sai_attribute_t *attr);
+
+            sai_status_t get(
+                    _In_ sai_object_type_t objectType,
+                    _In_ sai_object_id_t objectId,
+                    _In_ uint32_t attr_count,
+                    _Inout_ sai_attribute_t *attr_list);
+
         public: // QUAD api implementation
 
             // switch

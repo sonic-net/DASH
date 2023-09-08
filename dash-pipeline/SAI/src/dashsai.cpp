@@ -655,3 +655,59 @@ bool DashSai::removeFromTable(
 
     return retCode == grpc::StatusCode::OK;
 }
+
+// QUAD generic api implementation
+
+sai_status_t DashSai::create(
+        _In_ sai_object_type_t objectType,
+        _Out_ sai_object_id_t* objectId,
+        _In_ sai_object_id_t switchId,
+        _In_ uint32_t attr_count,
+        _In_ const sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
+    DASH_CHECK_API_INITIALIZED();
+
+    DASH_LOG_ERROR("not implemented");
+
+    return SAI_STATUS_NOT_IMPLEMENTED;
+}
+
+sai_status_t DashSai::remove(
+        _In_ sai_object_type_t objectType,
+        _In_ sai_object_id_t objectId)
+{
+    DASH_LOG_ENTER();
+    DASH_CHECK_API_INITIALIZED();
+
+    DASH_LOG_ERROR("not implemented");
+
+    return SAI_STATUS_NOT_IMPLEMENTED;
+}
+
+sai_status_t DashSai::set(
+        _In_ sai_object_type_t objectType,
+        _In_ sai_object_id_t objectId,
+        _In_ const sai_attribute_t *attr)
+{
+    DASH_LOG_ENTER();
+    DASH_CHECK_API_INITIALIZED();
+
+    DASH_LOG_ERROR("not implemented");
+
+    return SAI_STATUS_NOT_IMPLEMENTED;
+}
+
+sai_status_t DashSai::get(
+        _In_ sai_object_type_t objectType,
+        _In_ sai_object_id_t objectId,
+        _In_ uint32_t attr_count,
+        _Inout_ sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
+    DASH_CHECK_API_INITIALIZED();
+
+    DASH_LOG_ERROR("not implemented");
+
+    return SAI_STATUS_NOT_IMPLEMENTED;
+}
