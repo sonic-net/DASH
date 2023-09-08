@@ -65,50 +65,6 @@ sai_switch_api_t dash_sai_switch_api_impl = {
     .switch_mdio_cl22_write = 0,
 };
 
-static sai_status_t dash_sai_get_port_attribute(
-        _In_ sai_object_id_t port_id,
-        _In_ uint32_t attr_count,
-        _Inout_ sai_attribute_t *attr_list)
-{
-    DASH_LOG_ENTER();
-
-    return dashSai->getPortAttribute(port_id, attr_count, attr_list);
-}
-
-sai_port_api_t dash_sai_port_api_impl = {
-    .create_port = 0,
-    .remove_port = 0,
-    .set_port_attribute = 0,
-    .get_port_attribute = dash_sai_get_port_attribute,
-    .get_port_stats = 0,
-    .get_port_stats_ext = 0,
-    .clear_port_stats = 0,
-    .clear_port_all_stats = 0,
-    .create_port_pool = 0,
-    .remove_port_pool = 0,
-    .set_port_pool_attribute = 0,
-    .get_port_pool_attribute = 0,
-    .get_port_pool_stats = 0,
-    .get_port_pool_stats_ext = 0,
-    .clear_port_pool_stats = 0,
-    .create_port_connector = 0,
-    .remove_port_connector = 0,
-    .set_port_connector_attribute = 0,
-    .get_port_connector_attribute = 0,
-    .create_port_serdes = 0,
-    .remove_port_serdes = 0,
-    .set_port_serdes_attribute = 0,
-    .get_port_serdes_attribute = 0,
-    .create_ports = 0,
-    .remove_ports = 0,
-    .set_ports_attribute = 0,
-    .get_ports_attribute = 0,
-    .create_port_serdess = 0,
-    .remove_port_serdess = 0,
-    .set_port_serdess_attribute = 0,
-    .get_port_serdess_attribute = 0,
-};
-
 sai_status_t sai_api_query(
         _In_ sai_api_t api,
         _Out_ void **api_method_table)

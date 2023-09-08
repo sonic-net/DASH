@@ -668,7 +668,7 @@ sai_status_t DashSai::create(
     DASH_LOG_ENTER();
     DASH_CHECK_API_INITIALIZED();
 
-    DASH_LOG_ERROR("not implemented");
+    DASH_LOG_ERROR("not implemented for object type %d", objectType);
 
     return SAI_STATUS_NOT_IMPLEMENTED;
 }
@@ -680,7 +680,7 @@ sai_status_t DashSai::remove(
     DASH_LOG_ENTER();
     DASH_CHECK_API_INITIALIZED();
 
-    DASH_LOG_ERROR("not implemented");
+    DASH_LOG_ERROR("not implemented for object type %d", objectType);
 
     return SAI_STATUS_NOT_IMPLEMENTED;
 }
@@ -693,7 +693,7 @@ sai_status_t DashSai::set(
     DASH_LOG_ENTER();
     DASH_CHECK_API_INITIALIZED();
 
-    DASH_LOG_ERROR("not implemented");
+    DASH_LOG_ERROR("not implemented for object type %d", objectType);
 
     return SAI_STATUS_NOT_IMPLEMENTED;
 }
@@ -707,7 +707,10 @@ sai_status_t DashSai::get(
     DASH_LOG_ENTER();
     DASH_CHECK_API_INITIALIZED();
 
-    DASH_LOG_ERROR("not implemented");
+    if (objectType == SAI_OBJECT_TYPE_PORT)
+        return getPortAttribute(objectId, attr_count, attr_list);
+
+    DASH_LOG_ERROR("not implemented for object type %d", objectType);
 
     return SAI_STATUS_NOT_IMPLEMENTED;
 }
