@@ -177,7 +177,7 @@ sai-headers: p4 docker-saithrift-bldr-image-exists | SAI/SAI
 		--name build_sai-$(USER) \
 		-u $(HOST_USER):$(HOST_GROUP) \
 		-w /SAI $(DOCKER_SAITHRIFT_BLDR_IMG) \
-	    ./generate_dash_api.sh
+		make
 
 sai-meta:
 	@echo "Generate SAI metadata..."
@@ -271,7 +271,7 @@ DOCKER_RUN_SAITHRIFT_SRVR =\
 
 run-saithrift-server:
 	$(DOCKER_RUN_SAITHRIFT_SRVR) \
-	./saiserver
+	bash -c './saiserver'
 
 kill-saithrift-server:
 	-docker kill dash-saithrift-server-$(USER)
