@@ -1,7 +1,3 @@
-# DASH libsai.so Makefile
-# THIS MAKEFILE IS AUTO-GENERATED FROM templates/Makefile.j2
-# DO NOT MODIFY
-
 CXXFLAGS_COMMON=
 CXXFLAGS_COMMON+= -ansi
 CXXFLAGS_COMMON+= -fPIC
@@ -58,7 +54,7 @@ SAI_OBJS_PATHS=$(addprefix $(SAI_DIR)/,$(SAI_OBJS))
 DASH_SAI_SRCS=$(wildcard *.cpp)
 DASH_SAI_OBJS=$(DASH_SAI_SRCS:.cpp=.o)
 
-%.o: %.cpp
+%.o: %.cpp $(wildcard *.h)
 	g++ $(SAI_INC) $(GXX_FLAGS) $(CXXFLAGS_COMMON) -c $< -o $@
 
 all: libsai.so

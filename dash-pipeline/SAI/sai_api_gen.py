@@ -382,17 +382,10 @@ def write_sai_impl_files(sai_api):
     sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'], header_prefix = header_prefix)
     write_if_different('./lib/sai' + sai_api['app_name'].replace('_', '') + '.cpp',sai_impl_str)
 
-def write_sai_makefile(sai_api_name_list, sai_api_full_name_list):
-    env = Environment(loader=FileSystemLoader('.'))
-    makefile_tm = env.get_template('/templates/Makefile.j2')
-    makefile_str = makefile_tm.render(api_names = sai_api_name_list)
-
-    write_if_different('./lib/Makefile',makefile_str)
-
 def write_sai_fixed_api_files(sai_api_full_name_list):
     env = Environment(loader=FileSystemLoader('.'))
 
-    for filename in ['utils.cpp', 'utils.h', 'saifixedapis.cpp', 'saiimpl.h', 'logger.h', 'logger.cpp', 'saidash.h', 'dashsai.h', 'dashsai.cpp', 'config.h', 'config.cpp']:
+    for filename in ['saifixedapis.cpp', 'saiimpl.h']:
         env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
         sai_impl_tm = env.get_template('/templates/%s.j2' % filename)
         sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'], api_names = sai_api_full_name_list)
@@ -555,7 +548,6 @@ for line in lines:
 write_if_different('./SAI/experimental/saitypesextensions.h',''.join(new_lines))
 
 
-write_sai_makefile(sai_api_name_list, sai_api_full_name_list)
 write_sai_fixed_api_files(sai_api_full_name_list)
 
 if args.print_sai_lib:
