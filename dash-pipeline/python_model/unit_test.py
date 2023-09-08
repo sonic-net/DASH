@@ -2,7 +2,7 @@ from scapy.all import *
 from __main import *
 
 vip.insert({
-    "hdr.ipv4.dip" : 0xC0A80A0F,
+    "hdr.ipv4.dst_addr" : 0xC0A80A0F,
     "action"            : accept,
     "params"            : []
 })
@@ -28,7 +28,7 @@ eni.insert({
 routing.insert({
     "meta.eni_id"           : 12,
     "meta.is_overlay_ip_v6" : 1,
-    "meta.dip"      : {
+    "meta.dst_ip_addr"      : {
         "value"      : 0xABCD1234123412341234123412341234,
         "prefix_len" : 16
     },
@@ -68,13 +68,13 @@ appliance.insert({
 
 acl.insert({
     "meta.dash_acl_group_id" : 1,
-    "meta.sip"  : [
+    "meta.src_ip_addr"  : [
         {
             "value" : 0,
             "mask"  : 0
         }
     ],
-    "meta.dip"  : [
+    "meta.dst_ip_addr"  : [
         {
             "value" : 0,
             "mask"  : 0
@@ -105,13 +105,13 @@ acl.insert({
 
 acl.insert({
     "meta.dash_acl_group_id" : 2,
-    "meta.sip"  : [
+    "meta.src_ip_addr"  : [
         {
             "value" : 0,
             "mask"  : 0
         }
     ],
-    "meta.dip"  : [
+    "meta.dst_ip_addr"  : [
         {
             "value" : 0,
             "mask"  : 0
@@ -143,7 +143,7 @@ acl.insert({
 inbound_routing.insert({
     "meta.eni_id"       : 12,
     "hdr.vxlan.vni"     : 45,
-    "hdr.ipv4.sip" : {
+    "hdr.ipv4.src_addr" : {
         "value" : 0,
         "mask"  : 0
     },

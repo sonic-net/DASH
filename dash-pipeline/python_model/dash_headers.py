@@ -32,8 +32,8 @@ class ipv4_t:
     ttl            : Annotated[int, 8]
     protocol       : Annotated[int, 8]
     hdr_checksum   : Annotated[int, 16]
-    sip            : Annotated[int, IPv4Address_size]
-    dip            : Annotated[int, IPv4Address_size]
+    src_addr       : Annotated[int, IPv4Address_size]
+    dst_addr       : Annotated[int, IPv4Address_size]
 
 IPV4_HDR_SIZE = 20
 
@@ -85,8 +85,8 @@ class ipv6_t:
     payload_length : Annotated[int, 16]
     next_header    : Annotated[int, 8]
     hop_limit      : Annotated[int, 8]
-    sip            : Annotated[int, IPv6Address_size]
-    dip            : Annotated[int, IPv6Address_size]
+    src_addr       : Annotated[int, IPv6Address_size]
+    dst_addr       : Annotated[int, IPv6Address_size]
 
 IPV6_HDR_SIZE = 40
 

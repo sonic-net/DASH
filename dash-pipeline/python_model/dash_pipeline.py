@@ -17,7 +17,7 @@ def accept():
 
 vip = Table(
     key = {
-        "hdr.ipv4.dip" : EXACT
+        "hdr.ipv4.dst_addr" : EXACT
     },
     actions = [
        accept,
@@ -27,7 +27,7 @@ vip = Table(
 
     api_hints = {
         API_NAME       : "dash_vip",
-        "hdr.ipv4.dip" : {SAI_KEY_NAME : "VIP"},
+        "hdr.ipv4.dst_addr" : {SAI_KEY_NAME : "VIP"},
         deny           : {DEFAULT_ONLY : True}
     }
 )
@@ -165,7 +165,7 @@ def vxlan_decap_pa_validate(src_vnet_id: Annotated[int, 16]):
 pa_validation = Table(
     key = {
         "meta.vnet_id" : EXACT,
-        "hdr.ipv4.sip" : EXACT
+        "hdr.ipv4.src_addr" : EXACT
     },
     actions = [
        permit,
@@ -183,7 +183,7 @@ inbound_routing = Table(
     key = {
         "meta.eni_id"   : EXACT,
         "hdr.vxlan.vni" : EXACT,
-        "hdr.ipv4.sip"  : TERNARY
+        "hdr.ipv4.src_addr"  : TERNARY
     },
     actions = [
        vxlan_decap,
@@ -226,7 +226,7 @@ def set_policy_meter_class(meter_class: Annotated[int, 16]):
 meter_rule = Table(
     key = {
         "meta.meter_policy_id" : EXACT,
-        "hdr.ipv4.dip"         : TERNARY
+        "hdr.ipv4.dst_addr"         : TERNARY
     },
     actions = [
        set_policy_meter_class,
@@ -318,7 +318,7 @@ def apply():
     if vip.apply()["hit"]:
         # Use the same VIP that was in packet's destination if it's
         # present in the VIP table
-        meta.encap_data.underlay_sip = hdr.ipv4.dip
+        meta.encap_data.underlay_sip = hdr.ipv4.dst_addr
 
     # If Outer VNI matches with a reserved VNI, then the direction is Outbound
     direction_lookup.apply()
@@ -345,17 +345,17 @@ def apply():
 
     meta.is_overlay_ip_v6 = 0
     meta.protocol = 0
-    meta.dip = 0
-    meta.sip = 0
+    meta.dst_ip_addr = 0
+    meta.src_ip_addr = 0
     if hdr.ipv6:
         meta.protocol = hdr.ipv6.next_header
-        meta.sip = hdr.ipv6.sip
-        meta.dip = hdr.ipv6.dip
+        meta.src_ip_addr = hdr.ipv6.src_addr
+        meta.dst_ip_addr = hdr.ipv6.dst_addr
         meta.is_overlay_ip_v6 = 1
     elif hdr.ipv4:
         meta.protocol = hdr.ipv4.protocol
-        meta.sip = hdr.ipv4.sip
-        meta.dip = hdr.ipv4.dip
+        meta.src_ip_addr = hdr.ipv4.src_addr
+        meta.dst_ip_addr = hdr.ipv4.dst_addr
 
     if hdr.tcp:
         meta.src_port = hdr.tcp.src_port
@@ -375,7 +375,7 @@ def apply():
         inbound_apply()
 
     # Underlay routing
-    meta.dip = hdr.ipv4.dip
+    meta.dst_ip_addr = hdr.ipv4.dst_addr
     underlay_apply()
 
     if meta.meter_policy_en == 1:

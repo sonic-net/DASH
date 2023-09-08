@@ -13,8 +13,8 @@ def service_tunnel_encode(st_dst      : Annotated[int, 128],
     hdr.ipv6.payload_length = hdr.ipv4.total_len - IPV4_HDR_SIZE
     hdr.ipv6.next_header = hdr.ipv4.protocol
     hdr.ipv6.hop_limit = hdr.ipv4.ttl
-    hdr.ipv6.dip = (hdr.ipv4.dip & ~st_dst_mask) | (st_dst & st_dst_mask)
-    hdr.ipv6.sip = (hdr.ipv4.sip & ~st_src_mask) | (st_src & st_src_mask)
+    hdr.ipv6.dst_addr = (hdr.ipv4.dst_addr & ~st_dst_mask) | (st_dst & st_dst_mask)
+    hdr.ipv6.src_addr = (hdr.ipv4.src_addr & ~st_src_mask) | (st_src & st_src_mask)
 
     hdr.ipv4 = None
     hdr.ethernet.ether_type = IPV6_ETHTYPE
@@ -33,8 +33,8 @@ def service_tunnel_decode(src : Annotated[int, 32],
     hdr.ipv4.protocol = hdr.ipv6.next_header
     hdr.ipv4.ttl = hdr.ipv6.hop_limit
     hdr.ipv4.hdr_checksum = 0
-    hdr.ipv4.dip = dst
-    hdr.ipv4.sip = src
+    hdr.ipv4.dst_addr = dst
+    hdr.ipv4.src_addr = src
 
     hdr.ipv6 = None
     hdr.ethernet.ether_type = IPV4_ETHTYPE

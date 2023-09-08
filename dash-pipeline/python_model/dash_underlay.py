@@ -26,7 +26,7 @@ def def_act():
 # TODO: To add structural annotations (example: @Sai[skipHeaderGen=true])
 route = Table(
     key = {
-        "meta.dip" : LPM
+        "meta.dst_ip_addr" : LPM
     },
     actions = [
         pkt_act,
@@ -34,7 +34,7 @@ route = Table(
     ],
     api_hints = {
         API_NAME   : "route",
-        "meta.dip" : {SAI_KEY_NAME : "destination"},
+        "meta.dst_ip_addr" : {SAI_KEY_NAME : "destination"},
         def_act    : {DEFAULT_ONLY : True}
     }
 )

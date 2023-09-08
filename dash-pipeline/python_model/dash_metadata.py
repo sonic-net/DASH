@@ -44,8 +44,8 @@ class metadata_t:
     is_overlay_ip_v6             :  Annotated[int, 1]
     is_lkup_dst_ip_v6            :  Annotated[int, 1]
     protocol                     :  Annotated[int, 8]
-    dip                          :  Annotated[int, IPv4ORv6Address_size]
-    sip                          :  Annotated[int, IPv4ORv6Address_size]
+    dst_ip_addr                  :  Annotated[int, IPv4ORv6Address_size]
+    src_ip_addr                  :  Annotated[int, IPv4ORv6Address_size]
     lkup_dst_ip_addr             :  Annotated[int, IPv4ORv6Address_size]
     conntrack_data               :  conntrack_data_t
     src_port                     :  Annotated[int, 16]

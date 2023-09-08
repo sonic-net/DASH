@@ -20,8 +20,8 @@ def deny_and_continue():
 dash_acl_rule = Table(
     key = {
         "meta.dash_acl_group_id" : EXACT,
-        "meta.sip"          : TERNARY_LIST,
-        "meta.dip"          : TERNARY_LIST,
+        "meta.src_ip_addr"          : TERNARY_LIST,
+        "meta.dst_ip_addr"          : TERNARY_LIST,
         "meta.protocol"     : TERNARY_LIST,
         "meta.src_port"     : RANGE_LIST,
         "meta.dst_port"     : RANGE_LIST

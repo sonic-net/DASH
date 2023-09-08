@@ -10,8 +10,8 @@ def default_action():
 acl = Table(
     key = {
         "meta.dash_acl_group_id" : EXACT,
-        "meta.sip"  : TERNARY_LIST,
-        "meta.dip"  : TERNARY_LIST,
+        "meta.src_ip_addr"  : TERNARY_LIST,
+        "meta.dst_ip_addr"  : TERNARY_LIST,
         "meta.src_port"  : RANGE_LIST,
         "meta.dst_port"  : RANGE_LIST,
         "meta.protocol"  : TERNARY_LIST
@@ -22,7 +22,7 @@ acl = Table(
 
 acl.insert({
     "meta.dash_acl_group_id" : 1,
-    "meta.sip"  : [
+    "meta.src_ip_addr"  : [
         {
             "value" : 0x0A000000,
             "mask"  : 0xFFFFFF00
@@ -36,7 +36,7 @@ acl.insert({
             "mask"  : 0xFFFFFF00
         }
     ],
-    "meta.dip"  : [
+    "meta.dst_ip_addr"  : [
         {
             "value" : 0x0A00000A,
             "mask"  : 0xFFFFFFFF
@@ -87,7 +87,7 @@ acl.insert({
 
 acl.insert({
     "meta.dash_acl_group_id" : 1,
-    "meta.sip"  : [
+    "meta.src_ip_addr"  : [
         {
             "value" : 0x0A000000,
             "mask"  : 0xFFFFFF00
@@ -101,7 +101,7 @@ acl.insert({
             "mask"  : 0xFFFFFF00
         }
     ],
-    "meta.dip"  : [
+    "meta.dst_ip_addr"  : [
         {
             "value" : 0x0A0000C8,
             "mask"  : 0xFFFFFFFF
@@ -132,7 +132,7 @@ acl.insert({
 
 acl.insert({
     "meta.dash_acl_group_id" : 1,
-    "meta.sip"  : [
+    "meta.src_ip_addr"  : [
         {
             "value" : 0x0A000000,
             "mask"  : 0xFFFFFF00
@@ -146,7 +146,7 @@ acl.insert({
             "mask"  : 0xFFFFFF00
         }
     ],
-    "meta.dip"  : [
+    "meta.dst_ip_addr"  : [
         {
             "value" : 0x0A0000C9,
             "mask"  : 0xFFFFFFFF
@@ -177,7 +177,7 @@ acl.insert({
 
 acl.insert({
     "meta.dash_acl_group_id" : 1,
-    "meta.sip"  : [
+    "meta.src_ip_addr"  : [
         {
             "value" : 0x0A000000,
             "mask"  : 0xFFFFFF00
@@ -191,7 +191,7 @@ acl.insert({
             "mask"  : 0xFFFFFF00
         }
     ],
-    "meta.dip"  : [
+    "meta.dst_ip_addr"  : [
         {
             "value" : 0x0A0000CA,
             "mask"  : 0xFFFFFFFF
@@ -222,7 +222,7 @@ acl.insert({
 
 acl.insert({
     "meta.dash_acl_group_id" : 1,
-    "meta.sip"  : [
+    "meta.src_ip_addr"  : [
         {
             "value" : 0x0A000000,
             "mask"  : 0xFFFFFF00
@@ -236,7 +236,7 @@ acl.insert({
             "mask"  : 0xFFFFFF00
         }
     ],
-    "meta.dip"  : [
+    "meta.dst_ip_addr"  : [
         {
             "value" : 0x0A0000CB,
             "mask"  : 0xFFFFFFFF
@@ -267,13 +267,13 @@ acl.insert({
 
 acl.insert({
     "meta.dash_acl_group_id" : 1,
-    "meta.sip"  : [
+    "meta.src_ip_addr"  : [
         {
             "value" : 0,
             "mask"  : 0
         }
     ],
-    "meta.dip"  : [
+    "meta.dst_ip_addr"  : [
         {
             "value" : 0x08080808,
             "mask"  : 0xFFFFFFFF
@@ -304,13 +304,13 @@ acl.insert({
 
 acl.insert({
     "meta.dash_acl_group_id" : 1,
-    "meta.sip"  : [
+    "meta.src_ip_addr"  : [
         {
             "value" : 0,
             "mask"  : 0
         }
     ],
-    "meta.dip"  : [
+    "meta.dst_ip_addr"  : [
         {
             "value" : 0x08080808,
             "mask"  : 0xFFFFFFFF
@@ -341,13 +341,13 @@ acl.insert({
 
 acl.insert({
     "meta.dash_acl_group_id" : 1,
-    "meta.sip"  : [
+    "meta.src_ip_addr"  : [
         {
             "value" : 0,
             "mask"  : 0
         }
     ],
-    "meta.dip"  : [
+    "meta.dst_ip_addr"  : [
         {
             "value" : 0x09090909,
             "mask"  : 0xFFFFFFFF
@@ -378,13 +378,13 @@ acl.insert({
 
 acl.insert({
     "meta.dash_acl_group_id" : 1,
-    "meta.sip"  : [
+    "meta.src_ip_addr"  : [
         {
             "value" : 0,
             "mask"  : 0
         }
     ],
-    "meta.dip"  : [
+    "meta.dst_ip_addr"  : [
         {
             "value" : 0,
             "mask"  : 0
@@ -416,8 +416,8 @@ acl.insert({
 
 
 meta.dash_acl_group_id = 1
-meta.sip = 0x0A000064
-meta.dip = 0x01010102
+meta.src_ip_addr = 0x0A000064
+meta.dst_ip_addr = 0x01010102
 meta.src_port = 56
 meta.dst_port = 99
 meta.protocol = 0x06

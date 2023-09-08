@@ -55,8 +55,8 @@ def route_service_tunnel(is_overlay_dip_v4_or_v6      : Annotated[int, 1],
     # assert(is_overlay_dip_v4_or_v6 == 1 && is_overlay_sip_v4_or_v6 == 1);
     # assert(is_overlay_dip_mask_v4_or_v6 == 1 && is_overlay_sip_mask_v4_or_v6 == 1);
     # assert(is_underlay_dip_v4_or_v6 != 1 && is_underlay_sip_v4_or_v6 != 1);
-    meta.encap_data.original_overlay_dip = hdr.ipv4.sip
-    meta.encap_data.original_overlay_sip = hdr.ipv4.dip
+    meta.encap_data.original_overlay_dip = hdr.ipv4.src_addr
+    meta.encap_data.original_overlay_sip = hdr.ipv4.dst_addr
 
     service_tunnel_encode(overlay_dip,
                           overlay_dip_mask,
@@ -83,7 +83,7 @@ outbound_routing = Table(
     key = {
         "meta.eni_id"           : EXACT,
         "meta.is_overlay_ip_v6" : EXACT,
-        "meta.dip"              : LPM
+        "meta.dst_ip_addr"              : LPM
     },
     actions = [
        route_vnet,
@@ -97,7 +97,7 @@ outbound_routing = Table(
     api_hints = {
         API_NAME                : "dash_outbound_routing",
         "meta.is_overlay_ip_v6" : {SAI_KEY_NAME : "is_destination_v4_or_v6"},
-        "meta.dip"              : {SAI_KEY_NAME : "destination"}
+        "meta.dst_ip_addr"              : {SAI_KEY_NAME : "destination"}
     }
 )
 
@@ -154,8 +154,8 @@ def _create_flows():
     timer = flow_timer(5, forward_flow, reverse_flow)
 
     forward_flow["meta.eni_id"] = meta.eni_id
-    forward_flow["meta.sip"] = meta.sip
-    forward_flow["meta.dip"] = meta.dip
+    forward_flow["meta.src_ip_addr"] = meta.src_ip_addr
+    forward_flow["meta.dst_ip_addr"] = meta.dst_ip_addr
     forward_flow["meta.protocol"] = meta.protocol
     forward_flow["meta.src_port"] = meta.src_port
     forward_flow["meta.dst_port"] = meta.dst_port
@@ -163,8 +163,8 @@ def _create_flows():
     forward_flow["params"] = [timer]
 
     reverse_flow["meta.eni_id"] = meta.eni_id
-    reverse_flow["meta.sip"] = meta.dip
-    reverse_flow["meta.dip"] = meta.sip
+    reverse_flow["meta.src_ip_addr"] = meta.dst_ip_addr
+    reverse_flow["meta.dst_ip_addr"] = meta.src_ip_addr
     reverse_flow["meta.protocol"] = meta.protocol
     reverse_flow["meta.src_port"] = meta.dst_port
     reverse_flow["meta.dst_port"] = meta.src_port
@@ -188,7 +188,7 @@ def outbound_apply():
         if not meta.dropped:
             _create_flows()
 
-    meta.lkup_dst_ip_addr = meta.dip
+    meta.lkup_dst_ip_addr = meta.dst_ip_addr
     meta.is_lkup_dst_ip_v6 = meta.is_overlay_ip_v6
 
     action_run = outbound_routing.apply()["action_run"]
