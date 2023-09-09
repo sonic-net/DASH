@@ -2,6 +2,7 @@
 
 #include "utils.h"
 #include "config.h"
+#include "objectidmanager.h"
 
 namespace dash
 {
@@ -135,5 +136,7 @@ namespace dash
             std::shared_ptr<grpc::Channel> m_grpcChannel;
 
             std::unique_ptr<p4::v1::P4Runtime::Stub> m_stub;
+
+            std::shared_ptr<ObjectIdManager> m_objectIdManager;
     };
 }

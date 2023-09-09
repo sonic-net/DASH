@@ -42,6 +42,13 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     //matchedParams = 0;
     objId = dashSai->getNextObjectId((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }});
 
+    if (objId == SAI_NULL_OBJECT_ID)
+    {
+        DASH_LOG_ERROR("getNextObjectId failed for SAI_OBJECT_TYPE_{{ table.name | upper }}");
+        // TODO clean resources
+        return SAI_STATUS_FAILURE;
+    }
+
     matchActionEntry->set_table_id(tableId);
 
     {% if table['keys'] | length== 1 %}
