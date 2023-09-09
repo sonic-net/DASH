@@ -668,6 +668,9 @@ sai_status_t DashSai::create(
     DASH_LOG_ENTER();
     DASH_CHECK_API_INITIALIZED();
 
+    if (objectType == SAI_OBJECT_TYPE_SWITCH)
+        return createSwitch(objectId, attr_count, attr_list);
+
     DASH_LOG_ERROR("not implemented for object type %d", objectType);
 
     return SAI_STATUS_NOT_IMPLEMENTED;
@@ -679,6 +682,9 @@ sai_status_t DashSai::remove(
 {
     DASH_LOG_ENTER();
     DASH_CHECK_API_INITIALIZED();
+
+    if (objectType == SAI_OBJECT_TYPE_SWITCH)
+        return removeSwitch(objectId);
 
     DASH_LOG_ERROR("not implemented for object type %d", objectType);
 
@@ -692,6 +698,9 @@ sai_status_t DashSai::set(
 {
     DASH_LOG_ENTER();
     DASH_CHECK_API_INITIALIZED();
+
+    if (objectType == SAI_OBJECT_TYPE_SWITCH)
+        return setSwitchAttribute(objectId, attr);
 
     DASH_LOG_ERROR("not implemented for object type %d", objectType);
 
@@ -709,6 +718,9 @@ sai_status_t DashSai::get(
 
     if (objectType == SAI_OBJECT_TYPE_PORT)
         return getPortAttribute(objectId, attr_count, attr_list);
+
+    if (objectType == SAI_OBJECT_TYPE_SWITCH)
+        return getSwitchAttribute(objectId, attr_count, attr_list);
 
     DASH_LOG_ERROR("not implemented for object type %d", objectType);
 

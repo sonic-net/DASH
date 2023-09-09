@@ -50,7 +50,7 @@ namespace dash
                     _In_ uint32_t attr_count,
                     _Inout_ sai_attribute_t *attr_list);
 
-        public: // QUAD api implementation
+        private: // QUAD api implementation
 
             // switch
 
