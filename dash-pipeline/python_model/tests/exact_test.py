@@ -5,7 +5,7 @@ def default_action():
 
 outbound_routing = Table(
     key = {
-        "meta.protocol" : EXACT
+        "meta.ip_protocol" : EXACT
     },
     actions = [],
     default_action = default_action
@@ -14,7 +14,7 @@ outbound_routing = Table(
 def action0():
     print("action0 executed!")
 outbound_routing.insert({
-    "meta.protocol"  :  0b01111111,
+    "meta.ip_protocol"  :  0b01111111,
     "action"            :  action0,
     "params"            :  []
 })
@@ -22,7 +22,7 @@ outbound_routing.insert({
 def action1():
     print("action1 executed!")
 outbound_routing.insert({
-    "meta.protocol"  :  0b10111111,
+    "meta.ip_protocol"  :  0b10111111,
     "action"            :  action1,
     "params"            :  []
 })
@@ -30,7 +30,7 @@ outbound_routing.insert({
 def action2():
     print("action2 executed!")
 outbound_routing.insert({
-    "meta.protocol"  :  0b11011111,
+    "meta.ip_protocol"  :  0b11011111,
     "action"            :  action2,
     "params"            :  []
 })
@@ -38,7 +38,7 @@ outbound_routing.insert({
 def action3():
     print("action3 executed!")
 outbound_routing.insert({
-    "meta.protocol"  :  0b11101111,
+    "meta.ip_protocol"  :  0b11101111,
     "action"            :  action3,
     "params"            :  []
 })
@@ -46,11 +46,11 @@ outbound_routing.insert({
 def action4():
     print("action4 executed!")
 outbound_routing.insert({
-    "meta.protocol"  :  0b11110111,
+    "meta.ip_protocol"  :  0b11110111,
     "action"            :  action4,
     "params"            :  []
 })
 
-meta.protocol = 0b11110111
+meta.ip_protocol = 0b11110111
 
 outbound_routing.apply()

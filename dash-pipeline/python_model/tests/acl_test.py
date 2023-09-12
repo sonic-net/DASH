@@ -12,9 +12,9 @@ acl = Table(
         "meta.dash_acl_group_id" : EXACT,
         "meta.src_ip_addr"  : TERNARY_LIST,
         "meta.dst_ip_addr"  : TERNARY_LIST,
-        "meta.src_port"  : RANGE_LIST,
-        "meta.dst_port"  : RANGE_LIST,
-        "meta.protocol"  : TERNARY_LIST
+        "meta.src_l4_port"  : RANGE_LIST,
+        "meta.dst_l4_port"  : RANGE_LIST,
+        "meta.ip_protocol"  : TERNARY_LIST
     },
     actions = [],
     default_action=default_action
@@ -62,19 +62,19 @@ acl.insert({
             "mask"  : 0xFFFFFF00
         }
     ],
-    "meta.src_port"  : [
+    "meta.src_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.dst_port"  : [
+    "meta.dst_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.protocol"  : [
+    "meta.ip_protocol"  : [
         {
             "value" : 0x06,
             "mask"  : 0xFF
@@ -107,19 +107,19 @@ acl.insert({
             "mask"  : 0xFFFFFFFF
         }
     ],
-    "meta.src_port"  : [
+    "meta.src_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.dst_port"  : [
+    "meta.dst_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.protocol"  : [
+    "meta.ip_protocol"  : [
         {
             "value" : 0x06,
             "mask"  : 0xFF
@@ -152,19 +152,19 @@ acl.insert({
             "mask"  : 0xFFFFFFFF
         }
     ],
-    "meta.src_port"  : [
+    "meta.src_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.dst_port"  : [
+    "meta.dst_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.protocol"  : [
+    "meta.ip_protocol"  : [
         {
             "value" : 0x06,
             "mask"  : 0xFF
@@ -197,19 +197,19 @@ acl.insert({
             "mask"  : 0xFFFFFFFF
         }
     ],
-    "meta.src_port"  : [
+    "meta.src_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.dst_port"  : [
+    "meta.dst_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.protocol"  : [
+    "meta.ip_protocol"  : [
         {
             "value" : 0x06,
             "mask"  : 0xFF
@@ -242,19 +242,19 @@ acl.insert({
             "mask"  : 0xFFFFFFFF
         }
     ],
-    "meta.src_port"  : [
+    "meta.src_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.dst_port"  : [
+    "meta.dst_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.protocol"  : [
+    "meta.ip_protocol"  : [
         {
             "value" : 0x06,
             "mask"  : 0xFF
@@ -279,19 +279,19 @@ acl.insert({
             "mask"  : 0xFFFFFFFF
         }
     ],
-    "meta.src_port"  : [
+    "meta.src_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.dst_port"  : [
+    "meta.dst_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.protocol"  : [
+    "meta.ip_protocol"  : [
         {
             "value" : 0,
             "mask"  : 0
@@ -316,19 +316,19 @@ acl.insert({
             "mask"  : 0xFFFFFFFF
         }
     ],
-    "meta.src_port"  : [
+    "meta.src_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.dst_port"  : [
+    "meta.dst_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.protocol"  : [
+    "meta.ip_protocol"  : [
         {
             "value" : 0,
             "mask"  : 0
@@ -353,19 +353,19 @@ acl.insert({
             "mask"  : 0xFFFFFFFF
         }
     ],
-    "meta.src_port"  : [
+    "meta.src_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.dst_port"  : [
+    "meta.dst_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.protocol"  : [
+    "meta.ip_protocol"  : [
         {
             "value" : 0,
             "mask"  : 0
@@ -390,19 +390,19 @@ acl.insert({
             "mask"  : 0
         }
     ],
-    "meta.src_port"  : [
+    "meta.src_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.dst_port"  : [
+    "meta.dst_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.protocol"  : [
+    "meta.ip_protocol"  : [
         {
             "value" : 0,
             "mask"  : 0
@@ -418,9 +418,9 @@ acl.insert({
 meta.dash_acl_group_id = 1
 meta.src_ip_addr = 0x0A000064
 meta.dst_ip_addr = 0x01010102
-meta.src_port = 56
-meta.dst_port = 99
-meta.protocol = 0x06
+meta.src_l4_port = 56
+meta.dst_l4_port = 99
+meta.ip_protocol = 0x06
 
 
 

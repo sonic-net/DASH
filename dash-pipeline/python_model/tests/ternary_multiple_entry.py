@@ -5,7 +5,7 @@ def default_action():
 
 outbound_routing = Table(
     key = {
-        "meta.protocol" : EXACT,
+        "meta.ip_protocol" : EXACT,
         "hdr.ipv4.ihl"     : TERNARY
     },
     actions = [],
@@ -15,7 +15,7 @@ outbound_routing = Table(
 def action0():
     print("action0 executed!")
 outbound_routing.insert({
-    "meta.protocol" : 246,
+    "meta.ip_protocol" : 246,
     "hdr.ipv4.ihl"     : {
         "value": 0b1101,
         "mask" : 0b1111
@@ -28,7 +28,7 @@ outbound_routing.insert({
 def action1():
     print("action1 executed!")
 outbound_routing.insert({
-    "meta.protocol" : 246,
+    "meta.ip_protocol" : 246,
     "hdr.ipv4.ihl"     : {
         "value": 0b0101,
         "mask" : 0b1111
@@ -41,7 +41,7 @@ outbound_routing.insert({
 def action2():
     print("action2 executed!")
 outbound_routing.insert({
-    "meta.protocol" : 246,
+    "meta.ip_protocol" : 246,
     "hdr.ipv4.ihl"     : {
         "value": 0b0101,
         "mask" : 0b1111
@@ -54,7 +54,7 @@ outbound_routing.insert({
 def action3():
     print("action3 executed!")
 outbound_routing.insert({
-    "meta.protocol" : 230,
+    "meta.ip_protocol" : 230,
     "hdr.ipv4.ihl"     : {
         "value": 0b0101,
         "mask" : 0b1111
@@ -67,7 +67,7 @@ outbound_routing.insert({
 def action4():
     print("action4 executed!")
 outbound_routing.insert({
-    "meta.protocol" : 246,
+    "meta.ip_protocol" : 246,
     "hdr.ipv4.ihl"     : {
         "value": 0b0101,
         "mask" : 0b1111
@@ -79,7 +79,7 @@ outbound_routing.insert({
 
 
 
-meta.protocol = 246
+meta.ip_protocol = 246
 hdr.ipv4.ihl = 0b0101
 
 outbound_routing.apply()

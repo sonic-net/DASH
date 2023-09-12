@@ -1,6 +1,6 @@
 from dash_headers import *
 from __table import *
-from dash_api_hints import *
+from __sai_keys import *
 
 # The values in this context have been sourced from the 'saiswitch.h' file and 
 # have been manually designated to maintain alignment with enum values specified in the SAI commit <d8d40b4>.
@@ -26,17 +26,13 @@ def def_act():
 # TODO: To add structural annotations (example: @Sai[skipHeaderGen=true])
 route = Table(
     key = {
-        "meta.dst_ip_addr" : LPM
+        "meta.dst_ip_addr": (LPM, {SAI_KEY_NAME : "destination"})
     },
     actions = [
         pkt_act,
-        def_act
+        (def_act, {DEFAULT_ONLY : True})
     ],
-    api_hints = {
-        API_NAME   : "route",
-        "meta.dst_ip_addr" : {SAI_KEY_NAME : "destination"},
-        def_act    : {DEFAULT_ONLY : True}
-    }
+    API_NAME="route"
 )
 
 def underlay_apply():

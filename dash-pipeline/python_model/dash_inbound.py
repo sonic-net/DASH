@@ -31,18 +31,18 @@ def _create_flows():
     forward_flow["meta.eni_id"] = meta.eni_id
     forward_flow["meta.src_ip_addr"] = meta.src_ip_addr
     forward_flow["meta.dst_ip_addr"] = meta.dst_ip_addr
-    forward_flow["meta.protocol"] = meta.protocol
-    forward_flow["meta.src_port"] = meta.src_port
-    forward_flow["meta.dst_port"] = meta.dst_port
+    forward_flow["meta.ip_protocol"] = meta.ip_protocol
+    forward_flow["meta.src_l4_port"] = meta.src_l4_port
+    forward_flow["meta.dst_l4_port"] = meta.dst_l4_port
     forward_flow["action"] = flow_action_inbound
     forward_flow["params"] = [timer, 0, 0]
 
     reverse_flow["meta.eni_id"] = meta.eni_id
     reverse_flow["meta.src_ip_addr"] = meta.dst_ip_addr
     reverse_flow["meta.dst_ip_addr"] = meta.src_ip_addr
-    reverse_flow["meta.protocol"] = meta.protocol
-    reverse_flow["meta.src_port"] = meta.dst_port
-    reverse_flow["meta.dst_port"] = meta.src_port
+    reverse_flow["meta.ip_protocol"] = meta.ip_protocol
+    reverse_flow["meta.src_l4_port"] = meta.dst_l4_port
+    reverse_flow["meta.dst_l4_port"] = meta.src_l4_port
     reverse_flow["action"] = flow_action_outbound
     reverse_flow["params"] = [timer]
 

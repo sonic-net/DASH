@@ -4,7 +4,7 @@ from dash_vxlan import *
 from dash_outbound import *
 from dash_inbound import *
 from dash_underlay import *
-from dash_api_hints import *
+from __sai_keys import *
 
 def drop_action():
     mark_to_drop(standard_metadata)
@@ -17,19 +17,13 @@ def accept():
 
 vip = Table(
     key = {
-        "hdr.ipv4.dst_addr" : EXACT
+        "hdr.ipv4.dst_addr": (EXACT, {SAI_KEY_NAME: "VIP"})
     },
     actions = [
        accept,
-       deny
+       (deny, {DEFAULT_ONLY: True})
     ],
-    default_action = deny,
-
-    api_hints = {
-        API_NAME       : "dash_vip",
-        "hdr.ipv4.dst_addr" : {SAI_KEY_NAME : "VIP"},
-        deny           : {DEFAULT_ONLY : True}
-    }
+    default_action = deny
 )
 
 def set_outbound_direction():
@@ -40,19 +34,13 @@ def set_inbound_direction():
 
 direction_lookup = Table(
     key = {
-        "hdr.vxlan.vni" : EXACT
+        "hdr.vxlan.vni": (EXACT, {SAI_KEY_NAME: "VNI"})
     },
     actions = [
        set_outbound_direction,
-       set_inbound_direction
+       (set_inbound_direction, {DEFAULT_ONLY : True})
     ],
-    default_action = set_inbound_direction,
-
-    api_hints = {
-        API_NAME              : "dash_direction_lookup",
-        "hdr.vxlan.vni"       : {SAI_KEY_NAME : "VNI"},
-        set_inbound_direction : {DEFAULT_ONLY : True}
-    }
+    default_action = set_inbound_direction
 )
 
 def set_appliance(neighbor_mac: Annotated[int, 48], mac: Annotated[int, 48]):
@@ -146,14 +134,9 @@ eni = Table(
     },
     actions = [
        set_eni_attrs,
-       deny
+       (deny, {DEFAULT_ONLY : True})
     ],
-    default_action = deny,
-
-    api_hints = {
-        API_NAME : "dash_eni",
-        deny     : {DEFAULT_ONLY : True}
-    }
+    default_action = deny
 )
 
 def permit():
@@ -164,39 +147,28 @@ def vxlan_decap_pa_validate(src_vnet_id: Annotated[int, 16]):
 
 pa_validation = Table(
     key = {
-        "meta.vnet_id" : EXACT,
-        "hdr.ipv4.src_addr" : EXACT
+        "meta.vnet_id"     : EXACT,
+        "hdr.ipv4.src_addr": EXACT
     },
     actions = [
        permit,
-       deny
+       (deny, {DEFAULT_ONLY: True})
     ],
-    default_action = deny,
-
-    api_hints = {
-        API_NAME : "dash_pa_validation",
-        deny     : {DEFAULT_ONLY : True}
-    }
+    default_action = deny
 )
 
 inbound_routing = Table(
     key = {
-        "meta.eni_id"   : EXACT,
-        "hdr.vxlan.vni" : EXACT,
-        "hdr.ipv4.src_addr"  : TERNARY
+        "meta.eni_id"       : EXACT,
+        "hdr.vxlan.vni"     : (EXACT, {SAI_KEY_NAME: "VNI"}),
+        "hdr.ipv4.src_addr" : TERNARY
     },
     actions = [
        vxlan_decap,
        vxlan_decap_pa_validate,
-       deny
+       (deny, {DEFAULT_ONLY: True})
     ],
-    default_action = deny,
-
-    api_hints = {
-        API_NAME        : "dash_inbound_routing",
-        "hdr.vxlan.vni" : {SAI_KEY_NAME : "VNI"},
-        deny            : {DEFAULT_ONLY : True}
-    }
+    default_action = deny
 )
 
 def check_ip_addr_family(ip_addr_family: Annotated[int, 32, {TYPE : "sai_ip_addr_family_t", ISRESOURCETYPE : "true"}]):
@@ -214,10 +186,8 @@ meter_policy = Table(
     actions = [
        check_ip_addr_family
     ],
-    api_hints = {
-        API_NAME : "dash_meter",
-        ISOBJECT : "true"
-    }
+    API_NAME = "dash_meter",
+    ISOBJECT = "true"
 )
 
 def set_policy_meter_class(meter_class: Annotated[int, 16]):
@@ -225,21 +195,16 @@ def set_policy_meter_class(meter_class: Annotated[int, 16]):
 
 meter_rule = Table(
     key = {
-        "meta.meter_policy_id" : EXACT,
-        "hdr.ipv4.dst_addr"         : TERNARY
+        "meta.meter_policy_id" : (EXACT, {TYPE : "sai_object_id_t", ISRESOURCETYPE : "true", OBJECTS : "METER_POLICY"}),
+        "hdr.ipv4.dst_addr"    : TERNARY
     },
     actions = [
        set_policy_meter_class,
-       NoAction
+       (NoAction, {DEFAULT_ONLY : True})
     ],
     default_action = NoAction,
-
-    api_hints = {
-        API_NAME               : "dash_meter",
-        ISOBJECT               : "true",
-        "meta.meter_policy_id" : {TYPE : "sai_object_id_t", ISRESOURCETYPE : "true", OBJECTS : "METER_POLICY"},
-        NoAction               : {DEFAULT_ONLY : True}
-    }
+    API_NAME = "dash_meter",
+    ISOBJECT = "true"
 )
 
 # MAX_METER_BUCKET = MAX_ENI(64) * NUM_BUCKETS_PER_ENI(4096)
@@ -261,15 +226,11 @@ meter_bucket = Table(
     },
     actions = [
        meter_bucket_action,
-       NoAction
+       (NoAction, {DEFAULT_ONLY : True})
     ],
     default_action = NoAction,
-
-    api_hints = {
-        API_NAME : "dash_meter",
-        ISOBJECT : "true",
-        NoAction : {DEFAULT_ONLY : True}
-    }
+    API_NAME = "dash_meter",
+    ISOBJECT = "true"
 )
 
 def set_eni(eni_id: Annotated[int, 16]):
@@ -277,19 +238,14 @@ def set_eni(eni_id: Annotated[int, 16]):
 
 eni_ether_address_map = Table(
     key = {
-        "meta.eni_addr" : EXACT
+        "meta.eni_addr" : (EXACT, {SAI_KEY_NAME : "address"})
     },
     actions = [
        set_eni,
-       deny
+       (deny, {DEFAULT_ONLY : True})
     ],
     default_action = deny,
-
-    api_hints = {
-        API_NAME        : "dash_eni",
-        "meta.eni_addr" : {SAI_KEY_NAME : "address"},
-        deny            : {DEFAULT_ONLY : True}
-    }
+    API_NAME="dash_eni"
 )
 
 def set_acl_group_attrs(ip_addr_family: Annotated[int, 32, {TYPE : "sai_ip_addr_family_t", ISRESOURCETYPE : "true"}]):
@@ -302,15 +258,12 @@ def set_acl_group_attrs(ip_addr_family: Annotated[int, 32, {TYPE : "sai_ip_addr_
 
 dash_acl_group = Table(
     key = {
-        "meta.stage1_dash_acl_group_id" : EXACT
+        "meta.stage1_dash_acl_group_id" : (EXACT, {SAI_KEY_NAME : "dash_acl_group_id"})
     },
     actions = [
        set_acl_group_attrs
     ],
-    api_hints = {
-        API_NAME                        : "dash_acl",
-        "meta.stage1_dash_acl_group_id" : {SAI_KEY_NAME : "dash_acl_group_id"}
-    }
+    API_NAME="dash_acl"
 )
 
 def apply():
@@ -344,25 +297,25 @@ def apply():
     # At this point the processing is done on customer headers
 
     meta.is_overlay_ip_v6 = 0
-    meta.protocol = 0
+    meta.ip_protocol = 0
     meta.dst_ip_addr = 0
     meta.src_ip_addr = 0
     if hdr.ipv6:
-        meta.protocol = hdr.ipv6.next_header
+        meta.ip_protocol = hdr.ipv6.next_header
         meta.src_ip_addr = hdr.ipv6.src_addr
         meta.dst_ip_addr = hdr.ipv6.dst_addr
         meta.is_overlay_ip_v6 = 1
     elif hdr.ipv4:
-        meta.protocol = hdr.ipv4.protocol
+        meta.ip_protocol = hdr.ipv4.protocol
         meta.src_ip_addr = hdr.ipv4.src_addr
         meta.dst_ip_addr = hdr.ipv4.dst_addr
 
     if hdr.tcp:
-        meta.src_port = hdr.tcp.src_port
-        meta.dst_port = hdr.tcp.dst_port
+        meta.src_l4_port = hdr.tcp.src_port
+        meta.dst_l4_port = hdr.tcp.dst_port
     elif hdr.udp:
-        meta.src_port = hdr.udp.src_port
-        meta.dst_port = hdr.udp.dst_port
+        meta.src_l4_port = hdr.udp.src_port
+        meta.dst_l4_port = hdr.udp.dst_port
 
     eni.apply()
     if meta.eni_data.admin_state == 0:

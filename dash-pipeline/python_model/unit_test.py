@@ -80,19 +80,19 @@ acl.insert({
             "mask"  : 0
         }
     ],
-    "meta.src_port"  : [
+    "meta.src_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.dst_port"  : [
+    "meta.dst_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.protocol"  : [
+    "meta.ip_protocol"  : [
         {
             "value" : 0,
             "mask"  : 0
@@ -117,19 +117,19 @@ acl.insert({
             "mask"  : 0
         }
     ],
-    "meta.src_port"  : [
+    "meta.src_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.dst_port"  : [
+    "meta.dst_l4_port"  : [
         {
             "first" : 0,
             "last"  : 0xFFFF
         }
     ],
-    "meta.protocol"  : [
+    "meta.ip_protocol"  : [
         {
             "value" : 0,
             "mask"  : 0

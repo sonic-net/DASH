@@ -5,7 +5,7 @@ def default_action():
 
 outbound_routing = Table(
     key = {
-        "meta.protocol" : LPM,
+        "meta.ip_protocol" : LPM,
         "hdr.ipv4.ihl"     : EXACT
     },
     actions = [],
@@ -15,7 +15,7 @@ outbound_routing = Table(
 def action0():
     print("action0 executed!")
 outbound_routing.insert({
-    "meta.protocol" : {
+    "meta.ip_protocol" : {
         "value"      : 0b11010101,
         "prefix_len" : 8
     },
@@ -27,7 +27,7 @@ outbound_routing.insert({
 def action1():
     print("action1 executed!")
 outbound_routing.insert({
-    "meta.protocol" : {
+    "meta.ip_protocol" : {
         "value"      : 0b01010101,
         "prefix_len" : 4
     },
@@ -39,7 +39,7 @@ outbound_routing.insert({
 def action2():
     print("action2 executed!")
 outbound_routing.insert({
-    "meta.protocol" : {
+    "meta.ip_protocol" : {
         "value"      : 0b01010101,
         "prefix_len" : 5
     },
@@ -51,7 +51,7 @@ outbound_routing.insert({
 def action3():
     print("action3 executed!")
 outbound_routing.insert({
-    "meta.protocol" : {
+    "meta.ip_protocol" : {
         "value"      : 0b01010101,
         "prefix_len" : 8
     },
@@ -63,7 +63,7 @@ outbound_routing.insert({
 def action4():
     print("action4 executed!")
 outbound_routing.insert({
-    "meta.protocol" : {
+    "meta.ip_protocol" : {
         "value"      : 0b01010101,
         "prefix_len" : 1
     },
@@ -72,7 +72,7 @@ outbound_routing.insert({
     "params"   : []
 })
 
-meta.protocol = 0b01010101
+meta.ip_protocol = 0b01010101
 hdr.ipv4.ihl = 246
 
 outbound_routing.apply()

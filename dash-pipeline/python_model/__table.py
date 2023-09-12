@@ -1,7 +1,7 @@
 from inspect import *
 from __vars import *
 from threading import Lock
-from dash_api_hints import *
+from __sai_keys import *
 
 def EXACT(entry_value, match_value, width):
     return entry_value == match_value
@@ -46,16 +46,15 @@ def _winning_criteria_PREFIX_LEN(a, b, key):
     return a[lpm_key]["prefix_len"] > b[lpm_key]["prefix_len"]
 
 class Table:
-    def __init__(self, key, actions, default_action=NoAction, default_params=[], api_hints={}):
+    def __init__(self, key, actions, default_action=NoAction, default_params=[], api_name=None, is_object=None):
         self.entries = []
         self.key = key
         self.actions = actions
         self.default_action = default_action
         self.default_params = default_params
-        self.api_hints = api_hints
         if (default_action is NoAction) and (NoAction not in self.actions):
-            self.actions.append(NoAction)
-            self.api_hints[NoAction] = {DEFAULT_ONLY : True}
+            self.actions.append((NoAction, {DEFAULT_ONLY : True}))
+        self.api_hints = self.__extract_api_hints(api_name, is_object)
         self.lock = Lock()
 
     def insert(self, entry):
@@ -138,6 +137,22 @@ class Table:
             return None
         else:
             return self.__select_winning_entry(matching_entries)
+
+    def __extract_api_hints(self, api_name, is_object):
+        api_hints = {}
+        for k in self.key:
+            if type(self.key[k]) == tuple:
+                api_hints[k] = self.key[k][1]
+                self.key[k] = self.key[k][0]
+        for idx, action in enumerate(self.actions):
+            if type(action) == tuple:
+                api_hints[action[0]] = action[1]
+                self.actions[idx] = action[0]
+        if api_name:
+            api_hints[API_NAME] = api_name
+        if is_object:
+            api_hints[ISOBJECT] = is_object
+        return api_hints
 
 def _read_value(input):
     tokens = input.split(".")

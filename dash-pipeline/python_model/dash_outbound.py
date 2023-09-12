@@ -4,7 +4,7 @@ from __table import *
 from dash_vxlan import *
 from dash_acl import *
 from dash_flows import *
-from dash_api_hints import *
+from __sai_keys import *
 
 def set_route_meter_attrs(meter_policy_en : Annotated[int, 1],
                           meter_class     : Annotated[int, 16]):
@@ -81,9 +81,9 @@ def route_service_tunnel(is_overlay_dip_v4_or_v6      : Annotated[int, 1],
 
 outbound_routing = Table(
     key = {
-        "meta.eni_id"           : EXACT,
-        "meta.is_overlay_ip_v6" : EXACT,
-        "meta.dst_ip_addr"              : LPM
+        "meta.eni_id"          : (EXACT,  {SAI_KEY_NAME : "eni_id"}),
+        "meta.is_overlay_ip_v6": (EXACT,  {SAI_KEY_NAME: "is_destination_v4_or_v6"}),
+        "meta.dst_ip_addr"     : (LPM,    {SAI_KEY_NAME : "destination"})
     },
     actions = [
        route_vnet,
@@ -92,13 +92,7 @@ outbound_routing = Table(
        route_service_tunnel,
        drop
     ],
-    default_action = drop,
-
-    api_hints = {
-        API_NAME                : "dash_outbound_routing",
-        "meta.is_overlay_ip_v6" : {SAI_KEY_NAME : "is_destination_v4_or_v6"},
-        "meta.dst_ip_addr"              : {SAI_KEY_NAME : "destination"}
-    }
+    default_action = drop
 )
 
 def set_tunnel_mapping(underlay_dip         : Annotated[int, 32],
@@ -115,22 +109,15 @@ def set_tunnel_mapping(underlay_dip         : Annotated[int, 32],
 
 outbound_ca_to_pa = Table(
     key = {
-        "meta.dst_vnet_id"       : EXACT,
-        "meta.is_lkup_dst_ip_v6" : EXACT,
-        "meta.lkup_dst_ip_addr"  : EXACT
+        "meta.dst_vnet_id"      : (EXACT, {SAI_KEY_NAME: "dst_vnet_id"}),
+        "meta.is_lkup_dst_ip_v6": (EXACT, {SAI_KEY_NAME: "is_dip_v4_or_v6"}),
+        "meta.lkup_dst_ip_addr" : (EXACT, {SAI_KEY_NAME: "dip"})
     },
     actions = [
        set_tunnel_mapping,
-       drop
+       (drop, {DEFAULT_ONLY : True})
     ],
-    default_action = drop,
-
-    api_hints = {
-        API_NAME                 : "dash_outbound_ca_to_pa",
-        "meta.is_lkup_dst_ip_v6" : {SAI_KEY_NAME : "is_dip_v4_or_v6"},
-        "meta.lkup_dst_ip_addr"  : {SAI_KEY_NAME : "dip"},
-        drop                     : {DEFAULT_ONLY : True}
-    }
+    default_action = drop
 )
 
 def set_vnet_attrs(vni: Annotated[int, 24]):
@@ -138,43 +125,38 @@ def set_vnet_attrs(vni: Annotated[int, 24]):
 
 vnet = Table(
     key = {
-        "meta.vnet_id"       : EXACT
+        "meta.vnet_id": EXACT
     },
     actions = [
        set_vnet_attrs
-    ],
-    api_hints = {
-        API_NAME : "dash_vnet"
-    }
+    ]
 )
 
 def _create_flows():
     forward_flow = {}
     reverse_flow = {}
     timer = flow_timer(5, forward_flow, reverse_flow)
-
     forward_flow["meta.eni_id"] = meta.eni_id
     forward_flow["meta.src_ip_addr"] = meta.src_ip_addr
     forward_flow["meta.dst_ip_addr"] = meta.dst_ip_addr
-    forward_flow["meta.protocol"] = meta.protocol
-    forward_flow["meta.src_port"] = meta.src_port
-    forward_flow["meta.dst_port"] = meta.dst_port
+    forward_flow["meta.ip_protocol"] = meta.ip_protocol
+    forward_flow["meta.src_l4_port"] = meta.src_l4_port
+    forward_flow["meta.dst_l4_port"] = meta.dst_l4_port
     forward_flow["action"] = flow_action_outbound
     forward_flow["params"] = [timer]
 
     reverse_flow["meta.eni_id"] = meta.eni_id
     reverse_flow["meta.src_ip_addr"] = meta.dst_ip_addr
     reverse_flow["meta.dst_ip_addr"] = meta.src_ip_addr
-    reverse_flow["meta.protocol"] = meta.protocol
-    reverse_flow["meta.src_port"] = meta.dst_port
-    reverse_flow["meta.dst_port"] = meta.src_port
+    reverse_flow["meta.ip_protocol"] = meta.ip_protocol
+    reverse_flow["meta.src_l4_port"] = meta.dst_l4_port
+    reverse_flow["meta.dst_l4_port"] = meta.src_l4_port
     reverse_flow["action"] = flow_action_inbound
     reverse_flow["params"] = [
         timer,
         meta.encap_data.original_overlay_sip,
         meta.encap_data.original_overlay_dip
     ]
-
     flows.insert(forward_flow)
     flows.insert(reverse_flow)
 

@@ -1,6 +1,6 @@
 from __main import *
 from __id_map import *
-from dash_api_hints import *
+from __sai_keys import *
 import sys
 from __jsonize import *
 

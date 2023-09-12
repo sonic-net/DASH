@@ -1,5 +1,5 @@
 from __table import *
-from dash_api_hints import *
+from __sai_keys import *
 
 def permit():
     meta.acl_outcome_allow = 1
@@ -19,12 +19,12 @@ def deny_and_continue():
 
 dash_acl_rule = Table(
     key = {
-        "meta.dash_acl_group_id" : EXACT,
-        "meta.src_ip_addr"          : TERNARY_LIST,
-        "meta.dst_ip_addr"          : TERNARY_LIST,
-        "meta.protocol"     : TERNARY_LIST,
-        "meta.src_port"     : RANGE_LIST,
-        "meta.dst_port"     : RANGE_LIST
+        "meta.dash_acl_group_id": (EXACT,        {TYPE : "sai_object_id_t", ISRESOURCETYPE : "true", OBJECTS : "SAI_OBJECT_TYPE_DASH_ACL_GROUP"}),
+        "meta.src_ip_addr"      : (TERNARY_LIST, {SAI_KEY_NAME : "sip"}),
+        "meta.dst_ip_addr"      : (TERNARY_LIST, {SAI_KEY_NAME : "dip"}),
+        "meta.ip_protocol"      : (TERNARY_LIST, {SAI_KEY_NAME : "protocol"}),
+        "meta.src_l4_port"      : (RANGE_LIST,   {SAI_KEY_NAME : "src_port"}),
+        "meta.dst_l4_port"      : (RANGE_LIST,   {SAI_KEY_NAME : "dst_port"})
     },
     actions = [
         permit,
@@ -33,10 +33,7 @@ dash_acl_rule = Table(
         deny_and_continue
     ],
     default_action = deny,
-    api_hints = {
-        API_NAME                 : "dash_acl",
-        "meta.dash_acl_group_id" : {TYPE : "sai_object_id_t", ISRESOURCETYPE : "true", OBJECTS : "SAI_OBJECT_TYPE_DASH_ACL_GROUP"}
-    }
+    API_NAME="dash_acl"
 )
 
 def acl_apply():
