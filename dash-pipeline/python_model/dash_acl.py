@@ -33,7 +33,7 @@ dash_acl_rule = Table(
         deny_and_continue
     ],
     default_action = deny,
-    API_NAME="dash_acl"
+    api_name="dash_acl"
 )
 
 def acl_apply():

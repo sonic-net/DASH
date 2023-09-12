@@ -64,7 +64,7 @@ def make_table_node(table: Table, table_name):
 
     preamble_node = {}
     preamble_node["id"] = generate_id(table)
-    preamble_node["name"] = table_name + "|" + table.api_hints[API_NAME]
+    preamble_node["name"] = table_name + "|" + table.api_hints.get(API_NAME, "dash_" + table_name)
     str_annos = _get_str_annos_for_table(table)
     if str_annos is not None:
         preamble_node["structuredAnnotations"] = _make_str_annos_node(str_annos)

@@ -186,8 +186,8 @@ meter_policy = Table(
     actions = [
        check_ip_addr_family
     ],
-    API_NAME = "dash_meter",
-    ISOBJECT = "true"
+    api_name = "dash_meter",
+    is_object = "true"
 )
 
 def set_policy_meter_class(meter_class: Annotated[int, 16]):
@@ -203,8 +203,8 @@ meter_rule = Table(
        (NoAction, {DEFAULT_ONLY : True})
     ],
     default_action = NoAction,
-    API_NAME = "dash_meter",
-    ISOBJECT = "true"
+    api_name = "dash_meter",
+    is_object = "true"
 )
 
 # MAX_METER_BUCKET = MAX_ENI(64) * NUM_BUCKETS_PER_ENI(4096)
@@ -229,8 +229,8 @@ meter_bucket = Table(
        (NoAction, {DEFAULT_ONLY : True})
     ],
     default_action = NoAction,
-    API_NAME = "dash_meter",
-    ISOBJECT = "true"
+    api_name = "dash_meter",
+    is_object = "true"
 )
 
 def set_eni(eni_id: Annotated[int, 16]):
@@ -245,7 +245,7 @@ eni_ether_address_map = Table(
        (deny, {DEFAULT_ONLY : True})
     ],
     default_action = deny,
-    API_NAME="dash_eni"
+    api_name="dash_eni"
 )
 
 def set_acl_group_attrs(ip_addr_family: Annotated[int, 32, {TYPE : "sai_ip_addr_family_t", ISRESOURCETYPE : "true"}]):
@@ -263,7 +263,7 @@ dash_acl_group = Table(
     actions = [
        set_acl_group_attrs
     ],
-    API_NAME="dash_acl"
+    api_name = "dash_acl"
 )
 
 def apply():

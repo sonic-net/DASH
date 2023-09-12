@@ -32,7 +32,7 @@ route = Table(
         pkt_act,
         (def_act, {DEFAULT_ONLY : True})
     ],
-    API_NAME="route"
+    api_name = "route"
 )
 
 def underlay_apply():
