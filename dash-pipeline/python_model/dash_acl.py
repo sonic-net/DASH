@@ -19,12 +19,12 @@ def deny_and_continue():
 
 dash_acl_rule = Table(
     key = {
-        "meta.dash_acl_group_id": (EXACT,        {TYPE : "sai_object_id_t", ISRESOURCETYPE : "true", OBJECTS : "SAI_OBJECT_TYPE_DASH_ACL_GROUP"}),
-        "meta.src_ip_addr"      : (TERNARY_LIST, {SAI_KEY_NAME : "sip"}),
-        "meta.dst_ip_addr"      : (TERNARY_LIST, {SAI_KEY_NAME : "dip"}),
-        "meta.ip_protocol"      : (TERNARY_LIST, {SAI_KEY_NAME : "protocol"}),
-        "meta.src_l4_port"      : (RANGE_LIST,   {SAI_KEY_NAME : "src_port"}),
-        "meta.dst_l4_port"      : (RANGE_LIST,   {SAI_KEY_NAME : "dst_port"})
+        "meta.dash_acl_group_id": (EXACT,       {TYPE : "sai_object_id_t", ISRESOURCETYPE : "true", OBJECTS : "SAI_OBJECT_TYPE_DASH_ACL_GROUP"}),
+        "meta.dst_ip_addr"      : (LIST,        {SAI_KEY_NAME : "dip"}),
+        "meta.src_ip_addr"      : (LIST,        {SAI_KEY_NAME : "sip"}),
+        "meta.ip_protocol"      : (LIST,        {SAI_KEY_NAME : "protocol"}),
+        "meta.src_l4_port"      : (RANGE_LIST,  {SAI_KEY_NAME : "src_port"}),
+        "meta.dst_l4_port"      : (RANGE_LIST,  {SAI_KEY_NAME : "dst_port"})
     },
     actions = [
         permit,

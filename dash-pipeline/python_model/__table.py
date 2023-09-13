@@ -11,7 +11,7 @@ def TERNARY(entry_value, match_value, width):
     mask = entry_value["mask"]
     return (value & mask) == (match_value & mask)
 
-def TERNARY_LIST(entry_value, match_value, width):
+def LIST(entry_value, match_value, width):
     for ev in entry_value:
         if TERNARY(ev, match_value, width):
             return True
@@ -116,7 +116,7 @@ class Table:
 
     def __get_winning_criteria(self):
         for k in self.key:
-            if self.key[k]==TERNARY or self.key[k]==TERNARY_LIST or self.key[k]==RANGE or self.key[k]==RANGE_LIST:
+            if self.key[k]==TERNARY or self.key[k]==LIST or self.key[k]==RANGE or self.key[k]==RANGE_LIST:
                 return _winning_criteria_PRIORITY
         for k in self.key:
             if self.key[k]==LPM:

@@ -10,11 +10,11 @@ def default_action():
 acl = Table(
     key = {
         "meta.dash_acl_group_id" : EXACT,
-        "meta.src_ip_addr"  : TERNARY_LIST,
-        "meta.dst_ip_addr"  : TERNARY_LIST,
+        "meta.src_ip_addr"  : LIST,
+        "meta.dst_ip_addr"  : LIST,
         "meta.src_l4_port"  : RANGE_LIST,
         "meta.dst_l4_port"  : RANGE_LIST,
-        "meta.ip_protocol"  : TERNARY_LIST
+        "meta.ip_protocol"  : LIST
     },
     actions = [],
     default_action=default_action

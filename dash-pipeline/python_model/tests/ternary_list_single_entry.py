@@ -6,7 +6,7 @@ def default_action():
 outbound_routing = Table(
     key = {
         "meta.ip_protocol" : EXACT,
-        "hdr.ipv4.ihl"     : TERNARY_LIST
+        "hdr.ipv4.ihl"     : LIST
     },
     actions = [],
     default_action = default_action

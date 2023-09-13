@@ -148,7 +148,7 @@ def vxlan_decap_pa_validate(src_vnet_id: Annotated[int, 16]):
 pa_validation = Table(
     key = {
         "meta.vnet_id"     : EXACT,
-        "hdr.ipv4.src_addr": EXACT
+        "hdr.ipv4.src_addr": (EXACT, {SAI_KEY_NAME : "sip"})
     },
     actions = [
        permit,
@@ -160,8 +160,8 @@ pa_validation = Table(
 inbound_routing = Table(
     key = {
         "meta.eni_id"       : EXACT,
-        "hdr.vxlan.vni"     : (EXACT, {SAI_KEY_NAME: "VNI"}),
-        "hdr.ipv4.src_addr" : TERNARY
+        "hdr.vxlan.vni"     : (EXACT,   {SAI_KEY_NAME: "VNI"}),
+        "hdr.ipv4.src_addr" : (TERNARY, {SAI_KEY_NAME : "sip"})
     },
     actions = [
        vxlan_decap,
@@ -195,8 +195,8 @@ def set_policy_meter_class(meter_class: Annotated[int, 16]):
 
 meter_rule = Table(
     key = {
-        "meta.meter_policy_id" : (EXACT, {TYPE : "sai_object_id_t", ISRESOURCETYPE : "true", OBJECTS : "METER_POLICY"}),
-        "hdr.ipv4.dst_addr"    : TERNARY
+        "meta.meter_policy_id" : (EXACT,    {TYPE : "sai_object_id_t", ISRESOURCETYPE : "true", OBJECTS : "METER_POLICY"}),
+        "hdr.ipv4.dst_addr"    : (TERNARY,  {SAI_KEY_NAME : "dip"})
     },
     actions = [
        set_policy_meter_class,
