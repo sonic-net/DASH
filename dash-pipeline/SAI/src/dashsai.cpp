@@ -700,9 +700,11 @@ sai_status_t DashSai::create(
     if (objectType == SAI_OBJECT_TYPE_SWITCH)
         return createSwitch(objectId, attr_count, attr_list);
 
-    DASH_LOG_ERROR("not implemented for object type %d", objectType);
+    *objectId = m_objectIdManager->allocateNewObjectId(objectType, m_switchId);
 
-    return SAI_STATUS_NOT_IMPLEMENTED;
+    DASH_LOG_WARN("creating dummy object for obejct type %d: 0x%lx", objectType, *objectId);
+
+    return SAI_STATUS_SUCCESS;
 }
 
 sai_status_t DashSai::remove(
@@ -715,9 +717,9 @@ sai_status_t DashSai::remove(
     if (objectType == SAI_OBJECT_TYPE_SWITCH)
         return removeSwitch(objectId);
 
-    DASH_LOG_ERROR("not implemented for object type %d", objectType);
+    DASH_LOG_WARN("dummy remove: 0x%lx", objectId);
 
-    return SAI_STATUS_NOT_IMPLEMENTED;
+    return SAI_STATUS_SUCCESS;
 }
 
 sai_status_t DashSai::set(
@@ -731,9 +733,9 @@ sai_status_t DashSai::set(
     if (objectType == SAI_OBJECT_TYPE_SWITCH)
         return setSwitchAttribute(objectId, attr);
 
-    DASH_LOG_ERROR("attr id %d not implemented for object type %d", attr->id, objectType);
+    DASH_LOG_WARN("dummy set: 0x%lx, attr id: %d", objectId, attr->id);
 
-    return SAI_STATUS_NOT_IMPLEMENTED;
+    return SAI_STATUS_SUCCESS;
 }
 
 sai_status_t DashSai::get(

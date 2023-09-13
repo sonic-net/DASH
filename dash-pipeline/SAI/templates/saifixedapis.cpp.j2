@@ -10,20 +10,23 @@
 
 std::shared_ptr<dash::DashSai> dashSai = std::make_shared<dash::DashSai>();
 
+#define API(A,api) case SAI_API_ ## A: *api_method_table = (void*)&dash_sai_ ## api ## _api_impl; break;
+
 sai_status_t sai_api_query(
         _In_ sai_api_t api,
         _Out_ void **api_method_table)
 {
     DASH_LOG_ENTER();
 
-    switch((int)api) {
-        case SAI_API_SWITCH:
-            *api_method_table = (void *)&dash_sai_switch_api_impl;
-            break;
-
-        case SAI_API_PORT:
-            *api_method_table = (void *)&dash_sai_port_api_impl;
-            break;
+    switch((int)api)
+    {
+        API(HOSTIF,hostif);
+        API(NEIGHBOR,neighbor);
+        API(NEXT_HOP,next_hop);
+        API(POLICER,policer);
+        API(PORT,port);
+        API(ROUTER_INTERFACE,router_interface);
+        API(SWITCH,switch);
 
 {% for api in api_names %}
         case SAI_API_{{ api | upper }}:

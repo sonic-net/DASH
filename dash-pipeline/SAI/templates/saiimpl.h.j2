@@ -4,8 +4,13 @@
 
 #define DASH_PRIVATE __attribute__((visibility("hidden")))
 
-DASH_PRIVATE extern sai_switch_api_t dash_sai_switch_api_impl;
-DASH_PRIVATE extern sai_port_api_t dash_sai_port_api_impl;
+DASH_PRIVATE extern sai_hostif_api_t                  dash_sai_hostif_api_impl;
+DASH_PRIVATE extern sai_neighbor_api_t                dash_sai_neighbor_api_impl;
+DASH_PRIVATE extern sai_next_hop_api_t                dash_sai_next_hop_api_impl;
+DASH_PRIVATE extern sai_policer_api_t                 dash_sai_policer_api_impl;
+DASH_PRIVATE extern sai_port_api_t                    dash_sai_port_api_impl;
+DASH_PRIVATE extern sai_router_interface_api_t        dash_sai_router_interface_api_impl;
+DASH_PRIVATE extern sai_switch_api_t                  dash_sai_switch_api_impl;
 
 {% for api in api_names %}
 DASH_PRIVATE extern sai_{{ api }}_api_t dash_sai_{{ api }}_api_impl;
@@ -82,4 +87,9 @@ DASH_PRIVATE extern std::shared_ptr<dash::DashSai> dashSai;
     dash_remove_ ## ot,               \
     dash_set_ ## ot ##_attribute,     \
     dash_get_ ## ot ##_attribute,
+
+#define DASH_GENERIC_STATS_API(ot)    \
+    .get_ ## ot ## _stats = 0,        \
+    .get_ ## ot ## _stats_ext = 0,    \
+    .clear_ ## ot ## _stats = 0,
 
