@@ -60,7 +60,7 @@ int main(int argc, char **argv)
     QUERY_STATUS_CHECK(status, SAI_API_DASH_ENI);
 
     sai_direction_lookup_entry_t dle = {};
-    dle.switch_id = 0; // TODO switch_id, it fails when switch id is non zero
+    dle.switch_id = switch_id;
     dle.vni = 60;
 
     attr.id = SAI_DIRECTION_LOOKUP_ENTRY_ATTR_ACTION;
