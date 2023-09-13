@@ -33,6 +33,7 @@ dash_acl_rule = Table(
         deny_and_continue
     ],
     default_action = deny,
+    per_entry_stats = True,
     api_name="dash_acl"
 )
 

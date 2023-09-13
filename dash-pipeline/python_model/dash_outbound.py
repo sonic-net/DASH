@@ -81,9 +81,9 @@ def route_service_tunnel(is_overlay_dip_v4_or_v6      : Annotated[int, 1],
 
 outbound_routing = Table(
     key = {
-        "meta.eni_id"          : (EXACT,  {SAI_KEY_NAME : "eni_id"}),
+        "meta.eni_id"          : (EXACT,  {SAI_KEY_NAME: "eni_id"}),
         "meta.is_overlay_ip_v6": (EXACT,  {SAI_KEY_NAME: "is_destination_v4_or_v6"}),
-        "meta.dst_ip_addr"     : (LPM,    {SAI_KEY_NAME : "destination"})
+        "meta.dst_ip_addr"     : (LPM,    {SAI_KEY_NAME: "destination"})
     },
     actions = [
        route_vnet,
@@ -92,7 +92,8 @@ outbound_routing = Table(
        route_service_tunnel,
        drop
     ],
-    default_action = drop
+    default_action = drop,
+    per_entry_stats = True
 )
 
 def set_tunnel_mapping(underlay_dip         : Annotated[int, 32],
@@ -117,7 +118,8 @@ outbound_ca_to_pa = Table(
        set_tunnel_mapping,
        (drop, {DEFAULT_ONLY : True})
     ],
-    default_action = drop
+    default_action = drop,
+    per_entry_stats = True
 )
 
 def set_vnet_attrs(vni: Annotated[int, 24]):

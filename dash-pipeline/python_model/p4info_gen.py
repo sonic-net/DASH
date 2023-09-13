@@ -178,6 +178,14 @@ def make_p4info(ignore_tables):
     for e in dash_enum_list:
         serializableEnums_node[e.__name__] = make_enum_node(e)
     p4info["typeInfo"] = {"serializableEnums" : serializableEnums_node}
+
+    directCounters_node = []
+    for table_node in p4info["tables"]:
+        table_id = table_node["preamble"]["id"]
+        if id_map[table_id].per_entry_stats:
+            directCounters_node.append({"directTableId": table_id})
+    p4info["directCounters"] = directCounters_node
+
     return p4info
 
 
