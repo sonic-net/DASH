@@ -31,6 +31,18 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    sai_switch_api_t *switch_api;
+    status = sai_api_query((sai_api_t)SAI_API_SWITCH, (void**)&switch_api);
+    QUERY_STATUS_CHECK(status, SAI_API_SWITCH);
+
+    status = switch_api->create_switch(&switch_id, 0, NULL);
+
+    if (status != SAI_STATUS_SUCCESS)
+    {
+        std::cout << "Failed to create switch" << std::endl;
+        return 1;
+    }
+
     sai_dash_direction_lookup_api_t *dash_direction_lookup_api;
     status = sai_api_query((sai_api_t)SAI_API_DASH_DIRECTION_LOOKUP, (void**)&dash_direction_lookup_api);
     QUERY_STATUS_CHECK(status, SAI_API_DASH_DIRECTION_LOOKUP);
@@ -48,7 +60,7 @@ int main(int argc, char **argv)
     QUERY_STATUS_CHECK(status, SAI_API_DASH_ENI);
 
     sai_direction_lookup_entry_t dle = {};
-    dle.switch_id = switch_id;
+    dle.switch_id = 0; // TODO switch_id, it fails when switch id is non zero
     dle.vni = 60;
 
     attr.id = SAI_DIRECTION_LOOKUP_ENTRY_ATTR_ACTION;
