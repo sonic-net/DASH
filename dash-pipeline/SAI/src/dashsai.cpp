@@ -702,7 +702,7 @@ sai_status_t DashSai::create(
 
     *objectId = m_objectIdManager->allocateNewObjectId(objectType, m_switchId);
 
-    DASH_LOG_WARN("creating dummy object for obejct type %d: 0x%lx", objectType, *objectId);
+    DASH_LOG_WARN("creating dummy object for object type %d: 0x%lx", objectType, *objectId);
 
     return SAI_STATUS_SUCCESS;
 }

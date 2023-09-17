@@ -126,7 +126,7 @@ namespace dash
             /**
              * @brief Object index indexer map.
              *
-             * Each obejct type have it's own starting index from zero for easy
+             * Each object type have its own starting index from zero for easy
              * count how many objects of each type there are allocated.
              */
             std::map<sai_object_type_t, uint64_t> m_indexer;
