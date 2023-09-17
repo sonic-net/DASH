@@ -42,6 +42,13 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     //matchedParams = 0;
     objId = dashSai->getNextObjectId((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }});
 
+    if (objId == SAI_NULL_OBJECT_ID)
+    {
+        DASH_LOG_ERROR("getNextObjectId failed for SAI_OBJECT_TYPE_{{ table.name | upper }}");
+        // TODO clean resources
+        return SAI_STATUS_FAILURE;
+    }
+
     matchActionEntry->set_table_id(tableId);
 
     {% if table['keys'] | length== 1 %}
@@ -54,10 +61,13 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     {% else %}
     // SAI object table with multiple P4 table keys
     // Copy P4 table keys from appropriate SAI attributes
-    for (uint32_t i = 0; i < attr_count; i++) {
-        switch(attr_list[i].id) {
+    for (uint32_t i = 0; i < attr_count; i++)
+    {
+        switch(attr_list[i].id)
+        {
             {% for key in table['keys'] %}
-            case SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}: {
+            case SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}:
+            {
                 auto mf = matchActionEntry->add_match();
                 mf->set_field_id({{key.id}});
                 {% if key.match_type == 'exact' %}
@@ -102,16 +112,19 @@ static sai_status_t dash_sai_create_{{ table.name }}(
             {% if table['keys'] | selectattr('match_type', 'ne', 'exact') | list | length > 0 %}
             {% if table['keys'] | selectattr('match_type', 'eq', 'lpm') | list | length == 0 %}
             // Table has non lpm ternary keys - add priority field
-            case SAI_{{ table.name | upper }}_ATTR_PRIORITY: {
+            case SAI_{{ table.name | upper }}_ATTR_PRIORITY:
+            {
                 matchActionEntry->set_priority(attr_list[i].value.u32);
                 break;
             }
             {% endif %}
             {% endif %}
+            default:
+                DASH_LOG_ERROR("attribute [%d] %d not supported yet", i, attr_list[i].id);
+                break;
         }
     }
     {% endif %}
-
 
     // If there is only one action, simply set it.
     // Else, search in the attrs.
@@ -122,31 +135,41 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     {% endfor %}
     {% else %}
     // Search the action
-    for (uint32_t i = 0; i < attr_count; i++) {
+    for (uint32_t i = 0; i < attr_count; i++)
+    {
         if (SAI_{{ table.name | upper }}_ATTR_ACTION == attr_list[i].id)
         {
-            switch(attr_list[i].value.s32) {
+            switch(attr_list[i].value.s32)
+            {
                 {% for action in table.actions %}
-                case SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}: {
+                case SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}:
+                {
                     actionId = {{action.id}};
                     //expectedParams = {{ action.params|length }};
                     break;
                 }
                 {% endfor %}
+                default:
+                    DASH_LOG_ERROR("attribute value [%d] %d not supported yet", i, attr_list[i].value.s32);
+                    break;
             }
             // only one action
             break;
         }
     }
     {% endif %}
+
     action->set_action_id(actionId);
 
-    for (uint32_t i = 0; i < attr_count; i++) {
-        switch(attr_list[i].id) {
+    for (uint32_t i = 0; i < attr_count; i++)
+    {
+        switch(attr_list[i].id)
+        {
             {% for param in table.actionParams %}
             {% if param.skipattr == 'true' %}
             {% else %}
-            case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}: {
+            case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}:
+            {
                 auto param = action->add_params();
                 param->set_param_id({{param.id}});
                 {{param.field}}SetVal(attr_list[i].value, param, {{param.bitwidth}});
@@ -164,6 +187,9 @@ static sai_status_t dash_sai_create_{{ table.name }}(
             }
             {% endif %}
             {% endfor %}
+            default:
+                DASH_LOG_ERROR("attribute [%d] %d not supported yet", i, attr_list[i].id);
+                break;
         }
     }
 
@@ -198,14 +224,17 @@ static sai_status_t dash_sai_create_{{ table.name }}s(
 
     sai_status_t agg_status = SAI_STATUS_SUCCESS;
 
-    for (uint32_t i = 0; i < object_count; i++) {
+    for (uint32_t i = 0; i < object_count; i++)
+    {
         object_statuses[i] = dash_sai_create_{{ table.name }}(&object_id[i], switch_id, attr_count[i], attr_list[i]);
 
-        if (object_statuses[i] != SAI_STATUS_SUCCESS) {
+        if (object_statuses[i] != SAI_STATUS_SUCCESS)
+        {
             agg_status = SAI_STATUS_FAILURE;
         }
 
-        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR) {
+        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR)
+        {
             return agg_status;
         }
     }
@@ -213,7 +242,8 @@ static sai_status_t dash_sai_create_{{ table.name }}s(
     return agg_status;
 }
 
-static sai_status_t dash_sai_remove_{{ table.name }}(_In_ sai_object_id_t {{ table.name }}_id)
+static sai_status_t dash_sai_remove_{{ table.name }}(
+        _In_ sai_object_id_t {{ table.name }}_id)
 {
     DASH_LOG_ENTER();
 
@@ -235,14 +265,17 @@ static sai_status_t dash_sai_remove_{{ table.name }}s(
 
     sai_status_t agg_status = SAI_STATUS_SUCCESS;
 
-    for (uint32_t i = 0; i < object_count; i++) {
+    for (uint32_t i = 0; i < object_count; i++)
+    {
         object_statuses[i] = dash_sai_remove_{{ table.name }}(object_id[i]);
 
-        if (object_statuses[i] != SAI_STATUS_SUCCESS) {
+        if (object_statuses[i] != SAI_STATUS_SUCCESS)
+        {
             agg_status = SAI_STATUS_FAILURE;
         }
 
-        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR) {
+        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR)
+        {
             return agg_status;
         }
     }
@@ -330,15 +363,21 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     {% endfor %}
     {% else %}
     // Search the action
-    for (uint32_t i = 0; i < attr_count; i++) {
-        switch(attr_list[i].value.s32) {
+    for (uint32_t i = 0; i < attr_count; i++)
+    {
+        switch(attr_list[i].value.s32)
+        {
             {% for action in table.actions %}
-            case SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}: {
+            case SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}:
+            {
                 actionId = {{action.id}};
                 //expectedParams = {{ action.params|length }};
                 break;
             }
             {% endfor %}
+            default:
+                DASH_LOG_ERROR("attribute value [%d] %d not supported yet", i, attr_list[i].value.s32);
+                break;
         }
         // only one action
         break;
@@ -346,12 +385,15 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     {% endif %}
     action->set_action_id(actionId);
 
-    for (uint32_t i = 0; i < attr_count; i++) {
-        switch(attr_list[i].id) {
+    for (uint32_t i = 0; i < attr_count; i++)
+    {
+        switch(attr_list[i].id)
+        {
             {% for param in table.actionParams %}
             {% if param.skipattr == 'true' %}
             {% else %}
-            case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}: {
+            case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}:
+            {
                 auto param = action->add_params();
                 param->set_param_id({{param.id}});
                 {{param.field}}SetVal(attr_list[i].value, param, {{param.bitwidth}});
@@ -369,6 +411,9 @@ static sai_status_t dash_sai_create_{{ table.name }}(
             }
             {% endif %}
             {% endfor %}
+            default:
+                DASH_LOG_ERROR("attribute [%d] %d not supported yet", i, attr_list[i].id);
+                break;
         }
     }
 
@@ -379,7 +424,9 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     //}
     // TODO: ternaly needs to set priority
     retCode = dashSai->mutateTableEntry(matchActionEntry, p4::v1::Update_Type_INSERT);
-    if (grpc::StatusCode::OK == retCode) {
+
+    if (grpc::StatusCode::OK == retCode)
+    {
         return SAI_STATUS_SUCCESS;
     }
 ErrRet:
@@ -398,20 +445,22 @@ static sai_status_t dash_sai_create_{{ table.name | replace("entry", "entries") 
 
     sai_status_t agg_status = SAI_STATUS_SUCCESS;
 
-    for (uint32_t i = 0; i < object_count; i++) {
+    for (uint32_t i = 0; i < object_count; i++)
+    {
         object_statuses[i] = dash_sai_create_{{ table.name }}(&{{ table.name }}[i], attr_count[i], attr_list[i]);
 
-        if (object_statuses[i] != SAI_STATUS_SUCCESS) {
+        if (object_statuses[i] != SAI_STATUS_SUCCESS)
+        {
             agg_status = SAI_STATUS_FAILURE;
         }
 
-        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR) {
+        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR)
+        {
             return agg_status;
         }
     }
 
     return agg_status;
-
 }
 
 static sai_status_t dash_sai_remove_{{ table.name }}(
@@ -422,7 +471,7 @@ static sai_status_t dash_sai_remove_{{ table.name }}(
     std::shared_ptr<p4::v1::TableEntry> matchActionEntry = std::make_shared<p4::v1::TableEntry>();
     pi_p4_id_t tableId = {{table.id}};
     matchActionEntry->set_table_id(tableId);
-    auto tableEntry =  {{ table.name }};
+    auto tableEntry = {{ table.name }};
     grpc::StatusCode retCode;
 
     {% for key in table['keys'] %}
@@ -480,14 +529,17 @@ static sai_status_t dash_sai_remove_{{ table.name | replace("entry", "entries") 
 
     sai_status_t agg_status = SAI_STATUS_SUCCESS;
 
-    for (uint32_t i = 0; i < object_count; i++) {
+    for (uint32_t i = 0; i < object_count; i++)
+    {
         object_statuses[i] = dash_sai_remove_{{ table.name }}(&{{ table.name }}[i]);
 
-        if (object_statuses[i] != SAI_STATUS_SUCCESS) {
+        if (object_statuses[i] != SAI_STATUS_SUCCESS)
+        {
             agg_status = SAI_STATUS_FAILURE;
         }
 
-        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR) {
+        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR)
+        {
             return agg_status;
         }
     }
@@ -551,7 +603,7 @@ sai_{{ app_name }}_api_t dash_sai_{{ app_name }}_api_impl = {
 {% for table in tables %}
 {% if table.name in registered_group %}{% continue %}{% endif %}
 {% do registered_group.append( table.name ) %}
-    .create_{{ table.name }} =  dash_sai_create_{{ table.name }},
+    .create_{{ table.name }} = dash_sai_create_{{ table.name }},
     .remove_{{ table.name }} = dash_sai_remove_{{ table.name }},
     .set_{{ table.name }}_attribute = dash_sai_set_{{ table.name }}_attribute,
     .get_{{ table.name }}_attribute = dash_sai_get_{{ table.name }}_attribute,

@@ -6,9 +6,6 @@ using namespace dash;
 
 #define DASH_BMV2_CPU_QOS_NUMBER_OF_QUEUES 0
 
-#define DASH_OBJECT_SHFT 48
-#define DASH_MAKE_OID(objtype, objval) (sai_object_id_t)(((sai_object_id_t)objtype<<DASH_OBJECT_SHFT)+(sai_object_id_t)objval)
-
 #define DASH_CHECK_API_INITIALIZED()                                        \
     if (!m_apiInitialized) {                                                \
         DASH_LOG_ERROR("%s: api not initialized", __PRETTY_FUNCTION__);     \
@@ -31,21 +28,19 @@ using namespace dash;
 
 #define MUTEX std::lock_guard<std::mutex> _lock(m_tableLock);
 
-// TODO replace DASH_MAKE_OID with ObjectIdManager
-
 DashSai::DashSai():
     m_apiInitialized(false)
 {
     DASH_LOG_ENTER();
 
-    // those oids are constant
+    // TODO move to switch state
 
-    m_switchId = DASH_MAKE_OID(SAI_OBJECT_TYPE_SWITCH, 1);
-    m_defaultCpuPortId = DASH_MAKE_OID(SAI_OBJECT_TYPE_PORT, 64);
-    m_defaultVlanId = DASH_MAKE_OID(SAI_OBJECT_TYPE_VLAN, 1);
-    m_defaultVrfId = DASH_MAKE_OID(SAI_OBJECT_TYPE_VIRTUAL_ROUTER, 1);
-    m_default1QBridgeId = DASH_MAKE_OID(SAI_OBJECT_TYPE_BRIDGE, 1);
-    m_defaultTrapGroup = DASH_MAKE_OID(SAI_OBJECT_TYPE_HOSTIF_TRAP_GROUP, 1);
+    m_switchId = SAI_OBJECT_TYPE_NULL;
+    m_defaultCpuPortId = SAI_OBJECT_TYPE_NULL;
+    m_defaultVlanId = SAI_OBJECT_TYPE_NULL;
+    m_defaultVrfId = SAI_OBJECT_TYPE_NULL;
+    m_default1QBridgeId = SAI_OBJECT_TYPE_NULL;
+    m_defaultTrapGroup = SAI_OBJECT_TYPE_NULL;
 }
 
 DashSai::~DashSai()
@@ -78,22 +73,6 @@ sai_status_t DashSai::apiInitialize(
     m_cfg = dash::Config::getConfig(services);
 
     DASH_LOG_NOTICE("config: %s", m_cfg->getConfigString().c_str());
-
-    m_portList.clear();
-
-    for (uint32_t i = 1; i <= m_cfg->m_bmv2NumPorts; i++)
-    {
-        m_portList.push_back(DASH_MAKE_OID(SAI_OBJECT_TYPE_PORT,i));
-    }
-
-    if (m_cfg->m_bmv2NumPorts != (uint32_t)m_portList.size())
-    {
-        DASH_LOG_ERROR("FATAL: number of ports is different: config: %u vs port list: %u",
-                m_cfg->m_bmv2NumPorts,
-                (uint32_t)m_portList.size());
-
-        return SAI_STATUS_FAILURE;
-    }
 
     const grpc::string grpcTarget = m_cfg->m_grpcTarget;
     const char* test_json = m_cfg->m_pipelineJson.c_str();
@@ -189,6 +168,8 @@ sai_status_t DashSai::apiInitialize(
         config->release_p4info();
     }
 
+    m_objectIdManager = std::make_shared<ObjectIdManager>();
+
     m_apiInitialized = true;
 
     return SAI_STATUS_SUCCESS;
@@ -201,11 +182,9 @@ sai_status_t DashSai::apiUninitialize(void)
 
     m_cfg = nullptr;
 
-    m_portList.clear();
+    m_portList.clear(); // TODO move to switch state class
 
     m_tableEntryMap.clear();
-
-    m_nextId = 0;
 
     m_grpcChannel = nullptr;
 
@@ -214,6 +193,8 @@ sai_status_t DashSai::apiUninitialize(void)
     m_apiInitialized = false;
 
     m_serviceMethodTable = nullptr;
+
+    m_objectIdManager = nullptr;
 
     return SAI_STATUS_SUCCESS;
 }
@@ -230,7 +211,7 @@ sai_object_type_t DashSai::objectTypeQuery(
         return SAI_OBJECT_TYPE_NULL;
     }
 
-    return sai_object_type_t(object_id >> (DASH_OBJECT_SHFT));
+    return m_objectIdManager->objectTypeQuery(object_id);
 }
 
 sai_object_id_t DashSai::switchIdQuery(
@@ -239,12 +220,7 @@ sai_object_id_t DashSai::switchIdQuery(
     DASH_LOG_ENTER();
     DASH_CHECK_API_INITIALIZED();
 
-    if (object_id == SAI_NULL_OBJECT_ID)
-    {
-        return SAI_NULL_OBJECT_ID;
-    }
-
-    return m_switchId;
+    return m_objectIdManager->switchIdQuery(object_id);
 }
 
 sai_status_t DashSai::createSwitch(
@@ -255,9 +231,44 @@ sai_status_t DashSai::createSwitch(
     DASH_LOG_ENTER();
     DASH_CHECK_API_INITIALIZED();
 
+    std::string hardwareInfo;
+
     for (uint32_t i = 0; i < attr_count; i++)
     {
         DASH_LOG_WARN("attr id %d is NOT IMPLEMENTED, ignored", attr_list[i].id);
+
+        if (attr_list[i].id == SAI_SWITCH_ATTR_SWITCH_HARDWARE_INFO)
+        {
+            DASH_LOG_WARN("attr SAI_SWITCH_ATTR_SWITCH_HARDWARE_INFO specified, but ignored, set to '%s', FIXME",
+                    hardwareInfo.c_str());
+        }
+    }
+
+    // TODO add switch state and init switch method
+
+    m_switchId = m_objectIdManager->allocateNewSwitchObjectId(hardwareInfo);
+
+    if (m_switchId == SAI_NULL_OBJECT_ID)
+    {
+        DASH_LOG_ERROR("switch OID allocation failed");
+
+        return SAI_STATUS_FAILURE;
+    }
+
+    // TODO move to switch state
+
+    m_defaultCpuPortId = m_objectIdManager->allocateNewObjectId(SAI_OBJECT_TYPE_PORT, m_switchId);
+    m_defaultVlanId = m_objectIdManager->allocateNewObjectId(SAI_OBJECT_TYPE_VLAN, m_switchId);
+    m_defaultVrfId = m_objectIdManager->allocateNewObjectId(SAI_OBJECT_TYPE_VIRTUAL_ROUTER, m_switchId);
+    m_default1QBridgeId = m_objectIdManager->allocateNewObjectId(SAI_OBJECT_TYPE_BRIDGE, m_switchId);
+    m_defaultTrapGroup = m_objectIdManager->allocateNewObjectId(SAI_OBJECT_TYPE_HOSTIF_TRAP_GROUP, m_switchId);
+
+    m_portList.clear();
+
+    for (uint32_t i = 1; i <= m_cfg->m_bmv2NumPorts; i++)
+    {
+        // TODO in switch state must be internally calling create on this object
+        m_portList.push_back(m_objectIdManager->allocateNewObjectId(SAI_OBJECT_TYPE_PORT, m_switchId));
     }
 
     *switch_id = m_switchId;
@@ -279,6 +290,8 @@ sai_status_t DashSai::removeSwitch(
 
         return SAI_STATUS_INVALID_PARAMETER;
     }
+
+    m_objectIdManager->releaseObjectId(switch_id);
 
     // dummy switch remove
 
@@ -459,7 +472,15 @@ sai_status_t DashSai::getPortAttribute(
 
                 attr->value.s32 = SAI_PORT_OPER_STATUS_UP;
 
-                DASH_LOG_NOTICE("[%d] setting SAI_PORT_ATTR_OPER_STATUS=SAI_PORT_OPER_STATUS_UP for port %lx", i, port_id);
+                DASH_LOG_NOTICE("[%d] setting SAI_PORT_ATTR_OPER_STATUS=SAI_PORT_OPER_STATUS_UP for port 0x%lx", i, port_id);
+
+                break;
+
+            case SAI_PORT_ATTR_PORT_VLAN_ID:
+
+                attr->value.u16 = 1;
+
+                DASH_LOG_NOTICE("[%d] setting SAI_PORT_ATTR_PORT_VLAN_ID=1 for port 0x%lx", i, port_id);
 
                 break;
 
@@ -600,6 +621,7 @@ bool DashSai::insertInTable(
     return true;
 }
 
+// TODO needs to be converted to create (with attributes)
 sai_object_id_t DashSai::getNextObjectId(
         _In_ sai_object_type_t objectType)
 {
@@ -612,7 +634,14 @@ sai_object_id_t DashSai::getNextObjectId(
         return SAI_NULL_OBJECT_ID;
     }
 
-    return DASH_MAKE_OID(objectType, ++m_nextId);
+    if (m_switchId == SAI_NULL_OBJECT_ID)
+    {
+        DASH_LOG_ERROR("switch is not created, create switch first");
+
+        return SAI_NULL_OBJECT_ID;
+    }
+
+    return m_objectIdManager->allocateNewObjectId(objectType, m_switchId);
 }
 
 bool DashSai::removeFromTable(
@@ -654,4 +683,77 @@ bool DashSai::removeFromTable(
     m_tableEntryMap.erase(id);
 
     return retCode == grpc::StatusCode::OK;
+}
+
+// QUAD generic api implementation
+
+sai_status_t DashSai::create(
+        _In_ sai_object_type_t objectType,
+        _Out_ sai_object_id_t* objectId,
+        _In_ sai_object_id_t switchId,
+        _In_ uint32_t attr_count,
+        _In_ const sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
+    DASH_CHECK_API_INITIALIZED();
+
+    if (objectType == SAI_OBJECT_TYPE_SWITCH)
+        return createSwitch(objectId, attr_count, attr_list);
+
+    *objectId = m_objectIdManager->allocateNewObjectId(objectType, m_switchId);
+
+    DASH_LOG_WARN("creating dummy object for object type %d: 0x%lx", objectType, *objectId);
+
+    return SAI_STATUS_SUCCESS;
+}
+
+sai_status_t DashSai::remove(
+        _In_ sai_object_type_t objectType,
+        _In_ sai_object_id_t objectId)
+{
+    DASH_LOG_ENTER();
+    DASH_CHECK_API_INITIALIZED();
+
+    if (objectType == SAI_OBJECT_TYPE_SWITCH)
+        return removeSwitch(objectId);
+
+    DASH_LOG_WARN("dummy remove: 0x%lx", objectId);
+
+    return SAI_STATUS_SUCCESS;
+}
+
+sai_status_t DashSai::set(
+        _In_ sai_object_type_t objectType,
+        _In_ sai_object_id_t objectId,
+        _In_ const sai_attribute_t *attr)
+{
+    DASH_LOG_ENTER();
+    DASH_CHECK_API_INITIALIZED();
+
+    if (objectType == SAI_OBJECT_TYPE_SWITCH)
+        return setSwitchAttribute(objectId, attr);
+
+    DASH_LOG_WARN("dummy set: 0x%lx, attr id: %d", objectId, attr->id);
+
+    return SAI_STATUS_SUCCESS;
+}
+
+sai_status_t DashSai::get(
+        _In_ sai_object_type_t objectType,
+        _In_ sai_object_id_t objectId,
+        _In_ uint32_t attr_count,
+        _Inout_ sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
+    DASH_CHECK_API_INITIALIZED();
+
+    if (objectType == SAI_OBJECT_TYPE_PORT)
+        return getPortAttribute(objectId, attr_count, attr_list);
+
+    if (objectType == SAI_OBJECT_TYPE_SWITCH)
+        return getSwitchAttribute(objectId, attr_count, attr_list);
+
+    DASH_LOG_ERROR("not implemented for object type %d", objectType);
+
+    return SAI_STATUS_NOT_IMPLEMENTED;
 }
