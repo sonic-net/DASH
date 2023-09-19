@@ -1,32 +1,26 @@
-all:vnet_out
-vnet_out: vnet_out.cpp /SAI/lib/libsai.so
+
+INC=-I /SAI/SAI/inc -I /SAI/SAI/experimental/
+SRC=vnet_out.cpp
+OBJ=$(SRC:.cpp=.o)
+
+all: vnet_out
+
+%.o: %.cpp
+	g++ $(INC) -c $< -o $@
+
+vnet_out: $(OBJ) /SAI/lib/libsai.so
 	echo "building $@ ..."
-	g++ \
-	    -I /SAI/SAI/inc \
-	    -I /SAI/SAI/experimental/ \
-	    -o vnet_out \
-	    vnet_out.cpp \
+	g++ $(OBJ) \
+	    -o $@ \
 	    -Wl,-rpath,/SAI/lib \
 	    -L/SAI/lib/ \
 	    -lsai \
 	    -L/usr/local/lib/ \
-	    -lpthread \
-	    -lpiprotogrpc \
-	    -lpiprotobuf \
 	    -lprotobuf \
-	    -lgrpc++ \
-	    -lgrpc \
-	    -lpiall \
-	    -lpi_dummy \
-	    -lpthread \
-	    -labsl_synchronization \
-	    -labsl_status \
-		-labsl_raw_hash_set \
-		-lgpr \
-		-lre2 \
-		-lssl \
-		-laddress_sorting \
+		-lpiprotobuf \
+		-lpiprotogrpc \
+		-lgrpc++ \
 	    -g
 
 clean:
-	rm -rf vnet_out
+	rm -f vnet_out *.o
