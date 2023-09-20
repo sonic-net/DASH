@@ -212,6 +212,14 @@ SAI/lib/libsai.so: sai-headers sai-meta
 libsai-clean:
 	rm -rf SAI/lib/*
 
+libsai-debs: libsai
+	@echo "build dash libsai debian packages ..."
+	cd SAI/debian && make
+
+.PHONY: libsai-debs-clean
+libsai-debs-clean:
+	cd SAI/debian && make clean
+
 .PHONY:sai-clean
 sai-clean: SAI/SAI libsai-clean saithrift-server-clean
 	@echo "Restoring SAI subdirectories to baseline..."

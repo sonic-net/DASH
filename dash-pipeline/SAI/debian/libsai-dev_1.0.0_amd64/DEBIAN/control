@@ -1,0 +1,8 @@
+Package: libsai-dev
+Source: dash
+Version: 1.0.0
+Architecture: amd64
+Maintainer: Kamil Cudnik <kcudnik@microsoft.com>
+Section: libdevel
+Priority: optional
+Description: This package contains development files for DASH libsai
