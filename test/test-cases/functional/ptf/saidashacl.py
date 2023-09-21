@@ -6,30 +6,11 @@ from sai_base_test import *
 from sai_dash_utils import VnetAPI
 
 
-class Tag(object):
-    def __init__(self, saithrift, ip, mask, tag):
-        self.saithrift = saithrift
-        self.ip = ip
-        self.mask = mask
-        self.tag = tag
-        self.prefix = sai_thrift_ip_prefix_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
-                                        addr=sai_thrift_ip_addr_t(ip4=self.ip),
-                                        mask=sai_thrift_ip_addr_t(ip4=self.mask))
-        self.src_tag_entry = sai_thrift_src_tag_entry_t(switch_id=self.saithrift.switch_id, sip=self.prefix)
-        self.saithrift.create_entry(sai_thrift_create_src_tag_entry,
-                                    sai_thrift_remove_src_tag_entry, self.src_tag_entry, tag_map=self.tag)
-        self.dst_tag_entry = sai_thrift_dst_tag_entry_t(switch_id=self.saithrift.switch_id, dip=self.prefix)
-        self.saithrift.create_entry(sai_thrift_create_dst_tag_entry,
-                                    sai_thrift_remove_dst_tag_entry, self.dst_tag_entry, tag_map=self.tag)
-
-
 class AclRuleTest(object):
     def __init__(self,
                  saithrift,
                  acl_group,
                  protocol = 17,
-                 stag = None,
-                 dtag = None,
                  sip = None,
                  dip = None,
                  src_port = 1234,
@@ -47,8 +28,6 @@ class AclRuleTest(object):
         self.priority = priority
         self.action = action
         self.exp_receive = exp_receive
-        self.stag = stag
-        self.dtag = dtag
         self.src_port = src_port
         self.dst_port = dst_port
         if self.dip:
@@ -62,10 +41,6 @@ class AclRuleTest(object):
                                       sai_thrift_remove_dash_acl_rule,
                                       dash_acl_group_id=self.acl_group,
                                       protocol=self.protocol,
-                                      src_tag=self.stag,
-                                      src_tag_mask=self.stag,
-                                      dst_tag=self.dtag,
-                                      dst_tag_mask=self.dtag,
                                       sip=sip,
                                       dip=dip,
                                       src_port = self.src_port,
@@ -277,58 +252,6 @@ class SaiThriftDashAclTest(VnetAPI):
                                       priority=2,
                                       action=SAI_DASH_ACL_RULE_ACTION_DENY,
                                       exp_receive=False))
-
-        self.tag1 = Tag(self, ip = "10.1.2.4", mask = "255.255.255.254", tag = 0x11)
-        self.tests.append(AclRuleTest(self,
-                                      acl_group=self.out_v4_stage1_acl_group_id,
-                                      protocol=17,
-                                      stag = 0x1,
-                                      priority=3,
-                                      src_port=1234,
-                                      action=SAI_DASH_ACL_RULE_ACTION_PERMIT,
-                                      exp_receive=True,
-                                      test_sip = "10.1.2.4",
-                                      test_dip = self.dst_ca_ip))
-        self.tests.append(AclRuleTest(self,
-                                      acl_group=None,
-                                      exp_receive=True,
-                                      src_port=1234,
-                                      test_sip = "10.1.2.5",
-                                      test_dip = self.dst_ca_ip))
-        self.tests.append(AclRuleTest(self,
-                                      acl_group=self.out_v4_stage1_acl_group_id,
-                                      protocol=17,
-                                      stag = 0x10,
-                                      priority=3,
-                                      src_port=4321,
-                                      action=SAI_DASH_ACL_RULE_ACTION_DENY,
-                                      exp_receive=False,
-                                      test_sip = "10.1.2.4",
-                                      test_dip = self.dst_ca_ip))
-        self.tests.append(AclRuleTest(self,
-                                      acl_group=None,
-                                      exp_receive=False,
-                                      src_port=4321,
-                                      test_sip = "10.1.2.5",
-                                      test_dip = self.dst_ca_ip))
-        self.tests.append(AclRuleTest(self,
-                                      acl_group=None,
-                                      exp_receive=False,
-                                      src_port=1111,
-                                      test_sip = "10.1.2.4",
-                                      test_dip = self.dst_ca_ip))
-
-        self.tag2 = Tag(self, ip = self.dst_ca_ip, mask = "255.255.255.255", tag = 0x100)
-        self.tests.append(AclRuleTest(self,
-                                      acl_group=self.out_v4_stage1_acl_group_id,
-                                      protocol=17,
-                                      dtag = 0x100,
-                                      priority=3,
-                                      src_port=2222,
-                                      action=SAI_DASH_ACL_RULE_ACTION_PERMIT,
-                                      exp_receive=True,
-                                      test_sip = "10.1.2.6",
-                                      test_dip = self.dst_ca_ip))
 
     def setUp(self):
         super(SaiThriftDashAclTest, self).setUp()

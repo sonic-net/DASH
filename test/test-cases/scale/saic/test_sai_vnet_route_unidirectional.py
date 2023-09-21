@@ -7,6 +7,7 @@ from pathlib import Path
 from pprint import pprint
 import time
 import pytest
+import saichallenger.common.sai_dataplane.snappi.snappi_traffic_utils as stu
 from saichallenger.common.sai_dataplane.utils.ptf_testutils import (send_packet,
                                                                     simple_udp_packet,
                                                                     simple_vxlan_packet,
@@ -153,28 +154,59 @@ class TestSaiVnetRoute:
     @pytest.mark.snappi
     def test_vnet_route_packet_unidirectional_forwarding_with_route_match(self, dpu, dataplane):
         """Verify packet forwarding with route match"""
- 
-        """
-        Verify same config with high-rate traffic.
-        packets_per_flow=10 means that each possible packet path will be verified using 10 packet.
-        NOTE: For BMv2 we keep here PPS limitation
-        """
-        dh.scale_vnet_outbound_flows(dataplane, TEST_VNET_ROUTE_UNIDIRECTIONAL_CONFIG, packets_per_flow=10, pps_per_flow=10)
+
         dataplane.set_config()
-        dataplane.start_traffic()
-        # stu.wait_for(lambda: dh.check_flow_packets_metrics(dataplane, dataplane.flows[0], show=True)[0],
-        #             "Test", timeout_seconds=10)
         
-        time.sleep(10)
-        rows = dataplane.get_all_stats()
-        print("{}".format(rows[0].name))
-        print("--------------------------")
-        print("Tx_Frames : {}".format(rows[0].frames_tx))
-        print("Rx_Frames : {}".format(rows[0].frames_rx))
-        print("{}".format(rows[1].name))
-        print("--------------------------")
-        print("Tx_Frames : {}".format(rows[1].frames_tx))
-        print("Rx_Frames : {}".format(rows[1].frames_rx))
+        # No Route. send packets from a port, reflects the packets on the same port
+        SRC_VM_IP = "10.1.1.10"
+        OUTER_SMAC = "00:00:05:06:06:06"
+        OUR_MAC = "00:00:02:03:04:05"
+
+        VIP = TEST_VNET_ROUTE_UNIDIRECTIONAL_CONFIG['DASH_VIP']['vpe']['IPV4']
+        VNET_VNI = TEST_VNET_ROUTE_UNIDIRECTIONAL_CONFIG['DASH_VNET']['vnet']['VNI']
+        DIR_LOOKUP_VNI = TEST_VNET_ROUTE_UNIDIRECTIONAL_CONFIG['DASH_DIRECTION_LOOKUP']['dle']['VNI']
+        SRC_VM_PA_IP = TEST_VNET_ROUTE_UNIDIRECTIONAL_CONFIG['DASH_ENI']['eni']['VM_UNDERLAY_DIP']
+        ENI_MAC = TEST_VNET_ROUTE_UNIDIRECTIONAL_CONFIG['DASH_ENI_ETHER_ADDRESS_MAP']['eam']['MAC']
+        DST_CA_IP = TEST_VNET_ROUTE_UNIDIRECTIONAL_CONFIG['DASH_OUTBOUND_CA_TO_PA']['ocpe']['DIP']
+        DST_PA_IP = TEST_VNET_ROUTE_UNIDIRECTIONAL_CONFIG['DASH_OUTBOUND_CA_TO_PA']['ocpe']["UNDERLAY_DIP"]
+        DST_CA_MAC = TEST_VNET_ROUTE_UNIDIRECTIONAL_CONFIG['DASH_OUTBOUND_CA_TO_PA']['ocpe']["OVERLAY_DMAC"]
+        
+        # Send packet one
+        inner_pkt = simple_udp_packet(eth_dst = "02:02:02:02:02:02",
+                                      eth_src = ENI_MAC,
+                                      ip_dst  = DST_CA_IP,
+                                      ip_src  = SRC_VM_IP)
+        vxlan_pkt = simple_vxlan_packet(eth_dst         = OUR_MAC,
+                                        eth_src         = OUTER_SMAC,
+                                        ip_dst          = VIP,
+                                        ip_src          = SRC_VM_PA_IP,
+                                        udp_sport       = 11638,
+                                        with_udp_chksum = False,
+                                        vxlan_vni       = DIR_LOOKUP_VNI,
+                                        inner_frame     = inner_pkt)
+
+        # Expected received packet one
+        inner_exp_pkt = simple_udp_packet(eth_dst = DST_CA_MAC,
+                                          eth_src = ENI_MAC,
+                                          ip_dst  = DST_CA_IP,
+                                          ip_src  = SRC_VM_IP)
+        vxlan_exp_pkt = simple_vxlan_packet(eth_dst         = "00:00:00:00:00:00",
+                                            eth_src         = "00:00:00:00:00:00",
+                                            ip_dst          = DST_PA_IP,
+                                            ip_src          = VIP,
+                                            udp_sport       = 0,
+                                            with_udp_chksum = False,
+                                            vxlan_vni       = VNET_VNI,
+                                            vxlan_flags     = 0,
+                                            inner_frame     = inner_exp_pkt)
+        vxlan_exp_pkt['IP'].chksum = 0
+
+        # Send packets from port 0
+        send_packet(dataplane, 0, vxlan_pkt, 10)
+        time.sleep(0.5)
+
+        # Verify packets from port 0
+        assert verify_packet(dataplane, vxlan_exp_pkt, 0), "Packet not received on port 0"
 
     @pytest.mark.ptf
     @pytest.mark.snappi

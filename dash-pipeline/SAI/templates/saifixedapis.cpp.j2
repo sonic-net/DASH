@@ -10,100 +10,7 @@
 
 std::shared_ptr<dash::DashSai> dashSai = std::make_shared<dash::DashSai>();
 
-static sai_status_t dash_sai_create_switch(
-        _Out_ sai_object_id_t *switch_id,
-        _In_ uint32_t attr_count,
-        _In_ const sai_attribute_t *attr_list)
-{
-    DASH_LOG_ENTER();
-
-    return dashSai->createSwitch(switch_id, attr_count, attr_list);
-}
-
-static sai_status_t dash_sai_get_switch_attribute(
-        _In_ sai_object_id_t switch_id,
-        _In_ uint32_t attr_count,
-        _Inout_ sai_attribute_t *attr_list)
-{
-    DASH_LOG_ENTER();
-
-    return dashSai->getSwitchAttribute(switch_id, attr_count, attr_list);
-}
-
-static sai_status_t dash_sai_remove_switch(
-        _In_ sai_object_id_t switch_id)
-{
-    DASH_LOG_ENTER();
-
-    return dashSai->removeSwitch(switch_id);
-}
-
-static sai_status_t dash_sai_set_switch_attribute(
-        _In_ sai_object_id_t switch_id,
-        _In_ const sai_attribute_t *attr)
-{
-    DASH_LOG_ENTER();
-
-    return dashSai->setSwitchAttribute(switch_id, attr);
-}
-
-sai_switch_api_t dash_sai_switch_api_impl = {
-    .create_switch = dash_sai_create_switch,
-    .remove_switch = dash_sai_remove_switch,
-    .set_switch_attribute = dash_sai_set_switch_attribute,
-    .get_switch_attribute = dash_sai_get_switch_attribute,
-    .get_switch_stats = 0,
-    .get_switch_stats_ext = 0,
-    .clear_switch_stats = 0,
-    .switch_mdio_read = 0,
-    .switch_mdio_write = 0,
-    .create_switch_tunnel = 0,
-    .remove_switch_tunnel = 0,
-    .set_switch_tunnel_attribute = 0,
-    .get_switch_tunnel_attribute = 0,
-    .switch_mdio_cl22_read = 0,
-    .switch_mdio_cl22_write = 0,
-};
-
-static sai_status_t dash_sai_get_port_attribute(
-        _In_ sai_object_id_t port_id,
-        _In_ uint32_t attr_count,
-        _Inout_ sai_attribute_t *attr_list)
-{
-    DASH_LOG_ENTER();
-
-    return dashSai->getPortAttribute(port_id, attr_count, attr_list);
-}
-
-sai_port_api_t dash_sai_port_api_impl = {
-    .create_port = 0,
-    .remove_port = 0,
-    .set_port_attribute = 0,
-    .get_port_attribute = dash_sai_get_port_attribute,
-    .get_port_stats = 0,
-    .get_port_stats_ext = 0,
-    .clear_port_stats = 0,
-    .clear_port_all_stats = 0,
-    .create_port_pool = 0,
-    .remove_port_pool = 0,
-    .set_port_pool_attribute = 0,
-    .get_port_pool_attribute = 0,
-    .get_port_pool_stats = 0,
-    .get_port_pool_stats_ext = 0,
-    .clear_port_pool_stats = 0,
-    .create_port_connector = 0,
-    .remove_port_connector = 0,
-    .set_port_connector_attribute = 0,
-    .get_port_connector_attribute = 0,
-    .create_port_serdes = 0,
-    .remove_port_serdes = 0,
-    .set_port_serdes_attribute = 0,
-    .get_port_serdes_attribute = 0,
-    .create_ports = 0,
-    .remove_ports = 0,
-    .set_ports_attribute = 0,
-    .get_ports_attribute = 0
-};
+#define API(A,api) case SAI_API_ ## A: *api_method_table = (void*)&dash_sai_ ## api ## _api_impl; break;
 
 sai_status_t sai_api_query(
         _In_ sai_api_t api,
@@ -111,14 +18,15 @@ sai_status_t sai_api_query(
 {
     DASH_LOG_ENTER();
 
-    switch((int)api) {
-        case SAI_API_SWITCH:
-            *api_method_table = (void *)&dash_sai_switch_api_impl;
-            break;
-
-        case SAI_API_PORT:
-            *api_method_table = (void *)&dash_sai_port_api_impl;
-            break;
+    switch((int)api)
+    {
+        API(HOSTIF,hostif);
+        API(NEIGHBOR,neighbor);
+        API(NEXT_HOP,next_hop);
+        API(POLICER,policer);
+        API(PORT,port);
+        API(ROUTER_INTERFACE,router_interface);
+        API(SWITCH,switch);
 
 {% for api in api_names %}
         case SAI_API_{{ api | upper }}:

@@ -1,7 +1,3 @@
-# DASH libsai.so Makefile
-# THIS MAKEFILE IS AUTO-GENERATED FROM templates/Makefile.j2
-# DO NOT MODIFY
-
 CXXFLAGS_COMMON=
 CXXFLAGS_COMMON+= -ansi
 CXXFLAGS_COMMON+= -fPIC
@@ -50,52 +46,29 @@ CXXFLAGS_COMMON+= -Wno-unused-label
 
 # Sources from OCP SAI Repo:
 SAI_DIR=../SAI/meta/
-SAI_SRCS=saimetadatautils.c \
-		saimetadata.c \
-		saiserialize.c
+SAI_INC=-I../SAI/meta -I../SAI/inc -I../SAI/experimental
 
-SAI_SRC_PATHS=$(addprefix $(SAI_DIR),$(SAI_SRCS))
-SAI_OBJS=$(SAI_SRCS:.c=.o)
+SAI_OBJS=saimetadatautils.o saimetadata.o saiserialize.o
+SAI_OBJS_PATHS=$(addprefix $(SAI_DIR)/,$(SAI_OBJS))
 
-# DASH libsai "fixed" sources (not generated from P4 code)
-DASH_FIXED_SAI_SRCS=utils.cpp \
-		saifixedapis.cpp \
-		logger.cpp \
-		config.cpp \
-		dashsai.cpp
-DASH_FIXED_SAI_OBJ=$(DASH_FIXED_SAI_SRCS:.cpp=.o)
+DASH_SAI_SRCS=$(wildcard *.cpp)
+DASH_SAI_OBJS=$(DASH_SAI_SRCS:.cpp=.o)
 
-# DASH libsai "generated" sources (from P4 code)
-DASH_GEN_SAI_SRCS={% for api in api_names %}sai{{ api }}.cpp {% endfor %}
-DASH_GEN_SAI_OBJ=$(DASH_GEN_SAI_SRCS:.cpp=.o)
+all: libsai.so
 
-libsai.so: $(DASH_FIXED_SAI_SRCS) $(DASH_GEN_SAI_SRCS)
-	gcc \
-		-fPIC \
-	    -c \
-	    -I ../SAI/meta/ \
-	    -I ../SAI/inc/ \
-	    -I ../SAI/experimental/ \
-		$(GXX_FLAGS) \
-		$(SAI_SRC_PATHS)
+%.d: %.cpp
+	g++ $(SAI_INC) $(GXX_FLAGS) $(CXXFLAGS_COMMON) -M $^ -o $@
 
-	g++ \
-		-fpermissive \
-	    -c \
-	    -I ../SAI/meta/ \
-	    -I ../SAI/inc/ \
-	    -I ../SAI/experimental/ \
-	    -fPIC \
-	    -g \
-		$(CXXFLAGS_COMMON) \
-		$(GXX_FLAGS) \
-	    $(DASH_FIXED_SAI_SRCS) \
-	    $(DASH_GEN_SAI_SRCS)
+DEPS := $(DASH_SAI_OBJS:.o=.d)
 
-	g++ \
-	    -shared \
-	    -g \
-	    -o libsai.so \
-	    $(DASH_FIXED_SAI_OBJ) \
-	    $(DASH_GEN_SAI_OBJ) \
-		$(SAI_OBJS)
+-include $(DEPS)
+
+%.o: %.cpp
+	g++ $(SAI_INC) $(GXX_FLAGS) $(CXXFLAGS_COMMON) -MMD -c $< -o $@
+
+libsai.so: $(SAI_OBJS_PATHS) $(DASH_SAI_OBJS)
+	g++ -shared -g -o $@ $^
+
+.PHONY: clean
+clean:
+	rm -f *.o libsai.so

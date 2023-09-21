@@ -2,6 +2,7 @@
 
 #include "utils.h"
 #include "config.h"
+#include "objectidmanager.h"
 
 namespace dash
 {
@@ -26,7 +27,31 @@ namespace dash
             sai_object_id_t switchIdQuery(
                     _In_ sai_object_id_t object_id);
 
-        public: // QUAD api implementation
+        public: // QUAD generic api implementation
+
+            sai_status_t create(
+                    _In_ sai_object_type_t objectType,
+                    _Out_ sai_object_id_t* objectId,
+                    _In_ sai_object_id_t switchId,
+                    _In_ uint32_t attr_count,
+                    _In_ const sai_attribute_t *attr_list);
+
+            sai_status_t remove(
+                    _In_ sai_object_type_t objectType,
+                    _In_ sai_object_id_t objectId);
+
+            sai_status_t set(
+                    _In_ sai_object_type_t objectType,
+                    _In_ sai_object_id_t objectId,
+                    _In_ const sai_attribute_t *attr);
+
+            sai_status_t get(
+                    _In_ sai_object_type_t objectType,
+                    _In_ sai_object_id_t objectId,
+                    _In_ uint32_t attr_count,
+                    _Inout_ sai_attribute_t *attr_list);
+
+        private: // QUAD api implementation
 
             // switch
 
@@ -111,5 +136,7 @@ namespace dash
             std::shared_ptr<grpc::Channel> m_grpcChannel;
 
             std::unique_ptr<p4::v1::P4Runtime::Stub> m_stub;
+
+            std::shared_ptr<ObjectIdManager> m_objectIdManager;
     };
 }
