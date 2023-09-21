@@ -103,8 +103,10 @@ p4: $(P4_ARTIFACTS)
 p4-clean:
 	rm -rf $(P4_OUTDIR)
 
+$(P4_OUTDIR)/dash_pipeline.json: $(P4_OUTDIR)/dash_pipeline_p4rt.txt
+
 # Compile P4 into bmv2 .json fle and P4info for SAI header autogeneration
-$(P4_ARTIFACTS): $(P4_SRC)
+$(P4_OUTDIR)/dash_pipeline_p4rt.txt: $(P4_SRC)
 	@echo "Compile P4 program $(P4_MAIN) for bmv2 ..."
 	mkdir -p $(P4_OUTDIR)
 	docker run \
