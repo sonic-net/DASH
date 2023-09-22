@@ -143,7 +143,7 @@ control outbound(inout headers_t hdr,
                                     bit<16> meter_class,
                                     bit<1> meter_class_override) {
         meta.encap_data.dash_encapsulation = dash_encapsulation;
-        meta.encap_data.service_tunnel_key = tunnel_key;
+        meta.encap_data.vni = tunnel_key;
 
         service_tunnel_encode(hdr,
                               overlay_dip,
@@ -246,7 +246,7 @@ control outbound(inout headers_t hdr,
                                 meta.encap_data.underlay_dip,
                                 meta.encap_data.underlay_sip,
                                 meta.encap_data.overlay_dmac,
-                                meta.encap_data.service_tunnel_key);
+                                meta.encap_data.vni);
                 } else if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
                     nvgre_encap(hdr,
                                 meta.encap_data.underlay_dmac,
@@ -254,7 +254,7 @@ control outbound(inout headers_t hdr,
                                 meta.encap_data.underlay_dip,
                                 meta.encap_data.underlay_sip,
                                 meta.encap_data.overlay_dmac,
-                                meta.encap_data.service_tunnel_key);
+                                meta.encap_data.vni);
                 } else {
                     drop();
                 }
