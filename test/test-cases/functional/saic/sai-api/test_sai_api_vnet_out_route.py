@@ -54,7 +54,7 @@ class TestSaiVnetOutboundRoutingEntry:
                     "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
                     "SAI_ENI_ATTR_PL_SIP_MASK",
                     "2001:0db8:85a3:0000:0000:0000:0000:0000",
-                    "SAI_ENI_ATTR_PL_SIP_MASK",
+                    "SAI_ENI_ATTR_PL_UNDERLAY_SIP",
                     "10.0.0.18",
                     "SAI_ENI_ATTR_INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID",
                     "0",
