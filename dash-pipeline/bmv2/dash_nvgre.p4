@@ -74,4 +74,25 @@ action nvgre_encap(inout headers_t hdr,
 
 }
 
+action nvgre_decap(inout headers_t hdr) {
+    hdr.ethernet = hdr.inner_ethernet;
+    hdr.inner_ethernet.setInvalid();
+
+    hdr.ipv4 = hdr.inner_ipv4;
+    hdr.inner_ipv4.setInvalid();
+
+    hdr.ipv6 = hdr.inner_ipv6;
+    hdr.inner_ipv6.setInvalid();
+
+    hdr.vxlan.setInvalid();
+    hdr.udp.setInvalid();
+
+    hdr.tcp = hdr.inner_tcp;
+    hdr.inner_tcp.setInvalid();
+
+    hdr.udp = hdr.inner_udp;
+    hdr.inner_udp.setInvalid();
+}
+
+
 #endif /* _DASH_NVGRE_P4_ */

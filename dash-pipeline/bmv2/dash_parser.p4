@@ -57,6 +57,7 @@ parser dash_parser(
         transition select(hd.ipv4.protocol) {
             UDP_PROTO: parse_udp;
             TCP_PROTO: parse_tcp;
+            NVGRE_PROTO: parse_nvgre;
             default: accept;
         }
     }
@@ -66,6 +67,7 @@ parser dash_parser(
         transition select(hd.ipv6.next_header) {
             UDP_PROTO: parse_udp;
             TCP_PROTO: parse_tcp;
+            NVGRE_PROTO: parse_nvgre;
             default: accept;
         }
     }
@@ -81,6 +83,14 @@ parser dash_parser(
     state parse_tcp {
         packet.extract(hd.tcp);
         transition accept;
+    }
+
+    state parse_nvgre {
+        packet.extract(hd.nvgre);
+        transition select(hd.nvgre.protocol_type) {
+            0x6558: parse_inner_ethernet;
+            default: accept;
+        }
     }
 
     state parse_vxlan {

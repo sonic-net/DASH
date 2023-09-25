@@ -17,7 +17,9 @@ control inbound(inout headers_t hdr,
 #ifdef PNA_CONNTRACK
         ConntrackIn.apply(hdr, meta);
 
-        if (meta.encap_data.original_overlay_sip != 0) {
+        if (meta.flag_mvp == 1) {
+            meta.encap_data.original_overlay_sip = 0; //FIXME: ER gateway private ip?
+            meta.encap_data.original_overlay_dip = (IPv4Address)hdr.ipv6.dst_addr;
             service_tunnel_decode(hdr,
                                   meta.encap_data.original_overlay_sip,
                                   meta.encap_data.original_overlay_dip);

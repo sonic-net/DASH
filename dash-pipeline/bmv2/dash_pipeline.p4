@@ -383,10 +383,15 @@ control dash_ingress(
         if (meta.direction == dash_direction_t.OUTBOUND) {
             vxlan_decap(hdr);
         } else if (meta.direction == dash_direction_t.INBOUND) {
-            switch (inbound_routing.apply().action_run) {
-                vxlan_decap_pa_validate: {
-                    pa_validation.apply();
-                    vxlan_decap(hdr);
+            if (hdr.nvgre.protocol_type == 0x6558) {    // From PLS
+                meta.flag_mvp = 1;
+                nvgre_decap(hdr);
+            } else {
+                switch (inbound_routing.apply().action_run) {
+                    vxlan_decap_pa_validate: {
+                        pa_validation.apply();
+                        vxlan_decap(hdr);
+                    }
                 }
             }
         }
