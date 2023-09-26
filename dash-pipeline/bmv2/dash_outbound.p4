@@ -56,6 +56,9 @@ control outbound(inout headers_t hdr,
                                 IPv4ORv6Address underlay_sip,
                                 dash_encapsulation_t dash_encapsulation,
                                 bit<24> tunnel_key,
+                                bit<1> is_pl_nsg,
+                                IPv4Address pl_nsg_ip,
+                                bit<24> pl_nsg_vni,
                                 bit<1> meter_policy_en,
                                 bit<16> meter_class) {
         /* Assume the overlay addresses provided are always IPv6 and the original are IPv4 */
@@ -78,6 +81,11 @@ control outbound(inout headers_t hdr,
         meta.encap_data.dash_encapsulation = dash_encapsulation;
         meta.encap_data.service_tunnel_key = tunnel_key;
         set_route_meter_attrs(meter_policy_en, meter_class);
+        if (is_pl_nsg) {
+            meta.encap_data.flag_pl_nsg = is_pl_nsg;
+            meta.encap_data.pl_nsg_ip = pl_nsg_ip;
+            meta.encap_data.pl_nsg_vni = pl_nsg_vni;
+        }
     }
 
 #ifdef TARGET_BMV2_V1MODEL
@@ -237,6 +245,14 @@ control outbound(inout headers_t hdr,
                                 meta.encap_data.underlay_sip,
                                 meta.encap_data.overlay_dmac,
                                 meta.encap_data.service_tunnel_key);
+                    if (meta.encap_data.flag_pl_nsg == 1) {
+                        // FIXME vxlan encap for nsg
+                        hdr.outter_ipv4.setValid();
+                        hdr.outter_ipv4.dst_addr = meta.encap_data.pl_nsg_ip;
+                        hdr.outter_ipv4.src_addr = hdr.ipv4.src_addr;
+                        hdr.outter_vxlan.setValid();
+                        hdr.outter_vxlan.vni = meta.encap_data.pl_nsg_vni;
+                    }
                 } else {
                     drop();
                 }

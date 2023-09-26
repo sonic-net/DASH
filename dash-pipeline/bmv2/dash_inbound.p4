@@ -10,6 +10,24 @@
 control inbound(inout headers_t hdr,
                 inout metadata_t meta)
 {
+    action msee_ecmp(tuple<IPv4, MAC>) {
+        meta.encap_data.underlay_dip = ip[i];
+        meta.encap_data.underlay_dmac = mac[i];
+    }
+
+    @name("msee|dash_msee")
+    table msee {
+        key = {
+            meta.eni_id : exact @name("meta.eni_id:eni_id");
+        }
+
+        actions = {
+            msee_ecmp;
+            @defaultonly deny;
+        }
+        const default_action = deny;
+    }
+
     apply {
 #ifdef STATEFUL_P4
             ConntrackIn.apply(0);
@@ -23,6 +41,7 @@ control inbound(inout headers_t hdr,
             service_tunnel_decode(hdr,
                                   meta.encap_data.original_overlay_sip,
                                   meta.encap_data.original_overlay_dip);
+            msee.apply();
         }
 #endif // PNA_CONNTRACK
 

@@ -15,6 +15,9 @@ struct encap_data_t {
     bit<24> service_tunnel_key;
     IPv4Address original_overlay_sip;
     IPv4Address original_overlay_dip;
+    bit<1> flag_pl_nsg;
+    bit<24> pl_nsg_vni;
+    IPv4Address pl_nsg_ip;
 }
 
 enum bit<16> dash_direction_t {
