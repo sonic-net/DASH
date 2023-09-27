@@ -196,7 +196,7 @@ sai-meta:
 		-v $(PWD)/..:/dash \
 		-w /dash/dash-pipeline/SAI/SAI/meta \
 		$(DOCKER_SAITHRIFT_BLDR_IMG) \
-	    make
+	    make all libsaimetadata.so
 
 libsai: SAI/lib/libsai.so
 
