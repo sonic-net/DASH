@@ -116,6 +116,8 @@ control dash_ingress(
                          bit<16> vnet_id,
                          bit<16> v4_meter_policy_id,
                          bit<16> v6_meter_policy_id,
+                         dash_tunnel_dscp_mode_t dash_tunnel_dscp_mode,
+                         bit<6> dscp,
                          ACL_GROUPS_PARAM(inbound_v4),
                          ACL_GROUPS_PARAM(inbound_v6),
                          ACL_GROUPS_PARAM(outbound_v4),
@@ -124,6 +126,9 @@ control dash_ingress(
         meta.eni_data.pps            = pps;
         meta.eni_data.flows          = flows;
         meta.eni_data.admin_state    = admin_state;
+        if (dash_tunnel_dscp_mode == dash_tunnel_dscp_mode_t.PIPE_MODEL) {
+            meta.eni_data.dscp = dscp;
+        }
         meta.encap_data.underlay_dip = vm_underlay_dip;
         /* vm_vni is the encap VNI used for tunnel between inbound DPU -> VM
          * and not a VNET identifier */
@@ -372,6 +377,9 @@ control dash_ingress(
 
         appliance.apply();
 
+        // Save the original DSCP value
+        meta.eni_data.dscp = (bit<6>)hdr.ipv4.diffserv;
+
         /* Outer header processing */
 
         /* Put VM's MAC in the direction agnostic metadata field */
@@ -467,6 +475,11 @@ control dash_ingress(
 #ifdef TARGET_BMV2_V1MODEL
             meter_bucket_inbound.count(meta.meter_bucket_index);
 #endif
+        }
+
+        if (meta.eni_data.dscp != 0) {
+            // ECN is zero.
+            hdr.ipv4.diffserv = (bit<8>)meta.eni_data.dscp;
         }
 
         eni_meter.apply();

@@ -28,11 +28,18 @@ struct conntrack_data_t {
     bool allow_out;
 }
 
+enum bit<16> dash_tunnel_dscp_mode_t {
+    INVALID = 0,
+    PRESERVE_MODEL = 1,
+    PIPE_MODEL = 2
+}
+
 struct eni_data_t {
     bit<32> cps;
     bit<32> pps;
     bit<32> flows;
     bit<1>  admin_state;
+    bit<6>  dscp;
 }
 
 struct metadata_t {

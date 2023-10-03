@@ -152,6 +152,10 @@ dpu_config = [
       "SAI_ENI_ATTR_V4_METER_POLICY_ID",
       "0",
       "SAI_ENI_ATTR_V6_METER_POLICY_ID",
+      "0",
+      "SAI_ENI_ATTR_TUNNEL_DSCP_MODE",
+      "SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL",
+      "SAI_ENI_ATTR_DSCP",
       "0"
     ]
   },
@@ -217,6 +221,10 @@ dpu_config = [
       "SAI_ENI_ATTR_V4_METER_POLICY_ID",
       "0",
       "SAI_ENI_ATTR_V6_METER_POLICY_ID",
+      "0",
+      "SAI_ENI_ATTR_TUNNEL_DSCP_MODE",
+      "SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL",
+      "SAI_ENI_ATTR_DSCP",
       "0"
     ]
   },
