@@ -166,7 +166,7 @@ Althugh we could design the pipeline to have all stages created and connected ar
 ```mermaid
 flowchart LR
     LPM0[LPM 0 / Routing<br>Src IP or Dst IP]
-    LPM1[LPM 1 / Routingt<br>Dst IP or Src IP]
+    LPM1[LPM 1 / Routing<br>Dst IP or Src IP]
     Exact0[Exact Match 0 / VNET Mapping<br>Src IP or Dst IP]
     Exact1[Exact Match 1 / VNET Mapping<br>Dst IP or Src IP]
     Proto[Protocol Match / Port Mapping<br>Protocol + Src Port + Dst Port]
