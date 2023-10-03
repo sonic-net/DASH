@@ -157,19 +157,19 @@ Matching stages is the one of the core part of the DASH pipeline and the compone
 
 In DASH pipeline, a matching stage is basic building blocks for packet matching and metadata publishing. And currently, we have 3 type of matching stages:
 
-- LPM stage (on source **OR** destination IP)
-- Exact matching stage (on source **OR** destination IP)
-- Protocol matching stage (on protocol + source port + destination port)
+- LPM stage (on source **OR** destination IP), a.k.a. Routing Stage.
+- Exact matching stage (on source **OR** destination IP), a.k.a. VNET Mapping Stage.
+- Protocol matching stage (on protocol + source port + destination port), a.k.a. Port Mapping Stage.
 
 Althugh we could design the pipeline to have all stages created and connected arbitrarily, but it might make the pipeline hard to implement and debug, also it might be an overkill for majority of the cases. So the match stages are designed to be connected from larger range to smaller range as below:
 
 ```mermaid
 flowchart LR
-    LPM0[LPM 0<br>Src IP or Dst IP]
-    LPM1[LPM 1<br>Dst IP or Src IP]
-    Exact0[Exact Match 0<br>Src IP or Dst IP]
-    Exact1[Exact Match 1<br>Dst IP or Src IP]
-    Proto[Protocol Match<br>Protocol + Src Port + Dst Port]
+    LPM0[LPM 0 / Routing<br>Src IP or Dst IP]
+    LPM1[LPM 1 / Routingt<br>Dst IP or Src IP]
+    Exact0[Exact Match 0 / VNET Mapping<br>Src IP or Dst IP]
+    Exact1[Exact Match 1 / VNET Mapping<br>Dst IP or Src IP]
+    Proto[Protocol Match / Port Mapping<br>Protocol + Src Port + Dst Port]
 
     LPM0 --> |lpmrouting| LPM1
     LPM1 --> |maprouting| Exact0
