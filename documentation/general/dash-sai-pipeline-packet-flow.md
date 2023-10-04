@@ -1,0 +1,322 @@
+# DASH-SAI pipeline packet flow
+
+1. [Overview](#overview)
+2. [Pipeline components](#pipeline-components)
+   1. [Direction Lookup](#direction-lookup)
+   2. [Pipeline Lookup](#pipeline-lookup)
+   3. [Packet Decap](#packet-decap)
+   4. [Conntrack Lookup and Update](#conntrack-lookup-and-update)
+   5. [Pre-pipeline ACL and Post-pipeline ACL](#pre-pipeline-acl-and-post-pipeline-acl)
+   6. [Matching stages and metadata publishing](#matching-stages-and-metadata-publishing)
+      1. [Matching stage and stage progressing](#matching-stage-and-stage-progressing)
+      2. [Metadata publishing](#metadata-publishing)
+   7. [Routing action](#routing-action)
+   8. [Routing type](#routing-type)
+3. [Examples](#examples)
+
+TODO:
+- Stage names
+- Routing action name for switching stage
+
+## Overview
+
+DASH-SAI pipeline packet flow is the core of the DASH project. It defines from device perspective, how the traffic is modeled in DASH, packets gets processed and transformation gets applied to the packets.
+
+DASH-SAI pipeline is designed to work as a general purpose network function pipeline. Similar to [SAI](https://github.com/opencomputeproject/SAI), it works as a shim layer on top of DPU/ASIC SDKs, provides a set of low level hardware agnostic APIs that exposes the generic DPU primitives to the upper layer. So, the pipeline itself is not limited to any specific network function, but can be used to implement any network function.
+
+This design allows our upper layers to be flexible and doesn't limit to any specific object models for modeling their own policies. For example, [SONiC-DASH pipeline](https://github.com/sonic-net/SONiC/blob/master/doc/dash/dash-sonic-hld.md#2-packet-flows) uses DASH-SAI pipelie to implement VNET routing scenarios by translating the [SONiC DASH APIs](https://github.com/sonic-net/sonic-dash-api/tree/master/proto) to DASH-SAI model:
+
+- A DASH-SAI pipeline is used to represent a VM NIC (ENI).
+- The VxLAN VNI is used to do the direction lookup.
+- The inner MAC address is used for pipeline lookup, a.k.a. ENI lookup (ENI). 
+- Once it goes into the corresponding DASH pipeline, the `outbound` pipeline will be used to process the packets coming from the VM, while the `inbound` pipeline will be used to process the packets going into the VM.
+
+## Pipeline components
+
+DASH-SAI pipeline is modeled as a list of stages. Each stage defines its own tables, and use the table entries to match packets in certain way and publishing thecorresponding metadata when an entry is matched. After all stages are processed, a list of final routing actions will be defined. Then, by executing these routing actions, the packet will be transformed in the way we want and corresponding flows will be generated according to the direction of the packet.
+
+On the high level the pipeline looks like below:
+
+```mermaid
+flowchart TB
+    DL[Direction<br>Lookup]
+    PL[Pipeline<br>Lookup]
+    PD[Packet<br>Decap]
+
+    subgraph P0[DASH Pipeline 0]
+        subgraph In0[Inbound Pipeline]
+            CTL0[Conntrack<br>Lookup]
+            PreACL0[Pre-pipeline<br>ACL]
+            MATS0[Matching<br>Stages]
+            AA0[Action<br>Apply]
+            PostACL0[Post-pipeline<br>ACL]
+            CTU0[Conntrack<br>Update]
+            MS0[Meter<br>Update]
+        end
+
+        subgraph Out0[Outbound Pipeline]
+            CTL1[Conntrack<br>Lookup]
+            PreACL1[Pre-pipeline<br>ACL]
+            MATS1[Matching<br>Stages]
+            AA1[Action<br>Apply]
+            PostACL1[Post-pipeline<br>ACL]
+            CTU1[Conntrack<br>Update]
+            MS1[Meter<br>Update]
+        end
+    end
+
+    subgraph P1[DASH Pipeline 1]
+        In1[Inbound Pipeline<br>...]
+        Out1[Outbound Pipeline<br>...]
+    end
+
+    Out[Packet<br>Out]
+
+    DL --> PL
+    PL --> PD
+
+    PD --> In0
+    PD --> Out0
+    PD --> In1
+    PD --> Out1 
+    PD --> |No Match| Out
+
+    CTL0 --> PreACL0
+    CTL0 --> |Flow Match| AA0
+    PreACL0 --> MATS0
+    MATS0 --> AA0
+    AA0 --> PostACL0
+    PostACL0 --> CTU0
+    AA0 --> |Flow Match| MS0
+    CTU0 --> MS0
+    MS0 --> Out
+
+    CTL1 --> PreACL1
+    CTL1 --> |Flow Match| AA1
+    PreACL1 --> MATS1
+    MATS1 --> AA1
+    AA1 --> PostACL1
+    PostACL1 --> CTU1
+    AA1 --> |Flow Match| MS1
+    CTU1 --> MS1
+    MS1 --> Out
+```
+
+### Direction Lookup
+
+In DASH-SAI pipeline, traffic are split into 2 directions: `inbound` and `outbound`. Each direction has its own pipeline (see more details below). When a new packet arrives, we will assign a direction to the packet, then process the packet in the corresponding pipeline. This ensures us to do flow match propoerly and transform the packet in the right way.
+
+### Pipeline Lookup
+
+DASH uses multi-tenancy model for traffic handling. A single device can have multiple pipelines, and each pipeline is used to handle traffic for a specific tenant. When a packet arrives, besides direction lookup, we also need pipeline lookup to determine which pipeline to use for processing the packet.
+
+For example, SONiC-DASH uses inner packet MAC to find the pipeline. However, if we would like to implement a load balancer, we can use a DASH-SAI pipeline to represent a load balancer instance and use VIP range to find the SAI pipeline.
+
+```mermaid
+flowchart TD
+    subgraph SONiC-DASH
+        EL[ENI Lookup]
+
+        EP0[ENI 0 Pipeline]
+        EP1[ENI 1 Pipeline]
+        EP2[ENI 2 Pipeline]
+    end
+
+    subgraph LoadBalancer
+        VL[VipRange Lookup]
+
+        LBP0[LB 0 Pipeline]
+        LBP1[LB 1 Pipeline]
+        LBP2[LB 2 Pipeline]
+    end
+
+    EL --> |ENI 0| EP0
+    EL --> |ENI 1| EP1
+    EL --> |ENI 2| EP2
+
+    VL --> |LB 0| LBP0
+    VL --> |LB 1| LBP1
+    VL --> |LB 2| LBP2
+```
+
+One thing to notice is that, the pipeline is a logical concept. It doesn't have to be 1 to 1 mapping to a physical ASIC pipeline. The underlying implementation can be as simple as a metadata field update with a specific value, when the entry getting matched, e.g., `ENI = Inner Source/Destination MAC`.
+
+### Packet Decap
+
+If a pipeline is found, before processing the packets, all outer encaps will be decaped, and with key information saved in metadata bus, such as encap type, source IP and VNI / GRE Key, exposing the inner most packet going through the pipeline. This simplifies the flow matching logic and also allow us to create the reverse flow properly.
+
+### Conntrack Lookup and Update
+
+After entering a specific pipeline, the first stage will be the Conntrack Lookup stage, which does the flow lookup. If any flow is matched, the saved actions will be applied, the metering counters will be updated, and the rest of pipeline will be skipped.
+
+The core of the Conntrack Lookup and Update stage is flow table, whose usage **MUST** follow the rules below:
+
+1. Flows **MUST** be stored based on the pipeline direction. 
+   1. When outbound pipeline creates a flow, the forwarding flow should be created on the outbound side, while reverse flow should be created on the inbound side.
+   2. When inbound pipeline creates a flow, it creates the flow in reversed way.
+2. The flow lookup **MUST** use the information of inner most packet.
+   1. The matching keys can be configurated via the DASH flow APIs during the DASH initialzation.
+   2. Although the outer encaps are decap'ed and not used in flow matching, the source information of each encap **MUST** be compared. If any change is detected, the flow lookup **MUST** fail, pushing the packet going through the rest of pipeline, just like a new flow.
+      1. This is because the source information will be used for creating reverse flow, and failover can happen to whoever that sends us packet, so we need this behavior to fix the reverse flow actions.
+
+After the flow lookup, if a flow is matched, we will apply the saved actions in the flow direction and skip the rest of the pipeline. Otherwise, we will continue the pipeline processing.
+
+### Pre-pipeline ACL and Post-pipeline ACL
+
+Pre-pipeline ACL and Post-pipeline ACL are used to drop the unexpected traffic before and after the packet transformation. It works as below:
+
+1. As the high-level pipeline shows above, if an incoming packet hits a flow, it will skip matching all the ACLs. If an incoming packet is denied by a ACL, the packet will be dropped without creating a flow.
+2. Both outbound and inbound pipeline has its own ACL stages, and only used for matching the packets in their direction.
+
+A typical usage of the ACLs is to implement security policies. For example, in SONiC-DASH pipeline, we use the pre/post-pipeline ACLs to implement the underlay and overlay ACLs in both directions, where overlay ACLs will be used for implementing customer policies, while underlay ACLs will be used for implementing the infrastructure policies.
+
+```mermaid
+flowchart TD
+    subgraph Outbound Pipeline
+        Out_PreACL[Overlay ACL<br>== Outbound Pre-Pipeline ACL ==]
+        Out_MS[Match Stages]
+        Out_PostACL[Underlay ACL<br>== Outbound Post-Pipeline ACL ==]
+    end
+
+    subgraph Inbound Pipeline
+        In_PreACL[Underlay ACL<br>== Inbound Pre-Pipeline ACL ==]
+        In_MS[Match Stages]
+        In_PostACL[Overlay ACL<br>== Inbound Post-Pipeline ACL ==]
+    end
+
+    Out_PreACL --> Out_MS
+    Out_MS --> Out_PostACL
+
+    In_PreACL --> In_MS
+    In_MS --> In_PostACL
+```
+
+### Matching stages and metadata publishing
+
+#### Matching stage and stage progressing
+
+Matching stages is the one of the core part of the DASH-SAI pipeline and the components that gives the pipeline flexibility.
+
+In DASH-SAI pipeline, a matching stage is basic building blocks for packet matching and metadata publishing. And currently, we have 3 type of matching stages:
+
+- LPM stage (on source **OR** destination IP), a.k.a. Routing Stage.
+- Exact matching stage (on source **OR** destination IP), a.k.a. VNET Mapping Stage.
+- Protocol matching stage (on protocol + source port + destination port), a.k.a. Port Mapping Stage.
+
+Althugh we could design the pipeline to have all stages created and connected arbitrarily, but it might make the pipeline hard to implement and debug, also it might be an overkill for majority of the cases. So the match stages are designed to be connected from larger range to smaller range as below:
+
+```mermaid
+flowchart LR
+    LPM0[LPM 0 / Routing<br>Src IP or Dst IP]
+    LPM1[LPM 1 / Routing<br>Dst IP or Src IP]
+    Exact0[Exact Match 0 / VNET Mapping<br>Src IP or Dst IP]
+    Exact1[Exact Match 1 / VNET Mapping<br>Dst IP or Src IP]
+    Proto[Protocol Match / Port Mapping<br>Protocol + Src Port + Dst Port]
+
+    LPM0 --> |lpmrouting| LPM1
+    LPM1 --> |maprouting| Exact0
+    Exact0 --> |maprouting| Exact1
+    Exact1 --> |portmaprouting| Proto
+```
+
+Here is an example that shows how the DASH object presented in SONiC-DASH pipeline:
+
+```json
+// Routing table is used to define the LPM stage.
+// When this entry is matched, we will invoke the vnet routing type, which executes maprouting stage and jump to Exact Match stage.
+"DASH_ROUTE_TABLE:123456789012:10.0.1.0/24": {
+    "action_type": "vnet",
+    "vnet": "Vnet1"
+}
+
+"DASH_ROUTING_TYPE_TABLE:vnet": {
+    "name": "action1",
+    "action_type": "maprouting"
+}
+```
+
+In the pipeline progressing, the entries in each stage can define different routing actions, so we can skip some stages and move to the stage that we want. Take LPM stage as an example, it can use different routing actions to jump to different stages. But, reverse direction is not allowed, e.g., we can't jump from LPM 1 to LPM 0.
+
+```mermaid
+flowchart LR
+    LPM0[LPM 0<br>Src IP or Dst IP]
+    LPM1[LPM 1<br>Dst IP or Src IP]
+    Exact0[Exact Match 0<br>Src IP or Dst IP]
+    Exact1[Exact Match 1<br>Dst IP or Src IP]
+    Proto[Protocol Match<br>Protocol + Src Port + Dst Port]
+
+    LPM0 --> |lpmrouting| LPM1
+    LPM0 --> |maprouting| Exact0
+    LPM0 --> |maprouting| Exact1
+    LPM0 --> |portmaprouting| Proto
+
+    LPM1 --> |maprouting| Exact0
+    Exact0 --> |maprouting| Exact1
+    Exact1 --> |portmaprouting| Proto
+```
+
+#### Metadata publishing
+
+When an entry is matched in the matching stages, we will publish the metadata defined in the entry to the metadata bus. The metadata bus is a set of fields that can be used by the routing actions as parameters. And the metadata bus is designed to be a shared resource, so the metadata published by the entries in the later stages will override the earlier ones.
+
+```json
+// VNET mapping entry (Exact Match stage)
+"DASH_VNET_MAPPING_TABLE:Vnet1:10.0.1.1": {
+    "routing_type": "do_something",
+
+    // Underlay destination IP address. Used by staticencap action.
+    "underlay_dip": "3.3.3.1",
+
+    // Overlay IP address encoding from v4 to v6. Used by 4to6 action.
+    "4to6_sip_encoding": "9988::/ffff::",
+    "4to6_dip_encoding": "1122:3344:5566:7788::0303:0301/ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
+
+    // Metering ID. Used in metering stage.
+    "metering_class": "60001"
+}
+```
+
+With this in mind, the entire pipeline works as matching and metadata publishing until the final routing actions are executed.
+
+Please note that the Direction Lookup and Pipeline Lookup stages are also matching stages, so they can also populate metadatas too, e.g., ENI-level metadata for underlay encap.
+
+### Routing action
+
+In DASH-SAI pipeline, routing actions are the fundamental building blocks for packet transformations. Each routing action is designed to work as below:
+
+1. Take a specific list of metadata fields as input parameters:
+   1. For example, `staicencap` action will take the `underlay_dip`, `underlay_sip`, `encap_type` and `encap_key` to encapsulate the packet.
+   2. The parameter can come from 2 places - the metadata defined associated with the entries in each table, or the routing action definition itself. More details will be discussed in the next section.
+2. Transform the packet in a specific way, e.g., encapsulate the packet, natting the address and port, etc.
+3. Independent to other actions.
+   1. With this design, we don't have to worry about the order of the actions. It also enables the hardware to improve the E2E pipeline latency by doing the actions in parallel.
+
+Take staticencap as an example, it can be defined as below:
+
+- Action parameters:
+    - `encap_type`: "nvgre|vxlan|..."
+- Metadata parameters:
+    - `underlay_dip`: Destination IP used in encap.
+    - `underlay_sip`: Source IP used in encap.
+    - `encap_key`: GRE key in NvGRE or VNI in VxLAN
+- Actions:
+    - Enable the underlay encap header based on the `encap_type`.
+    - Update the underlay encap header with `encap_key`, `underlay_dip`, `underlay_sip`.
+
+### Routing type
+
+To implement a network funtion, we usually need to do multiple packet transformations, such as adding a tunnel and natting the address or port. This requires us to be able to combine multiple routing actions together, and this is what routing type is for.
+
+In DASH-SAI pipeline, routing type is defined as a list of routing actions. And by combining different routing actions into different routing types, we will be able to implement different network functions.
+
+For example:
+
+- We can implement the VNET routing by creating a routing type named `vnet` with only 1 action `staticencap`, which takes the next hop information from the mapping table.
+- We can also add additional hop to tunnel the traffic to an firewall first, which is known as [UDR](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview), by creating another routing type named `vnetfw` with a `staticencap` action and an extra `tunnel` actions.
+- We can even use `tunnel` action with multiple destinations as ECMP group to implement a simple load balancer!
+
+This combination of routing actions is very flexible and powerful, and it enables us to implement any network function we want.
+
+## Examples
+
+[SONiC-DASH pipeline](https://github.com/sonic-net/SONiC/blob/master/doc/dash/dash-sonic-hld.md#2-packet-flows).
