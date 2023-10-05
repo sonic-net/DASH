@@ -21,7 +21,8 @@
 4. [4. Examples](#4-examples)
    1. [4.1. VNET routing](#41-vnet-routing)
    2. [4.2. Load balancer (L4 DNAT)](#42-load-balancer-l4-dnat)
-   3. [4.3. More](#43-more)
+   3. [4.3. Load balancer (L3 SNAT)](#43-load-balancer-l3-snat)
+   4. [4.4. More](#44-more)
 
 ## 1. Overview
 
@@ -461,6 +462,8 @@ This combination of routing actions is very flexible and powerful, and it enable
             "src_port_max": 65535,
             "dst_port_min": 443,
             "dst_port_max": 443,
+
+            "underlay_tunnel_id": "lb-portmap-backend-1-1-1-1"
         }
     ]
 
@@ -478,12 +481,36 @@ This combination of routing actions is very flexible and powerful, and it enable
     "DASH_ROUTING_TYPE_TABLE:lbnat": [
         {
             "name": "action1",
-            "action_type": "tunnel_nat"
+            "action_type": "tunnel_nat",
+            "target": "underlay"
         }
     ]
 ]
 ```
 
-### 4.3. More
+### 4.3. Load balancer (L3 SNAT)
+
+```json
+[
+    // Routing to Internet.
+    "DASH_ROUTE_TABLE:123456789012:0.0.0.0/0": {
+        "routing_type": "l3snat",
+        "nat_sips": "1.1.1.1,2.2.2.2"
+    },
+
+    // This is the final routing type that gets executed.
+    // 
+    // The nat action will nat the inner packet source ip based on the nat_sips defined in the routing entry.
+    // All IPs will be treated as an ECMP group. And algorithm can be defined as metadata in the routing entry as well.
+    "DASH_ROUTING_TYPE_TABLE:l3snat": [
+        {
+            "name": "action1",
+            "action_type": "nat"
+        }
+    ]
+]
+```
+
+### 4.4. More
 
 - [SONiC-DASH packet flows](https://github.com/sonic-net/SONiC/blob/master/doc/dash/dash-sonic-hld.md#2-packet-flows)
