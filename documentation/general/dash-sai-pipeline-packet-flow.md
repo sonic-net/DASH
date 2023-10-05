@@ -2,21 +2,19 @@
 
 1. [Overview](#overview)
 2. [Pipeline components](#pipeline-components)
-   1. [Direction Lookup](#direction-lookup)
-   2. [Pipeline Lookup](#pipeline-lookup)
-   3. [Packet Decap](#packet-decap)
-   4. [Conntrack Lookup and Update](#conntrack-lookup-and-update)
-   5. [Pre-pipeline ACL and Post-pipeline ACL](#pre-pipeline-acl-and-post-pipeline-acl)
-   6. [Matching stages and metadata publishing](#matching-stages-and-metadata-publishing)
-      1. [Matching stage and stage progressing](#matching-stage-and-stage-progressing)
-      2. [Metadata publishing](#metadata-publishing)
-   7. [Routing action](#routing-action)
-   8. [Routing type](#routing-type)
+   1. [Per-packet Metadata bus](#per-packet-metadata-bus)
+   2. [Direction Lookup](#direction-lookup)
+   3. [Pipeline Lookup](#pipeline-lookup)
+   4. [Packet Decap](#packet-decap)
+   5. [Conntrack Lookup and Update](#conntrack-lookup-and-update)
+   6. [Pre-pipeline ACL and Post-pipeline ACL](#pre-pipeline-acl-and-post-pipeline-acl)
+   7. [Matching stages and metadata publishing](#matching-stages-and-metadata-publishing)
+      1. [Matching stage](#matching-stage)
+      2. [Stage progressing](#stage-progressing)
+      3. [Metadata publishing](#metadata-publishing)
+   8. [Routing action](#routing-action)
+   9. [Routing type](#routing-type)
 3. [Examples](#examples)
-
-TODO:
-- Stage names
-- Routing action name for switching stage
 
 ## Overview
 
@@ -101,6 +99,18 @@ flowchart TB
     CTU1 --> MS1
     MS1 --> Out
 ```
+
+### Per-packet Metadata bus
+
+First of all, since we have multiple matching stages in the pipeline, we need a way to pass the information from the matched entries in the earlier stages to the later ones to help us making final decisions on packet transformation. And this is what metadata bus is for.
+
+At high-level, the metadata bus is a set of fields that being carried all the way through the pipeline along with the packet. It contains:
+
+- The information from the original packet, such as encap information.
+- The information from each matched entry and related data structures, e.g., when a VNET mapping entry is matched, we will publish the information from VNET to the metadata bus. 
+- The routing action and its inline parameters from the matched entry.
+
+Implementation-wise, this is similar to Packet Header Vector or Bus in NPL.
 
 ### Direction Lookup
 
@@ -193,37 +203,46 @@ flowchart TD
 
 ### Matching stages and metadata publishing
 
-#### Matching stage and stage progressing
+#### Matching stage
 
-Matching stages is the one of the core part of the DASH-SAI pipeline and the components that gives the pipeline flexibility.
+Matching stage is the one of the core part of the DASH-SAI pipeline and the components that gives the pipeline flexibility.
 
-In DASH-SAI pipeline, a matching stage is basic building blocks for packet matching and metadata publishing. And currently, we have 3 type of matching stages:
 
-- LPM stage (on source **OR** destination IP), a.k.a. Routing Stage.
-- Exact matching stage (on source **OR** destination IP), a.k.a. VNET Mapping Stage.
-- Protocol matching stage (on protocol + source port + destination port), a.k.a. Port Mapping Stage.
+In DASH-SAI pipeline, a matching stage is a basic building block for packet matching and metadata publishing. And the DASH-SAI pipeline basically works as matching and metadata publishing until the final routing actions are executed. Currently, we support the following types of matching stages:
 
-Althugh we could design the pipeline to have all stages created and connected arbitrarily, but it might make the pipeline hard to implement and debug, also it might be an overkill for majority of the cases. So the match stages are designed to be connected from larger range to smaller range as below:
+| Stage type | Match Type | Match Fields | Metadata Behavior |
+| ---------- | ---------- | ------------ | -------- |
+| Routing | LPM | Source IP or Destination IP | Publish metadata from matched routing entry |
+| VNET Mapping | Exact Match | Source IP or Destination IP | Publish metadata from matched VNET and VNET mapping entry |
+| Port Mapping | Range Match | Source Port + Destination Port | Publish metadata from matched port mapping entry |
+
+For more on the metadata publishing, please refer to the metadata publishing section below.
+
+#### Stage progressing
+
+Althugh we could design the pipeline to have all stages created and connected arbitrarily, it might make the pipeline hard to implement and debug at this moment, for example, changing matching fields, matching type and connection is beyond the ability of P4. So, today, the match stages are designed to be connected from larger range to smaller range as below:
 
 ```mermaid
 flowchart LR
-    LPM0[LPM 0 / Routing<br>Src IP or Dst IP]
-    LPM1[LPM 1 / Routing<br>Dst IP or Src IP]
-    Exact0[Exact Match 0 / VNET Mapping<br>Src IP or Dst IP]
-    Exact1[Exact Match 1 / VNET Mapping<br>Dst IP or Src IP]
-    Proto[Protocol Match / Port Mapping<br>Protocol + Src Port + Dst Port]
+    RoutingDst[Routing<br>Destination IP]
+    RoutingSrc[Routing<br>Source IP]
+    MapDst[VNET Mapping<br>Destination IP]
+    MapSrc[VNET Mapping<br>Source IP]
+    TcpPortMap[TCP Port Mapping<br>Source + Dest Port]
+    UdpPortMap[UDP Port Mapping<br>Source + Dest Port]
 
-    LPM0 --> |lpmrouting| LPM1
-    LPM1 --> |maprouting| Exact0
-    Exact0 --> |maprouting| Exact1
-    Exact1 --> |portmaprouting| Proto
+    RoutingDst --> | srclpmrouting | RoutingSrc
+    RoutingSrc --> | maprouting | MapDst
+    MapDst --> | srcmaprouting | MapSrc
+    MapSrc --> | portmaprouting | TcpPortMap
+    MapSrc --> | portmaprouting | UdpPortMap
 ```
 
-Here is an example that shows how the DASH object presented in SONiC-DASH pipeline:
+Here is an example that shows how the routing stage entry looks like:
 
 ```json
-// Routing table is used to define the LPM stage.
-// When this entry is matched, we will invoke the vnet routing type, which executes maprouting stage and jump to Exact Match stage.
+// Routing stage entry:
+// When this entry is matched, we will invoke the vnet routing type, which executes maprouting action and jump to VNET mapping stage.
 "DASH_ROUTE_TABLE:123456789012:10.0.1.0/24": {
     "action_type": "vnet",
     "vnet": "Vnet1"
@@ -235,32 +254,43 @@ Here is an example that shows how the DASH object presented in SONiC-DASH pipeli
 }
 ```
 
-In the pipeline progressing, the entries in each stage can define different routing actions, so we can skip some stages and move to the stage that we want. Take LPM stage as an example, it can use different routing actions to jump to different stages. But, reverse direction is not allowed, e.g., we can't jump from LPM 1 to LPM 0.
+In the pipeline progressing, the entries in each stage can define different routing actions, so we can skip some stages and move to the stage that we want. Take Routing stage + TCP flow as an example, it can use different routing actions to jump to different stages. But, reverse direction is not allowed, e.g., we can't jump from TCP Port Mapping stage back to Routing stage.
+
 
 ```mermaid
 flowchart LR
-    LPM0[LPM 0<br>Src IP or Dst IP]
-    LPM1[LPM 1<br>Dst IP or Src IP]
-    Exact0[Exact Match 0<br>Src IP or Dst IP]
-    Exact1[Exact Match 1<br>Dst IP or Src IP]
-    Proto[Protocol Match<br>Protocol + Src Port + Dst Port]
+    RoutingDst[Routing<br>Destination IP]
+    RoutingSrc[Routing<br>Source IP]
+    MapDst[VNET Mapping<br>Destination IP]
+    MapSrc[VNET Mapping<br>Source IP]
+    TcpPortMap[TCP Port Mapping<br>Source + Dest Port]
 
-    LPM0 --> |lpmrouting| LPM1
-    LPM0 --> |maprouting| Exact0
-    LPM0 --> |maprouting| Exact1
-    LPM0 --> |portmaprouting| Proto
+    RoutingDst --> | srclpmrouting | RoutingSrc
+    RoutingDst --> | maprouting | MapDst
+    RoutingDst --> | srcmaprouting | MapSrc
+    RoutingDst --> | portmaprouting | TcpPortMap
 
-    LPM1 --> |maprouting| Exact0
-    Exact0 --> |maprouting| Exact1
-    Exact1 --> |portmaprouting| Proto
+    RoutingSrc --> | maprouting | MapDst
+    MapDst --> | srcmaprouting | MapSrc
+    MapSrc --> | portmaprouting | TcpPortMap
 ```
 
 #### Metadata publishing
 
-When an entry is matched in the matching stages, we will publish the metadata defined in the entry to the metadata bus. The metadata bus is a set of fields that can be used by the routing actions as parameters. And the metadata bus is designed to be a shared resource, so the metadata published by the entries in the later stages will override the earlier ones.
+When an entry is matched in the matching stages, we will publish the metadata defined in the entry to the metadata bus, and overrides the existing ones, if any. This means, all the entries in each matching stage can all be defined similarly as below:
 
 ```json
-// VNET mapping entry (Exact Match stage)
+"DASH_SOME_OBJECT_TABLE:<Unique Key of the object>": {
+    "action_type": "<routing type name>",
+
+    // Metadata properties/attributes ...
+}
+```
+
+Take the VNET mapping as an example. When following VNET mapping is matched, `underlay_dip`, `4to6_sip_encoding`, `4to6_dip_encoding` and `metering_class` will be published to the metadata bus.
+
+```json
+// VNET mapping entry (VNET mapping stage)
 "DASH_VNET_MAPPING_TABLE:Vnet1:10.0.1.1": {
     "routing_type": "do_something",
 
@@ -276,9 +306,11 @@ When an entry is matched in the matching stages, we will publish the metadata de
 }
 ```
 
-With this in mind, the entire pipeline works as matching and metadata publishing until the final routing actions are executed.
+After all matching stages is done, we will start applying all the actions. All the latest values in the metadata bus will be used as the input parameters for the routing actions.
 
-Please note that the Direction Lookup and Pipeline Lookup stages are also matching stages, so they can also populate metadatas too, e.g., ENI-level metadata for underlay encap.
+> NOTE:
+> 
+> The Direction Lookup and Pipeline Lookup stages are also matching stages, so they can also populate metadatas too, e.g., ENI-level metadata for underlay encap.
 
 ### Routing action
 
