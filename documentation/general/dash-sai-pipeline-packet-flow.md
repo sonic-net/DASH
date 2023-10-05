@@ -9,9 +9,10 @@
    3. [4.3. Pipeline Lookup](#43-pipeline-lookup)
    4. [4.4. Packet Decap](#44-packet-decap)
    5. [4.5. Conntrack Lookup and Update](#45-conntrack-lookup-and-update)
-      1. [4.5.1. Flow table](#451-flow-table)
+      1. [4.5.1. Flow lookup](#451-flow-lookup)
       2. [4.5.2. Flow creation](#452-flow-creation)
-      3. [4.5.3. Asymmetrical encap handling](#453-asymmetrical-encap-handling)
+         1. [4.5.2.1. Tunnel learning](#4521-tunnel-learning)
+         2. [4.5.2.2. Asymmetrical encap handling](#4522-asymmetrical-encap-handling)
    6. [4.6. Pre-pipeline ACL and Post-pipeline ACL](#46-pre-pipeline-acl-and-post-pipeline-acl)
    7. [4.7. Matching stages and metadata publishing](#47-matching-stages-and-metadata-publishing)
       1. [4.7.1. Matching stage](#471-matching-stage)
@@ -22,9 +23,10 @@
    9. [4.9. Routing type](#49-routing-type)
 5. [5. Examples](#5-examples)
    1. [5.1. VNET routing](#51-vnet-routing)
-   2. [5.2. Load balancer (L4 DNAT)](#52-load-balancer-l4-dnat)
-   3. [5.3. Load balancer (L3 SNAT)](#53-load-balancer-l3-snat)
-   4. [5.4. More](#54-more)
+   2. [5.2. VM level public IP inbound (L3 DNAT)](#52-vm-level-public-ip-inbound-l3-dnat)
+   3. [5.3. VM level public IP outbound (L3 SNAT)](#53-vm-level-public-ip-outbound-l3-snat)
+   4. [5.4. Load balancer (L4 DNAT)](#54-load-balancer-l4-dnat)
+   5. [5.5. More](#55-more)
 
 ## 1. Overview
 
@@ -94,25 +96,25 @@ flowchart TB
     PD --> Out0
     PD --> In1
     PD --> Out1 
-    PD --> |No Match| Out
+    PD --> |No Pipeline<br>Match| Out
 
     CTL0 --> |Flow Miss| PreACL0
-    CTL0 --> |Flow Match| AA0
+    CTL0 --> |Flow Hit| AA0
     PreACL0 --> MATS0
     MATS0 --> AA0
     AA0 --> PostACL0
     PostACL0 --> CTU0
-    AA0 --> |Flow Match| MS0
+    AA0 --> |Flow Hit| MS0
     CTU0 --> MS0
     MS0 --> Out
 
     CTL1 --> |Flow Miss| PreACL1
-    CTL1 --> |Flow Match| AA1
+    CTL1 --> |Flow Hit| AA1
     PreACL1 --> MATS1
     MATS1 --> AA1
     AA1 --> PostACL1
     PostACL1 --> CTU1
-    AA1 --> |Flow Match| MS1
+    AA1 --> |Flow Hit| MS1
     CTU1 --> MS1
     MS1 --> Out
 ```
@@ -140,7 +142,7 @@ Implementation-wise, this is similar to Packet Header Vector or Bus in NPL.
 
 ### 4.2. Direction Lookup
 
-In DASH-SAI pipeline, traffic are split into 2 directions: `inbound` and `outbound`. Each direction has its own pipeline (see pipeline overview above). When a new packet arrives, we will assign a direction to the packet, then process the packet in the corresponding pipeline. This ensures us to do flow match propoerly and transform the packet in the right way.
+In DASH-SAI pipeline, traffic are split into 2 directions: `inbound` and `outbound`. Each direction has its own pipeline (see pipeline overview above). When a new packet arrives, we will assign a direction to the packet, then process the packet in the corresponding pipeline. This ensures us to match the flow and transform the packet in the right way.
 
 ### 4.3. Pipeline Lookup
 
@@ -191,28 +193,39 @@ After entering a specific pipeline, the first stage will be the Conntrack Lookup
 
 The core of the Conntrack Lookup and Update stage is the flow table.
 
-#### 4.5.1. Flow table
+#### 4.5.1. Flow lookup
 
-1. Flows **MUST** be stored based on the pipeline direction. 
-   1. When outbound pipeline creates a flow, the forwarding flow should be created on the outbound side, while reverse flow should be created on the inbound side.
-   2. When inbound pipeline creates a flow, it creates the flow in reversed way.
-2. The flow lookup **MUST** use the information of inner most packet.
-   1. The matching keys can be configurated via the DASH flow APIs during the DASH initialzation.
-   2. Although the outer encaps are decap'ed and not used in flow matching, the source information of each encap **MUST** be compared. If any change is detected, the flow lookup **MUST** fail, pushing the packet going through the rest of pipeline, just like a new flow.
-      1. This is because the source information will be used for creating reverse flow, and failover can happen to whoever that sends us packet, so we need this behavior to fix the reverse flow actions.
+First, let's define the flow lookup behavior.
+
+The flow lookup **MUST** use the information of inner most packet. And the matching keys can be configurated via the DASH flow APIs during the DASH initialzation. This allows us to support different flow matching behaviors for certain cases. For example, in L3 level routing, we don't need to create 5 tuple flows.
 
 After the flow lookup, if a flow is matched, we will apply the saved actions in the flow direction and skip the rest of the pipeline. Otherwise, we will continue the pipeline processing.
 
 #### 4.5.2. Flow creation
 
-After all packet transformations are applied, we will create a new flow in the flow table.
+For new connections, after all packet transformations are applied, we will create a new flow in the flow table. 
+
+Since a connection can be bi-directional, the flows needs to be created as flow pairs: the one in the same direction as the packet is usually called forwarding flow, while the other direction is called reverse flow. Of course, the flow pairs **MUST** be stored based on the pipeline direction.
+
+- When outbound pipeline creates a flow, the forwarding flow should be created on the outbound side, while reverse flow should be created on the inbound side.
+- When inbound pipeline creates a flow, it creates the flow in reversed way.
+
+And here is how to create the flow pairs:
 
 - The forwarding flow creation is straight forward, because all the final transformations are defined in the flow actions and metadata bus.
-- To properly create the reverse flow, we will use the information from the original tunnels, and reverse them as return encaps, which is why we need to save all the original tunnel information when doing packet decaps.
+- To properly create the reverse flow, we will learn the information from the original tunnels, and reverse them as return encaps, which is why we need to save all the original tunnel information when doing packet decaps.
 
-#### 4.5.3. Asymmetrical encap handling
+##### 4.5.2.1. Tunnel learning
 
-There could be cases where the encaps are asymmetrical, which means the incoming packet and return packet uses different encaps.
+You might already notice that, although we uses the outer encap from the original packet to create the reverse flow, but the outer encaps are decap'ed and not used in flow matching. This creates a problem when source side fails over. Like the graph shows below, the traffic shifted from VTEP 1 (Green side) to VTEP 2 (Blue side), which changes the source IP in the encap. If we don't do anything, the existing reverse flow will continue to send the packet back to green side and causing the traffic being dropped.
+
+![](./images/dash-tunnel-learning.svg)
+
+To address this problem, the source information of each encap **MUST** be saved in te flow and compared during flow match. These information should no be part of the key, but whenever they change, we should reprocess the packet and update the saved reverse tunnel in the existing flow.
+
+##### 4.5.2.2. Asymmetrical encap handling
+
+There could be cases where the encaps are asymmetrical, which means the incoming packet and return packet uses different encaps. For example, in the case below, the encap of step 2 and 4 are not symmetrical. This means we could never recreate the flow on the DASH pipeline 2 side to tunnel the packet into the extra hop first with our current flow creation logic.
 
 ![](./images/dash-asymmetrical-encap.svg)
 
@@ -424,6 +437,8 @@ This combination of routing actions is very flexible and powerful, and it enable
 
 ## 5. Examples
 
+Here are some examples to demo how to apply the DASH-SAI pipeline to implement different network functions. They might not be up-to-date or complete policies, but mostly demoing the high level ideas.
+
 ### 5.1. VNET routing
 
 ```json
@@ -458,16 +473,80 @@ This combination of routing actions is very flexible and powerful, and it enable
 ]
 ```
 
-### 5.2. Load balancer (L4 DNAT)
+### 5.2. VM level public IP inbound (L3 DNAT)
 
 ```json
 [
-    // When ENI is matched, we can set the initial stage to maprouting.
     "DASH_ENI_TABLE:123456789012": {
-	    "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
+        "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
+        "admin_state": "enabled",
+        "mac_address": "12-34-56-78-90-12",
+
+        // In inbound pipeline, this field will be published as underlay_dip used by staticencap action.
+        "underlay_ip": "100.0.0.1",
+    },
+
+    // Routing to the public IP.
+    "DASH_ROUTE_TABLE:123456789012:1.1.1.1/32": {
+        "routing_type": "l3nat",
+
+        // Another way to implement the underlay encap is to use the underlay_dip in the routing entry.
+        "underlay_dip": "100.0.0.1",
+
+        // NAT destination IP to VM IP.
+        "nat_dips": "10.0.0.1"
+    },
+
+    // This is the final routing type that gets executed.
+    // 
+    // The nat action will nat the inner packet destination ip based on the nat_dips defined in the routing entry.
+    // If we have multiple IPs, they will be treated as an ECMP group. And algorithm can be defined as metadata in the routing entry as well.
+    "DASH_ROUTING_TYPE_TABLE:l3nat": [
+        {
+            "name": "action1",
+            "action_type": "nat"
+        },
+        {
+            "name": "action2",
+            "action_type": "staticencap"
+        }
+    ]
+]
+```
+
+### 5.3. VM level public IP outbound (L3 SNAT)
+
+```json
+[
+    // Routing to Internet.
+    // This is a simple implementation, basically means if nothing else is matched.
+    "DASH_ROUTE_TABLE:123456789012:0.0.0.0/0": {
+        "routing_type": "l3nat",
+        "nat_sips": "1.1.1.1,2.2.2.2"
+    },
+
+    // This is the final routing type that gets executed.
+    // 
+    // The nat action will nat the inner packet destination ip based on the nat_dips defined in the routing entry.
+    // If we have multiple IPs, they will be treated as an ECMP group. And algorithm can be defined as metadata in the routing entry as well.
+    "DASH_ROUTING_TYPE_TABLE:l3nat": [
+        {
+            "name": "action1",
+            "action_type": "nat"
+        }
+    ]
+]
+```
+
+
+### 5.4. Load balancer (L4 DNAT)
+
+```json
+[
+    // When any traffic is sent to any VIP that this DPU owns, we will start to lookup the destination.
+    "DASH_ROUTE_TABLE:123456789012:1.1.1.0/24": {
         "transit_to": "maprouting",
 	    "vnet": "vipmapping"
-        // ...
     },
 
     // If the packet is sent to 1.1.1.1, we start to do port mapping
@@ -476,6 +555,7 @@ This combination of routing actions is very flexible and powerful, and it enable
         "port_mapping_id": "lb-portmap-1-1-1-1",
     }
 
+    // Load balancing rule for port 443.
     "DASH_TCP_PORT_MAPPING_TABLE:lb-portmap-1-1-1-1": [
         {
             "routing_type": "lbdnat",
@@ -510,29 +590,6 @@ This combination of routing actions is very flexible and powerful, and it enable
 ]
 ```
 
-### 5.3. Load balancer (L3 SNAT)
-
-```json
-[
-    // Routing to Internet.
-    "DASH_ROUTE_TABLE:123456789012:0.0.0.0/0": {
-        "routing_type": "l3snat",
-        "nat_sips": "1.1.1.1,2.2.2.2"
-    },
-
-    // This is the final routing type that gets executed.
-    // 
-    // The nat action will nat the inner packet source ip based on the nat_sips defined in the routing entry.
-    // All IPs will be treated as an ECMP group. And algorithm can be defined as metadata in the routing entry as well.
-    "DASH_ROUTING_TYPE_TABLE:l3snat": [
-        {
-            "name": "action1",
-            "action_type": "nat"
-        }
-    ]
-]
-```
-
-### 5.4. More
+### 5.5. More
 
 - [SONiC-DASH packet flows](https://github.com/sonic-net/SONiC/blob/master/doc/dash/dash-sonic-hld.md#2-packet-flows)
