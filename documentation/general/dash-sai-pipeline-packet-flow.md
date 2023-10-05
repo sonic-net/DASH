@@ -4,7 +4,7 @@
 2. [2. Packet Structure](#2-packet-structure)
 3. [3. Pipeline Overview](#3-pipeline-overview)
 4. [4. Pipeline components](#4-pipeline-components)
-   1. [4.1. Per-packet Metadata bus](#41-per-packet-metadata-bus)
+   1. [4.1. Per-packet metadata bus](#41-per-packet-metadata-bus)
    2. [4.2. Direction Lookup](#42-direction-lookup)
    3. [4.3. Pipeline Lookup](#43-pipeline-lookup)
    4. [4.4. Packet Decap](#44-packet-decap)
@@ -13,6 +13,7 @@
       2. [4.5.2. Flow creation](#452-flow-creation)
          1. [4.5.2.1. Tunnel learning](#4521-tunnel-learning)
          2. [4.5.2.2. Asymmetrical encap handling](#4522-asymmetrical-encap-handling)
+      3. [4.5.3. Flow resimulation](#453-flow-resimulation)
    6. [4.6. Pre-pipeline ACL and Post-pipeline ACL](#46-pre-pipeline-acl-and-post-pipeline-acl)
    7. [4.7. Matching stages and metadata publishing](#47-matching-stages-and-metadata-publishing)
       1. [4.7.1. Matching stage](#471-matching-stage)
@@ -102,9 +103,10 @@ flowchart TB
     CTL0 --> |Flow Hit| AA0
     PreACL0 --> MATS0
     MATS0 --> AA0
-    AA0 --> PostACL0
+    AA0 --> |Flow Miss| PostACL0
     PostACL0 --> CTU0
     AA0 --> |Flow Hit| MS0
+    AA0 --> |Flow Change| CTU0
     CTU0 --> MS0
     MS0 --> Out
 
@@ -112,9 +114,10 @@ flowchart TB
     CTL1 --> |Flow Hit| AA1
     PreACL1 --> MATS1
     MATS1 --> AA1
-    AA1 --> PostACL1
+    AA1 --> |Flow Miss| PostACL1
     PostACL1 --> CTU1
     AA1 --> |Flow Hit| MS1
+    AA1 --> |Flow Change| CTU1
     CTU1 --> MS1
     MS1 --> Out
 ```
@@ -128,7 +131,7 @@ This design allows our upper layers to be flexible and doesn't limit to any spec
 
 ## 4. Pipeline components
 
-### 4.1. Per-packet Metadata bus
+### 4.1. Per-packet metadata bus
 
 First of all, since we have multiple matching stages in the pipeline, we need a way to pass the information from the matched entries in the earlier stages to the later ones to help us making final decisions on packet transformation. And this is what metadata bus is for.
 
@@ -230,6 +233,17 @@ There could be cases where the encaps are asymmetrical, which means the incoming
 ![](./images/dash-asymmetrical-encap.svg)
 
 To fix this issue, a special action called `reverse_tunnel` is defined, which enables reverse side of the encaps.
+
+#### 4.5.3. Flow resimulation
+
+When certain policies are changed, we might need to update the flows that is associated with the policies. For example, when a VM is moved to another place, the VNET mapping entry will be changed, and we need to update the existing flows that is associated with the VNET mapping entry. Otherwise, the outgoing traffic will be tunneled to incorrect place. This is called flow resimulation.
+
+However, the flow resimulation is not as simple as removing the flow and let the packet to going through the pipeline again. For example:
+
+- When a ACL is changed in the outbound side, all flows needs to be resimulated. However, this cannot be implemented by removing all flow entries and let all flows to be recreated with the latest policy. The reason is that ACLs can be asymmetric and flows are created in pair. If the flows are removed, the inbound side traffic will be dropped immediately, because there is no inbound flow to make it bypass the ACLs.
+- Certain actions might need to bypass the flow resimulatin to maintain the per flow consistency. For example, in load balancer case, we will want to ensure that flow resimulation will not causing us to forward existing connections to a different backend server.
+
+These requires us to implement the flow resimulation in a more sophisticated way, which is not fully modeled in DASH today. But we will come back to this design later.
 
 ### 4.6. Pre-pipeline ACL and Post-pipeline ACL
 
