@@ -334,7 +334,7 @@ Here is an example that shows how the routing stage entry looks like:
 ```json
 // Routing stage entry:
 // When this entry is matched, we will move to VNET mapping stage, which executes maprouting action and jump to VNET mapping stage.
-"DASH_ROUTE_TABLE:123456789012:10.0.1.0/24": {
+"DASH_SAI_ROUTE_TABLE:123456789012:10.0.1.0/24": {
     "transit_to": "maprouting",
     "vnet": "Vnet1"
 }
@@ -377,7 +377,7 @@ flowchart LR
 When an entry is matched in the matching stages, we will publish the metadata defined in the entry to the metadata bus, and overrides the existing ones, if any. This means, all the entries in each matching stage can all be defined similarly as below:
 
 ```json
-"DASH_SOME_OBJECT_TABLE:<Unique Key of the object>": {
+"DASH_SAI_SOME_OBJECT_TABLE:<Unique Key of the object>": {
     "transit_to": "<next stage name>",
     "routing_type": "<routing type name>",
 
@@ -389,7 +389,7 @@ Take the VNET mapping as an example. When following VNET mapping is matched, `un
 
 ```json
 // VNET mapping entry (VNET mapping stage)
-"DASH_VNET_MAPPING_TABLE:Vnet1:10.0.1.1": {
+"DASH_SAI_VNET_MAPPING_TABLE:Vnet1:10.0.1.1": {
     "transit_to": "portmaprouting",
     "routing_type": "do_something",
 
@@ -458,26 +458,26 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 ```json
 [
     // When sending to anywhere in the VNET, we start to lookup the destination
-    "DASH_ROUTE_TABLE:123456789012:10.0.1.0/24": {
+    "DASH_SAI_ROUTE_TABLE:123456789012:10.0.1.0/24": {
         "transit_to": "maprouting",
         "vnet": "Vnet1"
     },
 
     // If we are sending to 10.0.1.1, this entry will be matched and set the underlay destination IP for staticencap action.
-    "DASH_VNET_MAPPING_TABLE:Vnet1:10.0.1.1": {
+    "DASH_SAI_VNET_MAPPING_TABLE:Vnet1:10.0.1.1": {
         "routing_type": "vnet",
         "underlay_dip": "3.3.3.1",
     }
 
     // The corresponding table level information will also be populated, in this case - "encap_key"
-    "DASH_VNET_TABLE:Vnet1": {
+    "DASH_SAI_VNET_TABLE:Vnet1": {
         "name": "559c6ce8-26ab-4193-b946-ccc6e8f930b2",
         "encap_key": "45654"
     },
 
     // This is the final routing type that gets executed because VNET mapping table gets matched,
     // which addes the vxlan tunnel to the destination.
-    "DASH_ROUTING_TYPE_TABLE:vnet": [
+    "DASH_SAI_ROUTING_TYPE_TABLE:vnet": [
         {
             "name": "action1",
             "action_type": "static_encap",
@@ -491,7 +491,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 
 ```json
 [
-    "DASH_ENI_TABLE:123456789012": {
+    "DASH_SAI_ENI_TABLE:123456789012": {
         "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
         "admin_state": "enabled",
         "mac_address": "12-34-56-78-90-12",
@@ -501,7 +501,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
     },
 
     // Routing to the public IP.
-    "DASH_ROUTE_TABLE:123456789012:1.1.1.1/32": {
+    "DASH_SAI_ROUTE_TABLE:123456789012:1.1.1.1/32": {
         "routing_type": "l3nat",
 
         // Another way to implement the underlay encap is to use the underlay_dip in the routing entry.
@@ -515,7 +515,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
     // 
     // The nat action will nat the inner packet destination ip based on the nat_dips defined in the routing entry.
     // If we have multiple IPs, they will be treated as an ECMP group. And algorithm can be defined as metadata in the routing entry as well.
-    "DASH_ROUTING_TYPE_TABLE:l3nat": [
+    "DASH_SAI_ROUTING_TYPE_TABLE:l3nat": [
         {
             "name": "action1",
             "action_type": "nat"
@@ -534,7 +534,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 [
     // Routing to Internet.
     // This is a simple implementation, basically means if nothing else is matched.
-    "DASH_ROUTE_TABLE:123456789012:0.0.0.0/0": {
+    "DASH_SAI_ROUTE_TABLE:123456789012:0.0.0.0/0": {
         "routing_type": "l3nat",
         "nat_sips": "1.1.1.1,2.2.2.2"
     },
@@ -543,7 +543,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
     // 
     // The nat action will nat the inner packet destination ip based on the nat_dips defined in the routing entry.
     // If we have multiple IPs, they will be treated as an ECMP group. And algorithm can be defined as metadata in the routing entry as well.
-    "DASH_ROUTING_TYPE_TABLE:l3nat": [
+    "DASH_SAI_ROUTING_TYPE_TABLE:l3nat": [
         {
             "name": "action1",
             "action_type": "nat"
@@ -558,19 +558,19 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 ```json
 [
     // When any traffic is sent to any VIP that this DPU owns, we will start to lookup the destination.
-    "DASH_ROUTE_TABLE:123456789012:1.1.1.0/24": {
+    "DASH_SAI_ROUTE_TABLE:123456789012:1.1.1.0/24": {
         "transit_to": "maprouting",
 	    "vnet": "vipmapping"
     },
 
     // If the packet is sent to 1.1.1.1, we start to do port mapping
-    "DASH_VNET_MAPPING_TABLE:Vnet1:1.1.1.1": {
+    "DASH_SAI_VNET_MAPPING_TABLE:Vnet1:1.1.1.1": {
         "transit_to": "portmaprouting",
         "port_mapping_id": "lb-portmap-1-1-1-1",
     }
 
     // Load balancing rule for port 443.
-    "DASH_TCP_PORT_MAPPING_TABLE:lb-portmap-1-1-1-1": [
+    "DASH_SAI_TCP_PORT_MAPPING_TABLE:lb-portmap-1-1-1-1": [
         {
             "routing_type": "lbdnat",
 
@@ -584,7 +584,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
     ]
 
     // The corresponding table level information will also be populated, in this case - "encap_key"
-    "DASH_VNET_TABLE:vipmapping": {
+    "DASH_SAI_VNET_TABLE:vipmapping": {
         "name": "559c6ce8-26ab-4193-b946-ccc6e8f930b2",
         "encap_key": "45654"
     },
@@ -594,7 +594,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
     //
     // To start simple, all destination IPs can be treated as an ECMP group. And algorithm can be defined as metadata
     // in the VIP entry as well.
-    "DASH_ROUTING_TYPE_TABLE:lbnat": [
+    "DASH_SAI_ROUTING_TYPE_TABLE:lbnat": [
         {
             "name": "action1",
             "action_type": "tunnel_nat",
