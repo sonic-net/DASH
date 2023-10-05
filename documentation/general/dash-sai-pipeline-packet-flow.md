@@ -318,12 +318,13 @@ In DASH-SAI pipeline, routing actions are the fundamental building blocks for pa
 
 1. Take a specific list of metadata fields as input parameters:
    1. For example, `staicencap` action will take the `underlay_dip`, `underlay_sip`, `encap_type` and `encap_key` to encapsulate the packet.
-   2. The parameter can come from 2 places - the metadata defined associated with the entries in each table, or the routing action definition itself. More details will be discussed in the next section.
+   2. The parameters can come from 2 places - the metadata defined associated with the entries in each table, or the routing action definition itself. More details will be discussed in the next section.
 2. Transform the packet in a specific way, e.g., encapsulate the packet, natting the address and port, etc.
 3. Independent to other actions.
-   1. With this design, we don't have to worry about the order of the actions. It also enables the hardware to improve the E2E pipeline latency by doing the actions in parallel.
+   1. With this design, we don't have to worry about the order of the actions.
+   2. This also enables the hardware to improve the E2E pipeline latency by doing the actions in parallel.
 
-Take staticencap as an example, it can be defined as below:
+Take `staticencap` as an example, it can be defined as below:
 
 - Action parameters:
     - `encap_type`: "nvgre|vxlan|..."
@@ -344,11 +345,11 @@ In DASH-SAI pipeline, routing type is defined as a list of routing actions. And 
 For example:
 
 - We can implement the VNET routing by creating a routing type named `vnet` with only 1 action `staticencap`, which takes the next hop information from the mapping table.
-- We can also add additional hop to tunnel the traffic to an firewall first, which is known as [UDR](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview), by creating another routing type named `vnetfw` with a `staticencap` action and an extra `tunnel` actions.
+- We can also add additional hop to tunnel the traffic to an firewall or network virtual appliance first, which is known as [UDR](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview), by creating another routing type named `vnetfw` with a `staticencap` action and an extra `tunnel` actions.
 - We can even use `tunnel` action with multiple destinations as ECMP group to implement a simple load balancer!
 
 This combination of routing actions is very flexible and powerful, and it enables us to implement any network function we want.
 
 ## Examples
 
-[SONiC-DASH pipeline](https://github.com/sonic-net/SONiC/blob/master/doc/dash/dash-sonic-hld.md#2-packet-flows).
+- [SONiC-DASH packet flows](https://github.com/sonic-net/SONiC/blob/master/doc/dash/dash-sonic-hld.md#2-packet-flows)
