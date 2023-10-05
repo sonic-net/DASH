@@ -124,7 +124,7 @@ Implementation-wise, this is similar to Packet Header Vector or Bus in NPL.
 
 ### 3.2. Direction Lookup
 
-In DASH-SAI pipeline, traffic are split into 2 directions: `inbound` and `outbound`. Each direction has its own pipeline (see more details below). When a new packet arrives, we will assign a direction to the packet, then process the packet in the corresponding pipeline. This ensures us to do flow match propoerly and transform the packet in the right way.
+In DASH-SAI pipeline, traffic are split into 2 directions: `inbound` and `outbound`. Each direction has its own pipeline (see pipeline overview above). When a new packet arrives, we will assign a direction to the packet, then process the packet in the corresponding pipeline. This ensures us to do flow match propoerly and transform the packet in the right way.
 
 ### 3.3. Pipeline Lookup
 
@@ -276,7 +276,7 @@ To transit between stages, we can set the `transit_to` field in the matched entr
 | `srclpmrouting` | Routing stage by checking source IP |
 | `maprouting` | VNET Mapping stage by checking destination IP |
 | `srcmaprouting` | VNET Mapping stage by checking source IP |
-| `portmaprouting` | TCP or Port Mapping stage |
+| `portmaprouting` | TCP or UDP Port Mapping stage |
 | `rss` | Sending it to CPU |
 | `drop` | Drop the packet |
 
