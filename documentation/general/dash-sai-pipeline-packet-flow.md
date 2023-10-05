@@ -223,15 +223,15 @@ A typical usage of the ACLs is to implement security policies. For example, in S
 ```mermaid
 flowchart TD
     subgraph Outbound Pipeline
-        Out_PreACL[Overlay ACL<br>== Outbound Pre-Pipeline ACL ==]
+        Out_PreACL[Overlay ACL<br># Outbound Pre-Pipeline ACL #]
         Out_MS[Match Stages]
-        Out_PostACL[Underlay ACL<br>== Outbound Post-Pipeline ACL ==]
+        Out_PostACL[Underlay ACL<br># Outbound Post-Pipeline ACL #]
     end
 
     subgraph Inbound Pipeline
-        In_PreACL[Underlay ACL<br>== Inbound Pre-Pipeline ACL ==]
+        In_PreACL[Underlay ACL<br># Inbound Pre-Pipeline ACL #]
         In_MS[Match Stages]
-        In_PostACL[Overlay ACL<br>== Inbound Post-Pipeline ACL ==]
+        In_PostACL[Overlay ACL<br># Inbound Post-Pipeline ACL #]
     end
 
     Out_PreACL --> Out_MS
