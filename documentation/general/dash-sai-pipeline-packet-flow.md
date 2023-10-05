@@ -11,6 +11,7 @@
    5. [4.5. Conntrack Lookup and Update](#45-conntrack-lookup-and-update)
       1. [4.5.1. Flow table](#451-flow-table)
       2. [4.5.2. Flow creation](#452-flow-creation)
+      3. [4.5.3. Asymmetrical encap handling](#453-asymmetrical-encap-handling)
    6. [4.6. Pre-pipeline ACL and Post-pipeline ACL](#46-pre-pipeline-acl-and-post-pipeline-acl)
    7. [4.7. Matching stages and metadata publishing](#47-matching-stages-and-metadata-publishing)
       1. [4.7.1. Matching stage](#471-matching-stage)
@@ -188,9 +189,9 @@ If a pipeline is found, before processing the packets, all outer encaps will be 
 
 After entering a specific pipeline, the first stage will be the Conntrack Lookup stage, which does the flow lookup. If any flow is matched, the saved actions will be applied, the metering counters will be updated, and the rest of pipeline will be skipped.
 
-#### 4.5.1. Flow table
+The core of the Conntrack Lookup and Update stage is the flow table.
 
-The core of the Conntrack Lookup and Update stage is flow table, whose usage **MUST** follow the rules below:
+#### 4.5.1. Flow table
 
 1. Flows **MUST** be stored based on the pipeline direction. 
    1. When outbound pipeline creates a flow, the forwarding flow should be created on the outbound side, while reverse flow should be created on the inbound side.
@@ -209,7 +210,13 @@ After all packet transformations are applied, we will create a new flow in the f
 - The forwarding flow creation is straight forward, because all the final transformations are defined in the flow actions and metadata bus.
 - To properly create the reverse flow, we will use the information from the original tunnels, and reverse them as return encaps, which is why we need to save all the original tunnel information when doing packet decaps.
 
-There could be cases where the encaps are asymmetrical, which means the incoming packet and return packet uses different encaps. To fix this issue, a special action called `reverse_tunnel` is defined, which enables reverse side of the encaps.
+#### 4.5.3. Asymmetrical encap handling
+
+There could be cases where the encaps are asymmetrical, which means the incoming packet and return packet uses different encaps.
+
+![](./images/dash-asymmetrical-encap.svg)
+
+To fix this issue, a special action called `reverse_tunnel` is defined, which enables reverse side of the encaps.
 
 ### 4.6. Pre-pipeline ACL and Post-pipeline ACL
 
