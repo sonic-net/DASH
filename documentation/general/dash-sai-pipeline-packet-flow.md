@@ -1,33 +1,34 @@
 # DASH-SAI pipeline packet flow
 
 1. [1. Overview](#1-overview)
-2. [2. Packet Structure](#2-packet-structure)
-3. [3. Pipeline Overview](#3-pipeline-overview)
-4. [4. Pipeline components](#4-pipeline-components)
-   1. [4.1. Per-packet metadata bus](#41-per-packet-metadata-bus)
-   2. [4.2. Direction Lookup](#42-direction-lookup)
-   3. [4.3. Pipeline Lookup](#43-pipeline-lookup)
-   4. [4.4. Packet Decap](#44-packet-decap)
-   5. [4.5. Conntrack Lookup and Update](#45-conntrack-lookup-and-update)
-      1. [4.5.1. Flow lookup](#451-flow-lookup)
-      2. [4.5.2. Flow creation](#452-flow-creation)
-         1. [4.5.2.1. Tunnel learning](#4521-tunnel-learning)
-         2. [4.5.2.2. Asymmetrical encap handling](#4522-asymmetrical-encap-handling)
-      3. [4.5.3. Flow resimulation](#453-flow-resimulation)
-   6. [4.6. Pre-pipeline ACL and Post-pipeline ACL](#46-pre-pipeline-acl-and-post-pipeline-acl)
-   7. [4.7. Matching stages and metadata publishing](#47-matching-stages-and-metadata-publishing)
-      1. [4.7.1. Matching stage](#471-matching-stage)
-      2. [4.7.2. Pipeline profile and stage connections](#472-pipeline-profile-and-stage-connections)
-      3. [4.7.3. Stage transitions](#473-stage-transitions)
-      4. [4.7.4. Metadata publishing](#474-metadata-publishing)
-   8. [4.8. Routing action](#48-routing-action)
-   9. [4.9. Routing type](#49-routing-type)
-5. [5. Examples](#5-examples)
-   1. [5.1. VNET routing](#51-vnet-routing)
-   2. [5.2. VM level public IP inbound (L3 DNAT)](#52-vm-level-public-ip-inbound-l3-dnat)
-   3. [5.3. VM level public IP outbound (L3 SNAT)](#53-vm-level-public-ip-outbound-l3-snat)
-   4. [5.4. Load balancer (L4 DNAT)](#54-load-balancer-l4-dnat)
-   5. [5.5. More](#55-more)
+2. [2. Data path logical architecture stack](#2-data-path-logical-architecture-stack)
+3. [3. Packet Structure](#3-packet-structure)
+4. [4. Pipeline Overview](#4-pipeline-overview)
+5. [5. Pipeline components](#5-pipeline-components)
+   1. [5.1. Per-packet metadata bus](#51-per-packet-metadata-bus)
+   2. [5.2. Direction Lookup](#52-direction-lookup)
+   3. [5.3. Pipeline Lookup](#53-pipeline-lookup)
+   4. [5.4. Packet Decap](#54-packet-decap)
+   5. [5.5. Conntrack Lookup and Update](#55-conntrack-lookup-and-update)
+      1. [5.5.1. Flow lookup](#551-flow-lookup)
+      2. [5.5.2. Flow creation](#552-flow-creation)
+         1. [5.5.2.1. Tunnel learning](#5521-tunnel-learning)
+         2. [5.5.2.2. Asymmetrical encap handling](#5522-asymmetrical-encap-handling)
+      3. [5.5.3. Flow resimulation](#553-flow-resimulation)
+   6. [5.6. Pre-pipeline ACL and Post-pipeline ACL](#56-pre-pipeline-acl-and-post-pipeline-acl)
+   7. [5.7. Matching stages and metadata publishing](#57-matching-stages-and-metadata-publishing)
+      1. [5.7.1. Matching stage](#571-matching-stage)
+      2. [5.7.2. Pipeline profile and stage connections](#572-pipeline-profile-and-stage-connections)
+      3. [5.7.3. Stage transitions](#573-stage-transitions)
+      4. [5.7.4. Metadata publishing](#574-metadata-publishing)
+   8. [5.8. Routing action](#58-routing-action)
+   9. [5.9. Routing type](#59-routing-type)
+6. [6. Examples](#6-examples)
+   1. [6.1. VNET routing](#61-vnet-routing)
+   2. [6.2. VM level public IP inbound (L3 DNAT)](#62-vm-level-public-ip-inbound-l3-dnat)
+   3. [6.3. VM level public IP outbound (L3 SNAT)](#63-vm-level-public-ip-outbound-l3-snat)
+   4. [6.4. Load balancer (L4 DNAT)](#64-load-balancer-l4-dnat)
+   5. [6.5. More](#65-more)
 
 ## 1. Overview
 
@@ -35,7 +36,19 @@ DASH-SAI pipeline packet flow is the core of the DASH project. It defines from d
 
 DASH-SAI pipeline is designed to work as a general purpose network function pipeline. Similar to [SAI](https://github.com/opencomputeproject/SAI), it works as a shim layer on top of DPU/ASIC SDKs, provides a set of low level hardware agnostic APIs that exposes the generic DPU primitives to the upper layer. So, the pipeline itself is not limited to any specific network function, but can be used to implement any network function.
 
-## 2. Packet Structure
+## 2. Data path logical architecture stack
+
+[DASH HLD](https://github.com/sonic-net/DASH/blob/main/documentation/general/dash-high-level-design.md) already provided a very good high level overview on the system architecture. And here, we are going to dive a bit deeper from the data path perspective.
+
+![](./images/dash-data-path-overview.svg)
+
+DASH-SAI APIs are designed to be generic, so we could use it to set up the data path in different ways as needed. 
+
+- The simplest way to set up the data path is to use the DASH-SAI APIs to create your pipeline and offload all your policy to ASIC.
+- If your application requires more advanced policy, then the techonology provider could also provide a inbox data plane app to implement these policies. And still, this is transparent to the upper layer, everything is hidden under the SAI level.
+- If even more customized or complicated pipelines are needed for certain traffic, we could also provide our own customized data plane app and use the DASH policy to instruct the ASIC to trap these packets up when they shows up.
+
+## 3. Packet Structure
 
 Before diving into the pipeline and packet flow, to better describe the behaviors, let's first have a clear understanding on the packet structure that DASH supports.
 
@@ -49,7 +62,7 @@ Overall, the high-level packet structure looks like below:
 | - | - | - | - | - |
 | **...** | **Tunnel1** | **Tunnel0** | **Underlay** | **Overlay** |
 
-## 3. Pipeline Overview
+## 4. Pipeline Overview
 
 DASH-SAI pipeline is modeled as a list of stages. Each stage defines its own tables, and use the table entries to match packets in certain way and publishing thecorresponding metadata when an entry is matched. After all stages are processed, a list of final routing actions will be defined. Then, by executing these routing actions, the packet will be transformed in the way we want and corresponding flows will be generated according to the direction of the packet.
 
@@ -129,9 +142,9 @@ This design allows our upper layers to be flexible and doesn't limit to any spec
 - The inner MAC address is used for pipeline lookup, a.k.a. ENI lookup (ENI). 
 - Once it goes into the corresponding DASH pipeline, the `outbound` pipeline will be used to process the packets coming from the VM, while the `inbound` pipeline will be used to process the packets going into the VM.
 
-## 4. Pipeline components
+## 5. Pipeline components
 
-### 4.1. Per-packet metadata bus
+### 5.1. Per-packet metadata bus
 
 First of all, since we have multiple matching stages in the pipeline, we need a way to pass the information from the matched entries in the earlier stages to the later ones to help us making final decisions on packet transformation. And this is what metadata bus is for.
 
@@ -143,11 +156,11 @@ At high-level, the metadata bus is a set of fields that being carried all the wa
 
 Implementation-wise, this is similar to Packet Header Vector or Bus in NPL.
 
-### 4.2. Direction Lookup
+### 5.2. Direction Lookup
 
 In DASH-SAI pipeline, traffic are split into 2 directions: `inbound` and `outbound`. Each direction has its own pipeline (see pipeline overview above). When a new packet arrives, we will assign a direction to the packet, then process the packet in the corresponding pipeline. This ensures us to match the flow and transform the packet in the right way.
 
-### 4.3. Pipeline Lookup
+### 5.3. Pipeline Lookup
 
 DASH supports multi-tenancy model for traffic handling. A single device can have multiple pipelines, and each pipeline is used to handle traffic for a specific tenant. When a packet arrives, besides direction lookup, we also need pipeline lookup to determine which pipeline to use for processing the packet.
 
@@ -186,17 +199,17 @@ A pipeline can also define its initial matching stages, which will be used for s
 > 
 > DASH-SAI pipeline is a logical concept. It doesn't have to be 1 to 1 mapping to a physical ASIC pipeline. The underlying implementation can be as simple as a metadata field update with a specific value, when the entry getting matched, e.g., `ENI = Inner Source/Destination MAC`.
 
-### 4.4. Packet Decap
+### 5.4. Packet Decap
 
 If a pipeline is found, before processing the packets, all outer encaps will be decaped, and with key information saved in metadata bus, such as encap type, source IP and VNI / GRE Key, exposing the inner most packet going through the pipeline. This simplifies the flow matching logic and also allow us to create the reverse flow properly.
 
-### 4.5. Conntrack Lookup and Update
+### 5.5. Conntrack Lookup and Update
 
 After entering a specific pipeline, the first stage will be the Conntrack Lookup stage, which does the flow lookup. If any flow is matched, the saved actions will be applied, the metering counters will be updated, and the rest of pipeline will be skipped.
 
 The core of the Conntrack Lookup and Update stage is the flow table.
 
-#### 4.5.1. Flow lookup
+#### 5.5.1. Flow lookup
 
 First, let's define the flow lookup behavior.
 
@@ -204,7 +217,7 @@ The flow lookup **MUST** use the information of inner most packet. And the match
 
 After the flow lookup, if a flow is matched, we will apply the saved actions in the flow direction and skip the rest of the pipeline. Otherwise, we will continue the pipeline processing.
 
-#### 4.5.2. Flow creation
+#### 5.5.2. Flow creation
 
 For new connections, after all packet transformations are applied, we will create a new flow in the flow table. 
 
@@ -218,7 +231,7 @@ And here is how to create the flow pairs:
 - The forwarding flow creation is straight forward, because all the final transformations are defined in the flow actions and metadata bus.
 - To properly create the reverse flow, we will learn the information from the original tunnels, and reverse them as return encaps, which is why we need to save all the original tunnel information when doing packet decaps.
 
-##### 4.5.2.1. Tunnel learning
+##### 5.5.2.1. Tunnel learning
 
 You might already notice that, although we uses the outer encap from the original packet to create the reverse flow, but the outer encaps are decap'ed and not used in flow matching. This creates a problem when source side fails over. Like the graph shows below, the traffic shifted from VTEP 1 (Green side) to VTEP 2 (Blue side), which changes the source IP in the encap. If we don't do anything, the existing reverse flow will continue to send the packet back to green side and causing the traffic being dropped.
 
@@ -226,7 +239,7 @@ You might already notice that, although we uses the outer encap from the origina
 
 To address this problem, the source information of each encap **MUST** be saved in te flow and compared during flow match. These information should no be part of the key, but whenever they change, we should reprocess the packet and update the saved reverse tunnel in the existing flow.
 
-##### 4.5.2.2. Asymmetrical encap handling
+##### 5.5.2.2. Asymmetrical encap handling
 
 There could be cases where the encaps are asymmetrical, which means the incoming packet and return packet uses different encaps. For example, in the case below, the encap of step 2 and 4 are not symmetrical. This means we could never recreate the flow on the DASH pipeline 2 side to tunnel the packet into the extra hop first with our current flow creation logic.
 
@@ -234,7 +247,7 @@ There could be cases where the encaps are asymmetrical, which means the incoming
 
 To fix this issue, a special action called `reverse_tunnel` is defined, which enables reverse side of the encaps.
 
-#### 4.5.3. Flow resimulation
+#### 5.5.3. Flow resimulation
 
 When certain policies are changed, we might need to update the flows that is associated with the policies. For example, when a VM is moved to another place, the VNET mapping entry will be changed, and we need to update the existing flows that is associated with the VNET mapping entry. Otherwise, the outgoing traffic will be tunneled to incorrect place. This is called flow resimulation.
 
@@ -245,7 +258,7 @@ However, the flow resimulation is not as simple as removing the flow and let the
 
 These requires us to implement the flow resimulation in a more sophisticated way, which is not fully modeled in DASH today. But we will come back to this design later.
 
-### 4.6. Pre-pipeline ACL and Post-pipeline ACL
+### 5.6. Pre-pipeline ACL and Post-pipeline ACL
 
 Pre-pipeline ACL and Post-pipeline ACL are used to drop the unexpected traffic before and after the packet transformation. It works as below:
 
@@ -275,9 +288,9 @@ flowchart TD
     In_MS --> In_PostACL
 ```
 
-### 4.7. Matching stages and metadata publishing
+### 5.7. Matching stages and metadata publishing
 
-#### 4.7.1. Matching stage
+#### 5.7.1. Matching stage
 
 Matching stage is the one of the core part of the DASH-SAI pipeline and the components that gives the pipeline flexibility.
 
@@ -291,7 +304,7 @@ In DASH-SAI pipeline, a matching stage is a basic building block for packet matc
 
 For more on the metadata publishing, please refer to the metadata publishing section below.
 
-#### 4.7.2. Pipeline profile and stage connections
+#### 5.7.2. Pipeline profile and stage connections
 
 Ideally, when DASH initializes or whenever we create a new pipeline, by simply creating multiple numbers of different types of matching stages and connecting them in different ways, we can easily implement different pipeline and network functions. 
 
@@ -326,7 +339,7 @@ flowchart LR
     Map1 --> | portmaprouting | UdpPortMap
 ```
 
-#### 4.7.3. Stage transitions
+#### 5.7.3. Stage transitions
 
 To transit between stages, we can set the `transit_to` field in the matched entry. This will instruct the pipeline to skip the stages before the `transit_to` stage and resume from there. Now, DASH supports the following stages:
 
@@ -391,7 +404,7 @@ flowchart LR
     Map1 --> | portmaprouting | UdpPortMap
 ```
 
-#### 4.7.4. Metadata publishing
+#### 5.7.4. Metadata publishing
 
 When an entry is matched in the matching stages, we will publish the metadata defined in the entry to the metadata bus, and overrides the existing ones, if any. This means, all the entries in each matching stage can all be defined similarly as below:
 
@@ -430,7 +443,7 @@ After all matching stages is done, we will start applying all the actions. All t
 > 
 > The Direction Lookup and Pipeline Lookup stages are also matching stages, so they can also populate metadatas too, e.g., ENI-level metadata for underlay encap.
 
-### 4.8. Routing action
+### 5.8. Routing action
 
 In DASH-SAI pipeline, routing actions are the fundamental building blocks for packet transformations. Each routing action is designed to work as below:
 
@@ -454,7 +467,7 @@ Take `staticencap` as an example, it can be defined as below:
     - Enable the underlay encap header based on the `encap_type`.
     - Update the underlay encap header with `encap_key`, `underlay_dip`, `underlay_sip`.
 
-### 4.9. Routing type
+### 5.9. Routing type
 
 To implement a network funtion, we usually need to do multiple packet transformations, such as adding a tunnel and natting the address or port. This requires us to be able to combine multiple routing actions together, and this is what routing type is for.
 
@@ -468,11 +481,11 @@ For example:
 
 This combination of routing actions is very flexible and powerful, and it enables us to implement any network function we want.
 
-## 5. Examples
+## 6. Examples
 
 Here are some examples to demo how to apply the DASH-SAI pipeline to implement different network functions. They might not be up-to-date or complete policies, but mostly demoing the high level ideas.
 
-### 5.1. VNET routing
+### 6.1. VNET routing
 
 ```json
 [
@@ -506,7 +519,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 ]
 ```
 
-### 5.2. VM level public IP inbound (L3 DNAT)
+### 6.2. VM level public IP inbound (L3 DNAT)
 
 ```json
 [
@@ -547,7 +560,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 ]
 ```
 
-### 5.3. VM level public IP outbound (L3 SNAT)
+### 6.3. VM level public IP outbound (L3 SNAT)
 
 ```json
 [
@@ -572,7 +585,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 ```
 
 
-### 5.4. Load balancer (L4 DNAT)
+### 6.4. Load balancer (L4 DNAT)
 
 ```json
 [
@@ -623,6 +636,6 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 ]
 ```
 
-### 5.5. More
+### 6.5. More
 
 - [SONiC-DASH packet flows](https://github.com/sonic-net/SONiC/blob/master/doc/dash/dash-sonic-hld.md#2-packet-flows)
