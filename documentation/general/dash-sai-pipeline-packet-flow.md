@@ -293,11 +293,22 @@ For more on the metadata publishing, please refer to the metadata publishing sec
 
 #### 4.7.2. Pipeline profile and stage connections
 
-Although, ideally, by simply creating multiple numbers of different types of matching stages and connecting them in different ways, we can easily implement different network functions. However, in reality, it might make the pipeline hard to implement, model, debug and validate or test at this moment. For example, changing matching fields, matching type and connection dynamically on pipeline creation is simply beyond the ability of P4. 
+Ideally, when DASH initializes or whenever we create a new pipeline, by simply creating multiple numbers of different types of matching stages and connecting them in different ways, we can easily implement different pipeline and network functions. 
 
-To address this problem, we can define a set of predefined pipeline profile, each profile has their own predefined stages and connections in the pipeline.
+| Stage 0 | Stage 1 | Stage 2 | Stage 3 | Stage 4 |
+| ------- | ------- | ------- | ------- | ------- |
+| Routing 0 | IP Mapping 0 | Port Mapping | X | X |
+| Routing 0 | Routing 1 | IP Mapping 0 | IP Mapping 1 | Port Mapping |
+| Routing 0 | IP Mapping 0 | Port Mapping | Routing 1 | IP Mapping 1 |
 
-For example, today the only profile we support is ENI, which is used to implement the VM NIC. To ensure we have enough flexibility, the match stages are designed to be connected from larger range to smaller range as below:
+However, in reality, it might make the pipeline hard to implement, model, debug and validate or test at this moment. For example, changing matching fields, matching type and connection dynamically on pipeline creation is simply beyond the ability of P4, which is used by our behavior model today as well as many vendor's ASIC SDKs.
+
+To address this problem, a set of predefined pipeline profile are defined in DASH. And each profile has their own predefined stages and connections in the pipeline.
+
+For example, today the only profile we support is ENI, which is used to implement the VM NIC. To ensure we have enough flexibility:
+
+- The match stages are designed to be connected from larger range to smaller range as below.
+- There are 2 routing and IP mapping stages in the pipeline, so we can support either source and destination IP matching, as well as 2 layers of routing.
 
 ```mermaid
 flowchart LR
@@ -385,7 +396,7 @@ flowchart LR
 When an entry is matched in the matching stages, we will publish the metadata defined in the entry to the metadata bus, and overrides the existing ones, if any. This means, all the entries in each matching stage can all be defined similarly as below:
 
 ```json
-"DASH_SAI_SOME_OBJECT_TABLE:<Unique Key of the object>": {
+"DASH_SAI_SOME_ENTRY_TABLE:<entry partition key>:<Unique Key of the entry>": {
     "transit_to": "<next stage name>",
     "routing_type": "<routing type name>",
 
