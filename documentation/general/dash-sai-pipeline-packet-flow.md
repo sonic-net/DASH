@@ -64,7 +64,7 @@ Overall, the high-level packet structure looks like below:
 
 ## 4. Pipeline Overview
 
-DASH-SAI pipeline is modeled as a list of stages. Each stage defines its own tables, and use the table entries to match packets in certain way and publishing thecorresponding metadata when an entry is matched. After all stages are processed, a list of final routing actions will be defined. Then, by executing these routing actions, the packet will be transformed in the way we want and corresponding flows will be generated according to the direction of the packet.
+DASH-SAI pipeline is modeled as a list of stages. Each stage defines its own tables, and use the table entries to match packets in certain way and publishing the corresponding metadata when an entry is matched. After all stages are processed, a list of final routing actions will be defined. Then, by executing these routing actions, the packet will be transformed in the way we want and corresponding flows will be generated according to the direction of the packet.
 
 On the high level the pipeline looks like below:
 
@@ -201,7 +201,7 @@ A pipeline can also define its initial matching stages, which will be used for s
 
 ### 5.4. Packet Decap
 
-If a pipeline is found, before processing the packets, all outer encaps will be decaped, and with key information saved in metadata bus, such as encap type, source IP and VNI / GRE Key, exposing the inner most packet going through the pipeline. This simplifies the flow matching logic and also allow us to create the reverse flow properly.
+If a pipeline is found, before processing the packets, all outer encaps will be decap'ed, and with key information saved in metadata bus, such as encap type, source IP and VNI / GRE Key, exposing the inner most packet going through the pipeline. This simplifies the flow matching logic and also allow us to create the reverse flow properly.
 
 ### 5.5. Conntrack Lookup and Update
 
@@ -213,7 +213,7 @@ The core of the Conntrack Lookup and Update stage is the flow table.
 
 First, let's define the flow lookup behavior.
 
-The flow lookup **MUST** use the information of inner most packet. And the matching keys can be configurated via the DASH flow APIs during the DASH initialzation. This allows us to support different flow matching behaviors for certain cases. For example, in L3 level routing, we don't need to create 5 tuple flows.
+The flow lookup **MUST** use the information of inner most packet. And the matching keys can be configurated via the DASH flow APIs during the DASH initialization. This allows us to support different flow matching behaviors for certain cases. For example, in L3 level routing, we don't need to create 5 tuple flows.
 
 After the flow lookup, if a flow is matched, we will apply the saved actions in the flow direction and skip the rest of the pipeline. Otherwise, we will continue the pipeline processing.
 
@@ -237,7 +237,7 @@ You might already notice that, although we uses the outer encap from the origina
 
 ![](./images/dash-tunnel-learning.svg)
 
-To address this problem, the source information of each encap **MUST** be saved in te flow and compared during flow match. These information should no be part of the key, but whenever they change, we should reprocess the packet and update the saved reverse tunnel in the existing flow.
+To address this problem, the source information of each encap **MUST** be saved in the flow and compared during flow match. These information should no be part of the key, but whenever they change, we should reprocess the packet and update the saved reverse tunnel in the existing flow.
 
 ##### 5.5.2.2. Asymmetrical encap handling
 
@@ -254,7 +254,7 @@ When certain policies are changed, we might need to update the flows that is ass
 However, the flow resimulation is not as simple as removing the flow and let the packet to going through the pipeline again. For example:
 
 - When a ACL is changed in the outbound side, all flows needs to be resimulated. However, this cannot be implemented by removing all flow entries and let all flows to be recreated with the latest policy. The reason is that ACLs can be asymmetric and flows are created in pair. If the flows are removed, the inbound side traffic will be dropped immediately, because there is no inbound flow to make it bypass the ACLs.
-- Certain actions might need to bypass the flow resimulatin to maintain the per flow consistency. For example, in load balancer case, we will want to ensure that flow resimulation will not causing us to forward existing connections to a different backend server.
+- Certain actions might need to bypass the flow resimulation to maintain the per flow consistency. For example, in load balancer case, we will want to ensure that flow resimulation will not causing us to forward existing connections to a different backend server.
 
 These requires us to implement the flow resimulation in a more sophisticated way, which is not fully modeled in DASH today. But we will come back to this design later.
 
@@ -366,7 +366,7 @@ Here is an example that shows how the routing stage entry looks like:
 }
 ```
 
-To avoid loop shows up in the pipeline, the pipeine is designed to be forward only. The transition behavior can simply be described by the code below:
+To avoid loop shows up in the pipeline, the pipeline is designed to be forward only. The transition behavior can simply be described by the code below:
 
 ```c
 apply {
@@ -469,7 +469,7 @@ Take `staticencap` as an example, it can be defined as below:
 
 ### 5.9. Routing type
 
-To implement a network funtion, we usually need to do multiple packet transformations, such as adding a tunnel and natting the address or port. This requires us to be able to combine multiple routing actions together, and this is what routing type is for.
+To implement a network function, we usually need to do multiple packet transformations, such as adding a tunnel and natting the address or port. This requires us to be able to combine multiple routing actions together, and this is what routing type is for.
 
 In DASH-SAI pipeline, routing type is defined as a list of routing actions. And by combining different routing actions into different routing types, we will be able to implement different network functions.
 

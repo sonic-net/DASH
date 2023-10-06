@@ -90,7 +90,9 @@ conf
 CONFDB
 confgen
 config
+configurated
 configs
+Conntrack
 Containerlab
 CP
 CreatedHalfOpenFlow
@@ -134,6 +136,8 @@ de
 deallocating
 Decap
 decap
+decap'ed
+decaps
 deliverables
 DemoDays
 designator
@@ -199,6 +203,7 @@ DUT's
 EasyCLA
 ECMP
 encap
+encaps
 ENI
 eni
 Eni
@@ -267,6 +272,7 @@ INET
 INIT
 Init
 initializer
+initialization
 integrations
 integrators
 interoperable
@@ -347,6 +353,7 @@ MUX
 MUXes
 natively
 natted
+NAT'ing
 nb
 nd
 netdevs
@@ -358,6 +365,7 @@ noautoconsole
 NonSynStateful
 NorthBound
 Novus
+NPL
 NPUS
 NSG
 NSGs
@@ -367,6 +375,7 @@ NVA
 NVidia
 nvgre
 Nvgre
+NvGRE
 NVMe
 observability
 OCP
@@ -459,6 +468,7 @@ redis
 renderer
 repo
 repos
+resimulated
 resimulation
 responder
 Resttapi
@@ -578,6 +588,7 @@ TcpSynPacket
 TDI
 Teamd
 teardown
+techonology
 templating
 TEP
 testbed
