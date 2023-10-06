@@ -17,7 +17,7 @@
    6. [4.6. Pre-pipeline ACL and Post-pipeline ACL](#46-pre-pipeline-acl-and-post-pipeline-acl)
    7. [4.7. Matching stages and metadata publishing](#47-matching-stages-and-metadata-publishing)
       1. [4.7.1. Matching stage](#471-matching-stage)
-      2. [4.7.2. Device role and stage connections](#472-device-role-and-stage-connections)
+      2. [4.7.2. Pipeline profile and stage connections](#472-pipeline-profile-and-stage-connections)
       3. [4.7.3. Stage transitions](#473-stage-transitions)
       4. [4.7.4. Metadata publishing](#474-metadata-publishing)
    8. [4.8. Routing action](#48-routing-action)
@@ -286,33 +286,33 @@ In DASH-SAI pipeline, a matching stage is a basic building block for packet matc
 | Stage type | Match Type | Match Fields | Metadata Behavior |
 | ---------- | ---------- | ------------ | -------- |
 | Routing | LPM | Source IP or Destination IP | Publish metadata from matched routing entry |
-| VNET Mapping | Exact Match | Source IP or Destination IP | Publish metadata from matched VNET and VNET mapping entry |
+| IP Mapping | Exact Match | Source IP or Destination IP | Publish metadata from matched VNET and VNET mapping entry |
 | Port Mapping | Range Match | Source Port + Destination Port | Publish metadata from matched port mapping entry |
 
 For more on the metadata publishing, please refer to the metadata publishing section below.
 
-#### 4.7.2. Device role and stage connections
+#### 4.7.2. Pipeline profile and stage connections
 
-Although, ideally, by simply creating different matching stages and connecting them in different ways, we can easily implement different network functions. However, in reality, it might make the pipeline hard to implement, model, debug and validate or test at this moment. For example, changing matching fields, matching type and connection dynamically or on pipeline creation is simply beyond the ability of P4. 
+Although, ideally, by simply creating multiple numbers of different types of matching stages and connecting them in different ways, we can easily implement different network functions. However, in reality, it might make the pipeline hard to implement, model, debug and validate or test at this moment. For example, changing matching fields, matching type and connection dynamically on pipeline creation is simply beyond the ability of P4. 
 
-To address this problem, we can define a set of predefined device roles, each device role has their own predefined stages and connections in the pipeline.
+To address this problem, we can define a set of predefined pipeline profile, each profile has their own predefined stages and connections in the pipeline.
 
-For example, today the only device role we support is ENI, which is used to implement the VM NIC. To ensure we have enough flexibility, the match stages are designed to be connected from larger range to smaller range as below:
+For example, today the only profile we support is ENI, which is used to implement the VM NIC. To ensure we have enough flexibility, the match stages are designed to be connected from larger range to smaller range as below:
 
 ```mermaid
 flowchart LR
-    RoutingDst[Routing<br>Destination IP]
-    RoutingSrc[Routing<br>Source IP]
-    MapDst[VNET Mapping<br>Destination IP]
-    MapSrc[VNET Mapping<br>Source IP]
-    TcpPortMap[TCP Port Mapping<br>Source + Dest Port]
-    UdpPortMap[UDP Port Mapping<br>Source + Dest Port]
+    Routing0[Routing 0]
+    Routing1[Routing 1]
+    Map0[IP Mapping 0]
+    Map1[IP Mapping 1]
+    TcpPortMap[TCP Port Mapping]
+    UdpPortMap[UDP Port Mapping]
 
-    RoutingDst --> | srclpmrouting | RoutingSrc
-    RoutingSrc --> | maprouting | MapDst
-    MapDst --> | srcmaprouting | MapSrc
-    MapSrc --> | portmaprouting | TcpPortMap
-    MapSrc --> | portmaprouting | UdpPortMap
+    Routing0 --> | lpmrouting1 | Routing1
+    Routing1 --> | maprouting0 | Map0
+    Map0 --> | maprouting1 | Map1
+    Map1 --> | portmaprouting | TcpPortMap
+    Map1 --> | portmaprouting | UdpPortMap
 ```
 
 #### 4.7.3. Stage transitions
@@ -321,13 +321,15 @@ To transit between stages, we can set the `transit_to` field in the matched entr
 
 | `transit_to` value | Stage |
 | --------------------- | ----- |
-| `lpmrouting` | Routing stage by checking destination IP |
-| `srclpmrouting` | Routing stage by checking source IP |
-| `maprouting` | VNET Mapping stage by checking destination IP |
-| `srcmaprouting` | VNET Mapping stage by checking source IP |
+| `lpmrouting0` | First routing stage |
+| `lpmrouting1` | Second routing stage |
+| `maprouting0` | First IP mapping stage |
+| `maprouting1` | Second IP mapping stage |
 | `portmaprouting` | TCP or UDP Port Mapping stage |
-| `rss` | Sending it to CPU |
+| `trap` | Sending it to CPU |
 | `drop` | Drop the packet |
+
+> TODO: Need parameter support to stage transition.
 
 Here is an example that shows how the routing stage entry looks like:
 
@@ -335,7 +337,7 @@ Here is an example that shows how the routing stage entry looks like:
 // Routing stage entry:
 // When this entry is matched, we will move to VNET mapping stage, which executes maprouting action and jump to VNET mapping stage.
 "DASH_SAI_ROUTE_TABLE:123456789012:10.0.1.0/24": {
-    "transit_to": "maprouting",
+    "transit_to": "maprouting0",
     "vnet": "Vnet1"
 }
 ```
@@ -343,33 +345,39 @@ Here is an example that shows how the routing stage entry looks like:
 To avoid loop shows up in the pipeline, the pipeine is designed to be forward only. The transition behavior can simply be described by the code below:
 
 ```c
-if (meta.transit_to == DASH_MATCH_STAGE_MAPROUTING) {
-    maprouting.apply();
+apply {
+    // ...
+    if (meta.transit_to == DASH_MATCH_STAGE_MAPROUTING0) {
+        maprouting0.apply();
+    }
+    if (meta.transit_to == DASH_MATCH_STAGE_MAPROUTING1) {
+        maprouting1.apply();
+    }
+    // ...
 }
-if (meta.transit_to == DASH_MATCH_STAGE_SRCMAPROUTING) {
-    srcmaprouting.apply();
-}
-// ...
 ```
 
 This allows us easily bypass the stages as needed, also avoid loop being accidentally created. Take Routing stage + TCP flow as an example, it can use different transition to jump to different stages. 
 
 ```mermaid
 flowchart LR
-    RoutingDst[Routing<br>Destination IP]
-    RoutingSrc[Routing<br>Source IP]
-    MapDst[VNET Mapping<br>Destination IP]
-    MapSrc[VNET Mapping<br>Source IP]
-    TcpPortMap[TCP Port Mapping<br>Source + Dest Port]
+    Routing0[Routing 0]
+    Routing1[Routing 1]
+    Map0[IP Mapping 0]
+    Map1[IP Mapping 1]
+    TcpPortMap[TCP Port Mapping]
+    UdpPortMap[UDP Port Mapping]
 
-    RoutingDst --> | srclpmrouting | RoutingSrc
-    RoutingDst --> | maprouting | MapDst
-    RoutingDst --> | srcmaprouting | MapSrc
-    RoutingDst --> | portmaprouting | TcpPortMap
+    Routing0 --> | lpmrouting1 | Routing1
+    Routing0 --> | maprouting0 | Map0
+    Routing0 --> | maprouting1 | Map1
+    Routing0 --> | portmaprouting | TcpPortMap
+    Routing0 --> | portmaprouting | UdpPortMap
 
-    RoutingSrc --> | maprouting | MapDst
-    MapDst --> | srcmaprouting | MapSrc
-    MapSrc --> | portmaprouting | TcpPortMap
+    Routing1 --> | maprouting0 | Map0
+    Map0 --> | maprouting1 | Map1
+    Map1 --> | portmaprouting | TcpPortMap
+    Map1 --> | portmaprouting | UdpPortMap
 ```
 
 #### 4.7.4. Metadata publishing
@@ -416,7 +424,7 @@ After all matching stages is done, we will start applying all the actions. All t
 In DASH-SAI pipeline, routing actions are the fundamental building blocks for packet transformations. Each routing action is designed to work as below:
 
 1. Take a specific list of metadata fields as input parameters:
-   1. For example, `staicencap` action will take the `underlay_dip`, `underlay_sip`, `encap_type` and `encap_key` to encapsulate the packet.
+   1. For example, `staticencap` action will take the `underlay_dip`, `underlay_sip`, `encap_type` and `encap_key` to encapsulate the packet.
    2. The parameters can come from 2 places - the metadata defined associated with the entries in each table, or the routing action definition itself. More details will be discussed in the next section.
 2. Transform the packet in a specific way, e.g., encapsulate the packet, natting the address and port, etc.
 3. Independent to other actions.
@@ -459,7 +467,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 [
     // When sending to anywhere in the VNET, we start to lookup the destination
     "DASH_SAI_ROUTE_TABLE:123456789012:10.0.1.0/24": {
-        "transit_to": "maprouting",
+        "transit_to": "maprouting0",
         "vnet": "Vnet1"
     },
 
@@ -559,7 +567,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 [
     // When any traffic is sent to any VIP that this DPU owns, we will start to lookup the destination.
     "DASH_SAI_ROUTE_TABLE:123456789012:1.1.1.0/24": {
-        "transit_to": "maprouting",
+        "transit_to": "maprouting0",
 	    "vnet": "vipmapping"
     },
 
