@@ -341,32 +341,45 @@ flowchart LR
 
 #### 5.7.3. Stage transitions
 
-To transit between stages, we can set the `transit_to` field in the matched entry. This will instruct the pipeline to skip the stages before the `transit_to` stage and resume from there. Now, DASH supports the following stages:
+To transit between stages, we can `transit_to` routing action to specify the next stage with `stage_id` field. This will instruct the pipeline to skip the stages before the `stage_id` stage and resume from there.
 
-| `transit_to` value | Stage |
-| --------------------- | ----- |
+Here is the list of the `stage_id` values and the corresponding stage:
+
+| `stage_id` value | Stage |
+| ---------------- | ----- |
+| `drop` | Drop the packet |
+| `trap` | Sending it to CPU |
 | `lpmrouting0` | First routing stage |
 | `lpmrouting1` | Second routing stage |
 | `maprouting0` | First IP mapping stage |
 | `maprouting1` | Second IP mapping stage |
 | `portmaprouting` | TCP or UDP Port Mapping stage |
-| `trap` | Sending it to CPU |
-| `drop` | Drop the packet |
 
-> TODO: Need parameter support to stage transition.
+To help us being flexiable, `transit_to` also takes a few other parameters:
+
+- `use_src_ip`: Use source IP in routing and mapping stages.
+- `ip_mask`: IP mask to apply before matching the entries.
+- `default_routing_type`: If no entry is found, use this routing type to route the packet. If `default_routing_type` is not set, the packet will be dropped by default.
 
 Here is an example that shows how the routing stage entry looks like:
 
 ```json
 // Routing stage entry:
 // When this entry is matched, we will move to VNET mapping stage, which executes maprouting action and jump to VNET mapping stage.
-"DASH_SAI_ROUTE_TABLE:123456789012:10.0.1.0/24": {
-    "transit_to": "maprouting0",
+"DASH_SAI_ROUTE_TABLE|123456789012|10.0.1.0/24": {
+    "routing_type": "vnetmap",
     "vnet": "Vnet1"
 }
+
+"DASH_SAI_ROUTING_TYPE_TABLE|vnetmap": [
+    {
+        "action_type": "transit_to",
+        "stage_id": "maprouting0"
+    }
+]
 ```
 
-To avoid loop shows up in the pipeline, the pipeline is designed to be forward only. The transition behavior can simply be described by the code below:
+To avoid loop shows up in the pipeline, the pipeline is designed to be forward only. In the `transit_to` action, we can simply update the target stage in the metadata, then the transition behavior can simply be described by the code below:
 
 ```c
 apply {
@@ -410,7 +423,6 @@ When an entry is matched in the matching stages, we will publish the metadata de
 
 ```json
 "DASH_SAI_SOME_ENTRY_TABLE:<entry partition key>:<Unique Key of the entry>": {
-    "transit_to": "<next stage name>",
     "routing_type": "<routing type name>",
 
     // Metadata properties/attributes ...
