@@ -352,6 +352,7 @@ MTU
 MUX
 MUXes
 natively
+nat
 natted
 NAT'ing
 nb

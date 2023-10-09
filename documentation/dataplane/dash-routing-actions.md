@@ -49,14 +49,14 @@ For how routing action works, please refer to the ["Routing action and routing t
 
 ### Matching stage transition actions
 
-All matching stage transition actions supports the following parameters:
+All matching stage transition actions will support the following parameters:
 
 - `default_routing_type`: If no entry is found, use this routing type to route the packet. If `default_routing_type` is not set, the packet will be dropped by default.
 - `stage_index`: If there are multiple stage of the same stage type, use this field to specify which stage to transit to. The index is starting from 0 and by default 0.
 
 #### IP-based stage transition actions
 
-All IP-based stage transition actios supports the following parameters:
+All IP-based stage transition actions will support the following parameters:
 
 - `use_src_ip`: Use source IP in routing and mapping stages.
 - `ip_mask`: IP mask to apply before matching the entries.
