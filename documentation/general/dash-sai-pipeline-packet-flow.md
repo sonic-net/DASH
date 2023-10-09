@@ -16,13 +16,18 @@
          2. [5.5.2.2. Asymmetrical encap handling](#5522-asymmetrical-encap-handling)
       3. [5.5.3. Flow resimulation](#553-flow-resimulation)
    6. [5.6. Pre-pipeline ACL and Post-pipeline ACL](#56-pre-pipeline-acl-and-post-pipeline-acl)
-   7. [5.7. Matching stages and metadata publishing](#57-matching-stages-and-metadata-publishing)
-      1. [5.7.1. Matching stage](#571-matching-stage)
-      2. [5.7.2. Pipeline profile and stage connections](#572-pipeline-profile-and-stage-connections)
-      3. [5.7.3. Stage transitions](#573-stage-transitions)
-      4. [5.7.4. Metadata publishing](#574-metadata-publishing)
-   8. [5.8. Routing action](#58-routing-action)
-   9. [5.9. Routing type](#59-routing-type)
+   7. [5.7. Routing actions and routing types](#57-routing-actions-and-routing-types)
+      1. [5.7.1. Routing action](#571-routing-action)
+      2. [5.7.2. Routing type](#572-routing-type)
+   8. [5.8. Matching stages and metadata publishing](#58-matching-stages-and-metadata-publishing)
+      1. [5.8.1. Matching stage](#581-matching-stage)
+      2. [5.8.2. Pipeline profile and stage connections](#582-pipeline-profile-and-stage-connections)
+      3. [5.8.3. Stage transitions](#583-stage-transitions)
+         1. [5.8.3.1. Stage transition routing type](#5831-stage-transition-routing-type)
+         2. [5.8.3.2. Stage skipping](#5832-stage-skipping)
+      4. [5.8.4. Action publishing](#584-action-publishing)
+      5. [5.8.5. Metadata publishing](#585-metadata-publishing)
+   9. [5.9. Action apply](#59-action-apply)
 6. [6. Examples](#6-examples)
    1. [6.1. VNET routing](#61-vnet-routing)
    2. [6.2. VM level public IP inbound (L3 DNAT)](#62-vm-level-public-ip-inbound-l3-dnat)
@@ -288,9 +293,50 @@ flowchart TD
     In_MS --> In_PostACL
 ```
 
-### 5.7. Matching stages and metadata publishing
+### 5.7. Routing actions and routing types
 
-#### 5.7.1. Matching stage
+#### 5.7.1. Routing action
+
+In DASH-SAI pipeline, routing actions are the fundamental building blocks for packet transformations. Each routing action is designed to work as below:
+
+1. Take a specific list of metadata fields as input parameters:
+   1. For example, `staticencap` action will take the `underlay_dip`, `underlay_sip`, `encap_type` and `encap_key` to encapsulate the packet.
+   2. The parameters can come from 2 places - the metadata defined associated with the entries in each table, or the routing action definition itself. More details will be discussed in the next section.
+2. Transform the packet in a specific way, e.g., encapsulate the packet, natting the address and port, etc.
+3. Independent to other actions.
+   1. With this design, we don't have to worry about the order of the actions.
+   2. This also enables the hardware to improve the E2E pipeline latency by doing the actions in parallel.
+
+Take `staticencap` as an example, it can be defined as below:
+
+- Action parameters:
+    - `encap_type`: "nvgre|vxlan|..."
+- Metadata parameters:
+    - `underlay_dip`: Destination IP used in encap.
+    - `underlay_sip`: Source IP used in encap.
+    - `encap_key`: GRE key in NvGRE or VNI in VxLAN
+- Actions:
+    - Enable the underlay encap header based on the `encap_type`.
+    - Update the underlay encap header with `encap_key`, `underlay_dip`, `underlay_sip`.
+
+#### 5.7.2. Routing type
+
+To implement a network function, we usually need to do multiple packet transformations, such as adding a tunnel and natting the address or port. This requires us to be able to combine multiple routing actions together, and this is what routing type is for.
+
+In DASH-SAI pipeline, routing type is defined as a list of routing actions. And by combining different routing actions into different routing types, we will be able to implement different network functions.
+
+For example:
+
+- We can implement the VNET routing by creating a routing type named `vnet` with only 1 action `staticencap`, which takes the next hop information from the mapping table.
+- We can also add additional hop to tunnel the traffic to an firewall or network virtual appliance first, which is known as [UDR](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview), by creating another routing type named `vnetfw` with a `staticencap` action and an extra `tunnel` actions.
+- We can even use `tunnel` action with multiple destinations as ECMP group to implement a simple load balancer!
+
+This combination of routing actions is very flexible and powerful, and it enables us to implement any network function we want.
+
+
+### 5.8. Matching stages and metadata publishing
+
+#### 5.8.1. Matching stage
 
 Matching stage is the one of the core part of the DASH-SAI pipeline and the components that gives the pipeline flexibility.
 
@@ -304,7 +350,7 @@ In DASH-SAI pipeline, a matching stage is a basic building block for packet matc
 
 For more on the metadata publishing, please refer to the metadata publishing section below.
 
-#### 5.7.2. Pipeline profile and stage connections
+#### 5.8.2. Pipeline profile and stage connections
 
 Ideally, when DASH initializes or whenever we create a new pipeline, by simply creating multiple numbers of different types of matching stages and connecting them in different ways, we can easily implement different pipeline and network functions. 
 
@@ -332,34 +378,40 @@ flowchart LR
     TcpPortMap[TCP Port Mapping]
     UdpPortMap[UDP Port Mapping]
 
-    Routing0 --> | lpmrouting1 | Routing1
-    Routing1 --> | maprouting0 | Map0
-    Map0 --> | maprouting1 | Map1
+    Routing0 --> | lpmrouting - 1 | Routing1
+    Routing1 --> | maprouting - 0 | Map0
+    Map0 --> | maprouting - 1 | Map1
     Map1 --> | portmaprouting | TcpPortMap
     Map1 --> | portmaprouting | UdpPortMap
 ```
 
-#### 5.7.3. Stage transitions
+#### 5.8.3. Stage transitions
 
-To transit between stages, we can `transit_to` routing action to specify the next stage with `stage_id` field. This will instruct the pipeline to skip the stages before the `stage_id` stage and resume from there.
+##### 5.8.3.1. Stage transition routing type
 
-Here is the list of the `stage_id` values and the corresponding stage:
+To transit between stages, we use `transition` field to specify the transition routing type. 
 
-| `stage_id` value | Stage |
+A transition routing type is a special type of [Routing Type](#572-routing-type):
+1. Each transition routing type can only have one single routing action.
+2. Only a special list of routing actions will take effect in the routing types, which are all related to stage transitions, as listed below.
+3. If `transition` field is not set, we consider the packet is reaching the end of the pipeline and start executing the final routing actions.
+
+| `action_type` value | Stage |
 | ---------------- | ----- |
 | `drop` | Drop the packet |
 | `trap` | Sending it to CPU |
-| `lpmrouting0` | First routing stage |
-| `lpmrouting1` | Second routing stage |
-| `maprouting0` | First IP mapping stage |
-| `maprouting1` | Second IP mapping stage |
-| `portmaprouting` | TCP or UDP Port Mapping stage |
+| `lpmrouting` | Skip to next routing stage |
+| `maprouting` | Skip to next mapping stage |
+| `portmaprouting` | Skip to next TCP or UDP Port Mapping stage |
 
-To help us being flexiable, `transit_to` also takes a few other parameters:
+To help us being flexiable, the transition routing actions can take a few parameters:
 
-- `use_src_ip`: Use source IP in routing and mapping stages.
-- `ip_mask`: IP mask to apply before matching the entries.
-- `default_routing_type`: If no entry is found, use this routing type to route the packet. If `default_routing_type` is not set, the packet will be dropped by default.
+- All transition routing actions other than `drop` and `trap`:
+    - `default_routing_type`: If no entry is found, use this routing type to route the packet. If `default_routing_type` is not set, the packet will be dropped by default.
+    - `stage_index`: If there are multiple stage of the same stage type, use this field to specify which stage to transit to. The index is starting from 0 and by default 0.
+- IP-based routing actions (`lpmrouting` and `maprouting`):
+    - `use_src_ip`: Use source IP in routing and mapping stages.
+    - `ip_mask`: IP mask to apply before matching the entries.
 
 Here is an example that shows how the routing stage entry looks like:
 
@@ -367,27 +419,29 @@ Here is an example that shows how the routing stage entry looks like:
 // Routing stage entry:
 // When this entry is matched, we will move to VNET mapping stage, which executes maprouting action and jump to VNET mapping stage.
 "DASH_SAI_ROUTE_TABLE|123456789012|10.0.1.0/24": {
-    "routing_type": "vnetmap",
+    "transition": "vnetmap",
     "vnet": "Vnet1"
 }
 
 "DASH_SAI_ROUTING_TYPE_TABLE|vnetmap": [
     {
-        "action_type": "transit_to",
-        "stage_id": "maprouting0"
+        "action_type": "maprouting",
+        "stage_index": "0"
     }
 ]
 ```
 
-To avoid loop shows up in the pipeline, the pipeline is designed to be forward only. In the `transit_to` action, we can simply update the target stage in the metadata, then the transition behavior can simply be described by the code below:
+##### 5.8.3.2. Stage skipping
+
+To avoid loop shows up in the pipeline, the pipeline is designed to be forward only. When transition routing action is invoked, we can simply update the target stage in the metadata, then the transition behavior can simply be described by the code below:
 
 ```c
 apply {
     // ...
-    if (meta.transit_to == DASH_MATCH_STAGE_MAPROUTING0) {
+    if (meta.transit_to == DASH_MATCH_STAGE_MAPROUTING && meta.stage_index == 0) {
         maprouting0.apply();
     }
-    if (meta.transit_to == DASH_MATCH_STAGE_MAPROUTING1) {
+    if (meta.transit_to == DASH_MATCH_STAGE_MAPROUTING && meta.stage_index == 1) {
         maprouting1.apply();
     }
     // ...
@@ -405,24 +459,62 @@ flowchart LR
     TcpPortMap[TCP Port Mapping]
     UdpPortMap[UDP Port Mapping]
 
-    Routing0 --> | lpmrouting1 | Routing1
-    Routing0 --> | maprouting0 | Map0
-    Routing0 --> | maprouting1 | Map1
+    Routing0 --> | lpmrouting - 1 | Routing1
+    Routing0 --> | maprouting - 0 | Map0
+    Routing0 --> | maprouting - 1 | Map1
     Routing0 --> | portmaprouting | TcpPortMap
     Routing0 --> | portmaprouting | UdpPortMap
 
-    Routing1 --> | maprouting0 | Map0
-    Map0 --> | maprouting1 | Map1
+    Routing1 --> | maprouting - 0 | Map0
+    Map0 --> | maprouting - 1 | Map1
     Map1 --> | portmaprouting | TcpPortMap
     Map1 --> | portmaprouting | UdpPortMap
 ```
 
-#### 5.7.4. Metadata publishing
+#### 5.8.4. Action publishing
 
-When an entry is matched in the matching stages, we will publish the metadata defined in the entry to the metadata bus, and overrides the existing ones, if any. This means, all the entries in each matching stage can all be defined similarly as below:
+Each entry in the matching stages can specify a [routing type](#572-routing-type) that specifies the routing actions for specifying the packet transformations. When an entry is matched in the matching stages, the actions will be populated into the metadata bus, and the actions will be applied when the packet reaches the action apply stage.
+
+Populating the actions into the metadata bus are straightforward, which can be illustrated by the P4 code below:
+
+```c
+enum bit<16> routing_action_type_t {
+    staticencap = 0,
+    nat = 1,
+    // ...
+}
+
+action lpmrouting0_set_action(routing_action_type_t action0, ...) {
+    meta.stage0.action0 = action0;
+    // ...
+}
+```
+
+Since we can specify the both transition and actions in a single entry, this allows us to stack the actions as the pipeline moves forward:
+
+```c
+struct stage_actions_t {
+    bit<16> action0;
+    bit<16> action1;
+    // ...
+}
+
+struct metadata_t {
+    stage_actions_t stage0;
+    stage_actions_t stage1;
+    // ...
+}
+```
+
+#### 5.8.5. Metadata publishing
+
+Each entry in the matching stages can also specify a list of metadata. When an entry is matched in the matching stages, the metadata will be populated into the metadata bus, and the metadata will be used as the input parameters for the routing actions. These metadata are shared by all stages and actions, hence later ones will override the existing ones, if any. 
+
+With this design, all the entries in each matching stage can all be defined similarly as below:
 
 ```json
 "DASH_SAI_SOME_ENTRY_TABLE:<entry partition key>:<Unique Key of the entry>": {
+    "transition": "<transition routing type name>",
     "routing_type": "<routing type name>",
 
     // Metadata properties/attributes ...
@@ -434,7 +526,7 @@ Take the VNET mapping as an example. When following VNET mapping is matched, `un
 ```json
 // VNET mapping entry (VNET mapping stage)
 "DASH_SAI_VNET_MAPPING_TABLE:Vnet1:10.0.1.1": {
-    "transit_to": "portmaprouting",
+    "transition": "vnetportmap",
     "routing_type": "do_something",
 
     // Underlay destination IP address. Used by staticencap action.
@@ -449,49 +541,47 @@ Take the VNET mapping as an example. When following VNET mapping is matched, `un
 }
 ```
 
-After all matching stages is done, we will start applying all the actions. All the latest values in the metadata bus will be used as the input parameters for the routing actions.
+This can be illustrated by the P4 code below:
+
+```c
+struct metadata_t {
+    bit<32> underlay_dip;
+    // ...
+}
+
+action vnetportmap0_set_metadata(bit<32> underlay_dip, ...) {
+    meta.stage0.underlay_dip = underlay_dip;
+    // ...
+}
+```
 
 > NOTE:
 > 
 > The Direction Lookup and Pipeline Lookup stages are also matching stages, so they can also populate metadatas too, e.g., ENI-level metadata for underlay encap.
 
-### 5.8. Routing action
+This design also allows us to decouples the time of fulfilling the routing actions and their parameters. For example, all traffic that sends to a IP range needs to have a vxlan encap with encap key 12345, but different IP will have a different underlay IP, then this can be modeled as below:
 
-In DASH-SAI pipeline, routing actions are the fundamental building blocks for packet transformations. Each routing action is designed to work as below:
+```json
+// Routing entry for the destiation. All destination shares the same encap.
+"DASH_SAI_ROUTE_TABLE:123456789012:10.0.1.0/24": {
+    "transition": "vnetmap",
+    "routing_type": "vnetfwd",
+    "vnet": "Vnet1",
+    "encap_type": "vxlan",
+    "encap_key": "45654"
+},
+"DASH_SAI_ROUTING_TYPE_TABLE:vnetmap": [ { "action_type": "maprouting" } ],
+"DASH_SAI_ROUTING_TYPE_TABLE:vnetfwd": [ { "action_type": "static_encap" } ]
 
-1. Take a specific list of metadata fields as input parameters:
-   1. For example, `staticencap` action will take the `underlay_dip`, `underlay_sip`, `encap_type` and `encap_key` to encapsulate the packet.
-   2. The parameters can come from 2 places - the metadata defined associated with the entries in each table, or the routing action definition itself. More details will be discussed in the next section.
-2. Transform the packet in a specific way, e.g., encapsulate the packet, natting the address and port, etc.
-3. Independent to other actions.
-   1. With this design, we don't have to worry about the order of the actions.
-   2. This also enables the hardware to improve the E2E pipeline latency by doing the actions in parallel.
+// If we are sending to 10.0.1.1, this entry will be matched and delay set the underlay destination IP for staticencap action.
+"DASH_SAI_VNET_MAPPING_TABLE:Vnet1:10.0.1.1": {
+    "underlay_dip": "3.3.3.1"
+}
+```
 
-Take `staticencap` as an example, it can be defined as below:
+### 5.9. Action apply
 
-- Action parameters:
-    - `encap_type`: "nvgre|vxlan|..."
-- Metadata parameters:
-    - `underlay_dip`: Destination IP used in encap.
-    - `underlay_sip`: Source IP used in encap.
-    - `encap_key`: GRE key in NvGRE or VNI in VxLAN
-- Actions:
-    - Enable the underlay encap header based on the `encap_type`.
-    - Update the underlay encap header with `encap_key`, `underlay_dip`, `underlay_sip`.
-
-### 5.9. Routing type
-
-To implement a network function, we usually need to do multiple packet transformations, such as adding a tunnel and natting the address or port. This requires us to be able to combine multiple routing actions together, and this is what routing type is for.
-
-In DASH-SAI pipeline, routing type is defined as a list of routing actions. And by combining different routing actions into different routing types, we will be able to implement different network functions.
-
-For example:
-
-- We can implement the VNET routing by creating a routing type named `vnet` with only 1 action `staticencap`, which takes the next hop information from the mapping table.
-- We can also add additional hop to tunnel the traffic to an firewall or network virtual appliance first, which is known as [UDR](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview), by creating another routing type named `vnetfw` with a `staticencap` action and an extra `tunnel` actions.
-- We can even use `tunnel` action with multiple destinations as ECMP group to implement a simple load balancer!
-
-This combination of routing actions is very flexible and powerful, and it enables us to implement any network function we want.
+After all matching stages are done, we will start applying all the actions. All the latest values in the metadata bus will be used as the input parameters for the routing actions.
 
 ## 6. Examples
 
@@ -503,13 +593,14 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 [
     // When sending to anywhere in the VNET, we start to lookup the destination
     "DASH_SAI_ROUTE_TABLE:123456789012:10.0.1.0/24": {
-        "transit_to": "maprouting0",
+        "transition": "vnetmap",
         "vnet": "Vnet1"
     },
+    "DASH_SAI_ROUTING_TYPE_TABLE:vnetmap": [ { "action_type": "maprouting" } ],
 
     // If we are sending to 10.0.1.1, this entry will be matched and set the underlay destination IP for staticencap action.
     "DASH_SAI_VNET_MAPPING_TABLE:Vnet1:10.0.1.1": {
-        "routing_type": "vnet",
+        "routing_type": "vnetfwd",
         "underlay_dip": "3.3.3.1",
     }
 
@@ -521,12 +612,8 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 
     // This is the final routing type that gets executed because VNET mapping table gets matched,
     // which addes the vxlan tunnel to the destination.
-    "DASH_SAI_ROUTING_TYPE_TABLE:vnet": [
-        {
-            "name": "action1",
-            "action_type": "static_encap",
-            "encap_type": "vxlan",
-        }
+    "DASH_SAI_ROUTING_TYPE_TABLE:vnetfwd": [
+        { "action_type": "static_encap", "encap_type": "vxlan" }
     ]
 ]
 ```
@@ -560,14 +647,8 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
     // The nat action will nat the inner packet destination ip based on the nat_dips defined in the routing entry.
     // If we have multiple IPs, they will be treated as an ECMP group. And algorithm can be defined as metadata in the routing entry as well.
     "DASH_SAI_ROUTING_TYPE_TABLE:l3nat": [
-        {
-            "name": "action1",
-            "action_type": "nat"
-        },
-        {
-            "name": "action2",
-            "action_type": "staticencap"
-        }
+        { "action_type": "nat" },
+        { "action_type": "staticencap" }
     ]
 ]
 ```
@@ -588,10 +669,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
     // The nat action will nat the inner packet destination ip based on the nat_dips defined in the routing entry.
     // If we have multiple IPs, they will be treated as an ECMP group. And algorithm can be defined as metadata in the routing entry as well.
     "DASH_SAI_ROUTING_TYPE_TABLE:l3nat": [
-        {
-            "name": "action1",
-            "action_type": "nat"
-        }
+        { "action_type": "nat" }
     ]
 ]
 ```
@@ -603,15 +681,18 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 [
     // When any traffic is sent to any VIP that this DPU owns, we will start to lookup the destination.
     "DASH_SAI_ROUTE_TABLE:123456789012:1.1.1.0/24": {
-        "transit_to": "maprouting0",
+        "transition": "vipmap",
 	    "vnet": "vipmapping"
     },
+    "DASH_SAI_ROUTING_TYPE_TABLE:vipmap": [ { "action_type": "maprouting" } ],
+
 
     // If the packet is sent to 1.1.1.1, we start to do port mapping
     "DASH_SAI_VNET_MAPPING_TABLE:Vnet1:1.1.1.1": {
-        "transit_to": "portmaprouting",
+        "transition": "vipportmap",
         "port_mapping_id": "lb-portmap-1-1-1-1",
     }
+    "DASH_SAI_ROUTING_TYPE_TABLE:vipportmap": [ { "action_type": "maprouting" } ],
 
     // Load balancing rule for port 443.
     "DASH_SAI_TCP_PORT_MAPPING_TABLE:lb-portmap-1-1-1-1": [
@@ -639,11 +720,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
     // To start simple, all destination IPs can be treated as an ECMP group. And algorithm can be defined as metadata
     // in the VIP entry as well.
     "DASH_SAI_ROUTING_TYPE_TABLE:lbnat": [
-        {
-            "name": "action1",
-            "action_type": "tunnel_nat",
-            "target": "underlay"
-        }
+        { "action_type": "tunnel_nat", "target": "underlay" }
     ]
 ]
 ```
