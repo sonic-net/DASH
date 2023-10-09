@@ -25,6 +25,7 @@
       3. [5.8.3. Stage transitions](#583-stage-transitions)
          1. [5.8.3.1. Stage transition routing type](#5831-stage-transition-routing-type)
          2. [5.8.3.2. Stage skipping](#5832-stage-skipping)
+         3. [5.8.3.3. Multi-stage chaining](#5833-multi-stage-chaining)
       4. [5.8.4. Action publishing](#584-action-publishing)
       5. [5.8.5. Metadata publishing](#585-metadata-publishing)
    9. [5.9. Action apply](#59-action-apply)
@@ -427,7 +428,7 @@ Here is an example that shows how the routing stage entry looks like:
 "DASH_SAI_ROUTING_TYPE_TABLE|vnetmap": [
     {
         "action_type": "maprouting",
-        "stage_index": "0"
+        "stage_index": 0
     }
 ]
 ```
@@ -472,6 +473,46 @@ flowchart LR
     Map1 --> | portmaprouting | UdpPortMap
 ```
 
+##### 5.8.3.3. Multi-stage chaining
+
+With multiple instances of the same stage type, we can chain the stages together to implement more complicated policies.
+
+For example, we can use 2 routing stages to implement 2 layers of routing with the second layer checking the source IP.
+
+```json
+{
+    "DASH_SAI_ROUTE_TABLE|123456789012|0|10.0.1.0/24": {
+        "transition": "srclpm",
+        // ...
+    },
+    "DASH_SAI_ROUTING_TYPE_TABLE|srclpm": [{ "action_type": "lpmrouting", "stage_index": 1, "use_src_ip": true } ],
+    
+    "DASH_SAI_ROUTE_TABLE|123456789012|1|10.1.1.0/24": {
+        // ...
+    },
+}
+```
+
+Or, with a slight change, we can implement another routing policy to enable a tunnel for a special destination IP range.
+
+```json
+{
+    // First LPM
+    "DASH_SAI_ROUTE_TABLE|123456789012|0|10.0.1.0/24": {
+        "transition": "lpm2",
+        // ...
+    },
+    "DASH_SAI_ROUTING_TYPE_TABLE|srclpm": [{ "action_type": "lpmrouting", "stage_index": 1 } ],
+    
+    // Second LPM
+    "DASH_SAI_ROUTE_TABLE|123456789012|1|10.0.1.128/25": {
+        "routing_type": "firewalltunnel",
+        "tunnel0_tunnel_id": "firewall_tunnel_0"
+    },
+    "DASH_SAI_ROUTING_TYPE_TABLE:firewalltunnel": [ { "action_type": "tunnel" } ]
+}
+```
+
 #### 5.8.4. Action publishing
 
 Each entry in the matching stages can specify a [routing type](#572-routing-type) that specifies the routing actions for specifying the packet transformations. When an entry is matched in the matching stages, the actions will be populated into the metadata bus, and the actions will be applied when the packet reaches the action apply stage.
@@ -514,7 +555,7 @@ Each entry in the matching stages can also specify a list of metadata. When an e
 With this design, all the entries in each matching stage can all be defined similarly as below:
 
 ```json
-"DASH_SAI_SOME_ENTRY_TABLE:<entry partition key>:<Unique Key of the entry>": {
+"DASH_SAI_SOME_ENTRY_TABLE|<entry partition key>|<stage_index>|<Unique Key of the entry>": {
     "transition": "<transition routing type name>",
     "routing_type": "<routing type name>",
 
@@ -526,7 +567,7 @@ Take the VNET mapping as an example. When following VNET mapping is matched, `un
 
 ```json
 // VNET mapping entry (VNET mapping stage)
-"DASH_SAI_VNET_MAPPING_TABLE:Vnet1:10.0.1.1": {
+"DASH_SAI_VNET_MAPPING_TABLE|Vnet1|0|10.0.1.1": {
     "transition": "vnetportmap",
     "routing_type": "do_something",
 
@@ -538,7 +579,7 @@ Take the VNET mapping as an example. When following VNET mapping is matched, `un
     "4to6_dip_encoding": "1122:3344:5566:7788::0303:0301/ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
 
     // Metering ID. Used in metering stage.
-    "metering_class": "60001"
+    "metering_class": 60001
 }
 ```
 
@@ -551,7 +592,7 @@ struct metadata_t {
 }
 
 action vnetportmap0_set_metadata(bit<32> underlay_dip, ...) {
-    meta.stage0.underlay_dip = underlay_dip;
+    meta.underlay_dip = underlay_dip;
     // ...
 }
 ```
@@ -560,23 +601,30 @@ action vnetportmap0_set_metadata(bit<32> underlay_dip, ...) {
 > 
 > The Direction Lookup and Pipeline Lookup stages are also matching stages, so they can also populate metadatas too, e.g., ENI-level metadata for underlay encap.
 
-This design also allows us to decouples the time of fulfilling the routing actions and their parameters. For example, all traffic that sends to a IP range needs to have a vxlan encap with encap key 12345, but different IP will have a different underlay IP, then this can be modeled as below:
+This design also allows us to decouples the time of fulfilling the routing actions and their parameters. 
+
+For example, say, we have a network with this policy: all traffic that sends to an IP range needs to have a vxlan encap with encap key 12345, but different IP will have a different underlay IP. Also, for 10.0.1.1, a tunnel is enabled for tunneling traffic to a firewall first. Then this can be modeled as below:
 
 ```json
-// Routing entry for the destiation. All destination shares the same encap.
-"DASH_SAI_ROUTE_TABLE:123456789012:10.0.1.0/24": {
-    "transition": "vnetmap",
-    "routing_type": "vnetfwd",
-    "vnet": "Vnet1",
-    "encap_type": "vxlan",
-    "encap_key": "45654"
-},
-"DASH_SAI_ROUTING_TYPE_TABLE:vnetmap": [ { "action_type": "maprouting" } ],
-"DASH_SAI_ROUTING_TYPE_TABLE:vnetfwd": [ { "action_type": "static_encap" } ]
+{
+    // Routing entry for the destiation. All destination shares the same encap.
+    "DASH_SAI_ROUTE_TABLE|123456789012|0|10.0.1.0/24": {
+        "transition": "vnetmap",
+        "routing_type": "vnetfwd",
+        "vnet": "Vnet1",
+        "encap_type": "vxlan",
+        "encap_key": "12345"
+    },
+    "DASH_SAI_ROUTING_TYPE_TABLE:vnetmap": [ { "action_type": "maprouting" } ],
+    "DASH_SAI_ROUTING_TYPE_TABLE:vnetfwd": [ { "action_type": "static_encap" } ],
 
-// If we are sending to 10.0.1.1, this entry will be matched and delay set the underlay destination IP for staticencap action.
-"DASH_SAI_VNET_MAPPING_TABLE:Vnet1:10.0.1.1": {
-    "underlay_dip": "3.3.3.1"
+    // If we are sending to 10.0.1.1, this entry will be matched and delay set the underlay destination IP for staticencap action, also specify the tunnel action.
+    "DASH_SAI_VNET_MAPPING_TABLE|Vnet1|0|10.0.1.1": {
+        "routing_type": "firewalltunnel",
+        "underlay_dip": "3.3.3.1",
+        "tunnel0_tunnel_id": "firewall_tunnel_0"
+    },
+    "DASH_SAI_ROUTING_TYPE_TABLE:firewalltunnel": [ { "action_type": "tunnel" } ]
 }
 ```
 
@@ -597,27 +645,27 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 ```json
 [
     // When sending to anywhere in the VNET, we start to lookup the destination
-    "DASH_SAI_ROUTE_TABLE:123456789012:10.0.1.0/24": {
+    "DASH_SAI_ROUTE_TABLE|123456789012|0|10.0.1.0/24": {
         "transition": "vnetmap",
         "vnet": "Vnet1"
     },
-    "DASH_SAI_ROUTING_TYPE_TABLE:vnetmap": [ { "action_type": "maprouting" } ],
+    "DASH_SAI_ROUTING_TYPE_TABLE|vnetmap": [ { "action_type": "maprouting" } ],
 
     // If we are sending to 10.0.1.1, this entry will be matched and set the underlay destination IP for staticencap action.
-    "DASH_SAI_VNET_MAPPING_TABLE:Vnet1:10.0.1.1": {
+    "DASH_SAI_VNET_MAPPING_TABLE|Vnet1|0|10.0.1.1": {
         "routing_type": "vnetfwd",
         "underlay_dip": "3.3.3.1",
     }
 
     // The corresponding table level information will also be populated, in this case - "encap_key"
-    "DASH_SAI_VNET_TABLE:Vnet1": {
+    "DASH_SAI_VNET_TABLE|Vnet1": {
         "name": "559c6ce8-26ab-4193-b946-ccc6e8f930b2",
-        "encap_key": "45654"
+        "encap_key": 12345
     },
 
     // This is the final routing type that gets executed because VNET mapping table gets matched,
     // which addes the vxlan tunnel to the destination.
-    "DASH_SAI_ROUTING_TYPE_TABLE:vnetfwd": [
+    "DASH_SAI_ROUTING_TYPE_TABLE|vnetfwd": [
         { "action_type": "static_encap", "encap_type": "vxlan" }
     ]
 ]
@@ -627,7 +675,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 
 ```json
 [
-    "DASH_SAI_ENI_TABLE:123456789012": {
+    "DASH_SAI_ENI_TABLE|123456789012": {
         "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
         "admin_state": "enabled",
         "mac_address": "12-34-56-78-90-12",
@@ -637,7 +685,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
     },
 
     // Routing to the public IP.
-    "DASH_SAI_ROUTE_TABLE:123456789012:1.1.1.1/32": {
+    "DASH_SAI_ROUTE_TABLE|123456789012|0|1.1.1.1/32": {
         "routing_type": "l3nat",
 
         // Another way to implement the underlay encap is to use the underlay_dip in the routing entry.
@@ -651,7 +699,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
     // 
     // The nat action will nat the inner packet destination ip based on the nat_dips defined in the routing entry.
     // If we have multiple IPs, they will be treated as an ECMP group. And algorithm can be defined as metadata in the routing entry as well.
-    "DASH_SAI_ROUTING_TYPE_TABLE:l3nat": [
+    "DASH_SAI_ROUTING_TYPE_TABLE|l3nat": [
         { "action_type": "nat" },
         { "action_type": "staticencap" }
     ]
@@ -664,7 +712,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 [
     // Routing to Internet.
     // This is a simple implementation, basically means if nothing else is matched.
-    "DASH_SAI_ROUTE_TABLE:123456789012:0.0.0.0/0": {
+    "DASH_SAI_ROUTE_TABLE|123456789012|0|0.0.0.0/0": {
         "routing_type": "l3nat",
         "nat_sips": "1.1.1.1,2.2.2.2"
     },
@@ -673,7 +721,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
     // 
     // The nat action will nat the inner packet destination ip based on the nat_dips defined in the routing entry.
     // If we have multiple IPs, they will be treated as an ECMP group. And algorithm can be defined as metadata in the routing entry as well.
-    "DASH_SAI_ROUTING_TYPE_TABLE:l3nat": [
+    "DASH_SAI_ROUTING_TYPE_TABLE|l3nat": [
         { "action_type": "nat" }
     ]
 ]
@@ -685,22 +733,22 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 ```json
 [
     // When any traffic is sent to any VIP that this DPU owns, we will start to lookup the destination.
-    "DASH_SAI_ROUTE_TABLE:123456789012:1.1.1.0/24": {
+    "DASH_SAI_ROUTE_TABLE|123456789012|0|1.1.1.0/24": {
         "transition": "vipmap",
 	    "vnet": "vipmapping"
     },
-    "DASH_SAI_ROUTING_TYPE_TABLE:vipmap": [ { "action_type": "maprouting" } ],
+    "DASH_SAI_ROUTING_TYPE_TABLE|vipmap": [ { "action_type": "maprouting" } ],
 
 
     // If the packet is sent to 1.1.1.1, we start to do port mapping
-    "DASH_SAI_VNET_MAPPING_TABLE:Vnet1:1.1.1.1": {
+    "DASH_SAI_VNET_MAPPING_TABLE|Vnet1|0|1.1.1.1": {
         "transition": "vipportmap",
         "port_mapping_id": "lb-portmap-1-1-1-1",
     }
-    "DASH_SAI_ROUTING_TYPE_TABLE:vipportmap": [ { "action_type": "maprouting" } ],
+    "DASH_SAI_ROUTING_TYPE_TABLE|vipportmap": [ { "action_type": "maprouting" } ],
 
     // Load balancing rule for port 443.
-    "DASH_SAI_TCP_PORT_MAPPING_TABLE:lb-portmap-1-1-1-1": [
+    "DASH_SAI_TCP_PORT_MAPPING_TABLE|lb-portmap-1-1-1-1": [
         {
             "routing_type": "lbdnat",
 
@@ -714,9 +762,9 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
     ]
 
     // The corresponding table level information will also be populated, in this case - "encap_key"
-    "DASH_SAI_VNET_TABLE:vipmapping": {
+    "DASH_SAI_VNET_TABLE|vipmapping": {
         "name": "559c6ce8-26ab-4193-b946-ccc6e8f930b2",
-        "encap_key": "45654"
+        "encap_key": 12345
     },
 
     // This is the final routing type that gets executed. The tunnel_nat action will nat the inner packet destination
@@ -724,7 +772,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
     //
     // To start simple, all destination IPs can be treated as an ECMP group. And algorithm can be defined as metadata
     // in the VIP entry as well.
-    "DASH_SAI_ROUTING_TYPE_TABLE:lbnat": [
+    "DASH_SAI_ROUTING_TYPE_TABLE|lbnat": [
         { "action_type": "tunnel_nat", "target": "underlay" }
     ]
 ]
