@@ -303,7 +303,7 @@ In DASH-SAI pipeline, routing actions are the fundamental building blocks for pa
 1. Take a specific list of metadata fields as input parameters:
    1. For example, `staticencap` action will take the `underlay_dip`, `underlay_sip`, `encap_type` and `encap_key` to encapsulate the packet.
    2. The parameters can come from 2 places - the metadata defined associated with the entries in each table, or the routing action definition itself. More details will be discussed in the next section.
-2. Transform the packet in a specific way, e.g., encapsulate the packet, natting the address and port, etc.
+2. Transform the packet in a specific way, e.g., encapsulate the packet, NAT'ing the address and port, etc.
 3. Independent to other actions.
    1. With this design, we don't have to worry about the order of the actions.
    2. This also enables the hardware to improve the E2E pipeline latency by doing the actions in parallel.
@@ -322,7 +322,7 @@ Take `staticencap` as an example, it can be defined as below:
 
 #### 5.7.2. Routing type
 
-To implement a network function, we usually need to do multiple packet transformations, such as adding a tunnel and natting the address or port. This requires us to be able to combine multiple routing actions together, and this is what routing type is for.
+To implement a network function, we usually need to do multiple packet transformations, such as adding a tunnel and NAT'ing the address or port. This requires us to be able to combine multiple routing actions together, and this is what routing type is for.
 
 In DASH-SAI pipeline, routing type is defined as a list of routing actions. And by combining different routing actions into different routing types, we will be able to implement different network functions.
 
@@ -405,7 +405,7 @@ A transition routing type is a special type of [Routing Type](#572-routing-type)
 | `maprouting` | Skip to next mapping stage |
 | `portmaprouting` | Skip to next TCP or UDP Port Mapping stage |
 
-To help us being flexiable, the transition routing actions can take a few parameters:
+To help us being flexible, the transition routing actions can take a few parameters:
 
 - All transition routing actions other than `drop` and `trap`:
     - `default_routing_type`: If no entry is found, use this routing type to route the packet. If `default_routing_type` is not set, the packet will be dropped by default.
