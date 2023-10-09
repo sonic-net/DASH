@@ -215,7 +215,7 @@ If a pipeline is found, before processing the packets, all outer encaps will be 
 
 During the direction lookup stage, all other encaps will be examined, such as VNI lookup. For each VNI or GRE key, we can specify whether it is stateless or stateful.
 
-Altough the encap information will still be saved in the metadata bus, however, for stateless decap, we will not create the encap for the reverse flow. Otherwise (for the stateful decap), we will create the encap for the reverse flow by reversing the source and destination information.
+Although the encap information will still be saved in the metadata bus, however, for stateless decap, we will not create the encap for the reverse flow. Otherwise (for the stateful decap), we will create the encap for the reverse flow by reversing the source and destination information.
 
 ```json
 {
