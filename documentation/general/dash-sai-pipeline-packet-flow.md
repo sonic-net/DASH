@@ -335,6 +335,8 @@ Take `staticencap` as an example, it can be defined as below:
     - Enable the underlay encap header based on the `encap_type`.
     - Update the underlay encap header with `encap_key`, `underlay_dip`, `underlay_sip`.
 
+More routing action definitions can be found in the doc here: [DASH routing actions](../dataplane/dash-routing-actions.md).
+
 #### 5.7.2. Routing type
 
 To implement a network function, we usually need to do multiple packet transformations, such as adding a tunnel and NAT'ing the address or port. This requires us to be able to combine multiple routing actions together, and this is what routing type is for.
