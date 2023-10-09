@@ -9,6 +9,7 @@
    2. [5.2. Direction Lookup](#52-direction-lookup)
    3. [5.3. Pipeline Lookup](#53-pipeline-lookup)
    4. [5.4. Packet Decap](#54-packet-decap)
+      1. [Stateless decap vs stateful decap](#stateless-decap-vs-stateful-decap)
    5. [5.5. Conntrack Lookup and Update](#55-conntrack-lookup-and-update)
       1. [5.5.1. Flow lookup](#551-flow-lookup)
       2. [5.5.2. Flow creation](#552-flow-creation)
@@ -209,6 +210,19 @@ A pipeline can also define its initial matching stages, which will be used for s
 ### 5.4. Packet Decap
 
 If a pipeline is found, before processing the packets, all outer encaps will be decap'ed, and with key information saved in metadata bus, such as encap type, source IP and VNI / GRE Key, exposing the inner most packet going through the pipeline. This simplifies the flow matching logic and also allow us to create the reverse flow properly.
+
+#### Stateless decap vs stateful decap
+
+During the direction lookup stage, all other encaps will be examined, such as VNI lookup. For each VNI or GRE key, we can specify whether it is stateless or stateful.
+
+Altough the encap information will still be saved in the metadata bus, however, for stateless decap, we will not create the encap for the reverse flow. Otherwise (for the stateful decap), we will create the encap for the reverse flow by reversing the source and destination information.
+
+```json
+{
+    "DASH_SAI_VNI_TABLE|12345": { "direction": "outbound", "stateless": false },
+    "DASH_SAI_VNI_TABLE|12346": { "direction": "outbound", "stateless": true }
+}
+```
 
 ### 5.5. Conntrack Lookup and Update
 
@@ -509,7 +523,7 @@ Or, with a slight change, we can implement another routing policy to enable a tu
         "routing_type": "firewalltunnel",
         "tunnel0_tunnel_id": "firewall_tunnel_0"
     },
-    "DASH_SAI_ROUTING_TYPE_TABLE:firewalltunnel": [ { "action_type": "tunnel" } ]
+    "DASH_SAI_ROUTING_TYPE_TABLE|firewalltunnel": [ { "action_type": "tunnel" } ]
 }
 ```
 
@@ -615,8 +629,8 @@ For example, say, we have a network with this policy: all traffic that sends to 
         "encap_type": "vxlan",
         "encap_key": "12345"
     },
-    "DASH_SAI_ROUTING_TYPE_TABLE:vnetmap": [ { "action_type": "maprouting" } ],
-    "DASH_SAI_ROUTING_TYPE_TABLE:vnetfwd": [ { "action_type": "static_encap" } ],
+    "DASH_SAI_ROUTING_TYPE_TABLE|vnetmap": [ { "action_type": "maprouting" } ],
+    "DASH_SAI_ROUTING_TYPE_TABLE|vnetfwd": [ { "action_type": "static_encap" } ],
 
     // If we are sending to 10.0.1.1, this entry will be matched and delay set the underlay destination IP for staticencap action, also specify the tunnel action.
     "DASH_SAI_VNET_MAPPING_TABLE|Vnet1|0|10.0.1.1": {
@@ -624,7 +638,7 @@ For example, say, we have a network with this policy: all traffic that sends to 
         "underlay_dip": "3.3.3.1",
         "tunnel0_tunnel_id": "firewall_tunnel_0"
     },
-    "DASH_SAI_ROUTING_TYPE_TABLE:firewalltunnel": [ { "action_type": "tunnel" } ]
+    "DASH_SAI_ROUTING_TYPE_TABLE|firewalltunnel": [ { "action_type": "tunnel" } ]
 }
 ```
 
