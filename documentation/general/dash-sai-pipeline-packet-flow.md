@@ -28,6 +28,7 @@
       4. [5.8.4. Action publishing](#584-action-publishing)
       5. [5.8.5. Metadata publishing](#585-metadata-publishing)
    9. [5.9. Action apply](#59-action-apply)
+   10. [5.10. Meter update](#510-meter-update)
 6. [6. Examples](#6-examples)
    1. [6.1. VNET routing](#61-vnet-routing)
    2. [6.2. VM level public IP inbound (L3 DNAT)](#62-vm-level-public-ip-inbound-l3-dnat)
@@ -582,6 +583,10 @@ This design also allows us to decouples the time of fulfilling the routing actio
 ### 5.9. Action apply
 
 After all matching stages are done, we will start applying all the actions. All the latest values in the metadata bus will be used as the input parameters for the routing actions.
+
+### 5.10. Meter update
+
+After all actions are applied, post-pipeline ACLs are passed, we will update the metering counters if any metering class is specified.
 
 ## 6. Examples
 
