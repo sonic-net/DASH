@@ -420,7 +420,7 @@ Here is an example that shows how the routing stage entry looks like:
 ```json
 // Routing stage entry:
 // When this entry is matched, we will move to VNET mapping stage, which executes maprouting action and jump to VNET mapping stage.
-"DASH_SAI_ROUTE_TABLE|123456789012|10.0.1.0/24": {
+"DASH_SAI_ROUTE_TABLE|123456789012|0|10.0.1.0/24": {
     "transition": "vnetmap",
     "vnet": "Vnet1"
 }
