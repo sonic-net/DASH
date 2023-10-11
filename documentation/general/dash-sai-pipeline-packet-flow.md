@@ -13,6 +13,7 @@
       2. [5.4.2. Encap fields handling](#542-encap-fields-handling)
          1. [5.4.2.1. Handling DSCP](#5421-handling-dscp)
          2. [5.4.2.2. Handling TTL](#5422-handling-ttl)
+      3. [5.4.3. Encap preservation](#543-encap-preservation)
    5. [5.5. Conntrack Lookup and Update](#55-conntrack-lookup-and-update)
       1. [5.5.1. Flow lookup](#551-flow-lookup)
       2. [5.5.2. Flow creation](#552-flow-creation)
@@ -254,6 +255,14 @@ TTL behavior for encap shall be "pipe" model (similar to SAI_TUNNEL_TTL_MODE_PIP
 
 - When adding encaps, TTL value shall be default set to 64.
 - DASH pipeline shall not modify the TTL values in the overlay packet (customer packet).
+
+#### 5.4.3. Encap preservation
+
+Sometimes, depends on the scenario to implement, the customer might want to preserve certain original encaps in the outgoing traffic. For example, say we receive a packet with structure: overlay -> underlay -> tunnel1 -> tunnel2. And we want to remove or update underlay, preserve tunnel1 and remove tunnel2. This gives us the problem of handling all the CRUD combinations of all encaps, including structure changes: after removing underlay, should tunnel0 becomes underlay or should we keep it as tunnel0? All these things affects the encap related routing actions and final packet we create.
+
+Since all the encap information is preserved in the metadata bus for flow creation anyway, to solve this problem, we can simply recreate them in anyway we want with routing action: `tunnel_from_encap`. It allows the source and target encap and their override value being set, which allows us to preserve the encaps in anyway we want and also ensures the clarity of final transformation that we are doing in the end.
+
+Please note that: Encap preservation will not affect the reverse tunnel creation as "Stateless decap vs stateful decap" section described above. A encap can be preserved as well as used in reverse tunnel creation at the same time, since they are essentially 2 different things.
 
 ### 5.5. Conntrack Lookup and Update
 
