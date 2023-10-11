@@ -16,9 +16,10 @@ As [DASH packet flow HLD](../general/dash-sai-pipeline-packet-flow.md) describes
 3. [Packet transformation actions](#packet-transformation-actions)
    1. [`staticencap` action](#staticencap-action)
    2. [`tunnel` action](#tunnel-action)
-   3. [`4to6` action](#4to6-action)
-   4. [`6to4` action](#6to4-action)
-   5. [`nat` action](#nat-action)
+   3. [`reverse_tunnel` action](#reverse_tunnel-action)
+   4. [`4to6` action](#4to6-action)
+   5. [`6to4` action](#6to4-action)
+   6. [`nat` action](#nat-action)
 
 ## Overview
 
@@ -64,7 +65,7 @@ All IP-based stage transition actions will support the following parameters:
 ##### `lpmrouting` action
 
 - Actions:
-  - The packet will be routed to the next stage based on the LPM routing table.
+  - The packet will be routed to the next LPM routing stage specified by the `stage_index` field.
 
 The port mapping entries can be described as below:
 
@@ -81,7 +82,7 @@ The port mapping entries can be described as below:
 ##### `maprouting` action
 
 - Actions:
-  - The packet will be routed to the next stage based on the map routing table.
+  - The packet will be routed to the next map routing stage specified by the `stage_index` field.
 
 A map routing entry can be described as below:
 
@@ -131,8 +132,10 @@ The port mapping entries can be described as below:
 - Metadata parameters:
   - `underlay_dip`: Destination IP used in encap.
   - `underlay_sip`: Source IP used in encap.
-  - `encap_type`: "nvgre|vxlan|…"
-  - `encap_key`: GRE key in NvGRE or VNI in VxLAN
+  - `encap_type`: Encap type: "nvgre|vxlan"
+  - `encap_key`: GRE key in NvGRE or VNI in VxLAN.
+  - `dscp_mode`: DSCP handling mode: "preserve|pipe"
+  - `dscp`: DSCP value to set in the encap header.
 - Actions:
   - Enable the underlay encap header based on the encap type.
   - Update the underlay encap header with `encap_key`, `underlay_dip`, `underlay_sip`.
@@ -141,15 +144,16 @@ The port mapping entries can be described as below:
 ### `tunnel` action
 
 - Action parameters:
-  - `target` = "underlay|tunnel0|tunnel1|..."
+  - `target` = "underlay|tunnel1|tunnel2|..."
 - Metadata Parameters:
-  - `(underlay|tunnel0|tunnel1|...)_tunnel_id`: The ID of the tunnel we are going to use. 
+  - `(underlay|tunnel1|tunnel2|...)_tunnel_id`: The ID of the tunnel we are going to use. 
     - The definition of the tunnel can be found below.
     - The ECMP hash is calculated based on the 5 tuple of the inner-most (overlay) packet.
+  - `dscp_mode`: DSCP handling mode: "preserve|pipe"
+  - `dscp`: DSCP value to set in the encap header.
 - Actions:
   - Enable the encap header based on the target tunnel and encap_type.
-  - Update the encap information with the encap_key, dip and sip.
-    - If dip/sip is not set, use the IP from the original packet. 
+  - Update the encap information with the `encap_key`, `dip` and `sip`.
 
 A tunnel entry can be described as below:
 
@@ -162,6 +166,23 @@ A tunnel entry can be described as below:
     "encap_key": 101
 }
 ```
+
+### `reverse_tunnel` action
+
+- Action parameters:
+  - `target` = "underlay|tunnel1|tunnel2|..."
+- Metadata Parameters:
+  - `(underlay|tunnel1|tunnel2|...)_tunnel_id`: The ID of the tunnel we are going to use. 
+    - The definition of the tunnel can be found below.
+    - The ECMP hash is calculated based on the 5 tuple of the inner-most (overlay) packet.
+- Actions:
+  - No packet transformation should be done on the packet.
+  - When creating the flow, in the reverse flow,
+    - Enable the encap header based on the target tunnel and encap_type.
+    - Update the encap information with the `encap_key`, `dip` and `sip`.
+
+The tunnel entry is the same as the one in `tunnel` action.
+
 ### `4to6` action
 
 - Metadata parameters:

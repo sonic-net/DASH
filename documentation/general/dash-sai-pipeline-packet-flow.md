@@ -9,7 +9,10 @@
    2. [5.2. Direction Lookup](#52-direction-lookup)
    3. [5.3. Pipeline Lookup](#53-pipeline-lookup)
    4. [5.4. Packet Decap](#54-packet-decap)
-      1. [Stateless decap vs stateful decap](#stateless-decap-vs-stateful-decap)
+      1. [5.4.1. Stateless decap vs stateful decap](#541-stateless-decap-vs-stateful-decap)
+      2. [5.4.2. Encap fields handling](#542-encap-fields-handling)
+         1. [5.4.2.1. Handling DSCP](#5421-handling-dscp)
+         2. [5.4.2.2. Handling TTL](#5422-handling-ttl)
    5. [5.5. Conntrack Lookup and Update](#55-conntrack-lookup-and-update)
       1. [5.5.1. Flow lookup](#551-flow-lookup)
       2. [5.5.2. Flow creation](#552-flow-creation)
@@ -68,7 +71,7 @@ Overall, the high-level packet structure looks like below:
 
 | ... (Outer most) | 3 | 2 | 1 | 0 (Inner most) |
 | - | - | - | - | - |
-| **...** | **Tunnel1** | **Tunnel0** | **Underlay** | **Overlay** |
+| **...** | **Tunnel2** | **Tunnel1** | **Underlay** | **Overlay** |
 
 ## 4. Pipeline Overview
 
@@ -211,7 +214,7 @@ A pipeline can also define its initial matching stages, which will be used for s
 
 If a pipeline is found, before processing the packets, all outer encaps will be decap'ed, and with key information saved in metadata bus, such as encap type, source IP and VNI / GRE Key, exposing the inner most packet going through the pipeline. This simplifies the flow matching logic and also allow us to create the reverse flow properly.
 
-#### Stateless decap vs stateful decap
+#### 5.4.1. Stateless decap vs stateful decap
 
 During the direction lookup stage, all other encaps will be examined, such as VNI lookup. For each VNI or GRE key, we can specify whether it is stateless or stateful.
 
@@ -223,6 +226,34 @@ Although the encap information will still be saved in the metadata bus, however,
     "DASH_SAI_VNI_TABLE|12346": { "direction": "outbound", "stateless": true }
 }
 ```
+
+#### 5.4.2. Encap fields handling
+
+##### 5.4.2.1. Handling DSCP
+
+DASH pipeline provides 2 modes for handling the DSCP: "Preserve model" and "Pipe model".
+
+Preserve model works very similar to `SAI_TUNNEL_DSCP_MODE_UNIFORM_MODEL` with a slight difference:
+
+- The DSCP value of outer most encap header will be preserved.
+- When any encap being added, the preserved DSCP value will be copied to the new encap header.
+- The DSCP value of overlay packet (customer packet) shall never be modified or preserved and copied to the outer header.
+
+On the other hand, pipe model works very similar to `SAI_TUNNEL_DSCP_MODE_PIPE_MODEL`:
+
+- The DSCP value of existing encaps will not be preserved.
+- When any encap being added, the DASH pipeline will specify the DSCP value, and all routing action will take this value and copy it to the encaps.
+
+If no encaps are added, say, for traffic sending to Internet, the DSCP value of overlay packet will be exposed as it is, even-if original packet arrives with a non-zero value.
+
+This gives the cloud infra full control over the DSCP value and avoid the customer packet spoofing the fields.
+
+##### 5.4.2.2. Handling TTL
+
+TTL behavior for encap shall be "pipe" model (similar to SAI_TUNNEL_TTL_MODE_PIPE_MODEL):
+
+- When adding encaps, TTL value shall be default set to 64.
+- DASH pipeline shall not modify the TTL values in the overlay packet (customer packet).
 
 ### 5.5. Conntrack Lookup and Update
 
@@ -523,9 +554,9 @@ Or, with a slight change, we can implement another routing policy to enable a tu
     // Second LPM
     "DASH_SAI_ROUTE_TABLE|123456789012|1|10.0.1.128/25": {
         "routing_type": "firewalltunnel",
-        "tunnel0_tunnel_id": "firewall_tunnel_0"
+        "tunnel1_tunnel_id": "firewall_tunnel_0"
     },
-    "DASH_SAI_ROUTING_TYPE_TABLE|firewalltunnel": [ { "action_type": "tunnel" } ]
+    "DASH_SAI_ROUTING_TYPE_TABLE|firewalltunnel": [ { "action_type": "tunnel", "target": "tunnel1" } ]
 }
 ```
 
@@ -638,9 +669,9 @@ For example, say, we have a network with this policy: all traffic that sends to 
     "DASH_SAI_VNET_MAPPING_TABLE|Vnet1|0|10.0.1.1": {
         "routing_type": "firewalltunnel",
         "underlay_dip": "3.3.3.1",
-        "tunnel0_tunnel_id": "firewall_tunnel_0"
+        "tunnel1_tunnel_id": "firewall_tunnel_0"
     },
-    "DASH_SAI_ROUTING_TYPE_TABLE|firewalltunnel": [ { "action_type": "tunnel" } ]
+    "DASH_SAI_ROUTING_TYPE_TABLE|firewalltunnel": [ { "action_type": "tunnel", "target": "tunnel1" } ]
 }
 ```
 
