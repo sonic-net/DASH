@@ -174,7 +174,7 @@ In DASH-SAI pipeline, traffic are split into 2 directions: `inbound` and `outbou
 
 ### 5.3. Pipeline Lookup
 
-DASH supports multi-tenancy model for traffic handling. A single device can have multiple pipelines, and each pipeline is used to handle traffic for a specific tenant. When a packet arrives, besides direction lookup, we also need pipeline lookup to determine which pipeline to use for processing the packet.
+DASH supports multi-tenancy model for traffic handling. A single device can have multiple pipelines, and each pipeline is used to handle traffic for a specific tenant or whichever network function being modeled, such as a load balancer. When a packet arrives, besides direction lookup, we also need pipeline lookup to determine which pipeline to use for processing the packet.
 
 For example, if we like to implement a VM NIC with, then we can model one pipeline as one VM NIC, then use the inner packet MAC to find the pipeline. However, if we would like to implement a load balancer, we can use a DASH-SAI pipeline to represent a load balancer instance and use the Public IP to find the SAI pipeline.
 
