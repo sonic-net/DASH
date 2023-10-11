@@ -33,6 +33,9 @@ struct eni_data_t {
     bit<32> pps;
     bit<32> flows;
     bit<1>  admin_state;
+    IPv6Address pl_sip;
+    IPv6Address pl_sip_mask;
+    IPv4Address pl_underlay_sip;
 }
 
 struct metadata_t {

@@ -177,7 +177,20 @@ int main(int argc, char **argv)
         attrs.push_back(attr);
     }
 
+    attr.id = SAI_ENI_ATTR_PL_SIP;
+    attr.value.u32 = 0;
+    attrs.push_back(attr);
+
+    attr.id = SAI_ENI_ATTR_PL_SIP_MASK;
+    attr.value.u32 = 0;
+    attrs.push_back(attr);
+
+    attr.id = SAI_ENI_ATTR_PL_UNDERLAY_SIP;
+    attr.value.u32 = 0;
+    attrs.push_back(attr);
+
     status = dash_eni_api->create_eni(&eni_id, switch_id, attrs.size(), attrs.data());
+
     if (status != SAI_STATUS_SUCCESS)
     {
         std::cout << "Failed to create ENI object" << std::endl;

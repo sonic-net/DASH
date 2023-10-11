@@ -97,7 +97,7 @@ TEST_VNET_OUTBOUND_CONFIG_SCALE = {
     }
 }
 
-def add_meter_attrs(attr_type, attrs, ext):
+def add_extra_attrs(attr_type, attrs, ext):
     i = 0
     for item in attrs:
         if item['type'] == attr_type:
@@ -112,12 +112,14 @@ class TestSaiVnetOutbound:
         conf = dpugen.sai.SaiConfig()
         conf.mergeParams(TEST_VNET_OUTBOUND_CONFIG_SCALE)
         conf.generate()
-        ret = add_meter_attrs('SAI_OBJECT_TYPE_ENI', conf.items(), ["SAI_ENI_ATTR_V4_METER_POLICY_ID", "0", "SAI_ENI_ATTR_V6_METER_POLICY_ID", "0"])
+        ret = add_extra_attrs('SAI_OBJECT_TYPE_ENI', conf.items(), ["SAI_ENI_ATTR_V4_METER_POLICY_ID", "0", "SAI_ENI_ATTR_V6_METER_POLICY_ID", "0",
+                              'SAI_ENI_ATTR_PL_SIP', '2001:0db8:85a3:0000:0000:8a2e:0370:7334', 'SAI_ENI_ATTR_PL_SIP_MASK',
+                              '2001:0db8:85a3:0000:0000:0000:0000:0000', 'SAI_ENI_ATTR_PL_UNDERLAY_SIP', '10.0.0.18'])
 
-        ret = add_meter_attrs('SAI_OBJECT_TYPE_OUTBOUND_CA_TO_PA_ENTRY', ret, [ 'SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS', '0',
+        ret = add_extra_attrs('SAI_OBJECT_TYPE_OUTBOUND_CA_TO_PA_ENTRY', ret, [ 'SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS', '0',
                               'SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS_OVERRIDE', 'True' ])
 
-        ret = add_meter_attrs('SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY', ret, [ 'SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_POLICY_EN', 'True',
+        ret = add_extra_attrs('SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY', ret, [ 'SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_POLICY_EN', 'True',
                               'SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS', '0' ])
         return ret
 

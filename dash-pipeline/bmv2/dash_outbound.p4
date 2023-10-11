@@ -118,6 +118,14 @@ control outbound(inout headers_t hdr,
 #endif // TARGET_DPDK_PNA
     }
 
+    action set_tunnel(IPv4Address underlay_dip,
+                      bit<16> meter_class,
+                      bit<1> meter_class_override) {
+        meta.encap_data.underlay_dip = underlay_dip;
+        meta.mapping_meter_class = meter_class;
+        meta.mapping_meter_class_override = meter_class_override;
+        meta.encap_data.dash_encapsulation = dash_encapsulation_t.VXLAN;
+    }
 
     action set_tunnel_mapping(IPv4Address underlay_dip,
                               EthernetAddress overlay_dmac,
@@ -127,9 +135,32 @@ control outbound(inout headers_t hdr,
         if (use_dst_vnet_vni == 1)
             meta.vnet_id = meta.dst_vnet_id;
         meta.encap_data.overlay_dmac = overlay_dmac;
-        meta.encap_data.underlay_dip = underlay_dip;
-        meta.mapping_meter_class = meter_class;
-        meta.mapping_meter_class_override = meter_class_override;
+
+        set_tunnel(underlay_dip,
+                   meter_class,
+                   meter_class_override);
+    }
+
+    action set_private_link_mapping(IPv4Address underlay_dip,
+                                    IPv6Address overlay_sip,
+                                    IPv6Address overlay_dip,
+                                    dash_encapsulation_t dash_encapsulation,
+                                    bit<24> tunnel_key,
+                                    bit<16> meter_class,
+                                    bit<1> meter_class_override) {
+        meta.encap_data.overlay_dmac = hdr.ethernet.dst_addr;
+        meta.encap_data.dash_encapsulation = dash_encapsulation;
+        meta.encap_data.vni = tunnel_key;
+
+        service_tunnel_encode(hdr,
+                              overlay_dip,
+                              0xffffffffffffffffffffffff,
+                              (overlay_sip & ~meta.eni_data.pl_sip_mask) | meta.eni_data.pl_sip | (IPv6Address)hdr.ipv4.dst_addr,
+                              0xffffffffffffffffffffffff);
+
+        set_tunnel(underlay_dip,
+                   meter_class,
+                   meter_class_override);
     }
 
 #ifdef TARGET_BMV2_V1MODEL
@@ -152,6 +183,7 @@ control outbound(inout headers_t hdr,
 
         actions = {
             set_tunnel_mapping;
+            set_private_link_mapping;
             @defaultonly drop;
         }
         const default_action = drop;
@@ -209,16 +241,31 @@ control outbound(inout headers_t hdr,
         switch (routing.apply().action_run) {
             route_vnet_direct:
             route_vnet: {
-                ca_to_pa.apply();
-                vnet.apply();
+                switch (ca_to_pa.apply().action_run) {
+                    set_tunnel_mapping: {
+                        vnet.apply();
+                    }
+                }
 
-                vxlan_encap(hdr,
-                            meta.encap_data.underlay_dmac,
-                            meta.encap_data.underlay_smac,
-                            meta.encap_data.underlay_dip,
-                            meta.encap_data.underlay_sip,
-                            meta.encap_data.overlay_dmac,
-                            meta.encap_data.vni);
+                if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {
+                    vxlan_encap(hdr,
+                                meta.encap_data.underlay_dmac,
+                                meta.encap_data.underlay_smac,
+                                meta.encap_data.underlay_dip,
+                                meta.encap_data.underlay_sip,
+                                meta.encap_data.overlay_dmac,
+                                meta.encap_data.vni);
+                } else if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
+                    nvgre_encap(hdr,
+                                meta.encap_data.underlay_dmac,
+                                meta.encap_data.underlay_smac,
+                                meta.encap_data.underlay_dip,
+                                meta.encap_data.underlay_sip,
+                                meta.encap_data.overlay_dmac,
+                                meta.encap_data.vni);
+                } else {
+                    drop();
+                }
              }
            route_service_tunnel: {
                 if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {

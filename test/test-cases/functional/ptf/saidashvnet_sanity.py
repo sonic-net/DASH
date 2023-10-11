@@ -56,12 +56,21 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
 
         vm_underlay_dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
                                                   addr=sai_thrift_ip_addr_t(ip4=self.src_vm_pa_ip))
+        pl_sip_mask = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV6,
+                addr=sai_thrift_ip_addr_t(ip6="2001:0db8:85a3:0000:0000:0000:0000:0000"))
+        pl_sip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV6,
+                addr=sai_thrift_ip_addr_t(ip6="2001:0db8:85a3:0000:0000:8a2e:0370:7334"))
+        pl_underlay_sip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
+                addr=sai_thrift_ip_addr_t(ip4="10.0.0.18"))
         self.eni = sai_thrift_create_eni(self.client, cps=10000,
                                          pps=100000, flows=100000,
                                          admin_state=True,
                                          vm_underlay_dip=vm_underlay_dip,
                                          vm_vni=9,
                                          vnet_id=self.vnet,
+                                         pl_sip = pl_sip,
+                                         pl_sip_mask = pl_sip_mask,
+                                         pl_underlay_sip = pl_underlay_sip,
                                          v4_meter_policy_id = 0,
                                          v6_meter_policy_id = 0,
                                          # TODO: Enable ACL rule
