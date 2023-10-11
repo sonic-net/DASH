@@ -135,8 +135,8 @@ The port mapping entries can be described as below:
   - `underlay_sip`: Source IP used in encap.
   - `encap_type`: Encap type: "nvgre|vxlan"
   - `encap_key`: GRE key in NvGRE or VNI in VxLAN.
-  - `dscp_mode`: DSCP handling mode: "preserve|pipe"
-  - `dscp`: DSCP value to set in the encap header.
+  - `tunnel_dscp_mode`: DSCP handling mode: "preserve|pipe"
+  - `tunnel_dscp_value`: DSCP value to set in the encap header.
 - Actions:
   - Enable the underlay encap header based on the encap type.
   - Update the underlay encap header with `encap_key`, `underlay_dip`, `underlay_sip`.
@@ -150,8 +150,8 @@ The port mapping entries can be described as below:
   - `(underlay|tunnel1|tunnel2|...)_tunnel_id`: The ID of the tunnel we are going to use. 
     - The definition of the tunnel can be found below.
     - The ECMP hash is calculated based on the 5 tuple of the inner-most (overlay) packet.
-  - `dscp_mode`: DSCP handling mode: "preserve|pipe"
-  - `dscp`: DSCP value to set in the encap header.
+  - `tunnel_dscp_mode`: DSCP handling mode: "preserve|pipe"
+  - `tunnel_dscp_value`: DSCP value to set in the encap header.
 - Actions:
   - Enable the encap header based on the target tunnel and encap_type.
   - Update the encap information with the `encap_key`, `dip` and `sip`.
