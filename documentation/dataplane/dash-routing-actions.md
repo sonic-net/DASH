@@ -16,10 +16,11 @@ As [DASH packet flow HLD](../general/dash-sai-pipeline-packet-flow.md) describes
 3. [Packet transformation actions](#packet-transformation-actions)
    1. [`staticencap` action](#staticencap-action)
    2. [`tunnel` action](#tunnel-action)
-   3. [`reverse_tunnel` action](#reverse_tunnel-action)
-   4. [`4to6` action](#4to6-action)
-   5. [`6to4` action](#6to4-action)
-   6. [`nat` action](#nat-action)
+   3. [`tunnel_from_encap` action](#tunnel_from_encap-action)
+   4. [`reverse_tunnel` action](#reverse_tunnel-action)
+   5. [`4to6` action](#4to6-action)
+   6. [`6to4` action](#6to4-action)
+   7. [`nat` action](#nat-action)
 
 ## Overview
 
@@ -166,6 +167,19 @@ A tunnel entry can be described as below:
     "encap_key": 101
 }
 ```
+
+### `tunnel_from_encap` action
+
+- Parameters from action:
+  - `source`: "underlay|tunnel1|tunnel2|..."
+  - `target`: "underlay|tunnel1|tunnel2|..."
+- Parameters from metadata:
+  - `tunnel_from_encap_(underlay|tunnel1|tunnel2)_sip`: overrides the source ip in the specified target encap
+  - `tunnel_from_encap_(underlay|tunnel1|tunnel2)_dip`: overrides the destination ip in the specified target encap
+- Action:
+  - Enable the target encap by copying the information from the source encap.
+  - Copy the DSCP value and TTL value from the source encap.
+  - When overrides exists, uses the overridden one.
 
 ### `reverse_tunnel` action
 
