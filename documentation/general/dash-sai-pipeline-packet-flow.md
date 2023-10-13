@@ -215,6 +215,8 @@ A pipeline can also define its initial matching stages, which will be used for s
 
 If a pipeline is found, before processing the packets, all outer encaps will be decap'ed, and with key information saved in metadata bus, such as encap type, source IP and VNI / GRE Key, exposing the inner most packet going through the pipeline. This simplifies the flow matching logic and also allow us to create the reverse flow properly.
 
+Encap parsing is usually limited by capacity of the parser in the ASIC. By this moment, we support only decapping 2 layers of encap at maximum.
+
 #### 5.4.1. Stateless decap vs stateful decap
 
 During the direction lookup stage, all other encaps will be examined, such as VNI lookup. For each VNI or GRE key, we can specify whether it is stateless or stateful.
@@ -381,7 +383,7 @@ More routing action definitions can be found in the doc here: [DASH routing acti
 
 To implement a network function, we usually need to do multiple packet transformations, such as adding a tunnel and NAT'ing the address or port. This requires us to be able to combine multiple routing actions together, and this is what routing type is for.
 
-In DASH-SAI pipeline, routing type is defined as a list of routing actions. And by combining different routing actions into different routing types, we will be able to implement different network functions.
+In DASH-SAI pipeline, routing type is defined as a list of routing actions. Each routing type can support at maximum 5 routing actions. And by combining different routing actions into different routing types, we will be able to implement different network functions.
 
 For example:
 
@@ -390,7 +392,6 @@ For example:
 - We can even use `tunnel` action with multiple destinations as ECMP group to implement a simple load balancer!
 
 This combination of routing actions is very flexible and powerful, and it enables us to implement any network function we want.
-
 
 ### 5.8. Matching stages and metadata publishing
 
