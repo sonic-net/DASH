@@ -90,4 +90,5 @@ jobs:
       run:  DOCKER_FLAGS=$docker_fg_flags make docker-saichallenger-client
     - name: Run SAI-Challenger Tests
       run:  DOCKER_FLAGS=$docker_fg_root_flags make run-saichallenger-tests
-      
+    - name: Run SAI-Challenger Tests
+      run:  DOCKER_FLAGS=$docker_fg_root_flags make libsai-debs
