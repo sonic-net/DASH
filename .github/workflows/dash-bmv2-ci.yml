@@ -96,3 +96,4 @@ jobs:
       with:
         name: libsai-debian-packages
         path: /home/runner/work/DASH/DASH/dash-pipeline/SAI/debian/*deb
+        if-no-files-found: error
