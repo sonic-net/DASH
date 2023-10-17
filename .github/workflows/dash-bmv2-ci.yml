@@ -90,4 +90,10 @@ jobs:
       run:  DOCKER_FLAGS=$docker_fg_flags make docker-saichallenger-client
     - name: Run SAI-Challenger Tests
       run:  DOCKER_FLAGS=$docker_fg_root_flags make run-saichallenger-tests
-      
+    - name: Build libsai debian packages
+      run:  DOCKER_FLAGS=$docker_fg_root_flags make libsai-debs
+    - uses: actions/upload-artifact@v3
+      with:
+        name: libsai-debian-packages
+        path: /home/runner/work/DASH/DASH/dash-pipeline/SAI/debian/*deb
+        if-no-files-found: error
