@@ -95,4 +95,4 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         name: libsai-debian-packages
-        path: SAI/debian/*deb
+        path: /home/runner/work/DASH/DASH/dash-pipeline/SAI/debian/*deb
