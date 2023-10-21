@@ -1,5 +1,9 @@
 #include "dashsai.h"
 
+extern "C" {
+#include "saimetadata.h"
+}
+
 #include <cstdlib>
 
 using namespace dash;
@@ -341,6 +345,10 @@ sai_status_t DashSai::getSwitchAttribute(
 
     for (uint32_t i = 0; i < attr_count ; i++, attr++)
     {
+        auto *md = sai_metadata_get_attr_metadata(SAI_OBJECT_TYPE_SWITCH, attr->id);
+
+        const char* attrName = md ? md->attridname : "unknown";
+
         switch(attr->id)
         {
             case SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS:
@@ -421,12 +429,12 @@ sai_status_t DashSai::getSwitchAttribute(
 
                 if (getenv(DASH_USE_NOT_SUPPORTED))
                 {
-                    DASH_LOG_WARN("[%d] attr %d is NOT SUPPORTED", i, attr->id);
+                    DASH_LOG_WARN("[%d] attr %d %s is NOT SUPPORTED", i, attr->id, attrName);
 
                     return SAI_STATUS_NOT_SUPPORTED;
                 }
 
-                DASH_LOG_WARN("[%d] attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", i, attr->id);
+                DASH_LOG_WARN("[%d] attr %d %s is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", i, attr->id, attrName);
 
                 memset(&attr->value, 0, sizeof(attr->value)); // clear potential caller garbage
 
@@ -449,6 +457,10 @@ sai_status_t DashSai::getPortAttribute(
 
     for (uint32_t i = 0; i < attr_count ; i++, attr++)
     {
+        auto *md = sai_metadata_get_attr_metadata(SAI_OBJECT_TYPE_PORT, attr->id);
+
+        const char* attrName = md ? md->attridname : "unknown";
+
         switch(attr->id)
         {
             case SAI_PORT_ATTR_QOS_NUMBER_OF_QUEUES:
@@ -488,12 +500,12 @@ sai_status_t DashSai::getPortAttribute(
 
                 if (getenv(DASH_USE_NOT_SUPPORTED))
                 {
-                    DASH_LOG_WARN("[%d] attr %d is NOT SUPPORTED", i, attr->id);
+                    DASH_LOG_WARN("[%d] attr %d %s is NOT SUPPORTED", i, attr->id, attrName);
 
                     return SAI_STATUS_NOT_SUPPORTED;
                 }
 
-                DASH_LOG_WARN("[%d] attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", i, attr->id);
+                DASH_LOG_WARN("[%d] attr %d %s is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", i, attr->id, attrName);
 
                 memset(&attr->value, 0, sizeof(attr->value)); // clear potential caller garbage
 
