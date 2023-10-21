@@ -1,6 +1,10 @@
 #include "utils.h"
 #include "saiimpl.h"
 
+extern "C" {
+#include "saimetadata.h"
+}
+
 using namespace dash::utils;
 
 {% set registered_group = [] %}
@@ -63,6 +67,10 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     // Copy P4 table keys from appropriate SAI attributes
     for (uint32_t i = 0; i < attr_count; i++)
     {
+        auto *md = sai_metadata_get_attr_metadata((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_list[i].id);
+
+        const char* attrName = md ? md->attridname : "unknown";
+
         switch(attr_list[i].id)
         {
             {% for key in table['keys'] %}
@@ -120,7 +128,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
             {% endif %}
             {% endif %}
             default:
-                DASH_LOG_ERROR("attribute [%d] %d not supported yet", i, attr_list[i].id);
+                DASH_LOG_ERROR("attribute [%d] %d %s not supported yet", i, attr_list[i].id, attrName);
                 break;
         }
     }
@@ -163,6 +171,10 @@ static sai_status_t dash_sai_create_{{ table.name }}(
 
     for (uint32_t i = 0; i < attr_count; i++)
     {
+        auto *md = sai_metadata_get_attr_metadata((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_list[i].id);
+
+        const char* attrName = md ? md->attridname : "unknown";
+
         switch(attr_list[i].id)
         {
             {% for param in table.actionParams %}
@@ -188,7 +200,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
             {% endif %}
             {% endfor %}
             default:
-                DASH_LOG_ERROR("attribute [%d] %d not supported yet", i, attr_list[i].id);
+                DASH_LOG_ERROR("attribute [%d] %d %s not supported yet", i, attr_list[i].id, attrName);
                 break;
         }
     }
@@ -387,6 +399,10 @@ static sai_status_t dash_sai_create_{{ table.name }}(
 
     for (uint32_t i = 0; i < attr_count; i++)
     {
+        auto *md = sai_metadata_get_attr_metadata((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_list[i].id);
+
+        const char* attrName = md ? md->attridname : "unknown";
+
         switch(attr_list[i].id)
         {
             {% for param in table.actionParams %}
@@ -412,7 +428,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
             {% endif %}
             {% endfor %}
             default:
-                DASH_LOG_ERROR("attribute [%d] %d not supported yet", i, attr_list[i].id);
+                DASH_LOG_ERROR("attribute [%d] %d %s not supported yet", i, attr_list[i].id, attrName);
                 break;
         }
     }
