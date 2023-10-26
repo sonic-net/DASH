@@ -147,7 +147,7 @@ The port mapping entries can be described as below:
 - Action parameters:
   - `target` = "underlay|tunnel1|tunnel2|..."
 - Metadata Parameters:
-  - `(underlay|tunnel1|tunnel2|...)_tunnel_id`: The ID of the tunnel we are going to use. 
+  - `(underlay|tunnel1|tunnel2|...)_tunnel_id`: The ID of the tunnel we are going to use.
     - The definition of the tunnel can be found below.
     - The ECMP hash is calculated based on the 5 tuple of the inner-most (overlay) packet.
   - `tunnel_dscp_mode`: DSCP handling mode: "preserve|pipe"
@@ -186,7 +186,7 @@ A tunnel entry can be described as below:
 - Action parameters:
   - `target` = "underlay|tunnel1|tunnel2|..."
 - Metadata Parameters:
-  - `(underlay|tunnel1|tunnel2|...)_tunnel_id`: The ID of the tunnel we are going to use. 
+  - `(underlay|tunnel1|tunnel2|...)_tunnel_id`: The ID of the tunnel we are going to use.
     - The definition of the tunnel can be found below.
     - The ECMP hash is calculated based on the 5 tuple of the inner-most (overlay) packet.
 - Actions:
@@ -200,33 +200,40 @@ The tunnel entry is the same as the one in `tunnel` action.
 ### `4to6` action
 
 - Metadata parameters:
-  - `4to6_sip_encoding`: "value_bits/mask_bits"
-  - `4to6_dip_encoding`: "value_bits/mask_bits"
+  - `4to6_sip_encoding_value`: "value_bits"
+  - `4to6_sip_encoding_mask`: "mask_bits"
+  - `4to6_dip_encoding_value`: "value_bits"
+  - `4to6_dip_encoding_mask`: "mask_bits"
 - Metadata merging in parameter evaluation:
   - When same metadata is found during route action parameter evaluation process, value_bits and mask_bits will be reduced into one with following operation:
     - new_value_bits = (old_value_bits & !mask_bits) | value_bits
     - new_mask_bits = old_mask_bits | mask_bits
 - Actions:
-  - New SIP/DIP v6 = (SIP/DIP v4 & !4to6_sip/dip_encoding.mask_bits) | 4to6_sip/dip_encoding.value_bits.
+  - New SIP/DIP v6 = (SIP/DIP v4 & !4to6_sip/dip_encoding_mask) | 4to6_sip/dip_encoding_value.
 
 ### `6to4` action
 
 - Metadata parameters:
-  - `6to4_sip_encoding`: "value_bits/mask_bits"
-  - `6to4_dip_encoding`: "value_bits/mask_bits"
+  - `6to4_sip_encoding_value`: "value_bits"
+  - `6to4_sip_encoding_mask`: "mask_bits"
+  - `6to4_dip_encoding_value`: "value_bits"
+  - `6to4_dip_encoding_mask`: "mask_bits"
 - Metadata merging in parameter evaluation:
   - When same metadata is found during route action parameter evaluation process, value_bits and mask_bits will be reduced into one with following operation:
     - new_value_bits = (old_value_bits & !mask_bits) | value_bits
     - new_mask_bits = old_mask_bits | mask_bits
 - Actions:
-  - New SIP/DIP = (SIP/DIP v6 with higher bits removed & !6to4_sip/dip_encoding.mask_bits) | 6to4_sip/dip_encoding.value_bits.
+  - New SIP/DIP = (SIP/DIP v6 with higher bits removed & !6to4_sip/dip_encoding_mask) | 6to4_sip/dip_encoding_value.
 
 ### `nat` action
 
 - Metadata parameters:
   - `nat_dip` / `nat_sip`: The destination / source IP that we need to update to.
   - `nat_dport` / `nat_sport`: The destination / source port that we need to update to.
+  - `nat_dport_base` / `nat_sport_base`: The destination / source port that we use as the base port for natting.
 - Action:
-  - "nat" action always works on the overlay (inner most) packet.
-  - It updates the IP and Port based on the metadata parameters.
-  - If IP version doesn’t match, this action will fail and acting as no-op. 
+  - `nat` action always works on the overlay (inner most) packet.
+  - It updates the IP and Port based on the metadata parameters:
+    - IP will be directly assigned without change.
+    - Port assignment: `dport/sport = (dport/sport - nat_dport/sport_base) + nat_dport/sport`.
+  - If IP version doesn’t match, this action will fail and acting as no-op.
