@@ -62,8 +62,8 @@ control outbound(inout headers_t hdr,
         /* assert(is_overlay_dip_v4_or_v6 == 1 && is_overlay_sip_v4_or_v6 == 1);
         assert(is_overlay_dip_mask_v4_or_v6 == 1 && is_overlay_sip_mask_v4_or_v6 == 1);
         assert(is_underlay_dip_v4_or_v6 != 1 && is_underlay_sip_v4_or_v6 != 1); */
-        meta.encap_data.original_overlay_dip = hdr.ipv4.src_addr;
-        meta.encap_data.original_overlay_sip = hdr.ipv4.dst_addr;
+        meta.encap_data.original_overlay_dip = hdr.u0_ipv4.src_addr;
+        meta.encap_data.original_overlay_sip = hdr.u0_ipv4.dst_addr;
 
         service_tunnel_encode(hdr,
                               overlay_dip,
@@ -74,7 +74,7 @@ control outbound(inout headers_t hdr,
         /* encapsulation will be done in apply block based on dash_encapsulation */
         meta.encap_data.underlay_dip = underlay_dip == 0 ? meta.encap_data.original_overlay_dip : (IPv4Address)underlay_dip;
         meta.encap_data.underlay_sip = underlay_sip == 0 ? meta.encap_data.original_overlay_sip : (IPv4Address)underlay_sip;
-        meta.encap_data.overlay_dmac = hdr.ethernet.dst_addr;
+        meta.encap_data.overlay_dmac = hdr.u0_ethernet.dst_addr;
         meta.encap_data.dash_encapsulation = dash_encapsulation;
         meta.encap_data.service_tunnel_key = tunnel_key;
         set_route_meter_attrs(meter_policy_en, meter_class);
@@ -148,14 +148,14 @@ control outbound(inout headers_t hdr,
                                     bit<24> tunnel_key,
                                     bit<16> meter_class,
                                     bit<1> meter_class_override) {
-        meta.encap_data.overlay_dmac = hdr.ethernet.dst_addr;
+        meta.encap_data.overlay_dmac = hdr.u0_ethernet.dst_addr;
         meta.encap_data.dash_encapsulation = dash_encapsulation;
         meta.encap_data.vni = tunnel_key;
 
         service_tunnel_encode(hdr,
                               overlay_dip,
                               0xffffffffffffffffffffffff,
-                              (overlay_sip & ~meta.eni_data.pl_sip_mask) | meta.eni_data.pl_sip | (IPv6Address)hdr.ipv4.dst_addr,
+                              (overlay_sip & ~meta.eni_data.pl_sip_mask) | meta.eni_data.pl_sip | (IPv6Address)hdr.u0_ipv4.dst_addr,
                               0xffffffffffffffffffffffff);
 
         set_tunnel(underlay_dip,
@@ -247,46 +247,26 @@ control outbound(inout headers_t hdr,
                     }
                 }
 
-                if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {
-                    vxlan_encap(hdr,
-                                meta.encap_data.underlay_dmac,
-                                meta.encap_data.underlay_smac,
-                                meta.encap_data.underlay_dip,
-                                meta.encap_data.underlay_sip,
-                                meta.encap_data.overlay_dmac,
-                                meta.encap_data.vni);
-                } else if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
-                    nvgre_encap(hdr,
-                                meta.encap_data.underlay_dmac,
-                                meta.encap_data.underlay_smac,
-                                meta.encap_data.underlay_dip,
-                                meta.encap_data.underlay_sip,
-                                meta.encap_data.overlay_dmac,
-                                meta.encap_data.vni);
-                } else {
-                    drop();
-                }
+                tunnel_encap(hdr,
+                             meta,
+                             meta.encap_data.overlay_dmac,
+                             meta.encap_data.underlay_dmac,
+                             meta.encap_data.underlay_smac,
+                             meta.encap_data.underlay_dip,
+                             meta.encap_data.underlay_sip,
+                             meta.encap_data.dash_encapsulation,
+                             meta.encap_data.vni);
              }
            route_service_tunnel: {
-                if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {
-                    vxlan_encap(hdr,
-                                meta.encap_data.underlay_dmac,
-                                meta.encap_data.underlay_smac,
-                                meta.encap_data.underlay_dip,
-                                meta.encap_data.underlay_sip,
-                                meta.encap_data.overlay_dmac,
-                                meta.encap_data.service_tunnel_key);
-                } else if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
-                    nvgre_encap(hdr,
-                                meta.encap_data.underlay_dmac,
-                                meta.encap_data.underlay_smac,
-                                meta.encap_data.underlay_dip,
-                                meta.encap_data.underlay_sip,
-                                meta.encap_data.overlay_dmac,
-                                meta.encap_data.service_tunnel_key);
-                } else {
-                    drop();
-                }
+                tunnel_encap(hdr,
+                             meta,
+                             meta.encap_data.overlay_dmac,
+                             meta.encap_data.underlay_dmac,
+                             meta.encap_data.underlay_smac,
+                             meta.encap_data.underlay_dip,
+                             meta.encap_data.underlay_sip,
+                             meta.encap_data.dash_encapsulation,
+                             meta.encap_data.vni);
              }
          }
     }

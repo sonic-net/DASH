@@ -4,8 +4,7 @@
 #include "dash_headers.p4"
 #include "dash_metadata.p4"
 #include "dash_parser.p4"
-#include "dash_vxlan.p4"
-#include "dash_nvgre.p4"
+#include "dash_tunnel.p4"
 #include "dash_outbound.p4"
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"
@@ -42,7 +41,7 @@ control dash_ingress(
     @name("vip|dash_vip")
     table vip {
         key = {
-            hdr.ipv4.dst_addr : exact @name("hdr.ipv4.dst_addr:VIP");
+            hdr.u0_ipv4.dst_addr : exact @name("hdr.u0_ipv4.dst_addr:VIP");
         }
 
         actions = {
@@ -64,7 +63,7 @@ control dash_ingress(
     @name("direction_lookup|dash_direction_lookup")
     table direction_lookup {
         key = {
-            hdr.vxlan.vni : exact @name("hdr.vxlan.vni:VNI");
+            hdr.u0_vxlan.vni : exact @name("hdr.u0_vxlan.vni:VNI");
         }
 
         actions = {
@@ -207,7 +206,7 @@ control dash_ingress(
     action permit() {
     }
 
-    action vxlan_decap_pa_validate(bit<16> src_vnet_id) {
+    action tunnel_decap_pa_validate(bit<16> src_vnet_id) {
         meta.vnet_id = src_vnet_id;
     }
 
@@ -215,7 +214,7 @@ control dash_ingress(
     table pa_validation {
         key = {
             meta.vnet_id: exact @name("meta.vnet_id:vnet_id");
-            hdr.ipv4.src_addr : exact @name("hdr.ipv4.src_addr:sip");
+            hdr.u0_ipv4.src_addr : exact @name("hdr.u0_ipv4.src_addr:sip");
         }
 
         actions = {
@@ -230,12 +229,12 @@ control dash_ingress(
     table inbound_routing {
         key = {
             meta.eni_id: exact @name("meta.eni_id:eni_id");
-            hdr.vxlan.vni : exact @name("hdr.vxlan.vni:VNI");
-            hdr.ipv4.src_addr : ternary @name("hdr.ipv4.src_addr:sip");
+            hdr.u0_vxlan.vni : exact @name("hdr.u0_vxlan.vni:VNI");
+            hdr.u0_ipv4.src_addr : ternary @name("hdr.u0_ipv4.src_addr:sip");
         }
         actions = {
-            vxlan_decap(hdr);
-            vxlan_decap_pa_validate;
+            tunnel_decap(hdr, meta);
+            tunnel_decap_pa_validate;
             @defaultonly deny;
         }
 
@@ -274,7 +273,7 @@ control dash_ingress(
     table meter_rule {
         key = {
             meta.meter_policy_id: exact @name("meta.meter_policy_id:meter_policy_id") @Sai[type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
-            hdr.ipv4.dst_addr : ternary @name("hdr.ipv4.dst_addr:dip");
+            hdr.u0_ipv4.dst_addr : ternary @name("hdr.ipv4.dst_addr:dip");
         }
 
      actions = {
@@ -370,7 +369,7 @@ control dash_ingress(
         if (vip.apply().hit) {
             /* Use the same VIP that was in packet's destination if it's
                present in the VIP table */
-            meta.encap_data.underlay_sip = hdr.ipv4.dst_addr;
+            meta.encap_data.underlay_sip = hdr.u0_ipv4.dst_addr;
         }
 
         /* If Outer VNI matches with a reserved VNI, then the direction is Outbound - */
@@ -382,17 +381,17 @@ control dash_ingress(
 
         /* Put VM's MAC in the direction agnostic metadata field */
         meta.eni_addr = meta.direction == dash_direction_t.OUTBOUND  ?
-                                          hdr.inner_ethernet.src_addr :
-                                          hdr.inner_ethernet.dst_addr;
+                                          hdr.customer_ethernet.src_addr :
+                                          hdr.customer_ethernet.dst_addr;
 
         eni_ether_address_map.apply();
         if (meta.direction == dash_direction_t.OUTBOUND) {
-            vxlan_decap(hdr);
+            tunnel_decap(hdr, meta);
         } else if (meta.direction == dash_direction_t.INBOUND) {
             switch (inbound_routing.apply().action_run) {
-                vxlan_decap_pa_validate: {
+                tunnel_decap_pa_validate: {
                     pa_validation.apply();
-                    vxlan_decap(hdr);
+                    tunnel_decap(hdr, meta);
                 }
             }
         }
@@ -403,23 +402,23 @@ control dash_ingress(
         meta.ip_protocol = 0;
         meta.dst_ip_addr = 0;
         meta.src_ip_addr = 0;
-        if (hdr.ipv6.isValid()) {
-            meta.ip_protocol = hdr.ipv6.next_header;
-            meta.src_ip_addr = hdr.ipv6.src_addr;
-            meta.dst_ip_addr = hdr.ipv6.dst_addr;
+        if (hdr.customer_ipv6.isValid()) {
+            meta.ip_protocol = hdr.customer_ipv6.next_header;
+            meta.src_ip_addr = hdr.customer_ipv6.src_addr;
+            meta.dst_ip_addr = hdr.customer_ipv6.dst_addr;
             meta.is_overlay_ip_v6 = 1;
-        } else if (hdr.ipv4.isValid()) {
-            meta.ip_protocol = hdr.ipv4.protocol;
-            meta.src_ip_addr = (bit<128>)hdr.ipv4.src_addr;
-            meta.dst_ip_addr = (bit<128>)hdr.ipv4.dst_addr;
+        } else if (hdr.customer_ipv4.isValid()) {
+            meta.ip_protocol = hdr.customer_ipv4.protocol;
+            meta.src_ip_addr = (bit<128>)hdr.customer_ipv4.src_addr;
+            meta.dst_ip_addr = (bit<128>)hdr.customer_ipv4.dst_addr;
         }
 
-        if (hdr.tcp.isValid()) {
-            meta.src_l4_port = hdr.tcp.src_port;
-            meta.dst_l4_port = hdr.tcp.dst_port;
-        } else if (hdr.udp.isValid()) {
-            meta.src_l4_port = hdr.udp.src_port;
-            meta.dst_l4_port = hdr.udp.dst_port;
+        if (hdr.customer_tcp.isValid()) {
+            meta.src_l4_port = hdr.customer_tcp.src_port;
+            meta.dst_l4_port = hdr.customer_tcp.dst_port;
+        } else if (hdr.customer_udp.isValid()) {
+            meta.src_l4_port = hdr.customer_udp.src_port;
+            meta.dst_l4_port = hdr.customer_udp.dst_port;
         }
 
         eni.apply();
@@ -436,7 +435,7 @@ control dash_ingress(
         }
 
         /* Underlay routing */
-        meta.dst_ip_addr = (bit<128>)hdr.ipv4.dst_addr;
+        meta.dst_ip_addr = (bit<128>)hdr.u0_ipv4.dst_addr;
         underlay.apply(
               hdr
             , meta
