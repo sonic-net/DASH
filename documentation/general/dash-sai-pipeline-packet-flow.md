@@ -244,7 +244,7 @@ To solve this problems, we use 2 things for encap handling:
 
    When `final_encap` is set to true, the VNI will be sent to parser, so we can force the parser to treat the next layer as overlay packet.
 
-2. Since the parser doesn't know how many encaps beforehand, so parser can always start treating the outmost layer as underlay1. And whenever it sees an the protocol is not an encap or the VNI is unknown, it treat the packet as overlay packet. Then, after parsing is done, we will fix the encap information in metadata bus.
+2. Since the parser doesn't know how many encaps beforehand, so parser can always start treating the outermost layer as underlay1. And whenever it sees an the protocol is not an encap or the VNI is unknown, it treat the packet as overlay packet. Then, after parsing is done, we will fix the encap information in metadata bus.
 
    For example, in the [Inbound from LB](./sdn-pipeline-basic-elements.md#inbound-from-lb) case, the outer encap will start to be mapped to underlay1, the ethernet and IP part of the inner packet will be mapped into underlay0, while the TCP/UDP part will be mapped into overlay. Then, after parsing, we will extract the ethernet and IP parts in underlay0 as overlay, as well as extract the underlay1 as underlay0.
 

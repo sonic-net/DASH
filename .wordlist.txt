@@ -214,6 +214,7 @@ entrypoints
 enum
 EPUs
 EPYC
+ethernet
 executables
 ExpressRoute
 failover
@@ -459,6 +460,7 @@ qos
 QoS
 qos
 Radv
+recirculation
 rdpty
 reachability
 reconvergence
