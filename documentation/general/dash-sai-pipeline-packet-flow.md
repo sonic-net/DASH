@@ -9,11 +9,14 @@
    2. [5.2. Direction Lookup](#52-direction-lookup)
    3. [5.3. Pipeline Lookup](#53-pipeline-lookup)
    4. [5.4. Packet Decap](#54-packet-decap)
-      1. [5.4.1. Stateless decap vs stateful decap](#541-stateless-decap-vs-stateful-decap)
-      2. [5.4.2. Encap fields handling](#542-encap-fields-handling)
-         1. [5.4.2.1. Handling DSCP](#5421-handling-dscp)
-         2. [5.4.2.2. Handling TTL](#5422-handling-ttl)
-      3. [5.4.3. Encap preservation](#543-encap-preservation)
+      1. [5.4.1. Multi-layer encap handling](#541-multi-layer-encap-handling)
+         1. [5.4.1.1. Encap layers limitation](#5411-encap-layers-limitation)
+         2. [5.4.1.2. Encap layer detection and overlay packet handling](#5412-encap-layer-detection-and-overlay-packet-handling)
+      2. [5.4.2. Stateless decap vs stateful decap](#542-stateless-decap-vs-stateful-decap)
+      3. [5.4.3. Encap fields handling](#543-encap-fields-handling)
+         1. [5.4.3.1. Handling DSCP](#5431-handling-dscp)
+         2. [5.4.3.2. Handling TTL](#5432-handling-ttl)
+      4. [5.4.4. Encap preservation](#544-encap-preservation)
    5. [5.5. Conntrack Lookup and Update](#55-conntrack-lookup-and-update)
       1. [5.5.1. Flow lookup](#551-flow-lookup)
       2. [5.5.2. Flow creation](#552-flow-creation)
@@ -215,9 +218,37 @@ A pipeline can also define its initial matching stages, which will be used for s
 
 If a pipeline is found, before processing the packets, all outer encaps will be decap'ed, and with key information saved in metadata bus, such as encap type, source IP and VNI / GRE Key, exposing the inner most packet going through the pipeline. This simplifies the flow matching logic and also allow us to create the reverse flow properly.
 
-Encap parsing is usually limited by capacity of the parser in the ASIC. By this moment, we support only decap'ing 2 layers of encap at maximum.
+#### 5.4.1. Multi-layer encap handling
 
-#### 5.4.1. Stateless decap vs stateful decap
+##### 5.4.1.1. Encap layers limitation
+
+The incoming packet to DASH pipeline could have multiple layers of encap, however, the ASIC capacity is usually limited. The more encaps we handle in parser and decaps, the more the latency will be. Furthermore, using packet recirculation is also not ideal, because it can greatly reduces the throughput and increases the latency.
+
+Hence, to avoid unexpected latency being introduced by the parser and decap, at this moment, DASH support only parsing and decap'ing 2 layers of encap at maximum.
+
+##### 5.4.1.2. Encap layer detection and overlay packet handling
+
+Multi-layer encap also brings the problems for encap layer detection and handling overlay packet:
+
+1. In ASIC, parser is always parsing from the outermost bits to innermost bits. However, in DASH, the encap stack is defined reversely: underlay1 -> underlay0 -> overlay. Because the incoming packet could have various number of encaps, we need to be able to map the encaps to the right layer.
+2. The overlay (customer) packet could be also using encaps, so we need to be able to tell which one is ours and which one is overlay.
+3. The incoming packet could have various number of encaps, and each encap doesn't really know if the inner packet is a overlay or not. For example, from the SDN pipeline basic element doc, the [Inbound from LB](./sdn-pipeline-basic-elements.md#inbound-from-lb) and [Internal Load Balancer in VNET communication](./sdn-pipeline-basic-elements.md#internal-load-balancer-in-vnet-communication) actually shares the same outer most header.
+
+To solve this problems, we use 2 things for encap handling:
+
+1. We can specify if parser should stop parsing more encaps or not for VNI:
+
+   ```json
+   { "DASH_SAI_VNI_TABLE|12345": { "direction": "outbound", "final_encap": true } }
+   ```
+
+   When `final_encap` is set to true, the VNI will be sent to parser, so we can force the parser to treat the next layer as overlay packet.
+
+2. Since the parser doesn't know how many encaps beforehand, so parser can always start treating the outmost layer as underlay1. And whenever it sees an the protocol is not an encap or the VNI is unknown, it treat the packet as overlay packet. Then, after parsing is done, we will fix the encap information in metadata bus.
+
+   For example, in the [Inbound from LB](./sdn-pipeline-basic-elements.md#inbound-from-lb) case, the outer encap will start to be mapped to underlay1, the ethernet and IP part of the inner packet will be mapped into underlay0, while the TCP/UDP part will be mapped into overlay. Then, after parsing, we will fix the ethernet and IP parts in the overlay, as well as move the underlay1 to underlay0.
+
+#### 5.4.2. Stateless decap vs stateful decap
 
 During the direction lookup stage, all other encaps will be examined, such as VNI lookup. For each VNI or GRE key, we can specify whether it is stateless or stateful.
 
@@ -230,9 +261,9 @@ Although the encap information will still be saved in the metadata bus, however,
 }
 ```
 
-#### 5.4.2. Encap fields handling
+#### 5.4.3. Encap fields handling
 
-##### 5.4.2.1. Handling DSCP
+##### 5.4.3.1. Handling DSCP
 
 DASH pipeline provides 2 modes for handling the DSCP: "Preserve model" and "Pipe model".
 
@@ -251,14 +282,14 @@ If no encaps are added, say, for traffic sending to Internet, the DSCP value of 
 
 This gives the cloud infra full control over the DSCP value and avoid the customer packet spoofing the fields.
 
-##### 5.4.2.2. Handling TTL
+##### 5.4.3.2. Handling TTL
 
 TTL behavior for encap shall be "pipe" model (similar to SAI_TUNNEL_TTL_MODE_PIPE_MODEL):
 
 - When adding encaps, TTL value shall be default set to 64.
 - DASH pipeline shall not modify the TTL values in the overlay packet (customer packet).
 
-#### 5.4.3. Encap preservation
+#### 5.4.4. Encap preservation
 
 Sometimes, depends on the scenario to implement, the customer might want to preserve certain original encaps in the outgoing traffic. For example, say we receive a packet with structure: overlay -> underlay -> tunnel1 -> tunnel2. And we want to remove or update underlay, preserve tunnel1 and remove tunnel2. This gives us the problem of handling all the CRUD combinations of all encaps, including structure changes: after removing underlay, should tunnel0 becomes underlay or should we keep it as tunnel0? All these things affects the encap related routing actions and final packet we create.
 
