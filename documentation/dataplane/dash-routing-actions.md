@@ -230,7 +230,7 @@ The tunnel entry is the same as the one in `tunnel` action.
 - Metadata parameters:
   - `nat_dip` / `nat_sip`: The destination / source IP that we need to update to.
   - `nat_dport` / `nat_sport`: The destination / source port that we need to update to.
-  - `nat_dport_base` / `nat_sport_base`: The destination / source port that we use as the base port for natting.
+  - `nat_dport_base` / `nat_sport_base`: The destination / source port that we use as the base port for NAT'ing.
 - Action:
   - `nat` action always works on the overlay (inner most) packet.
   - It updates the IP and Port based on the metadata parameters:

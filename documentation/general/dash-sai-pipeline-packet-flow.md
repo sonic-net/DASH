@@ -52,9 +52,9 @@ DASH-SAI pipeline is designed to work as a general purpose network function pipe
 
 [DASH HLD](https://github.com/sonic-net/DASH/blob/main/documentation/general/dash-high-level-design.md) already provided a very good high level overview on the system architecture. And here, we are going to dive a bit deeper from the data path perspective.
 
-![](./images/dash-data-path-overview.svg)
+![DASH data path overview](./images/dash-data-path-overview.svg)
 
-DASH-SAI APIs are designed to be generic, so we could use it to set up the data path in different ways as needed. 
+DASH-SAI APIs are designed to be generic, so we could use it to set up the data path in different ways as needed.
 
 - The simplest way to set up the data path is to use the DASH-SAI APIs to create your pipeline and offload all your policy to ASIC.
 - If your application requires more advanced policy, then the techonology provider could also provide a inbox data plane app to implement these policies. And still, this is transparent to the upper layer, everything is hidden under the SAI level.
@@ -66,7 +66,7 @@ Before diving into the pipeline and packet flow, to better describe the behavior
 
 Overall, the high-level packet structure looks like below:
 
-- The inner most packet is whatever the customer sends, which is called overlay. 
+- The inner most packet is whatever the customer sends, which is called overlay.
 - The first encap is called underlay, which is the most frequently used layer for implement any virtual network functions, such as VNET routing, load balancer, etc.
 - On top of underlay, we can have multiple tunnels, which can be used for implementing additional routing hops.
 
@@ -151,7 +151,7 @@ This design allows our upper layers to be flexible and doesn't limit to any spec
 
 - A DASH-SAI pipeline is used to represent a VM NIC (ENI).
 - The VxLAN VNI is used to do the direction lookup.
-- The inner MAC address is used for pipeline lookup, a.k.a. ENI lookup (ENI). 
+- The inner MAC address is used for pipeline lookup, a.k.a. ENI lookup (ENI).
 - Once it goes into the corresponding DASH pipeline, the `outbound` pipeline will be used to process the packets coming from the VM, while the `inbound` pipeline will be used to process the packets going into the VM.
 
 ## 5. Pipeline components
@@ -163,7 +163,7 @@ First of all, since we have multiple matching stages in the pipeline, we need a 
 At high-level, the metadata bus is a set of fields that being carried all the way through the pipeline along with the packet. It contains:
 
 - The information from the original packet, such as encap information.
-- The information from each matched entry and related data structures, e.g., when a VNET mapping entry is matched, we will publish the information from VNET to the metadata bus. 
+- The information from each matched entry and related data structures, e.g., when a VNET mapping entry is matched, we will publish the information from VNET to the metadata bus.
 - The routing action and its inline parameters from the matched entry.
 
 Implementation-wise, this is similar to Packet Header Vector or Bus in NPL.
@@ -208,14 +208,14 @@ flowchart TD
 A pipeline can also define its initial matching stages, which will be used for starting processing the packets if no flow is matched.
 
 > NOTE:
-> 
+>
 > DASH-SAI pipeline is a logical concept. It doesn't have to be 1 to 1 mapping to a physical ASIC pipeline. The underlying implementation can be as simple as a metadata field update with a specific value, when the entry getting matched, e.g., `ENI = Inner Source/Destination MAC`.
 
 ### 5.4. Packet Decap
 
 If a pipeline is found, before processing the packets, all outer encaps will be decap'ed, and with key information saved in metadata bus, such as encap type, source IP and VNI / GRE Key, exposing the inner most packet going through the pipeline. This simplifies the flow matching logic and also allow us to create the reverse flow properly.
 
-Encap parsing is usually limited by capacity of the parser in the ASIC. By this moment, we support only decapping 2 layers of encap at maximum.
+Encap parsing is usually limited by capacity of the parser in the ASIC. By this moment, we support only decap'ing 2 layers of encap at maximum.
 
 #### 5.4.1. Stateless decap vs stateful decap
 
@@ -282,7 +282,7 @@ After the flow lookup, if a flow is matched, we will apply the saved actions in 
 
 #### 5.5.2. Flow creation
 
-For new connections, after all packet transformations are applied, we will create a new flow in the flow table. 
+For new connections, after all packet transformations are applied, we will create a new flow in the flow table.
 
 Since a connection can be bi-directional, the flows needs to be created as flow pairs: the one in the same direction as the packet is usually called forwarding flow, while the other direction is called reverse flow. Of course, the flow pairs **MUST** be stored based on the pipeline direction.
 
@@ -368,14 +368,14 @@ In DASH-SAI pipeline, routing actions are the fundamental building blocks for pa
 Take `staticencap` as an example, it can be defined as below:
 
 - Action parameters:
-    - `encap_type`: "nvgre|vxlan|..."
+  - `encap_type`: "nvgre|vxlan|..."
 - Metadata parameters:
-    - `underlay_dip`: Destination IP used in encap.
-    - `underlay_sip`: Source IP used in encap.
-    - `encap_key`: GRE key in NvGRE or VNI in VxLAN
+  - `underlay_dip`: Destination IP used in encap.
+  - `underlay_sip`: Source IP used in encap.
+  - `encap_key`: GRE key in NvGRE or VNI in VxLAN
 - Actions:
-    - Enable the underlay encap header based on the `encap_type`.
-    - Update the underlay encap header with `encap_key`, `underlay_dip`, `underlay_sip`.
+  - Enable the underlay encap header based on the `encap_type`.
+  - Update the underlay encap header with `encap_key`, `underlay_dip`, `underlay_sip`.
 
 More routing action definitions can be found in the doc here: [DASH routing actions](../dataplane/dash-routing-actions.md).
 
@@ -411,7 +411,7 @@ For more on the metadata publishing, please refer to the metadata publishing sec
 
 #### 5.8.2. Pipeline profile and stage connections
 
-Ideally, when DASH initializes or whenever we create a new pipeline, by simply creating multiple numbers of different types of matching stages and connecting them in different ways, we can easily implement different pipeline and network functions. 
+Ideally, when DASH initializes or whenever we create a new pipeline, by simply creating multiple numbers of different types of matching stages and connecting them in different ways, we can easily implement different pipeline and network functions.
 
 | Stage 0 | Stage 1 | Stage 2 | Stage 3 | Stage 4 |
 | ------- | ------- | ------- | ------- | ------- |
@@ -448,9 +448,10 @@ flowchart LR
 
 ##### 5.8.3.1. Stage transition routing type
 
-To transit between stages, we use `transition` field to specify the transition routing type. 
+To transit between stages, we use `transition` field to specify the transition routing type.
 
 A transition routing type is a special type of [Routing Type](#572-routing-type):
+
 1. Each transition routing type can only have one single routing action.
 2. Only a special list of routing actions will take effect in the routing types, which are all related to stage transitions, as listed below.
 3. If `transition` field is not set, we consider the packet is reaching the end of the pipeline and start executing the final routing actions.
@@ -466,11 +467,11 @@ A transition routing type is a special type of [Routing Type](#572-routing-type)
 To help us being flexible, the transition routing actions can take a few parameters:
 
 - All transition routing actions other than `drop` and `trap`:
-    - `default_routing_type`: If no entry is found, use this routing type to route the packet. If `default_routing_type` is not set, the packet will be dropped by default.
-    - `stage_index`: If there are multiple stage of the same stage type, use this field to specify which stage to transit to. The index is starting from 0 and by default 0.
+  - `default_routing_type`: If no entry is found, use this routing type to route the packet. If `default_routing_type` is not set, the packet will be dropped by default.
+  - `stage_index`: If there are multiple stage of the same stage type, use this field to specify which stage to transit to. The index is starting from 0 and by default 0.
 - IP-based routing actions (`lpmrouting` and `maprouting`):
-    - `use_src_ip`: Use source IP in routing and mapping stages.
-    - `ip_mask`: IP mask to apply before matching the entries.
+  - `use_src_ip`: Use source IP in routing and mapping stages.
+  - `ip_mask`: IP mask to apply before matching the entries.
 
 Here is an example that shows how the routing stage entry looks like:
 
@@ -507,7 +508,7 @@ apply {
 }
 ```
 
-This allows us easily bypass the stages as needed, also avoid loop being accidentally created. Take Routing stage + TCP flow as an example, it can use different transition to jump to different stages. 
+This allows us easily bypass the stages as needed, also avoid loop being accidentally created. Take Routing stage + TCP flow as an example, it can use different transition to jump to different stages.
 
 ```mermaid
 flowchart LR
@@ -607,7 +608,7 @@ struct metadata_t {
 
 #### 5.8.5. Metadata publishing
 
-Each entry in the matching stages can also specify a list of metadata. When an entry is matched in the matching stages, the metadata will be populated into the metadata bus, and the metadata will be used as the input parameters for the routing actions. These metadata are shared by all stages and actions, hence later ones will override the existing ones, if any. 
+Each entry in the matching stages can also specify a list of metadata. When an entry is matched in the matching stages, the metadata will be populated into the metadata bus, and the metadata will be used as the input parameters for the routing actions. These metadata are shared by all stages and actions, hence later ones will override the existing ones, if any.
 
 With this design, all the entries in each matching stage can all be defined similarly as below:
 
@@ -655,10 +656,10 @@ action vnetportmap0_set_metadata(bit<32> underlay_dip, ...) {
 ```
 
 > NOTE:
-> 
+>
 > The Direction Lookup and Pipeline Lookup stages are also matching stages, so they can also populate metadatas too, e.g., ENI-level metadata for underlay encap.
 
-This design also allows us to decouples the time of fulfilling the routing actions and their parameters. 
+This design also allows us to decouples the time of fulfilling the routing actions and their parameters.
 
 For example, say, we have a network with this policy: all traffic that sends to an IP range needs to have a vxlan encap with encap key 12345, but different IP will have a different underlay IP. Also, for 10.0.1.1, a tunnel is enabled for tunneling traffic to a firewall first. Then this can be modeled as below:
 
@@ -784,7 +785,6 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 ]
 ```
 
-
 ### 6.4. Load balancer (L4 DNAT)
 
 ```json
@@ -792,7 +792,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
     // When any traffic is sent to any VIP that this DPU owns, we will start to lookup the destination.
     "DASH_SAI_ROUTE_TABLE|123456789012|0|1.1.1.0/24": {
         "transition": "vipmap",
-	    "vnet": "vipmapping"
+     "vnet": "vipmapping"
     },
     "DASH_SAI_ROUTING_TYPE_TABLE|vipmap": [ { "action_type": "maprouting" } ],
 
