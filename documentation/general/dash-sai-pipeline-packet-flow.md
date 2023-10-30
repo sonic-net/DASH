@@ -246,7 +246,7 @@ To solve this problems, we use 2 things for encap handling:
 
 2. Since the parser doesn't know how many encaps beforehand, so parser can always start treating the outmost layer as underlay1. And whenever it sees an the protocol is not an encap or the VNI is unknown, it treat the packet as overlay packet. Then, after parsing is done, we will fix the encap information in metadata bus.
 
-   For example, in the [Inbound from LB](./sdn-pipeline-basic-elements.md#inbound-from-lb) case, the outer encap will start to be mapped to underlay1, the ethernet and IP part of the inner packet will be mapped into underlay0, while the TCP/UDP part will be mapped into overlay. Then, after parsing, we will fix the ethernet and IP parts in the overlay, as well as move the underlay1 to underlay0.
+   For example, in the [Inbound from LB](./sdn-pipeline-basic-elements.md#inbound-from-lb) case, the outer encap will start to be mapped to underlay1, the ethernet and IP part of the inner packet will be mapped into underlay0, while the TCP/UDP part will be mapped into overlay. Then, after parsing, we will extract the ethernet and IP parts in underlay0 as overlay, as well as extract the underlay1 as underlay0.
 
 #### 5.4.2. Stateless decap vs stateful decap
 
