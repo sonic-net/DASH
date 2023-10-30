@@ -70,12 +70,12 @@ Before diving into the pipeline and packet flow, to better describe the behavior
 Overall, the high-level packet structure looks like below:
 
 - The inner most packet is whatever the customer sends, which is called overlay.
-- The first encap is called underlay, which is the most frequently used layer for implement any virtual network functions, such as VNET routing, load balancer, etc.
-- On top of underlay, we can have multiple tunnels, which can be used for implementing additional routing hops.
+- The first encap is called underlay0, which is the most frequently used layer for implement any virtual network functions, such as VNET routing, load balancer, etc.
+- On top of underlay0, we can have multiple tunnels, which can be used for implementing additional routing hops.
 
 | ... (Outer most) | 3 | 2 | 1 | 0 (Inner most) |
 | - | - | - | - | - |
-| **...** | **Tunnel2** | **Tunnel1** | **Underlay** | **Overlay** |
+| **...** | **Underlay 2** | **Underlay 1** | **Underlay 0** | **Overlay** |
 
 ## 4. Pipeline Overview
 
@@ -291,7 +291,7 @@ TTL behavior for encap shall be "pipe" model (similar to SAI_TUNNEL_TTL_MODE_PIP
 
 #### 5.4.4. Encap preservation
 
-Sometimes, depends on the scenario to implement, the customer might want to preserve certain original encaps in the outgoing traffic. For example, say we receive a packet with structure: overlay -> underlay -> tunnel1 -> tunnel2. And we want to remove or update underlay, preserve tunnel1 and remove tunnel2. This gives us the problem of handling all the CRUD combinations of all encaps, including structure changes: after removing underlay, should tunnel0 becomes underlay or should we keep it as tunnel0? All these things affects the encap related routing actions and final packet we create.
+Sometimes, depends on the scenario to implement, the customer might want to preserve certain original encaps in the outgoing traffic. For example, say we receive a packet with structure: overlay -> underlay0 -> underlay1 -> underlay2. And we want to remove or update underlay0, preserve underlay1 and remove underlay2. This gives us the problem of handling all the CRUD combinations of all encaps, including structure changes: after removing underlay0, should underlay1 becomes underlay0 or should we keep it as underlay1? All these things affects the encap related routing actions and final packet we create.
 
 Since all the encap information is preserved in the metadata bus for flow creation anyway, to solve this problem, we can simply recreate them in anyway we want with routing action: `tunnel_from_encap`. It allows the source and target encap and their override value being set, which allows us to preserve the encaps in anyway we want and also ensures the clarity of final transformation that we are doing in the end.
 
@@ -405,8 +405,8 @@ Take `staticencap` as an example, it can be defined as below:
   - `underlay_sip`: Source IP used in encap.
   - `encap_key`: GRE key in NvGRE or VNI in VxLAN
 - Actions:
-  - Enable the underlay encap header based on the `encap_type`.
-  - Update the underlay encap header with `encap_key`, `underlay_dip`, `underlay_sip`.
+  - Enable the underlay0 encap header based on the `encap_type`.
+  - Update the underlay0 encap header with `encap_key`, `underlay_dip`, `underlay_sip`.
 
 More routing action definitions can be found in the doc here: [DASH routing actions](../dataplane/dash-routing-actions.md).
 
@@ -596,9 +596,9 @@ Or, with a slight change, we can implement another routing policy to enable a tu
     // Second LPM
     "DASH_SAI_ROUTE_TABLE|123456789012|1|10.0.1.128/25": {
         "routing_type": "firewalltunnel",
-        "tunnel1_tunnel_id": "firewall_tunnel_0"
+        "underlay1_tunnel_id": "firewall_tunnel_0"
     },
-    "DASH_SAI_ROUTING_TYPE_TABLE|firewalltunnel": [ { "action_type": "tunnel", "target": "tunnel1" } ]
+    "DASH_SAI_ROUTING_TYPE_TABLE|firewalltunnel": [ { "action_type": "tunnel", "target": "underlay1" } ]
 }
 ```
 
@@ -711,9 +711,9 @@ For example, say, we have a network with this policy: all traffic that sends to 
     "DASH_SAI_VNET_MAPPING_TABLE|Vnet1|0|10.0.1.1": {
         "routing_type": "firewalltunnel",
         "underlay_dip": "3.3.3.1",
-        "tunnel1_tunnel_id": "firewall_tunnel_0"
+        "underlay1_tunnel_id": "firewall_tunnel_0"
     },
-    "DASH_SAI_ROUTING_TYPE_TABLE|firewalltunnel": [ { "action_type": "tunnel", "target": "tunnel1" } ]
+    "DASH_SAI_ROUTING_TYPE_TABLE|firewalltunnel": [ { "action_type": "tunnel", "target": "underlay1" } ]
 }
 ```
 

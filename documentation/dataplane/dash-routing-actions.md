@@ -145,9 +145,9 @@ The port mapping entries can be described as below:
 ### `tunnel` action
 
 - Action parameters:
-  - `target` = "underlay|tunnel1|tunnel2|..."
+  - `target` = "underlay0|underlay1|underlay2|..."
 - Metadata Parameters:
-  - `(underlay|tunnel1|tunnel2|...)_tunnel_id`: The ID of the tunnel we are going to use.
+  - `(underlay0|underlay1|underlay2|...)_tunnel_id`: The ID of the tunnel we are going to use.
     - The definition of the tunnel can be found below.
     - The ECMP hash is calculated based on the 5 tuple of the inner-most (overlay) packet.
   - `tunnel_dscp_mode`: DSCP handling mode: "preserve|pipe"
@@ -171,11 +171,11 @@ A tunnel entry can be described as below:
 ### `tunnel_from_encap` action
 
 - Parameters from action:
-  - `source`: "underlay|tunnel1|tunnel2|..."
-  - `target`: "underlay|tunnel1|tunnel2|..."
+  - `source`: "underlay0|underlay1|underlay2|..."
+  - `target`: "underlay0|underlay1|underlay2|..."
 - Parameters from metadata:
-  - `tunnel_from_encap_(underlay|tunnel1|tunnel2)_sip`: overrides the source ip in the specified target encap
-  - `tunnel_from_encap_(underlay|tunnel1|tunnel2)_dip`: overrides the destination ip in the specified target encap
+  - `tunnel_from_encap_(underlay0|underlay1|underlay2)_sip`: overrides the source ip in the specified target encap
+  - `tunnel_from_encap_(underlay0|underlay1|underlay2)_dip`: overrides the destination ip in the specified target encap
 - Action:
   - Enable the target encap by copying the information from the source encap.
   - Copy the DSCP value and TTL value from the source encap.
@@ -184,9 +184,9 @@ A tunnel entry can be described as below:
 ### `reverse_tunnel` action
 
 - Action parameters:
-  - `target` = "underlay|tunnel1|tunnel2|..."
+  - `target` = "underlay0|underlay1|underlay2|..."
 - Metadata Parameters:
-  - `(underlay|tunnel1|tunnel2|...)_tunnel_id`: The ID of the tunnel we are going to use.
+  - `(underlay0|underlay1|underlay2|...)_tunnel_id`: The ID of the tunnel we are going to use.
     - The definition of the tunnel can be found below.
     - The ECMP hash is calculated based on the 5 tuple of the inner-most (overlay) packet.
 - Actions:
