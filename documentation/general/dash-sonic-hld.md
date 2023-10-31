@@ -547,7 +547,7 @@ vm_vni                   = VM VNI that is used for setting direction. Also used 
 ### 3.2.8 ROUTE LPM TABLE - OUTBOUND
 
 ``` 
-DASH_ROUTE_TABLE:{{eni}}:{{prefix}} 
+DASH_ROUTE_TABLE:{{eni_mac}}:{{prefix}} 
     "action_type": {{routing_type}} 
     "vnet":{{vnet_name}} (OPTIONAL)
     "appliance":{{appliance_id}} (OPTIONAL)
@@ -561,7 +561,7 @@ DASH_ROUTE_TABLE:{{eni}}:{{prefix}}
 ```
   
 ```
-key                      = DASH_ROUTE_TABLE:eni:prefix ; ENI route table with CA prefix for packet Outbound
+key                      = DASH_ROUTE_TABLE:eni_mac:prefix ; ENI route table with CA prefix for packet Outbound
 ; field                  = value 
 action_type              = routing_type              ; reference to routing type
 vnet                     = vnet name                 ; destination vnet name if routing_type is {vnet, vnet_direct}, a vnet other than eni's vnet means vnet peering
