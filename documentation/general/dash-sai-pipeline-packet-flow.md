@@ -829,37 +829,44 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
     // When any traffic is sent to any VIP that this DPU owns, we will start to lookup the destination.
     "DASH_SAI_ROUTE_TABLE|123456789012|0|1.1.1.0/24": {
         "transition": "vipmap",
-     "vnet": "vipmapping"
+        "vnet": "vipmapping"
     },
     "DASH_SAI_ROUTING_TYPE_TABLE|vipmap": [ { "action_type": "maprouting" } ],
-
 
     // If the packet is sent to 1.1.1.1, we start to do port mapping
     "DASH_SAI_VNET_MAPPING_TABLE|Vnet1|0|1.1.1.1": {
         "transition": "vipportmap",
-        "port_mapping_id": "lb-portmap-1-1-1-1",
+        "port_mapping_id": "lb-portmap-1-1-1-1"
     }
     "DASH_SAI_ROUTING_TYPE_TABLE|vipportmap": [ { "action_type": "maprouting" } ],
 
     // Load balancing rule for port 443.
     "DASH_SAI_TCP_PORT_MAPPING_TABLE|lb-portmap-1-1-1-1": [
         {
-            "routing_type": "lbdnat",
+            "routing_type": "lbnat",
 
             "src_port_min": 0,
             "src_port_max": 65535,
             "dst_port_min": 443,
             "dst_port_max": 443,
 
-            "underlay_tunnel_id": "lb-portmap-backend-1-1-1-1"
+            // Specify the VTEP info for the backend pool.
+            "underlay0_tunnel_id": "lb-backend-pool-vtep-1-1-1-1-443",
+            
+            // NAT destination IP to multiple VM IPs as ECMP group and a different port.
+            "nat_dips": "10.0.0.1,10.0.0.2",
+            "nat_dport": "8443"
         }
     ]
 
-    // The corresponding table level information will also be populated, in this case - "encap_key"
-    "DASH_SAI_VNET_TABLE|vipmapping": {
-        "name": "559c6ce8-26ab-4193-b946-ccc6e8f930b2",
+    // Tunnel to VTEP for getting right underlay info.
+    "DASH_SAI_ROUTING_TUNNEL_TABLE|lb-backend-pool-vtep-1-1-1-1-443": {
+        "name": "lb-backend-pool-vtep-1-1-1-1-443",
+        "dips": "100.1.0.1,100.1.0.2",
+        "sip": "100.0.0.1",
+        "encap_type": "vxlan",
         "encap_key": 12345
-    },
+    }
 
     // This is the final routing type that gets executed. The tunnel_nat action will nat the inner packet destination
     // from public ip to VM IP, also adds the corresponding vxlan tunnel to the destination.
@@ -867,7 +874,8 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
     // To start simple, all destination IPs can be treated as an ECMP group. And algorithm can be defined as metadata
     // in the VIP entry as well.
     "DASH_SAI_ROUTING_TYPE_TABLE|lbnat": [
-        { "action_type": "tunnel_nat", "target": "underlay" }
+        { "action_type": "tunnel", "target": "underlay0" },
+        { "action_type": "nat" }
     ]
 ]
 ```
