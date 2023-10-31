@@ -6,38 +6,38 @@
 4. [4. Pipeline Overview](#4-pipeline-overview)
 5. [5. Pipeline components](#5-pipeline-components)
    1. [5.1. Per-packet metadata bus](#51-per-packet-metadata-bus)
-   2. [5.2. Direction Lookup](#52-direction-lookup)
-   3. [5.3. Pipeline Lookup](#53-pipeline-lookup)
-   4. [5.4. Packet Decap](#54-packet-decap)
-      1. [5.4.1. Multi-layer encap handling](#541-multi-layer-encap-handling)
-         1. [5.4.1.1. Encap layers limitation](#5411-encap-layers-limitation)
-         2. [5.4.1.2. Encap layer detection and overlay packet handling](#5412-encap-layer-detection-and-overlay-packet-handling)
-      2. [5.4.2. Stateless decap vs stateful decap](#542-stateless-decap-vs-stateful-decap)
-      3. [5.4.3. Encap fields handling](#543-encap-fields-handling)
-         1. [5.4.3.1. Handling DSCP](#5431-handling-dscp)
-         2. [5.4.3.2. Handling TTL](#5432-handling-ttl)
-      4. [5.4.4. Encap preservation](#544-encap-preservation)
-   5. [5.5. Conntrack Lookup and Update](#55-conntrack-lookup-and-update)
-      1. [5.5.1. Flow lookup](#551-flow-lookup)
-      2. [5.5.2. Flow creation](#552-flow-creation)
-         1. [5.5.2.1. Tunnel learning](#5521-tunnel-learning)
-         2. [5.5.2.2. Asymmetrical encap handling](#5522-asymmetrical-encap-handling)
-      3. [5.5.3. Flow resimulation](#553-flow-resimulation)
-   6. [5.6. Pre-pipeline ACL and Post-pipeline ACL](#56-pre-pipeline-acl-and-post-pipeline-acl)
-   7. [5.7. Routing actions and routing types](#57-routing-actions-and-routing-types)
-      1. [5.7.1. Routing action](#571-routing-action)
-      2. [5.7.2. Routing type](#572-routing-type)
-   8. [5.8. Matching stages and metadata publishing](#58-matching-stages-and-metadata-publishing)
-      1. [5.8.1. Matching stage](#581-matching-stage)
-      2. [5.8.2. Pipeline profile and stage connections](#582-pipeline-profile-and-stage-connections)
-      3. [5.8.3. Stage transitions](#583-stage-transitions)
-         1. [5.8.3.1. Stage transition routing type](#5831-stage-transition-routing-type)
-         2. [5.8.3.2. Stage skipping](#5832-stage-skipping)
-         3. [5.8.3.3. Multi-stage chaining](#5833-multi-stage-chaining)
-      4. [5.8.4. Action publishing](#584-action-publishing)
-      5. [5.8.5. Metadata publishing](#585-metadata-publishing)
-   9. [5.9. Action apply](#59-action-apply)
-   10. [5.10. Meter update](#510-meter-update)
+   2. [5.2. Packet parsing](#52-packet-parsing)
+      1. [5.2.1. Multi-layer encap parsing](#521-multi-layer-encap-parsing)
+   3. [5.3. Direction Lookup](#53-direction-lookup)
+   4. [5.4. Pipeline Lookup](#54-pipeline-lookup)
+   5. [5.5. Packet Decap](#55-packet-decap)
+      1. [5.5.1. Multi-layer encap handling](#551-multi-layer-encap-handling)
+      2. [5.5.2. Stateless decap vs stateful decap](#552-stateless-decap-vs-stateful-decap)
+      3. [5.5.3. Encap fields handling](#553-encap-fields-handling)
+         1. [5.5.3.1. Handling DSCP](#5531-handling-dscp)
+         2. [5.5.3.2. Handling TTL](#5532-handling-ttl)
+      4. [5.5.4. Encap preservation](#554-encap-preservation)
+   6. [5.6. Conntrack Lookup and Update](#56-conntrack-lookup-and-update)
+      1. [5.6.1. Flow lookup](#561-flow-lookup)
+      2. [5.6.2. Flow creation](#562-flow-creation)
+         1. [5.6.2.1. Tunnel learning](#5621-tunnel-learning)
+         2. [5.6.2.2. Asymmetrical encap handling](#5622-asymmetrical-encap-handling)
+      3. [5.6.3. Flow resimulation](#563-flow-resimulation)
+   7. [5.7. Pre-pipeline ACL and Post-pipeline ACL](#57-pre-pipeline-acl-and-post-pipeline-acl)
+   8. [5.8. Routing actions and routing types](#58-routing-actions-and-routing-types)
+      1. [5.8.1. Routing action](#581-routing-action)
+      2. [5.8.2. Routing type](#582-routing-type)
+   9. [5.9. Matching stages and metadata publishing](#59-matching-stages-and-metadata-publishing)
+      1. [5.9.1. Matching stage](#591-matching-stage)
+      2. [5.9.2. Pipeline profile and stage connections](#592-pipeline-profile-and-stage-connections)
+      3. [5.9.3. Stage transitions](#593-stage-transitions)
+         1. [5.9.3.1. Stage transition routing type](#5931-stage-transition-routing-type)
+         2. [5.9.3.2. Stage skipping](#5932-stage-skipping)
+         3. [5.9.3.3. Multi-stage chaining](#5933-multi-stage-chaining)
+      4. [5.9.4. Action publishing](#594-action-publishing)
+      5. [5.9.5. Metadata publishing](#595-metadata-publishing)
+   10. [5.10. Action apply](#510-action-apply)
+   11. [5.11. Meter update](#511-meter-update)
 6. [6. Examples](#6-examples)
    1. [6.1. VNET routing](#61-vnet-routing)
    2. [6.2. VM level public IP inbound (L3 DNAT)](#62-vm-level-public-ip-inbound-l3-dnat)
@@ -71,11 +71,13 @@ Overall, the high-level packet structure looks like below:
 
 - The inner most packet is whatever the customer sends, which is called overlay.
 - The first encap is called underlay0, which is the most frequently used layer for implement any virtual network functions, such as VNET routing, load balancer, etc.
-- On top of underlay0, we can have multiple tunnels, which can be used for implementing additional routing hops.
+- On top of underlay0, we can extend and have more layer of encaps, which can be used for implementing additional routing hops.
 
-| ... (Outer most) | 3 | 2 | 1 | 0 (Inner most) |
+| ... (Outer most) | 2 | 1 | 0 (Inner most) |
 | - | - | - | - | - |
-| **...** | **Underlay 2** | **Underlay 1** | **Underlay 0** | **Overlay** |
+| **...** | **Underlay 1** | **Underlay 0** | **Overlay** |
+
+Today, DASH supports up to 2 layers of encaps: underlay0 and underlay1.
 
 ## 4. Pipeline Overview
 
@@ -85,6 +87,7 @@ On the high level the pipeline looks like below:
 
 ```mermaid
 flowchart TB
+    PP[Packet<br>Parsing]
     DL[Direction<br>Lookup]
     PL[Pipeline<br>Lookup]
     PD[Packet<br>Decap]
@@ -118,6 +121,7 @@ flowchart TB
 
     Out[Packet<br>Out]
 
+    PP --> DL
     DL --> PL
     PL --> PD
 
@@ -171,11 +175,37 @@ At high-level, the metadata bus is a set of fields that being carried all the wa
 
 Implementation-wise, this is similar to Packet Header Vector or Bus in NPL.
 
-### 5.2. Direction Lookup
+### 5.2. Packet parsing
+
+In ASIC, parser is usually the first stage of the pipeline. It parses the incoming packet and extract the information into metadata bus, such as the source and destination MAC, IP, etc. And based on these information, we will invoke the rest of pipeline.
+
+#### 5.2.1. Multi-layer encap parsing
+
+Multi-layer encap brings the problem in the pakcet parsing, because of encap layer detection and overlay packet handling:
+
+1. In ASIC, parser is always parsing from the outermost bits to innermost bits. However, in DASH, the encap stack is defined reversely: underlay1 -> underlay0 -> overlay. Because the incoming packet could have various number of encaps, we need to be able to map the encaps to the right layer.
+2. The overlay (customer) packet could be also using encaps, so we need to be able to tell which one is ours and which one is overlay.
+3. The incoming packet could have various number of encaps, and each encap doesn't really know if the inner packet is a overlay or not. For example, from the SDN pipeline basic element doc, the [Inbound from LB](./sdn-pipeline-basic-elements.md#inbound-from-lb) and [Internal Load Balancer in VNET communication](./sdn-pipeline-basic-elements.md#internal-load-balancer-in-vnet-communication) actually shares the same outer most header.
+
+To solve this problems, we use 2 things for encap handling:
+
+1. We can specify if parser should stop parsing more encaps or not for VNI:
+
+   ```json
+   { "DASH_SAI_VNI_TABLE|12345": { "direction": "outbound", "final_encap": true } }
+   ```
+
+   When `final_encap` is set to true, the VNI will be sent to parser to force the parser to treat the next layer as overlay packet.
+
+2. Since the parser doesn't know how many encaps beforehand, so parser can always start treating the outermost layer as underlay1. And whenever it sees an the protocol is not an encap or the VNI is unknown, it treat the packet as overlay packet. Then, after parsing is done, we will fix the encap information in metadata bus.
+
+   For example, in the [Inbound from LB](./sdn-pipeline-basic-elements.md#inbound-from-lb) case, the outer encap will start to be mapped to underlay1, the ethernet and IP part of the inner packet will be mapped into underlay0, while the TCP/UDP part will be mapped into overlay. Then, after parsing, we will extract the ethernet and IP parts in underlay0 as overlay, as well as extract the underlay1 as underlay0.
+
+### 5.3. Direction Lookup
 
 In DASH-SAI pipeline, traffic are split into 2 directions: `inbound` and `outbound`. Each direction has its own pipeline (see pipeline overview above). When a new packet arrives, we will assign a direction to the packet, then process the packet in the corresponding pipeline. This ensures us to match the flow and transform the packet in the right way.
 
-### 5.3. Pipeline Lookup
+### 5.4. Pipeline Lookup
 
 DASH supports multi-tenancy model for traffic handling. A single device can have multiple pipelines, and each pipeline is used to handle traffic for a specific tenant or whichever network function being modeled, such as a load balancer. When a packet arrives, besides direction lookup, we also need pipeline lookup to determine which pipeline to use for processing the packet.
 
@@ -214,41 +244,17 @@ A pipeline can also define its initial matching stages, which will be used for s
 >
 > DASH-SAI pipeline is a logical concept. It doesn't have to be 1 to 1 mapping to a physical ASIC pipeline. The underlying implementation can be as simple as a metadata field update with a specific value, when the entry getting matched, e.g., `ENI = Inner Source/Destination MAC`.
 
-### 5.4. Packet Decap
+### 5.5. Packet Decap
 
 If a pipeline is found, before processing the packets, all outer encaps will be decap'ed, and with key information saved in metadata bus, such as encap type, source IP and VNI / GRE Key, exposing the inner most packet going through the pipeline. This simplifies the flow matching logic and also allow us to create the reverse flow properly.
 
-#### 5.4.1. Multi-layer encap handling
-
-##### 5.4.1.1. Encap layers limitation
+#### 5.5.1. Multi-layer encap handling
 
 The incoming packet to DASH pipeline could have multiple layers of encap, however, the ASIC capacity is usually limited. The more encaps we handle in parser and decaps, the more the latency will be. Furthermore, using packet recirculation is also not ideal, because it can greatly reduces the throughput and increases the latency.
 
-Hence, to avoid unexpected latency being introduced by the parser and decap, at this moment, DASH support only parsing and decap'ing 2 layers of encap at maximum.
+The limit of having 2 layers of encap at maximum is trying to help this problem and avoid the pipeline having unexpected latency.
 
-##### 5.4.1.2. Encap layer detection and overlay packet handling
-
-Multi-layer encap also brings the problems for encap layer detection and handling overlay packet:
-
-1. In ASIC, parser is always parsing from the outermost bits to innermost bits. However, in DASH, the encap stack is defined reversely: underlay1 -> underlay0 -> overlay. Because the incoming packet could have various number of encaps, we need to be able to map the encaps to the right layer.
-2. The overlay (customer) packet could be also using encaps, so we need to be able to tell which one is ours and which one is overlay.
-3. The incoming packet could have various number of encaps, and each encap doesn't really know if the inner packet is a overlay or not. For example, from the SDN pipeline basic element doc, the [Inbound from LB](./sdn-pipeline-basic-elements.md#inbound-from-lb) and [Internal Load Balancer in VNET communication](./sdn-pipeline-basic-elements.md#internal-load-balancer-in-vnet-communication) actually shares the same outer most header.
-
-To solve this problems, we use 2 things for encap handling:
-
-1. We can specify if parser should stop parsing more encaps or not for VNI:
-
-   ```json
-   { "DASH_SAI_VNI_TABLE|12345": { "direction": "outbound", "final_encap": true } }
-   ```
-
-   When `final_encap` is set to true, the VNI will be sent to parser, so we can force the parser to treat the next layer as overlay packet.
-
-2. Since the parser doesn't know how many encaps beforehand, so parser can always start treating the outermost layer as underlay1. And whenever it sees an the protocol is not an encap or the VNI is unknown, it treat the packet as overlay packet. Then, after parsing is done, we will fix the encap information in metadata bus.
-
-   For example, in the [Inbound from LB](./sdn-pipeline-basic-elements.md#inbound-from-lb) case, the outer encap will start to be mapped to underlay1, the ethernet and IP part of the inner packet will be mapped into underlay0, while the TCP/UDP part will be mapped into overlay. Then, after parsing, we will extract the ethernet and IP parts in underlay0 as overlay, as well as extract the underlay1 as underlay0.
-
-#### 5.4.2. Stateless decap vs stateful decap
+#### 5.5.2. Stateless decap vs stateful decap
 
 During the direction lookup stage, all other encaps will be examined, such as VNI lookup. For each VNI or GRE key, we can specify whether it is stateless or stateful.
 
@@ -261,9 +267,9 @@ Although the encap information will still be saved in the metadata bus, however,
 }
 ```
 
-#### 5.4.3. Encap fields handling
+#### 5.5.3. Encap fields handling
 
-##### 5.4.3.1. Handling DSCP
+##### 5.5.3.1. Handling DSCP
 
 DASH pipeline provides 2 modes for handling the DSCP: "Preserve model" and "Pipe model".
 
@@ -282,14 +288,14 @@ If no encaps are added, say, for traffic sending to Internet, the DSCP value of 
 
 This gives the cloud infra full control over the DSCP value and avoid the customer packet spoofing the fields.
 
-##### 5.4.3.2. Handling TTL
+##### 5.5.3.2. Handling TTL
 
 TTL behavior for encap shall be "pipe" model (similar to SAI_TUNNEL_TTL_MODE_PIPE_MODEL):
 
 - When adding encaps, TTL value shall be default set to 64.
 - DASH pipeline shall not modify the TTL values in the overlay packet (customer packet).
 
-#### 5.4.4. Encap preservation
+#### 5.5.4. Encap preservation
 
 Sometimes, depends on the scenario to implement, the customer might want to preserve certain original encaps in the outgoing traffic. For example, say we receive a packet with structure: overlay -> underlay0 -> underlay1 -> underlay2. And we want to remove or update underlay0, preserve underlay1 and remove underlay2. This gives us the problem of handling all the CRUD combinations of all encaps, including structure changes: after removing underlay0, should underlay1 becomes underlay0 or should we keep it as underlay1? All these things affects the encap related routing actions and final packet we create.
 
@@ -297,13 +303,13 @@ Since all the encap information is preserved in the metadata bus for flow creati
 
 Please note that: Encap preservation will not affect the reverse tunnel creation as "Stateless decap vs stateful decap" section described above. A encap can be preserved as well as used in reverse tunnel creation at the same time, since they are essentially 2 different things.
 
-### 5.5. Conntrack Lookup and Update
+### 5.6. Conntrack Lookup and Update
 
 After entering a specific pipeline, the first stage will be the Conntrack Lookup stage, which does the flow lookup. If any flow is matched, the saved actions will be applied, the metering counters will be updated, and the rest of pipeline will be skipped.
 
 The core of the Conntrack Lookup and Update stage is the flow table.
 
-#### 5.5.1. Flow lookup
+#### 5.6.1. Flow lookup
 
 First, let's define the flow lookup behavior.
 
@@ -311,7 +317,7 @@ The flow lookup **MUST** use the information of inner most packet. And the match
 
 After the flow lookup, if a flow is matched, we will apply the saved actions in the flow direction and skip the rest of the pipeline. Otherwise, we will continue the pipeline processing.
 
-#### 5.5.2. Flow creation
+#### 5.6.2. Flow creation
 
 For new connections, after all packet transformations are applied, we will create a new flow in the flow table.
 
@@ -325,23 +331,23 @@ And here is how to create the flow pairs:
 - The forwarding flow creation is straight forward, because all the final transformations are defined in the flow actions and metadata bus.
 - To properly create the reverse flow, we will learn the information from the original tunnels, and reverse them as return encaps, which is why we need to save all the original tunnel information when doing packet decaps.
 
-##### 5.5.2.1. Tunnel learning
+##### 5.6.2.1. Tunnel learning
 
 You might already notice that, although we uses the outer encap from the original packet to create the reverse flow, but the outer encaps are decap'ed and not used in flow matching. This creates a problem when source side fails over. Like the graph shows below, the traffic shifted from VTEP 1 (Green side) to VTEP 2 (Blue side), which changes the source IP in the encap. If we don't do anything, the existing reverse flow will continue to send the packet back to green side and causing the traffic being dropped.
 
-![](./images/dash-tunnel-learning.svg)
+![Tunnel learning](./images/dash-tunnel-learning.svg)
 
 To address this problem, the source information of each encap **MUST** be saved in the flow and compared during flow match. These information should no be part of the key, but whenever they change, we should reprocess the packet and update the saved reverse tunnel in the existing flow.
 
-##### 5.5.2.2. Asymmetrical encap handling
+##### 5.6.2.2. Asymmetrical encap handling
 
 There could be cases where the encaps are asymmetrical, which means the incoming packet and return packet uses different encaps. For example, in the case below, the encap of step 2 and 4 are not symmetrical. This means we could never recreate the flow on the DASH pipeline 2 side to tunnel the packet into the extra hop first with our current flow creation logic.
 
-![](./images/dash-asymmetrical-encap.svg)
+![Asymmetrical encap](./images/dash-asymmetrical-encap.svg)
 
 To fix this issue, a special action called `reverse_tunnel` is defined, which enables reverse side of the encaps.
 
-#### 5.5.3. Flow resimulation
+#### 5.6.3. Flow resimulation
 
 When certain policies are changed, we might need to update the flows that is associated with the policies. For example, when a VM is moved to another place, the VNET mapping entry will be changed, and we need to update the existing flows that is associated with the VNET mapping entry. Otherwise, the outgoing traffic will be tunneled to incorrect place. This is called flow resimulation.
 
@@ -352,7 +358,7 @@ However, the flow resimulation is not as simple as removing the flow and let the
 
 These requires us to implement the flow resimulation in a more sophisticated way, which is not fully modeled in DASH today. But we will come back to this design later.
 
-### 5.6. Pre-pipeline ACL and Post-pipeline ACL
+### 5.7. Pre-pipeline ACL and Post-pipeline ACL
 
 Pre-pipeline ACL and Post-pipeline ACL are used to drop the unexpected traffic before and after the packet transformation. It works as below:
 
@@ -382,9 +388,9 @@ flowchart TD
     In_MS --> In_PostACL
 ```
 
-### 5.7. Routing actions and routing types
+### 5.8. Routing actions and routing types
 
-#### 5.7.1. Routing action
+#### 5.8.1. Routing action
 
 In DASH-SAI pipeline, routing actions are the fundamental building blocks for packet transformations. Each routing action is designed to work as below:
 
@@ -410,7 +416,7 @@ Take `staticencap` as an example, it can be defined as below:
 
 More routing action definitions can be found in the doc here: [DASH routing actions](../dataplane/dash-routing-actions.md).
 
-#### 5.7.2. Routing type
+#### 5.8.2. Routing type
 
 To implement a network function, we usually need to do multiple packet transformations, such as adding a tunnel and NAT'ing the address or port. This requires us to be able to combine multiple routing actions together, and this is what routing type is for.
 
@@ -424,9 +430,9 @@ For example:
 
 This combination of routing actions is very flexible and powerful, and it enables us to implement any network function we want.
 
-### 5.8. Matching stages and metadata publishing
+### 5.9. Matching stages and metadata publishing
 
-#### 5.8.1. Matching stage
+#### 5.9.1. Matching stage
 
 Matching stage is the one of the core part of the DASH-SAI pipeline and the components that gives the pipeline flexibility.
 
@@ -440,7 +446,7 @@ In DASH-SAI pipeline, a matching stage is a basic building block for packet matc
 
 For more on the metadata publishing, please refer to the metadata publishing section below.
 
-#### 5.8.2. Pipeline profile and stage connections
+#### 5.9.2. Pipeline profile and stage connections
 
 Ideally, when DASH initializes or whenever we create a new pipeline, by simply creating multiple numbers of different types of matching stages and connecting them in different ways, we can easily implement different pipeline and network functions.
 
@@ -475,9 +481,9 @@ flowchart LR
     Map1 --> | portmaprouting | UdpPortMap
 ```
 
-#### 5.8.3. Stage transitions
+#### 5.9.3. Stage transitions
 
-##### 5.8.3.1. Stage transition routing type
+##### 5.9.3.1. Stage transition routing type
 
 To transit between stages, we use `transition` field to specify the transition routing type.
 
@@ -522,7 +528,7 @@ Here is an example that shows how the routing stage entry looks like:
 ]
 ```
 
-##### 5.8.3.2. Stage skipping
+##### 5.9.3.2. Stage skipping
 
 To avoid loop shows up in the pipeline, the pipeline is designed to be forward only. When transition routing action is invoked, we can simply update the target stage in the metadata, then the transition behavior can simply be described by the code below:
 
@@ -562,7 +568,7 @@ flowchart LR
     Map1 --> | portmaprouting | UdpPortMap
 ```
 
-##### 5.8.3.3. Multi-stage chaining
+##### 5.9.3.3. Multi-stage chaining
 
 With multiple instances of the same stage type, we can chain the stages together to implement more complicated policies.
 
@@ -602,7 +608,7 @@ Or, with a slight change, we can implement another routing policy to enable a tu
 }
 ```
 
-#### 5.8.4. Action publishing
+#### 5.9.4. Action publishing
 
 Each entry in the matching stages can specify a [routing type](#572-routing-type) that specifies the routing actions for specifying the packet transformations. When an entry is matched in the matching stages, the actions will be populated into the metadata bus, and the actions will be applied when the packet reaches the action apply stage.
 
@@ -637,7 +643,7 @@ struct metadata_t {
 }
 ```
 
-#### 5.8.5. Metadata publishing
+#### 5.9.5. Metadata publishing
 
 Each entry in the matching stages can also specify a list of metadata. When an entry is matched in the matching stages, the metadata will be populated into the metadata bus, and the metadata will be used as the input parameters for the routing actions. These metadata are shared by all stages and actions, hence later ones will override the existing ones, if any.
 
@@ -717,11 +723,11 @@ For example, say, we have a network with this policy: all traffic that sends to 
 }
 ```
 
-### 5.9. Action apply
+### 5.10. Action apply
 
 After all matching stages are done, we will start applying all the actions. All the latest values in the metadata bus will be used as the input parameters for the routing actions.
 
-### 5.10. Meter update
+### 5.11. Meter update
 
 After all actions are applied, post-pipeline ACLs are passed, we will update the metering counters if any metering class is specified.
 
