@@ -82,7 +82,7 @@ Today, DASH supports up to 2 layers of encaps: underlay0 and underlay1.
 
 ## 4. Pipeline Overview
 
-DASH-SAI pipeline is modeled as a list of stages. Each stage defines its own tables, and use the table entries to match packets per the processing logic inside the match-action pipeline (key, action id, action data), and publish the corresponding metadata when an entry is matched. After all stages are processed, a list of final routing actions will be defined. Then, by executing these routing actions, the packet will be transformed accordingly, and corresponding flows will be generated for to the direction of the packet.
+DASH-SAI pipeline is modeled as a list of stages. Each stage defines its own tables, and use the table entries to match packets per the processing logic inside the match-action pipeline (key, action id, action data), and publish the corresponding metadata when an entry is matched. After all stages are processed, a list of final routing actions will be defined. Then, by executing these routing actions, the packet will be transformed accordingly, and corresponding flows will be generated for the direction of the packet.
 
 At a high level the pipeline looks like below:
 
@@ -166,9 +166,9 @@ This design allows our upper layers to be flexible and doesn't limit to any spec
 
 ### 5.1. Per-packet metadata bus
 
-First of all, since we have multiple matching stages in the pipeline, we need a way to pass the information from the matched entries in the earlier stages to the later ones to help us making final decisions on packet transformation. And this is what metadata bus is for.
+First of all, since we have multiple matching stages in the pipeline, we need a way to pass the information from the matched entries in the earlier stages to the later ones to help us make final decisions on packet transformation. And this is what metadata bus is for.
 
-At high-level, the metadata bus is a set of fields that being carried all the way through the pipeline along with the packet. It contains:
+At high-level, the metadata bus is a set of fields that are carried throughout the pipeline along with the packet. It contains:
 
 - The information from the original packet, such as encap information.
 - The information from each matched entry and related data structures, e.g., when a VNET mapping entry is matched, we will publish the information from VNET to the metadata bus.
@@ -178,19 +178,19 @@ Implementation-wise, this is similar to Packet Header Vector or Bus in NPL.
 
 ### 5.2. Packet parsing
 
-In ASIC, parser is usually the first stage of the pipeline. It parses the incoming packet and extract the information into metadata bus, such as the source and destination MAC, IP, etc. And based on these information, we will invoke the rest of pipeline.
+In an ASIC, the parser is usually the first stage of the pipeline. It parses the incoming packet and extracts the information into the metadata bus, such as the source and destination MAC, IP, etc. And based on this information, we will invoke the rest of pipeline.
 
 #### 5.2.1. Multi-layer encap parsing
 
 Multi-layer encap brings the problem in the packet parsing, because of encap layer detection and overlay packet handling:
 
-1. In ASIC, parser is always parsing from the outermost bits to innermost bits. However, in DASH, the encap stack is defined reversely: underlay1 -> underlay0 -> overlay. Because the incoming packet could have various number of encaps, we need to be able to map the encaps to the right layer.
+1. In an ASIC, the parser is always parsing from the outermost bits to innermost bits. However, in DASH, the encap stack is defined reversely: underlay1 -> underlay0 -> overlay. Because the incoming packet could have various number of encaps, we need to be able to map the encaps to the right layer.
 2. The overlay (customer) packet could be also using encaps, so we need to be able to tell which one is ours and which one is overlay.
-3. The incoming packet could have various number of encaps, and each encap doesn't really know if the inner packet is a overlay or not. For example, from the SDN pipeline basic element doc, the [Inbound from LB](./sdn-pipeline-basic-elements.md#inbound-from-lb) and [Internal Load Balancer in VNET communication](./sdn-pipeline-basic-elements.md#internal-load-balancer-in-vnet-communication) actually shares the same outer most header.
+3. The incoming packet could have various number of encaps, and each encap is not aware whether the inner packet is a overlay or not. For example, from the SDN pipeline basic element doc, the [Inbound from LB](./sdn-pipeline-basic-elements.md#inbound-from-lb) and [Internal Load Balancer in VNET communication](./sdn-pipeline-basic-elements.md#internal-load-balancer-in-vnet-communication) actually shares the same outer-most header.
 
 To solve this problems, we use 2 things for encap handling:
 
-1. We can specify if parser should stop parsing more encaps or not for VNI:
+1. We can specify if parser should stop parsing more encaps or not for the VNI:
 
    ```json
    { "DASH_SAI_VNI_TABLE|12345": { "direction": "outbound", "final_encap": true } }
@@ -198,17 +198,17 @@ To solve this problems, we use 2 things for encap handling:
 
    When `final_encap` is set to true, the VNI will be sent to parser to force the parser to treat the next layer as overlay packet.
 
-2. Since the parser doesn't know how many encaps beforehand, so parser can always start treating the outermost layer as underlay1. And whenever it sees an the protocol is not an encap or the VNI is unknown, it treat the packet as overlay packet. Then, after parsing is done, we will fix the encap information in metadata bus.
+2. Since the parser doesn't know how many encaps existed prior, the parser can always start treating the outermost layer as underlay1. And whenever it sees that the protocol is not an encap, or the VNI is unknown, it will treat the packet as overlay packet. Then, after parsing is complete, we will fix the encap information in metadata bus.
 
-   For example, in the [Inbound from LB](./sdn-pipeline-basic-elements.md#inbound-from-lb) case, the outer encap will start to be mapped to underlay1, the ethernet and IP part of the inner packet will be mapped into underlay0, while the TCP/UDP part will be mapped into overlay. Then, after parsing, we will extract the ethernet and IP parts in underlay0 as overlay, as well as extract the underlay1 as underlay0.
+   For example, in the [Inbound from LB](./sdn-pipeline-basic-elements.md#inbound-from-lb) case, the outer encap will initially be mapped to underlay1, the ethernet and IP part of the inner packet will be mapped into underlay0, while the TCP/UDP part will be mapped into overlay. Then, after parsing, we will extract the ethernet and IP parts in underlay0 as overlay, as well as extract the underlay1 as underlay0.
 
 ### 5.3. Direction Lookup
 
-In DASH-SAI pipeline, traffic are split into 2 directions: `inbound` and `outbound`. Each direction has its own pipeline (see pipeline overview above). When a new packet arrives, we will assign a direction to the packet, then process the packet in the corresponding pipeline. This ensures us to match the flow and transform the packet in the right way.
+In the DASH-SAI pipeline, traffic has 2 directions: `inbound` and `outbound`. Each direction has its own pipeline (see pipeline overview above). When a new packet arrives, we will assign a direction to the packet, then process the packet in the corresponding pipeline. This ensures we match the flow and transform the packet correctly.
 
 ### 5.4. Pipeline Lookup
 
-DASH supports multi-tenancy model for traffic handling. A single device can have multiple pipelines, and each pipeline is used to handle traffic for a specific tenant or whichever network function being modeled, such as a load balancer. When a packet arrives, besides direction lookup, we also need pipeline lookup to determine which pipeline to use for processing the packet.
+DASH supports a multi-tenancy model for traffic handling. A single device can have multiple pipelines, and each pipeline is used to handle traffic for a specific tenant, or the intended network function being modeled (such as a load balancer). When a packet arrives, besides direction lookup, we also need pipeline lookup to determine which pipeline to use for processing the packet.
 
 For example, if we like to implement a VM NIC with DASH-SAI pipeline, then we can model one pipeline as one NIC, then use the inner packet MAC to find the pipeline. However, if we would like to implement a load balancer, we can use a DASH-SAI pipeline to represent a load balancer instance and use the Public IP to find the pipeline.
 
@@ -239,11 +239,11 @@ flowchart TD
     VL --> |LB 2| LBP2
 ```
 
-A pipeline can also define its initial matching stages, which will be used for starting processing the packets if no flow is matched.
+A pipeline can also define its initial matching stages, which will be used to start processing the packets if no flow is matched.
 
 > NOTE:
 >
-> DASH-SAI pipeline is a logical concept. It doesn't have to be 1 to 1 mapping to a physical ASIC pipeline. The underlying implementation can be as simple as a metadata field update with a specific value, when the entry getting matched, e.g., `ENI = Inner Source/Destination MAC`.
+> The DASH-SAI pipeline is a logical concept. It doesn't have to be a 1 to 1 mapping to a physical ASIC pipeline. The underlying implementation can be as simple as a metadata field update with a specific value, when the entry is matched, e.g., `ENI = Inner Source/Destination MAC`.
 
 ### 5.5. Packet Decap
 
@@ -253,9 +253,9 @@ As [Packet Parsing](#52-packet-parsing) section described, this will not cause a
 
 #### 5.5.1. Multi-layer encap handling
 
-The incoming packet to DASH pipeline could have multiple layers of encap, however, the ASIC capacity is usually limited. The more encaps we handle in parser and decaps, the more the latency will be. Furthermore, using packet recirculation is also not ideal, because it can greatly reduces the throughput and increases the latency.
+The incoming packet to DASH pipeline could have multiple layers of encap, however, the ASIC capacity is usually limited. The more encaps we handle in the parser and decaps, adds latency.  Furthermore, using packet recirculation is also not ideal, because it can greatly reduce throughput and increase latency.
 
-The limit of having 2 layers of encap at maximum is trying to help this problem and avoid the pipeline having unexpected latency.
+The limit of having 2 layers of encap at maximum is an attempt to help this problem and avoid the pipeline potentially experiencing unexpected latency.
 
 #### 5.5.2. Stateless decap vs stateful decap
 
@@ -274,7 +274,7 @@ Although the encap information will still be saved in the metadata bus, however,
 
 ##### 5.5.3.1. Handling DSCP
 
-DASH pipeline provides 2 modes for handling the DSCP: "Preserve model" and "Pipe model".
+The DASH pipeline provides 2 modes for handling the DSCP: "Preserve model" and "Pipe model".
 
 Preserve model works very similar to `SAI_TUNNEL_DSCP_MODE_UNIFORM_MODEL` with a slight difference:
 
