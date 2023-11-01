@@ -53,7 +53,8 @@ DASH-SAI pipeline is designed to work as a general purpose network function pipe
 
 ## 2. Data path logical architecture stack
 
-[DASH HLD](https://github.com/sonic-net/DASH/blob/main/documentation/general/dash-high-level-design.md) already provided a very good high level overview on the system architecture. And here, we are going to dive a bit deeper from the data path perspective.
+[DASH HLD](https://github.com/sonic-net/DASH/blob/main/documentation/general/dash-high-level-design.md) 
+ and and [SDN Pipeline Basic Elements](https://github.com/sonic-net/DASH/blob/main/documentation/general/sdn-pipeline-basic-elements.md) already provided a very good high level overview on the system architecture. And here, we are going to dive a bit deeper from the data path perspective.
 
 ![DASH data path overview](./images/dash-data-path-overview.svg)
 
