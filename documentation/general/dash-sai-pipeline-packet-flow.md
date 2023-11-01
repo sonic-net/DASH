@@ -181,7 +181,7 @@ In ASIC, parser is usually the first stage of the pipeline. It parses the incomi
 
 #### 5.2.1. Multi-layer encap parsing
 
-Multi-layer encap brings the problem in the pakcet parsing, because of encap layer detection and overlay packet handling:
+Multi-layer encap brings the problem in the packet parsing, because of encap layer detection and overlay packet handling:
 
 1. In ASIC, parser is always parsing from the outermost bits to innermost bits. However, in DASH, the encap stack is defined reversely: underlay1 -> underlay0 -> overlay. Because the incoming packet could have various number of encaps, we need to be able to map the encaps to the right layer.
 2. The overlay (customer) packet could be also using encaps, so we need to be able to tell which one is ours and which one is overlay.
