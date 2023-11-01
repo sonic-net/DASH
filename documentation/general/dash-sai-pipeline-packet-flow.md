@@ -58,7 +58,7 @@ DASH-SAI pipeline is designed to work as a general purpose network function pipe
 
 ![DASH data path overview](./images/dash-data-path-overview.svg)
 
-DASH-SAI APIs are designed to be generic, so we could use it to set up the data path in different ways as needed.
+DASH-SAI APIs are designed to be generic, with the intent to set up the data path in different ways as needed.
 
 - The simplest way to set up the data path is to use the DASH-SAI APIs to create your pipeline and offload all your policy to ASIC.
 - If your application requires more advanced policy, then the techonology provider could also provide a inbox data plane app to implement these policies. And still, this is transparent to the upper layer, everything is hidden under the SAI level.
@@ -70,8 +70,8 @@ Before diving into the pipeline and packet flow, to better describe the behavior
 
 Overall, the high-level packet structure looks like below:
 
-- The inner most packet is whatever the customer sends, which is called overlay.
-- The first encap is called underlay0, which is the most frequently used layer for implement any virtual network functions, such as VNET routing, load balancer, etc.
+- The inner most packet is the customer input, which is called overlay.
+- The first encap is called underlay0, which is the most frequently used layer to implement any virtual network function, such as VNET routing, load balancer, etc.
 - On top of underlay0, we can extend and have more layer of encaps, which can be used for implementing additional routing hops.
 
 | ... (Outer most) | 2 | 1 | 0 (Inner most) |
@@ -82,9 +82,9 @@ Today, DASH supports up to 2 layers of encaps: underlay0 and underlay1.
 
 ## 4. Pipeline Overview
 
-DASH-SAI pipeline is modeled as a list of stages. Each stage defines its own tables, and use the table entries to match packets in certain way and publishing the corresponding metadata when an entry is matched. After all stages are processed, a list of final routing actions will be defined. Then, by executing these routing actions, the packet will be transformed in the way we want and corresponding flows will be generated according to the direction of the packet.
+DASH-SAI pipeline is modeled as a list of stages. Each stage defines its own tables, and use the table entries to match packets per the processing logic inside the match-action pipeline (key, action id, action data), and publish the corresponding metadata when an entry is matched. After all stages are processed, a list of final routing actions will be defined. Then, by executing these routing actions, the packet will be transformed accordingly, and corresponding flows will be generated for to the direction of the packet.
 
-On the high level the pipeline looks like below:
+At a high level the pipeline looks like below:
 
 ```mermaid
 flowchart TB
@@ -160,7 +160,7 @@ This design allows our upper layers to be flexible and doesn't limit to any spec
 - A DASH-SAI pipeline is used to represent a VM NIC (ENI).
 - The VxLAN VNI is used to do the direction lookup.
 - The inner MAC address is used for pipeline lookup, a.k.a. ENI lookup (ENI).
-- Once it goes into the corresponding DASH pipeline, the `outbound` pipeline will be used to process the packets coming from the VM, while the `inbound` pipeline will be used to process the packets going into the VM.
+- Once it enters the corresponding DASH pipeline, the `outbound` pipeline will be used to process the packets sourced from the VM, while the `inbound` pipeline will be used to process the packets destined to the VM.
 
 ## 5. Pipeline components
 
