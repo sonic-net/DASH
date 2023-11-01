@@ -53,7 +53,7 @@ DASH-SAI pipeline is designed to work as a general purpose network function pipe
 
 ## 2. Data path logical architecture stack
 
-[DASH HLD](https://github.com/sonic-net/DASH/blob/main/documentation/general/dash-high-level-design.md) 
+[DASH HLD](https://github.com/sonic-net/DASH/blob/main/documentation/general/dash-high-level-design.md)
  and and [SDN Pipeline Basic Elements](https://github.com/sonic-net/DASH/blob/main/documentation/general/sdn-pipeline-basic-elements.md) already provided a very good high level overview on the system architecture. And here, we are going to dive a bit deeper from the data path perspective.
 
 ![DASH data path overview](./images/dash-data-path-overview.svg)
@@ -75,7 +75,7 @@ Overall, the high-level packet structure looks like below:
 - On top of underlay0, we can extend and have more layer of encaps, which can be used for implementing additional routing hops.
 
 | ... (Outer most) | 2 | 1 | 0 (Inner most) |
-| - | - | - | - | - |
+| - | - | - | - |
 | **...** | **Underlay 1** | **Underlay 0** | **Overlay** |
 
 Today, DASH supports up to 2 layers of encaps: underlay0 and underlay1.
@@ -210,7 +210,7 @@ In DASH-SAI pipeline, traffic are split into 2 directions: `inbound` and `outbou
 
 DASH supports multi-tenancy model for traffic handling. A single device can have multiple pipelines, and each pipeline is used to handle traffic for a specific tenant or whichever network function being modeled, such as a load balancer. When a packet arrives, besides direction lookup, we also need pipeline lookup to determine which pipeline to use for processing the packet.
 
-For example, if we like to implement a VM NIC with, then we can model one pipeline as one VM NIC, then use the inner packet MAC to find the pipeline. However, if we would like to implement a load balancer, we can use a DASH-SAI pipeline to represent a load balancer instance and use the Public IP to find the SAI pipeline.
+For example, if we like to implement a VM NIC with DASH-SAI pipeline, then we can model one pipeline as one NIC, then use the inner packet MAC to find the pipeline. However, if we would like to implement a load balancer, we can use a DASH-SAI pipeline to represent a load balancer instance and use the Public IP to find the pipeline.
 
 ```mermaid
 flowchart TD
@@ -247,7 +247,9 @@ A pipeline can also define its initial matching stages, which will be used for s
 
 ### 5.5. Packet Decap
 
-If a pipeline is found, before processing the packets, all outer encaps will be decap'ed, and with key information saved in metadata bus, such as encap type, source IP and VNI / GRE Key, exposing the inner most packet going through the pipeline. This simplifies the flow matching logic and also allow us to create the reverse flow properly.
+If a pipeline is found, all outer encaps will be decap'ed before processing the packets, exposing the inner most packet going through the pipeline. This simplifies the flow matching logic and also allow us to create the reverse flow properly.
+
+As [Packet Parsing](#52-packet-parsing) section described, this will not cause any key information to be lost, as they are saved in metadata bus, such as encap type, source IP and VNI / GRE Key.
 
 #### 5.5.1. Multi-layer encap handling
 
@@ -287,7 +289,7 @@ On the other hand, pipe model works very similar to `SAI_TUNNEL_DSCP_MODE_PIPE_M
 
 If no encaps are added, say, for traffic sending to Internet, the DSCP value of overlay packet will be exposed as it is, even-if original packet arrives with a non-zero value.
 
-This gives the cloud infra full control over the DSCP value and avoid the customer packet spoofing the fields.
+This gives the cloud infra full control over the DSCP value and will prevent the customer from spoofing the fields.
 
 ##### 5.5.3.2. Handling TTL
 
