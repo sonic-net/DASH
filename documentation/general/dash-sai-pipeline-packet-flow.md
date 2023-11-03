@@ -300,7 +300,7 @@ TTL behavior for encap shall be "pipe" model (similar to SAI_TUNNEL_TTL_MODE_PIP
 
 #### 5.5.4. Encap preservation
 
-Sometimes, depends on the scenario to implement, the customer might want to preserve certain original encaps in the outgoing traffic. For example, say we receive a packet with structure: overlay -> underlay0 -> underlay1 -> underlay2. And we want to remove or update underlay0, preserve underlay1 and remove underlay2. This gives us the problem of handling all the CRUD combinations of all encaps, including structure changes: after removing underlay0, should underlay1 becomes underlay0 or should we keep it as underlay1? All these things affects the encap related routing actions and final packet we create.
+Sometimes, depending upon the scenario to implement, the customer might want to preserve certain original encaps in the outgoing traffic. For example, say we receive a packet with structure: overlay -> underlay0 -> underlay1 -> underlay2. And we want to remove or update underlay0, preserve underlay1 and remove underlay2. This gives us the problem of handling all the CRUD combinations of all encaps, including structure changes: after removing underlay0, should underlay1 becomes underlay0 or should we keep it as underlay1? All these questions affect the encap related routing actions and final packet we create.
 
 Since all of the encap information is preserved in the metadata bus for flow creation, to solve this problem, we can simply recreate them in the manner we want using the routing action: `tunnel_from_encap`. It allows the source and target encap and their override value to be set, which allows us to preserve the encaps exactly as intended, and also ensures the clarity of final transformation performed in the end.
 
@@ -366,7 +366,7 @@ These requires us to implement the flow resimulation in a more sophisticated way
 Pre-pipeline ACL and Post-pipeline ACL are used to drop the unexpected traffic before and after the packet transformation. It works as below:
 
 1. As the high-level pipeline shows above, if an incoming packet hits a flow (i.e. is in the FastPath), it will skip matching all the ACLs. If an incoming packet is denied by a ACL, the packet will be dropped without creating a flow.
-2. Both outbound and inbound pipeline has its own ACL stages, and only used for matching the packets in their direction.
+2. Both the outbound and inbound pipeline have their own ACL stages, and are used for matching the packets in their own direction.
 
 A typical usage of the ACLs is to implement security policies. For example, in SONiC-DASH pipeline, we use the pre/post-pipeline ACLs to implement the underlay and overlay ACLs in both directions, where overlay ACLs will be used for implementing customer policies, while underlay ACLs will be used for implementing the infrastructure policies.
 
