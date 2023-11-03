@@ -182,13 +182,13 @@ In an ASIC, the parser is usually the first stage of the pipeline. It parses the
 
 #### 5.2.1. Multi-layer encap parsing
 
-Multi-layer encap brings the problem in the packet parsing, because of encap layer detection and overlay packet handling:
+Multi-layer encap generates a problem in the packet parsing, because of the encap layer detection and overlay packet handling:
 
 1. In an ASIC, the parser is always parsing from the outermost bits to innermost bits. However, in DASH, the encap stack is defined reversely: underlay1 -> underlay0 -> overlay. Because the incoming packet could have various number of encaps, we need to be able to map the encaps to the right layer.
 2. The overlay (customer) packet could be also using encaps, so we need to be able to tell which one is ours and which one is overlay.
 3. The incoming packet could have various number of encaps, and each encap is not aware whether the inner packet is a overlay or not. For example, from the SDN pipeline basic element doc, the [Inbound from LB](./sdn-pipeline-basic-elements.md#inbound-from-lb) and [Internal Load Balancer in VNET communication](./sdn-pipeline-basic-elements.md#internal-load-balancer-in-vnet-communication) actually shares the same outer-most header.
 
-To solve this problems, we use 2 things for encap handling:
+To solve this problems, we use 2 methods for encap handling:
 
 1. We can specify if parser should stop parsing more encaps or not for the VNI:
 
@@ -302,13 +302,13 @@ TTL behavior for encap shall be "pipe" model (similar to SAI_TUNNEL_TTL_MODE_PIP
 
 Sometimes, depends on the scenario to implement, the customer might want to preserve certain original encaps in the outgoing traffic. For example, say we receive a packet with structure: overlay -> underlay0 -> underlay1 -> underlay2. And we want to remove or update underlay0, preserve underlay1 and remove underlay2. This gives us the problem of handling all the CRUD combinations of all encaps, including structure changes: after removing underlay0, should underlay1 becomes underlay0 or should we keep it as underlay1? All these things affects the encap related routing actions and final packet we create.
 
-Since all the encap information is preserved in the metadata bus for flow creation anyway, to solve this problem, we can simply recreate them in anyway we want with routing action: `tunnel_from_encap`. It allows the source and target encap and their override value being set, which allows us to preserve the encaps in anyway we want and also ensures the clarity of final transformation that we are doing in the end.
+Since all of the encap information is preserved in the metadata bus for flow creation, to solve this problem, we can simply recreate them in the manner we want using the routing action: `tunnel_from_encap`. It allows the source and target encap and their override value to be set, which allows us to preserve the encaps exactly as intended, and also ensures the clarity of final transformation performed in the end.
 
 Please note that: Encap preservation will not affect the reverse tunnel creation as "Stateless decap vs stateful decap" section described above. A encap can be preserved as well as used in reverse tunnel creation at the same time, since they are essentially 2 different things.
 
 ### 5.6. Conntrack Lookup and Update
 
-After entering a specific pipeline, the first stage will be the Conntrack Lookup stage, which does the flow lookup. If any flow is matched, the saved actions will be applied, the metering counters will be updated, and the rest of pipeline will be skipped.
+After entering a specific pipeline, the first stage will be the Conntrack Lookup stage, which performs the flow lookup. If any flow is matched, the saved actions will be applied, the metering counters will be updated, and the rest of pipeline will be exited.
 
 The core of the Conntrack Lookup and Update stage is the flow table.
 
@@ -316,18 +316,18 @@ The core of the Conntrack Lookup and Update stage is the flow table.
 
 First, let's define the flow lookup behavior.
 
-The flow lookup **MUST** use the information of inner most packet. And the matching keys can be configurated via the DASH flow APIs during the DASH initialization. This allows us to support different flow matching behaviors for certain cases. For example, in L3 level routing, we don't need to create 5 tuple flows.
+The flow lookup **MUST** use the information of inner most packet. And the matching keys can be configurated via the DASH flow APIs during the DASH initialization. This allows us to support different flow matching behaviors for specific cases. For example, in L3 level routing, we don't need to create 5 tuple flows.
 
-After the flow lookup, if a flow is matched, we will apply the saved actions in the flow direction and skip the rest of the pipeline. Otherwise, we will continue the pipeline processing.
+After the flow lookup, if a flow is matched, we will apply the saved actions in the flow direction and exit the rest of the pipeline. Otherwise, we will continue the pipeline processing.
 
 #### 5.6.2. Flow creation
 
 For new connections, after all packet transformations are applied, we will create a new flow in the flow table.
 
-Since a connection can be bi-directional, the flows needs to be created as flow pairs: the one in the same direction as the packet is usually called forwarding flow, while the other direction is called reverse flow. Of course, the flow pairs **MUST** be stored based on the pipeline direction.
+Since a connection can be bi-directional, the flows need to be created as flow pairs: the one in the same direction as the packet is usually called forwarding flow, while the other direction is called reverse flow. Of course, the flow pairs **MUST** be stored based on the pipeline direction.
 
-- When outbound pipeline creates a flow, the forwarding flow should be created on the outbound side, while reverse flow should be created on the inbound side.
-- When inbound pipeline creates a flow, it creates the flow in reversed way.
+- When the outbound pipeline creates a flow, the forwarding flow should be created on the outbound side, while the reverse flow should be created on the inbound side.
+- When the inbound pipeline creates a flow, it creates the flow in reverse way.
 
 And here is how to create the flow pairs:
 
@@ -336,7 +336,7 @@ And here is how to create the flow pairs:
 
 ##### 5.6.2.1. Tunnel learning
 
-You might already notice that, although we uses the outer encap from the original packet to create the reverse flow, but the outer encaps are decap'ed and not used in flow matching. This creates a problem when source side fails over. Like the graph shows below, the traffic shifted from VTEP 1 (Green side) to VTEP 2 (Blue side), which changes the source IP in the encap. If we don't do anything, the existing reverse flow will continue to send the packet back to green side and causing the traffic being dropped.
+You might already notice that, although we uses the outer encap from the original packet to create the reverse flow, but the outer encaps are decap'ed and not used in flow matching. This creates a problem when source side fails over. Like the graph shows below, the traffic shifted from VTEP 1 (Green side) to VTEP 2 (Blue side), which changes the source IP in the encap. If we don't do anything (such as save the information), the existing reverse flow will continue to send the packet back to green side and cause the traffic to be dropped.
 
 ![Tunnel learning](./images/dash-tunnel-learning.svg)
 
@@ -344,7 +344,7 @@ To address this problem, the source information of each encap **MUST** be saved 
 
 ##### 5.6.2.2. Asymmetrical encap handling
 
-There could be cases where the encaps are asymmetrical, which means the incoming packet and return packet uses different encaps. For example, in the case below, the encap of step 2 and 4 are not symmetrical. This means we could never recreate the flow on the DASH pipeline 2 side to tunnel the packet into the extra hop first with our current flow creation logic.
+There could be cases where the encaps are asymmetrical, which means the incoming packet and return packet use different encaps. For example, in the case below, the encap of step 2 and 4 are not symmetrical. This means we could never recreate the flow on the DASH pipeline 2 side to tunnel the packet into the extra hop first with our current flow creation logic.
 
 ![Asymmetrical encap](./images/dash-asymmetrical-encap.svg)
 
@@ -352,12 +352,12 @@ To fix this issue, a special action called `reverse_tunnel` is defined, which en
 
 #### 5.6.3. Flow resimulation
 
-When certain policies are changed, we might need to update the flows that is associated with the policies. For example, when a VM is moved to another place, the VNET mapping entry will be changed, and we need to update the existing flows that is associated with the VNET mapping entry. Otherwise, the outgoing traffic will be tunneled to incorrect place. This is called flow resimulation.
+In the event of a policy change, we might need to update the flows associated with the policies. For example, when a VM is moved to another location, the VNET mapping entry will be changed, and we need to update the existing flows associated with the VNET mapping entry. Otherwise, the outgoing traffic will be tunneled to an incorrect location. This is called flow resimulation.
 
-However, the flow resimulation is not as simple as removing the flow and let the packet to going through the pipeline again. For example:
+However, the flow resimulation is not as simple as removing the flow and sending the packet through the pipeline again. For example:
 
 - When a ACL is changed in the outbound side, all flows needs to be resimulated. However, this cannot be implemented by removing all flow entries and let all flows to be recreated with the latest policy. The reason is that ACLs can be asymmetric and flows are created in pair. If the flows are removed, the inbound side traffic will be dropped immediately, because there is no inbound flow to make it bypass the ACLs.
-- Certain actions might need to bypass the flow resimulation to maintain the per flow consistency. For example, in load balancer case, we will want to ensure that flow resimulation will not causing us to forward existing connections to a different backend server.
+- Certain actions might need to bypass the flow resimulation to maintain the per flow consistency. For example, in a load balancer case, we will want to ensure that flow resimulation will not cause the pipeline to forward existing connections to a different backend server.
 
 These requires us to implement the flow resimulation in a more sophisticated way, which is not fully modeled in DASH today. But we will come back to this design later.
 
@@ -365,7 +365,7 @@ These requires us to implement the flow resimulation in a more sophisticated way
 
 Pre-pipeline ACL and Post-pipeline ACL are used to drop the unexpected traffic before and after the packet transformation. It works as below:
 
-1. As the high-level pipeline shows above, if an incoming packet hits a flow, it will skip matching all the ACLs. If an incoming packet is denied by a ACL, the packet will be dropped without creating a flow.
+1. As the high-level pipeline shows above, if an incoming packet hits a flow (i.e. is in the FastPath), it will skip matching all the ACLs. If an incoming packet is denied by a ACL, the packet will be dropped without creating a flow.
 2. Both outbound and inbound pipeline has its own ACL stages, and only used for matching the packets in their direction.
 
 A typical usage of the ACLs is to implement security policies. For example, in SONiC-DASH pipeline, we use the pre/post-pipeline ACLs to implement the underlay and overlay ACLs in both directions, where overlay ACLs will be used for implementing customer policies, while underlay ACLs will be used for implementing the infrastructure policies.
@@ -403,7 +403,7 @@ In DASH-SAI pipeline, routing actions are the fundamental building blocks for pa
 2. Transform the packet in a specific way, e.g., encapsulate the packet, NAT'ing the address and port, etc.
 3. Independent to other actions.
    1. With this design, we don't have to worry about the order of the actions.
-   2. This also enables the hardware to improve the E2E pipeline latency by doing the actions in parallel.
+   2. This also enables the hardware to improve the E2E pipeline latency by executing the actions in parallel.
 
 Take `staticencap` as an example, it can be defined as below:
 
@@ -504,7 +504,7 @@ A transition routing type is a special type of [Routing Type](#572-routing-type)
 | `maprouting` | Skip to next mapping stage |
 | `portmaprouting` | Skip to next TCP or UDP Port Mapping stage |
 
-To help us being flexible, the transition routing actions can take a few parameters:
+To help us to stay flexible, the transition routing actions can take a few parameters:
 
 - All transition routing actions other than `drop` and `trap`:
   - `default_routing_type`: If no entry is found, use this routing type to route the packet. If `default_routing_type` is not set, the packet will be dropped by default.
@@ -533,7 +533,7 @@ Here is an example that shows how the routing stage entry looks like:
 
 ##### 5.9.3.2. Stage skipping
 
-To avoid loop shows up in the pipeline, the pipeline is designed to be forward only. When transition routing action is invoked, we can simply update the target stage in the metadata, then the transition behavior can simply be described by the code below:
+To avoid loops appearing in the pipeline, the pipeline is designed to be forward only. When transition routing action is invoked, we can simply update the target stage in the metadata, then the transition behavior can simply be described by the code below:
 
 ```c
 apply {
