@@ -97,7 +97,7 @@ To implement the flow tracking for each key, we can leverage the "Conntrack Upda
 - When a flow is created, we can get the flow tracking key from the metadata bus. If it is non-zero, we will store this mapping in a hash table.
 - When a flow is destroyed or resimulated, we can get the current flow tracking key from the flow state as well as the new one from metadata bus, then fix the mapping.
 
-When a match stage entry is updated, we can then find all flows that stored in the hash table and resimulate them by fliping their flow resimulated bit to true one by one.
+When a match stage entry is updated, we can then find all flows that stored in the hash table and resimulate them by flipping their flow resimulated bit to true one by one.
 
 ### 2.3. Passive flow tracking
 
