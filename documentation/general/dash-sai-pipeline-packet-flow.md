@@ -36,6 +36,7 @@
          3. [5.9.3.3. Multi-stage chaining](#5933-multi-stage-chaining)
       4. [5.9.4. Action publishing](#594-action-publishing)
       5. [5.9.5. Metadata publishing](#595-metadata-publishing)
+      6. [5.9.6. Routing active capability](#596-routing-active-capability)
    10. [5.10. Action apply](#510-action-apply)
    11. [5.11. Meter update](#511-meter-update)
 6. [6. Examples](#6-examples)
@@ -490,7 +491,7 @@ flowchart LR
 
 To transit between stages, we use `transition` field to specify the transition routing type.
 
-A transition routing type is a special type of [Routing Type](#572-routing-type):
+A transition routing type is a special type of [Routing Type](#582-routing-type):
 
 1. Each transition routing type can only have one single routing action.
 2. Only a special list of routing actions will take effect in the routing types, which are all related to stage transitions, as listed below.
@@ -613,7 +614,7 @@ Or, with a slight change, we can implement another routing policy to enable a tu
 
 #### 5.9.4. Action publishing
 
-Each entry in the matching stages can specify a [routing type](#572-routing-type) that specifies the routing actions for specifying the packet transformations. When an entry is matched in the matching stages, the actions will be populated into the metadata bus, and the actions will be applied when the packet reaches the action apply stage.
+Each entry in the matching stages can specify a [routing type](#582-routing-type) that specifies the routing actions for specifying the packet transformations. When an entry is matched in the matching stages, the actions will be populated into the metadata bus, and the actions will be applied when the packet reaches the action apply stage.
 
 Populating the actions into the metadata bus are straightforward, which can be illustrated by the P4 code below:
 
@@ -725,6 +726,8 @@ For example, say, we have a network with this policy: all traffic that sends to 
     "DASH_SAI_ROUTING_TYPE_TABLE|firewalltunnel": [ { "action_type": "tunnel", "target": "underlay1" } ]
 }
 ```
+
+#### 5.9.6. Routing active capability
 
 ### 5.10. Action apply
 
