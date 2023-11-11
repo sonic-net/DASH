@@ -359,7 +359,7 @@ However, the flow resimulation is not as simple as removing the flow and sending
 - When a ACL is changed in the outbound side, all flows needs to be resimulated. However, this cannot be implemented by removing all flow entries and let all flows to be recreated with the latest policy. The reason is that ACLs can be asymmetric and flows are created in pair. If the flows are removed, the inbound side traffic will be dropped immediately, because there is no inbound flow to make it bypass the ACLs.
 - Certain actions might need to bypass the flow resimulation to maintain the per flow consistency. For example, in a load balancer case, we will want to ensure that flow resimulation will not cause the pipeline to forward existing connections to a different backend server.
 
-These requires us to implement the flow resimulation in a more sophisticated way, which is not fully modeled in DASH today. But we will come back to this design later.
+These requires us to implement the flow resimulation in a more sophisticated way. Please check the detailed design here: [DASH flow resimulation](../dataplane/dash-flow-resimulation.md).
 
 ### 5.7. Pre-pipeline ACL and Post-pipeline ACL
 
