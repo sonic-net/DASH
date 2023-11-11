@@ -593,7 +593,6 @@ TcpSynPacket
 TDI
 Teamd
 teardown
-techonology
 templating
 TEP
 testbed
