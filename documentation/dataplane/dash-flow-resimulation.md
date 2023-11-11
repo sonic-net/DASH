@@ -33,9 +33,9 @@ To implement this, A flow incarnation id is introduced:
 With flow incarnation id, we can implement full flow resimulation as follows:
 
 - When a new packet arrives, the current flow incarnation id will be stored into the metadata bus.
-- In ConnTrack Lookup stage, if we found the id stored in its flow doesn't match the one in the pipeline, we treat this flow as resimulated.
+- In Conntrack Lookup stage, if we found the id stored in its flow doesn't match the one in the pipeline, we treat this flow as resimulated.
 - For simulated flows, we continue to run the later ACL and match stages instead of directly applying the actions saved in the flow.
-- In ConnTrack Update stage, a new pair of flow will be generated and replaces the current flow, which finishes the process of flow resimulation.
+- In Conntrack Update stage, a new pair of flow will be generated and replaces the current flow, which finishes the process of flow resimulation.
 
 After this, the later packet will directly hit the new flow and bypass the later stages.
 
@@ -53,7 +53,7 @@ When flow HA is enabled, both flow incarnation id and the updated flow needs to 
 
 The process follows the flow HA design. When replacing the current flow with the newly generated flows, the new flows will be marked as "not-synced". Then the packet will be sent back to the pipeline, which triggers the inline flow sync logic and takes the flow information to the other side.
 
-Since the flow incarnation id is part of the flow state, it will also be sync'ed to the standby side and updates the stored id there. Although in flow HA design, the policy will be programmed to both active and standby side, but we cannot use the id in the standby side directly, because these 2 pipelines are programmed independently, so we don't have a way to ensure that the standby one always matches the active one. To solve this, we make the standby pipeline always follows the active side, which follows the flow lifetime management design in flow HA.
+Since the flow incarnation id is part of the flow state, it will also be synched to the standby side and updates the stored id there. Although in flow HA design, the policy will be programmed to both active and standby side, but we cannot use the id in the standby side directly, because these 2 pipelines are programmed independently, so we don't have a way to ensure that the standby one always matches the active one. To solve this, we make the standby pipeline always follows the active side, which follows the flow lifetime management design in flow HA.
 
 ### 1.5. Object model change summary for full flow resimulation
 
@@ -82,7 +82,7 @@ To summarize, the following changes are needed to implement full flow resimulati
 
 ## 2. Policy-based flow resimulation
 
-Another typical case of flow remulation is policy-based resimulation. For example, whenever a VNET CA-PA mapping is updated, we need and only need to update the flows for this single mapping. This requirement can be applied to other policy updates as well, for example, routing entry or port mapping.
+Another typical case of flow resimulation is policy-based resimulation. For example, whenever a VNET CA-PA mapping is updated, we need and only need to update the flows for this single mapping. This requirement can be applied to other policy updates as well, for example, routing entry or port mapping.
 
 ### 2.1. Flow tracking key and flow resimulated bit
 
@@ -92,7 +92,7 @@ Whenever a match stage entry is updated which has a non-zero flow tracking key s
 
 ### 2.2. Active flow tracking
 
-To implement the flow tracking for each key, we can leverage the "ConnTrack Update" stage:
+To implement the flow tracking for each key, we can leverage the "Conntrack Update" stage:
 
 - When a flow is created, we can get the flow tracking key from the metadata bus. If it is non-zero, we will store this mapping in a hash table.
 - When a flow is destroyed or resimulated, we can get the current flow tracking key from the flow state as well as the new one from metadata bus, then fix the mapping.

@@ -412,6 +412,7 @@ oversubscription
 param
 params
 PAs
+PCC
 PCI
 PCIe
 Pensando
@@ -473,6 +474,7 @@ redis
 renderer
 repo
 repos
+resimulate
 resimulated
 resimulation
 responder
