@@ -9,13 +9,14 @@ In DASH pipeline, after flow is created, it may not remain unchanged until it is
    4. [1.4. Flow resimulation w/ flow HA](#14-flow-resimulation-w-flow-ha)
    5. [1.5. Object model change summary for full flow resimulation](#15-object-model-change-summary-for-full-flow-resimulation)
 2. [2. Policy-based flow resimulation](#2-policy-based-flow-resimulation)
-   1. [2.1. Flow tracking key and flow resimulated bit](#21-flow-tracking-key-and-flow-resimulated-bit)
+   1. [2.1. Flow tracking key and pending resimulation bit](#21-flow-tracking-key-and-pending-resimulation-bit)
    2. [2.2. Active flow tracking](#22-active-flow-tracking)
    3. [2.3. Passive flow tracking](#23-passive-flow-tracking)
    4. [2.4. Flow tracking key in flow HA](#24-flow-tracking-key-in-flow-ha)
    5. [2.5. Object model change summary for policy-based flow resimulation](#25-object-model-change-summary-for-policy-based-flow-resimulation)
 3. [3. Learning-based flow resimulation](#3-learning-based-flow-resimulation)
-4. [4. Explicit per flow consistency (PCC) support](#4-explicit-per-flow-consistency-pcc-support)
+4. [4. On-demand flow resimulation](#4-on-demand-flow-resimulation)
+5. [5. Explicit per flow consistency (PCC) support](#5-explicit-per-flow-consistency-pcc-support)
 
 ## 1. Full flow resimulation
 
@@ -84,11 +85,11 @@ To summarize, the following changes are needed to implement full flow resimulati
 
 Another typical case of flow resimulation is policy-based resimulation. For example, whenever a VNET CA-PA mapping is updated, we need and only need to update the flows for this single mapping. This requirement can be applied to other policy updates as well, for example, routing entry or port mapping.
 
-### 2.1. Flow tracking key and flow resimulated bit
+### 2.1. Flow tracking key and pending resimulation bit
 
-To solve this, a 128-bit flow tracking key can be set in each match stage entry. Additionally, this key and a flow resimulated bit is added to each flow.
+To solve this, a 128-bit flow tracking key can be set in each match stage entry. Additionally, this key and a pending resimulation bit is added to each flow.
 
-Whenever a match stage entry is updated which has a non-zero flow tracking key specified, all flows that shares the same flow tracking key will be resimulated together, which set the flow resimulated bit in each associated flow.
+Whenever a match stage entry is updated which has a non-zero flow tracking key specified, all flows that shares the same flow tracking key will be resimulated together, which set the pending resimulation bit in each associated flow.
 
 ### 2.2. Active flow tracking
 
@@ -97,7 +98,7 @@ To implement the flow tracking for each key, we can leverage the "Conntrack Upda
 - When a flow is created, we can get the flow tracking key from the metadata bus. If it is non-zero, we will store this mapping in a hash table.
 - When a flow is destroyed or resimulated, we can get the current flow tracking key from the flow state as well as the new one from metadata bus, then fix the mapping.
 
-When a match stage entry is updated, we can then find all flows that stored in the hash table and resimulate them by flipping their flow resimulated bit to true one by one.
+When a match stage entry is updated, we can then find all flows that stored in the hash table and resimulate them by flipping their pending resimulation bit to true one by one.
 
 ### 2.3. Passive flow tracking
 
@@ -133,7 +134,8 @@ To summarize, the following changes are needed to implement policy-based flow re
     ```json
     "DASH_SAI_SOME_ENTRY_TABLE|<entry partition key>|<stage_index>|<Unique Key of the entry>": {
         // ...
-        "flow_tracking_key": "0x1234567890abcdef1234567890abcdef"
+        "flow_tracking_key": "0x1234567890abcdef1234567890abcdef",
+        "flow_resimulation_requested": false // See On-demand flow resimulation for more details.
     }
     ```
 
@@ -143,8 +145,8 @@ To summarize, the following changes are needed to implement policy-based flow re
     typedef enum _sai_flow_state_metadata_attr_t {
         SAI_FLOW_ATTR_START,
         // ...
-        SAI_FLOW_METADATA_ATTR_FLOW_TRACKING_KEY, // Flow tracking key.
-        SAI_FLOW_METADATA_ATTR_RESIMULATED,       // Flow resimulated bit.
+        SAI_FLOW_METADATA_ATTR_FLOW_TRACKING_KEY,       // Flow tracking key.
+        SAI_FLOW_METADATA_ATTR_PENDING_RESIMULATION,    // pending resimulation bit.
         SAI_FLOW_METADATA_ATTR_END
     } sai_flow_metadata_attr_t;
     ```
@@ -155,7 +157,15 @@ The last type of flow resimulation trigger is learning-based. For example, [Tunn
 
 When tunnel change happens, the flow will be marked as to be resimulated. After [the flow resimulation process](#12-flow-resimulation-process), the new pair of flow will be generated, which contains the new tunnel information in the reverse flow and to be used to replace the current flow.
 
-## 4. Explicit per flow consistency (PCC) support
+## 4. On-demand flow resimulation
+
+For livesite mitigations, we need the ability for initiate flow resimulation from flow API. Currently, we have can support 3 types of resimulation request:
+
+- Pipeline level full flow resimulation. This can be implemented by changing the flow incarnation id, as we already discussed above.
+- Policy-based flow resimulation. This can be implemented by adding a dedicated attribute to the policy for requesting flow resimulation. Whenever the attribute is set to true, we will resimulate all flows that matches the policy even though no policy change is detected.
+- Flow resimulation for a single flow. This can be implemented by changing the pending resimulation bit to true.
+
+## 5. Explicit per flow consistency (PCC) support
 
 As we can see above, all flow resimulation will cause everything in the flow to be updated. This behavior might not be desired in some cases. For example, in load balancer case, we may only want to update the VTEP tunnel while keep the selected backend server unchanged, even when the backend server list is changed. This property of load balancer is called "per flow consistency" (PCC).
 
