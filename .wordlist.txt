@@ -317,6 +317,7 @@ libsai
 libprotobuf
 linux
 liveness
+livesite
 LLDP
 lldp
 loadbalancer
@@ -347,6 +348,7 @@ MaxUdpFlow
 md
 microsoft
 misorder
+mitigations
 MSFT
 msft
 MSRC
