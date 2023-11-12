@@ -38,9 +38,11 @@
       5. [5.9.5. Metadata publishing](#595-metadata-publishing)
    10. [5.10. Action apply](#510-action-apply)
    11. [5.11. Meter update](#511-meter-update)
-6. [6. Matching stage capability](#6-matching-stage-capability)
-   1. [6.1. Metadata capability](#61-metadata-capability)
-   2. [6.2. Routing action capability](#62-routing-action-capability)
+6. [6. DASH pipeline capability model](#6-dash-pipeline-capability-model)
+   1. [6.1. Matching stage capability](#61-matching-stage-capability)
+      1. [6.1.1. Matching stage metadata capability](#611-matching-stage-metadata-capability)
+   2. [6.2. Pipeline capability](#62-pipeline-capability)
+      1. [6.2.1. Routing action capability](#621-routing-action-capability)
 7. [7. Examples](#7-examples)
    1. [7.1. VNET routing](#71-vnet-routing)
    2. [7.2. VM level public IP inbound (L3 DNAT)](#72-vm-level-public-ip-inbound-l3-dnat)
@@ -721,13 +723,15 @@ After all matching stages are done, we will start applying all the actions. All 
 
 After all actions are applied, post-pipeline ACLs are passed, we will update the metering counters if any metering class is specified.
 
-## 6. Matching stage capability
+## 6. DASH pipeline capability model
 
 Although, the logical pipeline or behavior model allows us to set any metadata in any stage or doing any routing actions that we want, the ASIC can have certain limitations, either the functionality or the resource. So, we should allow technology providers to tell the user what is supported via capability.
 
 Because the underlying pipeline shall be initialized, when SAI create switch function call completes with specified profile. The capability of all stages will be known by then.
 
-### 6.1. Metadata capability
+### 6.1. Matching stage capability
+
+#### 6.1.1. Matching stage metadata capability
 
 First capability is the metadata capability.
 
@@ -752,7 +756,9 @@ typedef struct _sai_dash_stage_capability_t
 
 At this moment, DASH doesn't have a dedicated type for modeling the stages, hence the capabilities are exposed via SAI switch extensions.
 
-### 6.2. Routing action capability
+### 6.2. Pipeline capability
+
+#### 6.2.1. Routing action capability
 
 Similar to metadata capability, we should also allow technology providers to tell the user which routing actions are supported by the ASIC via capability, which can be defined as below in high level:
 
