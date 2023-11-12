@@ -618,7 +618,7 @@ Or, with a slight change, we can implement another routing policy to enable a tu
 
 #### 5.9.4. Action publishing
 
-Each entry in the matching stages can specify a [routing type](#582-routing-type) that contains a list of the routing actions for specifying the packet transformations. Since each action is designed to be independent, the routing types can be defined as a bitset, where every bit is a different type of action. When an entry is matched in the matching stages, the actions will be merged into the metadata bus, and the actions will be applied when the packet reaches the action apply stage.
+Each entry in the matching stages can specify a [routing type](#582-routing-type) that contains a list of the routing actions for specifying the packet transformations. Since each action is designed to be independent, the routing types can be defined as a bit set, where every bit is a different type of action. When an entry is matched in the matching stages, the actions will be merged into the metadata bus, and the actions will be applied when the packet reaches the action apply stage.
 
 Populating the actions into the metadata bus are straightforward, which can be illustrated by the P4 code below:
 
