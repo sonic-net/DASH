@@ -105,9 +105,9 @@ Although active flow tracking can resimulate the flows very fast, it requires us
 
 The implementation is simple:
 
-- Whenever a match stage with non-zero flow tracking key is updated, we add the key into the resimulation list of the pipeline.
-- Then kick off the flow aging process immediately, and resimulate all flows that matches the key in the resimulation list.
-- If policy is updated again during the resimulation process, reset the progress and start over.
+- Whenever a match stage with non-zero flow tracking key is updated, we add the key into the pending resimulation list of the pipeline.
+- Then kick off the flow aging process immediately, pickup the keys from the pending list, and resimulate all flows that matches the keys.
+- If the flow aging process completes, check if any more keys in the pending list. If yes, kick off the flow aging process again.
 
 This approach doesn't require any additional memory, however, it will be slower.
 
