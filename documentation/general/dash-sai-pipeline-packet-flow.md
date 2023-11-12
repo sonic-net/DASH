@@ -36,7 +36,7 @@
          3. [5.9.3.3. Multi-stage chaining](#5933-multi-stage-chaining)
       4. [5.9.4. Action publishing](#594-action-publishing)
       5. [5.9.5. Metadata publishing](#595-metadata-publishing)
-      6. [5.9.6. Routing active capability](#596-routing-active-capability)
+      6. [5.9.6. Matching stage capability](#596-matching-stage-capability)
    10. [5.10. Action apply](#510-action-apply)
    11. [5.11. Meter update](#511-meter-update)
 6. [6. Examples](#6-examples)
@@ -614,35 +614,19 @@ Or, with a slight change, we can implement another routing policy to enable a tu
 
 #### 5.9.4. Action publishing
 
-Each entry in the matching stages can specify a [routing type](#582-routing-type) that specifies the routing actions for specifying the packet transformations. When an entry is matched in the matching stages, the actions will be populated into the metadata bus, and the actions will be applied when the packet reaches the action apply stage.
+Each entry in the matching stages can specify a [routing type](#582-routing-type) that contains a list of the routing actions for specifying the packet transformations. Since each action is designed to be independent, the routing types can be defined as a bitset, where every bit is a different type of action. When an entry is matched in the matching stages, the actions will be merged into the metadata bus, and the actions will be applied when the packet reaches the action apply stage.
 
 Populating the actions into the metadata bus are straightforward, which can be illustrated by the P4 code below:
 
 ```c
-enum bit<16> routing_action_type_t {
-    staticencap = 0,
-    nat = 1,
+enum bit<32> routing_action_type_t {
+    staticencap = 1 << 0,
+    nat = 1 << 1,
     // ...
 }
 
-action lpmrouting0_set_action(routing_action_type_t action0, ...) {
-    meta.stage0.action0 = action0;
-    // ...
-}
-```
-
-Since we can specify the both transition and actions in a single entry, this allows us to stack the actions as the pipeline moves forward:
-
-```c
-struct stage_actions_t {
-    bit<16> action0;
-    bit<16> action1;
-    // ...
-}
-
-struct metadata_t {
-    stage_actions_t stage0;
-    stage_actions_t stage1;
+action lpmrouting0_set_action(routing_action_type_t routing_type, ...) {
+    meta.pending_actions = meta.pending_actions | routing_type;
     // ...
 }
 ```
@@ -727,7 +711,30 @@ For example, say, we have a network with this policy: all traffic that sends to 
 }
 ```
 
-#### 5.9.6. Routing active capability
+#### 5.9.6. Matching stage capability
+
+Although, ideally we can set any metadata in any stage that we want, the resource of ASIC can be limited. Either, the more metadata we put on each stage, the higher the latency will be. Or, sometimes, certain ASIC might not even support putting all metadata in all stages. So, we should allow technology providers to tell the user which metadata is supported by via capability, which can be defined as below in high level:
+
+```c
+typedef struct _sai_acl_capability_t
+{
+    /**
+     * @brief Output from get function.
+     *
+     * List of metadata supported per stage.
+     * Max action list can be obtained using the #SAI_SWITCH_ATTR_MAX_DASH_STAGE_METADATA_COUNT.
+     *
+     * @suffix enum_list
+     * @passparam &sai_metadata_enum_sai_dash_stage_metadata_type_t
+     */
+    sai_s32_list_t supported_metadata_list;
+
+} sai_dash_stage_capability_t;
+```
+
+When SAI create switch function call completes with specified profile, the underlying pipeline shall be initialized. By then, the capability of all stages will be known.
+
+At this moment, DASH doesn't have a dedicated type for modeling the stages, hence the capabilities are exposed via SAI switch extensions.
 
 ### 5.10. Action apply
 
