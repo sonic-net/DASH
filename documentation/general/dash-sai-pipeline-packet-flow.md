@@ -36,15 +36,17 @@
          3. [5.9.3.3. Multi-stage chaining](#5933-multi-stage-chaining)
       4. [5.9.4. Action publishing](#594-action-publishing)
       5. [5.9.5. Metadata publishing](#595-metadata-publishing)
-      6. [5.9.6. Matching stage capability](#596-matching-stage-capability)
    10. [5.10. Action apply](#510-action-apply)
    11. [5.11. Meter update](#511-meter-update)
-6. [6. Examples](#6-examples)
-   1. [6.1. VNET routing](#61-vnet-routing)
-   2. [6.2. VM level public IP inbound (L3 DNAT)](#62-vm-level-public-ip-inbound-l3-dnat)
-   3. [6.3. VM level public IP outbound (L3 SNAT)](#63-vm-level-public-ip-outbound-l3-snat)
-   4. [6.4. Load balancer (L4 DNAT)](#64-load-balancer-l4-dnat)
-   5. [6.5. More](#65-more)
+6. [6. Matching stage capability](#6-matching-stage-capability)
+   1. [6.1. Metadata capability](#61-metadata-capability)
+   2. [6.2. Routing action capability](#62-routing-action-capability)
+7. [7. Examples](#7-examples)
+   1. [7.1. VNET routing](#71-vnet-routing)
+   2. [7.2. VM level public IP inbound (L3 DNAT)](#72-vm-level-public-ip-inbound-l3-dnat)
+   3. [7.3. VM level public IP outbound (L3 SNAT)](#73-vm-level-public-ip-outbound-l3-snat)
+   4. [7.4. Load balancer (L4 DNAT)](#74-load-balancer-l4-dnat)
+   5. [7.5. More](#75-more)
 
 ## 1. Overview
 
@@ -711,12 +713,28 @@ For example, say, we have a network with this policy: all traffic that sends to 
 }
 ```
 
-#### 5.9.6. Matching stage capability
+### 5.10. Action apply
 
-Although, ideally we can set any metadata in any stage that we want, the resource of ASIC can be limited. Either, the more metadata we put on each stage, the higher the latency will be. Or, sometimes, certain ASIC might not even support putting all metadata in all stages. So, we should allow technology providers to tell the user which metadata is supported by via capability, which can be defined as below in high level:
+After all matching stages are done, we will start applying all the actions. All the latest values in the metadata bus will be used as the input parameters for the routing actions.
+
+### 5.11. Meter update
+
+After all actions are applied, post-pipeline ACLs are passed, we will update the metering counters if any metering class is specified.
+
+## 6. Matching stage capability
+
+Although, the logical pipeline or behavior model allows us to set any metadata in any stage or doing any routing actions that we want, the ASIC can have certain limitations, either the functionality or the resource. So, we should allow technology providers to tell the user what is supported via capability.
+
+Because the underlying pipeline shall be initialized, when SAI create switch function call completes with specified profile. The capability of all stages will be known by then.
+
+### 6.1. Metadata capability
+
+First capability is the metadata capability.
+
+Because the resource of ASIC can be limited, the more metadata we put on each stage, the higher the latency will be. So, the technology provider could choose which metadata are supported on which stage. And the capability can be defined as below in high level:
 
 ```c
-typedef struct _sai_acl_capability_t
+typedef struct _sai_dash_stage_capability_t
 {
     /**
      * @brief Output from get function.
@@ -732,23 +750,32 @@ typedef struct _sai_acl_capability_t
 } sai_dash_stage_capability_t;
 ```
 
-When SAI create switch function call completes with specified profile, the underlying pipeline shall be initialized. By then, the capability of all stages will be known.
-
 At this moment, DASH doesn't have a dedicated type for modeling the stages, hence the capabilities are exposed via SAI switch extensions.
 
-### 5.10. Action apply
+### 6.2. Routing action capability
 
-After all matching stages are done, we will start applying all the actions. All the latest values in the metadata bus will be used as the input parameters for the routing actions.
+Similar to metadata capability, we should also allow technology providers to tell the user which routing actions are supported by the ASIC via capability, which can be defined as below in high level:
 
-### 5.11. Meter update
+```c
+typedef struct _sai_dash_pipeline_capability_t
+{
+     /**
+     * @brief Bit mask of supported routing actions (sai_dash_routing_action_type_t)
+     *
+     * @flags sai_dash_routing_action_type_t
+     */
+    uint64_t supported_routing_actions;
 
-After all actions are applied, post-pipeline ACLs are passed, we will update the metering counters if any metering class is specified.
+} sai_dash_pipeline_capability_t;
+```
 
-## 6. Examples
+Since executing the routing actions requires all required metadata to be populated into metadata bus, there is one more thing that we will validate against the routing actions - will all required metadata by the supported routing actions are supported by the pipeline. This can be done by simply merging all supported metadata from all stages and check them. If not, we will return error when creating the pipeline.
+
+## 7. Examples
 
 Here are some examples to demo how to apply the DASH-SAI pipeline to implement different network functions. They might not be up-to-date or complete policies, but mostly demoing the high level ideas.
 
-### 6.1. VNET routing
+### 7.1. VNET routing
 
 ```json
 [
@@ -779,7 +806,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 ]
 ```
 
-### 6.2. VM level public IP inbound (L3 DNAT)
+### 7.2. VM level public IP inbound (L3 DNAT)
 
 ```json
 [
@@ -814,7 +841,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 ]
 ```
 
-### 6.3. VM level public IP outbound (L3 SNAT)
+### 7.3. VM level public IP outbound (L3 SNAT)
 
 ```json
 [
@@ -835,7 +862,7 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 ]
 ```
 
-### 6.4. Load balancer (L4 DNAT)
+### 7.4. Load balancer (L4 DNAT)
 
 ```json
 [
@@ -893,6 +920,6 @@ Here are some examples to demo how to apply the DASH-SAI pipeline to implement d
 ]
 ```
 
-### 6.5. More
+### 7.5. More
 
 - [SONiC-DASH packet flows](https://github.com/sonic-net/SONiC/blob/master/doc/dash/dash-sonic-hld.md#2-packet-flows)
