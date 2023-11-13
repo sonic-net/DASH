@@ -120,6 +120,10 @@ typedef struct _sai_dash_flow_key_t {
 
     /* @brief Transport Layer Information (TCP/UDP/ICMP) */
     sai_dash_ha_flow_l4_info_t l4_info;
+  
+    /* @brief VNI */
+  	sai_uint32_t vni;
+      
 } sai_dash_flow_key_t;
 
 /**
@@ -223,9 +227,10 @@ message SaiDashFlowMetadata {
     /* Destination PA IP address */
     string dest_pa = 3; 
     uint64 metering_class = 4;
-    SaiDashHaRewriteInfo rewrite_info = 5;
+    uint64 metering_class2 = 5;
+    SaiDashHaRewriteInfo rewrite_info = 6;
     /* Vendor specific metadata */
-    bytes vendor_metadata = 6; 
+    bytes vendor_metadata = 7; 
 }
 
 enum SaiDashPolicyResult {
