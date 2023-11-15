@@ -61,7 +61,8 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     auto mf = matchActionEntry->add_match();
     mf->set_field_id({{table['keys'][0].id}});
     auto mf_exact = mf->mutable_exact();
-    {{table['keys'][0].field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
+    //{{table['keys'][0].field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
+      {{table['keys'][0].field}}SetVal(static_cast<uint{{ table['keys'][0].bitwidth }}_t>(objId), mf_exact, {{ table['keys'][0].bitwidth }}); 
     {% else %}
     // SAI object table with multiple P4 table keys
     // Copy P4 table keys from appropriate SAI attributes
@@ -339,7 +340,14 @@ static sai_status_t dash_sai_create_{{ table.name }}(
         mf->set_field_id({{key.id}});
         {% if key.match_type == 'exact' %}
         auto mf_exact = mf->mutable_exact();
-        {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
+        //{{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
+        {% set keyfield = key.field %}
+        {% set bitwidth = key.bitwidth %}
+        {% if keyfield in ['ipaddr','mac'] or bitwidth in [24] %} 
+          {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
+        {% else %} 
+          {{key.field}}SetVal(static_cast<uint{{key.bitwidth}}_t>(tableEntry->{{ key.sai_key_name | lower }}), mf_exact, {{key.bitwidth}});
+        {% endif %}
         {% elif key.match_type == 'lpm' %}
         auto mf_lpm = mf->mutable_lpm();
         {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_lpm, {{key.bitwidth}});
@@ -496,7 +504,14 @@ static sai_status_t dash_sai_remove_{{ table.name }}(
         mf->set_field_id({{key.id}});
         {% if key.match_type == 'exact' %}
         auto mf_exact = mf->mutable_exact();
-        {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
+        {% set keyfield = key.field %}
+        {% set bitwidth = key.bitwidth %}
+        {% if keyfield in ['ipaddr','mac'] or bitwidth in [24] %}
+           {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
+        {% else %}
+          {{key.field}}SetVal(static_cast<uint{{key.bitwidth}}_t>(tableEntry->{{ key.sai_key_name | lower }}), mf_exact, {{key.bitwidth}});
+        {% endif %}  
+        //{{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
         {% elif key.match_type == 'lpm' %}
         auto mf_lpm = mf->mutable_lpm();
         {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_lpm, {{key.bitwidth}});
