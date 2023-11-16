@@ -87,9 +87,13 @@ Another typical case of flow resimulation is policy-based resimulation. For exam
 
 ### 2.1. Flow tracking key and pending resimulation bit
 
-To solve this, a 128-bit flow tracking key can be set in each match stage entry. Additionally, this key and a pending resimulation bit is added to each flow.
+To solve this, a flow tracking key can be set in each match stage entry. Additionally, this key and a pending resimulation bit is added to each flow.
 
 Whenever a match stage entry is updated which has a non-zero flow tracking key specified, all flows that shares the same flow tracking key will be resimulated together, which set the pending resimulation bit in each associated flow.
+
+Ideally, the width of the flow tracking key should be large enough to avoid collisions. For example, for supporting IPv6 CA-PA mappings, it is ideal to use 128-bits for the flow tracking key. But, it will also take the precious memory space in the match stage entry. So, to balance the memory usage and the collision possibility, we can use 32-bits for the flow tracking key.
+
+Furthermore, if flow tracking key can be deducted from the match stage key, then we can simply set an SAI attribute to use the match stage key as the flow tracking key. This will greatly reduce the memory usage in the match stage entry, for cases like VNET CA-PA mapping.
 
 ### 2.2. Active flow tracking
 
@@ -134,8 +138,9 @@ To summarize, the following changes are needed to implement policy-based flow re
     ```json
     "DASH_SAI_SOME_ENTRY_TABLE|<entry partition key>|<stage_index>|<Unique Key of the entry>": {
         // ...
-        "flow_tracking_key": "0x1234567890abcdef1234567890abcdef",
-        "flow_resimulation_requested": false // See On-demand flow resimulation for more details.
+        "flow_tracking_key": "0x12345678",
+        "flow_tracking_with_entry_key": true, // If true, the flow tracking key will be deducted from the entry key.
+        "flow_resimulation_requested": false  // See On-demand flow resimulation for more details.
     }
     ```
 
