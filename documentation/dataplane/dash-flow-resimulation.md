@@ -46,7 +46,7 @@ Some flows can be very low volume and causing flow incarnation id stops working.
 
 To solve this, whenever the incarnation id overflows, we will need to treat all flows as resimulated. Implementation-wise, this can be done by adding another bit to indicate overflow happened, then reset the flow incarnation id to 0 in each flow during the next flow aging process. After flow aging is done, we can reset the overflow bit.
 
-This is a really rare case, so we don't need to worry about the performance impact of this, as the traffic volume is super low for these flows anyway.
+Since frequently calling full flow resimulation is not going to be a good practice, this will be a rare case, so we don't need to worry about the performance impact of this.
 
 ### 1.4. Flow resimulation w/ flow HA
 
@@ -100,6 +100,9 @@ Furthermore, if flow tracking key can be deducted from the match stage key, then
 To implement the flow tracking for each key, we can leverage the "Conntrack Update" stage:
 
 - When a flow is created, we can get the flow tracking key from the metadata bus. If it is non-zero, we will store this mapping in a hash table.
+  - The hash table here keep the flow tracking key to flow id mapping, whose type is conceptually equivalent to `std::unordered_map<flow_tracking_key, std::set<flow_id>>` in c++.
+  - Implementation-wise, the hash table can essentially use the same hash table type that implements any other software lookup tables, such as flow table.
+  - From the [DASH scaling requirements](https://github.com/sonic-net/SONiC/blob/master/doc/dash/dash-sonic-hld.md#14-scaling-requirements), the maximum number of flow tracking key can be ~8M, while the maximum number of flow id will be ~32M. Hence, the scaling requirement for this hash table will be smaller than software-based flow table.
 - When a flow is destroyed or resimulated, we can get the current flow tracking key from the flow state as well as the new one from metadata bus, then fix the mapping.
 
 When a match stage entry is updated, we can then find all flows that stored in the hash table and resimulate them by flipping their pending resimulation bit to true one by one.
