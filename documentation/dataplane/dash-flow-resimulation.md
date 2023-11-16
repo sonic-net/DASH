@@ -91,7 +91,7 @@ To solve this, a flow tracking key can be set in each match stage entry. Additio
 
 Whenever a match stage entry is updated which has a non-zero flow tracking key specified, all flows that shares the same flow tracking key will be resimulated together, which set the pending resimulation bit in each associated flow.
 
-Ideally, the width of the flow tracking key should be large enough to avoid collisions. For example, for supporting IPv6 CA-PA mappings, it is ideal to use 128-bits for the flow tracking key. But, it will also take the precious memory space in the match stage entry. So, to balance the memory usage and the collision possibility, we can use 32-bits for the flow tracking key.
+Ideally, the width of the flow tracking key should be large enough to avoid collisions. For example, for supporting IPv6 CA-PA mappings, it is ideal to use 128-bits for the flow tracking key. But, it will also take the precious memory space in the match stage entry. So, to balance the memory usage and the collision possibility, we choose to use 32-bits for the flow tracking key, which is large enough to provide unique key due to [the scale of DASH requirements](https://github.com/sonic-net/SONiC/blob/master/doc/dash/dash-sonic-hld.md).
 
 Furthermore, if flow tracking key can be deducted from the match stage key, then we can simply set an SAI attribute to use the match stage key as the flow tracking key. This will greatly reduce the memory usage in the match stage entry, for cases like VNET CA-PA mapping.
 
