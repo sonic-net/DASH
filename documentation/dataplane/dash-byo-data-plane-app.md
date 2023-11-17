@@ -48,9 +48,9 @@ participant BYODPA as BYO data plane app
 participant netdev
 
 User->>SAI: SAI create switch<br>with controller role<br>and settings
-SAI->>IDPA: Configurate inbox<br>data plane app
+SAI->>IDPA: configure inbox<br>data plane app
 User->>SAI: Get netdev name<br>as switch attribute
-User->>BYODPA: Launch and configurate BYO data plane app
+User->>BYODPA: Launch and configure BYO data plane app
 BYODPA->>SAI: SAI create switch with worker role
 BYODPA->>netdev: Initialize on top of netdev
 ```
@@ -64,7 +64,7 @@ After initialization, the data plane app will be able to:
 
 There are 2 roles ASIC management roles for DASH:
 
-- Controller: When calling create switch with controller role, it will setup the ASIC, configurate the inbox data plane app, etc.
+- Controller: When calling create switch with controller role, it will setup the ASIC, configure the inbox data plane app, etc.
 - Worker: When calling create switch with worker role, it will only initialize the SDK for calling SAI APIs.
 
 This allows the data plane app also be able to program the ASIC, so that data plane app can implement features such as: flow management, match stage entry eviction, etc.
@@ -83,7 +83,7 @@ In DASH-SAI APIs, we have provided a set of APIs to help manage the flows. Pleas
 
 RSS is a frequently used feature in data plane app, which allows the packets to be distributed among different worker threads to increase throughput.
 
-To enable and configurate RSS, we don't have any extra APIs in SAI, and BYO data plane app can follow the standard way in DPDK to achieve this.
+To enable and configure RSS, we don't have any extra APIs in SAI, and BYO data plane app can follow the standard way in DPDK to achieve this.
 
 ## 3. SAI API design
 

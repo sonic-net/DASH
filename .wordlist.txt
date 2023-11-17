@@ -66,6 +66,7 @@ buildimage
 BulkSyncDone
 BW
 bw
+BYO
 bz
 callout
 cd
@@ -360,6 +361,7 @@ natted
 NAT'ing
 nb
 nd
+netdev
 netdevs
 Nexthop
 nexthop
@@ -488,6 +490,7 @@ roadmap
 routable
 RPC
 RPCs
+RSS
 RST
 RSTPackets
 RSTs
