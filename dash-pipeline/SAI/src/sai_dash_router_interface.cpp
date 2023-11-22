@@ -6,4 +6,9 @@ sai_router_interface_api_t dash_sai_router_interface_api_impl = {
 
     DASH_GENERIC_QUAD_API(router_interface)
     DASH_GENERIC_STATS_API(router_interface)
+
+    create_router_interfaces = 0,
+    remove_router_interfaces = 0,
+    set_router_interfaces_attribute = 0,
+    get_router_interfaces_attribute = 0,
 };
