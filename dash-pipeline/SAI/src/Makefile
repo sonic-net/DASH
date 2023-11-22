@@ -8,7 +8,7 @@ CXXFLAGS_COMMON+= -Wcast-align
 CXXFLAGS_COMMON+= -Wcast-qual
 CXXFLAGS_COMMON+= -Wconversion
 CXXFLAGS_COMMON+= -Wdisabled-optimization
-#CXXFLAGS_COMMON+= -Werror  # disabled until warnings will be fixed
+CXXFLAGS_COMMON+= -Werror
 CXXFLAGS_COMMON+= -Wextra
 CXXFLAGS_COMMON+= -Wfloat-equal
 CXXFLAGS_COMMON+= -Wformat=2
