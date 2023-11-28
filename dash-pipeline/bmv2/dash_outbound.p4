@@ -119,12 +119,13 @@ control outbound(inout headers_t hdr,
     }
 
     action set_tunnel(IPv4Address underlay_dip,
+                      dash_encapsulation_t dash_encapsulation,
                       bit<16> meter_class,
                       bit<1> meter_class_override) {
         meta.encap_data.underlay_dip = underlay_dip;
         meta.mapping_meter_class = meter_class;
         meta.mapping_meter_class_override = meter_class_override;
-        meta.encap_data.dash_encapsulation = dash_encapsulation_t.VXLAN;
+        meta.encap_data.dash_encapsulation = dash_encapsulation;
     }
 
     action set_tunnel_mapping(IPv4Address underlay_dip,
@@ -137,6 +138,7 @@ control outbound(inout headers_t hdr,
         meta.encap_data.overlay_dmac = overlay_dmac;
 
         set_tunnel(underlay_dip,
+                   dash_encapsulation_t.VXLAN,
                    meter_class,
                    meter_class_override);
     }
