@@ -2,10 +2,11 @@
 
 1. [1. Data plane app](#1-data-plane-app)
 2. [2. BYO data plane app](#2-byo-data-plane-app)
-   1. [2.1. Work flow](#21-work-flow)
-   2. [2.2. DASH management role and ASIC programming](#22-dash-management-role-and-asic-programming)
-   3. [2.3. Flow management](#23-flow-management)
-   4. [2.4. RSS support](#24-rss-support)
+   1. [2.1. DASH management role and system overview](#21-dash-management-role-and-system-overview)
+   2. [2.2. Initialization work flow](#22-initialization-work-flow)
+   3. [2.3. ASIC programming work flow](#23-asic-programming-work-flow)
+   4. [2.4. Flow management](#24-flow-management)
+   5. [2.5. RSS support](#25-rss-support)
 3. [3. SAI API design](#3-sai-api-design)
    1. [3.1. SAI switch attribute updates](#31-sai-switch-attribute-updates)
    2. [3.2. DASH pipeline programming APIs](#32-dash-pipeline-programming-apis)
@@ -30,11 +31,29 @@ BYO data plane app is essentially a DPDK application that directly interacts wit
 
 When BYO data plane app is enabled, the data plane app provided by technology providers will be either disabled or running without tied to the data plane netdev and only act as part of SAI API implementation if needed. With this setup, DASH users can start to use that device to run their own data plane app and process the packets.
 
-After the change, at a high level, the system architecture will be look like below:
+### 2.1. DASH management role and system overview
+
+With BYO data plane app, from our customer's prespective, we will have 2 sources to program the ASIC, such as creating match stage entries or managing flow entries:
+
+1. DASH users can explicitly program the ASIC via DASH SAI API proxy. A typical scenario is programming a new SDN policy.
+2. BYO data plane app can also program the ASIC. A typical scenario is creating flow entries.
+
+Even further, these 2 sources sometimes might need to work together in certain scenarios. For example, when a VNET mapping is updated, we need to update the VNET mapping entry as well as trigging flow resimulation to update all the flow entries that are related to this VNET mapping.
+
+Hence we need a design to avoid the same set of SAI APIs being called in 2 different processes accidentally and causing problems, such as managing the stage entries, as the last caller will overwrite the ASIC state without any synchronization and knowledge from the other side.
+
+To solve this problem, we are introducing 2 roles in DASH:
+
+- Controller, which is responsible for initializing the ASIC and envirnoments.
+- Worker, which is responsible for processing the packets of new flows, programming the match stage entries, managing the flows and more.
+
+At a high level, the system architecture will be look like below:
 
 ![DASH BYO data plane app](./images/dash-byo-data-plane-app.svg)
 
-### 2.1. Work flow
+To explain how these 2 roles works together, we will dive into the initialization and ASIC programming work flow here.
+
+### 2.2. Initialization work flow
 
 The work flow of enabling the BYO data plane app will be like below:
 
@@ -42,30 +61,58 @@ The work flow of enabling the BYO data plane app will be like below:
 sequenceDiagram
 
 participant User
-participant SAI
+participant SP as SAI Proxy
+participant SC as SAI (Controller)
 participant IDPA as DASH Inbox data plane app
 participant BYODPA as BYO data plane app
+participant SW as SAI (Worker)
 participant netdev
 
-User->>SAI: SAI create switch<br>with controller role<br>and settings
-SAI->>IDPA: configure inbox<br>data plane app
-User->>SAI: Get netdev name<br>as switch attribute
+note over User,netdev: Controller initialization
+User->>SP: SAI create switch<br>with controller role<br>and settings
+SP->>SC: Forward request to SAI
+SC->>SC: Initialize card<br>envirionment
+SC->>IDPA: Configure inbox<br>data plane app
+User->>SP: Get netdev name<br>as switch attribute
+SP->>SC: Get netdev name<br>as switch attribute
+note over User,netdev: BYO data plane app initialization
 User->>BYODPA: Launch and configure BYO data plane app
-BYODPA->>SAI: SAI create switch with worker role
+BYODPA->>SW: SAI create switch with worker role
+SW->>SP: Connect to proxy for handling stage entry and flow management request
 BYODPA->>netdev: Initialize on top of netdev
 ```
 
-After initialization, the data plane app will be able to:
+After initialization, the BYO data plane app will be able to:
 
 - Receive/Send packets from/to netdev
 - Use SAI API to program the ASIC
 
-### 2.2. DASH management role and ASIC programming
+> **NOTE**:
+>
+> Since BYO data plane app and DASH controller is essentially provided by our customer, so there are a few more things that BYO data plane app could do, but not listed in the diagram:
+>
+> 1. Controller can directly call into BYO data plane app for managing private features that is not provided by DASH.
+> 2. BYO data plane app could call into the platform-dependent APIs (ASIC SDK) directly for managing the ASIC. However, by doing so, it also loses the portability of the BYO data plane app.
 
-There are 2 roles ASIC management roles for DASH:
+### 2.3. ASIC programming work flow
 
-- Controller: When calling create switch with controller role, it will setup the ASIC, configure the inbox data plane app, etc.
-- Worker: When calling create switch with worker role, it will only initialize the SDK for calling SAI APIs.
+```mermaid
+sequenceDiagram
+
+participant User
+participant SP as SAI Proxy
+participant BYODPA as BYO data plane app
+participant SW as SAI (Worker)
+
+note over User,SW: User update a mapping entry
+User->>SP: SAI create mapping entry
+SP->>BYODPA: Forward request to worker
+BYODPA->>SW: Update mapping entry
+BYODPA->>SW: Trigger flow resimulation or other actions if needed.
+
+note over User,SW: BYO data plane app update a flow entry
+BYODPA->>SW: SAI update flow entry
+```
 
 This allows the data plane app also be able to program the ASIC, so that data plane app can implement features such as: flow management, match stage entry eviction, etc.
 
@@ -73,13 +120,13 @@ This allows the data plane app also be able to program the ASIC, so that data pl
 >
 > Please bare in mind that - Although some APIs can be accessed by both roles, such as creating match stage entries, but this is not a good practice, because the ASIC state will be overwritten by the last caller without any synchronization and knowledge from the other side. So, please make sure that the APIs are only called by one side.
 
-### 2.3. Flow management
+### 2.4. Flow management
 
 One of the most important responsibility of data plane app is flow management. Essentially, whenever a packet that cannot be handled by the hardware flow table, it will run through the DASH pipeline and sent to the data plane app. The data plane app will need to decide if a flow needs to be created, deleted or resimulated, and how.
 
 In DASH-SAI APIs, we have provided a set of APIs to help manage the flows. Please refer to DASH Flow API design doc for more details.
 
-### 2.4. RSS support
+### 2.5. RSS support
 
 RSS is a frequently used feature in data plane app, which allows the packets to be distributed among different worker threads to increase throughput.
 
