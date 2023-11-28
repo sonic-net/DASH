@@ -161,6 +161,7 @@ control outbound(inout headers_t hdr,
                               0xffffffffffffffffffffffff);
 
         set_tunnel(underlay_dip,
+                   dash_encapsulation,
                    meter_class,
                    meter_class_override);
     }
