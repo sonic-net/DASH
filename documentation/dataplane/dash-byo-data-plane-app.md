@@ -96,6 +96,10 @@ After initialization, the BYO data plane app will be able to:
 
 ### 2.3. ASIC programming work flow
 
+With this setup, whenever we need to program the ASIC with new entries, we will forward the request to the data plane app.
+
+Here is the example that shows how the users updates an existing mapping entry with flow resimulation, as well as how a BYO data plane app updates a flow entry:
+
 ```mermaid
 sequenceDiagram
 
@@ -113,12 +117,6 @@ BYODPA->>SW: Trigger flow resimulation or other actions if needed.
 note over User,SW: BYO data plane app update a flow entry
 BYODPA->>SW: SAI update flow entry
 ```
-
-This allows the data plane app also be able to program the ASIC, so that data plane app can implement features such as: flow management, match stage entry eviction, etc.
-
-> **NOTE**:
->
-> Please bare in mind that - Although some APIs can be accessed by both roles, such as creating match stage entries, but this is not a good practice, because the ASIC state will be overwritten by the last caller without any synchronization and knowledge from the other side. So, please make sure that the APIs are only called by one side.
 
 ### 2.4. Flow management
 
