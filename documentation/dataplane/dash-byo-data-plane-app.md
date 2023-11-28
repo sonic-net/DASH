@@ -33,18 +33,18 @@ When BYO data plane app is enabled, the data plane app provided by technology pr
 
 ### 2.1. DASH management role and system overview
 
-With BYO data plane app, from our customer's prespective, we will have 2 sources to program the ASIC, such as creating match stage entries or managing flow entries:
+With BYO data plane app, from our customer's perspective, we will have 2 sources to program the ASIC, such as creating match stage entries or managing flow entries:
 
 1. DASH users can explicitly program the ASIC via DASH SAI API proxy. A typical scenario is programming a new SDN policy.
 2. BYO data plane app can also program the ASIC. A typical scenario is creating flow entries.
 
-Even further, these 2 sources sometimes might need to work together in certain scenarios. For example, when a VNET mapping is updated, we need to update the VNET mapping entry as well as trigging flow resimulation to update all the flow entries that are related to this VNET mapping.
+Even further, these 2 sources sometimes might need to work together in certain scenarios. For example, when a VNET mapping is updated, we need to update the VNET mapping entry as well as triggering flow resimulation to update all the flow entries that are related to this VNET mapping.
 
 Hence we need a design to avoid the same set of SAI APIs being called in 2 different processes accidentally and causing problems, such as managing the stage entries, as the last caller will overwrite the ASIC state without any synchronization and knowledge from the other side.
 
 To solve this problem, we are introducing 2 roles in DASH:
 
-- Controller, which is responsible for initializing the ASIC and envirnoments.
+- Controller, which is responsible for initializing the ASIC and environments.
 - Worker, which is responsible for processing the packets of new flows, programming the match stage entries, managing the flows and more.
 
 At a high level, the system architecture will be look like below:
@@ -75,6 +75,7 @@ SC->>SC: Initialize card<br>envirionment
 SC->>IDPA: Configure inbox<br>data plane app
 User->>SP: Get netdev name<br>as switch attribute
 SP->>SC: Get netdev name<br>as switch attribute
+
 note over User,netdev: BYO data plane app initialization
 User->>BYODPA: Launch and configure BYO data plane app
 BYODPA->>SW: SAI create switch with worker role
@@ -108,14 +109,14 @@ participant SP as SAI Proxy
 participant BYODPA as BYO data plane app
 participant SW as SAI (Worker)
 
-note over User,SW: User update a mapping entry
+note over User,SW: User updates a mapping entry
 User->>SP: SAI create mapping entry
 SP->>BYODPA: Forward request to worker
 BYODPA->>SW: Update mapping entry
 BYODPA->>SW: Trigger flow resimulation or other actions if needed.
 
-note over User,SW: BYO data plane app update a flow entry
-BYODPA->>SW: SAI update flow entry
+note over User,SW: BYO data plane app updates a flow entry
+BYODPA->>SW: SAI updates flow entry
 ```
 
 ### 2.4. Flow management
