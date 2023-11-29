@@ -151,7 +151,6 @@ control outbound(inout headers_t hdr,
                                     bit<16> meter_class,
                                     bit<1> meter_class_override) {
         meta.encap_data.overlay_dmac = hdr.ethernet.dst_addr;
-        meta.encap_data.dash_encapsulation = dash_encapsulation;
         meta.encap_data.vni = tunnel_key;
 
         service_tunnel_encode(hdr,
