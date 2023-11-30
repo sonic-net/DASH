@@ -99,6 +99,7 @@ After initialization, the BYO data plane app will be able to:
 >
 > 1. Controller can directly call into BYO data plane app for managing private features that is not provided by DASH.
 > 2. BYO data plane app could call into the platform-dependent APIs (ASIC SDK) directly for managing the ASIC. However, by doing so, it also loses the portability of the BYO data plane app.
+> 3. Since BYO data plane app is essentially a DPDK-based application, it can also use DPDK APIs to manage the netdev and the ASIC, e.g., setting up RSS options, etc.
 
 ### 2.3. ASIC programming work flow
 
