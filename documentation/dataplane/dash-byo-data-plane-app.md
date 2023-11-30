@@ -65,6 +65,7 @@ participant SP as SAI Proxy
 participant SC as SAI (Controller)
 participant IDPA as DASH Inbox data plane app
 participant BYODPA as BYO data plane app
+participant SH as SAI Handler
 participant SW as SAI (Worker)
 participant netdev
 
@@ -78,8 +79,12 @@ SP->>SC: Get netdev name<br>as switch attribute
 
 note over User,netdev: BYO data plane app initialization
 User->>BYODPA: Launch and configure BYO data plane app
-BYODPA->>SW: SAI create switch with worker role
-SW->>SP: Connect to proxy for handling stage entry and flow management request
+BYODPA->>SH: Initialize
+activate SH
+SH->>SW: SAI create switch<br>with worker role
+SH->>SP: Connect to proxy for handling stage entry and flow management request
+SP->>User: Send BYO data plane app<br>ready notification
+deactivate SH
 BYODPA->>netdev: Initialize on top of netdev
 ```
 
@@ -148,6 +153,9 @@ typedef enum _sai_dash_management_role_t {
     SAI_DASH_MANAGEMENT_ROLE_WORKER,
 } sai_dash_management_role_t;
 
+typedef void (*sai_switch_dash_byo_data_plane_app_ready_notification_fn)(
+        _In_ sai_object_id_t switch_id);
+
 typedef enum _sai_switch_attr_extensions_t {
     // ...
 
@@ -176,6 +184,15 @@ typedef enum _sai_switch_attr_extensions_t {
      * @flags READ_ONLY
      */
     SAI_SWITCH_ATTR_DASH_BYO_DATA_PLANE_APP_NETDEV_NAME,
+
+    /**
+     * @brief Vendor specific path name of the firmware to load.
+     *
+     * @type sai_switch_dash_byo_data_plane_app_ready_notification_fn
+     * @flags CREATE_ONLY
+     * @default NULL
+     */
+    SAI_SWITCH_ATTR_DASH_BYO_DATA_PLANE_APP_READY_NOTIFY,
 } sai_switch_attr_extensions_t;
 ```
 
