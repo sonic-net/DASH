@@ -187,7 +187,7 @@ typedef enum _sai_switch_attr_extensions_t {
     SAI_SWITCH_ATTR_DASH_BYO_DATA_PLANE_APP_NETDEV_NAME,
 
     /**
-     * @brief Vendor specific path name of the firmware to load.
+     * @brief Data plane app ready notification callback function.
      *
      * @type sai_switch_dash_byo_data_plane_app_ready_notification_fn
      * @flags CREATE_ONLY
