@@ -12,21 +12,22 @@ In DASH pipeline, after flow is created, it may not remain unchanged until it is
    1. [2.1. Flow tracking key and pending resimulation bit](#21-flow-tracking-key-and-pending-resimulation-bit)
    2. [2.2. Active flow tracking](#22-active-flow-tracking)
    3. [2.3. Passive flow tracking](#23-passive-flow-tracking)
-   4. [2.4. Flow tracking key in flow HA](#24-flow-tracking-key-in-flow-ha)
-   5. [2.5. Object model change summary for policy-based flow resimulation](#25-object-model-change-summary-for-policy-based-flow-resimulation)
+   4. [2.4. Flow resimulation with overlapping match stage key](#24-flow-resimulation-with-overlapping-match-stage-key)
+   5. [2.5. Flow tracking key in flow HA](#25-flow-tracking-key-in-flow-ha)
+   6. [2.6. Object model change summary for policy-based flow resimulation](#26-object-model-change-summary-for-policy-based-flow-resimulation)
 3. [3. Learning-based flow resimulation](#3-learning-based-flow-resimulation)
 4. [4. On-demand flow resimulation](#4-on-demand-flow-resimulation)
 5. [5. Explicit per flow consistency (PCC) support](#5-explicit-per-flow-consistency-pcc-support)
 
 ## 1. Full flow resimulation
 
-Full flow resimulation is the most common flow resimulation. For example, after ACL is updated, we will need to resimulate all flows for this pipeline, e.g., ENI.
+Full flow resimulation is the most common flow resimulation. For example, after ACL is updated, we will need to resimulate all flows for this pipeline, i.e., ENI.
 
 ### 1.1. Flow incarnation id
 
 To implement this, A flow incarnation id is introduced:
 
-- Each pipeline will store its own flow incarnation id, which starts from 0 and changes whenever all flows needs to resimulated by updating the SAI attribute on the pipeline.
+- Each ENI will store its own flow incarnation id, which starts from 0 and changes whenever all flows needs to resimulated by updating the SAI attribute on the ENI.
 - Each flow also stores the current id when it is created.
 
 ### 1.2. Flow resimulation process
@@ -42,9 +43,14 @@ After this, the later packet will directly hit the new flow and bypass the later
 
 ### 1.3. Flow incarnation id overflow
 
-Some flows can be very low volume and causing flow incarnation id stops working. Say, if the flow incarnation id is 8 bits, and not it is set to 1, a low volume flow is created. And after 256 flow resimulation calls, the next packet finally arrives and see the same id, which bypasses the flow resimulation process.
+Some flows can be very low volume and causing flow incarnation id stops working. Say, if the flow incarnation id is 8 bits, and now it is set to 1, a low volume flow is created. And after 256 flow resimulation calls, the next packet finally arrives and see the same id, which bypasses the flow resimulation process.
 
-To solve this, whenever the incarnation id overflows, we will need to treat all flows as resimulated. Implementation-wise, this can be done by adding another bit to indicate overflow happened, then reset the flow incarnation id to 0 in each flow during the next flow aging process. After flow aging is done, we can reset the overflow bit.
+To solve this, whenever the incarnation id overflows, we will need to treat all flows as resimulated. Implementation-wise, this can be done by:
+
+1. Adding a pending resimulation bit to each flow.
+2. Adding a SAI attribute to ENI to force flow resimulation.
+
+Whenever overflow happens, we can set the force flow resimulation to true. Then, the flow aging process will pick it up, reset the request attribute to false, then start flow walking and set the pending resimulation bit on all flows to true. Whenever the next packet arrives, the pending resimulation bit will force the packet to go through the flow resimulation process.
 
 Since frequently calling full flow resimulation is not going to be a good practice, this will be a rare case, so we don't need to worry about the performance impact of this.
 
@@ -56,16 +62,36 @@ The process follows the flow HA design. When replacing the current flow with the
 
 Since the flow incarnation id is part of the flow state, it will also be synched to the standby side and updates the stored id there. Although in flow HA design, the policy will be programmed to both active and standby side, but we cannot use the id in the standby side directly, because these 2 pipelines are programmed independently, so we don't have a way to ensure that the standby one always matches the active one. To solve this, we make the standby pipeline always follows the active side, which follows the flow lifetime management design in flow HA.
 
+Another thing for flow HA is that, both pending-resimulation bit and flow-not-synced bit will affect where the packet should sent to. And there could be extreme case that flow resimulation bit is set before the sync is done. In this case, flow-not-synced bit always takes presendence. It is more important to make sure the previous flow decision is synced before making another decision.
+
 ### 1.5. Object model change summary for full flow resimulation
 
 To summarize, the following changes are needed to implement full flow resimulation:
 
 - 2 properties needs to be added for each pipeline:
 
-    ```json
-    "DASH_SAI_ENI_TABLE|123456789012": {
-        "flow_incarnation_id": 0,
-        "flow_incarnation_overflowed": false,
+    ```c
+    typedef enum _sai_eni_attr_t {
+        // ...
+
+        /**
+         * @brief Flow incarnation id.
+         *
+         * @type sai_uint8_t
+         * @flags CREATE_AND_SET
+         * @default 0
+         */
+        SAI_ENI_ATTR_FLOW_INCARNATION_ID,
+
+        /**
+         * @brief Force flow resimulation requested.
+         *
+         * @type bool
+         * @flags CREATE_AND_SET
+         * @default false
+         */
+        SAI_ENI_ATTR_FORCE_FLOW_INCARNATION_REQUESTED,
+
         // ...
     }
     ```
@@ -74,16 +100,33 @@ To summarize, the following changes are needed to implement full flow resimulati
   
   ```c
   typedef enum _sai_flow_state_metadata_attr_t {
-      SAI_FLOW_ATTR_START,
       // ...
-      SAI_FLOW_METADATA_ATTR_INCARNATION_ID, // Saved flow incarnation id.
-      SAI_FLOW_METADATA_ATTR_END
+
+      /**
+       * @brief Saved flow incarnation id when flow is created or last updated.
+       *
+       * @type sai_uint8_t
+       * @flags CREATE_AND_SET
+       * @default 0
+       */
+      SAI_FLOW_METADATA_ATTR_INCARNATION_ID,
+
+      /**
+       * @brief Pending resimulation bit.
+       *
+       * @type bool
+       * @flags CREATE_AND_SET
+       * @default false
+       */
+      SAI_FLOW_METADATA_ATTR_PENDING_RESIMULATION,
+
+      // ...
   } sai_flow_metadata_attr_t;
   ```
 
 ## 2. Policy-based flow resimulation
 
-Another typical case of flow resimulation is policy-based resimulation. For example, whenever a VNET CA-PA mapping is updated, we need and only need to update the flows for this single mapping. This requirement can be applied to other policy updates as well, for example, routing entry or port mapping.
+Another typical case of flow resimulation is policy-based resimulation. For example, whenever a VNET CA-PA mapping is updated, we need and only need to update the flows for this single mapping. This requirement can be applied to other policy updates as well, for example, port mapping.
 
 ### 2.1. Flow tracking key and pending resimulation bit
 
@@ -119,11 +162,20 @@ The implementation is simple:
 
 This approach doesn't require any additional memory, however, it will be slower.
 
-### 2.4. Flow tracking key in flow HA
+### 2.4. Flow resimulation with overlapping match stage key
+
+Certain match stages allow having overlapped match stage keys, such as routing table. Whenever an entries of these stages is added, it can affect the flows that is tied to other entries. However, we might not be able to find out these entries easily. In this case, policy-based flow resimulation is not recommended and we should use full flow resimulation instead to be safe, similar to ACLs.
+
+Take routing entry as an example here. Say, an ENI has a routing entry `10.0.0.0/16` programmed and some flows created that matched this entry. Later on, a new entry `10.0.1.0/24` with a different tracking key is programmed, and it requires existing flows to be resimulated to hit this new entry. In this case, we could either:
+
+1. Find all the affected overlapped entries - specifically, the matched entry when looking up using `10.0.1.0`, which is `10.0.0.0/16`. Then request flow resimulation on it.
+2. Or, request a full flow resimulation.
+
+### 2.5. Flow tracking key in flow HA
 
 Policy-based flow resimulation introduced another problem in flow HA. Since both active and standby side are programmed independently, how can we ensure that the flows associated to a policy on one side will be associated to the same policy on the other side? What if the policy is not even programmed yet on the other side?
 
-This is the reason that flow tracking key is introduced and has 128-bits. Essentially, the flow tracking key **MUST** be unique within the pipeline for all policies that we want to trigger the flow resimulation separately. And it must be programmed and aware by our caller to ensure both active side and standby side shares the same key for the same policy.
+Essentially, the flow tracking key **MUST** be unique within the pipeline for all policies that we want to trigger the flow resimulation separately. And it must be programmed and aware by our caller to ensure both active side and standby side shares the same key for the same policy.
 
 During planned switchover, we will ensure the policy on active side and standby side are updated to the same version and all future updates will be paused until the switchover is done. So we don't need to worry about the policy mismatch, such as one side has the flow tracking key while the other side doesn't.
 
@@ -132,18 +184,44 @@ During unplanned events and standby side is forced to become the new active, the
 - When active flow tracking is used, the flow tracking key to flow mapping hash table can be constructed on the standby side as part of the flow sync process. Hence, we can directly check if the keys are matched between policy and the hash table. If a key exists in the hash table, but not found in the policy, we will mark all the flow as resimulated to get them fixed when next packet arrives.
 - When passive flow tracking is used, we can enumerate all flows and resimulate the flow that contains unknown flow tracking key. A more brute force way is to increase the flow incarnation id, which makes all flows to be resimulated, but it may cause temporary high pressure on the entire pipeline.
 
-### 2.5. Object model change summary for policy-based flow resimulation
+### 2.6. Object model change summary for policy-based flow resimulation
 
 To summarize, the following changes are needed to implement policy-based flow resimulation:
 
 - 1 property needs to be added on match stage entry:
 
-    ```json
-    "DASH_SAI_SOME_ENTRY_TABLE|<entry partition key>|<stage_index>|<Unique Key of the entry>": {
+    ```c
+    typedef struct _sai_some_table_entry_attr_t {
         // ...
-        "flow_tracking_key": "0x12345678",
-        "flow_tracking_with_entry_key": true, // If true, the flow tracking key will be deducted from the entry key.
-        "flow_resimulation_requested": false  // See On-demand flow resimulation for more details.
+
+        /**
+         * @brief Flow tracking key.
+         *
+         * @type sai_uint32_t
+         * @flags CREATE_AND_SET
+         * @default 0
+         */
+        SAI_SOME_TABLE_ENTRY_ATTR_FLOW_TRACKING_KEY,
+
+        /**
+         * @brief Use the entry key as flow tracking key to track the flows.
+         *
+         * @type bool
+         * @flags CREATE_AND_SET
+         * @default false
+         */
+        SAI_SOME_TABLE_ENTRY_ATTR_FLOW_TRACKING_WITH_ENTRY_KEY,
+
+        /**
+         * @brief Request flow resimulation for all flows that having the same flow tracking key as this entry.
+         *
+         * @type bool
+         * @flags CREATE_AND_SET
+         * @default false
+         */
+        SAI_SOME_TABLE_ENTRY_ATTR_FLOW_RESIMULATION_REQUESTED,
+    
+        // ...
     }
     ```
 
@@ -151,11 +229,27 @@ To summarize, the following changes are needed to implement policy-based flow re
 
     ```c
     typedef enum _sai_flow_state_metadata_attr_t {
-        SAI_FLOW_ATTR_START,
         // ...
+
+        /**
+         * @brief Flow tracking key.
+         *
+         * @type sai_uint32_t
+         * @flags CREATE_AND_SET
+         * @default 0
+         */
         SAI_FLOW_METADATA_ATTR_FLOW_TRACKING_KEY,       // Flow tracking key.
-        SAI_FLOW_METADATA_ATTR_PENDING_RESIMULATION,    // pending resimulation bit.
-        SAI_FLOW_METADATA_ATTR_END
+
+        /**
+         * @brief Flow tracking key.
+         *
+         * @type bool
+         * @flags CREATE_AND_SET
+         * @default false
+         */
+        SAI_FLOW_METADATA_ATTR_PENDING_RESIMULATION,    // Pending resimulation bit.
+
+        // ...
     } sai_flow_metadata_attr_t;
     ```
 
