@@ -63,13 +63,13 @@ The process follows the flow HA design. When replacing the current flow with the
 
 Since the flow incarnation id is part of the flow state, it will also be synched to the standby side and updates the stored id there. Although in flow HA design, the policy will be programmed to both active and standby side, but we cannot use the id in the standby side directly, because these 2 pipelines are programmed independently, so we don't have a way to ensure that the standby one always matches the active one. To solve this, we make the standby pipeline always follows the active side, which follows the flow lifetime management design in flow HA.
 
-Another thing for flow HA is that, both pending-resimulation bit and flow-not-synced bit will affect where the packet should sent to. And there could be extreme case that flow resimulation bit is set before the sync is done. In this case, flow-not-synced bit always takes presendence. It is more important to make sure the previous flow decision is synced before making another decision.
+Another thing for flow HA is that, both pending-resimulation bit and flow-not-synced bit will affect where the packet should sent to. And there could be extreme case that flow resimulation bit is set before the sync is done. In this case, flow-not-synced bit always takes precedence. It is more important to make sure the previous flow decision is synced before making another decision.
 
 ### 1.5. Flow resimulation rate limiting
 
 When a flow needs to be resimulated, it will go through the entire pipeline just like a new flow (sometimes doing even more work), hence the scaling requirement for flow resimulation is counted as part of CPS. Additionally, flow resimulation are usually coming as a burst, not matter it is full flow resimulation or policy-based flow resimulation. Hence, flow resimulation without rate limiting can cause serious impact of CPS performance, or even completely kill the CPS path.
 
-To avoid flow resimulation from seriously impacting the CPS path, we are using token bucket as our rate limiting mechainism. This gives us an ability to provide good flow resimulation performance when the burst is small, while limiting the impact when the burst is large. The token bucket is implemented as follows:
+To avoid flow resimulation from seriously impacting the CPS path, we are using token bucket as our rate limiting mechainism. This gives us an ability to provide good flow resimulation performance when the burst is small, while limiting the impact when the burst is large. The token bucket is on each ENI, because it helps avoid a bad ENI impacting all ENIs on the same card. The algorithem can be briefly described as follows:
 
 - Each ENI has its own token bucket, the size of which is configurable by SAI attribute on the ENI.
 - The token bucket starts with full tokens. And each flow resimulation will consume 1 token.
@@ -84,49 +84,49 @@ To summarize, the following changes are needed to implement full flow resimulati
 
 - 2 properties needs to be added for each pipeline:
 
-    ```c
-    typedef enum _sai_eni_attr_t {
-        // ...
+  ```c
+  typedef enum _sai_eni_attr_t {
+      // ...
 
-        /**
-         * @brief Flow incarnation id.
-         *
-         * @type sai_uint8_t
-         * @flags CREATE_AND_SET
-         * @default 0
-         */
-        SAI_ENI_ATTR_FLOW_INCARNATION_ID,
+      /**
+       * @brief Flow incarnation id.
+       *
+       * @type sai_uint8_t
+       * @flags CREATE_AND_SET
+       * @default 0
+       */
+      SAI_ENI_ATTR_FLOW_INCARNATION_ID,
 
-        /**
-         * @brief Force flow resimulation requested.
-         *
-         * @type bool
-         * @flags CREATE_AND_SET
-         * @default false
-         */
-        SAI_ENI_ATTR_FORCE_FLOW_INCARNATION_REQUESTED,
+      /**
+       * @brief Force flow resimulation requested.
+       *
+       * @type bool
+       * @flags CREATE_AND_SET
+       * @default false
+       */
+      SAI_ENI_ATTR_FORCE_FLOW_RESIMULATION_REQUESTED,
 
-        /**
-         * @brief Flow resimulation token bucket size.
-         *
-         * @type sai_uint32_t
-         * @flags CREATE_AND_SET
-         * @default 0
-         */
-        SAI_ENI_ATTR_FLOW_RESIMULATION_TOKEN_BUCKET_SIZE,
+      /**
+       * @brief Flow resimulation token bucket size.
+       *
+       * @type sai_uint32_t
+       * @flags CREATE_AND_SET
+       * @default 0
+       */
+      SAI_ENI_ATTR_FLOW_RESIMULATION_TOKEN_BUCKET_SIZE,
 
-        /**
-         * @brief Flow resimulation token bucket refill rate.
-         *
-         * @type sai_uint32_t
-         * @flags CREATE_AND_SET
-         * @default 0
-         */
-        SAI_ENI_ATTR_FLOW_RESIMULATION_TOKEN_BUCKET_REFILL_RATE,
+      /**
+       * @brief Flow resimulation token bucket refill rate.
+       *
+       * @type sai_uint32_t
+       * @flags CREATE_AND_SET
+       * @default 0
+       */
+      SAI_ENI_ATTR_FLOW_RESIMULATION_TOKEN_BUCKET_REFILL_RATE,
 
-        // ...
-    }
-    ```
+      // ...
+  }
+  ```
 
 - 1 property needs to be added on flow state:
   
@@ -222,68 +222,68 @@ To summarize, the following changes are needed to implement policy-based flow re
 
 - 1 property needs to be added on match stage entry:
 
-    ```c
-    typedef struct _sai_some_table_entry_attr_t {
-        // ...
+  ```c
+  typedef struct _sai_some_table_entry_attr_t {
+      // ...
 
-        /**
-         * @brief Flow tracking key.
-         *
-         * @type sai_uint32_t
-         * @flags CREATE_AND_SET
-         * @default 0
-         */
-        SAI_SOME_TABLE_ENTRY_ATTR_FLOW_TRACKING_KEY,
+      /**
+       * @brief Flow tracking key.
+       *
+       * @type sai_uint32_t
+       * @flags CREATE_AND_SET
+       * @default 0
+       */
+      SAI_SOME_TABLE_ENTRY_ATTR_FLOW_TRACKING_KEY,
 
-        /**
-         * @brief Use the entry key as flow tracking key to track the flows.
-         *
-         * @type bool
-         * @flags CREATE_AND_SET
-         * @default false
-         */
-        SAI_SOME_TABLE_ENTRY_ATTR_FLOW_TRACKING_WITH_ENTRY_KEY,
+      /**
+       * @brief Use the entry key as flow tracking key to track the flows.
+       *
+       * @type bool
+       * @flags CREATE_AND_SET
+       * @default false
+       */
+      SAI_SOME_TABLE_ENTRY_ATTR_FLOW_TRACKING_WITH_ENTRY_KEY,
 
-        /**
-         * @brief Request flow resimulation for all flows that having the same flow tracking key as this entry.
-         *
-         * @type bool
-         * @flags CREATE_AND_SET
-         * @default false
-         */
-        SAI_SOME_TABLE_ENTRY_ATTR_FLOW_RESIMULATION_REQUESTED,
-    
-        // ...
-    }
-    ```
+      /**
+       * @brief Request flow resimulation for all flows that having the same flow tracking key as this entry.
+       *
+       * @type bool
+       * @flags CREATE_AND_SET
+       * @default false
+       */
+      SAI_SOME_TABLE_ENTRY_ATTR_FLOW_RESIMULATION_REQUESTED,
+  
+      // ...
+  }
+  ```
 
 - 2 property needs to be added on flow state:
 
-    ```c
-    typedef enum _sai_flow_state_metadata_attr_t {
-        // ...
+  ```c
+  typedef enum _sai_flow_state_metadata_attr_t {
+      // ...
 
-        /**
-         * @brief Flow tracking key.
-         *
-         * @type sai_uint32_t
-         * @flags CREATE_AND_SET
-         * @default 0
-         */
-        SAI_FLOW_METADATA_ATTR_FLOW_TRACKING_KEY,
+      /**
+       * @brief Flow tracking key.
+       *
+       * @type sai_uint32_t
+       * @flags CREATE_AND_SET
+       * @default 0
+       */
+      SAI_FLOW_METADATA_ATTR_FLOW_TRACKING_KEY,
 
-        /**
-         * @brief Pending resimulation bit. This is the same bits as shown above in full flow resimulation.
-         *
-         * @type bool
-         * @flags CREATE_AND_SET
-         * @default false
-         */
-        SAI_FLOW_METADATA_ATTR_PENDING_RESIMULATION,
+      /**
+       * @brief Pending resimulation bit. This is the same bits as shown above in full flow resimulation.
+       *
+       * @type bool
+       * @flags CREATE_AND_SET
+       * @default false
+       */
+      SAI_FLOW_METADATA_ATTR_PENDING_RESIMULATION,
 
-        // ...
-    } sai_flow_metadata_attr_t;
-    ```
+      // ...
+  } sai_flow_metadata_attr_t;
+  ```
 
 ## 3. Learning-based flow resimulation
 
