@@ -69,7 +69,7 @@ Another thing for flow HA is that, both pending-resimulation bit and flow-not-sy
 
 When a flow needs to be resimulated, it will go through the entire pipeline just like a new flow (sometimes doing even more work), hence the scaling requirement for flow resimulation is counted as part of CPS. Additionally, flow resimulation are usually coming as a burst, not matter it is full flow resimulation or policy-based flow resimulation. Hence, flow resimulation without rate limiting can cause serious impact of CPS performance, or even completely kill the CPS path.
 
-To avoid flow resimulation from seriously impacting the CPS path, we are using token bucket as our rate limiting mechainism. This gives us an ability to provide good flow resimulation performance when the burst is small, while limiting the impact when the burst is large. The token bucket is on each ENI, because it helps avoid a bad ENI impacting all ENIs on the same card. The algorithem can be briefly described as follows:
+To avoid flow resimulation from seriously impacting the CPS path, we are using token bucket as our rate limiting mechanism. This gives us an ability to provide good flow resimulation performance when the burst is small, while limiting the impact when the burst is large. The token bucket is on each ENI, because it helps avoid a bad ENI impacting all ENIs on the same card. The algorithm can be briefly described as follows:
 
 - Each ENI has its own token bucket, the size of which is configurable by SAI attribute on the ENI.
 - The token bucket starts with full tokens. And each flow resimulation will consume 1 token.
@@ -254,7 +254,7 @@ To summarize, the following changes are needed to implement policy-based flow re
       SAI_SOME_TABLE_ENTRY_ATTR_FLOW_RESIMULATION_REQUESTED,
   
       // ...
-  }
+  } sai_some_table_entry_attr_t;
   ```
 
 - 2 property needs to be added on flow state:
@@ -287,7 +287,7 @@ To summarize, the following changes are needed to implement policy-based flow re
 
 ## 3. Learning-based flow resimulation
 
-The last type of flow resimulation trigger is learning-based. For example, [Tunnel Learning](../general/dash-sai-pipeline-packet-flow.md#5621-tunnel-learning).
+The last type of flow resimulation trigger is learning-based. For example, [tunnel Learning](../general/dash-sai-pipeline-packet-flow.md#5621-tunnel-learning).
 
 When tunnel change happens, the flow will be marked as to be resimulated. After [the flow resimulation process](#12-flow-resimulation-process), the new pair of flow will be generated, which contains the new tunnel information in the reverse flow and to be used to replace the current flow.
 
