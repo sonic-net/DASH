@@ -7,7 +7,8 @@ In DASH pipeline, after flow is created, it may not remain unchanged until it is
    2. [1.2. Flow resimulation process](#12-flow-resimulation-process)
    3. [1.3. Flow incarnation id overflow](#13-flow-incarnation-id-overflow)
    4. [1.4. Flow resimulation w/ flow HA](#14-flow-resimulation-w-flow-ha)
-   5. [1.5. Object model change summary for full flow resimulation](#15-object-model-change-summary-for-full-flow-resimulation)
+   5. [1.5. Flow resimulation rate limiting](#15-flow-resimulation-rate-limiting)
+   6. [1.6. Object model change summary for full flow resimulation](#16-object-model-change-summary-for-full-flow-resimulation)
 2. [2. Policy-based flow resimulation](#2-policy-based-flow-resimulation)
    1. [2.1. Flow tracking key and pending resimulation bit](#21-flow-tracking-key-and-pending-resimulation-bit)
    2. [2.2. Active flow tracking](#22-active-flow-tracking)
@@ -64,7 +65,20 @@ Since the flow incarnation id is part of the flow state, it will also be synched
 
 Another thing for flow HA is that, both pending-resimulation bit and flow-not-synced bit will affect where the packet should sent to. And there could be extreme case that flow resimulation bit is set before the sync is done. In this case, flow-not-synced bit always takes presendence. It is more important to make sure the previous flow decision is synced before making another decision.
 
-### 1.5. Object model change summary for full flow resimulation
+### 1.5. Flow resimulation rate limiting
+
+When a flow needs to be resimulated, it will go through the entire pipeline just like a new flow (sometimes doing even more work), hence the scaling requirement for flow resimulation is counted as part of CPS. Additionally, flow resimulation are usually coming as a burst, not matter it is full flow resimulation or policy-based flow resimulation. Hence, flow resimulation without rate limiting can cause serious impact of CPS performance, or even completely kill the CPS path.
+
+To avoid flow resimulation from seriously impacting the CPS path, we are using token bucket as our rate limiting mechainism. This gives us an ability to provide good flow resimulation performance when the burst is small, while limiting the impact when the burst is large. The token bucket is implemented as follows:
+
+- Each ENI has its own token bucket, the size of which is configurable by SAI attribute on the ENI.
+- The token bucket starts with full tokens. And each flow resimulation will consume 1 token.
+- Every 100ms, the token bucket will be refilled with a configurable number of tokens until it reaches the maximum size, which is also an SAI attribute on the ENI.
+- The rate limiting only affects the flow resimulation process when the packet comes in. It doesn't affect the process that mark the flow as pending resimulation, such as flow aging.
+
+This chops the burst into small pieces and makes sure the flow resimulation rate is limited.
+
+### 1.6. Object model change summary for full flow resimulation
 
 To summarize, the following changes are needed to implement full flow resimulation:
 
@@ -91,6 +105,24 @@ To summarize, the following changes are needed to implement full flow resimulati
          * @default false
          */
         SAI_ENI_ATTR_FORCE_FLOW_INCARNATION_REQUESTED,
+
+        /**
+         * @brief Flow resimulation token bucket size.
+         *
+         * @type sai_uint32_t
+         * @flags CREATE_AND_SET
+         * @default 0
+         */
+        SAI_ENI_ATTR_FLOW_RESIMULATION_TOKEN_BUCKET_SIZE,
+
+        /**
+         * @brief Flow resimulation token bucket refill rate.
+         *
+         * @type sai_uint32_t
+         * @flags CREATE_AND_SET
+         * @default 0
+         */
+        SAI_ENI_ATTR_FLOW_RESIMULATION_TOKEN_BUCKET_REFILL_RATE,
 
         // ...
     }
@@ -238,16 +270,16 @@ To summarize, the following changes are needed to implement policy-based flow re
          * @flags CREATE_AND_SET
          * @default 0
          */
-        SAI_FLOW_METADATA_ATTR_FLOW_TRACKING_KEY,       // Flow tracking key.
+        SAI_FLOW_METADATA_ATTR_FLOW_TRACKING_KEY,
 
         /**
-         * @brief Flow tracking key.
+         * @brief Pending resimulation bit. This is the same bits as shown above in full flow resimulation.
          *
          * @type bool
          * @flags CREATE_AND_SET
          * @default false
          */
-        SAI_FLOW_METADATA_ATTR_PENDING_RESIMULATION,    // Pending resimulation bit.
+        SAI_FLOW_METADATA_ATTR_PENDING_RESIMULATION,
 
         // ...
     } sai_flow_metadata_attr_t;
