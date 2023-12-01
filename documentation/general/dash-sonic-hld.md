@@ -47,6 +47,7 @@
 |  1.4  | 05/03/2023 |    Prince Sunny     | ACL Tagging, ACL Requirements             |
 |  1.5  | 05/22/2023 | Oleksandr Ivantsiv  | Update configuration examples             |
 |  1.6  | 06/01/2023 |    Prince Sunny     | Added FastPath                            |
+|  1.7  | 12/01/2023 |    Riff Jiang       | Added Flow resimulation requirement       |
 
 # About this Manual
 This document provides more detailed design of DASH APIs, DASH orchestration agent, Config and APP DB Schemas and other SONiC buildimage changes required to bring up SONiC image on an appliance card. General DASH HLD can be found at [dash_hld](./dash-high-level-design.md).
@@ -101,26 +102,26 @@ Warm-restart support is not considered in Phase 1. TBD
 ## 1.4 Scaling requirements
 Following are the minimal scaling requirements
 
-| Item                          | Expected value                |
-| ----------------------------- | ----------------------------- |
-| VNETs                         | 1024*                         |
-| ENI                           | 32 Per Card                   |
-| Outbound Routes per ENI       | 100k                          |
-| Inbound Routes per ENI        | 10k**                         |
-| NSGs per ENI                  | 10***                         |
-| ACL rules per NSG             | 1000                          |
-| ACL prefixes per ENI          | 10x100k                       |
-| Max prefixes per rule         | 8k                            |
-| ACL ports per ENI             | 10x10k SRC/DST ports          |
-| Total tags per ENI            | 4k                            |
-| Max prefixes per tag          | 24k                           |
-| Max tags one prefix belong to | 512                           |
-| Max tags in an ACL rule       | 4k                            |
-| CA-PA Mappings                | 8M Per Card                   |
-| Active Connections/ENI        | 1M (Bidirectional TCP or UDP) |
-| Total active connections      | 32M (Bidirectional)           |
-| Metering Buckets per ENI      | 4000                          |
-| CPS                           | 3M                            |
+| Item                               | Expected value                |
+| ---------------------------------- | ----------------------------- |
+| VNETs                              | 1024*                         |
+| ENI                                | 32 Per Card                   |
+| Outbound Routes per ENI            | 100k                          |
+| Inbound Routes per ENI             | 10k**                         |
+| NSGs per ENI                       | 10***                         |
+| ACL rules per NSG                  | 1000                          |
+| ACL prefixes per ENI               | 10x100k                       |
+| Max prefixes per rule              | 8k                            |
+| ACL ports per ENI                  | 10x10k SRC/DST ports          |
+| Total tags per ENI                 | 4k                            |
+| Max prefixes per tag               | 24k                           |
+| Max tags one prefix belong to      | 512                           |
+| Max tags in an ACL rule            | 4k                            |
+| CA-PA Mappings                     | 8M Per Card                   |
+| Active Connections/ENI             | 1M (Bidirectional TCP or UDP) |
+| Total active connections           | 32M (Bidirectional)           |
+| Metering Buckets per ENI           | 4000                          |
+| CPS (New flow + flow resimulation) | 3M                            |
 
 \* Number of VNET is a software limit as VNET by itself does not take hardware resources. This shall be limited to number of VNI hardware can support
 
