@@ -1,56 +1,79 @@
-# NAT scenario
+# NAT service
 
 ## Overview
 
-NAT scenario describes 2 NAT use cases:
+NAT scenario describes NAT use case in 2 ways:
 
-* VMs in VNET access Internet, aka SNAT.
-* Users from Internet access services hosted on the cloud VMs in VNET, aka DNAT.
+* VMs in VNET access Internet, aka SNAT, sessions initiated from VMs.
+* Users from Internet access services hosted in the cloud VMs inside VNET, aka DNAT, i.e session initialted from Internet.
 
-We use network appliance in this HLD, acting the role of NAT gateway as well as underlay router.
+We use smart-switch in this HLD, acting the role of NAT gateway as well as underlay router.
 This scenario provides the following capabilities:
 
-* SNAT service for TCP, UDP and ICMP packets.
-* DNAT service for TCP, UDP and ICMP packets.
+* NAT service for TCP, UDP and ICMP packets.
 * Routing service for underlay forwarding.
-* Billing service(by traffic volume and by committed traffic rate).
+* VxLAN VTEP for traffic isolation.
+* Billing service(by traffic volume and by committed traffic rate, i.e metering and counting).
 
-The goal is to test the following properties:
 
-* Connection set up rate in Connections per Second (CPS)
-* Data traffic bandwidth in Bits per Second (BPS)
-* Data traffic performance in Packet per Second (PPS)
-* Connection Flow Scale
-
-## NAT scenario architecture
+## NAT service architecture
 
 ![nat-architecture](images/Figure1-dash-nat-topo.svg)
 *Figure 1 - NAT scenario architecture*
 
-Tenant1 access Internet service, with VM1 in VNET1 through NAT gateway running on a smart switch. Tenant2 provide service to the public, hosted on VM2 in VNET2, Internet user access this service through NAT gateway running on a smart switch.
+Tenant1 access Internet service from VM1 and VM2 in VNET1 through NAT gateway running on a smart switch. Tenant2 provide service to the public, hosted on VM3 and VM4 in VNET2, Internet user access this service through NAT gateway running on a smart switch.
 
 For both case, VMs in different VNET connects to Internet through a NAT gateway.
 
 ## Packet processing pipeline in NAT scenario
 
-### 1. SNAT scenario
+### Pre-service processing
+
+![Generic pre-service processing pipeline](images/dash-pre-service-processing-pipeline.svg)
+
+* The pipeline parse the packet and extract VxLAN header fields: 'SIP', 'DIP', 'VNI'. If VxLAN header is absent, direction is 'inbound'. Otherwise launch a lookup into table 'DASH_SAI_VNET_TABLE' using key VNI. If hit, get direction from 'DASH_SAI_VNET_TABLE', if missed, direction is 'inbound'.
+* Pipeline lookup: for NAT service, this can be skipped and directly go to next stage. Optionally, 'DIP' + 'DPORT' + 'VNI' can be used to launch a lookup into a 'DASH_SAI_SERVICE_PIPELINE_TABLE', if hit, get the processing pipe from table entry, if missed, drop the packet. 'VNI' used as part of the key if it's present.
+
+### Generic NAT inbound processing pipeline
+
+* For 'inbound' traffic, a lookup with key ['SIP', 'DIP', 'PROTO', 'SPORT', 'DPORT'] is launched into 'DASH_SAI_FLOW_TABLE'. The keys for 'inbound' are always extracted from overlay contents.
+* If hit, apply fast path packet tranformation: replace DIP and DPORT, encap VxLAN header, launch LPM lookup with encapsualted DIP and send the packet out.
+* If missed, push to slow path processing. Launch a lookup into 'DASH_SAI_NAT_TABLE' with keys ['DIP', 'DPORT'], if hit, obtain 'VNI', 'OUTER_DIP', 'OUTER_SIP', then ADD an entry into 'DASH_SAI_FLOW_TABLE" for inbound fast path and reverse path(outbound). If missed, drop the packet.
+
+### Generic NAT outbound processing pipeline
+
+* For 'outbound' traffic, lookup with key ['SIP', 'DIP', 'PROTO', 'SPORT', 'DPORT', 'VNI'] is launched into 'DASH_SAI_FLOW_TABLE'. The keys for 'outbound' are always extracted from overlay contents except 'VNI'.
+* If hit, apply fast path packet transformation: deap VxLAN, repalce 'SIP' and 'SPORT', launch LPM lookup with decapsulated packet's 'DIP' and send the packet out.
+* If missed, push to slow path processing. Lauch a lookup into 'DASH_SAI_NAT_TABLE' with keys ['SIP', 'SPORT', 'VNI'] to obtain 'NEW_SIP' and 'NEW_SPORT'. This process can be optionally replace by copying the packet to 'CPU', meaning it can be handled by software for more flexible/customized determination of 'NEW_SIP' and 'NEW_SPORT'. If hit, ADD 'DASH_SAI_NAT_TABLE' entry for outbound fastpath and reverse path(inbound). If missed, drop the packet.
+
+### Post-NAT service processing
+
+* Optionally, we need counters and meters for billing purpose. For each packet, counter may be updated. For each outbound packet, a meter may be updated for final decision whether the packet can be sent out or dropped, after the LPM lookup.
+
+### 1. SNAT scenario view
 
 #### 1.1 Outbound packet processing pipeline
 
 ![snat-outbound-pipeline](images/Figure2-snat-outbound-pipeline.png)
 *Figure 2 - SNAT outbound packet processing pipeline*
 
-* The pipeline determines the **outbound direction** based on the presence of a VXLAN header in the incoming packet.  The tenant's VNI is a part of the key in flow table entries.
+* The pipeline determines the **outbound direction** based on the presence of a VXLAN header in the incoming packet and a matching lookup into the 'DASH_SAI_VNET_TABLE', with 'VNI' and 'DIP', the keys for this lookup is based on direction 'outbound'.
 
-* An outbound flow table lookup is launched. If a match is found, the packet is processed through the **fast path**(H/W table processing).  If a match is not found, the packet is handled through the **slow path** processing, also referred as the **first packet** processing. A search for an SNAT rule table is then initiated to select a new public source IP address and port number.
+* As the direction is outbound, lookup keys are ['DIP' + 'DPORT' + 'VNI'], to lookup 'DASH_SAI_SERVICE_PIPELINE_TABLE', should hit and get 'NAT' processing pipe.
 
-* The pipeline launches a VTEP lookup to retrieve the VTEP IP of the VM from which the incoming packet originates (i.e. VM's SIP to VTEP mapping). This VTEP IP is used to create an inbound flow table entry (for the responding traffic).
+* An 'DASH_SAI_FLOW_TABLE' lookup is launched. If a match is found, the packet is processed through the **fast path**, apply action: decapsulate VxLAN header, replace SIP and SPORT, do LPM lookup on decapsulated packet and send out.  If a match entry is not found, the packet is handled through the **slow path** processing, also referred as the **first packet** processing.
 
-* Both an outbound flow table entry and an inbound flow table entry are added to their respective flow tables (H/W tables).
+* For **slow path**, a search for an 'DASH_SAI_NAT_TABLE' is then initiated to select a new public source IP address and a source port number, search keys are ['VNI', 'SIP', 'SPORT']. Upon a hit, optional LPM with 'DIP' + 'prefix' can be launched to select a list of 'NEW_SIP', and a hash valued is used to determine the fineal 'NEW_SIP'. The source port number is provided in the NAT rule or optionally change to copy the packet to local CPU for software processing, to that the source port may have a global resource view.
 
-* A search of the outbound flow table is triggered once the packet is re-inserted. The packet will match the outbound flow table entry created (with previous **slow path** processing), and the flow action will be applied to the packet, including the replacement of the source IP address/port number and the decapsulation of the VXLAN header.
+* Through a hit of 'DASH_SAI_NAT_TABLE', it can obtain a new SIP, new SPORT.
 
-* A routing lookup is performed based on destination IP address in order to retrieve the next-hop. This next-hop is used rewrite destination MAC address and determine egress interface.
+* 2 entry are added to 'DASH_SAI_FLOW_TABLE', 1 for outbound, 1 for inbound(reverse direction). So far, the connection is established for bi-directional traffic.
+
+* After 'NEW_SIP', 'NEW_SPORT' repalced, decapsulate the VxLAN header and lauch LPM lookup with decapsulated packet.
+
+* For **fast path**, when the next packet of the same SNAT session arrives for outbound, a search of the 'DASH_SAI_FLOW_TABLE' is launch. The packet will match the 'DASH_SAI_FLOW_TABLE' entry created (with previous **slow path** processing), and the flow action will be applied to the packet, including the replacement of the source IP address/port number and the decapsulation of the VXLAN header.
+
+* A routing lookup is performed based on destination IP address in order to retrieve the next-hop. This next-hop is used to rewrite destination MAC address and determine egress interface.
 
 * Metering and counting are performed for billing purposes before the packet is sent to the Internet.
 
@@ -59,7 +82,11 @@ For both case, VMs in different VNET connects to Internet through a NAT gateway.
 ![snat-inbound-packet-processing-pipeline](images/Figure3-snat-inbound-pipeline.png)
 *Figure 3 - SNAT inbound packet processing pipeline*
 
-* As described in section 1.1, during the handling of the **first packet** processing, the inbound flow table entry has been created in the H/W table. So the incoming packet from Internet (the responding packet) will result in a match during the inbound flow lookup. Then action will be applied, replacing the destination IP address/port number, encapsulating the VXLAN header, performing a routing lookup with DIP (the VTEP IP) obtained from inbound flow table, and finally sends the packet to the destination VM.
+* The pipeline determins the **inbound direction** based on absence of a VxLAN header in the incoming packet or use 'VNI' to lookup into 'DASH_SAI_VNET_TABLE' and obtain the direction 'inbound'.
+
+* Then keys ['DIP', 'DPORT', 'VNI'] or ['DIP', 'DPORT'] are used to lookup 'DASH_SAI_SERIVCE_PIPELINE_TABLE', get pipeline 'NAT'.
+
+* As described in section 1.1, during the handling of the **first packet** processing, the flow table entry for inbound has been created. So the incoming packet from Internet (the responding packet) will result in a match during the inbound flow lookup. Then action will be applied, replacing the destination IP address and destionation port number, encapsulating the VXLAN header, performing a routing lookup with DIP (the VTEP IP) obtained from flow table, and finally sends the packet to the destination VM.
 
 ### 2. DNAT scenario
 
@@ -68,24 +95,32 @@ For both case, VMs in different VNET connects to Internet through a NAT gateway.
 ![dnat-inbound-packet-processing-pipe](images/Figure4-dnat-inbound-pipeline.png)
 *Figure 4 - DNAT inbound packet processing pipeline*
 
-* The pipeline determines the **inbound direction** based on the absence of a VXLAN header in the incoming packet.
+* The pipeline determines the **inbound direction** based on the absence of a VXLAN header in the incoming packet, or a lookup miss into the 'DASH_SAI_VNET_TABLE' or a hit with entry telling that the direction is 'inbound'.
 
-* A search of the inbound flow table is initiated. If a match is found, the packet is processed through the **fast path**(H/W flow table actions obtained and applied). If no match is found, the packet is handled through the **slow path**. A search for a DNAT rule is then initiated, if found, it replaces the public destination IP address and port number with the mapped VM IP address and port number.
+* Then keys ['DIP', 'DPORT', 'VNI'] or ['DIP, 'DPORT'] are used to lookup 'DASH_SAI_SERVICE_PIPELINE_TABLE', get pipeline 'NAT'.
 
-* The pipeline also initiates an VTEP lookup to obtain the VTEP IP of the DNAT mapped VM, which is then used to create an inbound flow table entry.
+* A search of the inbound flow table is initiated. If a match is found, the packet is processed through the **fast path**(flow table actions obtained and applied). If no match is found, the packet is handled through the **slow path**.
 
-* Both an outbound flow table entry and an inbound flow table entry are added to corresponding flow tables.
+* For **slow path**, a search for a NAT rule is then initiated, Keys are ['DIP', 'DPORT', VNI] or ["DIP', 'DPORT'], lookup 'DASH_SAI_NAT_TABLE', 'DPORT' is optional. If found, it replaces the public destination IP address and destionation port number with the mapped VM IP address and port number, encapsulate VxLAN header. VNET info such as VNI, DIP is obtained from the NAT rule entry.
 
-* A search of the inbound flow table is triggered once the packet is re-injected. The packet will match the inbound flow table entry created previously and the flow action will be applied, which includes replacing the destination IP address/port number and adding VXLAN encapsulation.
+* Both an outbound flow table entry and an inbound flow table entry are added to DASH_SAI_FLOW_TABLE.
+
+* For **fash path**, a search of the 'DASH_SAI_FLOW_TABLE' is triggered once the packet is re-injected. The packet will match the flow table entry created previously for inbound packet of this session and the flow action will be applied, which includes replacing the destination IP address + destionation port number and adding VXLAN encapsulation.
 
 * A routing lookup is performed based on destination VTEP IP address before sending the VXLAN encapsulated packet to VM.
+
+* A counting action may be optionally added before sending the packet to VM.
 
 ### 2.2 Outbound packet processing pipeline
 
 ![dnat-outbound-packet-processing-pipeline](images/Figure5-dnat-outbound-pipeline.png)
 *Figure 5 - DNAT outbound packet processing pipeline*
 
-* As described in section 2.1, the outbound flow table entry has been created during the handling of the *first packet* processing, when the responding packet arrives from VM, it matches the entry and performs the specified action of replacing the source IP address/port number and removing the VXLAN header before being sent to the internet.
+* The pipeline determines the **outbound direction** based on the presence of a VXLAN header in the incoming packet and a matching lookup into the 'DASH_SAI_VNET_TABLE', with 'VNI' and 'DIP', the keys for this lookup is based on direction 'outbound'.
+
+* As the direction is outbound, lookup keys are ['DIP' + 'DPORT' + 'VNI'], to lookup 'DASH_SAI_SERVICE_PIPELINE_TABLE', should hit and get 'NAT' processing pipe.
+
+* As described in section 2.1, the outbound flow table entry has been created during the handling of the **first packet** processing, when the responding packet arrives from VM, it matches the entry and performs the specified action of replacing the source IP address/port number and removing the VXLAN header before being sent to the internet.
 
 * Then it routes the packet based on DIP of the decapsulated packet.
 
@@ -110,7 +145,7 @@ DASH_VNET:Vnet2 {
 /* Define routing types */
 DASH_ROUTING_TYPE:vnet_encap: [
     {
-         "name": "action1",
+         "name": "to_vm",
          "action_type: "staticvxlan",
          "encap_type" "vxlan"
     }
@@ -129,7 +164,7 @@ DASH_VNET_ROUTE_TABLE:Vnet1:10.1.0.2 {
 }
 
 
-/* Define SNAT rules */
+/* Define SNAT rules, used for outbound slow path */
 DASH_SNAT_RULE_TABLE:Vnet1:10.1.0.0/24 {
     "0.0.0.0/0": {
         "src_ip_list":[111.1.1.237, 111.1.1.238]
@@ -140,6 +175,7 @@ DASH_SNAT_RULE_TABLE:Vnet1:10.1.1.0/24 {
         "src_ip_list":[111.1.1.239, 111.1.1.240]
     }
 },
+/* Multiple source ip list for different DIP+prefix */
 DASH_SNAT_RULE_TABLE:Vnet2:10.1.0.0/24 {
     "0.0.0.0/0": {
         "src_ip_list":[111.1.1.241]
@@ -149,7 +185,8 @@ DASH_SNAT_RULE_TABLE:Vnet2:10.1.0.0/24 {
     },
 }
 
-/* Define DNAT rules */
+/* Define DNAT rules, used in inbound slow path */
+/* Key: DIP + DPORT(optional) by default, VNI is added when present */
 DASH_DNAT_RULE_TABLE:111.2.190.195:80 {
     "mapping_vnet": Vnet1,
     "mapping_address": 10.1.0.2:80
