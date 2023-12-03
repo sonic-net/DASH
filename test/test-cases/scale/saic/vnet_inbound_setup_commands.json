@@ -71,6 +71,12 @@
       "9",
       "SAI_ENI_ATTR_VNET_ID",
       "$vnet_1",
+      "SAI_ENI_ATTR_PL_SIP",
+      "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+      "SAI_ENI_ATTR_PL_SIP_MASK",
+      "2001:0db8:85a3:0000:0000:0000:0000:0000",
+      "SAI_ENI_ATTR_PL_UNDERLAY_SIP",
+      "10.0.0.18",
       "SAI_ENI_ATTR_INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID",
       "$acl_in_1",
       "SAI_ENI_ATTR_INBOUND_V4_STAGE2_DASH_ACL_GROUP_ID",
@@ -110,6 +116,10 @@
       "SAI_ENI_ATTR_OUTBOUND_V6_STAGE4_DASH_ACL_GROUP_ID",
       "0",
       "SAI_ENI_ATTR_OUTBOUND_V6_STAGE5_DASH_ACL_GROUP_ID",
+      "0",
+      "SAI_ENI_ATTR_V4_METER_POLICY_ID",
+      "0",
+      "SAI_ENI_ATTR_V6_METER_POLICY_ID",
       "0"
     ]
   },
@@ -136,7 +146,7 @@
       "vni": "1000",
       "sip": "10.10.2.0",
       "sip_mask": "255.255.255.0",
-      "priority": 0
+      "priority": "0"
     },
     "attributes": [
       "SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION",

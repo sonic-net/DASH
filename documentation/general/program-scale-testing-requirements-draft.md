@@ -1,6 +1,6 @@
 # Program Scale Testing Requirements for LAB Validation
 
->**NOTE**: This prelimiary document includes a text description of a so-called **"Hero Test"** to establish minimum performance requirements and screen captures of Layer 2/3 packet generator stream configurations for IXIA IxExplorer packet tester device. These L23 streams simulate L4 connection establishment. This document, and the testing methodology, will be replaced by a more formal, complete requirements specification and  automated testing scripts in due time.
+>**NOTE**: This preliminary document includes a text description of a so-called **"Hero Test"** to establish minimum performance requirements and screen captures of Layer 2/3 packet generator stream configurations for IXIA IxExplorer packet tester device. These L23 streams simulate L4 connection establishment. This document, and the testing methodology, will be replaced by a more formal, complete requirements specification and  automated testing scripts in due time.
 
 ## Table of Contents
 
@@ -185,16 +185,16 @@ integrators to track and test the designs in a common manner.
 
 -   **Performance Testing Methodology**:
 
-    -   2M TCP background connections setup before testing.
+    -   15M TCP background connections setup before testing.
 
-    -   2M UDP background bi-directional flows setup before testing.
+    -   15M UDP background bi-directional flows setup before testing.
 
     -   We use an equal mix of TCP and UDP although in the real world we
         expect more TCP and in fact in some cases we meter UDP as a
         potential source of DoS.
 
-    -   Connection aging set to 1 sec and requires each connection or
-        bi-directional flow to receive one packet every second in each
+    -   Connection aging set to 5 sec and requires each connection or
+        bi-directional flow to receive one packet every 4.9 seconds in each
         direction at a size that will fill up the links to near 100% in
         conjunction with the dynamically setup connection traffic. For
         this to be run successfully it may take a few runs as each TCP
@@ -204,9 +204,9 @@ integrators to track and test the designs in a common manner.
         seen that meets the policy for the bi-directional flow setup.
         When using this in CPS testing, we will send a total of 6
         packets to match TCP to make things more balanced. UDP
-        bi-directional flows will be aged within 1 second after
+        bi-directional flows will be aged within 5 second after
         receiving the last packet. I would set all UDP bi-directional
-        flows to 0.5 - 1.0 second aging to ensure that we do not inflate
+        flows to 5 seconds aging to ensure that we do not inflate
         the connection table over time.
 
     -   One packet should be sent in each direction to be able to keep
@@ -214,33 +214,33 @@ integrators to track and test the designs in a common manner.
         to a minimum that allows 6 CPS packets at maximum rate and at
         least one packet on each of the active connections in both
         directions that also allows for close to 100% link utilization
-        while not exceeding the TCP aging time of 1 sec.
+        while not exceeding the TCP aging time of 5 sec.
 
     -   TCP connection is established and terminated without any data
         packets.
         -   Real use case
         -   6 packets: SYN, SYN-ACK, ACK, FIN, FIN-ACK, ACK
-        -   Flow Table Size: (2 \* CPS) + 2M + 2M
-            //For 5M CPS, Flow Table Size: (2 \* 5M) +2M +2M = 14M
+        -   Flow Table Size: (2 \* CPS) + 15M + 15M
+            //For 5M CPS, Flow Table Size: (2 \* 1000) + 15M + 15M = ~30M
         -   Effective PPS: Sustained CPS \* 6 + PPS for background flows.
 
 -   CPS and flow results will be measured while channel bandwidth is
     saturated at 100Gbps for the duration of test runtime. At the same
     time we want as close to 100Gbps without losing packets.
 
--   Inactivity based aging timer of 1 second.
+-   Inactivity based aging timer of 5 second.
 
     -   All TCP connections should be deleted from the table after the
         test completes.
 
     -   The connection table should therefore be zero.
 
-    -   All UDP bi-directional flows need to age out before the 1 second
+    -   All UDP bi-directional flows need to age out before the 5 second
         interval to allow for new UDP bi-directional flows to be
         established. If everything works as advertised, we should never
-        see the connection table go above the 8M connections. If we do
+        see the connection table go above the 32M connections. If we do
         then it is likely that UDP bi-directional flows were not aged
-        within the 1 second interval. To check this, we need to see a
+        within the 5 second interval. To check this, we need to see a
         high water counter for maximum connection table size.
 
 ## Feature Requirements
@@ -294,21 +294,24 @@ The following scale of policies and routes are at minimum required to be
 configured during validation and test plan needs to be executed covering
 both scenarios:
 
-**NEW Values Start** ###################################################
+|                     | per ENI    | 200G (DPU)  | 400G  | 800G  | 1.6T (smart switch) |
+|---------------------|------------|-------------|-------|-------|-------|
+| VNETs               |            | 1024        | 2048  | 4096  |  8192 |
+| ENIs                |            | 32          | 64    | 128   |  256  |
+| Outbound Routes     | 100K       | 3.2M        | 6.4M  | 12.8M | 25.6M |
+| Inbound Routes      |  10K       | 320K        | 640K  | 1.28M | 2.56M |
+| NSGs                | 5in + 5out | 320         | 640   | 1280  | 2560  |
+| ACLs prefixes       | 10x100K    | 32MM        | 64M   | 128M  | 256M  |
+| ACLs Ports          | 10x10K     | 3.2M        | 6.4M  | 12.8M | 25.6M |
+| Mappings (CA to PA) | NA[^1]     | 8M          | 16M   | 32M   | 64M   |
+| Act Con             | 1M         | 32M[^2]     | 64M   | 128M  | 256M  |
+| CPS                 |            | 3M          | 6M    | 12M   | 24M   |
+| bg flows TCP        |            | 15M[^2]     | 30M   | 60M   | 120M  |
+| bg flows UDP        |            | 15M[^2]     | 30M   | 60M   | 120M  |
 
-|               | per ENI    | 200G (DPU)   | 400G  | 800G  | 1.6T (smart switch) |
-|---------------|------------|--------------|-------|-------|-------|
-| VNETs         |            | 1024         | 2048  | 4096  |  8192 |
-| ENIs          |            | 64           | 128   | 256   |  512  |
-| Routes        | 100K       | 6.4M         | 12.8M | 25.6M | 51.2M |
-| NSGs          | 5in + 5out | 640          | 1280  | 2560  |  5120 |
-| ACLs prefixes | 10x100K    | 64M          | 128M  | 256M  | 512M  |
-| ACLs Ports    | 10x10K     | 6.4M         | 12.8M | 25.6M | 51.2M |
-| Mappings (CA to PA)     | 160K       | 10M          | 20M   | 40M   | 80M   |
-| Act Con       | 1M (bidir w/ connection pool capable of oversubscription) | 64M          | 128M  | 256M  | 512M  |
-| CPS           |            | 3.75M        | 7.5M  | 15M   | 30M   |
-| bg flows TCP  |            | 1M  (bidir w/ connection pool capable of oversubscription)  |  2M   | 4M    |  8M   |
-| bg flows UDP  |            | 1M  (bidir w/ connection pool capable of oversubscription)  | 2M    | 4M    | 8M    |
+
+[^1]: per ASIC numbers, can be distributed in any way to each ENI
+[^2]: flows are bidir w/ connection pool capable of oversubscription
 
 - ACL rules per NSG = 1000
 - Prefixes per ACL rule = 100
@@ -317,24 +320,6 @@ both scenarios:
 - Routes per ACL rule = 10
 - -> Change Above:  NSG per ENI changed since 5 Inbound & 5 Outbound stages are required
 
-**NEW Values End** ####################################################
-<!--Comment Out 
-1. &nbsp; 8 ENI Scenario
-    - 8 ENIs/VPorts
-    - 200k \* 8 = 1.6M routes
-    - 8 \* 6 = 48 NSGs
-    - 48 \* 1000 rules = 48000 ACL rules
-    - 48 \* 200k prefixes per NSG = 9.6M Prefixes
-    - 2M Mapping Table
-
-2. &nbsp; 1 ENI Scenario
-    - 1 ENI/VPort
-    - 1.6M routes
-    - 48 NSGs
-    - 48000 ACL rules
-    - 9.6M Prefixes (upper limit per DPU - sum of the above)
-    - 2M Mapping Table
--->
 
 ## MSFT LAB IXIA Configuration
 
@@ -354,9 +339,9 @@ RX: Remote vnic to local vnic
 
 #### Learning Streams
 
-Learning Streams will be used to establish 2M CPS connections and 2M UDP
-background bi-directional flows prior to test execution. These 2M flows
-will be split across 8 vnics that are pre-configured.
+Learning Streams will be used to establish 15M CPS connections and 15M UDP
+background bi-directional flows prior to test execution. These 15M flows
+will be split across 64 vnics that are pre-configured.
 
 ![learning-streams](images/req/learning-streams.png)
 
@@ -436,7 +421,7 @@ need to be created individually.
 
 #### Bandwidth Streams
 
-Bandwidth streams runs with a higher packet size -- 1500 byte -- and
+Bandwidth streams runs with a higher packet size -- 500 byte -- and
 will be used to verify the total 100Gbps bandwidth.
 
 - MSFT-8V-1M-TX-BW-Port1-100Sec

@@ -23,6 +23,9 @@ DASH_UID ?=4321
 DASH_GUID?=4321
 DASH_HOST?=dash
 
+HOST_USER := $(shell id -u)
+HOST_GROUP := $(shell id -g)
+
 ENABLE_DOCKER_PULL ?= y
 
 # Include file defines DOCKER_GRPC_IMG_NAME and DOCKER_GRPC_IMG_CTAG
@@ -71,7 +74,10 @@ DOCKER_RUN := docker run \
 	-v $(PWD)/tests:/tests \
 	--network=host \
 	--rm \
+	-u $(HOST_USER):$(HOST_GROUP) \
 	$(DOCKER_FLAGS)
+
+SHA1SUM := sha1sum | awk '{print substr($$1,0,11);}'
 
 SAI/SAI: sai-submodule
 
@@ -91,20 +97,22 @@ P4_MAIN=bmv2/dash_pipeline.p4
 P4_OUTDIR=bmv2/dash_pipeline.bmv2
 P4_ARTIFACTS=$(P4_OUTDIR)/dash_pipeline.json $(P4_OUTDIR)/dash_pipeline_p4rt.txt
 
-p4: $(P4_OUTDIR)/dash_pipeline.json
+p4: $(P4_ARTIFACTS)
 
 .PHONY:p4-clean
 p4-clean:
-	-rm -rf $(P4_OUTDIR)
+	rm -rf $(P4_OUTDIR)
+
+$(P4_OUTDIR)/dash_pipeline.json: $(P4_OUTDIR)/dash_pipeline_p4rt.txt
+
 # Compile P4 into bmv2 .json fle and P4info for SAI header autogeneration
-$(P4_ARTIFACTS): $(P4_SRC)
+$(P4_OUTDIR)/dash_pipeline_p4rt.txt: $(P4_SRC)
 	@echo "Compile P4 program $(P4_MAIN) for bmv2 ..."
-	mkdir -p $(P4_OUTDIR) && \
-	chmod o+w $(P4_OUTDIR) && \
+	mkdir -p $(P4_OUTDIR)
 	docker run \
 	--rm \
 	--name dash-p4c-$(USER) \
-	-u $(DASH_USER) \
+	-u $(HOST_USER):$(HOST_GROUP) \
 	$(DOCKER_FLAGS) \
 	-v $(PWD)/bmv2:/bmv2 \
 	-w / \
@@ -121,12 +129,11 @@ P4_DPDK_OUTDIR=dpdk-pna/dash_pipeline.dpdk
 
 p4c-dpdk-pna:
 	@echo "Compile P4 program $(P4_MAIN) for dpdk-pna ..."
-	mkdir -p $(P4_DPDK_OUTDIR) && \
-	chmod o+w $(P4_DPDK_OUTDIR) && \
+	mkdir -p $(P4_DPDK_OUTDIR)
 	docker run \
 	--rm \
 	--name dash-p4c-dpdk-$(USER) \
-	-u $(DASH_USER) \
+	-u $(HOST_USER):$(HOST_GROUP) \
 	$(DOCKER_FLAGS) \
 	-v $(PWD)/bmv2:/bmv2 \
 	-v $(PWD)/dpdk-pna:/dpdk-pna \
@@ -137,7 +144,6 @@ p4c-dpdk-pna:
 		--bf-rt-schema $(P4_DPDK_OUTDIR)/dash_pipeline.p4.bfrt.json \
 		--p4runtime-files $(P4_DPDK_OUTDIR)/dash_pipeline.p4.p4info.txt \
 		$(P4_MAIN)
-
 
 	# p4c-dpdk -DDPDK_PNA -DPNA_CONNTRACK --dump $(P4_DPDK_OUTDIR) --pp $(P4_DPDK_OUTDIR)/dash_pipeline.pp.p4 \
 	# -o $(P4_DPDK_OUTDIR)/dash_pipeline.spec --arch pna --bf-rt-schema $(P4_DPDK_OUTDIR)/dash_pipeline.p4.bfrt.json \
@@ -156,48 +162,65 @@ DOCKER_RUN_SAITHRIFT_BLDR =\
 	--name dash-saithrift-bldr-$(USER) \
 	-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/saithrift \
 	-e SAIRPC_VENDOR_EXTRA_LIBS=$(SAIRPC_VENDOR_EXTRA_LIBS) \
+	-u $(DASH_UID):$(DASH_GUID) \
+	-e HOST_USER=$(HOST_USER) \
+	-e HOST_GROUP=$(HOST_GROUP) \
 	$(DOCKER_SAITHRIFT_BLDR_IMG) \
 
 # TODO - create separate rules for headers, libsai.so
 .PHONY:sai
+sai: sai-headers sai-meta libsai
 
-sai: sai-clean sai-headers sai-meta libsai
-
-sai-headers: p4 | SAI/SAI
+sai-headers: p4 docker-saithrift-bldr-image-exists | SAI/SAI
 	@echo "Generate SAI library headers and implementation..."
-	mkdir -p SAI/lib && chmod -R o+w SAI && \
+	mkdir -p SAI/lib
 	$(DOCKER_RUN) \
 		$(DOCKER_FLAGS) \
 		--name build_sai-$(USER) \
+		-u $(HOST_USER):$(HOST_GROUP) \
 		-w /SAI $(DOCKER_SAITHRIFT_BLDR_IMG) \
-	    ./generate_dash_api.sh
+		make
 
 sai-meta:
 	@echo "Generate SAI metadata..."
 	# hack - remove scripts which cause Git ownership failures in CI pipelines
 	# We don't need them, they're to check that SAI headers didn't experience enum changes etc.
-	sed -ie '/checkenumlock.sh/d' SAI/SAI/meta/Makefile
-	sed -ie '/checkancestry.sh/d' SAI/SAI/meta/Makefile
+	sed -i.bak '/checkenumlock.sh/d' SAI/SAI/meta/Makefile
+	sed -i.bak '/checkancestry.sh/d' SAI/SAI/meta/Makefile
+	sed -i.bak '/checkstructs.sh/d' SAI/SAI/meta/Makefile
 	docker run \
 		$(DOCKER_FLAGS) \
 		--rm \
 		--name dash-saithrift-bldr-$(USER) \
-		-v $(PWD)/..:/dash -w /dash/dash-pipeline/SAI/SAI/meta \
+		-u $(HOST_USER):$(HOST_GROUP) \
+		-v $(PWD)/..:/dash \
+		-w /dash/dash-pipeline/SAI/SAI/meta \
 		$(DOCKER_SAITHRIFT_BLDR_IMG) \
-	    make
+	    make all libsaimetadata.so
 
-# TODO - add SAI header dependencies
-libsai:
+libsai: SAI/lib/libsai.so
+
+SAI/lib/libsai.so: sai-headers sai-meta
 	@echo "build libsai.so..."
 	$(DOCKER_RUN) \
 		$(DOCKER_FLAGS) \
 		-w /SAI/lib \
 		--name build_libsai-$(USER) \
+		-u $(HOST_USER):$(HOST_GROUP) \
 		$(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
+.PHONY:libsai-clean
 libsai-clean:
-	-rm -rf SAI/lib/*
+	rm -rf SAI/lib/*
+
+libsai-debs: libsai
+	@echo "build dash libsai debian packages ..."
+	cd SAI/debian && make
+
+.PHONY: libsai-debs-clean
+libsai-debs-clean:
+	cd SAI/debian && make clean
 
 .PHONY:sai-clean
 sai-clean: SAI/SAI libsai-clean saithrift-server-clean
@@ -238,7 +261,7 @@ kill-switch:
 # SAI-THRIFT SERVER TARGETS
 ###############################
 
-saithrift-server:
+saithrift-server: docker-saithrift-bldr-image-exists
 	$(DOCKER_RUN_SAITHRIFT_BLDR) \
 	    make $@
 
@@ -258,7 +281,7 @@ DOCKER_RUN_SAITHRIFT_SRVR =\
 
 run-saithrift-server:
 	$(DOCKER_RUN_SAITHRIFT_SRVR) \
-	./saiserver
+	bash -c './saiserver'
 
 kill-saithrift-server:
 	-docker kill dash-saithrift-server-$(USER)
@@ -267,7 +290,8 @@ run-saithrift-server-bash:
 	$(DOCKER_RUN_SAITHRIFT_SRVR) \
 	/bin/bash
 
-saithrift-server-clean:
+.PHONY:saithrift-server-clean
+saithrift-server-clean: docker-saithrift-bldr-image-exists
 	$(DOCKER_RUN_SAITHRIFT_BLDR) \
 	    make $@
 	rm -rf SAI/rpc
@@ -276,18 +300,18 @@ saithrift-server-clean:
 # SAI TEST TARGETS
 ###############################
 
-.PHONY:test libsai-test
-test:libsai-test
+.PHONY:test
+test: libsai-test
 
+.PHONY:test-clean
 test-clean:
 	make -C tests/libsai clean
 
-
 .PHONY:libsai-test
-libsai-test:SAI/SAI SAI/lib/libsai.so
-	chmod -R a+w tests/libsai
+libsai-test: SAI/lib/libsai.so
 	$(DOCKER_RUN) \
 	    --name dash-build-test-$(USER) \
+		-u $(HOST_USER):$(HOST_GROUP) \
 		-w /tests/libsai  $(DOCKER_BMV2_BLDR_IMG) \
 	    make
 
@@ -328,7 +352,7 @@ init-switch:
 # DOCKER BUILD/PUBLISH TARGETS
 ###############################
 
-DOCKER_BMV2_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.bmv2-bldr | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_BMV2_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.bmv2-bldr | $(SHA1SUM))
 DOCKER_BMV2_BLDR_IMG = $(DOCKER_BMV2_BLDR_IMG_NAME):$(DOCKER_BMV2_BLDR_IMG_TAG)
 
 docker-bmv2-bldr:
@@ -363,15 +387,26 @@ docker-publish-bmv2-bldr:
 		docker push $(DOCKER_BMV2_BLDR_IMG_NAME):$(DOCKER_BMV2_BLDR_IMG_CTAG)
 
 ###############################
+# Ubuntu docker image SHA
+# amd64/ubuntu:20.04 on 2022-07-03
+AMD64_UBUNTU_20_04 := b2339eee806d44d6a8adc0a790f824fb71f03366dd754d400316ae5a7e3ece3e
+# amd64/ubuntu:22.04 on 2023-05-16
+AMD64_UBUNTU_22_04 := ca5534a51dd04bbcebe9b23ba05f389466cf0c190f1f8f182d7eea92a9671d00
 
-DOCKER_SAITHRIFT_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.saithrift-bldr | sha1sum | awk '{print substr($$1,0,11);}')
+AMD64_UBUNTU_SHA256 ?= $(AMD64_UBUNTU_22_04)
+
+DOCKER_SAITHRIFT_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.saithrift-bldr | sed 's/ubuntu_image_sha/$(AMD64_UBUNTU_SHA256)/g' | $(SHA1SUM))
 DOCKER_SAITHRIFT_BLDR_IMG = $(DOCKER_SAITHRIFT_BLDR_IMG_NAME):$(DOCKER_SAITHRIFT_BLDR_IMG_TAG)
+
+docker-saithrift-bldr-image-exists:
+	docker images --format "{{.Repository}}:{{.Tag}}" | grep $(DOCKER_SAITHRIFT_BLDR_IMG) || make docker-saithrift-bldr
 
 docker-saithrift-bldr:
 	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_SAITHRIFT_BLDR_IMG); } || \
 	docker build \
 		-f dockerfiles/Dockerfile.saithrift-bldr \
 	    -t $(DOCKER_SAITHRIFT_BLDR_IMG) \
+	    --build-arg ubuntu_image_sha=$(AMD64_UBUNTU_SHA256) \
 	    --build-arg user=$(DASH_USER) \
 	    --build-arg group=$(DASH_GROUP) \
 	    --build-arg uid=$(DASH_UID) \
@@ -395,8 +430,11 @@ docker-publish-saithrift-bldr:
 ###############################
 # Builder, has base packages to make client docker
 
-DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.saithrift-client-bldr | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.saithrift-client-bldr | $(SHA1SUM))
 DOCKER_SAITHRIFT_CLIENT_BLDR_IMG = $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_NAME):$(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_TAG)
+
+docker-saithrift-client-bldr-image-exists:
+	docker images --format "{{.Repository}}:{{.Tag}}" |grep $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG) || make docker-saithrift-client-bldr
 
 docker-saithrift-client-bldr:
 	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_SAITHRIFT_CLIENT_BLDR_IMG); } || \
@@ -427,7 +465,7 @@ docker-publish-saithrift-client-bldr:
 
 # Client image, rebuild any time SAI interface changes
 # TODO - add sai header (inc/ and experimental) dependencies
-docker-saithrift-client:
+docker-saithrift-client: docker-saithrift-client-bldr-image-exists
 	docker build \
 		-f dockerfiles/Dockerfile.saithrift-client \
 	    -t $(DOCKER_SAITHRIFT_CLIENT_IMG) \
@@ -483,7 +521,7 @@ run-saithrift-client-bash:
 ###############################
 
 
-DOCKER_P4C_BMV2_IMG_TAG = $(shell cat dockerfiles/Dockerfile.p4c-bmv2 | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_P4C_BMV2_IMG_TAG = $(shell cat dockerfiles/Dockerfile.p4c-bmv2 | $(SHA1SUM))
 DOCKER_P4C_BMV2_IMG = $(DOCKER_P4C_BMV2_IMG_NAME):$(DOCKER_P4C_BMV2_IMG_TAG)
 
 docker-dash-p4c:
@@ -512,7 +550,7 @@ docker-publish-dash-p4c:
 
 ###############################
 
-DOCKER_P4C_DPDK_IMG_TAG = $(shell cat dockerfiles/Dockerfile.p4c-dpdk | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_P4C_DPDK_IMG_TAG = $(shell cat dockerfiles/Dockerfile.p4c-dpdk | $(SHA1SUM))
 DOCKER_P4C_DPDK_IMG = $(DOCKER_P4C_DPDK_IMG_NAME):$(DOCKER_P4C_DPDK_IMG_TAG)
 
 docker-dash-p4c-dpdk:
@@ -541,7 +579,7 @@ docker-publish-dash-p4c-dpdk:
 
 ###############################
 
-DOCKER_GRPC_IMG_TAG = $(shell cat dockerfiles/Dockerfile.grpc1.43.2 | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_GRPC_IMG_TAG = $(shell cat dockerfiles/Dockerfile.grpc1.43.2 | $(SHA1SUM))
 DOCKER_GRPC_IMG = $(DOCKER_GRPC_IMG_NAME):$(DOCKER_GRPC_IMG_TAG)
 
 docker-dash-grpc:
@@ -639,8 +677,12 @@ ifeq ($(SAI_CHALLENGER_TEST),)
 SAI_CHALLENGER_TEST := .
 endif
 
-DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.saichallenger-client-bldr | sha1sum | awk '{print substr($$1,0,11);}')
+DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_TAG = $(shell cat dockerfiles/Dockerfile.saichallenger-client-bldr | $(SHA1SUM))
 DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG = $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_NAME):$(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG_TAG)
+
+
+docker-saichallenger-client-bldr-image-exists:
+	docker images --format "{{.Repository}}:{{.Tag}}" |grep $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG) || make docker-saichallenger-client-bldr
 
 docker-saichallenger-client-bldr:
 	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG); } || \
@@ -661,7 +703,7 @@ docker-publish-saichallenger-client-bldr:
 docker-pull-saichallenger-client-bldr:
 	docker pull $(DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG)
 
-docker-saichallenger-client: docker-saichallenger-client-bldr
+docker-saichallenger-client: docker-saichallenger-client-bldr-image-exists
 	docker build \
 		-f dockerfiles/Dockerfile.saichallenger-client \
 		-t $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \

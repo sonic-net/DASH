@@ -11,9 +11,13 @@ struct encap_data_t {
     EthernetAddress underlay_smac;
     EthernetAddress underlay_dmac;
     EthernetAddress overlay_dmac;
+    dash_encapsulation_t dash_encapsulation;
+    bit<24> service_tunnel_key;
+    IPv4Address original_overlay_sip;
+    IPv4Address original_overlay_dip;
 }
 
-enum bit<16> direction_t {
+enum bit<16> dash_direction_t {
     INVALID = 0,
     OUTBOUND = 1,
     INBOUND = 2
@@ -29,11 +33,14 @@ struct eni_data_t {
     bit<32> pps;
     bit<32> flows;
     bit<1>  admin_state;
+    IPv6Address pl_sip;
+    IPv6Address pl_sip_mask;
+    IPv4Address pl_underlay_sip;
 }
 
 struct metadata_t {
     bool dropped;
-    direction_t direction;
+    dash_direction_t direction;
     encap_data_t encap_data;
     EthernetAddress eni_addr;
     bit<16> vnet_id;
@@ -56,6 +63,14 @@ struct metadata_t {
     bit<16> stage3_dash_acl_group_id;
     bit<16> stage4_dash_acl_group_id;
     bit<16> stage5_dash_acl_group_id;
+    bit<1> meter_policy_en;
+    bit<1> mapping_meter_class_override;
+    bit<16> meter_policy_id;
+    bit<16> policy_meter_class;
+    bit<16> route_meter_class;
+    bit<16> mapping_meter_class;
+    bit<16> meter_class;
+    bit<32> meter_bucket_index;
 }
 
 #endif /* _SIRIUS_METADATA_P4_ */

@@ -11,11 +11,11 @@ const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_NOW    = (ExpireTimeProfileId_t)
 const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_LONG   = (ExpireTimeProfileId_t) 2;
 
 IPv4Address directionNeutralAddr (
-    in direction_t direction,
+    in dash_direction_t direction,
     in IPv4Address outbound_address,
     in IPv4Address inbound_address)
 {
-    if (direction == direction_t.OUTBOUND) {
+    if (direction == dash_direction_t.OUTBOUND) {
         return outbound_address;
     } else {
         return inbound_address;
@@ -23,11 +23,11 @@ IPv4Address directionNeutralAddr (
 }
 
 bit<16> directionNeutralPort (
-    in direction_t direction,
+    in dash_direction_t direction,
     in bit<16> outbound_port,
     in bit<16> inbound_port)
 {
-    if (direction == direction_t.OUTBOUND) {
+    if (direction == dash_direction_t.OUTBOUND) {
         return outbound_port;
     } else {
         return inbound_port;
@@ -38,7 +38,8 @@ bit<16> directionNeutralPort (
 control ConntrackIn(inout headers_t hdr,
                 inout metadata_t meta)
 {
-  action conntrackIn_allow () {
+
+  action conntrackIn_allow (IPv4Address original_overlay_sip, IPv4Address original_overlay_dip) {
   /* Invalidate entry based on TCP flags */
           // If FIN is 1 (0b000001), or if RST is 1 (0b000100):
           if ((hdr.tcp.flags & 0b000101 /* FIN/RST */) != 0) {
@@ -47,14 +48,18 @@ control ConntrackIn(inout headers_t hdr,
           }
           restart_expire_timer(); // reset expiration timer for entry
           meta.conntrack_data.allow_in = true;
+          meta.encap_data.original_overlay_sip = original_overlay_sip;
+          meta.encap_data.original_overlay_dip = original_overlay_dip;
   }
 
   action conntrackIn_miss() {
           // TODO: Should this be ((hdr.tcp.flags & 0x2) != 0) instead?
           if (hdr.tcp.flags == 0x2 /* SYN */) {
-            if (meta.direction == direction_t.OUTBOUND) {
+            if (meta.direction == dash_direction_t.OUTBOUND) {
                // New PNA Extern
-               add_entry("conntrackIn_allow", {}, EXPIRE_TIME_PROFILE_LONG);
+               add_entry("conntrackIn_allow",
+                         {meta.encap_data.original_overlay_sip, meta.encap_data.original_overlay_dip},
+                         EXPIRE_TIME_PROFILE_LONG);
                //adding failure to be eventually handled
             }
           }
@@ -105,7 +110,7 @@ control ConntrackOut(inout headers_t hdr,
   action conntrackOut_miss() {
           // TODO: Should this be ((hdr.tcp.flags & 0x2) != 0) instead?
           if (hdr.tcp.flags == 0x2 /* SYN */) {
-            if (meta.direction == direction_t.INBOUND) {
+            if (meta.direction == dash_direction_t.INBOUND) {
                // New PNA Extern
                add_entry("conntrackOut_allow", {}, EXPIRE_TIME_PROFILE_LONG);
                //adding failure to be eventually handled
@@ -158,7 +163,7 @@ state_graph ConnGraphOut(inout state_context flow_ctx,
             return;
         }
 
-        if (meta.direction == direction_t.INBOUND) {
+        if (meta.direction == dash_direction_t.INBOUND) {
             transition ALLOW;
         }
     }
@@ -184,7 +189,7 @@ state_graph ConnGraphIn(inout state_context flow_ctx,
             return;
         }
 
-        if (meta.direction == direction_t.OUTBOUND) {
+        if (meta.direction == dash_direction_t.OUTBOUND) {
             transition ALLOW;
         }
     }

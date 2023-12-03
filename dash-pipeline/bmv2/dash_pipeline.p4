@@ -5,9 +5,11 @@
 #include "dash_metadata.p4"
 #include "dash_parser.p4"
 #include "dash_vxlan.p4"
+#include "dash_nvgre.p4"
 #include "dash_outbound.p4"
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"
+#include "underlay.p4"
 
 control dash_ingress(
       inout headers_t hdr
@@ -52,11 +54,11 @@ control dash_ingress(
     }
 
     action set_outbound_direction() {
-        meta.direction = direction_t.OUTBOUND;
+        meta.direction = dash_direction_t.OUTBOUND;
     }
 
     action set_inbound_direction() {
-        meta.direction = direction_t.INBOUND;
+        meta.direction = dash_direction_t.INBOUND;
     }
 
     @name("direction_lookup|dash_direction_lookup")
@@ -109,34 +111,45 @@ control dash_ingress(
                          bit<32> flows,
                          bit<1> admin_state,
                          IPv4Address vm_underlay_dip,
+                         @Sai[type="sai_uint32_t"]
                          bit<24> vm_vni,
                          bit<16> vnet_id,
+                         IPv6Address pl_sip,
+                         IPv6Address pl_sip_mask,
+                         IPv4Address pl_underlay_sip,
+                         bit<16> v4_meter_policy_id,
+                         bit<16> v6_meter_policy_id,
                          ACL_GROUPS_PARAM(inbound_v4),
                          ACL_GROUPS_PARAM(inbound_v6),
                          ACL_GROUPS_PARAM(outbound_v4),
                          ACL_GROUPS_PARAM(outbound_v6)) {
-        meta.eni_data.cps            = cps;
-        meta.eni_data.pps            = pps;
-        meta.eni_data.flows          = flows;
-        meta.eni_data.admin_state    = admin_state;
-        meta.encap_data.underlay_dip = vm_underlay_dip;
+        meta.eni_data.cps             = cps;
+        meta.eni_data.pps             = pps;
+        meta.eni_data.flows           = flows;
+        meta.eni_data.admin_state     = admin_state;
+        meta.eni_data.pl_sip          = pl_sip;
+        meta.eni_data.pl_sip_mask     = pl_sip_mask;
+        meta.eni_data.pl_underlay_sip = pl_underlay_sip;
+        meta.encap_data.underlay_dip  = vm_underlay_dip;
         /* vm_vni is the encap VNI used for tunnel between inbound DPU -> VM
          * and not a VNET identifier */
-        meta.encap_data.vni          = vm_vni;
-        meta.vnet_id                 = vnet_id;
+        meta.encap_data.vni           = vm_vni;
+        meta.vnet_id                  = vnet_id;
 
         if (meta.is_overlay_ip_v6 == 1) {
-            if (meta.direction == direction_t.OUTBOUND) {
+            if (meta.direction == dash_direction_t.OUTBOUND) {
                 ACL_GROUPS_COPY_TO_META(outbound_v6);
             } else {
                 ACL_GROUPS_COPY_TO_META(inbound_v6);
             }
+            meta.meter_policy_id = v6_meter_policy_id;
         } else {
-            if (meta.direction == direction_t.OUTBOUND) {
+            if (meta.direction == dash_direction_t.OUTBOUND) {
                 ACL_GROUPS_COPY_TO_META(outbound_v4);
             } else {
                 ACL_GROUPS_COPY_TO_META(inbound_v4);
             }
+            meta.meter_policy_id = v4_meter_policy_id;
         }
     }
 
@@ -229,6 +242,76 @@ control dash_ingress(
         const default_action = deny;
     }
 
+    action check_ip_addr_family(@Sai[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
+        if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
+            if (meta.is_overlay_ip_v6 == 1) {
+                meta.dropped = true;
+            }
+        } else {
+            if (meta.is_overlay_ip_v6 == 0) {
+                meta.dropped = true;
+            }
+        }
+    }
+
+    @name("meter_policy|dash_meter")
+    @Sai[isobject="true"]
+    table meter_policy {
+        key = {
+            meta.meter_policy_id : exact @name("meta.meter_policy_id:meter_policy_id");
+        }
+        actions = {
+            check_ip_addr_family;
+        }
+    }
+
+    action set_policy_meter_class(bit<16> meter_class) {
+        meta.policy_meter_class = meter_class;
+    }
+
+    @name("meter_rule|dash_meter")
+    @Sai[isobject="true"]
+    table meter_rule {
+        key = {
+            meta.meter_policy_id: exact @name("meta.meter_policy_id:meter_policy_id") @Sai[type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
+            hdr.ipv4.dst_addr : ternary @name("hdr.ipv4.dst_addr:dip");
+        }
+
+     actions = {
+            set_policy_meter_class;
+            @defaultonly NoAction;
+        }
+        const default_action = NoAction();
+    }
+    
+    // MAX_METER_BUCKET = MAX_ENI(64) * NUM_BUCKETS_PER_ENI(4096)
+    #define MAX_METER_BUCKETS 262144
+#ifdef TARGET_BMV2_V1MODEL
+    counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_inbound;
+    counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_outbound;
+#endif // TARGET_BMV2_V1MODEL
+    action meter_bucket_action(
+            @Sai[type="sai_uint64_t", isreadonly="true"] bit<64> outbound_bytes_counter,
+            @Sai[type="sai_uint64_t", isreadonly="true"] bit<64> inbound_bytes_counter,
+            @Sai[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index) {
+        // read only counters for SAI api generation only
+        meta.meter_bucket_index = meter_bucket_index;
+    }
+
+    @name("meter_bucket|dash_meter")
+    @Sai[isobject="true"]
+    table meter_bucket {
+        key = {
+            meta.eni_id: exact @name("meta.eni_id:eni_id");
+            meta.meter_class: exact @name("meta.meter_class:meter_class");
+        }
+        actions = {
+            meter_bucket_action;
+            @defaultonly NoAction;
+        }
+        const default_action = NoAction();
+    }
+
     action set_eni(bit<16> eni_id) {
         meta.eni_id = eni_id;
     }
@@ -246,7 +329,7 @@ control dash_ingress(
         const default_action = deny;
     }
 
-    action set_acl_group_attrs(bit<32> ip_addr_family) {
+    action set_acl_group_attrs(@Sai[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
         if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
             if (meta.is_overlay_ip_v6 == 1) {
                 meta.dropped = true;
@@ -270,10 +353,6 @@ control dash_ingress(
 
     apply {
 
-        /* Send packet on same port it arrived (echo) by default */
-#ifdef TARGET_BMV2_V1MODEL
-        standard_metadata.egress_spec = standard_metadata.ingress_port;
-#endif // TARGET_BMV2_V1MODEL
 #ifdef TARGET_DPDK_PNA
 #ifdef DPDK_PNA_SEND_TO_PORT_FIX_MERGED
         // As of 2023-Jan-26, the version of the pna.p4 header file
@@ -301,9 +380,15 @@ control dash_ingress(
 
         /* Outer header processing */
 
-        if (meta.direction == direction_t.OUTBOUND) {
+        /* Put VM's MAC in the direction agnostic metadata field */
+        meta.eni_addr = meta.direction == dash_direction_t.OUTBOUND  ?
+                                          hdr.inner_ethernet.src_addr :
+                                          hdr.inner_ethernet.dst_addr;
+
+        eni_ether_address_map.apply();
+        if (meta.direction == dash_direction_t.OUTBOUND) {
             vxlan_decap(hdr);
-        } else if (meta.direction == direction_t.INBOUND) {
+        } else if (meta.direction == dash_direction_t.INBOUND) {
             switch (inbound_routing.apply().action_run) {
                 vxlan_decap_pa_validate: {
                     pa_validation.apply();
@@ -311,6 +396,8 @@ control dash_ingress(
                 }
             }
         }
+
+        /* At this point the processing is done on customer headers */
 
         meta.is_overlay_ip_v6 = 0;
         meta.ip_protocol = 0;
@@ -335,23 +422,57 @@ control dash_ingress(
             meta.dst_l4_port = hdr.udp.dst_port;
         }
 
-        /* At this point the processing is done on customer headers */
-
-        /* Put VM's MAC in the direction agnostic metadata field */
-        meta.eni_addr = meta.direction == direction_t.OUTBOUND  ?
-                                          hdr.ethernet.src_addr :
-                                          hdr.ethernet.dst_addr;
-        eni_ether_address_map.apply();
         eni.apply();
         if (meta.eni_data.admin_state == 0) {
             deny();
         }
         acl_group.apply();
 
-        if (meta.direction == direction_t.OUTBOUND) {
+
+        if (meta.direction == dash_direction_t.OUTBOUND) {
             outbound.apply(hdr, meta);
-        } else if (meta.direction == direction_t.INBOUND) {
+        } else if (meta.direction == dash_direction_t.INBOUND) {
             inbound.apply(hdr, meta);
+        }
+
+        /* Underlay routing */
+        meta.dst_ip_addr = (bit<128>)hdr.ipv4.dst_addr;
+        underlay.apply(
+              hdr
+            , meta
+    #ifdef TARGET_BMV2_V1MODEL
+            , standard_metadata
+    #endif // TARGET_BMV2_V1MODEL
+    #ifdef TARGET_DPDK_PNA
+            , istd
+    #endif // TARGET_DPDK_PNA        
+        );
+
+        if (meta.meter_policy_en == 1) {
+            meter_policy.apply();
+            meter_rule.apply();
+        }
+
+        {
+            if (meta.meter_policy_en == 1) {
+                meta.meter_class = meta.policy_meter_class;
+            } else {
+                meta.meter_class = meta.route_meter_class;
+            }
+            if ((meta.meter_class == 0) || (meta.mapping_meter_class_override == 1)) {
+                meta.meter_class = meta.mapping_meter_class;
+            }
+        }
+
+        meter_bucket.apply();
+        if (meta.direction == dash_direction_t.OUTBOUND) {
+#ifdef TARGET_BMV2_V1MODEL
+            meter_bucket_outbound.count(meta.meter_bucket_index);
+#endif
+        } else if (meta.direction == dash_direction_t.INBOUND) {
+#ifdef TARGET_BMV2_V1MODEL
+            meter_bucket_inbound.count(meta.meter_bucket_index);
+#endif
         }
 
         eni_meter.apply();

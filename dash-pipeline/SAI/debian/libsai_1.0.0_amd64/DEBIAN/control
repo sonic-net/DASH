@@ -1,0 +1,8 @@
+Package: libsai
+Source: dash
+Version: 1.0.0
+Architecture: amd64
+Maintainer: Kamil Cudnik <kcudnik@microsoft.com>
+Section: libs
+Priority: optional
+Description: This package contains DASH libsai

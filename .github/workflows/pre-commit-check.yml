@@ -1,0 +1,93 @@
+name: pre-commit-check
+
+on:
+    pull_request:
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - run: pip install pre-commit>=3.2.1
+    - run: pre-commit --version
+    - run: git --version
+    - run: git status
+    - run: pre-commit install
+    - run: git fetch origin
+    - run: |
+        set -x
+        set +e
+        OUTPUT=$(pre-commit run --color never --from-ref HEAD^ --to-ref HEAD 2>&1)
+        EXIT_CODE=$?
+        echo $OUTPUT
+        echo $EXIT_CODE
+        echo "pre_commit<<EOF" >> $GITHUB_ENV
+        echo $OUTPUT >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+        echo "exit_code=$EXIT_CODE" >> $GITHUB_ENV
+      continue-on-error: true
+
+    - name: Prepare comment
+      if: ${{ env.exit_code  != 0 }}
+      env:
+        PRE_COMMIT: ${{ env.pre_commit }}
+        EXIT_CODE: ${{ env.exit_code }}
+      run: |
+        echo "$PRE_COMMIT"
+        echo $EXIT_CODE
+        if [[ `echo "$PRE_COMMIT" | wc -l` -gt 20 ]]; then
+            PRE_COMMIT=`echo "$PRE_COMMIT" | head -n 20`
+            PRE_COMMIT="$PRE_COMMIT\n...\n[truncated extra lines, please run pre-commit locally to view full check results]"
+            PRE_COMMIT=`printf "$PRE_COMMIT"`
+        fi
+        br='<br/>'
+        PR_MESSAGE="The [pre-commit](http://pre-commit.com/) check detected issues in the files touched by this pull request.
+
+        Detailed pre-commit check results:
+
+        <samp>$PRE_COMMIT</samp>
+        To run the pre-commit checks locally, you can follow below steps:
+
+        1. Ensure that default python is python3.
+
+        2. Ensure that the \`pre-commit\` package is installed:
+
+        \`\`\`sudo pip install pre-commit\`\`\`
+
+        3. Go to repository root folder
+
+        4. Install the pre-commit hooks:
+
+        \`\`\`pre-commit install\`\`\`
+
+        5. Use pre-commit to check staged file:
+
+        \`\`\`pre-commit\`\`\`
+
+        6. Alternatively, you can check committed files using:
+
+        \`\`\`pre-commit run --from-ref <commit_id> --to-ref <commit_id>\`\`\`
+        or
+        \`\`\`pre-commit run --all-files\`\`\`"
+        results=`echo "$PR_MESSAGE" |  while read line; do echo $line$br; done | tr -d '\n'`
+        echo "pre_commit_mod=$results" >> $GITHUB_ENV
+        echo "exit_code=$EXIT_CODE" >> $GITHUB_ENV
+
+    - name: Add comment to PR
+      if: ${{ env.exit_code  != 0 }}
+      env:
+        URL: ${{ github.event.pull_request.comments_url }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PRE_COMMIT: ${{ env.pre_commit_mod }}
+      run: |
+        curl \
+            -X POST \
+            $URL \
+            -H "Content-Type: application/json" \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            --data "{ \"body\": \"$PRE_COMMIT\" }"
+
+    - name: pre-commit exit code
+      env:
+        EXIT_CODE: ${{ env.exit_code }}
+      run: exit $EXIT_CODE

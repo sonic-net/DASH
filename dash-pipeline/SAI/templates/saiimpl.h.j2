@@ -1,0 +1,95 @@
+#pragma once
+
+#include "dashsai.h"
+
+#define DASH_PRIVATE __attribute__((visibility("hidden")))
+
+DASH_PRIVATE extern sai_hostif_api_t                  dash_sai_hostif_api_impl;
+DASH_PRIVATE extern sai_neighbor_api_t                dash_sai_neighbor_api_impl;
+DASH_PRIVATE extern sai_next_hop_api_t                dash_sai_next_hop_api_impl;
+DASH_PRIVATE extern sai_policer_api_t                 dash_sai_policer_api_impl;
+DASH_PRIVATE extern sai_port_api_t                    dash_sai_port_api_impl;
+DASH_PRIVATE extern sai_router_interface_api_t        dash_sai_router_interface_api_impl;
+DASH_PRIVATE extern sai_switch_api_t                  dash_sai_switch_api_impl;
+
+{% for api in api_names %}
+DASH_PRIVATE extern sai_{{ api }}_api_t dash_sai_{{ api }}_api_impl;
+{% endfor %}
+
+DASH_PRIVATE extern std::shared_ptr<dash::DashSai> dashSai;
+
+// QUAD OID
+
+#define DASH_CREATE(OT,ot)                              \
+    static sai_status_t dash_create_ ## ot(             \
+            _Out_ sai_object_id_t *object_id,           \
+            _In_ sai_object_id_t switch_id,             \
+            _In_ uint32_t attr_count,                   \
+            _In_ const sai_attribute_t *attr_list)      \
+{                                                       \
+    DASH_LOG_ENTER();                                   \
+    return dashSai->create(                             \
+            (sai_object_type_t)SAI_OBJECT_TYPE_ ## OT,  \
+            object_id,                                  \
+            switch_id,                                  \
+            attr_count,                                 \
+            attr_list);                                 \
+}
+
+#define DASH_REMOVE(OT,ot)                              \
+    static sai_status_t dash_remove_ ## ot(             \
+            _In_ sai_object_id_t object_id)             \
+{                                                       \
+    DASH_LOG_ENTER();                                   \
+    return dashSai->remove(                             \
+            (sai_object_type_t)SAI_OBJECT_TYPE_ ## OT,  \
+            object_id);                                 \
+}
+
+#define DASH_SET(OT,ot)                                 \
+    static sai_status_t dash_set_ ## ot ## _attribute(  \
+            _In_ sai_object_id_t object_id,             \
+            _In_ const sai_attribute_t *attr)           \
+{                                                       \
+    DASH_LOG_ENTER();                                   \
+    return dashSai->set(                                \
+            (sai_object_type_t)SAI_OBJECT_TYPE_ ## OT,  \
+            object_id,                                  \
+            attr);                                      \
+}
+
+#define DASH_GET(OT,ot)                                 \
+    static sai_status_t dash_get_ ## ot ## _attribute(  \
+            _In_ sai_object_id_t object_id,             \
+            _In_ uint32_t attr_count,                   \
+            _Inout_ sai_attribute_t *attr_list)         \
+{                                                       \
+    DASH_LOG_ENTER();                                   \
+    return dashSai->get(                                \
+            (sai_object_type_t)SAI_OBJECT_TYPE_ ## OT,  \
+            object_id,                                  \
+            attr_count,                                 \
+            attr_list);                                 \
+}
+
+// QUAD DECLARE
+
+#define DASH_GENERIC_QUAD(OT,ot)  \
+    DASH_CREATE(OT,ot);           \
+    DASH_REMOVE(OT,ot);           \
+    DASH_SET(OT,ot);              \
+    DASH_GET(OT,ot);
+
+// QUAD API
+
+#define DASH_GENERIC_QUAD_API(ot)     \
+    dash_create_ ## ot,               \
+    dash_remove_ ## ot,               \
+    dash_set_ ## ot ##_attribute,     \
+    dash_get_ ## ot ##_attribute,
+
+#define DASH_GENERIC_STATS_API(ot)    \
+    .get_ ## ot ## _stats = 0,        \
+    .get_ ## ot ## _stats_ext = 0,    \
+    .clear_ ## ot ## _stats = 0,
+

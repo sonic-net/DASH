@@ -114,7 +114,7 @@ class CreateDeleteEniTest(VnetAPI):
         """
         Verifies Direction Lookup creation
         """
-        self.dir_lookup = self.direction_lookup_create(vni=self.outbound_vnet)
+        self.dir_lookup = self.direction_lookup_create(vni=self.vm_vni)
 
     def createEniTest(self):
         """
@@ -130,6 +130,8 @@ class CreateDeleteEniTest(VnetAPI):
                                    vm_underlay_dip=self.vm_underlay_dip,
                                    vm_vni=self.vm_vni,
                                    vnet_id=self.vm_vnet,
+                                   v4_meter_policy_id=0,
+                                   v6_meter_policy_id=0,
                                    inbound_v4_stage1_dash_acl_group_id=self.in_acl_group_id,
                                    inbound_v4_stage2_dash_acl_group_id=self.in_acl_group_id,
                                    inbound_v4_stage3_dash_acl_group_id=self.in_acl_group_id,
@@ -345,7 +347,7 @@ class CreateDeleteEniTest(VnetAPI):
         self.assertEqual(attr['pps'], self.pps)
         self.assertEqual(attr['flows'], self.flows)
         self.assertEqual(attr['admin_state'], self.admin_state)
-        self.assertEqual(attr['vm_underlay_dip'], self.vm_underlay_dip.addr.ip4)
+        self.assertEqual(attr['vm_underlay_dip'].addr.ip4, self.vm_underlay_dip.addr.ip4)
         self.assertEqual(attr['vm_vni'], self.vm_vni)
         self.assertEqual(attr['vnet_id'], self.vm_vnet)
         self.assertEqual(attr['inbound_v4_stage1_dash_acl_group_id'], self.in_acl_group_id)
@@ -423,7 +425,7 @@ class CreateDeleteEniTest(VnetAPI):
             self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
 
             attr = sai_thrift_get_eni_attribute(self.client, self.eni, vm_underlay_dip=True)
-            self.assertEqual(attr['vm_underlay_dip'], test_vm_underlay_dip.addr.ip)
+            self.assertEqual(attr['vm_underlay_dip'].addr.ip4, test_vm_underlay_dip.addr.ip4)
 
             # set and verify new vm_vni value
             sai_thrift_set_eni_attribute(self.client, self.eni, vm_vni=test_vm_vni)
@@ -664,7 +666,7 @@ class CreateDeleteEniTest(VnetAPI):
             self.assertEqual(attr['pps'], self.pps)
             self.assertEqual(attr['flows'], self.flows)
             self.assertEqual(attr['admin_state'], self.admin_state)
-            self.assertEqual(attr['vm_underlay_dip'], self.vm_underlay_dip.addr.ip4)
+            self.assertEqual(attr['vm_underlay_dip'].addr.ip4, self.vm_underlay_dip.addr.ip4)
             self.assertEqual(attr['vm_vni'], self.vm_vni)
             self.assertEqual(attr['vnet_id'], self.vm_vnet)
             self.assertEqual(attr['inbound_v4_stage1_dash_acl_group_id'], self.in_acl_group_id)
@@ -708,7 +710,7 @@ class CreateDeleteEniTest(VnetAPI):
             test_flows = 500
             test_vm_underlay_ip = sai_ipaddress('172.0.15.15')
 
-            test_eni = self.eni(cps=test_cps,
+            test_eni = self.eni_create(cps=test_cps,
                                 pps=test_pps,
                                 flows=test_flows,
                                 admin_state=True,
@@ -844,7 +846,7 @@ class CreateDeleteEniTest(VnetAPI):
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.assertEqual(attr['action'], SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT)
         self.assertEqual(attr['dst_vnet_id'], self.outbound_vnet)
-        self.assertEqual(attr['overlay_ip'], self.overlay_ip)
+        self.assertEqual(attr['overlay_ip'].addr.ip4, self.overlay_ip)
         # TODO: add get counter verification
 
         try:
@@ -916,7 +918,7 @@ class CreateDeleteEniTest(VnetAPI):
             use_dst_vnet_vni=True
         )
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
-        self.assertEqual(attr['underlay_dip'], self.underlay_dip)
+        self.assertEqual(attr['underlay_dip'].addr.ip4, self.underlay_dip)
         self.assertEqual(attr['overlay_dmac'], self.overlay_dmac)
         self.assertEqual(attr['use_dst_vnet_vni'], True)
         # TODO: add get counter verification
@@ -947,8 +949,8 @@ class CreateDeleteEniTest(VnetAPI):
             overlay_dmac=True,
             use_dst_vnet_vni=True
         )
-        self.assertEqual(attr['underlay_dip'], test_dip)
-        self.assertEqual(attr['overlay_dmac'], test_overlay_dmac)
+        self.assertEqual(attr['underlay_dip'].addr.ip4, test_dip)
+        self.assertEqual(attr['overlay_dmac'].upper(), test_overlay_dmac)
         self.assertEqual(attr['use_dst_vnet_vni'], False)
 
     def deleteVnetWhenMapExistTest(self):

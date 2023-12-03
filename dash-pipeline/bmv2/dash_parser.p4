@@ -12,6 +12,7 @@ error {
 #define UDP_PORT_VXLAN 4789
 #define UDP_PROTO 17
 #define TCP_PROTO 6
+#define NVGRE_PROTO 0x2f
 #define IPV4_ETHTYPE 0x0800
 #define IPV6_ETHTYPE 0x86dd
 
@@ -144,6 +145,7 @@ control dash_deparser(
         packet.emit(hdr.udp);
         packet.emit(hdr.tcp);
         packet.emit(hdr.vxlan);
+        packet.emit(hdr.nvgre);
         packet.emit(hdr.inner_ethernet);
         packet.emit(hdr.inner_ipv4);
         packet.emit(hdr.inner_ipv6);
