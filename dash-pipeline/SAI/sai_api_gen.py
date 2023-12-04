@@ -48,6 +48,212 @@ sai_type_to_field = {
     'sai_ip_prefix_list_t': 'ipprefixlist'
 }
 
+#
+# SAI parser decorators
+#
+def sai_parser_from_p4rt(cls):
+    @staticmethod
+    def create(p4rt_value, *args, **kwargs):
+        sai_object = cls()
+        sai_object.parse(p4rt_value, *args, **kwargs)
+        return sai_object
+
+    def parse(self, p4rt_value, *args, **kwargs):
+        preamble = p4rt_value[PREAMBLE_TAG]
+        self.id = preamble['id']
+        self.name = preamble['name']
+        self.alias = preamble['alias']
+        self._parse_p4rt(p4rt_value, *args, **kwargs)
+
+    setattr(cls, "from_p4rt", create)
+    setattr(cls, "parse", parse)
+    return cls
+
+def sai_parser_from_p4rt_no_preamble(cls):
+    @staticmethod
+    def create(p4rt_object_name, p4rt_object_value, *args, **kwargs):
+        sai_object = cls()
+        sai_object.parse(p4rt_object_name, p4rt_object_value, *args, **kwargs)
+        return sai_object
+
+    def parse(self, p4rt_object_name, p4rt_object_value, *args, **kwargs):
+        self.name = p4rt_object_name
+        self._parse_p4rt(p4rt_object_value, *args, **kwargs)
+
+    setattr(cls, "from_p4rt", create)
+    setattr(cls, "parse", parse)
+    return cls
+
+#
+# Parsed SAI objects
+#
+class SAIObject:
+    def __init__(self):
+        self.name = ''
+        self.id = 0
+        self.alias = ''
+
+@sai_parser_from_p4rt_no_preamble
+class SAIEnumMember(SAIObject):
+    '''
+    This class represents a single SAI enum member and provides parser from the P4Runtime enum member object
+    '''
+    def __init__(self):
+        super().__init__()
+        self.sai_name = ""
+        self.p4rt_value = ""
+
+    def _parse_p4rt(self, p4rt_value):
+        self.sai_name = self.name
+        self.p4rt_value = p4rt_value
+
+@sai_parser_from_p4rt_no_preamble
+class SAIEnum(SAIObject):
+    '''
+    This class represents a single SAI enum and provides parser from the P4Runtime enum object
+    '''
+    def __init__(self):
+        super().__init__()
+        self.members = []
+        
+    def _parse_p4rt(self, p4rt_value):
+        print("Parsing enum: " + self.name)
+        self.name = self.name[:-2]
+        self.members = [SAIEnumMember.from_p4rt(enum_member['name'], enum_member['value']) for enum_member in p4rt_value[MEMBERS_TAG]]
+
+@sai_parser_from_p4rt
+class SAIAPISet(SAIObject):
+    '''
+    This class represents a single SAI API set and provides parser from the P4Runtime table object
+    '''
+    def __init__(self):
+        super().__init__()
+        self.ignored = False
+        self.keys = []
+        self.ipaddr_family_attr = 'false'
+        self.actions = []
+        self.actionParams = []
+
+    def _parse_p4rt(self, p4rt_value, all_actions, ignore_tables):
+        pass
+
+@sai_parser_from_p4rt_no_preamble
+class DASHSAIExtensions:
+    '''
+    This class holds all parsed SAI APIs and provides parser for the generated p4 runtime json file
+    '''
+    def __init__(self):
+        self.name = ""
+        self.sai_enums = []
+        self.sai_apis = []
+        self.all_table_names = []
+    
+    @staticmethod
+    def from_p4rt_file(p4rt_json_file_path, ignore_tables):
+        print("Parsing SAI APIs BMv2 P4Runtime Json file: " + p4rt_json_file_path)
+        with open(p4rt_json_file_path) as p4rt_json_file:
+            p4rt = json.load(p4rt_json_file)
+
+        return DASHSAIExtensions.from_p4rt('dash_sai_apis', p4rt, ignore_tables)
+
+    def _parse_p4rt(self, p4rt_value, ignore_tables):
+        self.__generate_sai_enums(p4rt_value)
+        self.__generate_sai_apis(p4rt_value, ignore_tables)
+
+    def __generate_sai_enums(self, p4rt_value):
+        all_p4rt_enums = p4rt_value[TYPE_INFO_TAG][SERIALIZABLE_ENUMS_TAG]
+        self.sai_enums = [SAIEnum.from_p4rt(enum_name, enum_value) for enum_name, enum_value in all_p4rt_enums.items()]
+
+    def __generate_sai_apis(self, program, ignore_tables):
+        all_actions = extract_action_data(program, self.sai_enums)
+        tables = sorted(program[TABLES_TAG], key=lambda k: k[PREAMBLE_TAG][NAME_TAG])
+        for table in tables:
+            sai_api = SAIAPISet.from_p4rt(table, all_actions, ignore_tables)
+
+            sai_table_data = dict()
+            sai_table_data['keys'] = []
+            sai_table_data['ipaddr_family_attr'] = 'false'
+            sai_table_data[ACTIONS_TAG] = []
+            sai_table_data[ACTION_PARAMS_TAG] = []
+
+            if STRUCTURED_ANNOTATIONS_TAG in table[PREAMBLE_TAG]:
+                p4_annotation_to_sai_table(table[PREAMBLE_TAG], sai_table_data)
+            table_control, table_name = table[PREAMBLE_TAG][NAME_TAG].split('.', 1)
+            if 'ignore_table' in sai_table_data.keys():
+                ignore_tables.append(table_name)
+            if table_name in ignore_tables:
+                continue
+
+            print("Found table: " + table_name)
+            table_name, api_name = table_name.split('|')
+            if '.' in table_name:
+                sai_table_data[NAME_TAG] = table_name.split('.')[-1]
+            else:
+                sai_table_data[NAME_TAG] = table_name
+            sai_table_data['id'] =  table[PREAMBLE_TAG]['id']
+            sai_table_data['with_counters'] = table_with_counters(program, sai_table_data['id'])
+
+            if ':' in table_name:
+                stage, group_name = table_name.split(':')
+                table_name = group_name
+                stage = stage.replace('.' , '_')
+                sai_table_data[NAME_TAG] = table_name
+                sai_table_data[STAGE_TAG] = stage
+
+            for key in table[MATCH_FIELDS_TAG]:
+                # skip v4/v6 selector
+                if 'v4_or_v6' in key[NAME_TAG]:
+                    continue
+                sai_table_data['keys'].append(get_sai_key_data(key))
+
+            for key in table[MATCH_FIELDS_TAG]:
+                # mark presence of v4/v6 selector in the parent key field
+                if 'v4_or_v6' in key[NAME_TAG]:
+                    _, v4_or_v6_key_name = key[NAME_TAG].split(':')
+                    for key2 in sai_table_data['keys']:
+                        if "is_" + key2['sai_key_name'] + "_v4_or_v6" == v4_or_v6_key_name:
+                            key2["v4_or_v6_id"] = key['id']
+                            break
+
+            for key in sai_table_data['keys']:
+                if (key['match_type'] == 'exact' and key['type'] == 'sai_ip_address_t') or \
+                    (key['match_type'] == 'ternary' and key['type'] == 'sai_ip_address_t') or \
+                    (key['match_type'] == 'lpm' and key['type'] == 'sai_ip_prefix_t') or \
+                    (key['match_type'] == 'list' and key['type'] == 'sai_ip_prefix_list_t'):
+                        sai_table_data['ipaddr_family_attr'] = 'true'
+
+            param_names = []
+            for action in table[ACTION_REFS_TAG]:
+                action_id = action["id"]
+                if all_actions[action_id][NAME_TAG] != NOACTION and not (SCOPE_TAG in action and action[SCOPE_TAG] == 'DEFAULT_ONLY'):
+                    fill_action_params(sai_table_data[ACTION_PARAMS_TAG], param_names, all_actions[action_id])
+                    sai_table_data[ACTIONS_TAG].append(all_actions[action_id])
+
+            if 'is_object' not in sai_table_data.keys():
+                if len(sai_table_data['keys']) == 1 and sai_table_data['keys'][0]['sai_key_name'].endswith(table_name.split('.')[-1] + '_id'):
+                    sai_table_data['is_object'] = 'true'
+                elif len(sai_table_data['keys']) > 5:
+                    sai_table_data['is_object'] = 'true'
+                else:
+                    sai_table_data['is_object'] = 'false'
+                    sai_table_data['name'] = sai_table_data['name'] + '_entry'
+
+            self.all_table_names.append(sai_table_data[NAME_TAG])
+            is_new_api = True
+            for sai_api in self.sai_apis:
+                if sai_api['app_name'] == api_name:
+                    sai_api[TABLES_TAG].append(sai_table_data)
+                    is_new_api = False
+                    break
+
+            if is_new_api:
+                new_api = dict()
+                new_api['app_name'] = api_name
+                new_api[TABLES_TAG] = [sai_table_data]
+                self.sai_apis.append(new_api)
+
+        return
+
 def p4_annotation_to_sai_attr(p4rt, sai_attr):
     for anno in p4rt[STRUCTURED_ANNOTATIONS_TAG]:
         if anno[NAME_TAG] == SAI_TAG:
@@ -140,6 +346,7 @@ def get_sai_range_list_type(key_size, key_header, key_field):
 
 
 def get_sai_key_data(key):
+    print(key)
     sai_key_data = dict()
     sai_key_data['id'] =  key['id']
     full_key_name, sai_key_name = key[NAME_TAG].split(':')
@@ -177,10 +384,11 @@ def get_sai_key_data(key):
     return sai_key_data
 
 
-def extract_action_data(program):
+def extract_action_data(program, sai_enums):
     action_data = {}
-    sai_enums = get_sai_enums(program)
     for action in program[ACTIONS_TAG]:
+        print("Found action: " + action[PREAMBLE_TAG][NAME_TAG])
+
         preable = action[PREAMBLE_TAG]
         id = preable['id']
         name = preable[NAME_TAG].split('.')[-1]
@@ -195,7 +403,7 @@ def extract_action_data(program):
                 else:
                     param['type'], param['field'] = get_sai_key_type(int(p[BITWIDTH_TAG]), p[NAME_TAG], p[NAME_TAG])
                     for sai_enum in sai_enums:
-                        if param[NAME_TAG] == sai_enum['name']:
+                        if param[NAME_TAG] == sai_enum.name:
                             param['type'] = 'sai_' + param[NAME_TAG] + '_t'
                             param['field'] = 's32'
                             param['default'] = 'SAI_' + param[NAME_TAG].upper() + '_INVALID'
@@ -236,113 +444,6 @@ def fill_action_params(table_params, param_names, action):
                     param2["v4_or_v6_id"] = param['id']
                     break
 
-
-def get_sai_enums(program):
-    all_enums = program[TYPE_INFO_TAG][SERIALIZABLE_ENUMS_TAG]
-    sai_enums = []
-    for enum_name in all_enums:
-        sai_enum = dict()
-        sai_enum['name'] = enum_name[:-2]
-        sai_enum['members'] = []
-        print(enum_name)
-        for enum_member in all_enums[enum_name][MEMBERS_TAG]:
-            member = dict()
-            member['sai_name'] = enum_member['name']
-            member['p4rt_value'] = enum_member['value']
-            sai_enum['members'].append(member)
-        sai_enums.append(sai_enum)
-
-    return sai_enums
-
-def generate_sai_apis(program, ignore_tables):
-    sai_apis = []
-    table_names = []
-    all_actions = extract_action_data(program)
-    sai_enums = get_sai_enums(program)
-    tables = sorted(program[TABLES_TAG], key=lambda k: k[PREAMBLE_TAG][NAME_TAG])
-    for table in tables:
-        sai_table_data = dict()
-        sai_table_data['keys'] = []
-        sai_table_data['ipaddr_family_attr'] = 'false'
-        sai_table_data[ACTIONS_TAG] = []
-        sai_table_data[ACTION_PARAMS_TAG] = []
-
-        if STRUCTURED_ANNOTATIONS_TAG in table['preamble']:
-            p4_annotation_to_sai_table(table['preamble'], sai_table_data)
-        table_control, table_name = table[PREAMBLE_TAG][NAME_TAG].split('.', 1)
-        if 'ignore_table' in sai_table_data.keys():
-            ignore_tables.append(table_name)
-        if table_name in ignore_tables:
-            continue
-
-        table_name, api_name = table_name.split('|')
-        if '.' in table_name:
-            sai_table_data[NAME_TAG] = table_name.split('.')[-1]
-        else:
-            sai_table_data[NAME_TAG] = table_name
-        sai_table_data['id'] =  table[PREAMBLE_TAG]['id']
-        sai_table_data['with_counters'] = table_with_counters(program, sai_table_data['id'])
-
-        if ':' in table_name:
-            stage, group_name = table_name.split(':')
-            table_name = group_name
-            stage = stage.replace('.' , '_')
-            sai_table_data[NAME_TAG] = table_name
-            sai_table_data[STAGE_TAG] = stage
-
-        for key in table[MATCH_FIELDS_TAG]:
-            # skip v4/v6 selector
-            if 'v4_or_v6' in key[NAME_TAG]:
-                continue
-            sai_table_data['keys'].append(get_sai_key_data(key))
-
-        for key in table[MATCH_FIELDS_TAG]:
-            # mark presence of v4/v6 selector in the parent key field
-            if 'v4_or_v6' in key[NAME_TAG]:
-                _, v4_or_v6_key_name = key[NAME_TAG].split(':')
-                for key2 in sai_table_data['keys']:
-                    if "is_" + key2['sai_key_name'] + "_v4_or_v6" == v4_or_v6_key_name:
-                        key2["v4_or_v6_id"] = key['id']
-                        break
-
-        for key in sai_table_data['keys']:
-            if (key['match_type'] == 'exact' and key['type'] == 'sai_ip_address_t') or \
-                (key['match_type'] == 'ternary' and key['type'] == 'sai_ip_address_t') or \
-                (key['match_type'] == 'lpm' and key['type'] == 'sai_ip_prefix_t') or \
-                (key['match_type'] == 'list' and key['type'] == 'sai_ip_prefix_list_t'):
-                    sai_table_data['ipaddr_family_attr'] = 'true'
-
-        param_names = []
-        for action in table[ACTION_REFS_TAG]:
-            action_id = action["id"]
-            if all_actions[action_id][NAME_TAG] != NOACTION and not (SCOPE_TAG in action and action[SCOPE_TAG] == 'DEFAULT_ONLY'):
-                fill_action_params(sai_table_data[ACTION_PARAMS_TAG], param_names, all_actions[action_id])
-                sai_table_data[ACTIONS_TAG].append(all_actions[action_id])
-
-        if 'is_object' not in sai_table_data.keys():
-            if len(sai_table_data['keys']) == 1 and sai_table_data['keys'][0]['sai_key_name'].endswith(table_name.split('.')[-1] + '_id'):
-                sai_table_data['is_object'] = 'true'
-            elif len(sai_table_data['keys']) > 5:
-                sai_table_data['is_object'] = 'true'
-            else:
-                sai_table_data['is_object'] = 'false'
-                sai_table_data['name'] = sai_table_data['name'] + '_entry'
-
-        table_names.append(sai_table_data[NAME_TAG])
-        is_new_api = True
-        for sai_api in sai_apis:
-            if sai_api['app_name'] == api_name:
-                sai_api[TABLES_TAG].append(sai_table_data)
-                is_new_api = False
-                break
-
-        if is_new_api:
-            new_api = dict()
-            new_api['app_name'] = api_name
-            new_api[TABLES_TAG] = [sai_table_data]
-            sai_apis.append(new_api)
-
-    return sai_apis, table_names, sai_enums
 
 def get_uniq_sai_api(sai_api):
     """ Only keep one table per group(with same table name) """
@@ -483,11 +584,10 @@ if not os.path.isfile(args.filepath):
 
 # 
 # Get SAI dictionary from P4 dictionary
-print("Generating SAI API...")
-with open(args.filepath) as json_program_file:
-    json_program = json.load(json_program_file)
-
-sai_apis, all_table_names, sai_enums = generate_sai_apis(json_program, args.ignore_tables.split(','))
+dash_sai_exts = DASHSAIExtensions.from_p4rt_file(args.filepath, args.ignore_tables.split(','))
+sai_apis = dash_sai_exts.sai_apis
+all_table_names = dash_sai_exts.all_table_names
+sai_enums = dash_sai_exts.sai_enums
 
 sai_api_name_list = []
 sai_api_full_name_list = []
@@ -526,7 +626,7 @@ final_sai_enums = []
 with open('./SAI/experimental/saitypesextensions.h', 'r') as f:
     content = f.read()
     for enum in sai_enums:
-        if enum['name'] not in content:
+        if enum.name not in content:
             final_sai_enums.append(enum)
 
 sai_enums_tm = env.get_template('templates/saienums.j2')
