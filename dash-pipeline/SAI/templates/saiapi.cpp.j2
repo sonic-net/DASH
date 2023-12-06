@@ -106,7 +106,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 assert(mask && "SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}_MASK isn't provided");
                 {{key.field}}SetMask(mask->value, mf_ternary, {{key.bitwidth}});
                 {% endif %}
-                {% if 'v4_or_v6_id' in key %}
+                {% if key.v4_or_v6_id != None %}
                 {
                     // set v4_or_v6 field
                     auto mf = matchActionEntry->add_match();
@@ -187,7 +187,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 param->set_param_id({{param.id}});
                 {{param.field}}SetVal(attr_list[i].value, param, {{param.bitwidth}});
                 //matchedParams++;
-                {% if 'v4_or_v6_id' in param %}
+                {% if param.v4_or_v6_id != None %}
                 {
                     // set v4_or_v6 field
                     auto param2 = action->add_params();
@@ -364,7 +364,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
         //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
         {% endif %}
     }
-    {% if 'v4_or_v6_id' in key %}
+    {% if key.v4_or_v6_id != None %}
     {
         // set v4_or_v6 field
         auto mf = matchActionEntry->add_match();
@@ -422,7 +422,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 param->set_param_id({{param.id}});
                 {{param.field}}SetVal(attr_list[i].value, param, {{param.bitwidth}});
                 //matchedParams++;
-                {% if 'v4_or_v6_id' in param %}
+                {% if param.v4_or_v6_id != None %}
                 {
                     // set v4_or_v6 field
                     auto param2 = action->add_params();
@@ -527,7 +527,7 @@ static sai_status_t dash_sai_remove_{{ table.name }}(
         //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
         {% endif %}
     }
-    {% if 'v4_or_v6_id' in key %}
+    {% if key.v4_or_v6_id != None %}
     {
         // set v4_or_v6 field
         auto mf = matchActionEntry->add_match();

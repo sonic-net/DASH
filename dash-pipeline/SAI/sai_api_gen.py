@@ -35,19 +35,6 @@ KV_PAIRS_TAG = 'kvPairs'
 KV_PAIR_LIST_TAG = 'kvPairList'
 SAI_TAG = 'Sai'
 
-sai_type_to_field = {
-    'bool': 'booldata',
-    'sai_uint8_t': 'u8',
-    'sai_object_id_t': 'u16',
-    'sai_uint16_t': 'u16',
-    'sai_ip_address_t': 'ipaddr',
-    'sai_ip_addr_family_t': 'u32',
-    'sai_uint32_t': 'u32',
-    'sai_uint64_t': 'u64',
-    'sai_mac_t': 'mac',
-    'sai_ip_prefix_list_t': 'ipprefixlist'
-}
-
 #
 # SAI parser decorators
 #
@@ -77,6 +64,23 @@ def sai_parser_from_p4rt(cls):
 # Parsed SAI objects and parsers
 #
 class SAIType:
+    sai_type_to_field = {
+        'bool': 'booldata',
+        'sai_uint8_t': 'u8',
+        'sai_object_id_t': 'u16',
+        'sai_uint16_t': 'u16',
+        'sai_ip_address_t': 'ipaddr',
+        'sai_ip_addr_family_t': 'u32',
+        'sai_uint32_t': 'u32',
+        'sai_uint64_t': 'u64',
+        'sai_mac_t': 'mac',
+        'sai_ip_prefix_list_t': 'ipprefixlist'
+    }
+
+    @staticmethod
+    def get_sai_default_field_from_type(sai_type):
+        return SAIType.sai_type_to_field[sai_type]
+
     @staticmethod
     def get_sai_key_type(key_size, key_header, key_field):
         if key_size == 1:
@@ -141,6 +145,7 @@ class SAIType:
             return 'sai_u64_range_list_t',  'u64rangelist'
         else:
             raise ValueError(f'key_size={key_size} is not supported')
+
 
 class SAIObject:
     def __init__(self):
@@ -207,7 +212,8 @@ class SAIObject:
                     else:
                         raise ValueError("Unknown attr annotation " + kv['key'])
 
-        self.field = sai_type_to_field[self.type]
+        self.field = SAIType.get_sai_default_field_from_type(self.type)
+
 
 @sai_parser_from_p4rt
 class SAIEnumMember(SAIObject):
@@ -229,6 +235,7 @@ class SAIEnumMember(SAIObject):
         '''
         self.sai_name = self.name
         self.p4rt_value = p4rt_member
+
 
 @sai_parser_from_p4rt
 class SAIEnum(SAIObject):
@@ -258,6 +265,7 @@ class SAIEnum(SAIObject):
         self.name = self.name[:-2]
         self.members = [SAIEnumMember.from_p4rt(enum_member['value'], name = enum_member['name']) for enum_member in p4rt_enum[MEMBERS_TAG]]
 
+
 @sai_parser_from_p4rt
 class SAIAPITableKey(SAIObject):
     '''
@@ -267,8 +275,6 @@ class SAIAPITableKey(SAIObject):
         super().__init__()
         self.sai_key_name = ""
         self.match_type = ""
-        self.type = ""
-        self.field = ""
         self.bitwidth = 0
         self.v4_or_v6_id = 0
 
@@ -292,11 +298,11 @@ class SAIAPITableKey(SAIObject):
             }
         '''
 
-        print("Parsing table p4rt_table_key: " + self.name)
+        self.id = p4rt_table_key['id']
+        self.name = p4rt_table_key[NAME_TAG]
+        print("Parsing table key: " + self.name)
 
-        self.id =  p4rt_table_key['id']
-        full_key_name, self.sai_key_name = p4rt_table_key[NAME_TAG].split(':')
-
+        full_key_name, self.sai_key_name = self.name.split(':')
         key_tuple = full_key_name.split('.')
         if len(key_tuple) == 3:
             key_struct, key_header, key_field = key_tuple
@@ -327,10 +333,103 @@ class SAIAPITableKey(SAIObject):
                 raise ValueError(f"match_type={self.match_type} is not supported")
 
         # If v4_or_v6 key is present, save its id.
-        if "is_" + self.sai_key_name + "_v4_or_v6" in v4_or_v6_key_ids:
-            self.v4_or_v6_id = p4rt_table_key['id']
+        v4_or_v6_key_name = "is_" + self.sai_key_name + "_v4_or_v6"
+        if v4_or_v6_key_name in v4_or_v6_key_ids:
+            self.v4_or_v6_id = v4_or_v6_key_ids[v4_or_v6_key_name]
 
         return
+
+
+@sai_parser_from_p4rt
+class SAIAPITableAction(SAIObject):
+    def __init__(self):
+        super().__init__()
+        self.params = []
+
+    def parse_p4rt(self, p4rt_table_action, sai_enums):
+        '''
+        This method parses the P4Runtime table action object and populates the SAI API table action object.
+
+        Example P4Runtime table action object:
+
+            {
+                "preamble": {
+                    "id": 25364446,
+                    "name": "dash_ingress.outbound.route_vnet",
+                    "alias": "route_vnet"
+                },
+                "params": [
+                    { "id": 1, "name": "dst_vnet_id", "bitwidth": 16 },
+                    { "id": 2, "name": "meter_policy_en", "bitwidth": 1 },
+                    { "id": 3, "name": "meter_class", "bitwidth": 16 }
+                ]
+            }
+        '''
+        print("Parsing table action: " + self.name)
+        self.name = self.name.split('.')[-1]
+        self.parse_action_params(p4rt_table_action, sai_enums)
+
+    def parse_action_params(self, p4rt_table_action, sai_enums):
+        if PARAMS_TAG not in p4rt_table_action:
+            return
+
+        # Save all *_v4_or_v6 param ids.
+        v4_or_v6_param_ids = dict()
+        for p4rt_table_action_param in p4rt_table_action[PARAMS_TAG]:
+            if 'v4_or_v6' in p4rt_table_action_param[NAME_TAG]:
+                v4_or_v6_param_name = p4rt_table_action_param[NAME_TAG]
+                v4_or_v6_param_ids[v4_or_v6_param_name] = p4rt_table_action_param['id']
+                break
+
+        # Parse all params.
+        for p in p4rt_table_action[PARAMS_TAG]:
+            param_name = p[NAME_TAG]
+            param = SAIAPITableActionParam.from_p4rt(p, name = param_name, sai_enums = sai_enums, v4_or_v6_param_ids = v4_or_v6_param_ids)
+            self.params.append(param)
+
+        return
+
+
+@sai_parser_from_p4rt
+class SAIAPITableActionParam(SAIObject):
+    def __init__(self):
+        super().__init__()
+        self.bitwidth = 0
+        self.default = None
+        self.v4_or_v6_id = 0
+        self.paramActions = []
+
+    def parse_p4rt(self, p4rt_table_action_param, sai_enums, v4_or_v6_param_ids):
+        '''
+        This method parses the P4Runtime table action object and populates the SAI API table action object.
+
+        Example P4Runtime table action object:
+
+            { "id": 1, "name": "dst_vnet_id", "bitwidth": 16 }
+        '''
+        print("Parsing table action param: " + self.name)
+        self.id = p4rt_table_action_param['id']
+        self.name = p4rt_table_action_param[NAME_TAG]
+
+        if STRUCTURED_ANNOTATIONS_TAG in p4rt_table_action_param:
+            self._parse_sai_object_annotation(p4rt_table_action_param)
+        else:
+            self.type, self.field = SAIType.get_sai_key_type(int(p4rt_table_action_param[BITWIDTH_TAG]), p4rt_table_action_param[NAME_TAG], p4rt_table_action_param[NAME_TAG])
+            for sai_enum in sai_enums:
+                if self.name == sai_enum.name:
+                    self.type = 'sai_' + self.name + '_t'
+                    self.field = 's32'
+                    self.default = 'SAI_' + self.name.upper() + '_INVALID'
+
+        self.bitwidth = p4rt_table_action_param[BITWIDTH_TAG]
+
+        # If v4_or_v6 key is present, save its id.
+        v4_or_v6_param_name = "is_" + self.name + "_v4_or_v6"
+        if v4_or_v6_param_name in v4_or_v6_param_ids:
+            self.v4_or_v6_id = v4_or_v6_param_ids[v4_or_v6_param_name]
+
+        return
+
 
 @sai_parser_from_p4rt
 class SAIAPITableData(SAIObject):
@@ -374,10 +473,10 @@ class SAIAPITableData(SAIObject):
         self.__parse_table_keys(p4rt_table)
 
         param_names = []
-        for action in p4rt_table[ACTION_REFS_TAG]:
-            action_id = action["id"]
-            if all_actions[action_id][NAME_TAG] != NOACTION and not (SCOPE_TAG in action and action[SCOPE_TAG] == 'DEFAULT_ONLY'):
-                fill_action_params(self.action_params, param_names, all_actions[action_id])
+        for p4rt_table_action in p4rt_table[ACTION_REFS_TAG]:
+            action_id = p4rt_table_action["id"]
+            if all_actions[action_id].name != NOACTION and not (SCOPE_TAG in p4rt_table_action and p4rt_table_action[SCOPE_TAG] == 'DEFAULT_ONLY'):
+                self.__merge_action_params_to_table_params(all_actions[action_id])
                 self.actions.append(all_actions[action_id])
 
         if self.is_object == None:
@@ -431,6 +530,29 @@ class SAIAPITableData(SAIObject):
 
         return
 
+    def __merge_action_params_to_table_params(self, action):
+        '''
+        Merge all parameters of an action into a single list of parameters for the table.
+
+        When merge the parameters, we need to handle duplications. If the same param passed to multiple actions,
+        we only need to keep one copy of the param in the table, so we don't generate multiple SAI attributes.
+        '''
+        for action_param in action.params:
+            # skip v4/v6 selector, as they are linked via parameter property already.
+            if 'v4_or_v6' in action_param.name:
+                continue
+
+            for table_action_param in self.action_params:
+                # Already have this param in the table.
+                if table_action_param.name == action_param.name:
+                    table_action_param.paramActions.append(action.name)
+                    break
+            else:
+                # New param is found, add it to the table.
+                action_param.paramActions = [action.name]
+                self.action_params.append(action_param)
+
+
 class DASHAPISet:
     '''
     This class holds all parsed SAI API info for a specific API set, such as routing or CA-PA mapping.
@@ -441,6 +563,7 @@ class DASHAPISet:
     
     def add_table(self, table):
         self.tables.append(table)
+
 
 @sai_parser_from_p4rt
 class DASHSAIExtensions(SAIObject):
@@ -472,10 +595,13 @@ class DASHSAIExtensions(SAIObject):
         self.sai_enums = [SAIEnum.from_p4rt(enum_value, name = enum_name) for enum_name, enum_value in all_p4rt_enums.items()]
 
     def __parse_sai_apis_from_p4rt(self, program, ignore_tables):
-        all_actions = extract_action_data(program, self.sai_enums)
+        # Parse all actions.
+        actions = self.__parse_sai_table_action(program[ACTIONS_TAG], self.sai_enums)
+
+        # Parse all tables into SAI API sets.
         tables = sorted(program[TABLES_TAG], key=lambda k: k[PREAMBLE_TAG][NAME_TAG])
         for table in tables:
-            sai_api_table_data = SAIAPITableData.from_p4rt(table, program, all_actions, ignore_tables)
+            sai_api_table_data = SAIAPITableData.from_p4rt(table, program, actions, ignore_tables)
 
             for sai_api in self.sai_apis:
                 if sai_api.app_name == sai_api_table_data.api_name:
@@ -488,60 +614,12 @@ class DASHSAIExtensions(SAIObject):
 
         return
 
-
-def extract_action_data(program, sai_enums):
-    action_data = {}
-    for action in program[ACTIONS_TAG]:
-        print("Found action: " + action[PREAMBLE_TAG][NAME_TAG])
-
-        preable = action[PREAMBLE_TAG]
-        id = preable['id']
-        name = preable[NAME_TAG].split('.')[-1]
-        params = []
-        if PARAMS_TAG in action:
-            for p in action[PARAMS_TAG]:
-                param = dict()
-                param['id'] = p['id']
-                param[NAME_TAG] = p[NAME_TAG]
-                if STRUCTURED_ANNOTATIONS_TAG in p:
-                    p4_annotation_to_sai_attr(p, param)
-                else:
-                    param['type'], param['field'] = SAIType.get_sai_key_type(int(p[BITWIDTH_TAG]), p[NAME_TAG], p[NAME_TAG])
-                    for sai_enum in sai_enums:
-                        if param[NAME_TAG] == sai_enum.name:
-                            param['type'] = 'sai_' + param[NAME_TAG] + '_t'
-                            param['field'] = 's32'
-                            param['default'] = 'SAI_' + param[NAME_TAG].upper() + '_INVALID'
-                param['bitwidth'] = p[BITWIDTH_TAG]
-                params.append(param)
-        action_data[id] = {'id': id, NAME_TAG: name, PARAMS_TAG: params}
-    return action_data
-
-
-def fill_action_params(table_params, param_names, action):
-    for param in action[PARAMS_TAG]:
-        # skip v4/v6 selector
-        if 'v4_or_v6' in param[NAME_TAG]:
-           continue
-        if param[NAME_TAG] not in param_names:
-            param_names.append(param[NAME_TAG])
-            param[PARAM_ACTIONS] = [action[NAME_TAG]]
-            table_params.append(param)
-        else:
-            # ensure that same param passed to multiple actions of the
-            # same P4 table does not generate more than 1 SAI attribute
-            for tbl_param in table_params:
-                if tbl_param[NAME_TAG] == param[NAME_TAG]:
-                    tbl_param[PARAM_ACTIONS].append(action[NAME_TAG])
-
-    for param in action[PARAMS_TAG]:
-        # mark presence of v4/v6 selector in the parent param
-        if 'v4_or_v6' in param[NAME_TAG]:
-            v4_or_v6_param_name = param[NAME_TAG]
-            for param2 in  action[PARAMS_TAG]:
-                if "is_" + param2[NAME_TAG] + "_v4_or_v6" == param[NAME_TAG]:
-                    param2["v4_or_v6_id"] = param['id']
-                    break
+    def __parse_sai_table_action(self, p4rt_actions, sai_enums):
+        action_data = {}
+        for p4rt_action in p4rt_actions:
+            action = SAIAPITableAction.from_p4rt(p4rt_action, sai_enums)
+            action_data[action.id] = action
+        return action_data
 
 
 def get_uniq_sai_api(sai_api):
@@ -694,20 +772,20 @@ for sai_api in sai_apis:
     # Update object name reference for action params
     for table in sai_api.tables:
         for param in table.action_params:
-            if param['type'] == 'sai_object_id_t':
-                table_ref = param[NAME_TAG][:-len("_id")]
+            if param.type == 'sai_object_id_t':
+                table_ref = param.name[:-len("_id")]
                 for table_name in all_table_names:
                     if table_ref.endswith(table_name):
-                        param[OBJECT_NAME_TAG] = table_name
+                        param.objectName = table_name
     # Update object name reference for keys
     for table in sai_api.tables:
         for key in table.keys:
-            if 'type' in key:
-                if key['type'] == 'sai_object_id_t':
-                    table_ref = key['sai_key_name'][:-len("_id")]
+            if key.type != None:
+                if key.type == 'sai_object_id_t':
+                    table_ref = key.sai_key_name[:-len("_id")]
                     for table_name in all_table_names:
                         if table_ref.endswith(table_name):
-                            key[OBJECT_NAME_TAG] = table_name
+                            key.objectName = table_name
     # Write SAI dictionary into SAI API headers
     if "dash" in sai_api.app_name:
         write_sai_files(get_uniq_sai_api(sai_api))
