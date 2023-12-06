@@ -178,7 +178,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
 
         switch(attr_list[i].id)
         {
-            {% for param in table.actionParams %}
+            {% for param in table.action_params %}
             {% if param.skipattr == 'true' %}
             {% else %}
             case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}:
