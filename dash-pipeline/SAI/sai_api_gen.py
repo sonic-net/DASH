@@ -63,7 +63,7 @@ def sai_parser_from_p4rt(cls):
         self.id = preamble['id']
         self.name = preamble['name']
         self.alias = preamble['alias']
-        self._parse_p4rt(p4rt_value, *args, **kwargs)
+        self.parse_p4rt(p4rt_value, *args, **kwargs)
 
     setattr(cls, "from_p4rt", create)
     setattr(cls, "parse", parse)
@@ -78,7 +78,7 @@ def sai_parser_from_p4rt_no_preamble(cls):
 
     def parse(self, p4rt_object_name, p4rt_object_value, *args, **kwargs):
         self.name = p4rt_object_name
-        self._parse_p4rt(p4rt_object_value, *args, **kwargs)
+        self.parse_p4rt(p4rt_object_value, *args, **kwargs)
 
     setattr(cls, "from_p4rt", create)
     setattr(cls, "parse", parse)
@@ -103,7 +103,7 @@ class SAIEnumMember(SAIObject):
         self.sai_name = ""
         self.p4rt_value = ""
 
-    def _parse_p4rt(self, p4rt_member):
+    def parse_p4rt(self, p4rt_member):
         self.sai_name = self.name
         self.p4rt_value = p4rt_member
 
@@ -116,7 +116,7 @@ class SAIEnum(SAIObject):
         super().__init__()
         self.members = []
         
-    def _parse_p4rt(self, p4rt_enum):
+    def parse_p4rt(self, p4rt_enum):
         print("Parsing enum: " + self.name)
         self.name = self.name[:-2]
         self.members = [SAIEnumMember.from_p4rt(enum_member['name'], enum_member['value']) for enum_member in p4rt_enum[MEMBERS_TAG]]
@@ -138,7 +138,7 @@ class SAIAPITableData(SAIObject):
         self.stage = None
         self.is_object = None
 
-    def _parse_p4rt(self, p4rt_table, program, all_actions, ignore_tables):
+    def parse_p4rt(self, p4rt_table, program, all_actions, ignore_tables):
         table_control, self.name = p4rt_table[PREAMBLE_TAG][NAME_TAG].split('.', 1)
 
         self.__parse_table_annotations(p4rt_table)
@@ -221,6 +221,17 @@ class SAIAPITableData(SAIObject):
         return 'false'
 
 
+class DASHAPISet:
+    '''
+    This class holds all parsed SAI API table info for a specific API.
+    '''
+    def __init__(self, api_name):
+        self.app_name = api_name
+        self.tables = []
+    
+    def add_table(self, table):
+        self.tables.append(table)
+
 @sai_parser_from_p4rt_no_preamble
 class DASHSAIExtensions:
     '''
@@ -230,8 +241,7 @@ class DASHSAIExtensions:
         self.name = ""
         self.sai_enums = []
         self.sai_apis = []
-        self.all_table_names = []
-    
+
     @staticmethod
     def from_p4rt_file(p4rt_json_file_path, ignore_tables):
         print("Parsing SAI APIs BMv2 P4Runtime Json file: " + p4rt_json_file_path)
@@ -240,7 +250,10 @@ class DASHSAIExtensions:
 
         return DASHSAIExtensions.from_p4rt('dash_sai_apis', p4rt, ignore_tables)
 
-    def _parse_p4rt(self, p4rt_value, ignore_tables):
+    def get_all_table_names(self):
+        return [table.name for api in self.sai_apis for table in api.tables]
+    
+    def parse_p4rt(self, p4rt_value, ignore_tables):
         self.__parse_sai_enums_from_p4rt(p4rt_value)
         self.__parse_sai_apis_from_p4rt(p4rt_value, ignore_tables)
 
@@ -254,18 +267,13 @@ class DASHSAIExtensions:
         for table in tables:
             sai_api_table_data = SAIAPITableData.from_p4rt(table, program, all_actions, ignore_tables)
 
-            self.all_table_names.append(sai_api_table_data.name)
-            is_new_api = True
             for sai_api in self.sai_apis:
-                if sai_api['app_name'] == sai_api_table_data.api_name:
-                    sai_api[TABLES_TAG].append(sai_api_table_data)
-                    is_new_api = False
+                if sai_api.app_name == sai_api_table_data.api_name:
+                    sai_api.add_table(sai_api_table_data)
                     break
-
-            if is_new_api:
-                new_api = dict()
-                new_api['app_name'] = sai_api_table_data.api_name
-                new_api[TABLES_TAG] = [sai_api_table_data]
+            else:
+                new_api = DASHAPISet(sai_api_table_data.api_name)
+                new_api.add_table(sai_api_table_data)
                 self.sai_apis.append(new_api)
 
         return
@@ -452,12 +460,12 @@ def get_uniq_sai_api(sai_api):
     groups = set()
     sai_api = copy.deepcopy(sai_api)
     tables = []
-    for table in sai_api[TABLES_TAG]:
+    for table in sai_api.tables:
         if table.name in groups:
             continue
         tables.append(table)
         groups.add(table.name)
-    sai_api[TABLES_TAG] = tables
+    sai_api.tables = tables
     return sai_api
 
 # don't write content to file if file already exists
@@ -478,12 +486,12 @@ def write_sai_impl_files(sai_api):
     env.add_extension('jinja2.ext.loopcontrols')
     env.add_extension('jinja2.ext.do')
     sai_impl_tm = env.get_template('/templates/saiapi.cpp.j2')
-    if "dash" in sai_api['app_name']:
+    if "dash" in sai_api.app_name:
         header_prefix = "experimental"
     else:
         header_prefix = ""
-    sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'], header_prefix = header_prefix)
-    write_if_different('./lib/sai' + sai_api['app_name'].replace('_', '') + '.cpp',sai_impl_str)
+    sai_impl_str = sai_impl_tm.render(tables = sai_api.tables, app_name = sai_api.app_name, header_prefix = header_prefix)
+    write_if_different('./lib/sai' + sai_api.app_name.replace('_', '') + '.cpp',sai_impl_str)
 
 def write_sai_fixed_api_files(sai_api_full_name_list):
     env = Environment(loader=FileSystemLoader('.'))
@@ -491,7 +499,7 @@ def write_sai_fixed_api_files(sai_api_full_name_list):
     for filename in ['saifixedapis.cpp', 'saiimpl.h']:
         env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
         sai_impl_tm = env.get_template('/templates/%s.j2' % filename)
-        sai_impl_str = sai_impl_tm.render(tables = sai_api[TABLES_TAG], app_name = sai_api['app_name'], api_names = sai_api_full_name_list)
+        sai_impl_str = sai_impl_tm.render(tables = sai_api.tables, app_name = sai_api.app_name, api_names = sai_api_full_name_list)
 
         write_if_different('./lib/%s' % filename,sai_impl_str)
 
@@ -507,7 +515,7 @@ def write_sai_files(sai_api):
     sai_header_tm = env.get_template('templates/saiapi.h.j2')
     sai_header_str = sai_header_tm.render(sai_api = sai_api)
 
-    write_if_different('./SAI/experimental/saiexperimental' + sai_api['app_name'].replace('_', '') + '.h',sai_header_str)
+    write_if_different('./SAI/experimental/saiexperimental' + sai_api.app_name.replace('_', '') + '.h',sai_header_str)
 
     # The SAI Extensions
     with open('./SAI/experimental/saiextensions.h', 'r') as f:
@@ -516,12 +524,12 @@ def write_sai_files(sai_api):
     new_lines = []
     for line in lines:
         if 'Add new experimental APIs above this line' in line:
-            new_line = '    SAI_API_' + sai_api['app_name'].upper() + ',\n'
+            new_line = '    SAI_API_' + sai_api.app_name.upper() + ',\n'
             if new_line not in lines:
                 new_lines.append(new_line + '\n')
         if 'new experimental object type includes' in line:
             new_lines.append(line)
-            new_line = '#include "saiexperimental' + sai_api['app_name'].replace('_', '') + '.h"\n'
+            new_line = '#include "saiexperimental' + sai_api.app_name.replace('_', '') + '.h"\n'
             if new_line not in lines:
                 new_lines.append(new_line)
             continue
@@ -538,7 +546,7 @@ def write_sai_files(sai_api):
     for line in lines:
         if 'Add new experimental object types above this line' in line:
             
-            for table in sai_api[TABLES_TAG]:
+            for table in sai_api.tables:
                 new_line = '    SAI_OBJECT_TYPE_' + table.name.upper() + ',\n'
                 if new_line not in lines:
                     new_lines.append(new_line + '\n')
@@ -554,7 +562,7 @@ def write_sai_files(sai_api):
     new_lines = []
     for line in lines:
         if 'Add new experimental entries above this line' in line:
-            for table in sai_api[TABLES_TAG]:
+            for table in sai_api.tables:
                 if table.is_object == 'false':
                     new_line = '    sai_' + table.name + '_t ' + table.name + ';\n'
                     if new_line not in lines:
@@ -562,7 +570,7 @@ def write_sai_files(sai_api):
                         new_lines.append(new_line + '\n')
         if 'new experimental object type includes' in line:
             new_lines.append(line)
-            new_line = '#include <saiexperimental' + sai_api['app_name'].replace('_', '') + '.h>\n'
+            new_line = '#include <saiexperimental' + sai_api.app_name.replace('_', '') + '.h>\n'
             if new_line not in lines:
                 new_lines.append(new_line)
             continue
@@ -588,14 +596,14 @@ if not os.path.isfile(args.filepath):
 # Get SAI dictionary from P4 dictionary
 dash_sai_exts = DASHSAIExtensions.from_p4rt_file(args.filepath, args.ignore_tables.split(','))
 sai_apis = dash_sai_exts.sai_apis
-all_table_names = dash_sai_exts.all_table_names
+all_table_names = dash_sai_exts.get_all_table_names()
 sai_enums = dash_sai_exts.sai_enums
 
 sai_api_name_list = []
 sai_api_full_name_list = []
 for sai_api in sai_apis:
     # Update object name reference for action params
-    for table in sai_api[TABLES_TAG]:
+    for table in sai_api.tables:
         for param in table.action_params:
             if param['type'] == 'sai_object_id_t':
                 table_ref = param[NAME_TAG][:-len("_id")]
@@ -603,7 +611,7 @@ for sai_api in sai_apis:
                     if table_ref.endswith(table_name):
                         param[OBJECT_NAME_TAG] = table_name
     # Update object name reference for keys
-    for table in sai_api[TABLES_TAG]:
+    for table in sai_api.tables:
         for key in table.keys:
             if 'type' in key:
                 if key['type'] == 'sai_object_id_t':
@@ -612,13 +620,13 @@ for sai_api in sai_apis:
                         if table_ref.endswith(table_name):
                             key[OBJECT_NAME_TAG] = table_name
     # Write SAI dictionary into SAI API headers
-    if "dash" in sai_api['app_name']:
+    if "dash" in sai_api.app_name:
         write_sai_files(get_uniq_sai_api(sai_api))
 
     # Write SAI implementation    
     write_sai_impl_files(sai_api)
-    sai_api_name_list.append(sai_api['app_name'].replace('_', ''))
-    sai_api_full_name_list.append(sai_api['app_name'])
+    sai_api_name_list.append(sai_api.app_name.replace('_', ''))
+    sai_api_full_name_list.append(sai_api.app_name)
 
 env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
 env.add_extension('jinja2.ext.loopcontrols')
