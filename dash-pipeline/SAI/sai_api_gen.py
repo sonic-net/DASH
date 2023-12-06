@@ -223,7 +223,7 @@ class SAIAPITableData(SAIObject):
 
 class DASHAPISet:
     '''
-    This class holds all parsed SAI API table info for a specific API.
+    This class holds all parsed SAI API info for a specific API set, such as routing or CA-PA mapping.
     '''
     def __init__(self, api_name):
         self.app_name = api_name
