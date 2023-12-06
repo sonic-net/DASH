@@ -35,7 +35,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     {% for group_item in tables%}
     {% if group_item.name != table.name  %}{% continue %}{% endif %}
     {% set table = group_item %}
-    {% if 'stage' in table %}
+    {% if table.stage != None %}
     // For stage {{ table.stage }}
     {% endif %}
     matchActionEntry = std::make_shared<p4::v1::TableEntry>();
@@ -413,7 +413,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
 
         switch(attr_list[i].id)
         {
-            {% for param in table.actionParams %}
+            {% for param in table.action_params %}
             {% if param.skipattr == 'true' %}
             {% else %}
             case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}:

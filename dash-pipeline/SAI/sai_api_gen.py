@@ -135,7 +135,7 @@ class SAIAPITableData(SAIObject):
         self.actions = []
         self.action_params = []
         self.with_counters = 'false'
-        self.stage = ""
+        self.stage = None
         self.is_object = None
 
     def _parse_p4rt(self, p4rt_table, program, all_actions, ignore_tables):
@@ -555,8 +555,8 @@ def write_sai_files(sai_api):
     for line in lines:
         if 'Add new experimental entries above this line' in line:
             for table in sai_api[TABLES_TAG]:
-                if table['is_object'] == 'false':
-                    new_line = '    sai_' + table[NAME_TAG] + '_t ' + table[NAME_TAG] + ';\n'
+                if table.is_object == 'false':
+                    new_line = '    sai_' + table.name + '_t ' + table.name + ';\n'
                     if new_line not in lines:
                         new_lines.append('    /** @validonly object_type == SAI_OBJECT_TYPE_' + table[NAME_TAG].upper() + ' */\n')
                         new_lines.append(new_line + '\n')
