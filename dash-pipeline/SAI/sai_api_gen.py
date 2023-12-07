@@ -396,7 +396,6 @@ class SAIAPITableAction(SAIObject):
             if 'v4_or_v6' in p4rt_table_action_param[NAME_TAG]:
                 v4_or_v6_param_name = p4rt_table_action_param[NAME_TAG]
                 v4_or_v6_param_ids[v4_or_v6_param_name] = p4rt_table_action_param['id']
-                break
 
         # Parse all params.
         for p in p4rt_table_action[PARAMS_TAG]:
@@ -462,26 +461,27 @@ class SAIAPITableData(SAIObject):
         self.actions = []
         self.action_params = []
         self.with_counters = 'false'
+
+        # Extra properties from annotations
         self.stage = None
         self.is_object = None
 
     def parse_p4rt(self, p4rt_table, program, all_actions, ignore_tables):
-        table_control, self.name = p4rt_table[PREAMBLE_TAG][NAME_TAG].split('.', 1)
+        table_control, table_name = p4rt_table[PREAMBLE_TAG][NAME_TAG].split('.', 1)
 
         self.__parse_sai_table_annotations(p4rt_table[PREAMBLE_TAG])
         if self.ignored:
-            ignore_tables.append(self.name)
-        if self.name in ignore_tables:
+            ignore_tables.append(table_name)
+        if table_name in ignore_tables:
             return
 
-        print("Parsing table: " + self.name)
+        print("Parsing table: " + table_name)
 
-        self.name, self.api_name = self.name.split('|')
-        if '.' in self.name:
-            self.name = self.name.split('.')[-1]
+        table_name, self.api_name = table_name.split('|')
+        self.name = table_name.split('.')[-1] if '.' in table_name else table_name
 
-        if ':' in self.name:
-            stage, group_name = self.name.split(':')
+        if ':' in table_name:
+            stage, group_name = table_name.split(':')
             self.name = group_name
             self.stage = stage.replace('.' , '_')
 
