@@ -469,21 +469,24 @@ class SAIAPITableData(SAIObject):
     def parse_p4rt(self, p4rt_table, program, all_actions, ignore_tables):
         table_control, table_name = p4rt_table[PREAMBLE_TAG][NAME_TAG].split('.', 1)
 
+        if table_name in ignore_tables:
+            self.ignored = True
+            return
+
         self.__parse_sai_table_annotations(p4rt_table[PREAMBLE_TAG])
         if self.ignored:
             ignore_tables.append(table_name)
-        if table_name in ignore_tables:
             return
 
         print("Parsing table: " + table_name)
 
         table_name, self.api_name = table_name.split('|')
-        self.name = table_name.split('.')[-1] if '.' in table_name else table_name
-
         if ':' in table_name:
             stage, group_name = table_name.split(':')
             self.name = group_name
             self.stage = stage.replace('.' , '_')
+        else:
+            self.name = table_name.split('.')[-1] if '.' in table_name else table_name
 
         self.with_counters = self.__table_with_counters(program)
 
@@ -619,6 +622,8 @@ class DASHSAIExtensions(SAIObject):
         tables = sorted(program[TABLES_TAG], key=lambda k: k[PREAMBLE_TAG][NAME_TAG])
         for table in tables:
             sai_api_table_data = SAIAPITableData.from_p4rt(table, program, actions, ignore_tables)
+            if sai_api_table_data.ignored:
+                continue
 
             for sai_api in self.sai_apis:
                 if sai_api.app_name == sai_api_table_data.api_name:
