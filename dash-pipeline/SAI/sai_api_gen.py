@@ -681,7 +681,7 @@ class SAIFileUpdater:
 
         existing_lines = set([l.strip() for l in self.lines])
         for line in self.lines:
-            if line.strip() == target_line.strip():
+            if target_line in line:
                 if new_line_only:
                     for insert_line in insert_lines:
                         if insert_line.strip() not in existing_lines:
@@ -699,7 +699,7 @@ class SAIFileUpdater:
         existing_lines = set([l.strip() for l in self.lines])
         for line in self.lines:
             new_lines.append(line)
-            if line.strip() == target_line.strip():
+            if target_line in line:
                 if new_line_only == True:
                     for insert_line in insert_lines:
                         if insert_line.strip() not in existing_lines:
@@ -753,6 +753,7 @@ class SAIGenerator:
         self.sai_api_names = []
         self.generated_sai_api_extension_names = []
         self.generated_sai_type_extension_names = []
+        self.generated_sai_object_entry_extension_names = []
         self.generated_header_file_names = []
         self.generated_impl_file_names = []
 
@@ -782,63 +783,65 @@ class SAIGenerator:
     def generate_dash_sai_definitions_for_api(self, sai_api):
         # SAI header file
         sai_header_file_name = 'saiexperimental' + sai_api.app_name.replace('_', '') + '.h'
-        SAITemplateRender('templates/saiapi.h.j2').render_to_file('./SAI/experimental/' + sai_header_file_name, sai_api = sai_api)
+        SAITemplateRender('templates/saiapi.h.j2').render_to_file('SAI/experimental/' + sai_header_file_name, sai_api = sai_api)
         self.generated_header_file_names.append(sai_header_file_name)
 
         # Gather SAI API extension name and object types
         self.generated_sai_api_extension_names.append('    SAI_API_' + sai_api.app_name.upper() + ',')
 
         for table in sai_api.tables:
-            self.generated_sai_type_extension_names.append({
-                'type': '    SAI_OBJECT_TYPE_' + table.name.upper() + ',',
-                'object_entry': '    sai_' + table.name + '_t ' + table.name + ';'
-            })
+            self.generated_sai_type_extension_names.append('    SAI_OBJECT_TYPE_' + table.name.upper() + ',')
+
+            if table.is_object == 'false':
+                self.generated_sai_object_entry_extension_names.append('    /** @validonly object_type == SAI_OBJECT_TYPE_' + table.name.upper() + ' */')
+                self.generated_sai_object_entry_extension_names.append('    sai_' + table.name + '_t ' + table.name + ';')
 
         return
 
     def generate_sai_impl_file_for_api(self, sai_api):
         sai_impl_file_name = 'sai' + sai_api.app_name.replace('_', '') + '.cpp'
         header_prefix = "experimental" if "dash" in sai_api.app_name else ""
-        SAITemplateRender('templates/saiapi.cpp.j2').render_to_file('./lib/' + sai_impl_file_name, tables = sai_api.tables, app_name = sai_api.app_name, header_prefix = header_prefix)
+        SAITemplateRender('templates/saiapi.cpp.j2').render_to_file('lib/' + sai_impl_file_name, tables = sai_api.tables, app_name = sai_api.app_name, header_prefix = header_prefix)
         self.generated_impl_file_names.append(sai_impl_file_name)
 
     def generate_dash_sai_global_definitions(self):
         print("\nGenerating DASH SAI API global definitions ...")
 
         # Update SAI extensions with API names and includes
-        with SAIFileUpdater('./SAI/experimental/saiextensions.h') as f:
+        with SAIFileUpdater('SAI/experimental/saiextensions.h') as f:
             f.insert_before('Add new experimental APIs above this line', self.generated_sai_api_extension_names, new_line_only=True)
-            f.insert_after('new experimental object type includes', self.generated_header_file_names, new_line_only=True)
+            f.insert_after('new experimental object type includes', ['#include "{}"'.format(f) for f in self.generated_header_file_names], new_line_only=True)
 
         # Update SAI type extensions with object types
-        with SAIFileUpdater('./SAI/experimental/saitypesextensions.h') as f:
+        with SAIFileUpdater('SAI/experimental/saitypesextensions.h') as f:
             f.insert_before('Add new experimental object types above this line', self.generated_sai_type_extension_names, new_line_only=True)
 
         # Update SAI object struct for entries
-        with SAIFileUpdater('./SAI/inc/saiobject.h') as f:
-            f.insert_before('Add new experimental entries above this line', self.generated_sai_type_extension_names, new_line_only=True)
-            f.insert_after('new experimental object type includes', self.generated_header_file_names, new_line_only=True)
+        with SAIFileUpdater('SAI/inc/saiobject.h') as f:
+            f.insert_before('Add new experimental entries above this line', self.generated_sai_object_entry_extension_names, new_line_only=True)
+            f.insert_after('new experimental object type includes', ["#include <{}>".format(f) for f in self.generated_header_file_names], new_line_only=True)
 
         return
 
     def generate_sai_enum(self):
         new_sai_enums = []
-        with open('./SAI/experimental/saitypesextensions.h', 'r') as f:
+        with open('SAI/experimental/saitypesextensions.h', 'r') as f:
             content = f.read()
             for enum in self.dash_sai_ext.sai_enums:
                 if enum.name not in content:
                     new_sai_enums.append(enum)
 
         sai_enums_str = SAITemplateRender('templates/saienums.j2').render(sai_enums = new_sai_enums)
-        sai_enums_lines = sai_enums_str.split('\n')
+        sai_enums_lines = [s.rstrip(" \n") for s in sai_enums_str.split('\n')]
+        sai_enums_lines = sai_enums_lines[:-1] # Remove the last empty line, so we won't add extra empty line to the file.
 
-        with SAIFileUpdater('./SAI/experimental/saitypesextensions.h') as f:
+        with SAIFileUpdater('SAI/experimental/saitypesextensions.h') as f:
             f.insert_before('/* __SAITYPESEXTENSIONS_H_ */', sai_enums_lines)
 
     def generate_sai_fixed_api_files(self):
         print("\nGenerating SAI fixed APIs ...")
         for filename in ['saifixedapis.cpp', 'saiimpl.h']:
-            SAITemplateRender('templates/%s.j2' % filename).render_to_file('./lib/%s' % filename, api_names = self.sai_api_names)
+            SAITemplateRender('templates/%s.j2' % filename).render_to_file('lib/%s' % filename, api_names = self.sai_api_names)
 
     def __get_uniq_sai_api(self, sai_api):
         """ Only keep one table per group(with same table name) """
@@ -863,12 +866,15 @@ if __name__ == "__main__":
     parser.add_argument('--ignore-tables', type=str, default='', help='Comma separated list of tables to ignore')
     args = parser.parse_args()
 
-    if not os.path.isfile(args.filepath):
-        print('File ' + args.filepath + ' does not exist')
+    p4rt_file_path = os.path.realpath(args.filepath)
+    if not os.path.isfile(p4rt_file_path):
+        print('File ' + p4rt_file_path + ' does not exist')
         exit(1)
 
+    os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
     # Parse SAI data from P4 runtime json file
-    dash_sai_exts = DASHSAIExtensions.from_p4rt_file(args.filepath, args.ignore_tables.split(','))
+    dash_sai_exts = DASHSAIExtensions.from_p4rt_file(p4rt_file_path, args.ignore_tables.split(','))
 
     if args.print_sai_lib:
         print("Dumping parsed SAI data:")
