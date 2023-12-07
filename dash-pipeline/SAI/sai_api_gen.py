@@ -472,7 +472,6 @@ class SAIAPITableData(SAIObject):
 
         self.__parse_table_keys(p4rt_table)
 
-        param_names = []
         for p4rt_table_action in p4rt_table[ACTION_REFS_TAG]:
             action_id = p4rt_table_action["id"]
             if all_actions[action_id].name != NOACTION and not (SCOPE_TAG in p4rt_table_action and p4rt_table_action[SCOPE_TAG] == 'DEFAULT_ONLY'):
@@ -518,6 +517,9 @@ class SAIAPITableData(SAIObject):
                 v4_or_v6_key_ids[v4_or_v6_key_name] = p4rt_table_key['id']
 
         for p4rt_table_key in p4rt_table[MATCH_FIELDS_TAG]:
+            if 'v4_or_v6' in p4rt_table_key[NAME_TAG]:
+                continue
+
             table_key = SAIAPITableKey.from_p4rt(p4rt_table_key, v4_or_v6_key_ids)
             self.keys.append(table_key)
 
