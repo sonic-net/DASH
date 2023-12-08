@@ -34,7 +34,7 @@
  */
 
 {% for table in sai_api.tables %}
-{% if table.actions | length > 1 or ((table.actions | length == 1) and (((table.is_object == 'false') or (table['keys'] | length <= 1)) and ((table['actionParams'] | length == 0))))  %}
+{% if table.actions | length > 1 or ((table.actions | length == 1) and (((table.is_object == 'false') or (table['keys'] | length <= 1)) and ((table['action_params'] | length == 0))))  %}
 /**
  * @brief Attribute data for #SAI_{{ table.name | upper }}_ATTR_ACTION
  */
@@ -103,7 +103,7 @@ typedef enum _sai_{{ table.name }}_attr_t
     SAI_{{ table.name | upper }}_ATTR_START,
 
 {% set ns = namespace(firstattr=false) %}
-{% if table.actions | length > 1 or ((table.actions | length == 1) and (((table.is_object == 'false') or (table['keys'] | length <= 1)) and ((table['actionParams'] | length == 0))))  %}
+{% if table.actions | length > 1 or ((table.actions | length == 1) and (((table.is_object == 'false') or (table['keys'] | length <= 1)) and ((table['action_params'] | length == 0))))  %}
     /**
      * @brief Action
      *
@@ -155,7 +155,7 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% endfor %}
 {% endif %}
 {% endif %}
-{% for param in table.actionParams %}
+{% for param in table.action_params %}
 {% if param.skipattr == 'true' %}
 {% else %}
     /**
