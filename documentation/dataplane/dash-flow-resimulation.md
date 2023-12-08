@@ -2,6 +2,10 @@
 
 In DASH, after flow is created, it may not remain unchanged until it is deleted. Things like policy updates could cause flow to be modified or deleted. This is called flow resimulation. And this doc is trying to describe this behavior in depth.
 
+|  Rev  |    Date    |       Author        | Change Description                        |
+| :---: | :--------: | :-----------------: | :---------------------------------------- |
+|  0.1  | 12/08/2023 | Riff Jiang          | Initial version                           |
+
 1. [1. Full flow resimulation](#1-full-flow-resimulation)
    1. [1.1. Flow incarnation id](#11-flow-incarnation-id)
    2. [1.2. Flow resimulation process](#12-flow-resimulation-process)
