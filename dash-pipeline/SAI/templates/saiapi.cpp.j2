@@ -106,11 +106,11 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 assert(mask && "SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}_MASK isn't provided");
                 {{key.field}}SetMask(mask->value, mf_ternary, {{key.bitwidth}});
                 {% endif %}
-                {% if key.is_ipv6_field_id != 0 %}
+                {% if key.ip_is_v6_field_id != 0 %}
                 {
-                    // set is_ipv6_field_id field
+                    // set ip_is_v6_field_id field
                     auto mf = matchActionEntry->add_match();
-                    mf->set_field_id({{key.is_ipv6_field_id}});
+                    mf->set_field_id({{key.ip_is_v6_field_id}});
                     auto mf_exact = mf->mutable_exact();
                     booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
                 }
@@ -187,11 +187,11 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 param->set_param_id({{param.id}});
                 {{param.field}}SetVal(attr_list[i].value, param, {{param.bitwidth}});
                 //matchedParams++;
-                {% if param.is_ipv6_field_id != 0 %}
+                {% if param.ip_is_v6_field_id != 0 %}
                 {
-                    // set is_ipv6_field_id field
+                    // set ip_is_v6_field_id field
                     auto param2 = action->add_params();
-                    param2->set_param_id({{param.is_ipv6_field_id}});
+                    param2->set_param_id({{param.ip_is_v6_field_id}});
                     booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param2, 1);
                     //matchedParams++;
                 }
@@ -364,11 +364,11 @@ static sai_status_t dash_sai_create_{{ table.name }}(
         //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
         {% endif %}
     }
-    {% if key.is_ipv6_field_id != 0 %}
+    {% if key.ip_is_v6_field_id != 0 %}
     {
-        // set is_ipv6_field_id field
+        // set ip_is_v6_field_id field
         auto mf = matchActionEntry->add_match();
-        mf->set_field_id({{key.is_ipv6_field_id}});
+        mf->set_field_id({{key.ip_is_v6_field_id}});
         auto mf_exact = mf->mutable_exact();
         booldataSetVal((tableEntry->{{ key.sai_key_name | lower }}.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
     }
@@ -422,11 +422,11 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 param->set_param_id({{param.id}});
                 {{param.field}}SetVal(attr_list[i].value, param, {{param.bitwidth}});
                 //matchedParams++;
-                {% if param.is_ipv6_field_id != 0 %}
+                {% if param.ip_is_v6_field_id != 0 %}
                 {
-                    // set is_ipv6_field_id field
+                    // set ip_is_v6_field_id field
                     auto param2 = action->add_params();
-                    param2->set_param_id({{param.is_ipv6_field_id}});
+                    param2->set_param_id({{param.ip_is_v6_field_id}});
                     booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param2, 1);
                     //matchedParams++;
                 }
@@ -527,11 +527,11 @@ static sai_status_t dash_sai_remove_{{ table.name }}(
         //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
         {% endif %}
     }
-    {% if key.is_ipv6_field_id != 0 %}
+    {% if key.ip_is_v6_field_id != 0 %}
     {
-        // set is_ipv6_field_id field
+        // set ip_is_v6_field_id field
         auto mf = matchActionEntry->add_match();
-        mf->set_field_id({{key.is_ipv6_field_id}});
+        mf->set_field_id({{key.ip_is_v6_field_id}});
         auto mf_exact = mf->mutable_exact();
         booldataSetVal((tableEntry->{{ key.sai_key_name | lower }}.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
     }

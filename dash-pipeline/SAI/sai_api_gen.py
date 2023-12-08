@@ -293,9 +293,9 @@ class SAIAPITableKey(SAIObject):
         self.sai_key_name = ""
         self.match_type = ""
         self.bitwidth = 0
-        self.is_ipv6_field_id = 0
+        self.ip_is_v6_field_id = 0
 
-    def parse_p4rt(self, p4rt_table_key, is_ipv6_key_ids):
+    def parse_p4rt(self, p4rt_table_key, ip_is_v6_key_ids):
         '''
         This method parses the P4Runtime table key object and populates the SAI API table key object.
 
@@ -350,9 +350,9 @@ class SAIAPITableKey(SAIObject):
                 raise ValueError(f"match_type={self.match_type} is not supported")
 
         # If *_is_v6 key is present, save its id.
-        is_ipv6_key_name = self.sai_key_name + "_is_v6"
-        if is_ipv6_key_name in is_ipv6_key_ids:
-            self.is_ipv6_field_id = is_ipv6_key_ids[is_ipv6_key_name]
+        ip_is_v6_key_name = self.sai_key_name + "_is_v6"
+        if ip_is_v6_key_name in ip_is_v6_key_ids:
+            self.ip_is_v6_field_id = ip_is_v6_key_ids[ip_is_v6_key_name]
 
         return
 
@@ -391,16 +391,16 @@ class SAIAPITableAction(SAIObject):
             return
 
         # Save all *_is_v6 param ids.
-        is_ipv6_param_ids = dict()
+        ip_is_v6_param_ids = dict()
         for p4rt_table_action_param in p4rt_table_action[PARAMS_TAG]:
             if '_is_v6' in p4rt_table_action_param[NAME_TAG]:
-                is_ipv6_param_name = p4rt_table_action_param[NAME_TAG]
-                is_ipv6_param_ids[is_ipv6_param_name] = p4rt_table_action_param['id']
+                ip_is_v6_param_name = p4rt_table_action_param[NAME_TAG]
+                ip_is_v6_param_ids[ip_is_v6_param_name] = p4rt_table_action_param['id']
 
         # Parse all params.
         for p in p4rt_table_action[PARAMS_TAG]:
             param_name = p[NAME_TAG]
-            param = SAIAPITableActionParam.from_p4rt(p, sai_enums = sai_enums, is_ipv6_param_ids = is_ipv6_param_ids)
+            param = SAIAPITableActionParam.from_p4rt(p, sai_enums = sai_enums, ip_is_v6_param_ids = ip_is_v6_param_ids)
             self.params.append(param)
 
         return
@@ -412,10 +412,10 @@ class SAIAPITableActionParam(SAIObject):
         super().__init__()
         self.bitwidth = 0
         self.default = None
-        self.is_ipv6_field_id = 0
+        self.ip_is_v6_field_id = 0
         self.paramActions = []
 
-    def parse_p4rt(self, p4rt_table_action_param, sai_enums, is_ipv6_param_ids):
+    def parse_p4rt(self, p4rt_table_action_param, sai_enums, ip_is_v6_param_ids):
         '''
         This method parses the P4Runtime table action object and populates the SAI API table action object.
 
@@ -440,9 +440,9 @@ class SAIAPITableActionParam(SAIObject):
         self.bitwidth = p4rt_table_action_param[BITWIDTH_TAG]
 
         # If *_is_v6 key is present, save its id.
-        is_ipv6_param_name = self.name + "_is_v6"
-        if is_ipv6_param_name in is_ipv6_param_ids:
-            self.is_ipv6_field_id = is_ipv6_param_ids[is_ipv6_param_name]
+        ip_is_v6_param_name = self.name + "_is_v6"
+        if ip_is_v6_param_name in ip_is_v6_param_ids:
+            self.ip_is_v6_field_id = ip_is_v6_param_ids[ip_is_v6_param_name]
 
         return
 
@@ -530,18 +530,18 @@ class SAIAPITableData(SAIObject):
         return 'false'
 
     def __parse_table_keys(self, p4rt_table):
-        is_ipv6_key_ids = dict()
+        ip_is_v6_key_ids = dict()
         for p4rt_table_key in p4rt_table[MATCH_FIELDS_TAG]:
             if '_is_v6' in p4rt_table_key[NAME_TAG]:
-                _, is_ipv6_key_name = p4rt_table_key[NAME_TAG].split(':')
-                is_ipv6_key_ids[is_ipv6_key_name] = p4rt_table_key['id']
+                _, ip_is_v6_key_name = p4rt_table_key[NAME_TAG].split(':')
+                ip_is_v6_key_ids[ip_is_v6_key_name] = p4rt_table_key['id']
 
         for p4rt_table_key in p4rt_table[MATCH_FIELDS_TAG]:
             # Skip all *_is_v6 keys, as they will be linked via table key property.
             if '_is_v6' in p4rt_table_key[NAME_TAG]:
                 continue
 
-            table_key = SAIAPITableKey.from_p4rt(p4rt_table_key, is_ipv6_key_ids)
+            table_key = SAIAPITableKey.from_p4rt(p4rt_table_key, ip_is_v6_key_ids)
             self.keys.append(table_key)
 
         for p4rt_table_key in self.keys:
