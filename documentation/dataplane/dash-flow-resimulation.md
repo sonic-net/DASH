@@ -131,7 +131,7 @@ To summarize, the following changes are needed to implement full flow resimulati
        * @flags CREATE_AND_SET
        * @default 0
        */
-      SAI_ENI_ATTR_FLOW_RESIMULATION_TOKEN_BUCKET_REFILL_INTERVAL,
+      SAI_ENI_ATTR_FLOW_RESIMULATION_TOKEN_BUCKET_REFILL_INTERVAL_IN_MS,
 
       // ...
   }
