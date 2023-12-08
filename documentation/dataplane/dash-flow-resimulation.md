@@ -98,13 +98,13 @@ To summarize, the following changes are needed to implement full flow resimulati
       // ...
 
       /**
-       * @brief Increase flow incarnation id requested. Once request is done, the value shall be reset to false.
+       * @brief Full flow resimulation requested by increasing flow incarnation id. Once request is done, the value shall be reset to false.
        *
        * @type bool
        * @flags CREATE_AND_SET
        * @default false
        */
-      SAI_ENI_ATTR_INC_FLOW_INCARNATION_ID_REQUESTED,
+      SAI_ENI_ATTR_FULL_FLOW_RESIMULATION_REQUESTED,
 
       /**
        * @brief Flow resimulation token bucket size (PPS).
