@@ -175,7 +175,7 @@ class SAIObject:
         self.type = None
         self.isresourcetype = None
         self.isreadonly = None
-        self.objectName = None
+        self.object_name = None
         self.skipattr = None
         self.field = None
 
@@ -223,7 +223,7 @@ class SAIObject:
                     elif kv['key'] == 'isreadonly':
                         self.isreadonly = kv['value']['stringValue']
                     elif kv['key'] == 'objects':
-                        self.objectName = kv['value']['stringValue']
+                        self.object_name = kv['value']['stringValue']
                     elif kv['key'] == 'skipattr':
                         self.skipattr = kv['value']['stringValue']
                     else:
@@ -239,7 +239,6 @@ class SAIEnumMember(SAIObject):
     '''
     def __init__(self):
         super().__init__()
-        self.sai_name = ""
         self.p4rt_value = ""
 
     def parse_p4rt(self, p4rt_member):
@@ -250,7 +249,6 @@ class SAIEnumMember(SAIObject):
 
             { "name": "INVALID", "value": "AAA=" }
         '''
-        self.sai_name = self.name
         self.p4rt_value = p4rt_member
 
 
@@ -413,7 +411,7 @@ class SAIAPITableActionParam(SAIObject):
         self.bitwidth = 0
         self.default = None
         self.ip_is_v6_field_id = 0
-        self.paramActions = []
+        self.param_actions = []
 
     def parse_p4rt(self, p4rt_table_action_param, sai_enums, ip_is_v6_param_ids):
         '''
@@ -568,11 +566,11 @@ class SAIAPITableData(SAIObject):
             for table_action_param in self.action_params:
                 # Already have this param in the table.
                 if table_action_param.name == action_param.name:
-                    table_action_param.paramActions.append(action.name)
+                    table_action_param.param_actions.append(action.name)
                     break
             else:
                 # New param is found, add it to the table.
-                action_param.paramActions = [action.name]
+                action_param.param_actions = [action.name]
                 self.action_params.append(action_param)
 
 
@@ -646,7 +644,7 @@ class DASHSAIExtensions(SAIObject):
                         table_ref = param.name[:-len("_id")]
                         for table_name in all_table_names:
                             if table_ref.endswith(table_name):
-                                param.objectName = table_name
+                                param.object_name = table_name
 
             # Update object name reference for keys
             for table in sai_api.tables:
@@ -656,7 +654,7 @@ class DASHSAIExtensions(SAIObject):
                             table_ref = key.sai_key_name[:-len("_id")]
                             for table_name in all_table_names:
                                 if table_ref.endswith(table_name):
-                                    key.objectName = table_name
+                                    key.object_name = table_name
 
 
     def __parse_sai_table_action(self, p4rt_actions, sai_enums):
