@@ -175,7 +175,7 @@ class SAIObject:
         self.type = None
         self.isresourcetype = None
         self.isreadonly = None
-        self.objectName = None
+        self.object_name = None
         self.skipattr = None
         self.field = None
 
@@ -223,7 +223,7 @@ class SAIObject:
                     elif kv['key'] == 'isreadonly':
                         self.isreadonly = kv['value']['stringValue']
                     elif kv['key'] == 'objects':
-                        self.objectName = kv['value']['stringValue']
+                        self.object_name = kv['value']['stringValue']
                     elif kv['key'] == 'skipattr':
                         self.skipattr = kv['value']['stringValue']
                     else:
@@ -644,7 +644,7 @@ class DASHSAIExtensions(SAIObject):
                         table_ref = param.name[:-len("_id")]
                         for table_name in all_table_names:
                             if table_ref.endswith(table_name):
-                                param.objectName = table_name
+                                param.object_name = table_name
 
             # Update object name reference for keys
             for table in sai_api.tables:
@@ -654,7 +654,7 @@ class DASHSAIExtensions(SAIObject):
                             table_ref = key.sai_key_name[:-len("_id")]
                             for table_name in all_table_names:
                                 if table_ref.endswith(table_name):
-                                    key.objectName = table_name
+                                    key.object_name = table_name
 
 
     def __parse_sai_table_action(self, p4rt_actions, sai_enums):

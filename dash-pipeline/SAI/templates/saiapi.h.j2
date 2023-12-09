@@ -67,7 +67,7 @@ typedef struct _sai_{{ table.name }}_t
      * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.sai_key_name }}
 {% if key.type == 'sai_object_id_t' %}
      *
-     * @objects SAI_OBJECT_TYPE_{{ key.objectName | upper }}
+     * @objects SAI_OBJECT_TYPE_{{ key.object_name | upper }}
 {% endif %}
      */
     {{ key.type }} {{ key.sai_key_name | lower }};
@@ -179,7 +179,7 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% elif param.type == 'bool' %}
      * @default false
 {% elif param.type == 'sai_object_id_t' %}
-     * @objects SAI_OBJECT_TYPE_{{ param.objectName | upper }}
+     * @objects SAI_OBJECT_TYPE_{{ param.object_name | upper }}
      * @allownull true
      * @default SAI_NULL_OBJECT_ID
 {% elif param.field == 's32' %}
