@@ -411,7 +411,7 @@ class SAIAPITableActionParam(SAIObject):
         self.bitwidth = 0
         self.default = None
         self.ip_is_v6_field_id = 0
-        self.paramActions = []
+        self.param_actions = []
 
     def parse_p4rt(self, p4rt_table_action_param, sai_enums, ip_is_v6_param_ids):
         '''
@@ -566,11 +566,11 @@ class SAIAPITableData(SAIObject):
             for table_action_param in self.action_params:
                 # Already have this param in the table.
                 if table_action_param.name == action_param.name:
-                    table_action_param.paramActions.append(action.name)
+                    table_action_param.param_actions.append(action.name)
                     break
             else:
                 # New param is found, add it to the table.
-                action_param.paramActions = [action.name]
+                action_param.param_actions = [action.name]
                 self.action_params.append(action_param)
 
 
