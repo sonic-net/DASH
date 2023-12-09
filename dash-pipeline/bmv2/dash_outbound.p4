@@ -22,13 +22,13 @@ control outbound(inout headers_t hdr,
     }
 
     action route_vnet_direct(bit<16> dst_vnet_id,
-                             bit<1> is_overlay_ip_v4_or_v6,
+                             bit<1> overlay_ip_is_v6,
                              IPv4ORv6Address overlay_ip,
                              bit<1> meter_policy_en,
                              bit<16> meter_class) {
         meta.dst_vnet_id = dst_vnet_id;
         meta.lkup_dst_ip_addr = overlay_ip;
-        meta.is_lkup_dst_ip_v6 = is_overlay_ip_v4_or_v6;
+        meta.is_lkup_dst_ip_v6 = overlay_ip_is_v6;
         set_route_meter_attrs(meter_policy_en, meter_class);
     }
 
@@ -42,26 +42,26 @@ control outbound(inout headers_t hdr,
         meta.dropped = true;
     }
 
-    action route_service_tunnel(bit<1> is_overlay_dip_v4_or_v6,
+    action route_service_tunnel(bit<1> overlay_dip_is_v6,
                                 IPv4ORv6Address overlay_dip,
-                                bit<1> is_overlay_dip_mask_v4_or_v6,
+                                bit<1> overlay_dip_mask_is_v6,
                                 IPv4ORv6Address overlay_dip_mask,
-                                bit<1> is_overlay_sip_v4_or_v6,
+                                bit<1> overlay_sip_is_v6,
                                 IPv4ORv6Address overlay_sip,
-                                bit<1> is_overlay_sip_mask_v4_or_v6,
+                                bit<1> overlay_sip_mask_is_v6,
                                 IPv4ORv6Address overlay_sip_mask,
-                                bit<1> is_underlay_dip_v4_or_v6,
+                                bit<1> underlay_dip_is_v6,
                                 IPv4ORv6Address underlay_dip,
-                                bit<1> is_underlay_sip_v4_or_v6,
+                                bit<1> underlay_sip_is_v6,
                                 IPv4ORv6Address underlay_sip,
                                 dash_encapsulation_t dash_encapsulation,
                                 bit<24> tunnel_key,
                                 bit<1> meter_policy_en,
                                 bit<16> meter_class) {
         /* Assume the overlay addresses provided are always IPv6 and the original are IPv4 */
-        /* assert(is_overlay_dip_v4_or_v6 == 1 && is_overlay_sip_v4_or_v6 == 1);
-        assert(is_overlay_dip_mask_v4_or_v6 == 1 && is_overlay_sip_mask_v4_or_v6 == 1);
-        assert(is_underlay_dip_v4_or_v6 != 1 && is_underlay_sip_v4_or_v6 != 1); */
+        /* assert(overlay_dip_is_v6 == 1 && overlay_sip_is_v6 == 1);
+        assert(overlay_dip_mask_is_v6 == 1 && overlay_sip_mask_is_v6 == 1);
+        assert(underlay_dip_is_v6 != 1 && underlay_sip_is_v6 != 1); */
         meta.encap_data.original_overlay_dip = hdr.ipv4.src_addr;
         meta.encap_data.original_overlay_sip = hdr.ipv4.dst_addr;
 
@@ -95,7 +95,7 @@ control outbound(inout headers_t hdr,
     table routing {
         key = {
             meta.eni_id : exact @name("meta.eni_id:eni_id");
-            meta.is_overlay_ip_v6 : exact @name("meta.is_overlay_ip_v6:is_destination_v4_or_v6");
+            meta.is_overlay_ip_v6 : exact @name("meta.is_overlay_ip_v6:destination_is_v6");
             meta.dst_ip_addr : lpm @name("meta.dst_ip_addr:destination");
         }
 
@@ -179,7 +179,7 @@ control outbound(inout headers_t hdr,
         key = {
             /* Flow for express route */
             meta.dst_vnet_id: exact @name("meta.dst_vnet_id:dst_vnet_id");
-            meta.is_lkup_dst_ip_v6 : exact @name("meta.is_lkup_dst_ip_v6:is_dip_v4_or_v6");
+            meta.is_lkup_dst_ip_v6 : exact @name("meta.is_lkup_dst_ip_v6:dip_is_v6");
             meta.lkup_dst_ip_addr : exact @name("meta.lkup_dst_ip_addr:dip");
         }
 
