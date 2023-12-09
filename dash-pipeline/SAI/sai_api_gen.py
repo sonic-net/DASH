@@ -239,7 +239,6 @@ class SAIEnumMember(SAIObject):
     '''
     def __init__(self):
         super().__init__()
-        self.sai_name = ""
         self.p4rt_value = ""
 
     def parse_p4rt(self, p4rt_member):
@@ -250,7 +249,6 @@ class SAIEnumMember(SAIObject):
 
             { "name": "INVALID", "value": "AAA=" }
         '''
-        self.sai_name = self.name
         self.p4rt_value = p4rt_member
 
 
