@@ -533,6 +533,9 @@ class SAIAPITableData(SAIObject):
         
         # The first part of full name is the top level control block name, which is removed for showing better comments as stage.
         self.stage, self.name, self.api_name = self.parse_sai_annotated_name(self.name, full_name_part_start = 1)
+        self.stage = self.stage.replace('.', '_')
+        if "stage" not in self.stage:
+            self.stage = None
 
         # If tables are specified as ignored via CLI or annotations, skip them.
         if self.name in ignore_tables:
