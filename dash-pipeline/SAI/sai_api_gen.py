@@ -109,55 +109,68 @@ class SAITypeSolver:
     }
 
     @staticmethod
-    def get_sai_type_info(sai_type):
+    def get_sai_type(sai_type):
         return SAITypeSolver.sai_type_info_registry[sai_type]
 
     @staticmethod
-    def get_sai_key_type(key_size, key_header, key_field):
+    def get_object_sai_type(object_size, object_parent_name, object_name):
         sai_type_name = ""
 
-        if key_size == 1:
+        if object_size == 1:
             sai_type_name = 'bool'
-        elif key_size <= 8:
+        elif object_size <= 8:
             sai_type_name = 'sai_uint8_t'
-        elif key_size == 16 and ('_id' in key_field):
+        elif object_size == 16 and ('_id' in object_name):
             sai_type_name = 'sai_object_id_t'
-        elif key_size <= 16:
+        elif object_size <= 16:
             sai_type_name = 'sai_uint16_t'
-        elif key_size == 32 and ('ip_addr_family' in key_field):
+        elif object_size == 32 and ('ip_addr_family' in object_name):
             sai_type_name = 'sai_ip_addr_family_t'
-        elif key_size == 32 and ('addr' in key_field or 'ip' in key_header):
+        elif object_size == 32 and ('addr' in object_name or 'ip' in object_parent_name):
             sai_type_name = 'sai_ip_address_t'
-        elif key_size == 32 and ('_id' in key_field):
+        elif object_size == 32 and ('_id' in object_name):
             sai_type_name = 'sai_object_id_t'
-        elif key_size <= 32:
+        elif object_size <= 32:
             sai_type_name = 'sai_uint32_t'
-        elif key_size == 48 and ('addr' in key_field or 'mac' in key_header):
+        elif object_size == 48 and ('addr' in object_name or 'mac' in object_parent_name):
             sai_type_name = 'sai_mac_t'
-        elif key_size <= 64:
+        elif object_size <= 64:
             sai_type_name = 'sai_uint64_t'
-        elif key_size == 128:
+        elif object_size == 128:
             sai_type_name = 'sai_ip_address_t'
         else:
-            raise ValueError(f'key_size={key_size} is not supported')
+            raise ValueError(f'key_size={object_size} is not supported')
 
-        return SAITypeSolver.get_sai_type_info(sai_type_name)
+        return SAITypeSolver.get_sai_type(sai_type_name)
 
     @staticmethod
-    def get_sai_lpm_type(key_size, key_header, key_field):
+    def get_match_key_sai_type(match_type, key_size, key_parent_name, key_name):
+        if match_type == 'exact' or match_type == 'optional' or match_type == 'ternary':
+            return  SAITypeSolver.get_object_sai_type(key_size, key_parent_name, key_name)
+        elif match_type == 'lpm':
+            return SAITypeSolver.__get_lpm_match_key_sai_type(key_size, key_parent_name, key_name)
+        elif match_type == 'list':
+            return SAITypeSolver.__get_list_match_key_sai_type(key_size, key_parent_name, key_name)
+        elif match_type == 'range_list':
+            return SAITypeSolver.__get_range_list_sai_type(key_size, key_parent_name, key_name)
+        else:
+            raise ValueError(f"match_type={match_type} is not supported")
+
+    @staticmethod
+    def __get_lpm_match_key_sai_type(key_size, key_parent_name, key_name):
         sai_type_name = ""
 
-        if key_size == 32 and ('addr' in key_field or 'ip' in key_header):
+        if key_size == 32 and ('addr' in key_name or 'ip' in key_parent_name):
             sai_type_name = 'sai_ip_prefix_t'
-        elif key_size == 128 and ('addr' in key_field or 'ip' in key_header):
+        elif key_size == 128 and ('addr' in key_name or 'ip' in key_parent_name):
             sai_type_name = 'sai_ip_prefix_t'
         else:
-            raise ValueError(f'key_size={key_size}, key_header={key_header}, and key_field={key_field} is not supported')
+            raise ValueError(f'key_size={key_size}, key_header={key_parent_name}, and key_field={key_name} is not supported')
 
-        return SAITypeSolver.get_sai_type_info(sai_type_name)
+        return SAITypeSolver.get_sai_type(sai_type_name)
 
     @staticmethod
-    def get_sai_list_type(key_size, key_header, key_field):
+    def __get_list_match_key_sai_type(key_size, key_header, key_field):
         sai_type_name = ""
 
         if key_size <= 8:
@@ -173,10 +186,10 @@ class SAITypeSolver:
         else:
             raise ValueError(f'key_size={key_size} is not supported')
 
-        return SAITypeSolver.get_sai_type_info(sai_type_name)
+        return SAITypeSolver.get_sai_type(sai_type_name)
 
     @staticmethod
-    def get_sai_range_list_type(key_size, key_header, key_field):
+    def __get_range_list_sai_type(key_size, key_header, key_field):
         sai_type_name = ""
 
         if key_size <= 8:
@@ -192,7 +205,7 @@ class SAITypeSolver:
         else:
             raise ValueError(f'key_size={key_size} is not supported')
 
-        return SAITypeSolver.get_sai_type_info(sai_type_name)
+        return SAITypeSolver.get_sai_type(sai_type_name)
 
 
 class SAIObject:
@@ -300,7 +313,7 @@ class SAIObject:
                     else:
                         raise ValueError("Unknown attr annotation " + kv['key'])
 
-        sai_type_info = SAITypeSolver.get_sai_type_info(self.type)
+        sai_type_info = SAITypeSolver.get_sai_type(self.type)
         self.field = sai_type_info.field_func_prefix
 
 
@@ -404,17 +417,7 @@ class SAIAPITableKey(SAIObject):
         if STRUCTURED_ANNOTATIONS_TAG in p4rt_table_key:
             self._parse_sai_object_annotation(p4rt_table_key)
         else:
-            if self.match_type == 'exact' or  self.match_type == 'optional' or self.match_type == 'ternary':
-                sai_type_info = SAITypeSolver.get_sai_key_type(self.bitwidth, key_header, key_field)
-            elif self.match_type == 'lpm':
-                sai_type_info = SAITypeSolver.get_sai_lpm_type(self.bitwidth, key_header, key_field)
-            elif self.match_type == 'list':
-                sai_type_info = SAITypeSolver.get_sai_list_type(self.bitwidth, key_header, key_field)
-            elif self.match_type == 'range_list':
-                sai_type_info = SAITypeSolver.get_sai_range_list_type(self.bitwidth, key_header, key_field)
-            else:
-                raise ValueError(f"match_type={self.match_type} is not supported")
-
+            sai_type_info = SAITypeSolver.get_match_key_sai_type(self.match_type, self.bitwidth, key_header, key_field)
             self.type = sai_type_info.name
             self.field = sai_type_info.field_func_prefix
 
@@ -494,19 +497,20 @@ class SAIAPITableActionParam(SAIObject):
         '''
         self.id = p4rt_table_action_param['id']
         self.name = p4rt_table_action_param[NAME_TAG]
+        self.bitwidth = p4rt_table_action_param[BITWIDTH_TAG]
         #print("Parsing table action param: " + self.name)
 
         if STRUCTURED_ANNOTATIONS_TAG in p4rt_table_action_param:
             self._parse_sai_object_annotation(p4rt_table_action_param)
         else:
-            self.type, self.field = SAITypeSolver.get_sai_key_type(int(p4rt_table_action_param[BITWIDTH_TAG]), p4rt_table_action_param[NAME_TAG], p4rt_table_action_param[NAME_TAG])
+            sai_type_info = SAITypeSolver.get_object_sai_type(int(self.bitwidth), self.name, self.name)
+            self.type, self.field = sai_type_info.name, sai_type_info.field_func_prefix
             for sai_enum in sai_enums:
                 if self.name == sai_enum.name:
                     self.type = 'sai_' + self.name + '_t'
                     self.field = 's32'
                     self.default = 'SAI_' + self.name.upper() + '_INVALID'
 
-        self.bitwidth = p4rt_table_action_param[BITWIDTH_TAG]
 
         # If *_is_v6 key is present, save its id.
         ip_is_v6_param_name = self.name + "_is_v6"
