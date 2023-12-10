@@ -54,7 +54,8 @@ control outbound(inout headers_t hdr,
                                 IPv4ORv6Address underlay_dip,
                                 bit<1> underlay_sip_is_v6,
                                 IPv4ORv6Address underlay_sip,
-                                @Sai[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"] dash_encapsulation_t dash_encapsulation,
+                                @Sai[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"]
+                                dash_encapsulation_t dash_encapsulation,
                                 bit<24> tunnel_key,
                                 bit<1> meter_policy_en,
                                 bit<16> meter_class) {
