@@ -81,9 +81,11 @@ def sai_parser_from_p4rt(cls):
 #          |- SAIAPITableActionParam -| : Information of a single P4 table action parameter used by the action.
 #
 class SAITypeInfo:
-    def __init__(self, name, field_func_prefix):
+    def __init__(self, name, field_func_prefix, default = None, is_enum = False):
         self.name = name
         self.field_func_prefix = field_func_prefix
+        self.default = default
+        self.is_enum = is_enum
 
 class SAITypeSolver:
     sai_type_info_registry = {
@@ -107,6 +109,10 @@ class SAITypeSolver:
         "sai_u64_range_list_t": SAITypeInfo("sai_u64_range_list_t", "u64rangelist"),
         "sai_ipaddr_range_list_t": SAITypeInfo("sai_ipaddr_range_list_t", "ipaddrrangelist"),
     }
+
+    @staticmethod
+    def register_sai_type(name, field_func_prefix, default = None, is_enum = False):
+        SAITypeSolver.sai_type_info_registry[name] = SAITypeInfo(name, field_func_prefix=field_func_prefix, default=default, is_enum=is_enum)
 
     @staticmethod
     def get_sai_type(sai_type):
@@ -222,6 +228,7 @@ class SAIObject:
         self.object_name = None
         self.skipattr = None
         self.field = None
+        self.default = None
 
     def parse_preamble_if_exists(self, p4rt_object):
         '''
@@ -302,6 +309,8 @@ class SAIObject:
                 for kv in anno[KV_PAIR_LIST_TAG][KV_PAIRS_TAG]:
                     if kv['key'] == 'type':
                         self.type = kv['value']['stringValue']
+                    elif kv['key'] == 'default_value':  # "default" is a reserved keyword and cannot be used.
+                        self.default = kv['value']['stringValue']
                     elif kv['key'] == 'isresourcetype':
                         self.isresourcetype = kv['value']['stringValue']
                     elif kv['key'] == 'isreadonly':
@@ -315,6 +324,8 @@ class SAIObject:
 
         sai_type_info = SAITypeSolver.get_sai_type(self.type)
         self.field = sai_type_info.field_func_prefix
+        if self.default == None and sai_type_info.is_enum:
+            self.default = sai_type_info.default
 
 
 @sai_parser_from_p4rt
@@ -344,6 +355,7 @@ class SAIEnum(SAIObject):
     '''
     def __init__(self):
         super().__init__()
+        self.bitwidth = 0
         self.members = []
         
     def parse_p4rt(self, p4rt_enum):
@@ -362,8 +374,17 @@ class SAIEnum(SAIObject):
             }
         '''
         print("Parsing enum: " + self.name)
+
         self.name = self.name[:-2]
+        self.bitwidth = p4rt_enum['underlyingType'][BITWIDTH_TAG]
         self.members = [SAIEnumMember.from_p4rt(enum_member['value'], name = enum_member['name']) for enum_member in p4rt_enum[MEMBERS_TAG]]
+
+        # Register enum type info.
+        SAITypeSolver.register_sai_type(
+            'sai_' + self.name + '_t',
+            "s32",
+            default = 'SAI_' + self.name.upper() + '_INVALID',
+            is_enum = True)
 
 
 @sai_parser_from_p4rt
@@ -471,7 +492,6 @@ class SAIAPITableAction(SAIObject):
 
         # Parse all params.
         for p in p4rt_table_action[PARAMS_TAG]:
-            param_name = p[NAME_TAG]
             param = SAIAPITableActionParam.from_p4rt(p, sai_enums = sai_enums, ip_is_v6_param_ids = ip_is_v6_param_ids)
             self.params.append(param)
 
@@ -483,7 +503,6 @@ class SAIAPITableActionParam(SAIObject):
     def __init__(self):
         super().__init__()
         self.bitwidth = 0
-        self.default = None
         self.ip_is_v6_field_id = 0
         self.param_actions = []
 
@@ -503,14 +522,11 @@ class SAIAPITableActionParam(SAIObject):
         if STRUCTURED_ANNOTATIONS_TAG in p4rt_table_action_param:
             self._parse_sai_object_annotation(p4rt_table_action_param)
         else:
-            sai_type_info = SAITypeSolver.get_object_sai_type(int(self.bitwidth), self.name, self.name)
+            sai_type_info = SAITypeSolver.get_object_sai_type(self.bitwidth, self.name, self.name)
+            print("Parsing table action param: " + self.name + ", type: " + sai_type_info.name, ", is_enum: " + str(sai_type_info.is_enum))
             self.type, self.field = sai_type_info.name, sai_type_info.field_func_prefix
-            for sai_enum in sai_enums:
-                if self.name == sai_enum.name:
-                    self.type = 'sai_' + self.name + '_t'
-                    self.field = 's32'
-                    self.default = 'SAI_' + self.name.upper() + '_INVALID'
-
+            if sai_type_info.is_enum:
+                self.default = sai_type_info.default
 
         # If *_is_v6 key is present, save its id.
         ip_is_v6_param_name = self.name + "_is_v6"
