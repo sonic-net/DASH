@@ -111,7 +111,7 @@ control dash_ingress(
                          bit<32> flows,
                          bit<1> admin_state,
                          IPv4Address vm_underlay_dip,
-                         @Sai[type="sai_uint32_t"]
+                         @SaiVal[type="sai_uint32_t"]
                          bit<24> vm_vni,
                          bit<16> vnet_id,
                          IPv6Address pl_sip,
@@ -242,7 +242,7 @@ control dash_ingress(
         const default_action = deny;
     }
 
-    action check_ip_addr_family(@Sai[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
+    action check_ip_addr_family(@SaiVal[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
         if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
             if (meta.is_overlay_ip_v6 == 1) {
                 meta.dropped = true;
@@ -255,7 +255,7 @@ control dash_ingress(
     }
 
     @name("meter_policy|dash_meter")
-    @Sai[isobject="true"]
+    @SaiTable[isobject="true"]
     table meter_policy {
         key = {
             meta.meter_policy_id : exact @name("meta.meter_policy_id:meter_policy_id");
@@ -270,10 +270,10 @@ control dash_ingress(
     }
 
     @name("meter_rule|dash_meter")
-    @Sai[isobject="true"]
+    @SaiTable[isobject="true"]
     table meter_rule {
         key = {
-            meta.meter_policy_id: exact @name("meta.meter_policy_id:meter_policy_id") @Sai[type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
+            meta.meter_policy_id: exact @name("meta.meter_policy_id:meter_policy_id") @SaiVal[type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
             hdr.ipv4.dst_addr : ternary @name("hdr.ipv4.dst_addr:dip");
         }
 
@@ -291,15 +291,15 @@ control dash_ingress(
     counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_outbound;
 #endif // TARGET_BMV2_V1MODEL
     action meter_bucket_action(
-            @Sai[type="sai_uint64_t", isreadonly="true"] bit<64> outbound_bytes_counter,
-            @Sai[type="sai_uint64_t", isreadonly="true"] bit<64> inbound_bytes_counter,
-            @Sai[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index) {
+            @SaiVal[type="sai_uint64_t", isreadonly="true"] bit<64> outbound_bytes_counter,
+            @SaiVal[type="sai_uint64_t", isreadonly="true"] bit<64> inbound_bytes_counter,
+            @SaiVal[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index) {
         // read only counters for SAI api generation only
         meta.meter_bucket_index = meter_bucket_index;
     }
 
     @name("meter_bucket|dash_meter")
-    @Sai[isobject="true"]
+    @SaiTable[isobject="true"]
     table meter_bucket {
         key = {
             meta.eni_id: exact @name("meta.eni_id:eni_id");
@@ -329,7 +329,7 @@ control dash_ingress(
         const default_action = deny;
     }
 
-    action set_acl_group_attrs(@Sai[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
+    action set_acl_group_attrs(@SaiVal[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
         if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
             if (meta.is_overlay_ip_v6 == 1) {
                 meta.dropped = true;

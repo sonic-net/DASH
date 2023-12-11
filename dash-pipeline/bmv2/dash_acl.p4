@@ -37,7 +37,7 @@ match_kind {
     table table_name { \
         key = { \
             meta. ## table_name ##_dash_acl_group_id : exact @name("meta.dash_acl_group_id:dash_acl_group_id") \
-            @Sai[type="sai_object_id_t", isresourcetype="true", objects="SAI_OBJECT_TYPE_DASH_ACL_GROUP"]; \
+            @SaiVal[type="sai_object_id_t", isresourcetype="true", objects="SAI_OBJECT_TYPE_DASH_ACL_GROUP"]; \
             meta.dst_ip_addr : LIST_MATCH @name("meta.dst_ip_addr:dip"); \
             meta.src_ip_addr : LIST_MATCH @name("meta.src_ip_addr:sip"); \
             meta.ip_protocol : LIST_MATCH @name("meta.ip_protocol:protocol"); \

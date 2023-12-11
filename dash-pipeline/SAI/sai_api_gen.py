@@ -33,7 +33,8 @@ MEMBERS_TAG = 'members'
 STRUCTURED_ANNOTATIONS_TAG = 'structuredAnnotations'
 KV_PAIRS_TAG = 'kvPairs'
 KV_PAIR_LIST_TAG = 'kvPairList'
-SAI_TAG = 'Sai'
+SAI_VAL_TAG = 'SaiVal'
+SAI_TABLE_TAG = 'SaiTable'
 
 #
 # SAI parser decorators:
@@ -252,9 +253,11 @@ class SAIObject:
                     ]
                 }
             }
+
+        Whenever a new attribute is introduced, please update the doc here to get it captured: dash-pipeline/bmv2/README.md.
         '''
         for anno in p4rt_anno_list[STRUCTURED_ANNOTATIONS_TAG]:
-            if anno[NAME_TAG] == SAI_TAG:
+            if anno[NAME_TAG] == SAI_VAL_TAG:
                 for kv in anno[KV_PAIR_LIST_TAG][KV_PAIRS_TAG]:
                     if kv['key'] == 'type':
                         self.type = kv['value']['stringValue']
@@ -568,7 +571,7 @@ class SAIAPITableData(SAIObject):
             return
 
         for anno in p4rt_table_preamble[STRUCTURED_ANNOTATIONS_TAG]:
-            if anno[NAME_TAG] == SAI_TAG:
+            if anno[NAME_TAG] == SAI_TABLE_TAG:
                 for kv in anno[KV_PAIR_LIST_TAG][KV_PAIRS_TAG]:
                     if kv['key'] == 'isobject':
                         self.is_object = kv['value']['stringValue']

@@ -69,7 +69,7 @@ control underlay(
     }
 
     @name("route|route")
-    // TODO: To add structural annotations (example: @Sai[skipHeaderGen=true])
+    // TODO: To add structural annotations (example: @SaiTable[skipHeaderGen=true])
     table underlay_routing {
         key = {
             meta.dst_ip_addr : lpm @name("meta.dst_ip_addr:destination");
