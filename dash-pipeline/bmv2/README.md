@@ -18,7 +18,7 @@ The DASH pipeline BM is written in P4<sub>16</sub> with BMv2 v1model. For specs,
 
 ### P4 annotations for SAI code generation
 
-Currently, some of the SAI generation behavior is either controlled by using the `@name` attribute with a non-formalized format, or simplying guessing in the `sai_api_gen.py`. This is hard to maintain and extend and highly not recommended.
+Currently, some of the SAI generation behavior is either controlled by using the `@name` attribute with a non-formalized format, or simplifying guessing in the `sai_api_gen.py`. This is hard to maintain and extend and highly not recommended.
 
 To deprecate the complicated `@name` attribute, we are moving towards using structured annotations in P4. This annotation can apply on keys, action parameters and tables to document and provide necessary metadata for SAI API generation.
 
