@@ -481,7 +481,7 @@ class SAIAPITableAction(SAIObject):
                 ]
             }
         '''
-        #print("Parsing table action: " + self.name)
+        # print("Parsing table action: " + self.name)
         _, self.name, _ = self.parse_sai_annotated_name(self.name)
         self.parse_action_params(p4rt_table_action, sai_enums)
 
@@ -523,7 +523,7 @@ class SAIAPITableActionParam(SAIObject):
         self.id = p4rt_table_action_param['id']
         self.name = p4rt_table_action_param[NAME_TAG]
         self.bitwidth = p4rt_table_action_param[BITWIDTH_TAG]
-        print("Parsing table action param: " + self.name)
+        # print("Parsing table action param: " + self.name)
 
         if STRUCTURED_ANNOTATIONS_TAG in p4rt_table_action_param:
             self._parse_sai_object_annotation(p4rt_table_action_param)
@@ -592,21 +592,16 @@ class SAIAPITableData(SAIObject):
                 "size": "1024"
             }
         '''
-        
-        # The first part of full name is the top level control block name, which is removed for showing better comments as stage.
-        self.stage, self.name, self.api_name = self.parse_sai_annotated_name(self.name, full_name_part_start = 1)
-        self.stage = self.stage.replace('.', '_')
-        if "stage" not in self.stage:
-            self.stage = None
+        self.__parse_sai_table_annotations(p4rt_table[PREAMBLE_TAG])
 
         # If tables are specified as ignored via CLI or annotations, skip them.
         if self.name in ignore_tables:
             self.ignored = True
-            return
-
-        self.__parse_sai_table_annotations(p4rt_table[PREAMBLE_TAG])
-        if self.ignored:
+        elif self.ignored:
             ignore_tables.append(self.name)
+
+        if self.ignored:
+            print("Ignoring table: " + self.name)
             return
 
         print("Parsing table: " + self.name)
@@ -634,7 +629,7 @@ class SAIAPITableData(SAIObject):
                 for kv in anno[KV_PAIR_LIST_TAG][KV_PAIRS_TAG]:
                     if kv['key'] == 'isobject':
                         self.is_object = kv['value']['stringValue']
-                    if kv['key'] == 'ignoretable':
+                    if kv['key'] == 'ignored':
                         self.ignored = True
                     if kv['key'] == 'name':
                         self.name = kv['value']['stringValue']

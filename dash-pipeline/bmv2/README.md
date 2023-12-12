@@ -48,6 +48,6 @@ Available tags are:
 - `api_order`: Specify the order of the generated API in the SAI API header file. When multiple tables generates API entries in the same API set, e.g., acl group and acl rules. This explicit attribute helps us keep the order of the generated APIs to keep ABI compatibility.
 - `stage`: Specify which stage this table represents for the matching stage type, e.g. `acl.stage1`.
 - `isobject`: When set to "true", a top level objects in SAI that attached to switch will be generated. Otherwise, a new type of entry will be generated, if nothing else helps us to determine this table is an object table.
-- `ignoretable`: When set to "true", we skip this table in SAI API generation.
+- `ignored`: When set to "true", we skip this table in SAI API generation.
 
 For more details, please check the SAI API generation script: [sai_api_gen.py](../SAI/sai_api_gen.py).

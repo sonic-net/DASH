@@ -82,6 +82,7 @@ control dash_ingress(
     }
 
     /* This table API should be implemented manually using underlay SAI */
+    @SaiTable[ignored = "true"]
     table appliance {
         key = {
             meta.appliance_id : ternary @name("meta.appliance_id:appliance_id");
@@ -185,6 +186,7 @@ control dash_ingress(
 #endif // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
 #endif // TARGET_DPDK_PNA
 
+    @SaiTable[ignored = "true"]
     table eni_meter {
         key = {
             meta.eni_id : exact @name("meta.eni_id:eni_id");
