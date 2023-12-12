@@ -71,7 +71,7 @@ control underlay(
     @SaiTable[name = "route", api = "route", api_type="underlay"]
     table underlay_routing {
         key = {
-            meta.dst_ip_addr : lpm @SaiVal(name = "destination");
+            meta.dst_ip_addr : lpm @SaiVal[name = "destination"];
         }
 
         actions = {

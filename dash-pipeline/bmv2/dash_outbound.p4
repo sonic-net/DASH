@@ -95,9 +95,9 @@ control outbound(inout headers_t hdr,
     @SaiTable[name = "outbound_routing", api = "dash_outbound_routing"]
     table routing {
         key = {
-            meta.eni_id : exact @SaiVal(name = "eni_id");
-            meta.is_overlay_ip_v6 : exact @SaiVal(name = "destination_is_v6");
-            meta.dst_ip_addr : lpm @SaiVal(name = "destination");
+            meta.eni_id : exact @SaiVal[name = "eni_id"];
+            meta.is_overlay_ip_v6 : exact @SaiVal[name = "destination_is_v6"];
+            meta.dst_ip_addr : lpm @SaiVal[name = "destination"];
         }
 
         actions = {
@@ -179,9 +179,9 @@ control outbound(inout headers_t hdr,
     table ca_to_pa {
         key = {
             /* Flow for express route */
-            meta.dst_vnet_id: exact @SaiVal(name = "dst_vnet_id");
-            meta.is_lkup_dst_ip_v6 : exact @SaiVal(name = "dip_is_v6");
-            meta.lkup_dst_ip_addr : exact @SaiVal(name = "dip");
+            meta.dst_vnet_id: exact @SaiVal[name = "dst_vnet_id"];
+            meta.is_lkup_dst_ip_v6 : exact @SaiVal[name = "dip_is_v6"];
+            meta.lkup_dst_ip_addr : exact @SaiVal[name = "dip"];
         }
 
         actions = {
@@ -208,7 +208,7 @@ control outbound(inout headers_t hdr,
     @SaiTable[name = "vnet", api = "dash_vnet"]
     table vnet {
         key = {
-            meta.vnet_id : exact @SaiVal(name = "vnet_id");
+            meta.vnet_id : exact @SaiVal[name = "vnet_id"];
         }
 
         actions = {
