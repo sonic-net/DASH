@@ -560,6 +560,7 @@ class SAIAPITableData(SAIObject):
         self.stage = None
         self.is_object = None
         self.api_order = 0
+        self.api_type = None
 
     def parse_p4rt(self, p4rt_table, program, all_actions, ignore_tables):
         '''
@@ -641,6 +642,8 @@ class SAIAPITableData(SAIObject):
                         self.stage = kv['value']['stringValue']
                     if kv['key'] == 'api':
                         self.api_name = kv['value']['stringValue']
+                    if kv['key'] == 'api_type':
+                        self.api_type = kv['value']['stringValue']
                     if kv['key'] == 'api_order':
                         self.api_order = kv['value']['int64Value']
 
@@ -712,9 +715,15 @@ class DASHAPISet(SAIObject):
     '''
     def __init__(self, api_name):
         self.app_name = api_name
+        self.api_type = None
         self.tables = []
     
     def add_table(self, table):
+        if self.api_type == None:
+            self.api_type = table.api_type
+        elif self.api_type != table.api_type:
+            raise ValueError(f'API type mismatch: CurrentType = {self.api_type}, NewTableAPIType = {table.api_type}')
+
         self.tables.append(table)
 
 
@@ -914,7 +923,7 @@ class SAIGenerator:
     
         # For new DASH APIs, we need to generate SAI API headers.
         unique_sai_api = self.__get_uniq_sai_api(sai_api)
-        if "dash" in sai_api.app_name:
+        if sai_api.api_type != 'underlay':
             self.generate_dash_sai_definitions_for_api(unique_sai_api)
 
         # Generate SAI API implementation for all APIs.
@@ -940,7 +949,7 @@ class SAIGenerator:
 
     def generate_sai_impl_file_for_api(self, sai_api):
         sai_impl_file_name = 'sai' + sai_api.app_name.replace('_', '') + '.cpp'
-        header_prefix = "experimental" if "dash" in sai_api.app_name else ""
+        header_prefix = "experimental" if sai_api.api_type != "underlay" else ""
         SAITemplateRender('templates/saiapi.cpp.j2').render_to_file('lib/' + sai_impl_file_name, tables = sai_api.tables, app_name = sai_api.app_name, header_prefix = header_prefix)
         self.generated_impl_file_names.append(sai_impl_file_name)
 

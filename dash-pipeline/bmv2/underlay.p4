@@ -68,7 +68,7 @@ control underlay(
 #endif // TARGET_DPDK_PNA
     }
 
-    @SaiTable[name = "route", api = "route"]
+    @SaiTable[name = "route", api = "route", api_type="underlay"]
     // TODO: To add structural annotations (example: @SaiTable[skipHeaderGen=true]]
     table underlay_routing {
         key = {
