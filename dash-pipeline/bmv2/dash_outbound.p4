@@ -92,7 +92,7 @@ control outbound(inout headers_t hdr,
 #endif  // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
 #endif  // TARGET_DPDK_PNA
 
-    @name("outbound_routing|dash_outbound_routing")
+    @SaiTable[name = "outbound_routing", api = "dash_outbound_routing"]
     table routing {
         key = {
             meta.eni_id : exact @name("meta.eni_id:eni_id");
@@ -175,7 +175,7 @@ control outbound(inout headers_t hdr,
 #endif  // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
 #endif  // TARGET_DPDK_PNA
 
-    @name("outbound_ca_to_pa|dash_outbound_ca_to_pa")
+    @SaiTable[name = "outbound_ca_to_pa", api = "dash_outbound_ca_to_pa"]
     table ca_to_pa {
         key = {
             /* Flow for express route */
@@ -205,7 +205,7 @@ control outbound(inout headers_t hdr,
         meta.encap_data.vni = vni;
     }
 
-    @name("vnet|dash_vnet")
+    @SaiTable[name = "vnet", api = "dash_vnet"]
     table vnet {
         key = {
             meta.vnet_id : exact @name("meta.vnet_id:vnet_id");

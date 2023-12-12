@@ -4,7 +4,6 @@ try:
     import os
     import json
     import argparse
-    import shutil
     import copy
     from jinja2 import Template, Environment, FileSystemLoader
 except ImportError as ie:
@@ -35,6 +34,7 @@ KV_PAIRS_TAG = 'kvPairs'
 KV_PAIR_LIST_TAG = 'kvPairList'
 SAI_VAL_TAG = 'SaiVal'
 SAI_TABLE_TAG = 'SaiTable'
+SAI_API_ORDER_TAG = 'api_order'
 
 #
 # SAI parser decorators:
@@ -559,6 +559,7 @@ class SAIAPITableData(SAIObject):
         # Extra properties from annotations
         self.stage = None
         self.is_object = None
+        self.api_order = 0
 
     def parse_p4rt(self, p4rt_table, program, all_actions, ignore_tables):
         '''
@@ -640,6 +641,8 @@ class SAIAPITableData(SAIObject):
                         self.stage = kv['value']['stringValue']
                     if kv['key'] == 'api':
                         self.api_name = kv['value']['stringValue']
+                    if kv['key'] == 'api_order':
+                        self.api_order = kv['value']['int64Value']
 
         return
 
@@ -747,8 +750,7 @@ class DASHSAIExtensions(SAIObject):
         actions = self.__parse_sai_table_action(program[ACTIONS_TAG], self.sai_enums)
 
         # Parse all tables into SAI API sets.
-        tables = sorted(program[TABLES_TAG], key=lambda k: k[PREAMBLE_TAG][NAME_TAG])
-        for table in tables:
+        for table in program[TABLES_TAG]:
             sai_api_table_data = SAIAPITableData.from_p4rt(table, program, actions, ignore_tables)
             if sai_api_table_data.ignored:
                 continue
@@ -761,6 +763,10 @@ class DASHSAIExtensions(SAIObject):
                 new_api = DASHAPISet(sai_api_table_data.api_name)
                 new_api.add_table(sai_api_table_data)
                 self.sai_apis.append(new_api)
+
+        # Sort all parsed tables by API order, so we can always generate the APIs in the same order for keeping ABI compatibility.
+        for sai_api in self.sai_apis:
+            sai_api.tables.sort(key=lambda x: x.api_order)
 
     def __update_table_param_object_name_reference(self):
         all_table_names = [table.name for api in self.sai_apis for table in api.tables]

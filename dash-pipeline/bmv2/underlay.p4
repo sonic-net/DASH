@@ -68,8 +68,8 @@ control underlay(
 #endif // TARGET_DPDK_PNA
     }
 
-    @name("route|route")
-    // TODO: To add structural annotations (example: @SaiTable[skipHeaderGen=true])
+    @SaiTable[name = "route", api = "route"]
+    // TODO: To add structural annotations (example: @SaiTable[skipHeaderGen=true]]
     table underlay_routing {
         key = {
             meta.dst_ip_addr : lpm @name("meta.dst_ip_addr:destination");
