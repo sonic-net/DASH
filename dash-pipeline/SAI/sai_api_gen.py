@@ -313,7 +313,9 @@ class SAIObject:
         for anno in p4rt_anno_list[STRUCTURED_ANNOTATIONS_TAG]:
             if anno[NAME_TAG] == SAI_VAL_TAG:
                 for kv in anno[KV_PAIR_LIST_TAG][KV_PAIRS_TAG]:
-                    if kv['key'] == 'type':
+                    if kv['key'] == 'name':
+                        self.name = kv['value']['stringValue']
+                    elif kv['key'] == 'type':
                         self.type = kv['value']['stringValue']
                     elif kv['key'] == 'default_value':  # "default" is a reserved keyword and cannot be used.
                         self.default = kv['value']['stringValue']
