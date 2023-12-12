@@ -42,6 +42,9 @@ Use `@SaiTable["tag"="value", ...]` format for annotating tables.
 
 Available tags are:
 
+- `name`: Specify the preferred table name in SAI API generation, e.g. `dash_acl_rule`.
+- `api`: Specify which SAI API should be used in generation, e.g. `dash_acl`.
+- `stage`: Specify which stage this table represents for the matching stage type, e.g. `acl.stage1`.
 - `isobject`: When set to "true", a top level objects in SAI that attached to switch will be generated. Otherwise, a new type of entry will be generated, if nothing else helps us to determine this table is an object table.
 - `ignoretable`: When set to "true", we skip this table in SAI API generation.
 

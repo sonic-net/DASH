@@ -117,6 +117,9 @@ class SAITypeSolver:
 
     @staticmethod
     def get_sai_type(sai_type):
+        if sai_type not in SAITypeSolver.sai_type_info_registry:
+            raise ValueError(f'sai_type={sai_type} is not supported')
+
         return SAITypeSolver.sai_type_info_registry[sai_type]
 
     @staticmethod
@@ -520,13 +523,12 @@ class SAIAPITableActionParam(SAIObject):
         self.id = p4rt_table_action_param['id']
         self.name = p4rt_table_action_param[NAME_TAG]
         self.bitwidth = p4rt_table_action_param[BITWIDTH_TAG]
-        #print("Parsing table action param: " + self.name)
+        print("Parsing table action param: " + self.name)
 
         if STRUCTURED_ANNOTATIONS_TAG in p4rt_table_action_param:
             self._parse_sai_object_annotation(p4rt_table_action_param)
         else:
             sai_type_info = SAITypeSolver.get_object_sai_type(self.bitwidth, self.name, self.name)
-            print("Parsing table action param: " + self.name + ", type: " + sai_type_info.name, ", is_enum: " + str(sai_type_info.is_enum))
             self.type, self.field = sai_type_info.name, sai_type_info.field_func_prefix
             if sai_type_info.is_enum:
                 self.default = sai_type_info.default
@@ -632,6 +634,12 @@ class SAIAPITableData(SAIObject):
                         self.is_object = kv['value']['stringValue']
                     if kv['key'] == 'ignoretable':
                         self.ignored = True
+                    if kv['key'] == 'name':
+                        self.name = kv['value']['stringValue']
+                    if kv['key'] == 'stage':
+                        self.stage = kv['value']['stringValue']
+                    if kv['key'] == 'api':
+                        self.api_name = kv['value']['stringValue']
 
         return
 
