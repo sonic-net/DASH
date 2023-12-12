@@ -750,7 +750,8 @@ class DASHSAIExtensions(SAIObject):
         actions = self.__parse_sai_table_action(program[ACTIONS_TAG], self.sai_enums)
 
         # Parse all tables into SAI API sets.
-        for table in program[TABLES_TAG]:
+        tables = sorted(program[TABLES_TAG], key=lambda k: k[PREAMBLE_TAG][NAME_TAG])
+        for table in tables:
             sai_api_table_data = SAIAPITableData.from_p4rt(table, program, actions, ignore_tables)
             if sai_api_table_data.ignored:
                 continue
