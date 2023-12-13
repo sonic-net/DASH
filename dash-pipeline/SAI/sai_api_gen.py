@@ -136,8 +136,6 @@ class SAITypeSolver:
             sai_type_name = 'sai_object_id_t'
         elif object_size <= 16:
             sai_type_name = 'sai_uint16_t'
-        elif object_size == 32 and ('ip_addr_family' in object_name):
-            sai_type_name = 'sai_ip_addr_family_t'
         elif object_size == 32 and ('ip' in object_name):
             sai_type_name = 'sai_ip_address_t'
         elif object_size == 32 and ('_id' in object_name):
