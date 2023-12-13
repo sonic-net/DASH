@@ -36,13 +36,13 @@ match_kind {
     @SaiTable[name="dash_acl_rule", stage=str(acl.stage ## stage_index), api="dash_acl", api_order=1] \
     table stage ## stage_index { \
         key = { \
-            meta.stage ## stage_index ##_dash_acl_group_id : exact @name("meta.dash_acl_group_id:dash_acl_group_id") \
-            @SaiVal[type="sai_object_id_t", isresourcetype="true", objects="SAI_OBJECT_TYPE_DASH_ACL_GROUP"]; \
-            meta.dst_ip_addr : LIST_MATCH @name("meta.dst_ip_addr:dip"); \
-            meta.src_ip_addr : LIST_MATCH @name("meta.src_ip_addr:sip"); \
-            meta.ip_protocol : LIST_MATCH @name("meta.ip_protocol:protocol"); \
-            meta.src_l4_port : RANGE_LIST_MATCH @name("meta.src_l4_port:src_port"); \
-            meta.dst_l4_port : RANGE_LIST_MATCH @name("meta.dst_l4_port:dst_port"); \
+            meta.stage ## stage_index ##_dash_acl_group_id : exact \
+            @SaiVal[name = "dash_acl_group_id", type="sai_object_id_t", isresourcetype="true", objects="SAI_OBJECT_TYPE_DASH_ACL_GROUP"]; \
+            meta.dst_ip_addr : LIST_MATCH @SaiVal[name = "dip"]; \
+            meta.src_ip_addr : LIST_MATCH @SaiVal[name = "sip"]; \
+            meta.ip_protocol : LIST_MATCH @SaiVal[name = "protocol"]; \
+            meta.src_l4_port : RANGE_LIST_MATCH @SaiVal[name = "src_port"]; \
+            meta.dst_l4_port : RANGE_LIST_MATCH @SaiVal[name = "dst_port"]; \
         } \
         actions = { \
             permit; \
@@ -73,12 +73,12 @@ match_kind {
     @SaiTable[name="dash_acl_rule", stage=str(acl.stage ## stage_index), api="dash_acl"] \
     table stage ##stage_index { \
         key = { \
-            meta.stage ## stage_index ##_dash_acl_group_id : exact @name("meta.dash_acl_group_id:dash_acl_group_id"); \
-            meta.dst_ip_addr : LIST_MATCH @name("meta.dst_ip_addr:dip"); \
-            meta.src_ip_addr : LIST_MATCH @name("meta.src_ip_addr:sip"); \
-            meta.ip_protocol : LIST_MATCH @name("meta.ip_protocol:protocol"); \
-            meta.src_l4_port : RANGE_LIST_MATCH @name("meta.src_l4_port:src_port"); \
-            meta.dst_l4_port : RANGE_LIST_MATCH @name("meta.dst_l4_port:dst_port"); \
+            meta.stage ## stage_index ##_dash_acl_group_id : exact @SaiVal[name = "dash_acl_group_id"]; \
+            meta.dst_ip_addr : LIST_MATCH @SaiVal[name = "dip"]; \
+            meta.src_ip_addr : LIST_MATCH @SaiVal[name = "sip"]; \
+            meta.ip_protocol : LIST_MATCH @SaiVal[name = "protocol"]; \
+            meta.src_l4_port : RANGE_LIST_MATCH @SaiVal[name = "src_port"]; \
+            meta.dst_l4_port : RANGE_LIST_MATCH @SaiVal[name = "dst_port"]; \
         } \
         actions = { \
             permit; \

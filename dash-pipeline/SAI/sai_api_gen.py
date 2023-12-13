@@ -123,7 +123,9 @@ class SAITypeSolver:
         return SAITypeSolver.sai_type_info_registry[sai_type]
 
     @staticmethod
-    def get_object_sai_type(object_size, object_parent_name, object_name):
+    def get_object_sai_type(object_size, object_name):
+        object_name = object_name.lower()
+
         sai_type_name = ""
 
         if object_size == 1:
@@ -136,13 +138,13 @@ class SAITypeSolver:
             sai_type_name = 'sai_uint16_t'
         elif object_size == 32 and ('ip_addr_family' in object_name):
             sai_type_name = 'sai_ip_addr_family_t'
-        elif object_size == 32 and ('addr' in object_name or 'ip' in object_parent_name):
+        elif object_size == 32 and ('ip' in object_name):
             sai_type_name = 'sai_ip_address_t'
         elif object_size == 32 and ('_id' in object_name):
             sai_type_name = 'sai_object_id_t'
         elif object_size <= 32:
             sai_type_name = 'sai_uint32_t'
-        elif object_size == 48 and ('addr' in object_name or 'mac' in object_parent_name):
+        elif object_size == 48 and ('mac' in object_name):
             sai_type_name = 'sai_mac_t'
         elif object_size <= 64:
             sai_type_name = 'sai_uint64_t'
@@ -154,60 +156,55 @@ class SAITypeSolver:
         return SAITypeSolver.get_sai_type(sai_type_name)
 
     @staticmethod
-    def get_match_key_sai_type(match_type, key_size, key_parent_name, key_name):
+    def get_match_key_sai_type(match_type, key_size, key_name):
         if match_type == 'exact' or match_type == 'optional' or match_type == 'ternary':
-            return  SAITypeSolver.get_object_sai_type(key_size, key_parent_name, key_name)
+            return  SAITypeSolver.get_object_sai_type(key_size, key_name)
         elif match_type == 'lpm':
-            return SAITypeSolver.__get_lpm_match_key_sai_type(key_size, key_parent_name, key_name)
+            return SAITypeSolver.__get_lpm_match_key_sai_type(key_size)
         elif match_type == 'list':
-            return SAITypeSolver.__get_list_match_key_sai_type(key_size, key_parent_name, key_name)
+            return SAITypeSolver.__get_list_match_key_sai_type(key_size)
         elif match_type == 'range_list':
-            return SAITypeSolver.__get_range_list_sai_type(key_size, key_parent_name, key_name)
+            return SAITypeSolver.__get_range_list_sai_type(key_size)
         else:
             raise ValueError(f"match_type={match_type} is not supported")
 
     @staticmethod
-    def __get_lpm_match_key_sai_type(key_size, key_parent_name, key_name):
+    def __get_lpm_match_key_sai_type(key_size):
         sai_type_name = ""
 
-        if key_size == 32 and ('addr' in key_name or 'ip' in key_parent_name):
+        # LPM match key should always be converted into IP prefix.
+        if key_size == 32:
             sai_type_name = 'sai_ip_prefix_t'
-        elif key_size == 128 and ('addr' in key_name or 'ip' in key_parent_name):
+        elif key_size == 128:
             sai_type_name = 'sai_ip_prefix_t'
-        else:
-            raise ValueError(f'key_size={key_size}, key_header={key_parent_name}, and key_field={key_name} is not supported')
-
-        return SAITypeSolver.get_sai_type(sai_type_name)
-
-    @staticmethod
-    def __get_list_match_key_sai_type(key_size, key_header, key_field):
-        sai_type_name = ""
-
-        if key_size <= 8:
-            sai_type_name = 'sai_u8_list_t'
-        elif key_size <= 16:
-            sai_type_name = 'sai_u16_list_t'
-        elif key_size == 32 and ('addr' in key_field or 'ip' in key_header):
-            sai_type_name = 'sai_ip_prefix_list_t'
-        elif key_size <= 32:
-            sai_type_name = 'sai_u32_list_t'
-        elif key_size == 128 and ('addr' in key_field or 'ip' in key_header):
-            sai_type_name = 'sai_ip_prefix_list_t'
         else:
             raise ValueError(f'key_size={key_size} is not supported')
 
         return SAITypeSolver.get_sai_type(sai_type_name)
 
     @staticmethod
-    def __get_range_list_sai_type(key_size, key_header, key_field):
+    def __get_list_match_key_sai_type(key_size):
+        sai_type_name = ""
+
+        if key_size <= 8:
+            sai_type_name = 'sai_u8_list_t'
+        elif key_size <= 16:
+            sai_type_name = 'sai_u16_list_t'
+        elif key_size <= 32:
+            sai_type_name = 'sai_u32_list_t'
+        else:
+            raise ValueError(f'key_size={key_size} is not supported')
+
+        return SAITypeSolver.get_sai_type(sai_type_name)
+
+    @staticmethod
+    def __get_range_list_sai_type(key_size):
         sai_type_name = ""
 
         if key_size <= 8:
             sai_type_name = 'sai_u8_range_list_t'
         elif key_size <= 16:
             sai_type_name = 'sai_u16_range_list_t'
-        elif key_size == 32 and ('addr' in key_field or 'ip' in key_header):
-            sai_type_name = 'sai_ipaddr_range_list_t'
         elif key_size <= 32:
             sai_type_name = 'sai_u32_range_list_t'
         elif key_size <= 64:
@@ -313,7 +310,9 @@ class SAIObject:
         for anno in p4rt_anno_list[STRUCTURED_ANNOTATIONS_TAG]:
             if anno[NAME_TAG] == SAI_VAL_TAG:
                 for kv in anno[KV_PAIR_LIST_TAG][KV_PAIRS_TAG]:
-                    if kv['key'] == 'type':
+                    if kv['key'] == 'name':
+                        self.name = kv['value']['stringValue']
+                    elif kv['key'] == 'type':
                         self.type = kv['value']['stringValue']
                     elif kv['key'] == 'default_value':  # "default" is a reserved keyword and cannot be used.
                         self.default = kv['value']['stringValue']
@@ -328,10 +327,16 @@ class SAIObject:
                     else:
                         raise ValueError("Unknown attr annotation " + kv['key'])
 
-        sai_type_info = SAITypeSolver.get_sai_type(self.type)
-        self.field = sai_type_info.field_func_prefix
-        if self.default == None and sai_type_info.is_enum:
-            self.default = sai_type_info.default
+    def _link_ip_is_v6_vars(self, vars):
+        # Link *_is_v6 var to its corresponding var.
+        ip_is_v6_key_ids = {v.name.replace("_is_v6", ""): v.id for v in vars if '_is_v6' in v.name}
+
+        for v in vars:
+            if v.name in ip_is_v6_key_ids:
+                v.ip_is_v6_field_id = ip_is_v6_key_ids[v.name]
+
+        # Delete all vars with *_is_v6 in their names.
+        return [v for v in vars if '_is_v6' not in v.name]
 
 
 @sai_parser_from_p4rt
@@ -400,12 +405,11 @@ class SAIAPITableKey(SAIObject):
     '''
     def __init__(self):
         super().__init__()
-        self.sai_key_name = ""
         self.match_type = ""
         self.bitwidth = 0
         self.ip_is_v6_field_id = 0
 
-    def parse_p4rt(self, p4rt_table_key, ip_is_v6_key_ids):
+    def parse_p4rt(self, p4rt_table_key):
         '''
         This method parses the P4Runtime table key object and populates the SAI API table key object.
 
@@ -427,12 +431,10 @@ class SAIAPITableKey(SAIObject):
 
         self.id = p4rt_table_key['id']
         self.name = p4rt_table_key[NAME_TAG]
-        #print("Parsing table key: " + self.name)
-
-        full_key_name, self.sai_key_name, _ = self.parse_sai_annotated_name(self.name, full_name_part_start = -2)
-        key_header, key_field = full_key_name.split('.')
-
         self.bitwidth = p4rt_table_key[BITWIDTH_TAG]
+        # print("Parsing table key: " + self.name)
+
+        _, self.name, _ = self.parse_sai_annotated_name(self.name, full_name_part_start = -2)
 
         if OTHER_MATCH_TYPE_TAG in p4rt_table_key:
             self.match_type =  p4rt_table_key[OTHER_MATCH_TYPE_TAG].lower()
@@ -443,15 +445,17 @@ class SAIAPITableKey(SAIObject):
 
         if STRUCTURED_ANNOTATIONS_TAG in p4rt_table_key:
             self._parse_sai_object_annotation(p4rt_table_key)
-        else:
-            sai_type_info = SAITypeSolver.get_match_key_sai_type(self.match_type, self.bitwidth, key_header, key_field)
-            self.type = sai_type_info.name
-            self.field = sai_type_info.field_func_prefix
 
-        # If *_is_v6 key is present, save its id.
-        ip_is_v6_key_name = self.sai_key_name + "_is_v6"
-        if ip_is_v6_key_name in ip_is_v6_key_ids:
-            self.ip_is_v6_field_id = ip_is_v6_key_ids[ip_is_v6_key_name]
+        # If type is specified, use it. Otherwise, try to find the proper type using default heuristics.
+        if self.type != None:
+            sai_type_info = SAITypeSolver.get_sai_type(self.type)
+        else:
+            sai_type_info = SAITypeSolver.get_match_key_sai_type(self.match_type, self.bitwidth, self.name)
+            self.type = sai_type_info.name
+
+        self.field = sai_type_info.field_func_prefix
+        if self.default == None and sai_type_info.is_enum:
+            self.default = sai_type_info.default
 
         return
 
@@ -489,17 +493,12 @@ class SAIAPITableAction(SAIObject):
         if PARAMS_TAG not in p4rt_table_action:
             return
 
-        # Save all *_is_v6 param ids.
-        ip_is_v6_param_ids = dict()
-        for p4rt_table_action_param in p4rt_table_action[PARAMS_TAG]:
-            if '_is_v6' in p4rt_table_action_param[NAME_TAG]:
-                ip_is_v6_param_name = p4rt_table_action_param[NAME_TAG]
-                ip_is_v6_param_ids[ip_is_v6_param_name] = p4rt_table_action_param['id']
-
         # Parse all params.
         for p in p4rt_table_action[PARAMS_TAG]:
-            param = SAIAPITableActionParam.from_p4rt(p, sai_enums = sai_enums, ip_is_v6_param_ids = ip_is_v6_param_ids)
+            param = SAIAPITableActionParam.from_p4rt(p)
             self.params.append(param)
+
+        self.params = self._link_ip_is_v6_vars(self.params)
 
         return
 
@@ -512,7 +511,7 @@ class SAIAPITableActionParam(SAIObject):
         self.ip_is_v6_field_id = 0
         self.param_actions = []
 
-    def parse_p4rt(self, p4rt_table_action_param, sai_enums, ip_is_v6_param_ids):
+    def parse_p4rt(self, p4rt_table_action_param):
         '''
         This method parses the P4Runtime table action object and populates the SAI API table action object.
 
@@ -527,16 +526,17 @@ class SAIAPITableActionParam(SAIObject):
 
         if STRUCTURED_ANNOTATIONS_TAG in p4rt_table_action_param:
             self._parse_sai_object_annotation(p4rt_table_action_param)
-        else:
-            sai_type_info = SAITypeSolver.get_object_sai_type(self.bitwidth, self.name, self.name)
-            self.type, self.field = sai_type_info.name, sai_type_info.field_func_prefix
-            if sai_type_info.is_enum:
-                self.default = sai_type_info.default
 
-        # If *_is_v6 key is present, save its id.
-        ip_is_v6_param_name = self.name + "_is_v6"
-        if ip_is_v6_param_name in ip_is_v6_param_ids:
-            self.ip_is_v6_field_id = ip_is_v6_param_ids[ip_is_v6_param_name]
+        # If type is specified, use it. Otherwise, try to find the proper type using default heuristics.
+        if self.type != None:
+            sai_type_info = SAITypeSolver.get_sai_type(self.type)
+        else:
+            sai_type_info = SAITypeSolver.get_object_sai_type(self.bitwidth, self.name)
+            self.type = sai_type_info.name
+
+        self.field = sai_type_info.field_func_prefix
+        if self.default == None and sai_type_info.is_enum:
+            self.default = sai_type_info.default
 
         return
 
@@ -610,7 +610,7 @@ class SAIAPITableData(SAIObject):
         self.__parse_table_actions(p4rt_table, all_actions)
 
         if self.is_object == None:
-            if len(self.keys) == 1 and self.keys[0].sai_key_name.endswith(self.name.split('.')[-1] + '_id'):
+            if len(self.keys) == 1 and self.keys[0].name.endswith(self.name.split('.')[-1] + '_id'):
                 self.is_object = 'true'
             elif len(self.keys) > 5:
                 self.is_object = 'true'
@@ -651,19 +651,11 @@ class SAIAPITableData(SAIObject):
         return 'false'
 
     def __parse_table_keys(self, p4rt_table):
-        ip_is_v6_key_ids = dict()
         for p4rt_table_key in p4rt_table[MATCH_FIELDS_TAG]:
-            if '_is_v6' in p4rt_table_key[NAME_TAG]:
-                _, ip_is_v6_key_name, _ = self.parse_sai_annotated_name(p4rt_table_key[NAME_TAG])
-                ip_is_v6_key_ids[ip_is_v6_key_name] = p4rt_table_key['id']
-
-        for p4rt_table_key in p4rt_table[MATCH_FIELDS_TAG]:
-            # Skip all *_is_v6 keys, as they will be linked via table key property.
-            if '_is_v6' in p4rt_table_key[NAME_TAG]:
-                continue
-
-            table_key = SAIAPITableKey.from_p4rt(p4rt_table_key, ip_is_v6_key_ids)
+            table_key = SAIAPITableKey.from_p4rt(p4rt_table_key)
             self.keys.append(table_key)
+
+        self.keys = self._link_ip_is_v6_vars(self.keys)
 
         for p4rt_table_key in self.keys:
             if (p4rt_table_key.match_type == 'exact' and p4rt_table_key.type == 'sai_ip_address_t') or \
@@ -791,7 +783,7 @@ class DASHSAIExtensions(SAIObject):
                 for key in table.keys:
                     if key.type != None:
                         if key.type == 'sai_object_id_t':
-                            table_ref = key.sai_key_name[:-len("_id")]
+                            table_ref = key.name[:-len("_id")]
                             for table_name in all_table_names:
                                 if table_ref.endswith(table_name):
                                     key.object_name = table_name
