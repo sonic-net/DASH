@@ -42,7 +42,7 @@ control dash_ingress(
     @SaiTable[name = "vip", api = "dash_vip"]
     table vip {
         key = {
-            hdr.ipv4.dst_addr : exact @SaiVal[name = "VIP"];
+            hdr.ipv4.dst_addr : exact @SaiVal[name = "vip"];
         }
 
         actions = {
@@ -64,7 +64,7 @@ control dash_ingress(
     @SaiTable[name = "direction_lookup", api = "dash_direction_lookup"]
     table direction_lookup {
         key = {
-            hdr.vxlan.vni : exact @SaiVal[name = "VNI"];
+            hdr.vxlan.vni : exact @SaiVal[name = "vni"];
         }
 
         actions = {
@@ -318,7 +318,7 @@ control dash_ingress(
     @SaiTable[name = "eni_ether_address_map", api = "dash_eni", api_order=0]
     table eni_ether_address_map {
         key = {
-            meta.eni_addr : exact @SaiVal[name = "address"];
+            meta.eni_addr : exact @SaiVal[name = "address", type = "sai_mac_t"];
         }
 
         actions = {
