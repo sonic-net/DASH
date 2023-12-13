@@ -130,8 +130,6 @@ class SAITypeSolver:
             sai_type_name = 'bool'
         elif object_size <= 8:
             sai_type_name = 'sai_uint8_t'
-        elif object_size == 16 and ('_id' in object_name):
-            sai_type_name = 'sai_object_id_t'
         elif object_size <= 16:
             sai_type_name = 'sai_uint16_t'
         elif object_size <= 32:
