@@ -194,8 +194,8 @@ class SAITypeSolver:
     def __get_range_sai_type(key_size):
         sai_type_name = ""
 
-        # In SAI, all ranges that has smaller size than 32-bits are passed as 32-bits, such as port ranges and etc.
-        # So, we convert all ranges smaller than 32-bits to to sai_u32_range_t.
+        # In SAI, all ranges that having smaller size than 32-bits are passed as 32-bits, such as port ranges and etc.
+        # So, we convert all ranges smaller than 32-bits to to sai_u32_range_t by default.
         if key_size <= 32:
             sai_type_name = 'sai_u32_range_t'
         else:
