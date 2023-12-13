@@ -4,7 +4,6 @@ try:
     import os
     import json
     import argparse
-    import shutil
     import copy
     from jinja2 import Template, Environment, FileSystemLoader
 except ImportError as ie:
@@ -35,6 +34,7 @@ KV_PAIRS_TAG = 'kvPairs'
 KV_PAIR_LIST_TAG = 'kvPairList'
 SAI_VAL_TAG = 'SaiVal'
 SAI_TABLE_TAG = 'SaiTable'
+SAI_API_ORDER_TAG = 'api_order'
 
 #
 # SAI parser decorators:
@@ -481,7 +481,7 @@ class SAIAPITableAction(SAIObject):
                 ]
             }
         '''
-        #print("Parsing table action: " + self.name)
+        # print("Parsing table action: " + self.name)
         _, self.name, _ = self.parse_sai_annotated_name(self.name)
         self.parse_action_params(p4rt_table_action, sai_enums)
 
@@ -523,7 +523,7 @@ class SAIAPITableActionParam(SAIObject):
         self.id = p4rt_table_action_param['id']
         self.name = p4rt_table_action_param[NAME_TAG]
         self.bitwidth = p4rt_table_action_param[BITWIDTH_TAG]
-        print("Parsing table action param: " + self.name)
+        # print("Parsing table action param: " + self.name)
 
         if STRUCTURED_ANNOTATIONS_TAG in p4rt_table_action_param:
             self._parse_sai_object_annotation(p4rt_table_action_param)
@@ -559,6 +559,8 @@ class SAIAPITableData(SAIObject):
         # Extra properties from annotations
         self.stage = None
         self.is_object = None
+        self.api_order = 0
+        self.api_type = None
 
     def parse_p4rt(self, p4rt_table, program, all_actions, ignore_tables):
         '''
@@ -590,21 +592,16 @@ class SAIAPITableData(SAIObject):
                 "size": "1024"
             }
         '''
-        
-        # The first part of full name is the top level control block name, which is removed for showing better comments as stage.
-        self.stage, self.name, self.api_name = self.parse_sai_annotated_name(self.name, full_name_part_start = 1)
-        self.stage = self.stage.replace('.', '_')
-        if "stage" not in self.stage:
-            self.stage = None
+        self.__parse_sai_table_annotations(p4rt_table[PREAMBLE_TAG])
 
         # If tables are specified as ignored via CLI or annotations, skip them.
         if self.name in ignore_tables:
             self.ignored = True
-            return
-
-        self.__parse_sai_table_annotations(p4rt_table[PREAMBLE_TAG])
-        if self.ignored:
+        elif self.ignored:
             ignore_tables.append(self.name)
+
+        if self.ignored:
+            print("Ignoring table: " + self.name)
             return
 
         print("Parsing table: " + self.name)
@@ -632,7 +629,7 @@ class SAIAPITableData(SAIObject):
                 for kv in anno[KV_PAIR_LIST_TAG][KV_PAIRS_TAG]:
                     if kv['key'] == 'isobject':
                         self.is_object = kv['value']['stringValue']
-                    if kv['key'] == 'ignoretable':
+                    if kv['key'] == 'ignored':
                         self.ignored = True
                     if kv['key'] == 'name':
                         self.name = kv['value']['stringValue']
@@ -640,6 +637,10 @@ class SAIAPITableData(SAIObject):
                         self.stage = kv['value']['stringValue']
                     if kv['key'] == 'api':
                         self.api_name = kv['value']['stringValue']
+                    if kv['key'] == 'api_type':
+                        self.api_type = kv['value']['stringValue']
+                    if kv['key'] == 'api_order':
+                        self.api_order = kv['value']['int64Value']
 
         return
 
@@ -709,9 +710,15 @@ class DASHAPISet(SAIObject):
     '''
     def __init__(self, api_name):
         self.app_name = api_name
+        self.api_type = None
         self.tables = []
     
     def add_table(self, table):
+        if self.api_type == None:
+            self.api_type = table.api_type
+        elif self.api_type != table.api_type:
+            raise ValueError(f'API type mismatch: CurrentType = {self.api_type}, NewTableAPIType = {table.api_type}')
+
         self.tables.append(table)
 
 
@@ -761,6 +768,10 @@ class DASHSAIExtensions(SAIObject):
                 new_api = DASHAPISet(sai_api_table_data.api_name)
                 new_api.add_table(sai_api_table_data)
                 self.sai_apis.append(new_api)
+
+        # Sort all parsed tables by API order, so we can always generate the APIs in the same order for keeping ABI compatibility.
+        for sai_api in self.sai_apis:
+            sai_api.tables.sort(key=lambda x: x.api_order)
 
     def __update_table_param_object_name_reference(self):
         all_table_names = [table.name for api in self.sai_apis for table in api.tables]
@@ -907,7 +918,7 @@ class SAIGenerator:
     
         # For new DASH APIs, we need to generate SAI API headers.
         unique_sai_api = self.__get_uniq_sai_api(sai_api)
-        if "dash" in sai_api.app_name:
+        if sai_api.api_type != 'underlay':
             self.generate_dash_sai_definitions_for_api(unique_sai_api)
 
         # Generate SAI API implementation for all APIs.
@@ -933,7 +944,7 @@ class SAIGenerator:
 
     def generate_sai_impl_file_for_api(self, sai_api):
         sai_impl_file_name = 'sai' + sai_api.app_name.replace('_', '') + '.cpp'
-        header_prefix = "experimental" if "dash" in sai_api.app_name else ""
+        header_prefix = "experimental" if sai_api.api_type != "underlay" else ""
         SAITemplateRender('templates/saiapi.cpp.j2').render_to_file('lib/' + sai_impl_file_name, tables = sai_api.tables, app_name = sai_api.app_name, header_prefix = header_prefix)
         self.generated_impl_file_names.append(sai_impl_file_name)
 

@@ -39,7 +39,7 @@ control dash_ingress(
     action accept() {
     }
 
-    @name("vip|dash_vip")
+    @SaiTable[name = "vip", api = "dash_vip"]
     table vip {
         key = {
             hdr.ipv4.dst_addr : exact @name("hdr.ipv4.dst_addr:VIP");
@@ -61,7 +61,7 @@ control dash_ingress(
         meta.direction = dash_direction_t.INBOUND;
     }
 
-    @name("direction_lookup|dash_direction_lookup")
+    @SaiTable[name = "direction_lookup", api = "dash_direction_lookup"]
     table direction_lookup {
         key = {
             hdr.vxlan.vni : exact @name("hdr.vxlan.vni:VNI");
@@ -82,6 +82,7 @@ control dash_ingress(
     }
 
     /* This table API should be implemented manually using underlay SAI */
+    @SaiTable[ignored = "true"]
     table appliance {
         key = {
             meta.appliance_id : ternary @name("meta.appliance_id:appliance_id");
@@ -153,7 +154,7 @@ control dash_ingress(
         }
     }
 
-    @name("eni|dash_eni")
+    @SaiTable[name = "eni", api = "dash_eni", api_order=1]
     table eni {
         key = {
             meta.eni_id : exact @name("meta.eni_id:eni_id");
@@ -185,6 +186,7 @@ control dash_ingress(
 #endif // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
 #endif // TARGET_DPDK_PNA
 
+    @SaiTable[ignored = "true"]
     table eni_meter {
         key = {
             meta.eni_id : exact @name("meta.eni_id:eni_id");
@@ -211,7 +213,7 @@ control dash_ingress(
         meta.vnet_id = src_vnet_id;
     }
 
-    @name("pa_validation|dash_pa_validation")
+    @SaiTable[name = "pa_validation", api = "dash_pa_validation"]
     table pa_validation {
         key = {
             meta.vnet_id: exact @name("meta.vnet_id:vnet_id");
@@ -226,7 +228,7 @@ control dash_ingress(
         const default_action = deny;
     }
 
-    @name("inbound_routing|dash_inbound_routing")
+    @SaiTable[name = "inbound_routing", api = "dash_inbound_routing"]
     table inbound_routing {
         key = {
             meta.eni_id: exact @name("meta.eni_id:eni_id");
@@ -254,8 +256,7 @@ control dash_ingress(
         }
     }
 
-    @name("meter_policy|dash_meter")
-    @SaiTable[isobject="true"]
+    @SaiTable[name = "meter_policy", api = "dash_meter", api_order = 1, isobject="true"]
     table meter_policy {
         key = {
             meta.meter_policy_id : exact @name("meta.meter_policy_id:meter_policy_id");
@@ -269,8 +270,7 @@ control dash_ingress(
         meta.policy_meter_class = meter_class;
     }
 
-    @name("meter_rule|dash_meter")
-    @SaiTable[isobject="true"]
+    @SaiTable[name = "meter_rule", api = "dash_meter", api_order = 2, isobject="true"]
     table meter_rule {
         key = {
             meta.meter_policy_id: exact @name("meta.meter_policy_id:meter_policy_id") @SaiVal[type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
@@ -298,8 +298,7 @@ control dash_ingress(
         meta.meter_bucket_index = meter_bucket_index;
     }
 
-    @name("meter_bucket|dash_meter")
-    @SaiTable[isobject="true"]
+    @SaiTable[name = "meter_bucket", api = "dash_meter", api_order = 0, isobject="true"]
     table meter_bucket {
         key = {
             meta.eni_id: exact @name("meta.eni_id:eni_id");
@@ -316,7 +315,7 @@ control dash_ingress(
         meta.eni_id = eni_id;
     }
 
-    @name("eni_ether_address_map|dash_eni")
+    @SaiTable[name = "eni_ether_address_map", api = "dash_eni", api_order=0]
     table eni_ether_address_map {
         key = {
             meta.eni_addr : exact @name("meta.eni_addr:address");
@@ -341,7 +340,7 @@ control dash_ingress(
         }
     }
 
-    @name("dash_acl_group|dash_acl")
+    @SaiTable[name = "dash_acl_group", api = "dash_acl", api_order = 0]
     table acl_group {
         key = {
             meta.stage1_dash_acl_group_id : exact @name("meta.stage1_dash_acl_group_id:dash_acl_group_id");
