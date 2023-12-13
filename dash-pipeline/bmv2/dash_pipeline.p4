@@ -85,7 +85,7 @@ control dash_ingress(
     @SaiTable[ignored = "true"]
     table appliance {
         key = {
-            meta.appliance_id : ternary @SaiVal[name = "appliance_id"];
+            meta.appliance_id : ternary;
         }
 
         actions = {
@@ -156,7 +156,7 @@ control dash_ingress(
     @SaiTable[name = "eni", api = "dash_eni", api_order=1]
     table eni {
         key = {
-            meta.eni_id : exact @SaiVal[name = "eni_id", type="sai_object_id_t"];
+            meta.eni_id : exact @SaiVal[type="sai_object_id_t"];
         }
 
         actions = {
@@ -188,9 +188,9 @@ control dash_ingress(
     @SaiTable[ignored = "true"]
     table eni_meter {
         key = {
-            meta.eni_id : exact @SaiVal[name = "eni_id", type="sai_object_id_t"];
-            meta.direction : exact @SaiVal[name = "direction"];
-            meta.dropped : exact @SaiVal[name = "dropped"];
+            meta.eni_id : exact @SaiVal[type="sai_object_id_t"];
+            meta.direction : exact;
+            meta.dropped : exact;
         }
 
         actions = { NoAction; }
@@ -215,7 +215,7 @@ control dash_ingress(
     @SaiTable[name = "pa_validation", api = "dash_pa_validation"]
     table pa_validation {
         key = {
-            meta.vnet_id: exact @SaiVal[name = "vnet_id", type="sai_object_id_t"];
+            meta.vnet_id: exact @SaiVal[type="sai_object_id_t"];
             hdr.ipv4.src_addr : exact @SaiVal[name = "sip", type="sai_ip_address_t"];
         }
 
@@ -230,7 +230,7 @@ control dash_ingress(
     @SaiTable[name = "inbound_routing", api = "dash_inbound_routing"]
     table inbound_routing {
         key = {
-            meta.eni_id: exact @SaiVal[name = "eni_id", type="sai_object_id_t"];
+            meta.eni_id: exact @SaiVal[type="sai_object_id_t"];
             hdr.vxlan.vni : exact @SaiVal[name = "VNI"];
             hdr.ipv4.src_addr : ternary @SaiVal[name = "sip", type="sai_ip_address_t"];
         }
@@ -258,7 +258,7 @@ control dash_ingress(
     @SaiTable[name = "meter_policy", api = "dash_meter", api_order = 1, isobject="true"]
     table meter_policy {
         key = {
-            meta.meter_policy_id : exact @SaiVal[name = "meter_policy_id"];
+            meta.meter_policy_id : exact;
         }
         actions = {
             check_ip_addr_family;
@@ -272,7 +272,7 @@ control dash_ingress(
     @SaiTable[name = "meter_rule", api = "dash_meter", api_order = 2, isobject="true"]
     table meter_rule {
         key = {
-            meta.meter_policy_id: exact @SaiVal[name = "meter_policy_id", type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
+            meta.meter_policy_id: exact @SaiVal[type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
             hdr.ipv4.dst_addr : ternary @SaiVal[name = "dip", type="sai_ip_address_t"];
         }
 
@@ -300,8 +300,8 @@ control dash_ingress(
     @SaiTable[name = "meter_bucket", api = "dash_meter", api_order = 0, isobject="true"]
     table meter_bucket {
         key = {
-            meta.eni_id: exact @SaiVal[name = "eni_id", type="sai_object_id_t"];
-            meta.meter_class: exact @SaiVal[name = "meter_class"];
+            meta.eni_id: exact @SaiVal[type="sai_object_id_t"];
+            meta.meter_class: exact;
         }
         actions = {
             meter_bucket_action;
