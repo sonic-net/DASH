@@ -244,7 +244,7 @@ control dash_ingress(
         const default_action = deny;
     }
 
-    action check_ip_addr_family(@SaiVal[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family] {
+    action check_ip_addr_family(@SaiVal[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
         if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
             if (meta.is_overlay_ip_v6 == 1) {
                 meta.dropped = true;
@@ -293,7 +293,7 @@ control dash_ingress(
     action meter_bucket_action(
             @SaiVal[type="sai_uint64_t", isreadonly="true"] bit<64> outbound_bytes_counter,
             @SaiVal[type="sai_uint64_t", isreadonly="true"] bit<64> inbound_bytes_counter,
-            @SaiVal[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index] {
+            @SaiVal[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index) {
         // read only counters for SAI api generation only
         meta.meter_bucket_index = meter_bucket_index;
     }
@@ -328,7 +328,7 @@ control dash_ingress(
         const default_action = deny;
     }
 
-    action set_acl_group_attrs(@SaiVal[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family] {
+    action set_acl_group_attrs(@SaiVal[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
         if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
             if (meta.is_overlay_ip_v6 == 1) {
                 meta.dropped = true;

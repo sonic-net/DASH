@@ -31,6 +31,7 @@ Use `@SaiVal["tag"="value", ...]` format for annotating keys and action paramete
 Available tags are:
 
 - `type`: Specify which SAI object type should be used in generation, e.g. `sai_uint32_t`.
+- `default_value`: Override the default value for this key or action parameter.
 - `isresourcetype`: When set to "true", we generate a corresponding SAI tag in SAI APIs: `@isresourcetype true`.
 - `objects`: Space separated list of SAI object type this value accepts. When set, we force this value to be a SAI object id, and generate a corresponding SAI tag in SAI APIs: `@objects <list>`.
 - `isreadonly`: When set to "true", we generate force this value to be read-only in SAI API using: `@flags READ_ONLY`, otherwise, we generate `@flags CREATE_AND_SET`.

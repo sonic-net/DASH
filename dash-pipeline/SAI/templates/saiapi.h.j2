@@ -64,19 +64,19 @@ typedef struct _sai_{{ table.name }}_t
 
 {% for key in table['keys'] %}
     /**
-     * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.sai_key_name }}
+     * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.name }}
 {% if key.type == 'sai_object_id_t' %}
      *
      * @objects SAI_OBJECT_TYPE_{{ key.object_name | upper }}
 {% endif %}
      */
-    {{ key.type }} {{ key.sai_key_name | lower }};
+    {{ key.type }} {{ key.name | lower }};
 
 {% if key.match_type == 'ternary' %}
     /**
-     * @brief Ternary key {{ key.sai_key_name }} mask
+     * @brief Ternary key {{ key.name }} mask
      */
-    {{ key.type }} {{ key.sai_key_name | lower }}_mask;
+    {{ key.type }} {{ key.name | lower }}_mask;
 
 {% endif %}
 {% endfor %}
@@ -120,7 +120,7 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% for key in table['keys'] %}
 {% if key.isattribute != 'false' %}
     /**
-     * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.sai_key_name }}
+     * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.name }}
      *
      * @type {{ key.type }}
      * @flags MANDATORY_ON_CREATE | CREATE_ONLY
@@ -128,27 +128,27 @@ typedef enum _sai_{{ table.name }}_attr_t
      * @isvlan false
 {% endif %}
 {% if key.type == 'sai_object_id_t' %}
-     * @objects SAI_OBJECT_TYPE_{{ key.sai_key_name | replace('_id', '') | upper }}
+     * @objects SAI_OBJECT_TYPE_{{ key.name | replace('_id', '') | upper }}
 {% endif %}
 {% if key.isresourcetype == 'true' %}
      * @isresourcetype true
 {% endif %}
      */
 {% if not ns.firstattr %}
-    SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }} = SAI_{{ table.name | upper }}_ATTR_START,
+    SAI_{{ table.name | upper }}_ATTR_{{ key.name | upper }} = SAI_{{ table.name | upper }}_ATTR_START,
 {% set ns.firstattr = true %}
 {% else %}
-    SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }},
+    SAI_{{ table.name | upper }}_ATTR_{{ key.name | upper }},
 {% endif %}
 
 {% if key.match_type == 'ternary' %}
     /**
-     * @brief Ternary matched mask {{ key.sai_key_name }}
+     * @brief Ternary matched mask {{ key.name }}
      *
      * @type {{ key.type }}
      * @flags MANDATORY_ON_CREATE | CREATE_ONLY
      */
-    SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}_MASK,
+    SAI_{{ table.name | upper }}_ATTR_{{ key.name | upper }}_MASK,
 
 {% endif %}
 {% endif %}
