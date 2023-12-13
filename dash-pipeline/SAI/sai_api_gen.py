@@ -250,44 +250,12 @@ class SAIObject:
             self.alias = preamble['alias']
 
     @staticmethod
-    def parse_sai_annotated_name(name, full_name_part_start = 0, full_name_part_end = None):
+    def parse_sai_object_name(name):
         '''
-        This method parses the annotated name and returns the parsed parts.
-
-        Annotated name format in ABNF:
-        - annotated_name        = full_name [":" preferred_name] ["|" api_name]
-        - full_name             = control_block *child_control_block "." object_name
-        - child_control_block   = "." control_block
-        - control_block         = object_name = preferred_name = name
-        - name                  = 1*(ALPHA / DIGIT / "_")
-
-        Also if preferred_name is not specified, it will be the same as object_name.
-
-        Annotated name examples:
-        - dash_ingress.inbound_routing|dash_inbound_routing
-        - dash_ingress.outbound.acl.stage3:dash_acl_rule|dash_acl
-        - meta.dash_acl_group_id:dash_acl_group_id
+        This method parses the generated name and return the last piece as our object name.
         '''
-        full_name = ""
-        preferred_name = None
-        api_name = None
-
-        if '|' in name:
-            full_name, api_name = name.split('|')
-        else:
-            full_name = name
-
-        if ':' in full_name:
-            full_name, preferred_name = full_name.split(':')
-        
-        full_name_parts = full_name.split('.')
-        if preferred_name == None:
-            preferred_name = full_name_parts[-1]
-        
-        full_name_parts = full_name_parts[full_name_part_start:full_name_part_end]
-        full_name = '.'.join(full_name_parts)
-
-        return full_name, preferred_name, api_name
+        name_parts = name.split('.')
+        return name_parts[-1]
 
     def _parse_sai_object_annotation(self, p4rt_anno_list):
         '''
@@ -434,7 +402,7 @@ class SAIAPITableKey(SAIObject):
         self.bitwidth = p4rt_table_key[BITWIDTH_TAG]
         # print("Parsing table key: " + self.name)
 
-        _, self.name, _ = self.parse_sai_annotated_name(self.name, full_name_part_start = -2)
+        self.name = self.parse_sai_object_name(self.name)
 
         if OTHER_MATCH_TYPE_TAG in p4rt_table_key:
             self.match_type =  p4rt_table_key[OTHER_MATCH_TYPE_TAG].lower()
@@ -486,7 +454,7 @@ class SAIAPITableAction(SAIObject):
             }
         '''
         # print("Parsing table action: " + self.name)
-        _, self.name, _ = self.parse_sai_annotated_name(self.name)
+        self.name = self.parse_sai_object_name(self.name)
         self.parse_action_params(p4rt_table_action, sai_enums)
 
     def parse_action_params(self, p4rt_table_action, sai_enums):
