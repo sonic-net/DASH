@@ -23,6 +23,7 @@ control outbound(inout headers_t hdr,
 
     action route_vnet_direct(bit<16> dst_vnet_id,
                              bit<1> overlay_ip_is_v6,
+                             @SaiVal[type="sai_ip_address_t"]
                              IPv4ORv6Address overlay_ip,
                              bit<1> meter_policy_en,
                              bit<16> meter_class) {
@@ -119,7 +120,7 @@ control outbound(inout headers_t hdr,
 #endif // TARGET_DPDK_PNA
     }
 
-    action set_tunnel(IPv4Address underlay_dip,
+    action set_tunnel(@SaiVal[type="sai_ip_address_t"] IPv4Address underlay_dip,
                       @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t dash_encapsulation,
                       bit<16> meter_class,
                       bit<1> meter_class_override) {
@@ -129,7 +130,7 @@ control outbound(inout headers_t hdr,
         meta.encap_data.dash_encapsulation = dash_encapsulation;
     }
 
-    action set_tunnel_mapping(IPv4Address underlay_dip,
+    action set_tunnel_mapping(@SaiVal[type="sai_ip_address_t"] IPv4Address underlay_dip,
                               EthernetAddress overlay_dmac,
                               bit<1> use_dst_vnet_vni,
                               bit<16> meter_class,
@@ -144,7 +145,7 @@ control outbound(inout headers_t hdr,
                    meter_class_override);
     }
 
-    action set_private_link_mapping(IPv4Address underlay_dip,
+    action set_private_link_mapping(@SaiVal[type="sai_ip_address_t"] IPv4Address underlay_dip,
                                     IPv6Address overlay_sip,
                                     IPv6Address overlay_dip,
                                     @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t dash_encapsulation,

@@ -42,7 +42,7 @@ control dash_ingress(
     @SaiTable[name = "vip", api = "dash_vip"]
     table vip {
         key = {
-            hdr.ipv4.dst_addr : exact @SaiVal[name = "VIP"];
+            hdr.ipv4.dst_addr : exact @SaiVal[name = "VIP", type="sai_ip_address_t"];
         }
 
         actions = {
@@ -111,13 +111,12 @@ control dash_ingress(
                          bit<32> pps,
                          bit<32> flows,
                          bit<1> admin_state,
-                         IPv4Address vm_underlay_dip,
-                         @SaiVal[type="sai_uint32_t"]
-                         bit<24> vm_vni,
+                         @SaiVal[type="sai_ip_address_t"] IPv4Address vm_underlay_dip,
+                         @SaiVal[type="sai_uint32_t"] bit<24> vm_vni,
                          bit<16> vnet_id,
                          IPv6Address pl_sip,
                          IPv6Address pl_sip_mask,
-                         IPv4Address pl_underlay_sip,
+                         @SaiVal[type="sai_ip_address_t"] IPv4Address pl_underlay_sip,
                          bit<16> v4_meter_policy_id,
                          bit<16> v6_meter_policy_id,
                          ACL_GROUPS_PARAM(inbound_v4),
@@ -217,7 +216,7 @@ control dash_ingress(
     table pa_validation {
         key = {
             meta.vnet_id: exact @SaiVal[name = "vnet_id"];
-            hdr.ipv4.src_addr : exact @SaiVal[name = "sip"];
+            hdr.ipv4.src_addr : exact @SaiVal[name = "sip", type="sai_ip_address_t"];
         }
 
         actions = {
@@ -233,7 +232,7 @@ control dash_ingress(
         key = {
             meta.eni_id: exact @SaiVal[name = "eni_id"];
             hdr.vxlan.vni : exact @SaiVal[name = "VNI"];
-            hdr.ipv4.src_addr : ternary @SaiVal[name = "sip"];
+            hdr.ipv4.src_addr : ternary @SaiVal[name = "sip", type="sai_ip_address_t"];
         }
         actions = {
             vxlan_decap(hdr);
@@ -274,7 +273,7 @@ control dash_ingress(
     table meter_rule {
         key = {
             meta.meter_policy_id: exact @SaiVal[name = "meter_policy_id", type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
-            hdr.ipv4.dst_addr : ternary @SaiVal[name = "dip"];
+            hdr.ipv4.dst_addr : ternary @SaiVal[name = "dip", type="sai_ip_address_t"];
         }
 
      actions = {
