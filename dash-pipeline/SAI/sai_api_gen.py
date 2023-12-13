@@ -104,6 +104,7 @@ class SAITypeSolver:
         "sai_u16_list_t": SAITypeInfo("sai_u16_list_t", "u16list"),
         "sai_u32_list_t": SAITypeInfo("sai_u32_list_t", "u32list"),
         "sai_ip_prefix_list_t": SAITypeInfo("sai_ip_prefix_list_t", "ipprefixlist"),
+        "sai_u32_range_t": SAITypeInfo("sai_u32_range_t", "u32range"),
         "sai_u8_range_list_t": SAITypeInfo("sai_u8_range_list_t", "u8rangelist"),
         "sai_u16_range_list_t": SAITypeInfo("sai_u16_range_list_t", "u16rangelist"),
         "sai_u32_range_list_t": SAITypeInfo("sai_u32_range_list_t", "u32rangelist"),
@@ -153,6 +154,8 @@ class SAITypeSolver:
             return SAITypeSolver.__get_lpm_match_key_sai_type(key_size)
         elif match_type == 'list':
             return SAITypeSolver.__get_list_match_key_sai_type(key_size)
+        elif match_type == 'range':
+            return SAITypeSolver.__get_range_sai_type(key_size)
         elif match_type == 'range_list':
             return SAITypeSolver.__get_range_list_sai_type(key_size)
         else:
@@ -182,6 +185,19 @@ class SAITypeSolver:
             sai_type_name = 'sai_u16_list_t'
         elif key_size <= 32:
             sai_type_name = 'sai_u32_list_t'
+        else:
+            raise ValueError(f'key_size={key_size} is not supported')
+
+        return SAITypeSolver.get_sai_type(sai_type_name)
+
+    @staticmethod
+    def __get_range_sai_type(key_size):
+        sai_type_name = ""
+
+        # In SAI, all ranges that has smaller size than 32-bits are passed as 32-bits, such as port ranges and etc.
+        # So, we convert all ranges smaller than 32-bits to to sai_u32_range_t.
+        if key_size <= 32:
+            sai_type_name = 'sai_u32_range_t'
         else:
             raise ValueError(f'key_size={key_size} is not supported')
 
