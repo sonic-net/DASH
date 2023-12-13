@@ -158,56 +158,51 @@ class SAITypeSolver:
         if match_type == 'exact' or match_type == 'optional' or match_type == 'ternary':
             return  SAITypeSolver.get_object_sai_type(key_size, key_parent_name, key_name)
         elif match_type == 'lpm':
-            return SAITypeSolver.__get_lpm_match_key_sai_type(key_size, key_parent_name, key_name)
+            return SAITypeSolver.__get_lpm_match_key_sai_type(key_size)
         elif match_type == 'list':
-            return SAITypeSolver.__get_list_match_key_sai_type(key_size, key_parent_name, key_name)
+            return SAITypeSolver.__get_list_match_key_sai_type(key_size)
         elif match_type == 'range_list':
-            return SAITypeSolver.__get_range_list_sai_type(key_size, key_parent_name, key_name)
+            return SAITypeSolver.__get_range_list_sai_type(key_size)
         else:
             raise ValueError(f"match_type={match_type} is not supported")
 
     @staticmethod
-    def __get_lpm_match_key_sai_type(key_size, key_parent_name, key_name):
+    def __get_lpm_match_key_sai_type(key_size):
         sai_type_name = ""
 
-        if key_size == 32 and ('addr' in key_name or 'ip' in key_parent_name):
+        # LPM match key should always be converted into IP prefix.
+        if key_size == 32:
             sai_type_name = 'sai_ip_prefix_t'
-        elif key_size == 128 and ('addr' in key_name or 'ip' in key_parent_name):
+        elif key_size == 128:
             sai_type_name = 'sai_ip_prefix_t'
-        else:
-            raise ValueError(f'key_size={key_size}, key_header={key_parent_name}, and key_field={key_name} is not supported')
-
-        return SAITypeSolver.get_sai_type(sai_type_name)
-
-    @staticmethod
-    def __get_list_match_key_sai_type(key_size, key_header, key_field):
-        sai_type_name = ""
-
-        if key_size <= 8:
-            sai_type_name = 'sai_u8_list_t'
-        elif key_size <= 16:
-            sai_type_name = 'sai_u16_list_t'
-        elif key_size == 32 and ('addr' in key_field or 'ip' in key_header):
-            sai_type_name = 'sai_ip_prefix_list_t'
-        elif key_size <= 32:
-            sai_type_name = 'sai_u32_list_t'
-        elif key_size == 128 and ('addr' in key_field or 'ip' in key_header):
-            sai_type_name = 'sai_ip_prefix_list_t'
         else:
             raise ValueError(f'key_size={key_size} is not supported')
 
         return SAITypeSolver.get_sai_type(sai_type_name)
 
     @staticmethod
-    def __get_range_list_sai_type(key_size, key_header, key_field):
+    def __get_list_match_key_sai_type(key_size):
+        sai_type_name = ""
+
+        if key_size <= 8:
+            sai_type_name = 'sai_u8_list_t'
+        elif key_size <= 16:
+            sai_type_name = 'sai_u16_list_t'
+        elif key_size <= 32:
+            sai_type_name = 'sai_u32_list_t'
+        else:
+            raise ValueError(f'key_size={key_size} is not supported')
+
+        return SAITypeSolver.get_sai_type(sai_type_name)
+
+    @staticmethod
+    def __get_range_list_sai_type(key_size):
         sai_type_name = ""
 
         if key_size <= 8:
             sai_type_name = 'sai_u8_range_list_t'
         elif key_size <= 16:
             sai_type_name = 'sai_u16_range_list_t'
-        elif key_size == 32 and ('addr' in key_field or 'ip' in key_header):
-            sai_type_name = 'sai_ipaddr_range_list_t'
         elif key_size <= 32:
             sai_type_name = 'sai_u32_range_list_t'
         elif key_size <= 64:
