@@ -51,7 +51,7 @@ def sai_parser_from_p4rt(cls):
             self.name = kwargs['name']
             kwargs.pop('name')
 
-        self.parse_preamble_if_exists(p4rt_value)
+        self.parse_basic_info_if_exists(p4rt_value)
         self.parse_p4rt(p4rt_value, *args, **kwargs)
 
         return
@@ -231,9 +231,9 @@ class SAIObject:
         self.field = None
         self.default = None
 
-    def parse_preamble_if_exists(self, p4rt_object):
+    def parse_basic_info_if_exists(self, p4rt_object):
         '''
-        This method parses the P4Runtime preamble object and populates the SAI object.
+        This method parses basic info, such as id and name, from either the object itself or the P4Runtime preamble object and populates the SAI object.
 
         Example P4Runtime preamble object:
 
@@ -248,14 +248,16 @@ class SAIObject:
             self.id = preamble['id']
             self.name = preamble['name']
             self.alias = preamble['alias']
+        else:
+            self.id = p4rt_object['id'] if 'id' in p4rt_object else self.id
+            self.name = p4rt_object['name'] if 'name' in p4rt_object else self.name
 
-    @staticmethod
-    def parse_sai_object_name(name):
-        '''
-        This method parses the generated name and return the last piece as our object name.
-        '''
-        name_parts = name.split('.')
-        return name_parts[-1]
+        # We only care about the last piece of the name, which is the actual object name.
+        if '.' in self.name:
+            name_parts = self.name.split('.')
+            self.name = name_parts[-1]
+        
+        return
 
     def _parse_sai_object_annotation(self, p4rt_anno_list):
         '''
@@ -324,7 +326,7 @@ class SAIEnumMember(SAIObject):
 
             { "name": "INVALID", "value": "AAA=" }
         '''
-        self.p4rt_value = p4rt_member
+        self.p4rt_value = p4rt_member["value"]
 
 
 @sai_parser_from_p4rt
@@ -356,7 +358,7 @@ class SAIEnum(SAIObject):
 
         self.name = self.name[:-2]
         self.bitwidth = p4rt_enum['underlyingType'][BITWIDTH_TAG]
-        self.members = [SAIEnumMember.from_p4rt(enum_member['value'], name = enum_member['name']) for enum_member in p4rt_enum[MEMBERS_TAG]]
+        self.members = [SAIEnumMember.from_p4rt(enum_member) for enum_member in p4rt_enum[MEMBERS_TAG]]
 
         # Register enum type info.
         SAITypeSolver.register_sai_type(
@@ -397,12 +399,8 @@ class SAIAPITableKey(SAIObject):
             }
         '''
 
-        self.id = p4rt_table_key['id']
-        self.name = p4rt_table_key[NAME_TAG]
         self.bitwidth = p4rt_table_key[BITWIDTH_TAG]
         # print("Parsing table key: " + self.name)
-
-        self.name = self.parse_sai_object_name(self.name)
 
         if OTHER_MATCH_TYPE_TAG in p4rt_table_key:
             self.match_type =  p4rt_table_key[OTHER_MATCH_TYPE_TAG].lower()
@@ -454,7 +452,6 @@ class SAIAPITableAction(SAIObject):
             }
         '''
         # print("Parsing table action: " + self.name)
-        self.name = self.parse_sai_object_name(self.name)
         self.parse_action_params(p4rt_table_action, sai_enums)
 
     def parse_action_params(self, p4rt_table_action, sai_enums):
@@ -487,8 +484,6 @@ class SAIAPITableActionParam(SAIObject):
 
             { "id": 1, "name": "dst_vnet_id", "bitwidth": 16 }
         '''
-        self.id = p4rt_table_action_param['id']
-        self.name = p4rt_table_action_param[NAME_TAG]
         self.bitwidth = p4rt_table_action_param[BITWIDTH_TAG]
         # print("Parsing table action param: " + self.name)
 
