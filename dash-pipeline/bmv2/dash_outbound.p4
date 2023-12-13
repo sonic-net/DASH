@@ -14,7 +14,7 @@ control outbound(inout headers_t hdr,
         meta.meter_policy_en = meter_policy_en;
         meta.route_meter_class = meter_class;
     }
-    action route_vnet(bit<16> dst_vnet_id,
+    action route_vnet(@SaiVal[type="sai_object_id_t"] bit<16> dst_vnet_id,
                       bit<1> meter_policy_en,
                       bit<16> meter_class) {
         meta.dst_vnet_id = dst_vnet_id;
@@ -23,6 +23,7 @@ control outbound(inout headers_t hdr,
 
     action route_vnet_direct(bit<16> dst_vnet_id,
                              bit<1> overlay_ip_is_v6,
+                             @SaiVal[type="sai_ip_address_t"]
                              IPv4ORv6Address overlay_ip,
                              bit<1> meter_policy_en,
                              bit<16> meter_class) {
@@ -95,7 +96,7 @@ control outbound(inout headers_t hdr,
     @SaiTable[name = "outbound_routing", api = "dash_outbound_routing"]
     table routing {
         key = {
-            meta.eni_id : exact @SaiVal[name = "eni_id"];
+            meta.eni_id : exact @SaiVal[name = "eni_id", type="sai_object_id_t"];
             meta.is_overlay_ip_v6 : exact @SaiVal[name = "destination_is_v6"];
             meta.dst_ip_addr : lpm @SaiVal[name = "destination"];
         }
@@ -119,7 +120,7 @@ control outbound(inout headers_t hdr,
 #endif // TARGET_DPDK_PNA
     }
 
-    action set_tunnel(IPv4Address underlay_dip,
+    action set_tunnel(@SaiVal[type="sai_ip_address_t"] IPv4Address underlay_dip,
                       @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t dash_encapsulation,
                       bit<16> meter_class,
                       bit<1> meter_class_override) {
@@ -129,7 +130,7 @@ control outbound(inout headers_t hdr,
         meta.encap_data.dash_encapsulation = dash_encapsulation;
     }
 
-    action set_tunnel_mapping(IPv4Address underlay_dip,
+    action set_tunnel_mapping(@SaiVal[type="sai_ip_address_t"] IPv4Address underlay_dip,
                               EthernetAddress overlay_dmac,
                               bit<1> use_dst_vnet_vni,
                               bit<16> meter_class,
@@ -144,7 +145,7 @@ control outbound(inout headers_t hdr,
                    meter_class_override);
     }
 
-    action set_private_link_mapping(IPv4Address underlay_dip,
+    action set_private_link_mapping(@SaiVal[type="sai_ip_address_t"] IPv4Address underlay_dip,
                                     IPv6Address overlay_sip,
                                     IPv6Address overlay_dip,
                                     @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t dash_encapsulation,
@@ -179,7 +180,7 @@ control outbound(inout headers_t hdr,
     table ca_to_pa {
         key = {
             /* Flow for express route */
-            meta.dst_vnet_id: exact @SaiVal[name = "dst_vnet_id"];
+            meta.dst_vnet_id: exact @SaiVal[name = "dst_vnet_id", type="sai_object_id_t"];
             meta.is_lkup_dst_ip_v6 : exact @SaiVal[name = "dip_is_v6"];
             meta.lkup_dst_ip_addr : exact @SaiVal[name = "dip"];
         }
@@ -208,7 +209,7 @@ control outbound(inout headers_t hdr,
     @SaiTable[name = "vnet", api = "dash_vnet"]
     table vnet {
         key = {
-            meta.vnet_id : exact @SaiVal[name = "vnet_id"];
+            meta.vnet_id : exact @SaiVal[name = "vnet_id", type="sai_object_id_t"];
         }
 
         actions = {

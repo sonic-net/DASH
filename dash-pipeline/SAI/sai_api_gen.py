@@ -123,28 +123,18 @@ class SAITypeSolver:
         return SAITypeSolver.sai_type_info_registry[sai_type]
 
     @staticmethod
-    def get_object_sai_type(object_size, object_name):
-        object_name = object_name.lower()
-
+    def get_object_sai_type(object_size):
         sai_type_name = ""
 
         if object_size == 1:
             sai_type_name = 'bool'
         elif object_size <= 8:
             sai_type_name = 'sai_uint8_t'
-        elif object_size == 16 and ('_id' in object_name):
-            sai_type_name = 'sai_object_id_t'
         elif object_size <= 16:
             sai_type_name = 'sai_uint16_t'
-        elif object_size == 32 and ('ip_addr_family' in object_name):
-            sai_type_name = 'sai_ip_addr_family_t'
-        elif object_size == 32 and ('ip' in object_name):
-            sai_type_name = 'sai_ip_address_t'
-        elif object_size == 32 and ('_id' in object_name):
-            sai_type_name = 'sai_object_id_t'
         elif object_size <= 32:
             sai_type_name = 'sai_uint32_t'
-        elif object_size == 48 and ('mac' in object_name):
+        elif object_size == 48:
             sai_type_name = 'sai_mac_t'
         elif object_size <= 64:
             sai_type_name = 'sai_uint64_t'
@@ -156,9 +146,9 @@ class SAITypeSolver:
         return SAITypeSolver.get_sai_type(sai_type_name)
 
     @staticmethod
-    def get_match_key_sai_type(match_type, key_size, key_name):
+    def get_match_key_sai_type(match_type, key_size):
         if match_type == 'exact' or match_type == 'optional' or match_type == 'ternary':
-            return  SAITypeSolver.get_object_sai_type(key_size, key_name)
+            return  SAITypeSolver.get_object_sai_type(key_size)
         elif match_type == 'lpm':
             return SAITypeSolver.__get_lpm_match_key_sai_type(key_size)
         elif match_type == 'list':
@@ -416,7 +406,7 @@ class SAIAPITableKey(SAIObject):
         if self.type != None:
             sai_type_info = SAITypeSolver.get_sai_type(self.type)
         else:
-            sai_type_info = SAITypeSolver.get_match_key_sai_type(self.match_type, self.bitwidth, self.name)
+            sai_type_info = SAITypeSolver.get_match_key_sai_type(self.match_type, self.bitwidth)
             self.type = sai_type_info.name
 
         self.field = sai_type_info.field_func_prefix
@@ -494,7 +484,7 @@ class SAIAPITableActionParam(SAIObject):
         if self.type != None:
             sai_type_info = SAITypeSolver.get_sai_type(self.type)
         else:
-            sai_type_info = SAITypeSolver.get_object_sai_type(self.bitwidth, self.name)
+            sai_type_info = SAITypeSolver.get_object_sai_type(self.bitwidth)
             self.type = sai_type_info.name
 
         self.field = sai_type_info.field_func_prefix
