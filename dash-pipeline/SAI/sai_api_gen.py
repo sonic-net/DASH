@@ -142,7 +142,7 @@ class SAITypeSolver:
             sai_type_name = 'sai_object_id_t'
         elif object_size <= 32:
             sai_type_name = 'sai_uint32_t'
-        elif object_size == 48 and ('mac' in object_name):
+        elif object_size == 48:
             sai_type_name = 'sai_mac_t'
         elif object_size <= 64:
             sai_type_name = 'sai_uint64_t'
