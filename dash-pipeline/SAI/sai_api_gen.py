@@ -153,7 +153,6 @@ class SAITypeSolver:
         else:
             raise ValueError(f'key_size={object_size} is not supported')
 
-        print("object name = " + object_name + ", object size = " + str(object_size) + ", sai_type_name = " + sai_type_name)
         return SAITypeSolver.get_sai_type(sai_type_name)
 
     @staticmethod
