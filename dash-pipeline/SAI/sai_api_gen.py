@@ -124,8 +124,6 @@ class SAITypeSolver:
 
     @staticmethod
     def get_object_sai_type(object_size, object_name):
-        object_name = object_name.lower()
-
         sai_type_name = ""
 
         if object_size == 1:
