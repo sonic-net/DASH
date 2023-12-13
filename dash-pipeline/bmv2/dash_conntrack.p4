@@ -68,14 +68,14 @@ control ConntrackIn(inout headers_t hdr,
   table conntrackIn {
       key = {
           directionNeutralAddr(meta.direction, hdr.ipv4.src_addr, hdr.ipv4.dst_addr):
-              exact @name("ipv4_addr1")
+              exact @name("ipv4_addr1");
           directionNeutralAddr(meta.direction, hdr.ipv4.dst_addr, hdr.ipv4.src_addr):
-              exact @name("ipv4_addr2")
+              exact @name("ipv4_addr2");
           hdr.ipv4.protocol : exact;
           directionNeutralPort(meta.direction, hdr.tcp.src_port, hdr.tcp.dst_port):
-              exact @name("tcp_port1")
+              exact @name("tcp_port1");
           directionNeutralPort(meta.direction, hdr.tcp.dst_port, hdr.tcp.src_port):
-              exact @name("tcp_port2")
+              exact @name("tcp_port2");
           meta.eni_id : exact;
       }
       actions = {
@@ -121,14 +121,14 @@ control ConntrackOut(inout headers_t hdr,
   table conntrackOut {
       key = {
           directionNeutralAddr(meta.direction, hdr.ipv4.src_addr, hdr.ipv4.dst_addr):
-              exact @name("ipv4_addr1")
+              exact @name("ipv4_addr1");
           directionNeutralAddr(meta.direction, hdr.ipv4.dst_addr, hdr.ipv4.src_addr):
-              exact @name("ipv4_addr2")
+              exact @name("ipv4_addr2");
           hdr.ipv4.protocol : exact;
           directionNeutralPort(meta.direction, hdr.tcp.src_port, hdr.tcp.dst_port):
-              exact @name("tcp_port1")
+              exact @name("tcp_port1");
           directionNeutralPort(meta.direction, hdr.tcp.dst_port, hdr.tcp.src_port):
-              exact @name("tcp_port2")
+              exact @name("tcp_port2");
           meta.eni_id : exact;
       }
       actions = {
