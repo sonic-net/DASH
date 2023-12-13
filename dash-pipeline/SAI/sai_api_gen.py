@@ -389,7 +389,7 @@ class SAIEnum(SAIObject):
         SAITypeSolver.register_sai_type(
             'sai_' + self.name + '_t',
             "s32",
-            default = 'SAI_' + self.name.upper() + '_INVALID',
+            default = 'SAI_' + self.name.upper() + "_" + self.members[0].name.upper(),
             is_enum = True)
 
 
