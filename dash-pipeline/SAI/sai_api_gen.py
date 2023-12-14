@@ -236,6 +236,7 @@ class SAIObject:
         self.skipattr = None
         self.field = None
         self.default = None
+        self.match_type = ""
 
     def parse_basic_info_if_exists(self, p4rt_object):
         '''
@@ -300,6 +301,8 @@ class SAIObject:
                         self.object_name = kv['value']['stringValue']
                     elif kv['key'] == 'skipattr':
                         self.skipattr = kv['value']['stringValue']
+                    elif kv['key'] == 'match_type':
+                        self.match_type = kv['value']['stringValue']
                     else:
                         raise ValueError("Unknown attr annotation " + kv['key'])
 
@@ -381,7 +384,6 @@ class SAIAPITableKey(SAIObject):
     '''
     def __init__(self):
         super().__init__()
-        self.match_type = ""
         self.bitwidth = 0
         self.ip_is_v6_field_id = 0
 

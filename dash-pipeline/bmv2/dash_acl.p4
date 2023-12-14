@@ -38,11 +38,11 @@ match_kind {
         key = { \
             meta.stage ## stage_index ##_dash_acl_group_id : exact \
             @SaiVal[name = "dash_acl_group_id", type="sai_object_id_t", isresourcetype="true", objects="SAI_OBJECT_TYPE_DASH_ACL_GROUP"]; \
-            meta.dst_ip_addr : LIST_MATCH @SaiVal[name = "dip", type = "sai_ip_prefix_list_t"]; \
-            meta.src_ip_addr : LIST_MATCH @SaiVal[name = "sip", type = "sai_ip_prefix_list_t"]; \
-            meta.ip_protocol : LIST_MATCH @SaiVal[name = "protocol", type = "sai_u8_list_t"]; \
-            meta.src_l4_port : RANGE_LIST_MATCH @SaiVal[name = "src_port", type = "sai_u16_range_list_t"]; \
-            meta.dst_l4_port : RANGE_LIST_MATCH @SaiVal[name = "dst_port", type = "sai_u16_range_list_t"]; \
+            meta.dst_ip_addr : LIST_MATCH @SaiVal[name = "dip", type = "sai_ip_prefix_list_t", match_type = "list"]; \
+            meta.src_ip_addr : LIST_MATCH @SaiVal[name = "sip", type = "sai_ip_prefix_list_t", match_type = "list"]; \
+            meta.ip_protocol : LIST_MATCH @SaiVal[name = "protocol", type = "sai_u8_list_t", match_type = "list"]; \
+            meta.src_l4_port : RANGE_LIST_MATCH @SaiVal[name = "src_port", type = "sai_u16_range_list_t", match_type = "range_list"]; \
+            meta.dst_l4_port : RANGE_LIST_MATCH @SaiVal[name = "dst_port", type = "sai_u16_range_list_t", match_type = "range_list"]; \
         } \
         actions = { \
             permit; \
