@@ -86,16 +86,23 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 auto mf_lpm = mf->mutable_lpm();
                 {{key.field}}SetVal(attr_list[i].value, mf_lpm, {{key.bitwidth}});
                 {% elif key.match_type == 'list' %}
-                assert(0 && "mutable_list is not supported");
-                goto ErrRet;
-                // auto mf1_list = mf1->mutable_xxx();
-                //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+                // BMv2 doesn't support "list" match type, and we are using "optional" match in v1model as our implementation.
+                // Hence, here we only take the first item from the list and program it as optional match.
+                auto mf_optional = mf->mutable_optional();
+                sai_attribute_value_t attr_val;
+                    {% if key.field == 'ipprefixlist' %}
+                attr_val.ipaddr.addr_family = attr_list[i].value.ipprefixlist.list[0].addr_family;
+                attr_val.ipaddr.addr = attr_list[i].value.ipprefixlist.list[0].addr;
+                ipaddrSetVal(attr_val, mf_optional, {{key.bitwidth}});
+                    {% else %}
+                attr_val.{{ key.field | replace('list', '') }} = attr_list[i].value.{{key.field}}.list[0];
+                {{ key.field | replace('list', '') }}SetVal(attr_val, mf_optional, {{key.bitwidth}});
+                    {% endif %}
                 {% elif key.match_type == 'range_list' %}
-                goto ErrRet;
-                assert(0 && "range_list is not supported");
-                // TODO: if it is ternary, need to set the mask
-                // auto mf1_list = mf1->mutable_xxx();
-                //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+                // BMv2 doesn't support "range_list" match type, and we are using "optional" match in v1model as our implementation.
+                // Hence, here we only take the first item from the list and program it as optional match.
+                auto mf_optional = mf->mutable_optional();
+                {{ key.field | replace('rangelist', '') }}SetVal(attr_list[i].value.{{key.field}}.list[0].min, mf_optional, {{key.bitwidth}});
                 {% elif key.match_type == 'optional' %}
                 auto mf_optional = mf->mutable_optional();
                 {{key.field}}SetVal(attr_list[i].value, mf_optional, {{key.bitwidth}});
@@ -352,16 +359,23 @@ static sai_status_t dash_sai_create_{{ table.name }}(
         auto mf_lpm = mf->mutable_lpm();
         {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_lpm, {{key.bitwidth}});
         {% elif key.match_type == 'list' %}
-        assert(0 && "mutable_list is not supported");
-        goto ErrRet;
-        // auto mf1_list = mf1->mutable_xxx();
-        //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
-        {% elif key.match_type == 'range_list' %}
-        assert(0 && "range_list is not supported");
-        goto ErrRet;
-        // TODO: if it is ternary, need to set the mask
-        // auto mf1_list = mf1->mutable_xxx();
-        //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+        // BMv2 doesn't support "list" match type, and we are using "optional" match in v1model as our implementation.
+        // Hence, here we only take the first item from the list and program it as optional match.
+        auto mf_optional = mf->mutable_optional();
+        sai_attribute_value_t attr_val;
+            {% if key.field == 'ipprefixlist' %}
+        attr_val.ipaddr.addr_family = attr_list[i].value.ipprefixlist.list[0].addr_family;
+        attr_val.ipaddr.addr = attr_list[i].value.ipprefixlist.list[0].addr;
+        ipaddrSetVal(attr_val, mf_optional, {{key.bitwidth}});
+            {% else %}
+        attr_val.{{ key.field | replace('list', '') }} = attr_list[i].value.{{key.field}}.list[0];
+        {{ key.field | replace('list', '') }}SetVal(attr_val, mf_optional, {{key.bitwidth}});
+            {% endif %}
+        {% elif key.field == 'range_list' %}
+        // BMv2 doesn't support "range_list" match type, and we are using "optional" match in v1model as our implementation.
+        // Hence, here we only take the first item from the list and program the range start as optional match.
+        auto mf_optional = mf->mutable_optional();
+        {{ key.field | replace('rangelist', '') }}SetVal(attr_list[i].value.{{key.field}}.list[0].min, mf_optional, {{key.bitwidth}});
         {% endif %}
     }
     {% if key.ip_is_v6_field_id != 0 %}
@@ -516,15 +530,23 @@ static sai_status_t dash_sai_remove_{{ table.name }}(
         auto mf_lpm = mf->mutable_lpm();
         {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_lpm, {{key.bitwidth}});
         {% elif key.match_type == 'list' %}
-        assert(0 && "mutable_list is not supported");
-        goto ErrRet;
-        // auto mf1_list = mf1->mutable_xxx();
-        //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+        // BMv2 doesn't support "list" match type, and we are using "optional" match in v1model as our implementation.
+        // Hence, here we only take the first item from the list and program it as optional match.
+        auto mf_optional = mf->mutable_optional();
+        sai_attribute_value_t attr_val;
+            {% if key.field == 'ipprefixlist' %}
+        attr_val.ipaddr.addr_family = attr_list[i].value.ipprefixlist.list[0].addr_family;
+        attr_val.ipaddr.addr = attr_list[i].value.ipprefixlist.list[0].addr;
+        ipaddrSetVal(attr_val, mf_optional, {{key.bitwidth}});
+            {% else %}
+        attr_val.{{ key.field | replace('list', '') }} = attr_list[i].value.{{key.field}}.list[0];
+        {{ key.field | replace('list', '') }}SetVal(attr_val, mf_optional, {{key.bitwidth}});
+            {% endif %}
         {% elif key.match_type == 'range_list' %}
-        assert(0 && "range_list is not supported");
-        goto ErrRet;
-        // auto mf1_list = mf1->mutable_xxx();
-        //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+        // BMv2 doesn't support "range_list" match type, and we are using "optional" match in v1model as our implementation.
+        // Hence, here we only take the first item from the list and program it as optional match.
+        auto mf_optional = mf->mutable_optional();
+        {{ key.field | replace('rangelist', '') }}SetVal(attr_list[i].value.{{key.field}}.list[0].min, mf_optional, {{key.bitwidth}});
         {% endif %}
     }
     {% if key.ip_is_v6_field_id != 0 %}
