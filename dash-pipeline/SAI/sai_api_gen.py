@@ -36,6 +36,8 @@ SAI_VAL_TAG = 'SaiVal'
 SAI_TABLE_TAG = 'SaiTable'
 SAI_API_ORDER_TAG = 'api_order'
 
+BLANK_LINE_PLACEHOLDER = 'BLANK_LINE_PLACEHOLDER'
+
 #
 # SAI parser decorators:
 #
@@ -781,6 +783,22 @@ class SAIFileUpdater:
         print("Updating file: " + self.file_path + " ...")
         SAIFileUpdater.write_if_different(self.file_path, ''.join(self.lines))
 
+    def remove_existing_items(self, insert_lines, existing_lines):
+        new_lines = []
+        pre_is_blank_line = True
+
+        for line in [insert_line for insert_line in insert_lines
+                     if insert_line.strip() not in existing_lines]:
+            if line == BLANK_LINE_PLACEHOLDER:
+                if not pre_is_blank_line:
+                    new_lines.append('\n')
+                    pre_is_blank_line = True
+            else:
+                pre_is_blank_line = False
+                new_lines.append(line + '\n')
+
+        return new_lines
+
     def insert_before(self, target_line, insert_lines, new_line_only=False):
         new_lines = []
 
@@ -788,11 +806,11 @@ class SAIFileUpdater:
         for line in self.lines:
             if target_line in line:
                 if new_line_only:
-                    for insert_line in insert_lines:
-                        if insert_line.strip() not in existing_lines:
-                            new_lines.append(insert_line + '\n')
+                    new_lines.extend(self.remove_existing_items(insert_lines, existing_lines))
+
                 else:
-                    new_lines.extend([insert_line + '\n' for insert_line in insert_lines])
+                    new_lines.extend(['\n' if insert_line == BLANK_LINE_PLACEHOLDER
+                                      else insert_line + '\n' for insert_line in insert_lines])
 
             new_lines.append(line)
 
@@ -806,11 +824,10 @@ class SAIFileUpdater:
             new_lines.append(line)
             if target_line in line:
                 if new_line_only == True:
-                    for insert_line in insert_lines:
-                        if insert_line.strip() not in existing_lines:
-                            new_lines.append(insert_line + '\n')
+                    new_lines.extend(self.remove_existing_items(insert_lines, existing_lines))
                 else:
-                    new_lines.extend([insert_line + '\n' for insert_line in insert_lines])
+                    new_lines.extend(['\n' if insert_line == BLANK_LINE_PLACEHOLDER
+                                      else insert_line + '\n' for insert_line in insert_lines])
 
         self.lines = new_lines
 
@@ -893,13 +910,16 @@ class SAIGenerator:
 
         # Gather SAI API extension name and object types
         self.generated_sai_api_extension_names.append('    SAI_API_' + sai_api.app_name.upper() + ',')
+        self.generated_sai_api_extension_names.append(BLANK_LINE_PLACEHOLDER)
 
         for table in sai_api.tables:
             self.generated_sai_type_extension_names.append('    SAI_OBJECT_TYPE_' + table.name.upper() + ',')
+            self.generated_sai_type_extension_names.append(BLANK_LINE_PLACEHOLDER)
 
             if table.is_object == 'false':
                 self.generated_sai_object_entry_extension_names.append('    /** @validonly object_type == SAI_OBJECT_TYPE_' + table.name.upper() + ' */')
                 self.generated_sai_object_entry_extension_names.append('    sai_' + table.name + '_t ' + table.name + ';')
+                self.generated_sai_object_entry_extension_names.append(BLANK_LINE_PLACEHOLDER)
 
         return
 
