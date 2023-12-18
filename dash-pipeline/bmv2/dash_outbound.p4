@@ -14,7 +14,7 @@ control outbound(inout headers_t hdr,
         meta.meter_policy_en = meter_policy_en;
         meta.route_meter_class = meter_class;
     }
-    action route_vnet(bit<16> dst_vnet_id,
+    action route_vnet(@SaiVal[type="sai_object_id_t"] bit<16> dst_vnet_id,
                       bit<1> meter_policy_en,
                       bit<16> meter_class) {
         meta.dst_vnet_id = dst_vnet_id;
@@ -22,13 +22,14 @@ control outbound(inout headers_t hdr,
     }
 
     action route_vnet_direct(bit<16> dst_vnet_id,
-                             bit<1> is_overlay_ip_v4_or_v6,
+                             bit<1> overlay_ip_is_v6,
+                             @SaiVal[type="sai_ip_address_t"]
                              IPv4ORv6Address overlay_ip,
                              bit<1> meter_policy_en,
                              bit<16> meter_class) {
         meta.dst_vnet_id = dst_vnet_id;
         meta.lkup_dst_ip_addr = overlay_ip;
-        meta.is_lkup_dst_ip_v6 = is_overlay_ip_v4_or_v6;
+        meta.is_lkup_dst_ip_v6 = overlay_ip_is_v6;
         set_route_meter_attrs(meter_policy_en, meter_class);
     }
 
@@ -42,26 +43,27 @@ control outbound(inout headers_t hdr,
         meta.dropped = true;
     }
 
-    action route_service_tunnel(bit<1> is_overlay_dip_v4_or_v6,
+    action route_service_tunnel(bit<1> overlay_dip_is_v6,
                                 IPv4ORv6Address overlay_dip,
-                                bit<1> is_overlay_dip_mask_v4_or_v6,
+                                bit<1> overlay_dip_mask_is_v6,
                                 IPv4ORv6Address overlay_dip_mask,
-                                bit<1> is_overlay_sip_v4_or_v6,
+                                bit<1> overlay_sip_is_v6,
                                 IPv4ORv6Address overlay_sip,
-                                bit<1> is_overlay_sip_mask_v4_or_v6,
+                                bit<1> overlay_sip_mask_is_v6,
                                 IPv4ORv6Address overlay_sip_mask,
-                                bit<1> is_underlay_dip_v4_or_v6,
+                                bit<1> underlay_dip_is_v6,
                                 IPv4ORv6Address underlay_dip,
-                                bit<1> is_underlay_sip_v4_or_v6,
+                                bit<1> underlay_sip_is_v6,
                                 IPv4ORv6Address underlay_sip,
+                                @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"]
                                 dash_encapsulation_t dash_encapsulation,
                                 bit<24> tunnel_key,
                                 bit<1> meter_policy_en,
                                 bit<16> meter_class) {
         /* Assume the overlay addresses provided are always IPv6 and the original are IPv4 */
-        /* assert(is_overlay_dip_v4_or_v6 == 1 && is_overlay_sip_v4_or_v6 == 1);
-        assert(is_overlay_dip_mask_v4_or_v6 == 1 && is_overlay_sip_mask_v4_or_v6 == 1);
-        assert(is_underlay_dip_v4_or_v6 != 1 && is_underlay_sip_v4_or_v6 != 1); */
+        /* assert(overlay_dip_is_v6 == 1 && overlay_sip_is_v6 == 1);
+        assert(overlay_dip_mask_is_v6 == 1 && overlay_sip_mask_is_v6 == 1);
+        assert(underlay_dip_is_v6 != 1 && underlay_sip_is_v6 != 1); */
         meta.encap_data.original_overlay_dip = hdr.ipv4.src_addr;
         meta.encap_data.original_overlay_sip = hdr.ipv4.dst_addr;
 
@@ -91,12 +93,12 @@ control outbound(inout headers_t hdr,
 #endif  // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
 #endif  // TARGET_DPDK_PNA
 
-    @name("outbound_routing|dash_outbound_routing")
+    @SaiTable[name = "outbound_routing", api = "dash_outbound_routing"]
     table routing {
         key = {
-            meta.eni_id : exact @name("meta.eni_id:eni_id");
-            meta.is_overlay_ip_v6 : exact @name("meta.is_overlay_ip_v6:is_destination_v4_or_v6");
-            meta.dst_ip_addr : lpm @name("meta.dst_ip_addr:destination");
+            meta.eni_id : exact @SaiVal[type="sai_object_id_t"];
+            meta.is_overlay_ip_v6 : exact @SaiVal[name = "destination_is_v6"];
+            meta.dst_ip_addr : lpm @SaiVal[name = "destination"];
         }
 
         actions = {
@@ -118,16 +120,17 @@ control outbound(inout headers_t hdr,
 #endif // TARGET_DPDK_PNA
     }
 
-    action set_tunnel(IPv4Address underlay_dip,
+    action set_tunnel(@SaiVal[type="sai_ip_address_t"] IPv4Address underlay_dip,
+                      @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t dash_encapsulation,
                       bit<16> meter_class,
                       bit<1> meter_class_override) {
         meta.encap_data.underlay_dip = underlay_dip;
         meta.mapping_meter_class = meter_class;
         meta.mapping_meter_class_override = meter_class_override;
-        meta.encap_data.dash_encapsulation = dash_encapsulation_t.VXLAN;
+        meta.encap_data.dash_encapsulation = dash_encapsulation;
     }
 
-    action set_tunnel_mapping(IPv4Address underlay_dip,
+    action set_tunnel_mapping(@SaiVal[type="sai_ip_address_t"] IPv4Address underlay_dip,
                               EthernetAddress overlay_dmac,
                               bit<1> use_dst_vnet_vni,
                               bit<16> meter_class,
@@ -137,19 +140,19 @@ control outbound(inout headers_t hdr,
         meta.encap_data.overlay_dmac = overlay_dmac;
 
         set_tunnel(underlay_dip,
+                   dash_encapsulation_t.VXLAN,
                    meter_class,
                    meter_class_override);
     }
 
-    action set_private_link_mapping(IPv4Address underlay_dip,
+    action set_private_link_mapping(@SaiVal[type="sai_ip_address_t"] IPv4Address underlay_dip,
                                     IPv6Address overlay_sip,
                                     IPv6Address overlay_dip,
-                                    dash_encapsulation_t dash_encapsulation,
+                                    @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t dash_encapsulation,
                                     bit<24> tunnel_key,
                                     bit<16> meter_class,
                                     bit<1> meter_class_override) {
         meta.encap_data.overlay_dmac = hdr.ethernet.dst_addr;
-        meta.encap_data.dash_encapsulation = dash_encapsulation;
         meta.encap_data.vni = tunnel_key;
 
         service_tunnel_encode(hdr,
@@ -159,6 +162,7 @@ control outbound(inout headers_t hdr,
                               0xffffffffffffffffffffffff);
 
         set_tunnel(underlay_dip,
+                   dash_encapsulation,
                    meter_class,
                    meter_class_override);
     }
@@ -172,13 +176,13 @@ control outbound(inout headers_t hdr,
 #endif  // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
 #endif  // TARGET_DPDK_PNA
 
-    @name("outbound_ca_to_pa|dash_outbound_ca_to_pa")
+    @SaiTable[name = "outbound_ca_to_pa", api = "dash_outbound_ca_to_pa"]
     table ca_to_pa {
         key = {
             /* Flow for express route */
-            meta.dst_vnet_id: exact @name("meta.dst_vnet_id:dst_vnet_id");
-            meta.is_lkup_dst_ip_v6 : exact @name("meta.is_lkup_dst_ip_v6:is_dip_v4_or_v6");
-            meta.lkup_dst_ip_addr : exact @name("meta.lkup_dst_ip_addr:dip");
+            meta.dst_vnet_id: exact @SaiVal[type="sai_object_id_t"];
+            meta.is_lkup_dst_ip_v6 : exact @SaiVal[name = "dip_is_v6"];
+            meta.lkup_dst_ip_addr : exact @SaiVal[name = "dip"];
         }
 
         actions = {
@@ -202,10 +206,10 @@ control outbound(inout headers_t hdr,
         meta.encap_data.vni = vni;
     }
 
-    @name("vnet|dash_vnet")
+    @SaiTable[name = "vnet", api = "dash_vnet"]
     table vnet {
         key = {
-            meta.vnet_id : exact @name("meta.vnet_id:vnet_id");
+            meta.vnet_id : exact @SaiVal[type="sai_object_id_t"];
         }
 
         actions = {

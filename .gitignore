@@ -2,6 +2,7 @@
 **.swp
 .DS_STORE
 .idea
+.vscode
 *.bkp
 *.log
 *.pcap

@@ -35,7 +35,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     {% for group_item in tables%}
     {% if group_item.name != table.name  %}{% continue %}{% endif %}
     {% set table = group_item %}
-    {% if 'stage' in table %}
+    {% if table.stage != None %}
     // For stage {{ table.stage }}
     {% endif %}
     matchActionEntry = std::make_shared<p4::v1::TableEntry>();
@@ -61,7 +61,8 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     auto mf = matchActionEntry->add_match();
     mf->set_field_id({{table['keys'][0].id}});
     auto mf_exact = mf->mutable_exact();
-    {{table['keys'][0].field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
+    //{{table['keys'][0].field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
+      {{table['keys'][0].field}}SetVal(static_cast<uint{{ table['keys'][0].bitwidth }}_t>(objId), mf_exact, {{ table['keys'][0].bitwidth }}); 
     {% else %}
     // SAI object table with multiple P4 table keys
     // Copy P4 table keys from appropriate SAI attributes
@@ -74,7 +75,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
         switch(attr_list[i].id)
         {
             {% for key in table['keys'] %}
-            case SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}:
+            case SAI_{{ table.name | upper }}_ATTR_{{ key.name | upper }}:
             {
                 auto mf = matchActionEntry->add_match();
                 mf->set_field_id({{key.id}});
@@ -101,15 +102,15 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 {% elif key.match_type == 'ternary' %}
                 auto mf_ternary = mf->mutable_ternary();
                 {{key.field}}SetVal(attr_list[i].value, mf_ternary, {{key.bitwidth}});
-                auto mask = getMaskAttr(SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}_MASK, attr_count, attr_list);
-                assert(mask && "SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}_MASK isn't provided");
+                auto mask = getMaskAttr(SAI_{{ table.name | upper }}_ATTR_{{ key.name | upper }}_MASK, attr_count, attr_list);
+                assert(mask && "SAI_{{ table.name | upper }}_ATTR_{{ key.name | upper }}_MASK isn't provided");
                 {{key.field}}SetMask(mask->value, mf_ternary, {{key.bitwidth}});
                 {% endif %}
-                {% if 'v4_or_v6_id' in key %}
+                {% if key.ip_is_v6_field_id != 0 %}
                 {
-                    // set v4_or_v6 field
+                    // set ip_is_v6_field_id field
                     auto mf = matchActionEntry->add_match();
-                    mf->set_field_id({{key.v4_or_v6_id}});
+                    mf->set_field_id({{key.ip_is_v6_field_id}});
                     auto mf_exact = mf->mutable_exact();
                     booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
                 }
@@ -177,7 +178,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
 
         switch(attr_list[i].id)
         {
-            {% for param in table.actionParams %}
+            {% for param in table.action_params %}
             {% if param.skipattr == 'true' %}
             {% else %}
             case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}:
@@ -186,11 +187,11 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 param->set_param_id({{param.id}});
                 {{param.field}}SetVal(attr_list[i].value, param, {{param.bitwidth}});
                 //matchedParams++;
-                {% if 'v4_or_v6_id' in param %}
+                {% if param.ip_is_v6_field_id != 0 %}
                 {
-                    // set v4_or_v6 field
+                    // set ip_is_v6_field_id field
                     auto param2 = action->add_params();
-                    param2->set_param_id({{param.v4_or_v6_id}});
+                    param2->set_param_id({{param.ip_is_v6_field_id}});
                     booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param2, 1);
                     //matchedParams++;
                 }
@@ -339,10 +340,17 @@ static sai_status_t dash_sai_create_{{ table.name }}(
         mf->set_field_id({{key.id}});
         {% if key.match_type == 'exact' %}
         auto mf_exact = mf->mutable_exact();
-        {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
+        //{{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
+        {% set keyfield = key.field %}
+        {% set bitwidth = key.bitwidth %}
+        {% if keyfield in ['ipaddr','mac'] or bitwidth in [24] %} 
+          {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
+        {% else %} 
+          {{key.field}}SetVal(static_cast<uint{{key.bitwidth}}_t>(tableEntry->{{ key.name | lower }}), mf_exact, {{key.bitwidth}});
+        {% endif %}
         {% elif key.match_type == 'lpm' %}
         auto mf_lpm = mf->mutable_lpm();
-        {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_lpm, {{key.bitwidth}});
+        {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_lpm, {{key.bitwidth}});
         {% elif key.match_type == 'list' %}
         assert(0 && "mutable_list is not supported");
         goto ErrRet;
@@ -356,13 +364,13 @@ static sai_status_t dash_sai_create_{{ table.name }}(
         //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
         {% endif %}
     }
-    {% if 'v4_or_v6_id' in key %}
+    {% if key.ip_is_v6_field_id != 0 %}
     {
-        // set v4_or_v6 field
+        // set ip_is_v6_field_id field
         auto mf = matchActionEntry->add_match();
-        mf->set_field_id({{key.v4_or_v6_id}});
+        mf->set_field_id({{key.ip_is_v6_field_id}});
         auto mf_exact = mf->mutable_exact();
-        booldataSetVal((tableEntry->{{ key.sai_key_name | lower }}.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
+        booldataSetVal((tableEntry->{{ key.name | lower }}.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
     }
     {% endif %}
     {% endfor %}
@@ -405,7 +413,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
 
         switch(attr_list[i].id)
         {
-            {% for param in table.actionParams %}
+            {% for param in table.action_params %}
             {% if param.skipattr == 'true' %}
             {% else %}
             case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}:
@@ -414,11 +422,11 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 param->set_param_id({{param.id}});
                 {{param.field}}SetVal(attr_list[i].value, param, {{param.bitwidth}});
                 //matchedParams++;
-                {% if 'v4_or_v6_id' in param %}
+                {% if param.ip_is_v6_field_id != 0 %}
                 {
-                    // set v4_or_v6 field
+                    // set ip_is_v6_field_id field
                     auto param2 = action->add_params();
-                    param2->set_param_id({{param.v4_or_v6_id}});
+                    param2->set_param_id({{param.ip_is_v6_field_id}});
                     booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param2, 1);
                     //matchedParams++;
                 }
@@ -496,10 +504,17 @@ static sai_status_t dash_sai_remove_{{ table.name }}(
         mf->set_field_id({{key.id}});
         {% if key.match_type == 'exact' %}
         auto mf_exact = mf->mutable_exact();
-        {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
+        {% set keyfield = key.field %}
+        {% set bitwidth = key.bitwidth %}
+        {% if keyfield in ['ipaddr','mac'] or bitwidth in [24] %}
+           {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
+        {% else %}
+          {{key.field}}SetVal(static_cast<uint{{key.bitwidth}}_t>(tableEntry->{{ key.name | lower }}), mf_exact, {{key.bitwidth}});
+        {% endif %}  
+        //{{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
         {% elif key.match_type == 'lpm' %}
         auto mf_lpm = mf->mutable_lpm();
-        {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_lpm, {{key.bitwidth}});
+        {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_lpm, {{key.bitwidth}});
         {% elif key.match_type == 'list' %}
         assert(0 && "mutable_list is not supported");
         goto ErrRet;
@@ -512,13 +527,13 @@ static sai_status_t dash_sai_remove_{{ table.name }}(
         //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
         {% endif %}
     }
-    {% if 'v4_or_v6_id' in key %}
+    {% if key.ip_is_v6_field_id != 0 %}
     {
-        // set v4_or_v6 field
+        // set ip_is_v6_field_id field
         auto mf = matchActionEntry->add_match();
-        mf->set_field_id({{key.v4_or_v6_id}});
+        mf->set_field_id({{key.ip_is_v6_field_id}});
         auto mf_exact = mf->mutable_exact();
-        booldataSetVal((tableEntry->{{ key.sai_key_name | lower }}.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
+        booldataSetVal((tableEntry->{{ key.name | lower }}.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
     }
     {% endif %}
     {% endfor %}

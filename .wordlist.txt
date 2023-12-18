@@ -1,3 +1,4 @@
+ABI
 ABNF
 accessor
 accessors
@@ -593,7 +594,6 @@ TcpSynPacket
 TDI
 Teamd
 teardown
-techonology
 templating
 TEP
 testbed

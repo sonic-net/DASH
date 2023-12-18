@@ -2,7 +2,7 @@
 typedef enum _sai_{{ enum.name }}_t
 {
 {% for member in enum.members %}
-    SAI_{{ enum.name | upper }}_{{ member.sai_name | upper }},
+    SAI_{{ enum.name | upper }}_{{ member.name | upper }},
 
 {% endfor %}
 } sai_{{ enum.name }}_t;

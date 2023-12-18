@@ -61,7 +61,7 @@ DASH-SAI pipeline is designed to work as a general purpose network function pipe
 DASH-SAI APIs are designed to be generic, with the intent to set up the data path in different ways as needed.
 
 - The simplest way to set up the data path is to use the DASH-SAI APIs to create your pipeline and offload all your policy to ASIC.
-- If your application requires more advanced policy, then the techonology provider could also provide a inbox data plane app to implement these policies. And still, this is transparent to the upper layer, everything is hidden under the SAI level.
+- If your application requires more advanced policy, then the technology provider could also provide a inbox data plane app to implement these policies. And still, this is transparent to the upper layer, everything is hidden under the SAI level.
 - If even more customized or complicated pipelines are needed for certain traffic, we could also provide our own customized data plane app and use the DASH policy to instruct the ASIC to trap these packets up when they shows up.
 
 ## 3. Packet Structure
