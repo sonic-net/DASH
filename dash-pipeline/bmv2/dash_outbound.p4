@@ -206,7 +206,7 @@ control outbound(inout headers_t hdr,
         meta.encap_data.vni = vni;
     }
 
-    @SaiTable[name = "vnet", api = "dash_vnet"]
+    @SaiTable[name = "vnet", api = "dash_vnet", isobject="true"]
     table vnet {
         key = {
             meta.vnet_id : exact @SaiVal[type="sai_object_id_t"];
