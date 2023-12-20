@@ -562,8 +562,7 @@ class SAIAPITableData(SAIObject):
         self.__parse_table_keys(p4rt_table)
         self.__parse_table_actions(p4rt_table, all_actions)
 
-        if self.is_object == None:
-            self.is_object = 'false'
+        if self.is_object == "false":
             self.name = self.name + '_entry'
 
         return
@@ -589,6 +588,9 @@ class SAIAPITableData(SAIObject):
                         self.api_type = kv['value']['stringValue']
                     if kv['key'] == 'api_order':
                         self.api_order = kv['value']['int64Value']
+
+        if self.is_object == None:
+            self.is_object = 'false'
 
         return
 
