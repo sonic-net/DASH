@@ -155,9 +155,9 @@ class SAITypeSolver:
         elif match_type == 'list':
             return SAITypeSolver.__get_list_match_key_sai_type(key_size)
         elif match_type == 'range':
-            return SAITypeSolver.__get_range_sai_type(key_size)
+            return SAITypeSolver.__get_range_match_key_sai_type(key_size)
         elif match_type == 'range_list':
-            return SAITypeSolver.__get_range_list_sai_type(key_size)
+            return SAITypeSolver.__get_range_list_match_key_sai_type(key_size)
         else:
             raise ValueError(f"match_type={match_type} is not supported")
 
@@ -191,7 +191,7 @@ class SAITypeSolver:
         return SAITypeSolver.get_sai_type(sai_type_name)
 
     @staticmethod
-    def __get_range_sai_type(key_size):
+    def __get_range_match_key_sai_type(key_size):
         sai_type_name = ""
 
         # In SAI, all ranges that having smaller size than 32-bits are passed as 32-bits, such as port ranges and etc.
@@ -204,7 +204,7 @@ class SAITypeSolver:
         return SAITypeSolver.get_sai_type(sai_type_name)
 
     @staticmethod
-    def __get_range_list_sai_type(key_size):
+    def __get_range_list_match_key_sai_type(key_size):
         sai_type_name = ""
 
         if key_size <= 8:
@@ -236,6 +236,7 @@ class SAIObject:
         self.skipattr = None
         self.field = None
         self.default = None
+        self.match_type = ""
 
     def parse_basic_info_if_exists(self, p4rt_object):
         '''
@@ -300,6 +301,8 @@ class SAIObject:
                         self.object_name = kv['value']['stringValue']
                     elif kv['key'] == 'skipattr':
                         self.skipattr = kv['value']['stringValue']
+                    elif kv['key'] == 'match_type':
+                        self.match_type = kv['value']['stringValue']
                     else:
                         raise ValueError("Unknown attr annotation " + kv['key'])
 
@@ -381,7 +384,6 @@ class SAIAPITableKey(SAIObject):
     '''
     def __init__(self):
         super().__init__()
-        self.match_type = ""
         self.bitwidth = 0
         self.ip_is_v6_field_id = 0
 

@@ -50,6 +50,7 @@ Available tags are:
 - `stage`: Specify which stage this table represents for the matching stage type, e.g. `acl.stage1`.
 - `isobject`: When set to "true", a top level objects in SAI that attached to switch will be generated. Otherwise, a new type of entry will be generated, if nothing else helps us to determine this table is an object table.
 - `ignored`: When set to "true", we skip this table in SAI API generation.
+- `match_type`: Some match kinds used in DASH might not be supported by BMv2, such as `list` and `range_list`. In BMv2, we use `optional` to make the P4 compiler happy. However, we still want to generate the correct SAI API. This tag is used to specify the match type in SAI API generation.
 
 For more details, please check the SAI API generation script: [sai_api_gen.py](../SAI/sai_api_gen.py).
 
