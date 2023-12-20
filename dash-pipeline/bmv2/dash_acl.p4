@@ -33,7 +33,7 @@ match_kind {
 #ifdef TARGET_BMV2_V1MODEL
 #define ACL_STAGE(stage_index) \
     direct_counter(CounterType.packets_and_bytes) ## stage ## stage_index ##_counter; \
-    @SaiTable[name="dash_acl_rule", stage=str(acl.stage ## stage_index), api="dash_acl", api_order=1] \
+    @SaiTable[name="dash_acl_rule", stage=str(acl.stage ## stage_index), api="dash_acl", api_order=1, isobject="true"] \
     table stage ## stage_index { \
         key = { \
             meta.stage ## stage_index ##_dash_acl_group_id : exact \
@@ -70,7 +70,7 @@ match_kind {
 //        pna_direct_counter = stage ## stage_index ##_counter; \
 
 #define ACL_STAGE(stage_index) \
-    @SaiTable[name="dash_acl_rule", stage=str(acl.stage ## stage_index), api="dash_acl"] \
+    @SaiTable[name="dash_acl_rule", stage=str(acl.stage ## stage_index), api="dash_acl", isobject="true"] \
     table stage ##stage_index { \
         key = { \
             meta.stage ## stage_index ##_dash_acl_group_id : exact @SaiVal[name = "dash_acl_group_id"]; \

@@ -153,7 +153,7 @@ control dash_ingress(
         }
     }
 
-    @SaiTable[name = "eni", api = "dash_eni", api_order=1]
+    @SaiTable[name = "eni", api = "dash_eni", api_order=1, isobject="true"]
     table eni {
         key = {
             meta.eni_id : exact @SaiVal[type="sai_object_id_t"];
@@ -339,7 +339,7 @@ control dash_ingress(
         }
     }
 
-    @SaiTable[name = "dash_acl_group", api = "dash_acl", api_order = 0]
+    @SaiTable[name = "dash_acl_group", api = "dash_acl", api_order = 0, isobject="true"]
     table acl_group {
         key = {
             meta.stage1_dash_acl_group_id : exact @SaiVal[name = "dash_acl_group_id"];
