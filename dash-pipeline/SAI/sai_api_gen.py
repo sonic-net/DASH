@@ -6,40 +6,41 @@ try:
     import argparse
     import copy
     from jinja2 import Template, Environment, FileSystemLoader
+    from typing import (Any, Dict, List, Optional)
 except ImportError as ie:
     print("Import failed for " + ie.name)
     exit(1)
 
-NAME_TAG = 'name'
-TABLES_TAG = 'tables'
-BITWIDTH_TAG = 'bitwidth'
-ACTIONS_TAG = 'actions'
-ACTION_PARAMS_TAG = 'actionParams'
-PREAMBLE_TAG = 'preamble'
-OTHER_MATCH_TYPE_TAG = 'otherMatchType'
-MATCH_TYPE_TAG = 'matchType'
-PARAMS_TAG = 'params'
-ACTION_REFS_TAG = 'actionRefs'
-MATCH_FIELDS_TAG = 'matchFields'
-NOACTION = 'NoAction'
-STAGE_TAG = 'stage'
-PARAM_ACTIONS = 'paramActions'
-OBJECT_NAME_TAG = 'objectName'
-SCOPE_TAG = 'scope'
-TYPE_INFO_TAG = 'typeInfo'
-SERIALIZABLE_ENUMS_TAG = 'serializableEnums'
-MEMBERS_TAG = 'members'
-STRUCTURED_ANNOTATIONS_TAG = 'structuredAnnotations'
-KV_PAIRS_TAG = 'kvPairs'
-KV_PAIR_LIST_TAG = 'kvPairList'
-SAI_VAL_TAG = 'SaiVal'
-SAI_TABLE_TAG = 'SaiTable'
-SAI_API_ORDER_TAG = 'api_order'
+NAME_TAG: str = 'name'
+TABLES_TAG: str = 'tables'
+BITWIDTH_TAG: str = 'bitwidth'
+ACTIONS_TAG: str = 'actions'
+ACTION_PARAMS_TAG: str = 'actionParams'
+PREAMBLE_TAG: str = 'preamble'
+OTHER_MATCH_TYPE_TAG: str = 'otherMatchType'
+MATCH_TYPE_TAG: str = 'matchType'
+PARAMS_TAG: str = 'params'
+ACTION_REFS_TAG: str = 'actionRefs'
+MATCH_FIELDS_TAG: str = 'matchFields'
+NOACTION: str = 'NoAction'
+STAGE_TAG: str = 'stage'
+PARAM_ACTIONS: str = 'paramActions'
+OBJECT_NAME_TAG: str = 'objectName'
+SCOPE_TAG: str = 'scope'
+TYPE_INFO_TAG: str = 'typeInfo'
+SERIALIZABLE_ENUMS_TAG: str = 'serializableEnums'
+MEMBERS_TAG: str = 'members'
+STRUCTURED_ANNOTATIONS_TAG: str = 'structuredAnnotations'
+KV_PAIRS_TAG: str = 'kvPairs'
+KV_PAIR_LIST_TAG: str = 'kvPairList'
+SAI_VAL_TAG: str = 'SaiVal'
+SAI_TABLE_TAG: str = 'SaiTable'
+SAI_API_ORDER_TAG: str = 'api_order'
 
 #
 # SAI parser decorators:
 #
-def sai_parser_from_p4rt(cls):
+def sai_parser_from_p4rt(cls: type['SAIObject']):
     @staticmethod
     def create(p4rt_value, *args, **kwargs):
         sai_object = cls()
@@ -82,14 +83,14 @@ def sai_parser_from_p4rt(cls):
 #          |- SAIAPITableActionParam -| : Information of a single P4 table action parameter used by the action.
 #
 class SAITypeInfo:
-    def __init__(self, name, field_func_prefix, default = None, is_enum = False):
-        self.name = name
-        self.field_func_prefix = field_func_prefix
-        self.default = default
-        self.is_enum = is_enum
+    def __init__(self, name: str, field_func_prefix: str, default: str = None, is_enum: bool = False):
+        self.name: str = name
+        self.field_func_prefix: str = field_func_prefix
+        self.default: str = default
+        self.is_enum: bool = is_enum
 
 class SAITypeSolver:
-    sai_type_info_registry = {
+    sai_type_info_registry: Dict[str, SAITypeInfo] = {
         "bool": SAITypeInfo("bool", "booldata"),
         "sai_uint8_t": SAITypeInfo("sai_uint8_t", "u8"),
         "sai_object_id_t": SAITypeInfo("sai_object_id_t", "u16"),
@@ -113,19 +114,19 @@ class SAITypeSolver:
     }
 
     @staticmethod
-    def register_sai_type(name, field_func_prefix, default = None, is_enum = False):
+    def register_sai_type(name: str, field_func_prefix: str, default: bool = None, is_enum: bool = False) -> None:
         SAITypeSolver.sai_type_info_registry[name] = SAITypeInfo(name, field_func_prefix=field_func_prefix, default=default, is_enum=is_enum)
 
     @staticmethod
-    def get_sai_type(sai_type):
+    def get_sai_type(sai_type: str) -> SAITypeInfo:
         if sai_type not in SAITypeSolver.sai_type_info_registry:
             raise ValueError(f'sai_type={sai_type} is not supported')
 
         return SAITypeSolver.sai_type_info_registry[sai_type]
 
     @staticmethod
-    def get_object_sai_type(object_size):
-        sai_type_name = ""
+    def get_object_sai_type(object_size: int) -> SAITypeInfo:
+        sai_type_name: str = ""
 
         if object_size == 1:
             sai_type_name = 'bool'
@@ -147,98 +148,86 @@ class SAITypeSolver:
         return SAITypeSolver.get_sai_type(sai_type_name)
 
     @staticmethod
-    def get_match_key_sai_type(match_type, key_size):
+    def get_match_key_sai_type(match_type: str, key_size: int) -> SAITypeInfo:
         if match_type == 'exact' or match_type == 'optional' or match_type == 'ternary':
-            return  SAITypeSolver.get_object_sai_type(key_size)
-        elif match_type == 'lpm':
-            return SAITypeSolver.__get_lpm_match_key_sai_type(key_size)
+            return SAITypeSolver.get_object_sai_type(key_size)
+
+        sai_type_name: str = ""
+        if match_type == 'lpm':
+            sai_type_name = SAITypeSolver.__get_lpm_match_key_sai_type(key_size)
         elif match_type == 'list':
-            return SAITypeSolver.__get_list_match_key_sai_type(key_size)
+            sai_type_name = SAITypeSolver.__get_list_match_key_sai_type(key_size)
         elif match_type == 'range':
-            return SAITypeSolver.__get_range_match_key_sai_type(key_size)
+            sai_type_name = SAITypeSolver.__get_range_match_key_sai_type(key_size)
         elif match_type == 'range_list':
-            return SAITypeSolver.__get_range_list_match_key_sai_type(key_size)
+            sai_type_name = SAITypeSolver.__get_range_list_match_key_sai_type(key_size)
         else:
             raise ValueError(f"match_type={match_type} is not supported")
 
-    @staticmethod
-    def __get_lpm_match_key_sai_type(key_size):
-        sai_type_name = ""
+        return SAITypeSolver.get_sai_type(sai_type_name)
 
+    @staticmethod
+    def __get_lpm_match_key_sai_type(key_size: int) -> str:
         # LPM match key should always be converted into IP prefix.
         if key_size == 32:
-            sai_type_name = 'sai_ip_prefix_t'
+            return 'sai_ip_prefix_t'
         elif key_size == 128:
-            sai_type_name = 'sai_ip_prefix_t'
+            return 'sai_ip_prefix_t'
         else:
             raise ValueError(f'key_size={key_size} is not supported')
 
-        return SAITypeSolver.get_sai_type(sai_type_name)
-
     @staticmethod
-    def __get_list_match_key_sai_type(key_size):
-        sai_type_name = ""
-
+    def __get_list_match_key_sai_type(key_size: int) -> str:
         if key_size <= 8:
-            sai_type_name = 'sai_u8_list_t'
+            return 'sai_u8_list_t'
         elif key_size <= 16:
-            sai_type_name = 'sai_u16_list_t'
+            return 'sai_u16_list_t'
         elif key_size <= 32:
-            sai_type_name = 'sai_u32_list_t'
+            return 'sai_u32_list_t'
         else:
             raise ValueError(f'key_size={key_size} is not supported')
 
-        return SAITypeSolver.get_sai_type(sai_type_name)
-
     @staticmethod
-    def __get_range_match_key_sai_type(key_size):
-        sai_type_name = ""
-
+    def __get_range_match_key_sai_type(key_size: int) -> str:
         # In SAI, all ranges that having smaller size than 32-bits are passed as 32-bits, such as port ranges and etc.
         # So, we convert all ranges that is smaller than 32-bits to sai_u32_range_t by default.
         if key_size <= 32:
-            sai_type_name = 'sai_u32_range_t'
+            return 'sai_u32_range_t'
         else:
             raise ValueError(f'key_size={key_size} is not supported')
-
-        return SAITypeSolver.get_sai_type(sai_type_name)
 
     @staticmethod
-    def __get_range_list_match_key_sai_type(key_size):
-        sai_type_name = ""
-
+    def __get_range_list_match_key_sai_type(key_size: int) -> str:
         if key_size <= 8:
-            sai_type_name = 'sai_u8_range_list_t'
+            return 'sai_u8_range_list_t'
         elif key_size <= 16:
-            sai_type_name = 'sai_u16_range_list_t'
+            return 'sai_u16_range_list_t'
         elif key_size <= 32:
-            sai_type_name = 'sai_u32_range_list_t'
+            return 'sai_u32_range_list_t'
         elif key_size <= 64:
-            sai_type_name = 'sai_u64_range_list_t'
+            return 'sai_u64_range_list_t'
         else:
             raise ValueError(f'key_size={key_size} is not supported')
-
-        return SAITypeSolver.get_sai_type(sai_type_name)
 
 
 class SAIObject:
     def __init__(self):
         # Properties from P4Runtime preamble
-        self.name = ''
-        self.id = 0
-        self.alias = ''
+        self.name: str = ''
+        self.id: int = 0
+        self.alias: str = ''
 
         # Properties from SAI annotations
-        self.type = None
-        self.isresourcetype = None
-        self.isreadonly = None
-        self.object_name = None
-        self.skipattr = None
-        self.field = None
-        self.default = None
-        self.match_type = ""
+        self.type: Optional[str] = None
+        self.isresourcetype: Optional[str] = None
+        self.isreadonly: Optional[str] = None
+        self.object_name: Optional[str] = None
+        self.skipattr: Optional[str] = None
+        self.field: Optional[str] = None
+        self.default: Optional[str] = None
+        self.match_type: str = ""
 
-    def parse_basic_info_if_exists(self, p4rt_object):
+    def parse_basic_info_if_exists(self, p4rt_object: Dict[str, Any]) -> None:
         '''
         This method parses basic info, such as id and name, from either the object itself or the P4Runtime preamble object and populates the SAI object.
 
@@ -266,7 +255,7 @@ class SAIObject:
         
         return
 
-    def _parse_sai_object_annotation(self, p4rt_anno_list):
+    def _parse_sai_object_annotation(self, p4rt_anno_list: Dict[str, Any]) -> None:
         '''
         This method parses the SAI annotations and populates the SAI object.
         
@@ -306,7 +295,7 @@ class SAIObject:
                     else:
                         raise ValueError("Unknown attr annotation " + kv['key'])
 
-    def _link_ip_is_v6_vars(self, vars):
+    def _link_ip_is_v6_vars(self, vars: List['SAIAPITableActionParam']) -> List['SAIAPITableActionParam']:
         # Link *_is_v6 var to its corresponding var.
         ip_is_v6_key_ids = {v.name.replace("_is_v6", ""): v.id for v in vars if '_is_v6' in v.name}
 
@@ -325,9 +314,9 @@ class SAIEnumMember(SAIObject):
     '''
     def __init__(self):
         super().__init__()
-        self.p4rt_value = ""
+        self.p4rt_value: str = ""
 
-    def parse_p4rt(self, p4rt_member):
+    def parse_p4rt(self, p4rt_member: Dict[str, Any]) -> None:
         '''
         This method parses the P4Runtime enum member object and populates the SAI enum member object.
 
@@ -345,10 +334,10 @@ class SAIEnum(SAIObject):
     '''
     def __init__(self):
         super().__init__()
-        self.bitwidth = 0
-        self.members = []
+        self.bitwidth: int = 0
+        self.members: List[SAIEnumMember] = []
         
-    def parse_p4rt(self, p4rt_enum):
+    def parse_p4rt(self, p4rt_enum: Dict[str, Any]) -> None:
         '''
         This method parses the P4Runtime enum object and populates the SAI enum object.
         
@@ -384,10 +373,10 @@ class SAIAPITableKey(SAIObject):
     '''
     def __init__(self):
         super().__init__()
-        self.bitwidth = 0
-        self.ip_is_v6_field_id = 0
+        self.bitwidth: int = 0
+        self.ip_is_v6_field_id: int = 0
 
-    def parse_p4rt(self, p4rt_table_key):
+    def parse_p4rt(self, p4rt_table_key: Dict[str, Any]) -> None:
         '''
         This method parses the P4Runtime table key object and populates the SAI API table key object.
 
@@ -438,9 +427,9 @@ class SAIAPITableKey(SAIObject):
 class SAIAPITableAction(SAIObject):
     def __init__(self):
         super().__init__()
-        self.params = []
+        self.params: List[SAIAPITableActionParam] = []
 
-    def parse_p4rt(self, p4rt_table_action, sai_enums):
+    def parse_p4rt(self, p4rt_table_action: Dict[str, Any], sai_enums: List[SAIEnum]) -> None:
         '''
         This method parses the P4Runtime table action object and populates the SAI API table action object.
 
@@ -462,7 +451,7 @@ class SAIAPITableAction(SAIObject):
         # print("Parsing table action: " + self.name)
         self.parse_action_params(p4rt_table_action, sai_enums)
 
-    def parse_action_params(self, p4rt_table_action, sai_enums):
+    def parse_action_params(self, p4rt_table_action: Dict[str, Any], sai_enums: List[SAIEnum]) -> None:
         if PARAMS_TAG not in p4rt_table_action:
             return
 
@@ -480,11 +469,11 @@ class SAIAPITableAction(SAIObject):
 class SAIAPITableActionParam(SAIObject):
     def __init__(self):
         super().__init__()
-        self.bitwidth = 0
-        self.ip_is_v6_field_id = 0
-        self.param_actions = []
+        self.bitwidth: int = 0
+        self.ip_is_v6_field_id: int = 0
+        self.param_actions: List[SAIAPITableAction] = []
 
-    def parse_p4rt(self, p4rt_table_action_param):
+    def parse_p4rt(self, p4rt_table_action_param: Dict[str, Any]) -> None:
         '''
         This method parses the P4Runtime table action object and populates the SAI API table action object.
 
@@ -519,21 +508,21 @@ class SAIAPITableData(SAIObject):
     '''
     def __init__(self):
         super().__init__()
-        self.ignored = False
-        self.api_name = ""
-        self.ipaddr_family_attr = 'false'
-        self.keys = []
-        self.actions = []
-        self.action_params = []
-        self.with_counters = 'false'
+        self.ignored: bool = False
+        self.api_name: str = ""
+        self.ipaddr_family_attr: str = 'false'
+        self.keys: List[SAIAPITableKey] = []
+        self.actions: List[SAIAPITableAction] = []
+        self.action_params: List[SAIAPITableActionParam] = []
+        self.with_counters: str = 'false'
 
         # Extra properties from annotations
-        self.stage = None
-        self.is_object = None
-        self.api_order = 0
-        self.api_type = None
+        self.stage: Optional[str] = None
+        self.is_object: Optional[str] = None
+        self.api_order: int = 0
+        self.api_type: Optional[str] = None
 
-    def parse_p4rt(self, p4rt_table, program, all_actions, ignore_tables):
+    def parse_p4rt(self, p4rt_table: Dict[str, Any], program: Dict[str, Any], all_actions: List[SAIAPITableAction], ignore_tables: List[str]) -> None:
         '''
         This method parses the P4Runtime table object and populates the SAI API table object.
 
@@ -585,7 +574,7 @@ class SAIAPITableData(SAIObject):
 
         return
 
-    def __parse_sai_table_annotations(self, p4rt_table_preamble):
+    def __parse_sai_table_annotations(self, p4rt_table_preamble: Dict[str, Any]) -> None:
         if STRUCTURED_ANNOTATIONS_TAG not in p4rt_table_preamble:
             return
 
@@ -612,13 +601,13 @@ class SAIAPITableData(SAIObject):
 
         return
 
-    def __table_with_counters(self, program):
+    def __table_with_counters(self, program: Dict[str, Any]) -> None:
         for counter in program['directCounters']:
             if counter['directTableId'] == self.id:
                 return 'true'
         return 'false'
 
-    def __parse_table_keys(self, p4rt_table):
+    def __parse_table_keys(self, p4rt_table: Dict[str, Any]) -> None:
         for p4rt_table_key in p4rt_table[MATCH_FIELDS_TAG]:
             table_key = SAIAPITableKey.from_p4rt(p4rt_table_key)
             self.keys.append(table_key)
@@ -634,14 +623,14 @@ class SAIAPITableData(SAIObject):
 
         return
 
-    def __parse_table_actions(self, p4rt_table, all_actions):
+    def __parse_table_actions(self, p4rt_table: Dict[str, Any], all_actions: List[SAIAPITableAction]) -> None:
         for p4rt_table_action in p4rt_table[ACTION_REFS_TAG]:
             action_id = p4rt_table_action["id"]
             if all_actions[action_id].name != NOACTION and not (SCOPE_TAG in p4rt_table_action and p4rt_table_action[SCOPE_TAG] == 'DEFAULT_ONLY'):
                 self.__merge_action_params_to_table_params(all_actions[action_id])
                 self.actions.append(all_actions[action_id])
 
-    def __merge_action_params_to_table_params(self, action):
+    def __merge_action_params_to_table_params(self, action: SAIAPITableAction) -> None:
         '''
         Merge all parameters of an action into a single list of parameters for the table.
 
@@ -668,12 +657,12 @@ class DASHAPISet(SAIObject):
     '''
     This class holds all parsed SAI API info for a specific API set, such as routing or CA-PA mapping.
     '''
-    def __init__(self, api_name):
-        self.app_name = api_name
-        self.api_type = None
-        self.tables = []
+    def __init__(self, api_name: str):
+        self.app_name: str = api_name
+        self.api_type: Optional[str] = None
+        self.tables: List[SAIAPITableData] = []
     
-    def add_table(self, table):
+    def add_table(self, table: SAIAPITableData) -> None:
         if self.api_type == None:
             self.api_type = table.api_type
         elif self.api_type != table.api_type:
@@ -689,27 +678,27 @@ class DASHSAIExtensions(SAIObject):
     '''
     def __init__(self):
         super().__init__()
-        self.sai_enums = []
-        self.sai_apis = []
+        self.sai_enums: List[SAIEnum] = []
+        self.sai_apis: List[DASHAPISet] = []
 
     @staticmethod
-    def from_p4rt_file(p4rt_json_file_path, ignore_tables):
+    def from_p4rt_file(p4rt_json_file_path: str, ignore_tables: List[str]) -> 'DASHSAIExtensions':
         print("Parsing SAI APIs BMv2 P4Runtime Json file: " + p4rt_json_file_path)
         with open(p4rt_json_file_path) as p4rt_json_file:
             p4rt = json.load(p4rt_json_file)
 
         return DASHSAIExtensions.from_p4rt(p4rt, name = 'dash_sai_apis', ignore_tables = ignore_tables)
 
-    def parse_p4rt(self, p4rt_value, ignore_tables):
+    def parse_p4rt(self, p4rt_value: Dict[str, Any], ignore_tables: List[str]) -> None:
         self.__parse_sai_enums_from_p4rt(p4rt_value)
         self.__parse_sai_apis_from_p4rt(p4rt_value, ignore_tables)
         self.__update_table_param_object_name_reference()
 
-    def __parse_sai_enums_from_p4rt(self, p4rt_value):
+    def __parse_sai_enums_from_p4rt(self, p4rt_value: Dict[str, Any]) -> None:
         all_p4rt_enums = p4rt_value[TYPE_INFO_TAG][SERIALIZABLE_ENUMS_TAG]
         self.sai_enums = [SAIEnum.from_p4rt(enum_value, name = enum_name) for enum_name, enum_value in all_p4rt_enums.items()]
 
-    def __parse_sai_apis_from_p4rt(self, program, ignore_tables):
+    def __parse_sai_apis_from_p4rt(self, program: Dict[str, Any], ignore_tables: List[str]) -> None:
         # Parse all actions.
         actions = self.__parse_sai_table_action(program[ACTIONS_TAG], self.sai_enums)
 
@@ -733,7 +722,7 @@ class DASHSAIExtensions(SAIObject):
         for sai_api in self.sai_apis:
             sai_api.tables.sort(key=lambda x: x.api_order)
 
-    def __update_table_param_object_name_reference(self):
+    def __update_table_param_object_name_reference(self) -> None:
         all_table_names = [table.name for api in self.sai_apis for table in api.tables]
     
         for sai_api in self.sai_apis:
@@ -757,7 +746,7 @@ class DASHSAIExtensions(SAIObject):
                                     key.object_name = table_name
 
 
-    def __parse_sai_table_action(self, p4rt_actions, sai_enums):
+    def __parse_sai_table_action(self, p4rt_actions: Dict[str, Any], sai_enums: List[SAIEnum]) -> Dict[str, SAIAPITableAction]:
         action_data = {}
         for p4rt_action in p4rt_actions:
             action = SAIAPITableAction.from_p4rt(p4rt_action, sai_enums)
@@ -768,7 +757,7 @@ class DASHSAIExtensions(SAIObject):
 # SAI Generators:
 #
 class SAIFileUpdater:
-    def __init__(self, file_path):
+    def __init__(self, file_path: str):
         self.file_path = file_path
 
     def __enter__(self):
@@ -780,8 +769,8 @@ class SAIFileUpdater:
         print("Updating file: " + self.file_path + " ...")
         SAIFileUpdater.write_if_different(self.file_path, ''.join(self.lines))
 
-    def insert_before(self, target_line, insert_lines, new_line_only=False):
-        new_lines = []
+    def insert_before(self, target_line: str, insert_lines: List[str], new_line_only: bool = False) -> None:
+        new_lines: List[str] = []
 
         existing_lines = set([l.strip() for l in self.lines])
         for line in self.lines:
@@ -797,8 +786,8 @@ class SAIFileUpdater:
 
         self.lines = new_lines
 
-    def insert_after(self, target_line, insert_lines, new_line_only = False):
-        new_lines = []
+    def insert_after(self, target_line: str, insert_lines: List[str], new_line_only: bool = False) -> None:
+        new_lines: List[str] = []
 
         existing_lines = set([l.strip() for l in self.lines])
         for line in self.lines:
@@ -817,7 +806,7 @@ class SAIFileUpdater:
     # and the content is the same, this will not touch
     # the file and let make utilize this
     @staticmethod
-    def write_if_different(file, content):
+    def write_if_different(file: str, content: str) -> None:
         if os.path.isfile(file) == True:
             o = open(file, "r")
             data = o.read()
@@ -828,40 +817,40 @@ class SAIFileUpdater:
             o.write(content)
 
 class SAITemplateRender:
-    jinja2_env = None
+    jinja2_env: Environment = None
 
     @classmethod
-    def new_tm(cls, template_file_path):
+    def new_tm(cls, template_file_path: str):
         if cls.jinja2_env == None:
-            cls.env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
-            cls.env.add_extension('jinja2.ext.loopcontrols')
-            cls.env.add_extension('jinja2.ext.do')
+            cls.jinja2_env = Environment(loader=FileSystemLoader('.'), trim_blocks=True, lstrip_blocks=True)
+            cls.jinja2_env.add_extension('jinja2.ext.loopcontrols')
+            cls.jinja2_env.add_extension('jinja2.ext.do')
         
-        return cls.env.get_template(template_file_path)
+        return cls.jinja2_env.get_template(template_file_path)
 
-    def __init__(self, template_file_path):
+    def __init__(self, template_file_path: str):
         self.template_file_path = template_file_path
         self.tm = SAITemplateRender.new_tm(template_file_path)
 
-    def render(self, **kwargs):
+    def render(self, **kwargs: Any) -> str:
         return self.tm.render(**kwargs)
 
-    def render_to_file(self, target_file_path, **kwargs):
+    def render_to_file(self, target_file_path: str, **kwargs: Any) -> None:
         print("Updating file: " + target_file_path + " (template = " + self.template_file_path + ") ...")
         rendered_str = self.tm.render(**kwargs)
         SAIFileUpdater.write_if_different(target_file_path, rendered_str)
 
 class SAIGenerator:
-    def __init__(self, dash_sai_ext):
-        self.dash_sai_ext = dash_sai_ext
-        self.sai_api_names = []
-        self.generated_sai_api_extension_names = []
-        self.generated_sai_type_extension_names = []
-        self.generated_sai_object_entry_extension_names = []
-        self.generated_header_file_names = []
-        self.generated_impl_file_names = []
+    def __init__(self, dash_sai_ext: DASHSAIExtensions):
+        self.dash_sai_ext: DASHSAIExtensions = dash_sai_ext
+        self.sai_api_names: List[str] = []
+        self.generated_sai_api_extension_names: List[str] = []
+        self.generated_sai_type_extension_names: List[str] = []
+        self.generated_sai_object_entry_extension_names: List[str] = []
+        self.generated_header_file_names: List[str] = []
+        self.generated_impl_file_names: List[str] = []
 
-    def generate(self):
+    def generate(self) -> None:
         print("\nGenerating all SAI APIs ...")
 
         for sai_api in self.dash_sai_ext.sai_apis:
@@ -871,7 +860,7 @@ class SAIGenerator:
         self.generate_sai_enum()
         self.generate_sai_fixed_api_files()
 
-    def generate_sai_api(self, sai_api):
+    def generate_sai_api(self, sai_api: DASHAPISet) -> None:
         print("\nGenerating DASH SAI API definitions and implementation for API: " + sai_api.app_name + " ...")
 
         self.sai_api_names.append(sai_api.app_name)
@@ -884,7 +873,7 @@ class SAIGenerator:
         # Generate SAI API implementation for all APIs.
         self.generate_sai_impl_file_for_api(sai_api)
 
-    def generate_dash_sai_definitions_for_api(self, sai_api):
+    def generate_dash_sai_definitions_for_api(self, sai_api: DASHAPISet) -> None:
         # SAI header file
         sai_header_file_name = 'saiexperimental' + sai_api.app_name.replace('_', '') + '.h'
         SAITemplateRender('templates/saiapi.h.j2').render_to_file('SAI/experimental/' + sai_header_file_name, sai_api = sai_api)
@@ -902,13 +891,13 @@ class SAIGenerator:
 
         return
 
-    def generate_sai_impl_file_for_api(self, sai_api):
+    def generate_sai_impl_file_for_api(self, sai_api: DASHAPISet) -> None:
         sai_impl_file_name = 'sai' + sai_api.app_name.replace('_', '') + '.cpp'
         header_prefix = "experimental" if sai_api.api_type != "underlay" else ""
         SAITemplateRender('templates/saiapi.cpp.j2').render_to_file('lib/' + sai_impl_file_name, tables = sai_api.tables, app_name = sai_api.app_name, header_prefix = header_prefix)
         self.generated_impl_file_names.append(sai_impl_file_name)
 
-    def generate_dash_sai_global_definitions(self):
+    def generate_dash_sai_global_definitions(self) -> None:
         print("\nGenerating DASH SAI API global definitions ...")
 
         # Update SAI extensions with API names and includes
@@ -927,8 +916,8 @@ class SAIGenerator:
 
         return
 
-    def generate_sai_enum(self):
-        new_sai_enums = []
+    def generate_sai_enum(self) -> None:
+        new_sai_enums: List[SAIEnum] = []
         with open('SAI/experimental/saitypesextensions.h', 'r') as f:
             content = f.read()
             for enum in self.dash_sai_ext.sai_enums:
@@ -942,12 +931,12 @@ class SAIGenerator:
         with SAIFileUpdater('SAI/experimental/saitypesextensions.h') as f:
             f.insert_before('/* __SAITYPESEXTENSIONS_H_ */', sai_enums_lines)
 
-    def generate_sai_fixed_api_files(self):
+    def generate_sai_fixed_api_files(self) -> None:
         print("\nGenerating SAI fixed APIs ...")
         for filename in ['saifixedapis.cpp', 'saiimpl.h']:
             SAITemplateRender('templates/%s.j2' % filename).render_to_file('lib/%s' % filename, api_names = self.sai_api_names)
 
-    def __get_uniq_sai_api(self, sai_api):
+    def __get_uniq_sai_api(self, sai_api: DASHAPISet) -> None:
         """ Only keep one table per group(with same table name) """
         groups = set()
         sai_api = copy.deepcopy(sai_api)
