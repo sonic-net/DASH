@@ -511,7 +511,7 @@ encap_type               = encap type depends on the action_type - {vxlan, nvgre
 vni                      = vni value associated with the corresponding action. Applicable if encap_type is specified. 
 ```
 
-### 3.2.5.1 ROUTING APPLIANCE
+### 3.2.7 ROUTING APPLIANCE
 	
 ```
 DASH_ROUTING_APPLIANCE_TABLE:{{appliance_id}}:
@@ -529,7 +529,7 @@ encap_type               = encap type depends on the action_type - {vxlan, nvgre
 vni                      = vni value associated with the corresponding action.
 ```
 
-### 3.2.6 APPLIANCE
+### 3.2.8 APPLIANCE
 	
 ```
 DASH_APPLIANCE_TABLE:{{appliance_id}}
@@ -544,7 +544,7 @@ sip                      = source ip address, to be used in encap
 vm_vni                   = VM VNI that is used for setting direction. Also used for inbound encap to VM
 ```
 
-### 3.2.8 ROUTE LPM TABLE - OUTBOUND
+### 3.2.9 ROUTE LPM TABLE - OUTBOUND
 
 ``` 
 DASH_ROUTE_TABLE:{{eni}}:{{prefix}} 
@@ -575,7 +575,7 @@ metering_policy_en	 = bool                      ; Metering policy lookup enable 
 metering_class           = class_id                  ; Metering class-id, used if metering policy lookup is not enabled
 ```
 
-### 3.2.9 ROUTE RULE TABLE - INBOUND
+### 3.2.10 ROUTE RULE TABLE - INBOUND
 
 ``` 
 DASH_ROUTE_RULE_TABLE:{{eni}}:{{vni}}:{{prefix}} 
@@ -600,7 +600,7 @@ metering_class           = class_id                  ; Metering class-id
 region                   = region_id                 ; optional region_id which the vni/prefix belongs to as a string for any vendor optimizations
 ```
 
-### 3.2.10 VNET MAPPING TABLE
+### 3.2.11 VNET MAPPING TABLE
 
 ``` 
 DASH_VNET_MAPPING_TABLE:{{vnet}}:{{ip_address}} 
@@ -627,7 +627,7 @@ overlay_sip              = ip_address                ; overlay src ip if routing
 overlay_dip              = ip_address                ; overlay dst ip if routing_type is {privatelink} 
 ```
 
-### 3.2.10 METER
+### 3.2.12 METER
 
 ```
 DASH_METER_POLICY:{{meter_policy_id}} 
@@ -672,7 +672,7 @@ tx_counter         = bytes    ; Number of transmitted bytes (read-only)
 rx_counter         = bytes    ; Number of received bytes (read-only)
 ```
 
-### 3.2.11 DASH orchagent (Overlay)
+### 3.2.13 DASH orchagent (Overlay)
 
 | APP_DB Table          | Key          | Field           | SAI Attributes/*objects*                        | Comment                                       |
 | --------------------- | ------------ | --------------- | ----------------------------------------------- | --------------------------------------------- |
@@ -750,7 +750,7 @@ rx_counter         = bytes    ; Number of received bytes (read-only)
 |                       |              | pa_validation   | SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION           | use PA_VALIDATE if true                       |
 |                       |              | metering_bucket |                                                 |                                               |
 
-### 3.2.11 Protobuf encoding
+### 3.2.14 Protobuf encoding
 
 For saving memory consumption([AppDBMemoryEstimation.xlsx](data/AppDBMemoryEstimation.xlsx)), the DASH table of APP_DB could be encoded as protobuf.
 
@@ -1506,7 +1506,7 @@ For the example configuration above, the following is a brief explanation of loo
 		a. LPM lookup hits for entry 10.2.0.6/24
 		b. The action in this case is "vnet"
 		c. Next lookup is in the mapping table and mapping table action here is "privatelinknsg"
-		d. First Action for "privatelink" is 4to6 transposition
+		d. First Action for "privatelinknsg" is 4to6 transposition
 		e. Packet gets transformed as: 
 		 	For Overlay SIP, using ENI's "pl_sip_encoding": "0x0020000000000a0b0c0d0a0b/0x002000000000ffffffffffff" -> Overlay SIP fd30:108:0:0a0b:0c0d:0a0b:a01:102;	
 			Overlay DIP 2603:10e1:100:2::3402:206 (No transformation, provided as part of mapping)
