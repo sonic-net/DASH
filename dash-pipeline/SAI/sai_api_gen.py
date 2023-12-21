@@ -5,6 +5,7 @@ try:
     import json
     import argparse
     import copy
+    from enum import Enum
     from jinja2 import Template, Environment, FileSystemLoader
     from typing import (Any, Dict, List, Optional)
 except ImportError as ie:
@@ -28,12 +29,14 @@ PARAM_ACTIONS: str = 'paramActions'
 OBJECT_NAME_TAG: str = 'objectName'
 SCOPE_TAG: str = 'scope'
 TYPE_INFO_TAG: str = 'typeInfo'
+COUNTER_TAG: str = 'counter'
 SERIALIZABLE_ENUMS_TAG: str = 'serializableEnums'
 MEMBERS_TAG: str = 'members'
 STRUCTURED_ANNOTATIONS_TAG: str = 'structuredAnnotations'
 KV_PAIRS_TAG: str = 'kvPairs'
 KV_PAIR_LIST_TAG: str = 'kvPairList'
 SAI_VAL_TAG: str = 'SaiVal'
+SAI_COUNTER_TAG: str = 'SaiCounter'
 SAI_TABLE_TAG: str = 'SaiTable'
 SAI_API_ORDER_TAG: str = 'api_order'
 
@@ -365,6 +368,80 @@ class SAIEnum(SAIObject):
             default = 'SAI_' + self.name.upper() + "_" + self.members[0].name.upper(),
             is_enum = True)
 
+class SAICounterType(Enum):
+    BYTES = 0
+    PACKETS = 1
+    BOTH = 2
+
+@sai_parser_from_p4rt
+class SAICounter(SAIObject):
+    '''
+    This class represents a single counter in SAI and provides parser from the P4Runtime counter object
+    '''
+    def __init__(self):
+        super().__init__()
+        self.type: SAICounterType = SAICounterType.BYTES
+        self.table_name: str = ""
+
+    def parse_p4rt(self, p4rt_counter: Dict[str, Any]) -> None:
+        '''
+        This method parses the P4Runtime counter object and populates the SAI counter object.
+
+        Example P4Runtime counter object:
+
+            {
+                "preamble": {
+                    "id": 318423147,
+                    "name": "dash_ingress.meter_bucket_inbound",
+                    "alias": "meter_bucket_inbound"
+                },
+                "spec": {
+                    "unit": "BYTES"
+                },
+                "size": "262144"
+            }
+        '''
+        self._parse_sai_counter_annotation(p4rt_counter)
+
+        counter_unit = p4rt_counter['spec']['unit']
+        if counter_unit == 'BYTES':
+            self.type = SAICounterType.BYTES 
+        elif counter_unit == 'PACKETS':
+            self.type = SAICounterType.PACKETS
+        elif counter_unit == 'BOTH':
+            self.type = SAICounterType.BOTH
+        else:
+            raise ValueError(f'Unknown counter unit: {counter_unit}')
+
+        return
+
+    def _parse_sai_counter_annotation(self, p4rt_counter: Dict[str, Any]) -> None:
+        '''
+        This method parses the SAI annotations and populates the SAI counter object.
+        
+        Example SAI annotations:
+
+            {
+                "name": "SaiCounter",
+                "kvPairList": {
+                    "kvPairs": [
+                        { "key": "name", "value": { "stringValue": "counter_name" } }
+                    ]
+                }
+            }
+
+        Whenever a new attribute is introduced, please update the doc here to get it captured: dash-pipeline/bmv2/README.md.
+        '''
+        for anno in p4rt_counter[STRUCTURED_ANNOTATIONS_TAG]:
+            if anno[NAME_TAG] == SAI_COUNTER_TAG:
+                for kv in anno[KV_PAIR_LIST_TAG][KV_PAIRS_TAG]:
+                    if kv['key'] == 'name':
+                        self.name = kv['value']['stringValue']
+                    if kv['key'] == 'table_name':
+                        self.table_name = kv['value']['stringValue']
+                    else:
+                        raise ValueError("Unknown attr annotation " + kv['key'])
+
 
 @sai_parser_from_p4rt
 class SAIAPITableKey(SAIObject):
@@ -514,6 +591,7 @@ class SAIAPITableData(SAIObject):
         self.keys: List[SAIAPITableKey] = []
         self.actions: List[SAIAPITableAction] = []
         self.action_params: List[SAIAPITableActionParam] = []
+        self.counters: List[SAICounter] = []
         self.with_counters: str = 'false'
 
         # Extra properties from annotations
@@ -522,7 +600,7 @@ class SAIAPITableData(SAIObject):
         self.api_order: int = 0
         self.api_type: Optional[str] = None
 
-    def parse_p4rt(self, p4rt_table: Dict[str, Any], program: Dict[str, Any], all_actions: List[SAIAPITableAction], ignore_tables: List[str]) -> None:
+    def parse_p4rt(self, p4rt_table: Dict[str, Any], program: Dict[str, Any], all_actions: Dict[int, SAIAPITableAction], table_counters: Dict[str, List[SAICounter]], ignore_tables: List[str]) -> None:
         '''
         This method parses the P4Runtime table object and populates the SAI API table object.
 
@@ -568,6 +646,7 @@ class SAIAPITableData(SAIObject):
         self.with_counters = self.__table_with_counters(program)
         self.__parse_table_keys(p4rt_table)
         self.__parse_table_actions(p4rt_table, all_actions)
+        self.counters = table_counters[self.name] if self.name in table_counters else []
 
         if self.is_object == "false":
             self.name = self.name + '_entry'
@@ -679,6 +758,7 @@ class DASHSAIExtensions(SAIObject):
     def __init__(self):
         super().__init__()
         self.sai_enums: List[SAIEnum] = []
+        self.sai_counters: List[SAICounter] = []
         self.sai_apis: List[DASHAPISet] = []
 
     @staticmethod
@@ -691,6 +771,7 @@ class DASHSAIExtensions(SAIObject):
 
     def parse_p4rt(self, p4rt_value: Dict[str, Any], ignore_tables: List[str]) -> None:
         self.__parse_sai_enums_from_p4rt(p4rt_value)
+        self.__parse_sai_counters_from_p4rt(p4rt_value)
         self.__parse_sai_apis_from_p4rt(p4rt_value, ignore_tables)
         self.__update_table_param_object_name_reference()
 
@@ -698,14 +779,24 @@ class DASHSAIExtensions(SAIObject):
         all_p4rt_enums = p4rt_value[TYPE_INFO_TAG][SERIALIZABLE_ENUMS_TAG]
         self.sai_enums = [SAIEnum.from_p4rt(enum_value, name = enum_name) for enum_name, enum_value in all_p4rt_enums.items()]
 
+    def __parse_sai_counters_from_p4rt(self, p4rt_value: Dict[str, Any]) -> None:
+        all_p4rt_counters = p4rt_value[COUNTER_TAG]
+        for p4rt_counter in all_p4rt_counters:
+            counter = SAICounter.from_p4rt(p4rt_counter)
+            self.sai_counters.append(counter)
+
     def __parse_sai_apis_from_p4rt(self, program: Dict[str, Any], ignore_tables: List[str]) -> None:
         # Parse all actions.
         actions = self.__parse_sai_table_action(program[ACTIONS_TAG], self.sai_enums)
 
+        table_counters = {}
+        for counter in self.sai_counters:
+            table_counters.setdefault(counter.table_name, []).append(counter)
+
         # Parse all tables into SAI API sets.
         tables = sorted(program[TABLES_TAG], key=lambda k: k[PREAMBLE_TAG][NAME_TAG])
         for table in tables:
-            sai_api_table_data = SAIAPITableData.from_p4rt(table, program, actions, ignore_tables)
+            sai_api_table_data = SAIAPITableData.from_p4rt(table, program, actions, table_counters, ignore_tables)
             if sai_api_table_data.ignored:
                 continue
 
@@ -746,7 +837,7 @@ class DASHSAIExtensions(SAIObject):
                                     key.object_name = table_name
 
 
-    def __parse_sai_table_action(self, p4rt_actions: Dict[str, Any], sai_enums: List[SAIEnum]) -> Dict[str, SAIAPITableAction]:
+    def __parse_sai_table_action(self, p4rt_actions: Dict[str, Any], sai_enums: List[SAIEnum]) -> Dict[int, SAIAPITableAction]:
         action_data = {}
         for p4rt_action in p4rt_actions:
             action = SAIAPITableAction.from_p4rt(p4rt_action, sai_enums)

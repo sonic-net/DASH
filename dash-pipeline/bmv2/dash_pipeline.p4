@@ -286,7 +286,9 @@ control dash_ingress(
     // MAX_METER_BUCKET = MAX_ENI(64) * NUM_BUCKETS_PER_ENI(4096)
     #define MAX_METER_BUCKETS 262144
 #ifdef TARGET_BMV2_V1MODEL
+    @SaiCounter[table_name="meter_bucket"]
     counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_inbound;
+    @SaiCounter[table_name="meter_bucket"]
     counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_outbound;
 #endif // TARGET_BMV2_V1MODEL
     action meter_bucket_action(
