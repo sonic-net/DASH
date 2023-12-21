@@ -40,7 +40,7 @@ SAI_API_ORDER_TAG: str = 'api_order'
 #
 # SAI parser decorators:
 #
-def sai_parser_from_p4rt(cls: 'SAIObject'):
+def sai_parser_from_p4rt(cls: type['SAIObject']):
     @staticmethod
     def create(p4rt_value, *args, **kwargs):
         sai_object = cls()
