@@ -396,8 +396,8 @@ class SAICounter(SAIAPITableAttribute):
         self.bitwidth: int = 64
         self.isreadonly: str = "true"
         self.counter_type: str = "bytes"
-        self.action_name: str = ""
         self.as_attr: bool = False
+        self.param_actions: List[str] = []
 
     def parse_p4rt(self, p4rt_counter: Dict[str, Any]) -> None:
         '''
@@ -454,8 +454,8 @@ class SAICounter(SAIAPITableAttribute):
                 for kv in anno[KV_PAIR_LIST_TAG][KV_PAIRS_TAG]:
                     if self._parse_sai_common_annotation(kv):
                         continue
-                    elif kv['key'] == 'action_name':
-                        self.action_name = kv['value']['stringValue']
+                    elif kv['key'] == 'action_names':
+                        self.param_actions = kv['value']['stringValue'].split(",")
                     elif kv['key'] == 'as_attr':
                         self.as_attr = True if kv['value']['stringValue'] == "true" else False
                     else:
@@ -797,7 +797,8 @@ class SAIAPITableData(SAIObject):
         # We need to build a mechanism to ensure the order of the attributes, because the attributes can come from
         # multiple actions as well as counters. Adding a new parameter to one action may cause the new parameter
         # being inserted in the middle of the list and break the ABI compatibility.
-        self.sai_attributes = self.action_params + [counter for counter in self.counters if counter.as_attr]
+        self.sai_attributes = [action_param for action_param in self.action_params if action_param.skipattr != "true"] \
+            + [counter for counter in self.counters if counter.as_attr]
 
 
 class DASHAPISet(SAIObject):
@@ -860,7 +861,8 @@ class DASHSAIExtensions(SAIObject):
         # Group all counters by action name.
         counters_by_action_name = {}
         for counter in self.sai_counters:
-            counters_by_action_name.setdefault(counter.action_name, []).append(counter)
+            for action_name in counter.param_actions:
+                counters_by_action_name.setdefault(action_name, []).append(counter)
 
         # Parse all actions.
         actions = self.__parse_sai_table_action(program[ACTIONS_TAG], self.sai_enums, counters_by_action_name)
