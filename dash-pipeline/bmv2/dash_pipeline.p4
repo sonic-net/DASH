@@ -291,8 +291,7 @@ control dash_ingress(
     @SaiCounter[name="inbound_bytes_counter", action_names="meter_bucket_action", as_attr="true"]
     counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_inbound;
 #endif // TARGET_BMV2_V1MODEL
-    action meter_bucket_action(
-            @SaiVal[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index) {
+    action meter_bucket_action(@SaiVal[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index) {
         meta.meter_bucket_index = meter_bucket_index;
     }
 
