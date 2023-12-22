@@ -155,43 +155,43 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% endfor %}
 {% endif %}
 {% endif %}
-{% for param in table.action_params %}
-{% if param.skipattr == 'true' %}
+{% for sai_attr in table.sai_attributes %}
+{% if sai_attr.skipattr == 'true' %}
 {% else %}
     /**
-     * @brief Action {% for action in param.param_actions %}{{ action }}{{ ", " if not loop.last else "" }}{% endfor %} parameter {{ param.name | upper }}
+     * @brief Action {% for action in sai_attr.param_actions %}{{ action }}{{ ", " if not loop.last else "" }}{% endfor %} parameter {{ sai_attr.name | upper }}
      *
-     * @type {{ param.type }}
-{% if param.isreadonly == 'true' %}
+     * @type {{ sai_attr.type }}
+{% if sai_attr.isreadonly == 'true' %}
      * @flags READ_ONLY
 {% else %}
      * @flags CREATE_AND_SET
 {% endif %}
-{% if param.type == 'sai_uint16_t' %}
+{% if sai_attr.type == 'sai_uint16_t' %}
      * @isvlan false
 {% endif %}
-{% if param.type == 'sai_object_id_t' %}
-     * @objects SAI_OBJECT_TYPE_{{ param.object_name | upper }}
+{% if sai_attr.type == 'sai_object_id_t' %}
+     * @objects SAI_OBJECT_TYPE_{{ sai_attr.object_name | upper }}
      * @allownull true
 {% endif %}
-{% if param.isreadonly != 'true' %}
-     * @default {{ param.default }}
+{% if sai_attr.isreadonly != 'true' %}
+     * @default {{ sai_attr.default }}
 {% endif %}
 {% if table.actions | length > 1 %}
-{% if param.param_actions | length > 0 %}
-     * @validonly {% for action in param.param_actions %}SAI_{{ table.name | upper }}_ATTR_ACTION == SAI_{{ table.name | upper }}_ACTION_{{ action | upper }}{{ " or " if not loop.last else "" }}{% endfor %}
+{% if sai_attr.param_actions | length > 0 %}
+     * @validonly {% for action in sai_attr.param_actions %}SAI_{{ table.name | upper }}_ATTR_ACTION == SAI_{{ table.name | upper }}_ACTION_{{ action | upper }}{{ " or " if not loop.last else "" }}{% endfor %}
 
 {% endif %}
 {% endif %}
-{% if param.isresourcetype == 'true' %}
+{% if sai_attr.isresourcetype == 'true' %}
      * @isresourcetype true
 {% endif %}
      */
 {% if not ns.firstattr %}
-    SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }} = SAI_{{ table.name | upper }}_ATTR_START,
+    SAI_{{ table.name | upper }}_ATTR_{{ sai_attr.name | upper }} = SAI_{{ table.name | upper }}_ATTR_START,
 {% set ns.firstattr = true %}
 {% else %}
-    SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }},
+    SAI_{{ table.name | upper }}_ATTR_{{ sai_attr.name | upper }},
 {% endif %}
 
 {% endif %}

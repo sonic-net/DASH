@@ -5,7 +5,6 @@ try:
     import json
     import argparse
     import copy
-    from enum import Enum
     from jinja2 import Template, Environment, FileSystemLoader
     from typing import (Any, Dict, List, Optional)
 except ImportError as ie:
@@ -29,7 +28,7 @@ PARAM_ACTIONS: str = 'paramActions'
 OBJECT_NAME_TAG: str = 'objectName'
 SCOPE_TAG: str = 'scope'
 TYPE_INFO_TAG: str = 'typeInfo'
-COUNTER_TAG: str = 'counter'
+COUNTERS_TAG: str = 'counters'
 SERIALIZABLE_ENUMS_TAG: str = 'serializableEnums'
 MEMBERS_TAG: str = 'members'
 STRUCTURED_ANNOTATIONS_TAG: str = 'structuredAnnotations'
@@ -86,9 +85,9 @@ def sai_parser_from_p4rt(cls: type['SAIObject']):
 #          |- SAIAPITableActionParam -| : Information of a single P4 table action parameter used by the action.
 #
 class SAITypeInfo:
-    def __init__(self, name: str, field_func_prefix: str, default: str = None, is_enum: bool = False):
+    def __init__(self, name: str, sai_attribute_value_field: str, default: str = None, is_enum: bool = False):
         self.name: str = name
-        self.field_func_prefix: str = field_func_prefix
+        self.sai_attribute_value_field: str = sai_attribute_value_field
         self.default: str = default
         self.is_enum: bool = is_enum
 
@@ -117,8 +116,8 @@ class SAITypeSolver:
     }
 
     @staticmethod
-    def register_sai_type(name: str, field_func_prefix: str, default: bool = None, is_enum: bool = False) -> None:
-        SAITypeSolver.sai_type_info_registry[name] = SAITypeInfo(name, field_func_prefix=field_func_prefix, default=default, is_enum=is_enum)
+    def register_sai_type(name: str, sai_attribute_value_field: str, default: bool = None, is_enum: bool = False) -> None:
+        SAITypeSolver.sai_type_info_registry[name] = SAITypeInfo(name, sai_attribute_value_field=sai_attribute_value_field, default=default, is_enum=is_enum)
 
     @staticmethod
     def get_sai_type(sai_type: str) -> SAITypeInfo:
@@ -220,16 +219,6 @@ class SAIObject:
         self.id: int = 0
         self.alias: str = ''
 
-        # Properties from SAI annotations
-        self.type: Optional[str] = None
-        self.isresourcetype: Optional[str] = None
-        self.isreadonly: Optional[str] = None
-        self.object_name: Optional[str] = None
-        self.skipattr: Optional[str] = None
-        self.field: Optional[str] = None
-        self.default: Optional[str] = None
-        self.match_type: str = ""
-
     def parse_basic_info_if_exists(self, p4rt_object: Dict[str, Any]) -> None:
         '''
         This method parses basic info, such as id and name, from either the object itself or the P4Runtime preamble object and populates the SAI object.
@@ -258,56 +247,19 @@ class SAIObject:
         
         return
 
-    def _parse_sai_object_annotation(self, p4rt_anno_list: Dict[str, Any]) -> None:
+    def _parse_sai_common_annotation(self, p4rt_anno: Dict[str, Any]) -> None:
         '''
-        This method parses the SAI annotations and populates the SAI object.
-        
-        Example SAI annotations:
+        This method parses a single SAI annotation key value pair and populates the SAI object.
 
-            {
-                "name": "Sai",
-                "kvPairList": {
-                    "kvPairs": [
-                        { "key": "type", "value": { "stringValue": "sai_ip_addr_family_t" } },
-                        { "key": "isresourcetype", "value": { "stringValue": "true" } }
-                    ]
-                }
-            }
+        Example SAI annotation key value pair:
 
-        Whenever a new attribute is introduced, please update the doc here to get it captured: dash-pipeline/bmv2/README.md.
+            { "key": "type", "value": { "stringValue": "sai_ip_addr_family_t" } }
         '''
-        for anno in p4rt_anno_list[STRUCTURED_ANNOTATIONS_TAG]:
-            if anno[NAME_TAG] == SAI_VAL_TAG:
-                for kv in anno[KV_PAIR_LIST_TAG][KV_PAIRS_TAG]:
-                    if kv['key'] == 'name':
-                        self.name = kv['value']['stringValue']
-                    elif kv['key'] == 'type':
-                        self.type = kv['value']['stringValue']
-                    elif kv['key'] == 'default_value':  # "default" is a reserved keyword and cannot be used.
-                        self.default = kv['value']['stringValue']
-                    elif kv['key'] == 'isresourcetype':
-                        self.isresourcetype = kv['value']['stringValue']
-                    elif kv['key'] == 'isreadonly':
-                        self.isreadonly = kv['value']['stringValue']
-                    elif kv['key'] == 'objects':
-                        self.object_name = kv['value']['stringValue']
-                    elif kv['key'] == 'skipattr':
-                        self.skipattr = kv['value']['stringValue']
-                    elif kv['key'] == 'match_type':
-                        self.match_type = kv['value']['stringValue']
-                    else:
-                        raise ValueError("Unknown attr annotation " + kv['key'])
+        if p4rt_anno['key'] == 'name':
+            self.name = p4rt_anno['value']['stringValue']
+            return True
 
-    def _link_ip_is_v6_vars(self, vars: List['SAIAPITableActionParam']) -> List['SAIAPITableActionParam']:
-        # Link *_is_v6 var to its corresponding var.
-        ip_is_v6_key_ids = {v.name.replace("_is_v6", ""): v.id for v in vars if '_is_v6' in v.name}
-
-        for v in vars:
-            if v.name in ip_is_v6_key_ids:
-                v.ip_is_v6_field_id = ip_is_v6_key_ids[v.name]
-
-        # Delete all vars with *_is_v6 in their names.
-        return [v for v in vars if '_is_v6' not in v.name]
+        return False
 
 
 @sai_parser_from_p4rt
@@ -368,20 +320,84 @@ class SAIEnum(SAIObject):
             default = 'SAI_' + self.name.upper() + "_" + self.members[0].name.upper(),
             is_enum = True)
 
-class SAICounterType(Enum):
-    BYTES = 0
-    PACKETS = 1
-    BOTH = 2
+class SAIAPITableAttribute(SAIObject):
+    def __init__(self):
+        # Properties from SAI annotations
+        self.type: Optional[str] = None
+        self.field: Optional[str] = None
+        self.default: Optional[str] = None
+        self.bitwidth: int = 0
+        self.isresourcetype: Optional[str] = None
+        self.isreadonly: Optional[str] = None
+        self.object_name: Optional[str] = None
+        self.skipattr: Optional[str] = None
+        self.match_type: str = ""
+
+    def _parse_sai_table_attribute_annotation(self, p4rt_anno_list: Dict[str, Any]) -> None:
+        '''
+        This method parses the SAI annotations and populates the SAI object.
+        
+        Example SAI annotations:
+
+            {
+                "name": "SaiVal",
+                "kvPairList": {
+                    "kvPairs": [
+                        { "key": "type", "value": { "stringValue": "sai_ip_addr_family_t" } },
+                        { "key": "isresourcetype", "value": { "stringValue": "true" } }
+                    ]
+                }
+            }
+
+        Whenever a new attribute is introduced, please update the doc here to get it captured: dash-pipeline/bmv2/README.md.
+        '''
+        for anno in p4rt_anno_list[STRUCTURED_ANNOTATIONS_TAG]:
+            if anno[NAME_TAG] == SAI_VAL_TAG:
+                for kv in anno[KV_PAIR_LIST_TAG][KV_PAIRS_TAG]:
+                    if self._parse_sai_common_annotation(kv):
+                        continue
+                    elif kv['key'] == 'type':
+                        self.type = kv['value']['stringValue']
+                    elif kv['key'] == 'default_value':  # "default" is a reserved keyword and cannot be used.
+                        self.default = kv['value']['stringValue']
+                    elif kv['key'] == 'isresourcetype':
+                        self.isresourcetype = kv['value']['stringValue']
+                    elif kv['key'] == 'isreadonly':
+                        self.isreadonly = kv['value']['stringValue']
+                    elif kv['key'] == 'objects':
+                        self.object_name = kv['value']['stringValue']
+                    elif kv['key'] == 'skipattr':
+                        self.skipattr = kv['value']['stringValue']
+                    elif kv['key'] == 'match_type':
+                        self.match_type = kv['value']['stringValue']
+                    else:
+                        raise ValueError("Unknown attr annotation " + kv['key'])
+
+    @staticmethod
+    def link_ip_is_v6_vars(vars: List['SAIAPITableAttribute']) -> List['SAIAPITableAttribute']:
+        # Link *_is_v6 var to its corresponding var.
+        ip_is_v6_key_ids = {v.name.replace("_is_v6", ""): v.id for v in vars if '_is_v6' in v.name}
+
+        for v in vars:
+            if v.name in ip_is_v6_key_ids:
+                v.ip_is_v6_field_id = ip_is_v6_key_ids[v.name]
+
+        # Delete all vars with *_is_v6 in their names.
+        return [v for v in vars if '_is_v6' not in v.name]
+
 
 @sai_parser_from_p4rt
-class SAICounter(SAIObject):
+class SAICounter(SAIAPITableAttribute):
     '''
     This class represents a single counter in SAI and provides parser from the P4Runtime counter object
     '''
     def __init__(self):
         super().__init__()
-        self.type: SAICounterType = SAICounterType.BYTES
-        self.table_name: str = ""
+        self.bitwidth: int = 64
+        self.isreadonly: str = "true"
+        self.counter_type: str = "bytes"
+        self.action_name: str = ""
+        self.as_attr: bool = False
 
     def parse_p4rt(self, p4rt_counter: Dict[str, Any]) -> None:
         '''
@@ -401,21 +417,21 @@ class SAICounter(SAIObject):
                 "size": "262144"
             }
         '''
-        self._parse_sai_counter_annotation(p4rt_counter)
+        self.__parse_sai_counter_annotation(p4rt_counter)
+
+        counter_storage_type = SAITypeSolver.get_object_sai_type(self.bitwidth)
+        self.type = counter_storage_type.name
+        self.field = counter_storage_type.sai_attribute_value_field
 
         counter_unit = p4rt_counter['spec']['unit']
-        if counter_unit == 'BYTES':
-            self.type = SAICounterType.BYTES 
-        elif counter_unit == 'PACKETS':
-            self.type = SAICounterType.PACKETS
-        elif counter_unit == 'BOTH':
-            self.type = SAICounterType.BOTH
+        if counter_unit in ['BYTES', 'PACKETS', 'BOTH']:
+            self.counter_type = counter_unit.lower()
         else:
             raise ValueError(f'Unknown counter unit: {counter_unit}')
 
         return
 
-    def _parse_sai_counter_annotation(self, p4rt_counter: Dict[str, Any]) -> None:
+    def __parse_sai_counter_annotation(self, p4rt_counter: Dict[str, Any]) -> None:
         '''
         This method parses the SAI annotations and populates the SAI counter object.
         
@@ -432,25 +448,26 @@ class SAICounter(SAIObject):
 
         Whenever a new attribute is introduced, please update the doc here to get it captured: dash-pipeline/bmv2/README.md.
         '''
-        for anno in p4rt_counter[STRUCTURED_ANNOTATIONS_TAG]:
+        for anno in p4rt_counter[PREAMBLE_TAG][STRUCTURED_ANNOTATIONS_TAG]:
             if anno[NAME_TAG] == SAI_COUNTER_TAG:
                 for kv in anno[KV_PAIR_LIST_TAG][KV_PAIRS_TAG]:
-                    if kv['key'] == 'name':
-                        self.name = kv['value']['stringValue']
-                    if kv['key'] == 'table_name':
+                    if self._parse_sai_common_annotation(kv):
+                        continue
+                    elif kv['key'] == 'action_name':
                         self.table_name = kv['value']['stringValue']
+                    elif kv['key'] == 'as_attr':
+                        self.as_attr = True if kv['value']['stringValue'] == "true" else False
                     else:
                         raise ValueError("Unknown attr annotation " + kv['key'])
 
 
 @sai_parser_from_p4rt
-class SAIAPITableKey(SAIObject):
+class SAIAPITableKey(SAIAPITableAttribute):
     '''
     This class represents a single SAI API table key and provides parser from the P4Runtime table key object.
     '''
     def __init__(self):
         super().__init__()
-        self.bitwidth: int = 0
         self.ip_is_v6_field_id: int = 0
 
     def parse_p4rt(self, p4rt_table_key: Dict[str, Any]) -> None:
@@ -484,7 +501,7 @@ class SAIAPITableKey(SAIObject):
             raise ValueError(f'No valid match tag found')
 
         if STRUCTURED_ANNOTATIONS_TAG in p4rt_table_key:
-            self._parse_sai_object_annotation(p4rt_table_key)
+            self._parse_sai_table_attribute_annotation(p4rt_table_key)
 
         # If type is specified, use it. Otherwise, try to find the proper type using default heuristics.
         if self.type != None:
@@ -493,7 +510,7 @@ class SAIAPITableKey(SAIObject):
             sai_type_info = SAITypeSolver.get_match_key_sai_type(self.match_type, self.bitwidth)
             self.type = sai_type_info.name
 
-        self.field = sai_type_info.field_func_prefix
+        self.field = sai_type_info.sai_attribute_value_field
         if self.default == None:
             self.default = sai_type_info.default
 
@@ -537,13 +554,13 @@ class SAIAPITableAction(SAIObject):
             param = SAIAPITableActionParam.from_p4rt(p)
             self.params.append(param)
 
-        self.params = self._link_ip_is_v6_vars(self.params)
+        self.params = SAIAPITableAttribute.link_ip_is_v6_vars(self.params)
 
         return
 
 
 @sai_parser_from_p4rt
-class SAIAPITableActionParam(SAIObject):
+class SAIAPITableActionParam(SAIAPITableAttribute):
     def __init__(self):
         super().__init__()
         self.bitwidth: int = 0
@@ -562,7 +579,7 @@ class SAIAPITableActionParam(SAIObject):
         # print("Parsing table action param: " + self.name)
 
         if STRUCTURED_ANNOTATIONS_TAG in p4rt_table_action_param:
-            self._parse_sai_object_annotation(p4rt_table_action_param)
+            self._parse_sai_table_attribute_annotation(p4rt_table_action_param)
 
         # If type is specified, use it. Otherwise, try to find the proper type using default heuristics.
         if self.type != None:
@@ -571,7 +588,7 @@ class SAIAPITableActionParam(SAIObject):
             sai_type_info = SAITypeSolver.get_object_sai_type(self.bitwidth)
             self.type = sai_type_info.name
 
-        self.field = sai_type_info.field_func_prefix
+        self.field = sai_type_info.sai_attribute_value_field
         if self.default == None:
             self.default = sai_type_info.default
 
@@ -593,6 +610,7 @@ class SAIAPITableData(SAIObject):
         self.action_params: List[SAIAPITableActionParam] = []
         self.counters: List[SAICounter] = []
         self.with_counters: str = 'false'
+        self.sai_attributes: List[SAIAPITableAttribute] = []
 
         # Extra properties from annotations
         self.stage: Optional[str] = None
@@ -600,7 +618,7 @@ class SAIAPITableData(SAIObject):
         self.api_order: int = 0
         self.api_type: Optional[str] = None
 
-    def parse_p4rt(self, p4rt_table: Dict[str, Any], program: Dict[str, Any], all_actions: Dict[int, SAIAPITableAction], table_counters: Dict[str, List[SAICounter]], ignore_tables: List[str]) -> None:
+    def parse_p4rt(self, p4rt_table: Dict[str, Any], program: Dict[str, Any], all_actions: Dict[int, SAIAPITableAction], ignore_tables: List[str]) -> None:
         '''
         This method parses the P4Runtime table object and populates the SAI API table object.
 
@@ -646,7 +664,6 @@ class SAIAPITableData(SAIObject):
         self.with_counters = self.__table_with_counters(program)
         self.__parse_table_keys(p4rt_table)
         self.__parse_table_actions(p4rt_table, all_actions)
-        self.counters = table_counters[self.name] if self.name in table_counters else []
 
         if self.is_object == "false":
             self.name = self.name + '_entry'
@@ -660,19 +677,19 @@ class SAIAPITableData(SAIObject):
         for anno in p4rt_table_preamble[STRUCTURED_ANNOTATIONS_TAG]:
             if anno[NAME_TAG] == SAI_TABLE_TAG:
                 for kv in anno[KV_PAIR_LIST_TAG][KV_PAIRS_TAG]:
-                    if kv['key'] == 'isobject':
+                    if self._parse_sai_common_annotation(kv):
+                        continue
+                    elif kv['key'] == 'isobject':
                         self.is_object = kv['value']['stringValue']
-                    if kv['key'] == 'ignored':
+                    elif kv['key'] == 'ignored':
                         self.ignored = True
-                    if kv['key'] == 'name':
-                        self.name = kv['value']['stringValue']
-                    if kv['key'] == 'stage':
+                    elif kv['key'] == 'stage':
                         self.stage = kv['value']['stringValue']
-                    if kv['key'] == 'api':
+                    elif kv['key'] == 'api':
                         self.api_name = kv['value']['stringValue']
-                    if kv['key'] == 'api_type':
+                    elif kv['key'] == 'api_type':
                         self.api_type = kv['value']['stringValue']
-                    if kv['key'] == 'api_order':
+                    elif kv['key'] == 'api_order':
                         self.api_order = kv['value']['int64Value']
 
         if self.is_object == None:
@@ -691,7 +708,7 @@ class SAIAPITableData(SAIObject):
             table_key = SAIAPITableKey.from_p4rt(p4rt_table_key)
             self.keys.append(table_key)
 
-        self.keys = self._link_ip_is_v6_vars(self.keys)
+        self.keys = SAIAPITableAttribute.link_ip_is_v6_vars(self.keys)
 
         for p4rt_table_key in self.keys:
             if (p4rt_table_key.match_type == 'exact' and p4rt_table_key.type == 'sai_ip_address_t') or \
@@ -731,6 +748,50 @@ class SAIAPITableData(SAIObject):
                 action_param.param_actions = [action.name]
                 self.action_params.append(action_param)
 
+    def post_parsing_process(self, all_table_names: List[str], counters_by_action_name: Dict[str, List[SAICounter]]) -> None:
+        self.__update_table_param_object_name_reference(all_table_names)
+
+        # Updating table counter references are done in the end of the parsing process.
+        #
+        # Although we could do it inline, but this way is more future-proof, since we may parse the bmv2
+        # json program (not p4runtime) to fetch more info on the relationship between tables and counters.
+        self.__build_counters_used_by_table(counters_by_action_name)
+
+        self.__build_sai_attributes_after_parsing()
+
+    def __update_table_param_object_name_reference(self, all_table_names) -> None:
+        # Update object name reference for action params
+        for param in self.action_params:
+            if param.type == 'sai_object_id_t':
+                table_ref = param.name[:-len("_id")]
+                for table_name in all_table_names:
+                    if table_ref.endswith(table_name):
+                        param.object_name = table_name
+
+        # Update object name reference for keys
+        for key in self.keys:
+            if key.type != None:
+                if key.type == 'sai_object_id_t':
+                    table_ref = key.name[:-len("_id")]
+                    for table_name in all_table_names:
+                        if table_ref.endswith(table_name):
+                            key.object_name = table_name
+
+    def __build_counters_used_by_table(self, counters_by_action_name: Dict[str, List[SAICounter]]) -> None:
+        for action in self.actions:
+            if action.name not in counters_by_action_name:
+                continue
+
+            for counter in counters_by_action_name[action.name]:
+                self.counters.append(counter)
+
+    def __build_sai_attributes_after_parsing(self):
+        # TODO:
+        # We need to build a mechanism to ensure the order of the attributes, because the attributes can come from
+        # multiple actions as well as counters. Adding a new parameter to one action may cause the new parameter
+        # being inserted in the middle of the list and break the ABI compatibility.
+        self.sai_attributes = self.action_params + [counter for counter in self.counters if counter.as_attr]
+
 
 class DASHAPISet(SAIObject):
     '''
@@ -748,6 +809,10 @@ class DASHAPISet(SAIObject):
             raise ValueError(f'API type mismatch: CurrentType = {self.api_type}, NewTableAPIType = {table.api_type}')
 
         self.tables.append(table)
+
+    def post_parsing_process(self, all_table_names: List[str], counters_by_action_name: Dict[str, List[SAICounter]]) -> None:
+        for table in self.tables:
+            table.post_parsing_process(all_table_names, counters_by_action_name)
 
 
 @sai_parser_from_p4rt
@@ -773,14 +838,13 @@ class DASHSAIExtensions(SAIObject):
         self.__parse_sai_enums_from_p4rt(p4rt_value)
         self.__parse_sai_counters_from_p4rt(p4rt_value)
         self.__parse_sai_apis_from_p4rt(p4rt_value, ignore_tables)
-        self.__update_table_param_object_name_reference()
 
     def __parse_sai_enums_from_p4rt(self, p4rt_value: Dict[str, Any]) -> None:
         all_p4rt_enums = p4rt_value[TYPE_INFO_TAG][SERIALIZABLE_ENUMS_TAG]
         self.sai_enums = [SAIEnum.from_p4rt(enum_value, name = enum_name) for enum_name, enum_value in all_p4rt_enums.items()]
 
     def __parse_sai_counters_from_p4rt(self, p4rt_value: Dict[str, Any]) -> None:
-        all_p4rt_counters = p4rt_value[COUNTER_TAG]
+        all_p4rt_counters = p4rt_value[COUNTERS_TAG]
         for p4rt_counter in all_p4rt_counters:
             counter = SAICounter.from_p4rt(p4rt_counter)
             self.sai_counters.append(counter)
@@ -789,14 +853,10 @@ class DASHSAIExtensions(SAIObject):
         # Parse all actions.
         actions = self.__parse_sai_table_action(program[ACTIONS_TAG], self.sai_enums)
 
-        table_counters = {}
-        for counter in self.sai_counters:
-            table_counters.setdefault(counter.table_name, []).append(counter)
-
         # Parse all tables into SAI API sets.
         tables = sorted(program[TABLES_TAG], key=lambda k: k[PREAMBLE_TAG][NAME_TAG])
         for table in tables:
-            sai_api_table_data = SAIAPITableData.from_p4rt(table, program, actions, table_counters, ignore_tables)
+            sai_api_table_data = SAIAPITableData.from_p4rt(table, program, actions, ignore_tables)
             if sai_api_table_data.ignored:
                 continue
 
@@ -813,36 +873,23 @@ class DASHSAIExtensions(SAIObject):
         for sai_api in self.sai_apis:
             sai_api.tables.sort(key=lambda x: x.api_order)
 
-    def __update_table_param_object_name_reference(self) -> None:
-        all_table_names = [table.name for api in self.sai_apis for table in api.tables]
-    
-        for sai_api in self.sai_apis:
-            # Update object name reference for action params
-            for table in sai_api.tables:
-                for param in table.action_params:
-                    if param.type == 'sai_object_id_t':
-                        table_ref = param.name[:-len("_id")]
-                        for table_name in all_table_names:
-                            if table_ref.endswith(table_name):
-                                param.object_name = table_name
-
-            # Update object name reference for keys
-            for table in sai_api.tables:
-                for key in table.keys:
-                    if key.type != None:
-                        if key.type == 'sai_object_id_t':
-                            table_ref = key.name[:-len("_id")]
-                            for table_name in all_table_names:
-                                if table_ref.endswith(table_name):
-                                    key.object_name = table_name
-
-
     def __parse_sai_table_action(self, p4rt_actions: Dict[str, Any], sai_enums: List[SAIEnum]) -> Dict[int, SAIAPITableAction]:
         action_data = {}
         for p4rt_action in p4rt_actions:
             action = SAIAPITableAction.from_p4rt(p4rt_action, sai_enums)
             action_data[action.id] = action
         return action_data
+
+    def post_parsing_process(self) -> None:
+        counters_by_action_name = {}
+        for counter in self.sai_counters:
+            counters_by_action_name.setdefault(counter.table_name, []).append(counter)
+
+        all_table_names = [table.name for api in self.sai_apis for table in api.tables]
+    
+        for sai_api in self.sai_apis:
+            sai_api.post_parsing_process(all_table_names, counters_by_action_name)
+
 
 #
 # SAI Generators:
@@ -1059,6 +1106,7 @@ if __name__ == "__main__":
 
     # Parse SAI data from P4 runtime json file
     dash_sai_exts = DASHSAIExtensions.from_p4rt_file(p4rt_file_path, args.ignore_tables.split(','))
+    dash_sai_exts.post_parsing_process()
 
     if args.print_sai_lib:
         print("Dumping parsed SAI data:")
