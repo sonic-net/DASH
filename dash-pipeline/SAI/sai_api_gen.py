@@ -417,6 +417,7 @@ class SAICounter(SAIAPITableAttribute):
                 "size": "262144"
             }
         '''
+        # print("Parsing counter: " + self.name)
         self.__parse_sai_counter_annotation(p4rt_counter)
 
         counter_storage_type = SAITypeSolver.get_object_sai_type(self.bitwidth)
@@ -454,7 +455,7 @@ class SAICounter(SAIAPITableAttribute):
                     if self._parse_sai_common_annotation(kv):
                         continue
                     elif kv['key'] == 'action_name':
-                        self.table_name = kv['value']['stringValue']
+                        self.action_name = kv['value']['stringValue']
                     elif kv['key'] == 'as_attr':
                         self.as_attr = True if kv['value']['stringValue'] == "true" else False
                     else:
@@ -522,8 +523,9 @@ class SAIAPITableAction(SAIObject):
     def __init__(self):
         super().__init__()
         self.params: List[SAIAPITableActionParam] = []
+        self.counters: List[SAICounter] = []
 
-    def parse_p4rt(self, p4rt_table_action: Dict[str, Any], sai_enums: List[SAIEnum]) -> None:
+    def parse_p4rt(self, p4rt_table_action: Dict[str, Any], sai_enums: List[SAIEnum], counters_by_action_name: Dict[str, List[SAICounter]]) -> None:
         '''
         This method parses the P4Runtime table action object and populates the SAI API table action object.
 
@@ -544,6 +546,7 @@ class SAIAPITableAction(SAIObject):
         '''
         # print("Parsing table action: " + self.name)
         self.parse_action_params(p4rt_table_action, sai_enums)
+        self.counters = counters_by_action_name[self.name] if self.name in counters_by_action_name else []
 
     def parse_action_params(self, p4rt_table_action: Dict[str, Any], sai_enums: List[SAIEnum]) -> None:
         if PARAMS_TAG not in p4rt_table_action:
@@ -618,7 +621,11 @@ class SAIAPITableData(SAIObject):
         self.api_order: int = 0
         self.api_type: Optional[str] = None
 
-    def parse_p4rt(self, p4rt_table: Dict[str, Any], program: Dict[str, Any], all_actions: Dict[int, SAIAPITableAction], ignore_tables: List[str]) -> None:
+    def parse_p4rt(self,
+                   p4rt_table: Dict[str, Any],
+                   program: Dict[str, Any],
+                   all_actions: Dict[int, SAIAPITableAction],
+                   ignore_tables: List[str]) -> None:
         '''
         This method parses the P4Runtime table object and populates the SAI API table object.
 
@@ -723,16 +730,21 @@ class SAIAPITableData(SAIObject):
         for p4rt_table_action in p4rt_table[ACTION_REFS_TAG]:
             action_id = p4rt_table_action["id"]
             if all_actions[action_id].name != NOACTION and not (SCOPE_TAG in p4rt_table_action and p4rt_table_action[SCOPE_TAG] == 'DEFAULT_ONLY'):
-                self.__merge_action_params_to_table_params(all_actions[action_id])
-                self.actions.append(all_actions[action_id])
+                action = all_actions[action_id]
+                self.actions.append(action)
+                self.__merge_action_info_to_table(action)
+
+    def __merge_action_info_to_table(self, action: SAIAPITableAction) -> None:
+        '''
+        Merge objects used by an action into the table for SAI attributes generation.
+
+        This is needed for deduplication. If the same counter is used by multiple actions, we only need to keep one
+        copy of for a table, so we don't generate multiple SAI attributes.
+        '''
+        self.__merge_action_params_to_table_params(action)
+        self.__merge_action_counters_to_table_counters(action)
 
     def __merge_action_params_to_table_params(self, action: SAIAPITableAction) -> None:
-        '''
-        Merge all parameters of an action into a single list of parameters for the table.
-
-        When merge the parameters, we need to handle duplications. If the same param passed to multiple actions,
-        we only need to keep one copy of the param in the table, so we don't generate multiple SAI attributes.
-        '''
         for action_param in action.params:
             # skip v4/v6 selector, as they are linked via parameter property.
             if '_is_v6' in action_param.name:
@@ -748,15 +760,18 @@ class SAIAPITableData(SAIObject):
                 action_param.param_actions = [action.name]
                 self.action_params.append(action_param)
 
-    def post_parsing_process(self, all_table_names: List[str], counters_by_action_name: Dict[str, List[SAICounter]]) -> None:
+    def __merge_action_counters_to_table_counters(self, action: SAIAPITableAction) -> None:
+        for counter in action.counters:
+            for table_counter in self.counters:
+                # Already have this counter in the table.
+                if table_counter.name == counter.name:
+                    break
+            else:
+                # New counter is found, add it to the table.
+                self.counters.append(counter)
+
+    def post_parsing_process(self, all_table_names: List[str]) -> None:
         self.__update_table_param_object_name_reference(all_table_names)
-
-        # Updating table counter references are done in the end of the parsing process.
-        #
-        # Although we could do it inline, but this way is more future-proof, since we may parse the bmv2
-        # json program (not p4runtime) to fetch more info on the relationship between tables and counters.
-        self.__build_counters_used_by_table(counters_by_action_name)
-
         self.__build_sai_attributes_after_parsing()
 
     def __update_table_param_object_name_reference(self, all_table_names) -> None:
@@ -776,14 +791,6 @@ class SAIAPITableData(SAIObject):
                     for table_name in all_table_names:
                         if table_ref.endswith(table_name):
                             key.object_name = table_name
-
-    def __build_counters_used_by_table(self, counters_by_action_name: Dict[str, List[SAICounter]]) -> None:
-        for action in self.actions:
-            if action.name not in counters_by_action_name:
-                continue
-
-            for counter in counters_by_action_name[action.name]:
-                self.counters.append(counter)
 
     def __build_sai_attributes_after_parsing(self):
         # TODO:
@@ -810,9 +817,9 @@ class DASHAPISet(SAIObject):
 
         self.tables.append(table)
 
-    def post_parsing_process(self, all_table_names: List[str], counters_by_action_name: Dict[str, List[SAICounter]]) -> None:
+    def post_parsing_process(self, all_table_names: List[str]) -> None:
         for table in self.tables:
-            table.post_parsing_process(all_table_names, counters_by_action_name)
+            table.post_parsing_process(all_table_names)
 
 
 @sai_parser_from_p4rt
@@ -850,8 +857,13 @@ class DASHSAIExtensions(SAIObject):
             self.sai_counters.append(counter)
 
     def __parse_sai_apis_from_p4rt(self, program: Dict[str, Any], ignore_tables: List[str]) -> None:
+        # Group all counters by action name.
+        counters_by_action_name = {}
+        for counter in self.sai_counters:
+            counters_by_action_name.setdefault(counter.action_name, []).append(counter)
+
         # Parse all actions.
-        actions = self.__parse_sai_table_action(program[ACTIONS_TAG], self.sai_enums)
+        actions = self.__parse_sai_table_action(program[ACTIONS_TAG], self.sai_enums, counters_by_action_name)
 
         # Parse all tables into SAI API sets.
         tables = sorted(program[TABLES_TAG], key=lambda k: k[PREAMBLE_TAG][NAME_TAG])
@@ -873,22 +885,17 @@ class DASHSAIExtensions(SAIObject):
         for sai_api in self.sai_apis:
             sai_api.tables.sort(key=lambda x: x.api_order)
 
-    def __parse_sai_table_action(self, p4rt_actions: Dict[str, Any], sai_enums: List[SAIEnum]) -> Dict[int, SAIAPITableAction]:
+    def __parse_sai_table_action(self, p4rt_actions: Dict[str, Any], sai_enums: List[SAIEnum], counters_by_action_name: Dict[str, List[SAICounter]]) -> Dict[int, SAIAPITableAction]:
         action_data = {}
         for p4rt_action in p4rt_actions:
-            action = SAIAPITableAction.from_p4rt(p4rt_action, sai_enums)
+            action = SAIAPITableAction.from_p4rt(p4rt_action, sai_enums, counters_by_action_name)
             action_data[action.id] = action
         return action_data
 
     def post_parsing_process(self) -> None:
-        counters_by_action_name = {}
-        for counter in self.sai_counters:
-            counters_by_action_name.setdefault(counter.table_name, []).append(counter)
-
         all_table_names = [table.name for api in self.sai_apis for table in api.tables]
-    
         for sai_api in self.sai_apis:
-            sai_api.post_parsing_process(all_table_names, counters_by_action_name)
+            sai_api.post_parsing_process(all_table_names)
 
 
 #
