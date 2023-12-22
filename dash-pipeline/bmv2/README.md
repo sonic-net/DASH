@@ -18,11 +18,7 @@ The DASH pipeline BM is written in P4<sub>16</sub> with BMv2 v1model. For specs,
 
 ### P4 annotations for SAI code generation
 
-Currently, some of the SAI generation behavior is either controlled by using the `@name` attribute with a non-formalized format, or simplifying guessing in the `sai_api_gen.py`. This is hard to maintain and extend and highly not recommended.
-
-To deprecate the complicated `@name` attribute, we are moving towards using structured annotations in P4. This annotation can apply on keys, action parameters and tables to document and provide necessary metadata for SAI API generation.
-
-The old mode is still supported, but no more new features will be added to it and it will be deprecated in the future.
+To better control the SAI API generation, we use P4 annotations to provide any additional information that generator needs.
 
 #### `@SaiVal`: Keys and action parameters
 
@@ -36,6 +32,16 @@ Available tags are:
 - `objects`: Space separated list of SAI object type this value accepts. When set, we force this value to be a SAI object id, and generate a corresponding SAI tag in SAI APIs: `@objects <list>`.
 - `isreadonly`: When set to "true", we generate force this value to be read-only in SAI API using: `@flags READ_ONLY`, otherwise, we generate `@flags CREATE_AND_SET`.
 - `skipattr`: When set to "true", we skip this attribute in SAI API generation.
+
+#### `@SaiCounter`: Counters
+
+Use `@SaiCounter["tag"="value", ...]` format for annotating counters.
+
+Available tags are:
+
+- `name`: Specify the preferred counter name in SAI API generation, e.g. `outbound_bytes_counter`.
+- `action_names`: The counters are usually updated in actions whenever a table is matched. However, v1model doesn't support conditional statements (if-else) in action blocks. Hence, to workaround, sometimes counters should be updated in the actions are updated in the control blocks after the action is called. This tag is used to specify the name of the actions that was supposed to update this counter. e.g. `action1,action2,...`
+- `as_attr`: When set to "true", the counters will be generated as an attribute of the SAI object. This is not a normal behavior in SAI, since SAI usually either use get stats APIs or directly use counter IDs. Currently, generating get stats APIs is not supported yet, hence when this is not set, the attribute will be ignored.
 
 #### `@SaiTable`: Tables
 
