@@ -6,7 +6,7 @@ try:
     import argparse
     import copy
     from jinja2 import Template, Environment, FileSystemLoader
-    from typing import (Any, Dict, List, Optional)
+    from typing import (Type, Any, Dict, List, Optional)
 except ImportError as ie:
     print("Import failed for " + ie.name)
     exit(1)
@@ -37,12 +37,11 @@ KV_PAIR_LIST_TAG: str = 'kvPairList'
 SAI_VAL_TAG: str = 'SaiVal'
 SAI_COUNTER_TAG: str = 'SaiCounter'
 SAI_TABLE_TAG: str = 'SaiTable'
-SAI_API_ORDER_TAG: str = 'api_order'
 
 #
 # SAI parser decorators:
 #
-def sai_parser_from_p4rt(cls: type['SAIObject']):
+def sai_parser_from_p4rt(cls: Type['SAIObject']):
     @staticmethod
     def create(p4rt_value, *args, **kwargs):
         sai_object = cls()
@@ -218,6 +217,7 @@ class SAIObject:
         self.name: str = ''
         self.id: int = 0
         self.alias: str = ''
+        self.order: int = 0
 
     def parse_basic_info_if_exists(self, p4rt_object: Dict[str, Any]) -> None:
         '''
@@ -257,6 +257,9 @@ class SAIObject:
         '''
         if p4rt_anno['key'] == 'name':
             self.name = p4rt_anno['value']['stringValue']
+            return True
+        elif p4rt_anno['key'] == 'order':
+            self.order = p4rt_anno['value']['int64Value']
             return True
 
         return False
@@ -322,6 +325,8 @@ class SAIEnum(SAIObject):
 
 class SAIAPITableAttribute(SAIObject):
     def __init__(self):
+        super().__init__()
+
         # Properties from SAI annotations
         self.type: Optional[str] = None
         self.field: Optional[str] = None
@@ -618,7 +623,6 @@ class SAIAPITableData(SAIObject):
         # Extra properties from annotations
         self.stage: Optional[str] = None
         self.is_object: Optional[str] = None
-        self.api_order: int = 0
         self.api_type: Optional[str] = None
 
     def parse_p4rt(self,
@@ -696,8 +700,6 @@ class SAIAPITableData(SAIObject):
                         self.api_name = kv['value']['stringValue']
                     elif kv['key'] == 'api_type':
                         self.api_type = kv['value']['stringValue']
-                    elif kv['key'] == 'api_order':
-                        self.api_order = kv['value']['int64Value']
 
         if self.is_object == None:
             self.is_object = 'false'
@@ -793,12 +795,21 @@ class SAIAPITableData(SAIObject):
                             key.object_name = table_name
 
     def __build_sai_attributes_after_parsing(self):
-        # TODO:
-        # We need to build a mechanism to ensure the order of the attributes, because the attributes can come from
-        # multiple actions as well as counters. Adding a new parameter to one action may cause the new parameter
-        # being inserted in the middle of the list and break the ABI compatibility.
-        self.sai_attributes = [action_param for action_param in self.action_params if action_param.skipattr != "true"] \
-            + [counter for counter in self.counters if counter.as_attr]
+        # Group all actions parameters and counters with as_attr set by order with sequence kept the same.
+        # Then merge them into a single list.
+        sai_attributes_by_order = {}
+        for action_param in self.action_params:
+            if action_param.skipattr != "true":
+                sai_attributes_by_order.setdefault(action_param.order, []).append(action_param)
+
+        for counter in self.counters:
+            if counter.as_attr:
+                sai_attributes_by_order.setdefault(counter.order, []).append(counter)
+        
+        # Merge all attributes into a single list.
+        self.sai_attributes = []
+        for order in sorted(sai_attributes_by_order.keys()):
+            self.sai_attributes.extend(sai_attributes_by_order[order])
 
 
 class DASHAPISet(SAIObject):
@@ -885,7 +896,7 @@ class DASHSAIExtensions(SAIObject):
 
         # Sort all parsed tables by API order, so we can always generate the APIs in the same order for keeping ABI compatibility.
         for sai_api in self.sai_apis:
-            sai_api.tables.sort(key=lambda x: x.api_order)
+            sai_api.tables.sort(key=lambda x: x.order)
 
     def __parse_sai_table_action(self, p4rt_actions: Dict[str, Any], sai_enums: List[SAIEnum], counters_by_action_name: Dict[str, List[SAICounter]]) -> Dict[int, SAIAPITableAction]:
         action_data = {}

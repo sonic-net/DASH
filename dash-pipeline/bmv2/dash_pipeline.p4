@@ -153,7 +153,7 @@ control dash_ingress(
         }
     }
 
-    @SaiTable[name = "eni", api = "dash_eni", api_order=1, isobject="true"]
+    @SaiTable[name = "eni", api = "dash_eni", order=1, isobject="true"]
     table eni {
         key = {
             meta.eni_id : exact @SaiVal[type="sai_object_id_t"];
@@ -255,7 +255,7 @@ control dash_ingress(
         }
     }
 
-    @SaiTable[name = "meter_policy", api = "dash_meter", api_order = 1, isobject="true"]
+    @SaiTable[name = "meter_policy", api = "dash_meter", order = 1, isobject="true"]
     table meter_policy {
         key = {
             meta.meter_policy_id : exact;
@@ -269,7 +269,7 @@ control dash_ingress(
         meta.policy_meter_class = meter_class;
     }
 
-    @SaiTable[name = "meter_rule", api = "dash_meter", api_order = 2, isobject="true"]
+    @SaiTable[name = "meter_rule", api = "dash_meter", order = 2, isobject="true"]
     table meter_rule {
         key = {
             meta.meter_policy_id: exact @SaiVal[type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
@@ -295,7 +295,7 @@ control dash_ingress(
         meta.meter_bucket_index = meter_bucket_index;
     }
 
-    @SaiTable[name = "meter_bucket", api = "dash_meter", api_order = 0, isobject="true"]
+    @SaiTable[name = "meter_bucket", api = "dash_meter", order = 0, isobject="true"]
     table meter_bucket {
         key = {
             meta.eni_id: exact @SaiVal[type="sai_object_id_t"];
@@ -312,7 +312,7 @@ control dash_ingress(
         meta.eni_id = eni_id;
     }
 
-    @SaiTable[name = "eni_ether_address_map", api = "dash_eni", api_order=0]
+    @SaiTable[name = "eni_ether_address_map", api = "dash_eni", order=0]
     table eni_ether_address_map {
         key = {
             meta.eni_addr : exact @SaiVal[name = "address", type = "sai_mac_t"];
@@ -337,7 +337,7 @@ control dash_ingress(
         }
     }
 
-    @SaiTable[name = "dash_acl_group", api = "dash_acl", api_order = 0, isobject="true"]
+    @SaiTable[name = "dash_acl_group", api = "dash_acl", order = 0, isobject="true"]
     table acl_group {
         key = {
             meta.stage1_dash_acl_group_id : exact @SaiVal[name = "dash_acl_group_id"];
