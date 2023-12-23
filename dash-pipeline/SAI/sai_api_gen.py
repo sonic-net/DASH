@@ -91,26 +91,26 @@ class SAITypeInfo:
 
 class SAITypeSolver:
     sai_type_info_registry: Dict[str, SAITypeInfo] = {
-        "bool": SAITypeInfo("bool", "booldata"),
-        "sai_uint8_t": SAITypeInfo("sai_uint8_t", "u8"),
-        "sai_object_id_t": SAITypeInfo("sai_object_id_t", "u16"),
-        "sai_uint16_t": SAITypeInfo("sai_uint16_t", "u16"),
-        "sai_ip_address_t": SAITypeInfo("sai_ip_address_t", "ipaddr"),
-        "sai_ip_addr_family_t": SAITypeInfo("sai_ip_addr_family_t", "u32"),
-        "sai_uint32_t": SAITypeInfo("sai_uint32_t", "u32"),
-        "sai_uint64_t": SAITypeInfo("sai_uint64_t", "u64"),
-        "sai_mac_t": SAITypeInfo("sai_mac_t", "mac"),
-        "sai_ip_prefix_t": SAITypeInfo("sai_ip_prefix_t", "ipPrefix"),
-        "sai_u8_list_t": SAITypeInfo("sai_u8_list_t", "u8list"),
-        "sai_u16_list_t": SAITypeInfo("sai_u16_list_t", "u16list"),
-        "sai_u32_list_t": SAITypeInfo("sai_u32_list_t", "u32list"),
-        "sai_ip_prefix_list_t": SAITypeInfo("sai_ip_prefix_list_t", "ipprefixlist"),
-        "sai_u32_range_t": SAITypeInfo("sai_u32_range_t", "u32range"),
-        "sai_u8_range_list_t": SAITypeInfo("sai_u8_range_list_t", "u8rangelist"),
-        "sai_u16_range_list_t": SAITypeInfo("sai_u16_range_list_t", "u16rangelist"),
-        "sai_u32_range_list_t": SAITypeInfo("sai_u32_range_list_t", "u32rangelist"),
-        "sai_u64_range_list_t": SAITypeInfo("sai_u64_range_list_t", "u64rangelist"),
-        "sai_ipaddr_range_list_t": SAITypeInfo("sai_ipaddr_range_list_t", "ipaddrrangelist"),
+        "bool": SAITypeInfo("bool", "booldata", default="false"),
+        "sai_uint8_t": SAITypeInfo("sai_uint8_t", "u8", default="0"),
+        "sai_object_id_t": SAITypeInfo("sai_object_id_t", "u16", default="SAI_NULL_OBJECT_ID"),
+        "sai_uint16_t": SAITypeInfo("sai_uint16_t", "u16", default="0"),
+        "sai_ip_address_t": SAITypeInfo("sai_ip_address_t", "ipaddr", default="0.0.0.0"),
+        "sai_ip_addr_family_t": SAITypeInfo("sai_ip_addr_family_t", "u32", default="SAI_IP_ADDR_FAMILY_IPV4"),
+        "sai_uint32_t": SAITypeInfo("sai_uint32_t", "u32", default="0"),
+        "sai_uint64_t": SAITypeInfo("sai_uint64_t", "u64", default="0"),
+        "sai_mac_t": SAITypeInfo("sai_mac_t", "mac", default="0:0:0:0:0:0"),
+        "sai_ip_prefix_t": SAITypeInfo("sai_ip_prefix_t", "ipPrefix", default="0"),
+        "sai_u8_list_t": SAITypeInfo("sai_u8_list_t", "u8list", default="empty"),
+        "sai_u16_list_t": SAITypeInfo("sai_u16_list_t", "u16list", default="empty"),
+        "sai_u32_list_t": SAITypeInfo("sai_u32_list_t", "u32list", default="empty"),
+        "sai_ip_prefix_list_t": SAITypeInfo("sai_ip_prefix_list_t", "ipprefixlist", default="empty"),
+        "sai_u32_range_t": SAITypeInfo("sai_u32_range_t", "u32range", default="empty"),
+        "sai_u8_range_list_t": SAITypeInfo("sai_u8_range_list_t", "u8rangelist", default="empty"),
+        "sai_u16_range_list_t": SAITypeInfo("sai_u16_range_list_t", "u16rangelist", default="empty"),
+        "sai_u32_range_list_t": SAITypeInfo("sai_u32_range_list_t", "u32rangelist", default="empty"),
+        "sai_u64_range_list_t": SAITypeInfo("sai_u64_range_list_t", "u64rangelist", default="empty"),
+        "sai_ipaddr_range_list_t": SAITypeInfo("sai_ipaddr_range_list_t", "ipaddrrangelist", default="empty"),
     }
 
     @staticmethod
@@ -417,7 +417,7 @@ class SAIAPITableKey(SAIObject):
             self.type = sai_type_info.name
 
         self.field = sai_type_info.field_func_prefix
-        if self.default == None and sai_type_info.is_enum:
+        if self.default == None:
             self.default = sai_type_info.default
 
         return
@@ -495,7 +495,7 @@ class SAIAPITableActionParam(SAIObject):
             self.type = sai_type_info.name
 
         self.field = sai_type_info.field_func_prefix
-        if self.default == None and sai_type_info.is_enum:
+        if self.default == None:
             self.default = sai_type_info.default
 
         return
