@@ -880,14 +880,14 @@ class SAIGenerator:
         self.generated_header_file_names.append(sai_header_file_name)
 
         # Gather SAI API extension name and object types
-        self.generated_sai_api_extension_names.append('    SAI_API_' + sai_api.app_name.upper() + ',')
+        self.generated_sai_api_extension_names.append('    SAI_API_' + sai_api.app_name.upper() + ',\n')
 
         for table in sai_api.tables:
-            self.generated_sai_type_extension_names.append('    SAI_OBJECT_TYPE_' + table.name.upper() + ',')
+            self.generated_sai_type_extension_names.append('    SAI_OBJECT_TYPE_' + table.name.upper() + ',\n')
 
             if table.is_object == 'false':
                 self.generated_sai_object_entry_extension_names.append('    /** @validonly object_type == SAI_OBJECT_TYPE_' + table.name.upper() + ' */')
-                self.generated_sai_object_entry_extension_names.append('    sai_' + table.name + '_t ' + table.name + ';')
+                self.generated_sai_object_entry_extension_names.append('    sai_' + table.name + '_t ' + table.name + ';\n')
 
         return
 
