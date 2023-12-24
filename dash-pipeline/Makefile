@@ -116,12 +116,12 @@ $(P4_OUTDIR)/dash_pipeline_p4rt.txt: $(P4_SRC)
 	$(DOCKER_FLAGS) \
 	-v $(PWD)/bmv2:/bmv2 \
 	-w / \
-	$(DOCKER_P4C_BMV2_IMG) p4c \
+	$(DOCKER_P4C_BMV2_IMG) p4c-bm2-ss \
 		-DTARGET_BMV2_V1MODEL \
 	    $(P4_MAIN) \
-		-b bmv2 \
-		-o $(P4_OUTDIR) \
-	    --p4runtime-files $(P4_OUTDIR)/dash_pipeline_p4rt.json,$(P4_OUTDIR)/dash_pipeline_p4rt.txt
+        -o $(P4_OUTDIR)/dash_pipeline.json \
+	    --p4runtime-files $(P4_OUTDIR)/dash_pipeline_p4rt.json,$(P4_OUTDIR)/dash_pipeline_p4rt.txt \
+        --toJSON $(P4_OUTDIR)/dash_pipeline_ir.json
 
 # DPDK - experimental/WIP
 
