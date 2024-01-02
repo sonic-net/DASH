@@ -32,10 +32,57 @@ class InsertRequest:
     priority : int
 
 
+def insert_request_to_table_entry(insertRequest: InsertRequest, key_format: list):
+    entry = Entry()
+
+    entry.values = []
+    for idx, val in enumerate(insertRequest.values):
+        if key_format[idx] is EXACT:
+            entry.values.append(int(val.exact, 0))
+        elif key_format[idx] is TERNARY:
+            ternary = Entry.Ternary()
+            ternary.value = int(val.ternary.value , 0)
+            ternary.mask = int(val.ternary.mask , 0)
+            entry.values.append(ternary)
+        elif key_format[idx] is LIST:
+            ternary_list = []
+            for t in val.ternary_list:
+                ternary = Entry.Ternary()
+                ternary.value = int(t.value , 0)
+                ternary.mask = int(t.mask , 0)
+                ternary_list.append(ternary)
+            entry.values.append(ternary_list)
+        elif key_format[idx] is RANGE:
+            range = Entry.Range()
+            range.first = int(val.range.first , 0)
+            range.last = int(val.range.last , 0)
+            entry.values.append(range)
+        elif key_format[idx] is RANGE_LIST:
+            range_list = []
+            for r in val.range_list:
+                range = Entry.Range()
+                range.first = int(r.first , 0)
+                range.last = int(r.last , 0)
+                range_list.append(range)
+            entry.values.append(range_list)
+        elif key_format[idx] is LPM:
+            lpm = Entry.LPM()
+            lpm.value = int(val.prefix.value , 0)
+            lpm.prefix_len = val.prefix.prefix_len
+            entry.values.append(lpm)
+
+    entry.action = id_map[insertRequest.action]
+
+    entry.params = []
+    for param_str in insertRequest.params:
+        entry.params.append(int(param_str , 0))
+
+    entry.priority = insertRequest.priority
+    return entry
+
 def table_insert_api(insertRequest: InsertRequest):
     table = id_map[insertRequest.table]
-    
-
+    table.insert(insert_request_to_table_entry(insertRequest, list(table.key.values())))
 
 def json_obj_to_insert_request(json_obj):
     insertRequest = InsertRequest()
@@ -83,9 +130,6 @@ def json_obj_to_insert_request(json_obj):
     insertRequest.priority = json_obj["priority"]
     return insertRequest
 
-
-
-
 class ModelTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         api_id = self.request.recv(1)[0]
@@ -93,10 +137,8 @@ class ModelTCPHandler(socketserver.BaseRequestHandler):
             json_buf_size = int(self.request.recv(8).decode("ascii"), 16)
             json_obj = json.loads(self.request.recv(json_buf_size))
             insertRequest = json_obj_to_insert_request(json_obj)
-
-
-#        self.request.sendall(data)
-
+            table_insert_api(insertRequest)
+            self.request.sendall(b'\x00')
 
 HOST, PORT = "localhost", 46500
 
