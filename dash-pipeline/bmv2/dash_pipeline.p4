@@ -286,14 +286,12 @@ control dash_ingress(
     // MAX_METER_BUCKET = MAX_ENI(64) * NUM_BUCKETS_PER_ENI(4096)
     #define MAX_METER_BUCKETS 262144
 #ifdef TARGET_BMV2_V1MODEL
-    counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_inbound;
+    @SaiCounter[name="outbound_bytes_counter", action_names="meter_bucket_action", as_attr="true"]
     counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_outbound;
+    @SaiCounter[name="inbound_bytes_counter", action_names="meter_bucket_action", as_attr="true"]
+    counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_inbound;
 #endif // TARGET_BMV2_V1MODEL
-    action meter_bucket_action(
-            @SaiVal[type="sai_uint64_t", isreadonly="true"] bit<64> outbound_bytes_counter,
-            @SaiVal[type="sai_uint64_t", isreadonly="true"] bit<64> inbound_bytes_counter,
-            @SaiVal[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index) {
-        // read only counters for SAI api generation only
+    action meter_bucket_action(@SaiVal[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index) {
         meta.meter_bucket_index = meter_bucket_index;
     }
 
