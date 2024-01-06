@@ -54,7 +54,7 @@ Some of the guiding principles for this approach are:
 - [SONiC](https://github.com/Azure/SONiC)
 - [SAI](https://github.com/opencomputeproject/SAI)
 - [P4](https://opennetworking.org/p4) and [P4 working group](https://p4.org/working-groups)
-- [PINS](opennetworking.org/pins)
+- [PINS](https://opennetworking.org/pins)
 - [PNA Consortium Spec](https://p4.org/p4-spec/docs/PNA-v0.5.0.html)
 - [IPDK](https://ipdk.io/) and [IPDK GitHub](https://github.com/ipdk-io/ipdk-io.github.io)
 - [bmv2 - behavioral model v2](https://github.com/p4lang/behavioral-model)
