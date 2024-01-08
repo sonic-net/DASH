@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+from typing import Iterator
+
+
 try:
     import os
     import json
@@ -537,8 +540,8 @@ class SAICounter(SAIAPITableAttribute):
         self.type = counter_storage_type.name
         self.field = counter_storage_type.sai_attribute_value_field
 
-        counter_unit: str = p4rt_counter['spec']['unit']
-        if counter_unit in ['BYTES', 'PACKETS', 'BOTH']:
+        counter_unit = str(p4rt_counter['spec']['unit']).lower()
+        if counter_unit in ['bytes', 'packets', 'both']:
             self.counter_type = counter_unit.lower()
         else:
             raise ValueError(f'Unknown counter unit: {counter_unit}')
@@ -581,6 +584,18 @@ class SAICounter(SAIAPITableAttribute):
                         self.as_attr = True if kv['value']['stringValue'] == "true" else False
                     else:
                         raise ValueError("Unknown attr annotation " + kv['key'])
+
+    def generate_final_counter_on_type(self) -> 'Iterator[SAICounter]':
+        if self.counter_type != 'both':
+            self.name = f"{self.name}_{self.counter_type}_counter"
+            yield self
+        else:
+            packets_counter = copy.deepcopy(self)
+            packets_counter.name = f"{packets_counter.name}_packets_counter"
+            yield packets_counter
+
+            self.name = f"{self.name}_bytes_counter"
+            yield self
 
 
 @sai_parser_from_p4rt
@@ -982,7 +997,7 @@ class DASHSAIExtensions(SAIObject):
         all_p4rt_counters = p4rt_value[COUNTERS_TAG]
         for p4rt_counter in all_p4rt_counters:
             counter = SAICounter.from_p4rt(p4rt_counter, var_ref_graph)
-            self.sai_counters.append(counter)
+            self.sai_counters.extend(counter.generate_final_counter_on_type())
 
     def __parse_sai_apis_from_p4rt(self, program: Dict[str, Any], ignore_tables: List[str]) -> None:
         # Group all counters by action name.
