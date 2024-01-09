@@ -41,7 +41,6 @@ control dash_ingress(
     @SaiTable[name = "vip", api = "dash_vip"]
     table vip {
         key = {
-            hdr.u0_ipv4.dst_addr : exact @name("hdr.u0_ipv4.dst_addr:VIP");
             hdr.u0_ipv4.dst_addr : exact @SaiVal[name = "VIP", type="sai_ip_address_t"];
         }
 
