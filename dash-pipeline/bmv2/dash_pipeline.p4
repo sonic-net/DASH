@@ -38,10 +38,11 @@ control dash_ingress(
     action accept() {
     }
 
-    @name("vip|dash_vip")
+    @SaiTable[name = "vip", api = "dash_vip"]
     table vip {
         key = {
             hdr.u0_ipv4.dst_addr : exact @name("hdr.u0_ipv4.dst_addr:VIP");
+            hdr.u0_ipv4.dst_addr : exact @SaiVal[name = "VIP", type="sai_ip_address_t"];
         }
 
         actions = {
@@ -60,10 +61,10 @@ control dash_ingress(
         meta.direction = dash_direction_t.INBOUND;
     }
 
-    @name("direction_lookup|dash_direction_lookup")
+    @SaiTable[name = "direction_lookup", api = "dash_direction_lookup"]
     table direction_lookup {
         key = {
-            hdr.u0_vxlan.vni : exact @name("hdr.u0_vxlan.vni:VNI");
+            hdr.u0_vxlan.vni : exact @SaiVal[name = "VNI"];
         }
 
         actions = {
@@ -81,9 +82,10 @@ control dash_ingress(
     }
 
     /* This table API should be implemented manually using underlay SAI */
+    @SaiTable[ignored = "true"]
     table appliance {
         key = {
-            meta.appliance_id : ternary @name("meta.appliance_id:appliance_id");
+            meta.appliance_id : ternary;
         }
 
         actions = {
@@ -92,11 +94,11 @@ control dash_ingress(
     }
 
 #define ACL_GROUPS_PARAM(prefix) \
-    bit<16> ## prefix ##_stage1_dash_acl_group_id, \
-    bit<16> ## prefix ##_stage2_dash_acl_group_id, \
-    bit<16> ## prefix ##_stage3_dash_acl_group_id, \
-    bit<16> ## prefix ##_stage4_dash_acl_group_id, \
-    bit<16> ## prefix ##_stage5_dash_acl_group_id
+    @SaiVal[type="sai_object_id_t"] bit<16> ## prefix ##_stage1_dash_acl_group_id, \
+    @SaiVal[type="sai_object_id_t"] bit<16> ## prefix ##_stage2_dash_acl_group_id, \
+    @SaiVal[type="sai_object_id_t"] bit<16> ## prefix ##_stage3_dash_acl_group_id, \
+    @SaiVal[type="sai_object_id_t"] bit<16> ## prefix ##_stage4_dash_acl_group_id, \
+    @SaiVal[type="sai_object_id_t"] bit<16> ## prefix ##_stage5_dash_acl_group_id
 
 #define ACL_GROUPS_COPY_TO_META(prefix) \
    meta.stage1_dash_acl_group_id = ## prefix ##_stage1_dash_acl_group_id; \
@@ -109,15 +111,14 @@ control dash_ingress(
                          bit<32> pps,
                          bit<32> flows,
                          bit<1> admin_state,
-                         IPv4Address vm_underlay_dip,
-                         @Sai[type="sai_uint32_t"]
-                         bit<24> vm_vni,
-                         bit<16> vnet_id,
+                         @SaiVal[type="sai_ip_address_t"] IPv4Address vm_underlay_dip,
+                         @SaiVal[type="sai_uint32_t"] bit<24> vm_vni,
+                         @SaiVal[type="sai_object_id_t"] bit<16> vnet_id,
                          IPv6Address pl_sip,
                          IPv6Address pl_sip_mask,
-                         IPv4Address pl_underlay_sip,
-                         bit<16> v4_meter_policy_id,
-                         bit<16> v6_meter_policy_id,
+                         @SaiVal[type="sai_ip_address_t"] IPv4Address pl_underlay_sip,
+                         @SaiVal[type="sai_object_id_t"] bit<16> v4_meter_policy_id,
+                         @SaiVal[type="sai_object_id_t"] bit<16> v6_meter_policy_id,
                          ACL_GROUPS_PARAM(inbound_v4),
                          ACL_GROUPS_PARAM(inbound_v6),
                          ACL_GROUPS_PARAM(outbound_v4),
@@ -152,10 +153,10 @@ control dash_ingress(
         }
     }
 
-    @name("eni|dash_eni")
+    @SaiTable[name = "eni", api = "dash_eni", order=1, isobject="true"]
     table eni {
         key = {
-            meta.eni_id : exact @name("meta.eni_id:eni_id");
+            meta.eni_id : exact @SaiVal[type="sai_object_id_t"];
         }
 
         actions = {
@@ -184,11 +185,12 @@ control dash_ingress(
 #endif // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
 #endif // TARGET_DPDK_PNA
 
+    @SaiTable[ignored = "true"]
     table eni_meter {
         key = {
-            meta.eni_id : exact @name("meta.eni_id:eni_id");
-            meta.direction : exact @name("meta.direction:direction");
-            meta.dropped : exact @name("meta.dropped:dropped");
+            meta.eni_id : exact @SaiVal[type="sai_object_id_t"];
+            meta.direction : exact;
+            meta.dropped : exact;
         }
 
         actions = { NoAction; }
@@ -206,15 +208,15 @@ control dash_ingress(
     action permit() {
     }
 
-    action tunnel_decap_pa_validate(bit<16> src_vnet_id) {
+    action tunnel_decap_pa_validate(@SaiVal[type="sai_object_id_t"] bit<16> src_vnet_id) {
         meta.vnet_id = src_vnet_id;
     }
 
-    @name("pa_validation|dash_pa_validation")
+    @SaiTable[name = "pa_validation", api = "dash_pa_validation"]
     table pa_validation {
         key = {
-            meta.vnet_id: exact @name("meta.vnet_id:vnet_id");
-            hdr.u0_ipv4.src_addr : exact @name("hdr.u0_ipv4.src_addr:sip");
+            meta.vnet_id: exact @SaiVal[type="sai_object_id_t"];
+            hdr.u0_ipv4.src_addr : exact @SaiVal[name = "sip", type="sai_ip_address_t"];
         }
 
         actions = {
@@ -225,12 +227,12 @@ control dash_ingress(
         const default_action = deny;
     }
 
-    @name("inbound_routing|dash_inbound_routing")
+    @SaiTable[name = "inbound_routing", api = "dash_inbound_routing"]
     table inbound_routing {
         key = {
-            meta.eni_id: exact @name("meta.eni_id:eni_id");
-            hdr.u0_vxlan.vni : exact @name("hdr.u0_vxlan.vni:VNI");
-            hdr.u0_ipv4.src_addr : ternary @name("hdr.u0_ipv4.src_addr:sip");
+            meta.eni_id: exact @SaiVal[type="sai_object_id_t"];
+            hdr.u0_vxlan.vni : exact @SaiVal[name = "VNI"];
+            hdr.u0_ipv4.src_addr : ternary @SaiVal[name = "sip", type="sai_ip_address_t"];
         }
         actions = {
             tunnel_decap(hdr, meta);
@@ -241,7 +243,7 @@ control dash_ingress(
         const default_action = deny;
     }
 
-    action check_ip_addr_family(@Sai[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
+    action check_ip_addr_family(@SaiVal[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
         if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
             if (meta.is_overlay_ip_v6 == 1) {
                 meta.dropped = true;
@@ -253,11 +255,10 @@ control dash_ingress(
         }
     }
 
-    @name("meter_policy|dash_meter")
-    @Sai[isobject="true"]
+    @SaiTable[name = "meter_policy", api = "dash_meter", order = 1, isobject="true"]
     table meter_policy {
         key = {
-            meta.meter_policy_id : exact @name("meta.meter_policy_id:meter_policy_id");
+            meta.meter_policy_id : exact;
         }
         actions = {
             check_ip_addr_family;
@@ -268,12 +269,11 @@ control dash_ingress(
         meta.policy_meter_class = meter_class;
     }
 
-    @name("meter_rule|dash_meter")
-    @Sai[isobject="true"]
+    @SaiTable[name = "meter_rule", api = "dash_meter", order = 2, isobject="true"]
     table meter_rule {
         key = {
-            meta.meter_policy_id: exact @name("meta.meter_policy_id:meter_policy_id") @Sai[type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
-            hdr.u0_ipv4.dst_addr : ternary @name("hdr.ipv4.dst_addr:dip");
+            meta.meter_policy_id: exact @SaiVal[type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
+            hdr.u0_ipv4.dst_addr : ternary @SaiVal[name = "dip", type="sai_ip_address_t"];
         }
 
      actions = {
@@ -286,23 +286,20 @@ control dash_ingress(
     // MAX_METER_BUCKET = MAX_ENI(64) * NUM_BUCKETS_PER_ENI(4096)
     #define MAX_METER_BUCKETS 262144
 #ifdef TARGET_BMV2_V1MODEL
-    counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_inbound;
+    @SaiCounter[name="outbound_bytes_counter", action_names="meter_bucket_action", as_attr="true"]
     counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_outbound;
+    @SaiCounter[name="inbound_bytes_counter", action_names="meter_bucket_action", as_attr="true"]
+    counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_inbound;
 #endif // TARGET_BMV2_V1MODEL
-    action meter_bucket_action(
-            @Sai[type="sai_uint64_t", isreadonly="true"] bit<64> outbound_bytes_counter,
-            @Sai[type="sai_uint64_t", isreadonly="true"] bit<64> inbound_bytes_counter,
-            @Sai[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index) {
-        // read only counters for SAI api generation only
+    action meter_bucket_action(@SaiVal[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index) {
         meta.meter_bucket_index = meter_bucket_index;
     }
 
-    @name("meter_bucket|dash_meter")
-    @Sai[isobject="true"]
+    @SaiTable[name = "meter_bucket", api = "dash_meter", order = 0, isobject="true"]
     table meter_bucket {
         key = {
-            meta.eni_id: exact @name("meta.eni_id:eni_id");
-            meta.meter_class: exact @name("meta.meter_class:meter_class");
+            meta.eni_id: exact @SaiVal[type="sai_object_id_t"];
+            meta.meter_class: exact;
         }
         actions = {
             meter_bucket_action;
@@ -311,14 +308,14 @@ control dash_ingress(
         const default_action = NoAction();
     }
 
-    action set_eni(bit<16> eni_id) {
+    action set_eni(@SaiVal[type="sai_object_id_t"] bit<16> eni_id) {
         meta.eni_id = eni_id;
     }
 
-    @name("eni_ether_address_map|dash_eni")
+    @SaiTable[name = "eni_ether_address_map", api = "dash_eni", order=0]
     table eni_ether_address_map {
         key = {
-            meta.eni_addr : exact @name("meta.eni_addr:address");
+            meta.eni_addr : exact @SaiVal[name = "address", type = "sai_mac_t"];
         }
 
         actions = {
@@ -328,7 +325,7 @@ control dash_ingress(
         const default_action = deny;
     }
 
-    action set_acl_group_attrs(@Sai[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
+    action set_acl_group_attrs(@SaiVal[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
         if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
             if (meta.is_overlay_ip_v6 == 1) {
                 meta.dropped = true;
@@ -340,10 +337,10 @@ control dash_ingress(
         }
     }
 
-    @name("dash_acl_group|dash_acl")
+    @SaiTable[name = "dash_acl_group", api = "dash_acl", order = 0, isobject="true"]
     table acl_group {
         key = {
-            meta.stage1_dash_acl_group_id : exact @name("meta.stage1_dash_acl_group_id:dash_acl_group_id");
+            meta.stage1_dash_acl_group_id : exact @SaiVal[name = "dash_acl_group_id"];
         }
         actions = {
             set_acl_group_attrs();

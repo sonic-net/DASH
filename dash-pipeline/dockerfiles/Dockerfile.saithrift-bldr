@@ -27,7 +27,7 @@ ENV DASH_SAIGEN_DEPS python3 python3-pip
 
 RUN apt-get update -q && \
     apt-get install -y --no-install-recommends $SAI_PTF_DEPS $DASH_SAIGEN_DEPS && \
-    pip3 install ctypesgen jinja2
+    pip3 install ctypesgen jinja2 jsonpath-ng
 
 ENV SAI_THRIFT_DEPS automake bison flex g++ git libboost-all-dev libevent-dev libssl-dev libtool make pkg-config
 

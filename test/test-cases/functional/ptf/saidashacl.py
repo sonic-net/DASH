@@ -31,30 +31,38 @@ class AclRuleTest(object):
         self.src_port = src_port
         self.dst_port = dst_port
         if self.dip:
-            dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
-                                            addr=sai_thrift_ip_addr_t(ip4=self.dip))
+            dip_prefix = sai_thrift_ip_prefix_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4, addr=sai_thrift_ip_addr_t(ip4=self.dip), mask=sai_thrift_ip_addr_t(ip4="255.255.255.0"))
+            dip_prefix_list = sai_thrift_ip_prefix_list_t(count=1, prefixlist=[dip_prefix])
+
         if self.sip:
-            sip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
-                                        addr=sai_thrift_ip_addr_t(ip4=self.sip))
+            sip_prefix = sai_thrift_ip_prefix_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4, addr=sai_thrift_ip_addr_t(ip4=self.sip), mask=sai_thrift_ip_addr_t(ip4="255.255.255.0"))
+            sip_prefix_list = sai_thrift_ip_prefix_list_t(count=1, prefixlist=[sip_prefix])
+
         if self.acl_group is not None:
+            protocols = sai_thrift_u8_list_t(count=1, uint8list=[self.protocol])
+            src_ports = sai_thrift_u16_range_list_t(count=1, rangelist=[sai_thrift_u16_range_t(min=self.src_port, max=self.src_port)])
+            dst_ports = sai_thrift_u16_range_list_t(count=1, rangelist=[sai_thrift_u16_range_t(min=self.dst_port, max=self.dst_port)])
             self.saithrift.create_obj(sai_thrift_create_dash_acl_rule,
                                       sai_thrift_remove_dash_acl_rule,
                                       dash_acl_group_id=self.acl_group,
-                                      protocol=self.protocol,
-                                      sip=sip,
-                                      dip=dip,
-                                      src_port = self.src_port,
-                                      dst_port = self.dst_port,
+                                      protocol=protocols,
+                                      sip=sip_prefix_list,
+                                      dip=dip_prefix_list,
+                                      src_port=src_ports,
+                                      dst_port=dst_ports,
                                       priority=self.priority,
                                       action=self.action)
+
         if test_sip:
             self.test_sip = test_sip
         else:
             self.test_sip = self.sip
+
         if test_dip:
             self.test_dip = test_dip
         else:
             self.test_dip = self.dip
+
         self.meta = copy.copy(self.__dict__)
         del self.meta["saithrift"]
 

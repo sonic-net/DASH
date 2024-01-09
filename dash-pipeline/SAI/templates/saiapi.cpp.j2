@@ -1,6 +1,10 @@
 #include "utils.h"
 #include "saiimpl.h"
 
+extern "C" {
+#include "saimetadata.h"
+}
+
 using namespace dash::utils;
 
 {% set registered_group = [] %}
@@ -31,7 +35,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     {% for group_item in tables%}
     {% if group_item.name != table.name  %}{% continue %}{% endif %}
     {% set table = group_item %}
-    {% if 'stage' in table %}
+    {% if table.stage != None %}
     // For stage {{ table.stage }}
     {% endif %}
     matchActionEntry = std::make_shared<p4::v1::TableEntry>();
@@ -57,16 +61,21 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     auto mf = matchActionEntry->add_match();
     mf->set_field_id({{table['keys'][0].id}});
     auto mf_exact = mf->mutable_exact();
-    {{table['keys'][0].field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
+    //{{table['keys'][0].field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
+      {{table['keys'][0].field}}SetVal(static_cast<uint{{ table['keys'][0].bitwidth }}_t>(objId), mf_exact, {{ table['keys'][0].bitwidth }}); 
     {% else %}
     // SAI object table with multiple P4 table keys
     // Copy P4 table keys from appropriate SAI attributes
     for (uint32_t i = 0; i < attr_count; i++)
     {
+        auto *md = sai_metadata_get_attr_metadata((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_list[i].id);
+
+        const char* attrName = md ? md->attridname : "unknown";
+
         switch(attr_list[i].id)
         {
             {% for key in table['keys'] %}
-            case SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}:
+            case SAI_{{ table.name | upper }}_ATTR_{{ key.name | upper }}:
             {
                 auto mf = matchActionEntry->add_match();
                 mf->set_field_id({{key.id}});
@@ -77,31 +86,40 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 auto mf_lpm = mf->mutable_lpm();
                 {{key.field}}SetVal(attr_list[i].value, mf_lpm, {{key.bitwidth}});
                 {% elif key.match_type == 'list' %}
-                assert(0 && "mutable_list is not supported");
-                goto ErrRet;
-                // auto mf1_list = mf1->mutable_xxx();
-                //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+                // BMv2 doesn't support "list" match type, and we are using "optional" match in v1model as our implementation.
+                // Hence, here we only take the first item from the list and program it as optional match.
+                assert(attr_list[i].value.{{key.field}}.count == 1 && "BMv2 only supports one item in list match type");
+                auto mf_optional = mf->mutable_optional();
+                sai_attribute_value_t attr_val;
+                    {% if key.field == 'ipprefixlist' %}
+                attr_val.ipaddr.addr_family = attr_list[i].value.ipprefixlist.list[0].addr_family;
+                attr_val.ipaddr.addr = attr_list[i].value.ipprefixlist.list[0].addr;
+                ipaddrSetVal(attr_val, mf_optional, {{key.bitwidth}});
+                    {% else %}
+                attr_val.{{ key.field | replace('list', '') }} = attr_list[i].value.{{key.field}}.list[0];
+                {{ key.field | replace('list', '') }}SetVal(attr_val, mf_optional, {{key.bitwidth}});
+                    {% endif %}
                 {% elif key.match_type == 'range_list' %}
-                goto ErrRet;
-                assert(0 && "range_list is not supported");
-                // TODO: if it is ternary, need to set the mask
-                // auto mf1_list = mf1->mutable_xxx();
-                //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+                // BMv2 doesn't support "range_list" match type, and we are using "optional" match in v1model as our implementation.
+                // Hence, here we only take the first item from the list and program it as optional match.
+                assert(attr_list[i].value.{{key.field}}.count == 1 && "BMv2 only supports one item in list match type");
+                auto mf_optional = mf->mutable_optional();
+                {{ key.field | replace('rangelist', '') }}SetVal(attr_list[i].value.{{key.field}}.list[0].min, mf_optional, {{key.bitwidth}});
                 {% elif key.match_type == 'optional' %}
                 auto mf_optional = mf->mutable_optional();
                 {{key.field}}SetVal(attr_list[i].value, mf_optional, {{key.bitwidth}});
                 {% elif key.match_type == 'ternary' %}
                 auto mf_ternary = mf->mutable_ternary();
                 {{key.field}}SetVal(attr_list[i].value, mf_ternary, {{key.bitwidth}});
-                auto mask = getMaskAttr(SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}_MASK, attr_count, attr_list);
-                assert(mask && "SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}_MASK isn't provided");
+                auto mask = getMaskAttr(SAI_{{ table.name | upper }}_ATTR_{{ key.name | upper }}_MASK, attr_count, attr_list);
+                assert(mask && "SAI_{{ table.name | upper }}_ATTR_{{ key.name | upper }}_MASK isn't provided");
                 {{key.field}}SetMask(mask->value, mf_ternary, {{key.bitwidth}});
                 {% endif %}
-                {% if 'v4_or_v6_id' in key %}
+                {% if key.ip_is_v6_field_id != 0 %}
                 {
-                    // set v4_or_v6 field
+                    // set ip_is_v6_field_id field
                     auto mf = matchActionEntry->add_match();
-                    mf->set_field_id({{key.v4_or_v6_id}});
+                    mf->set_field_id({{key.ip_is_v6_field_id}});
                     auto mf_exact = mf->mutable_exact();
                     booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
                 }
@@ -120,7 +138,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
             {% endif %}
             {% endif %}
             default:
-                DASH_LOG_ERROR("attribute [%d] %d not supported yet", i, attr_list[i].id);
+                DASH_LOG_ERROR("attribute [%d] %d %s not supported yet", i, attr_list[i].id, attrName);
                 break;
         }
     }
@@ -163,9 +181,13 @@ static sai_status_t dash_sai_create_{{ table.name }}(
 
     for (uint32_t i = 0; i < attr_count; i++)
     {
+        auto *md = sai_metadata_get_attr_metadata((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_list[i].id);
+
+        const char* attrName = md ? md->attridname : "unknown";
+
         switch(attr_list[i].id)
         {
-            {% for param in table.actionParams %}
+            {% for param in table.action_params %}
             {% if param.skipattr == 'true' %}
             {% else %}
             case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}:
@@ -174,11 +196,11 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 param->set_param_id({{param.id}});
                 {{param.field}}SetVal(attr_list[i].value, param, {{param.bitwidth}});
                 //matchedParams++;
-                {% if 'v4_or_v6_id' in param %}
+                {% if param.ip_is_v6_field_id != 0 %}
                 {
-                    // set v4_or_v6 field
+                    // set ip_is_v6_field_id field
                     auto param2 = action->add_params();
-                    param2->set_param_id({{param.v4_or_v6_id}});
+                    param2->set_param_id({{param.ip_is_v6_field_id}});
                     booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param2, 1);
                     //matchedParams++;
                 }
@@ -188,7 +210,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
             {% endif %}
             {% endfor %}
             default:
-                DASH_LOG_ERROR("attribute [%d] %d not supported yet", i, attr_list[i].id);
+                DASH_LOG_ERROR("attribute [%d] %d %s not supported yet", i, attr_list[i].id, attrName);
                 break;
         }
     }
@@ -327,30 +349,46 @@ static sai_status_t dash_sai_create_{{ table.name }}(
         mf->set_field_id({{key.id}});
         {% if key.match_type == 'exact' %}
         auto mf_exact = mf->mutable_exact();
-        {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
+        //{{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
+        {% set keyfield = key.field %}
+        {% set bitwidth = key.bitwidth %}
+        {% if keyfield in ['ipaddr','mac'] or bitwidth in [24] %} 
+          {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
+        {% else %} 
+          {{key.field}}SetVal(static_cast<uint{{key.bitwidth}}_t>(tableEntry->{{ key.name | lower }}), mf_exact, {{key.bitwidth}});
+        {% endif %}
         {% elif key.match_type == 'lpm' %}
         auto mf_lpm = mf->mutable_lpm();
-        {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_lpm, {{key.bitwidth}});
+        {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_lpm, {{key.bitwidth}});
         {% elif key.match_type == 'list' %}
-        assert(0 && "mutable_list is not supported");
-        goto ErrRet;
-        // auto mf1_list = mf1->mutable_xxx();
-        //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
-        {% elif key.match_type == 'range_list' %}
-        assert(0 && "range_list is not supported");
-        goto ErrRet;
-        // TODO: if it is ternary, need to set the mask
-        // auto mf1_list = mf1->mutable_xxx();
-        //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+        // BMv2 doesn't support "list" match type, and we are using "optional" match in v1model as our implementation.
+        // Hence, here we only take the first item from the list and program it as optional match.
+        assert(attr_list[i].value.{{key.field}}.count == 1 && "BMv2 only supports one item in list match type");
+        auto mf_optional = mf->mutable_optional();
+        sai_attribute_value_t attr_val;
+            {% if key.field == 'ipprefixlist' %}
+        attr_val.ipaddr.addr_family = attr_list[i].value.ipprefixlist.list[0].addr_family;
+        attr_val.ipaddr.addr = attr_list[i].value.ipprefixlist.list[0].addr;
+        ipaddrSetVal(attr_val, mf_optional, {{key.bitwidth}});
+            {% else %}
+        attr_val.{{ key.field | replace('list', '') }} = attr_list[i].value.{{key.field}}.list[0];
+        {{ key.field | replace('list', '') }}SetVal(attr_val, mf_optional, {{key.bitwidth}});
+            {% endif %}
+        {% elif key.field == 'range_list' %}
+        // BMv2 doesn't support "range_list" match type, and we are using "optional" match in v1model as our implementation.
+        // Hence, here we only take the first item from the list and program the range start as optional match.
+        assert(attr_list[i].value.{{key.field}}.count == 1 && "BMv2 only supports one item in list match type");
+        auto mf_optional = mf->mutable_optional();
+        {{ key.field | replace('rangelist', '') }}SetVal(attr_list[i].value.{{key.field}}.list[0].min, mf_optional, {{key.bitwidth}});
         {% endif %}
     }
-    {% if 'v4_or_v6_id' in key %}
+    {% if key.ip_is_v6_field_id != 0 %}
     {
-        // set v4_or_v6 field
+        // set ip_is_v6_field_id field
         auto mf = matchActionEntry->add_match();
-        mf->set_field_id({{key.v4_or_v6_id}});
+        mf->set_field_id({{key.ip_is_v6_field_id}});
         auto mf_exact = mf->mutable_exact();
-        booldataSetVal((tableEntry->{{ key.sai_key_name | lower }}.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
+        booldataSetVal((tableEntry->{{ key.name | lower }}.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
     }
     {% endif %}
     {% endfor %}
@@ -387,9 +425,13 @@ static sai_status_t dash_sai_create_{{ table.name }}(
 
     for (uint32_t i = 0; i < attr_count; i++)
     {
+        auto *md = sai_metadata_get_attr_metadata((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_list[i].id);
+
+        const char* attrName = md ? md->attridname : "unknown";
+
         switch(attr_list[i].id)
         {
-            {% for param in table.actionParams %}
+            {% for param in table.action_params %}
             {% if param.skipattr == 'true' %}
             {% else %}
             case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}:
@@ -398,11 +440,11 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 param->set_param_id({{param.id}});
                 {{param.field}}SetVal(attr_list[i].value, param, {{param.bitwidth}});
                 //matchedParams++;
-                {% if 'v4_or_v6_id' in param %}
+                {% if param.ip_is_v6_field_id != 0 %}
                 {
-                    // set v4_or_v6 field
+                    // set ip_is_v6_field_id field
                     auto param2 = action->add_params();
-                    param2->set_param_id({{param.v4_or_v6_id}});
+                    param2->set_param_id({{param.ip_is_v6_field_id}});
                     booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param2, 1);
                     //matchedParams++;
                 }
@@ -412,7 +454,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
             {% endif %}
             {% endfor %}
             default:
-                DASH_LOG_ERROR("attribute [%d] %d not supported yet", i, attr_list[i].id);
+                DASH_LOG_ERROR("attribute [%d] %d %s not supported yet", i, attr_list[i].id, attrName);
                 break;
         }
     }
@@ -480,29 +522,46 @@ static sai_status_t dash_sai_remove_{{ table.name }}(
         mf->set_field_id({{key.id}});
         {% if key.match_type == 'exact' %}
         auto mf_exact = mf->mutable_exact();
-        {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
+        {% set keyfield = key.field %}
+        {% set bitwidth = key.bitwidth %}
+        {% if keyfield in ['ipaddr','mac'] or bitwidth in [24] %}
+           {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
+        {% else %}
+          {{key.field}}SetVal(static_cast<uint{{key.bitwidth}}_t>(tableEntry->{{ key.name | lower }}), mf_exact, {{key.bitwidth}});
+        {% endif %}  
+        //{{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
         {% elif key.match_type == 'lpm' %}
         auto mf_lpm = mf->mutable_lpm();
-        {{key.field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_lpm, {{key.bitwidth}});
+        {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_lpm, {{key.bitwidth}});
         {% elif key.match_type == 'list' %}
-        assert(0 && "mutable_list is not supported");
-        goto ErrRet;
-        // auto mf1_list = mf1->mutable_xxx();
-        //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+        // BMv2 doesn't support "list" match type, and we are using "optional" match in v1model as our implementation.
+        // Hence, here we only take the first item from the list and program it as optional match.
+        assert(attr_list[i].value.{{key.field}}.count == 1 && "BMv2 only supports one item in list match type");
+        auto mf_optional = mf->mutable_optional();
+        sai_attribute_value_t attr_val;
+            {% if key.field == 'ipprefixlist' %}
+        attr_val.ipaddr.addr_family = attr_list[i].value.ipprefixlist.list[0].addr_family;
+        attr_val.ipaddr.addr = attr_list[i].value.ipprefixlist.list[0].addr;
+        ipaddrSetVal(attr_val, mf_optional, {{key.bitwidth}});
+            {% else %}
+        attr_val.{{ key.field | replace('list', '') }} = attr_list[i].value.{{key.field}}.list[0];
+        {{ key.field | replace('list', '') }}SetVal(attr_val, mf_optional, {{key.bitwidth}});
+            {% endif %}
         {% elif key.match_type == 'range_list' %}
-        assert(0 && "range_list is not supported");
-        goto ErrRet;
-        // auto mf1_list = mf1->mutable_xxx();
-        //{{key.field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+        // BMv2 doesn't support "range_list" match type, and we are using "optional" match in v1model as our implementation.
+        // Hence, here we only take the first item from the list and program it as optional match.
+        assert(attr_list[i].value.{{key.field}}.count == 1 && "BMv2 only supports one item in list match type");
+        auto mf_optional = mf->mutable_optional();
+        {{ key.field | replace('rangelist', '') }}SetVal(attr_list[i].value.{{key.field}}.list[0].min, mf_optional, {{key.bitwidth}});
         {% endif %}
     }
-    {% if 'v4_or_v6_id' in key %}
+    {% if key.ip_is_v6_field_id != 0 %}
     {
-        // set v4_or_v6 field
+        // set ip_is_v6_field_id field
         auto mf = matchActionEntry->add_match();
-        mf->set_field_id({{key.v4_or_v6_id}});
+        mf->set_field_id({{key.ip_is_v6_field_id}});
         auto mf_exact = mf->mutable_exact();
-        booldataSetVal((tableEntry->{{ key.sai_key_name | lower }}.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
+        booldataSetVal((tableEntry->{{ key.name | lower }}.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
     }
     {% endif %}
     {% endfor %}
