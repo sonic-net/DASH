@@ -64,8 +64,8 @@ control outbound(inout headers_t hdr,
         /* assert(overlay_dip_is_v6 == 1 && overlay_sip_is_v6 == 1);
         assert(overlay_dip_mask_is_v6 == 1 && overlay_sip_mask_is_v6 == 1);
         assert(underlay_dip_is_v6 != 1 && underlay_sip_is_v6 != 1); */
-        meta.encap_data.original_overlay_dip = hdr.ipv4.src_addr;
-        meta.encap_data.original_overlay_sip = hdr.ipv4.dst_addr;
+        meta.encap_data.original_overlay_dip = hdr.u0_ipv4.src_addr;
+        meta.encap_data.original_overlay_sip = hdr.u0_ipv4.dst_addr;
 
         service_tunnel_encode(hdr,
                               overlay_dip,
