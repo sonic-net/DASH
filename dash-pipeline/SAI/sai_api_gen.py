@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 
-from typing import Iterator
-
-
 try:
     import os
     import json
     import argparse
     import copy
+    import re
     from jinja2 import Template, Environment, FileSystemLoader
-    from typing import (Type, Any, Dict, List, Optional, Callable)
+    from typing import (Type, Any, Dict, List, Optional, Callable, Iterator)
     import jsonpath_ng.ext as jsonpath_ext
     import jsonpath_ng as jsonpath
 except ImportError as ie:
@@ -1221,14 +1219,21 @@ class SAIGenerator:
 
         # If any counter doesn't have any table assigned, they should be added as port attributes and track globally.
         new_port_counters: List[SAICounter] = []
+        is_first_attr = False
         with open('SAI/experimental/saiportextensions.h', 'r') as f:
             content = f.read()
+
+            all_port_attrs = re.findall(r'SAI_PORT_ATTR_\w+', content)
+            is_first_attr = len(all_port_attrs) == 3
+
             for sai_counter in self.dash_sai_ext.sai_counters:
                 if len(sai_counter.param_actions) == 0 and sai_counter.as_attr == False:
-                    if sai_counter.name not in content:
+                    sai_counter_port_attr_name = f"SAI_PORT_ATTR_{sai_counter.name.upper()}"
+                    if sai_counter_port_attr_name not in all_port_attrs:
                         new_port_counters.append(sai_counter)
 
-        sai_counters_str = SAITemplateRender('templates/saicounter.j2').render(sai_counters = new_port_counters)
+        print("Is first port attr: " + str(is_first_attr) + ", all port attrs: " + str(all_port_attrs))
+        sai_counters_str = SAITemplateRender('templates/saicounter.j2').render(table_name = "port", sai_counters = new_port_counters, is_first_attr = is_first_attr)
         sai_counters_lines = [s.rstrip(" \n") for s in sai_counters_str.split('\n')]
         sai_counters_lines = sai_counters_lines[:-1] # Remove the last empty line, so we won't add extra empty line to the file.
 

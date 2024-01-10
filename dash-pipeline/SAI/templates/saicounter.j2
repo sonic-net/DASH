@@ -8,6 +8,11 @@
      * @allownull true
      * @default SAI_NULL_OBJECT_ID
      */
-    SAI_PORT_ATTR_{{ counter.name | upper }},
+    {% if is_first_attr == true %}
+    SAI_{{ table_name | upper }}_ATTR_{{ counter.name | upper }} = SAI_{{ table_name | upper }}_ATTR_EXTENSIONS_RANGE_START,
+    {% set is_first_attr = true %}
+    {% else %}
+    SAI_{{ table_name | upper }}_ATTR_{{ counter.name | upper }},
+    {% endif %}
 
 {% endfor %}
