@@ -1232,7 +1232,6 @@ class SAIGenerator:
                     if sai_counter_port_attr_name not in all_port_attrs:
                         new_port_counters.append(sai_counter)
 
-        print("Is first port attr: " + str(is_first_attr) + ", all port attrs: " + str(all_port_attrs))
         sai_counters_str = SAITemplateRender('templates/saicounter.j2').render(table_name = "port", sai_counters = new_port_counters, is_first_attr = is_first_attr)
         sai_counters_lines = [s.rstrip(" \n") for s in sai_counters_str.split('\n')]
         sai_counters_lines = sai_counters_lines[:-1] # Remove the last empty line, so we won't add extra empty line to the file.
