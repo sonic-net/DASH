@@ -546,7 +546,7 @@ class SAICounter(SAIAPITableAttribute):
         if self.as_attr:
             counter_storage_type = SAITypeSolver.get_object_sai_type(self.bitwidth)
 
-        # Otherwise, this counter should be linked to a SAI counter using a object it.
+        # Otherwise, this counter should be linked to a SAI counter using an object ID.
         # In this case, the type needs to be sai_object_id_t.
         else:
             counter_storage_type = SAITypeSolver.get_sai_type("sai_object_id_t")
@@ -1013,7 +1013,6 @@ class DASHSAIExtensions(SAIObject):
         for p4rt_counter in all_p4rt_counters:
             counter = SAICounter.from_p4rt(p4rt_counter, var_ref_graph)
             self.sai_counters.extend(counter.generate_final_counter_on_type())
-        print(self.sai_counters)
 
     def __parse_sai_apis_from_p4rt(self, program: Dict[str, Any], ignore_tables: List[str]) -> None:
         # Group all counters by action name.
