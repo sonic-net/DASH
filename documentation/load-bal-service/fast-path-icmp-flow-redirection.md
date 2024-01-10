@@ -62,7 +62,7 @@ The fast path ICMP flow redirection packet is based on ICMP redirect packet ([IP
 
 The detailed packet format is described as below:
 
-|SLB IP|APPL IP|GRE|SLB MAC|VM MAC|IP|Inner Src IP|Inner Dst IP|ICMPv4/v6 Redirect|Redirect Option (IPv6 only)|Redirection Info|
+|SLB IP|APPL IP|GRE|SLB MAC|VM MAC|IP|Inner Src IP|Inner Dst IP|ICMP v4/v6 Redirect|Redirect Option (IPv6 only)|Redirection Info|
 |------|-------|---|-------|------|--|------------|------------|------------------|---------------------------|----------------|
 
 The `RedirectOption` and `RedirectInfo` structs are defined as below:
@@ -134,7 +134,7 @@ The following shall be used for translations:
 
 All fast path packet handling and flow manipulation are done under the SAI API, hence there is no SAI API added for implementing the feature.
 
-### SAI API for fast path enablement
+### SAI API for enabling and disabling fast path
 
 In case of live sites, for example, fast path goes wrong and incorrectly updates the flow, we will need a toggle to disable this behavior.
 

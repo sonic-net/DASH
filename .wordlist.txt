@@ -262,6 +262,7 @@ hw
 HW
 IETF
 ICLA
+icmp
 ICMP
 idempotency
 IDL
@@ -552,6 +553,7 @@ stateful
 statemachine
 stdout
 struct
+structs
 subclassed
 subdirectories
 subdirectory
