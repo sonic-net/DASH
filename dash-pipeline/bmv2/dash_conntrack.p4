@@ -124,7 +124,7 @@ control ConntrackOut(inout headers_t hdr,
               exact @name("ipv4_addr1");
           directionNeutralAddr(meta.direction, hdr.customer_ipv4.dst_addr, hdr.customer_ipv4.src_addr):
               exact @name("ipv4_addr2");
-          hdr.ipv4.protocol : exact;
+          hdr.customer_ipv4.protocol : exact;
           directionNeutralPort(meta.direction, hdr.customer_tcp.src_port, hdr.customer_tcp.dst_port):
               exact @name("tcp_port1");
           directionNeutralPort(meta.direction, hdr.customer_tcp.dst_port, hdr.customer_tcp.src_port):
