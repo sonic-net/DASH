@@ -99,7 +99,7 @@ action push_vxlan_tunnel_ ## underlay_id ## (inout headers_t hdr, \
     hdr. ## underlay_id ## _udp.src_port = 0; \
     hdr. ## underlay_id ## _udp.dst_port = UDP_PORT_VXLAN; \
     hdr. ## underlay_id ## _udp.length = (UDP_HDR_SIZE + VXLAN_HDR_SIZE + ETHER_HDR_SIZE +
-        ## overlay_id ## _ip_len);
+        ## overlay_id ## _ip_len); \
     hdr. ## underlay_id ## _udp.checksum = 0; \
     \
     hdr. ## underlay_id ## _vxlan.setValid(); \
