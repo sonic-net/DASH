@@ -351,6 +351,7 @@ DASH_ENI_TABLE:{{eni}}
     "pl_underlay_sip": {{ip_addr}} (OPTIONAL)
     "v4_meter_policy_id": {{string}} (OPTIONAL)
     "v6_meter_policy_id": {{string}} (OPTIONAL)
+    "disable_fast_path_icmp_flow_redirection": {{bool}} (OPTIONAL)
 ```
 ```
 key                      = DASH_ENI_TABLE:eni ; ENI MAC as key
@@ -363,8 +364,9 @@ vnet                     = Vnet that ENI belongs to
 pl_sip_encoding          = Private Link encoding for IPv6 SIP transpositions; Format "0xfield_value/0xfull_mask". field_value must be used as a replacement to the
 			   first len(full_mask) bits of pl_sip. Last 32 bits are reserved for the IPv4 CA. Logic: ((pl_sip & !full_mask) | field_value).
 pl_underlay_sip          = Underlay SIP (ST GW VIP) to be used for all private link transformation for this ENI
-v4_meter_policy_id	 = IPv4 meter policy ID
-v6_meter_policy_id	 = IPv6 meter policy ID
+v4_meter_policy_id	     = IPv4 meter policy ID
+v6_meter_policy_id	     = IPv6 meter policy ID
+disable_fast_path_icmp_flow_redirection     = Disable handling fast path ICMP flow redirection packets
 ```
 
 ### 3.2.4 TAG
