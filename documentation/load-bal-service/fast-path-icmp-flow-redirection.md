@@ -1,10 +1,8 @@
-# Fast Path (aka Load  Balancer)
+# Fast Path ICMP flow redirection
 
 ## Overview
 
-FastPath is the feature that switches traffic from using VIP-to-VIP 
-connectivity (which involves transiting SLB MUXes), into using a direct
-path between VMs (direct PA to PA path).
+FastPath is the feature that switches traffic from using VIP-to-VIP connectivity (which involves transiting SLB MUXes), into using a direct path between VMs (direct PA to PA path).
 
 ## Definitions
 
@@ -16,7 +14,7 @@ path between VMs (direct PA to PA path).
 
 ## Architecture
 
-![load-balancer-architecture](images/load-balancer-architecture.png)
+![load-balancer-fast-path-architecture](images/load-balancer-fast-path-architecture.png)
 
 ## How it works?
 
