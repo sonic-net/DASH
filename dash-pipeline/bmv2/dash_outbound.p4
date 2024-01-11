@@ -154,6 +154,8 @@ control outbound(inout headers_t hdr,
                                     bit<1> meter_class_override) {
         meta.encap_data.overlay_dmac = hdr.ethernet.dst_addr;
         meta.encap_data.vni = tunnel_key;
+        // PL has its own underlay SIP, so override
+        meta.encap_data.underlay_sip = meta.eni_data.pl_underlay_sip;
 
         service_tunnel_encode(hdr,
                               overlay_dip,
