@@ -229,7 +229,7 @@ PUSH_NVGRE_TUNNEL_DEF(u1, u0)
                            underlay_dip, \
                            underlay_sip, \
                            tunnel_key); \
-        } else if (meta.tunnel_pointer == 0) { \
+        } else if (meta.tunnel_pointer == 1) { \
             push_vxlan_tunnel_u1(hdr, \
                            overlay_dmac, \
                            underlay_dmac, \
@@ -247,7 +247,7 @@ PUSH_NVGRE_TUNNEL_DEF(u1, u0)
                            underlay_dip, \
                            underlay_sip, \
                            tunnel_key); \
-        } else if (meta.tunnel_pointer == 0) { \
+        } else if (meta.tunnel_pointer == 1) { \
             push_vxlan_tunnel_u1(hdr, \
                            overlay_dmac, \
                            underlay_dmac, \
