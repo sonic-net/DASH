@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+from typing import Iterator
+
+
 try:
     import os
     import json
@@ -498,6 +501,11 @@ class SAIAPITableAttribute(SAIObject):
         # Delete all vars with *_is_v6 in their names.
         return [v for v in vars if '_is_v6' not in v.name]
 
+    def set_sai_type(self, sai_type_info: SAITypeInfo) -> None:
+        self.type = sai_type_info.name
+        self.field = sai_type_info.sai_attribute_value_field
+        if self.default == None:
+            self.default = sai_type_info.default
 
 @sai_parser_from_p4rt
 class SAICounter(SAIAPITableAttribute):
@@ -533,12 +541,23 @@ class SAICounter(SAIAPITableAttribute):
         print("Parsing counter: " + self.name)
         self.__parse_sai_counter_annotation(p4rt_counter)
 
-        counter_storage_type = SAITypeSolver.get_object_sai_type(self.bitwidth)
-        self.type = counter_storage_type.name
-        self.field = counter_storage_type.sai_attribute_value_field
+        # If this counter is marked as SAI attributes, then we need to generate dedicated SAI attributes for this counter.
+        # In this case, the type needs to be created based on the size.
+        if self.as_attr:
+            counter_storage_type = SAITypeSolver.get_object_sai_type(self.bitwidth)
 
-        counter_unit: str = p4rt_counter['spec']['unit']
-        if counter_unit in ['BYTES', 'PACKETS', 'BOTH']:
+        # Otherwise, this counter should be linked to a SAI counter using an object ID.
+        # In this case, the type needs to be sai_object_id_t.
+        else:
+            counter_storage_type = SAITypeSolver.get_sai_type("sai_object_id_t")
+            self.name = f"{self.name}_counter_id"
+            self.isreadonly = "false"
+            self.object_name = "counter"
+        
+        self.set_sai_type(counter_storage_type)
+
+        counter_unit = str(p4rt_counter['spec']['unit']).lower()
+        if counter_unit in ['bytes', 'packets', 'both']:
             self.counter_type = counter_unit.lower()
         else:
             raise ValueError(f'Unknown counter unit: {counter_unit}')
@@ -581,6 +600,24 @@ class SAICounter(SAIAPITableAttribute):
                         self.as_attr = True if kv['value']['stringValue'] == "true" else False
                     else:
                         raise ValueError("Unknown attr annotation " + kv['key'])
+
+    def generate_final_counter_on_type(self) -> 'Iterator[SAICounter]':
+        # If this counter is not used as an attribute, then we need to treat it as a counter object id.
+        if not self.as_attr:
+            yield self
+
+        # Otherwise, we need to generate dedicated SAI attributes for this counter.
+        else:
+            if self.counter_type != 'both':
+                self.name = f"{self.name}_{self.counter_type}_counter"
+                yield self
+            else:
+                packets_counter = copy.deepcopy(self)
+                packets_counter.name = f"{packets_counter.name}_packets_counter"
+                yield packets_counter
+
+                self.name = f"{self.name}_bytes_counter"
+                yield self
 
 
 @sai_parser_from_p4rt
@@ -630,11 +667,8 @@ class SAIAPITableKey(SAIAPITableAttribute):
             sai_type_info = SAITypeSolver.get_sai_type(self.type)
         else:
             sai_type_info = SAITypeSolver.get_match_key_sai_type(self.match_type, self.bitwidth)
-            self.type = sai_type_info.name
 
-        self.field = sai_type_info.sai_attribute_value_field
-        if self.default == None:
-            self.default = sai_type_info.default
+        self.set_sai_type(sai_type_info)
 
         return
 
@@ -710,11 +744,8 @@ class SAIAPITableActionParam(SAIAPITableAttribute):
             sai_type_info = SAITypeSolver.get_sai_type(self.type)
         else:
             sai_type_info = SAITypeSolver.get_object_sai_type(self.bitwidth)
-            self.type = sai_type_info.name
 
-        self.field = sai_type_info.sai_attribute_value_field
-        if self.default == None:
-            self.default = sai_type_info.default
+        self.set_sai_type(sai_type_info)
 
         return
 
@@ -919,8 +950,7 @@ class SAIAPITableData(SAIObject):
                 sai_attributes_by_order.setdefault(action_param.order, []).append(action_param)
 
         for counter in self.counters:
-            if counter.as_attr:
-                sai_attributes_by_order.setdefault(counter.order, []).append(counter)
+            sai_attributes_by_order.setdefault(counter.order, []).append(counter)
         
         # Merge all attributes into a single list.
         self.sai_attributes = []
@@ -982,7 +1012,7 @@ class DASHSAIExtensions(SAIObject):
         all_p4rt_counters = p4rt_value[COUNTERS_TAG]
         for p4rt_counter in all_p4rt_counters:
             counter = SAICounter.from_p4rt(p4rt_counter, var_ref_graph)
-            self.sai_counters.append(counter)
+            self.sai_counters.extend(counter.generate_final_counter_on_type())
 
     def __parse_sai_apis_from_p4rt(self, program: Dict[str, Any], ignore_tables: List[str]) -> None:
         # Group all counters by action name.
