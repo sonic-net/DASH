@@ -4,17 +4,17 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
 
 # "All" type targets for convenience
-all:p4 sai saithrift-server docker-saithrift-client docker-saichallenger-client test
+all:p4 sai saithrift-server docker-saithrift-client docker-saichallenger-client vpp test
 
 run-all-tests:run-libsai-test run-saithrift-client-tests run-saichallenger-tests
 run-saithrift-client-tests: run-saithrift-ptftests run-saithrift-pytests
 run-saithrift-client-dev-tests: run-saithrift-dev-ptftests run-saithrift-dev-pytests
 
 .PHONY:clean
-clean: kill-all p4-clean sai-clean test-clean network-clean saithrift-server-clean
+clean: kill-all p4-clean sai-clean test-clean network-clean saithrift-server-clean vpp-clean
 	rm -rf $(P4_OUTDIR)
 
-kill-all: kill-saithrift-server kill-switch undeploy-ixiac kill-saichallenger-client
+kill-all: kill-saithrift-server kill-switch undeploy-ixiac kill-saichallenger-client kill-vpp
 
 PWD := $(realpath $(mkfile_dir))
 DASH_USER ?=dashuser
@@ -63,6 +63,10 @@ include dockerfiles/DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG.env
 
 # SAIChallenger Client image built locally with saithrift client libs + PTF & Pytest frameworks
 DOCKER_SAI_CHALLENGER_CLIENT_IMG ?= local/dash-saichallenger-client:latest
+
+# Run/compile vpp
+# include file defines DOCKER_VPP_IMG
+include dockerfiles/DOCKER_VPP_IMG.env
 
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
@@ -250,6 +254,49 @@ check-sai-spec:
 run-saithrift-bldr-bash:
 	$(DOCKER_RUN_SAITHRIFT_BLDR) \
 	    /bin/bash
+
+######################################
+# VPP date-plane app TARGETS
+######################################
+DOCKER_RUN_VPP = docker run\
+	$(DOCKER_FLAGS) \
+	-v $(PWD)/bmv2:/bmv2 \
+	-v $(PWD)/tests:/tests \
+	-v $(PWD)/../:/dash \
+	--network=host \
+	-u $(HOST_USER):$(HOST_GROUP) \
+	--rm \
+
+.PHONY:vpp vpp-clean
+vpp-clean:
+	$(DOCKER_RUN_VPP) \
+	--name dash-vpp-$(USER) \
+	-w /dash/dash-pipeline/vpp-plugin $(DOCKER_VPP_IMG) \
+	make clean
+
+vpp:
+	@echo "Compile vpp for date-plane app ..."
+	$(DOCKER_RUN_VPP) \
+	--name dash-vpp-$(USER) \
+	-w /dash/dash-pipeline/vpp-plugin $(DOCKER_VPP_IMG) \
+	make
+
+run-vpp-bash:
+	$(DOCKER_RUN_VPP) \
+	--name dash-vpp-$(USER) \
+	-w /dash/dash-pipeline/vpp-plugin $(DOCKER_VPP_IMG) \
+	/bin/bash
+
+run-vpp:
+	$(DOCKER_RUN_VPP) \
+	--privileged \
+	-u root \
+	--name dash-vpp-$(USER) \
+	-w /dash/dash-pipeline/vpp-plugin $(DOCKER_VPP_IMG) \
+	./vpp.sh
+
+kill-vpp:
+	-docker kill dash-vpp-$(USER)
 
 ######################################
 # P4 Behavioral-model (switch) TARGETS
@@ -620,6 +667,35 @@ docker-publish-dash-grpc:
 	@echo "Publish $(DOCKER_GRPC_IMG) - requires credentials, can only do from DASH repo, not a fork"
 	docker push $(DOCKER_GRPC_IMG)
 	[ -n $(DOCKER_GRPC_IMG_CTAG) ] && docker push $(DOCKER_GRPC_IMG_NAME):$(DOCKER_GRPC_IMG_CTAG)
+
+###############################
+
+DOCKER_VPP_IMG_TAG = $(shell cat dockerfiles/Dockerfile.vpp | $(SHA1SUM))
+DOCKER_VPP_IMG = $(DOCKER_VPP_IMG_NAME):$(DOCKER_VPP_IMG_TAG)
+
+docker-dash-vpp:
+	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_VPP_IMG); } || \
+	docker build \
+	    -f dockerfiles/Dockerfile.vpp \
+	    -t $(DOCKER_VPP_IMG) \
+	    --build-arg user=$(DASH_USER) \
+	    --build-arg group=$(DASH_GROUP) \
+	    --build-arg uid=$(DASH_UID) \
+	    --build-arg guid=$(DASH_GUID) \
+	    --build-arg hostname=$(DASH_HOST) \
+	    --build-arg available_processors=$(shell nproc) \
+		dockerfiles
+	[ -n $(DOCKER_VPP_IMG_CTAG) ] && \
+		docker tag $(DOCKER_VPP_IMG) $(DOCKER_VPP_IMG_NAME):$(DOCKER_VPP_IMG_CTAG)
+
+docker-pull-dash-vpp:
+	docker pull $(DOCKER_VPP_IMG)
+
+docker-publish-dash-vpp:
+	@echo "Publish $(DOCKER_VPP_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_VPP_IMG)
+	[ -n $(DOCKER_VPP_IMG_CTAG) ] && \
+		docker push $(DOCKER_VPP_IMG_NAME):$(DOCKER_VPP_IMG_CTAG)
 
 ###############################
 # BMV2-PKTGEN NETWORKING TARGETS
