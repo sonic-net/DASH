@@ -262,6 +262,7 @@ hw
 HW
 IETF
 ICLA
+icmp
 ICMP
 idempotency
 IDL
@@ -421,6 +422,7 @@ pingmesh
 PIR
 pluggable
 PLVision's
+PKTS
 pmon
 PNA
 png
@@ -552,6 +554,7 @@ stateful
 statemachine
 stdout
 struct
+structs
 subclassed
 subdirectories
 subdirectory

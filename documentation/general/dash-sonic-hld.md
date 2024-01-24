@@ -269,7 +269,7 @@ It is possible that a given packet can get a hit in route table and/or mapping t
 
 ## 2.5 FastPath
 
-This section captures the Sonic-Dash specifics of FastPath use-case. Detailed document on FastPath is captured here ([FastPath](https://github.com/sonic-net/DASH/blob/main/documentation/load-bal-service/load-balancer-v3.md))
+This section captures the Sonic-Dash specifics of FastPath use-case. Detailed document on FastPath is captured here ([FastPath](https://github.com/sonic-net/DASH/blob/main/documentation/load-bal-service/fast-path-icmp-flow-redirection.md))
 
 The following are the salient points and requirements. Detailed design for FastPath feature shall come as a separate PR. FastPath redirect packets shall be handled by a standalone application and use SAI APIs to update the appliance/dpu flows. 
 - FastPath kicks in when appliance receives an ICMP redirect that matches an existing unified flow
@@ -280,60 +280,6 @@ The following are the salient points and requirements. Detailed design for FastP
 	- Original Outbound packet shall have an inner IPv6 header and outer IPv4 (Src VIP-A and Dst VIP-B)
 	- After an ICMP redirect is received from VIP-B hosting MUX, the Outbound flow shall be fixed-up to have outer IPV4 dst address to use the Redirect IP of VIP-B. Same fixup for Inbound flow to change VIP-B to Redirect IP
 	- After an ICMP redirect is received from VIP-A hosting MUX, the Outbound flow shall be fixed-up to have outer IPV4 src address to use the Redirect IP of VIP-A. Same fixup for Inbound flow to change VIP-A to Redirect IP
-	- ICMP redirect shall have the original inner IPv6 address as the IP header's src and dst address. 
-	- Redirect info shall contain the transposed IPv6 address, src and dst ports, sequence number and the encap type (NVGRE in this case) in addition to redirect address. 
-		```
-			struct 
-			{
-		            uint32 Reserved;
-		            in6_addr Target;
-		            in6_addr Destination;
-		            uint8 Type;
-		            uint8 Length;
-		            uint8 Reserved2[6];            
-		            IPV6_HEADER Ipv6Header;
-		            uint16 SourcePort;
-		            uint16 DestinationPort;
-		            uint32 SequenceNumber;
-		        } Redirect;
-			
-			struct 
-			{ 
-			    uint32 Version; 
-			    uint16 AddrFamily; 
-			    uint16 EncapType; 
-			    uint32 EncapId; 
-			    union { 
-			        struct { 
-			            in_addr DipPAv4; 
-			            char VMMac[MAC_ADDR_SIZE]; 
-			        } Info4; 
-			        struct { 
-			            in6_addr DipPAv6; 
-			            char VMMac[MAC_ADDR_SIZE]; 
-			        } Info6; 
-		   	} Redirect_Info; 
-		```
-- Implementation can use the above struct as a type-cast reference (packed as metadata in the redirect packet) and map it to a flow. Full packet capture is available in this ([doc](https://github.com/sonic-net/DASH/blob/main/documentation/load-bal-service/load-balancer-v3.md)) 
-- Redirect packet format is as below:
-
-
-  |SLB IP|APPL IP|GRE|SLB MAC|VM MAC|IP|Inner Src IP|Inner Dst IP|ICMP|Target Addr|Dst Addr|Redirect Header|Custom format|
-  |------|-------|---|-------|------|--|------------|------------|----|-----------|--------|---------------|-------------|
- 
-- The following shall be used for translations
-
-| Field                         | Mapping                       |
-| ----------------------------- | ----------------------------- |
-| VM Mac                        | Source ENI                    |
-| Inner Src IP                  | Original Src IP               |
-| Inner Dst IP                  | Original Dst IP               |
-| Target Address                | Original Dst IP               |
-| Redirect Header               | Original IPv6 Header + TCP ports (5 tuple) |
-| Addr Family                   | AF_INET/AF_INET6              |
-| Encap Type                    | NVGRE 1/VXLAN 2               |
-| Encap Id                      | Redirect GRE Key/ VXLAN Id    |
-| Custom Redirect Info          | Redirect DIP and Dst Mac      |
 
 # 3 Modules Design
 
@@ -405,6 +351,7 @@ DASH_ENI_TABLE:{{eni}}
     "pl_underlay_sip": {{ip_addr}} (OPTIONAL)
     "v4_meter_policy_id": {{string}} (OPTIONAL)
     "v6_meter_policy_id": {{string}} (OPTIONAL)
+    "disable_fast_path_icmp_flow_redirection": {{bool}} (OPTIONAL)
 ```
 ```
 key                      = DASH_ENI_TABLE:eni ; ENI MAC as key
@@ -417,8 +364,9 @@ vnet                     = Vnet that ENI belongs to
 pl_sip_encoding          = Private Link encoding for IPv6 SIP transpositions; Format "0xfield_value/0xfull_mask". field_value must be used as a replacement to the
 			   first len(full_mask) bits of pl_sip. Last 32 bits are reserved for the IPv4 CA. Logic: ((pl_sip & !full_mask) | field_value).
 pl_underlay_sip          = Underlay SIP (ST GW VIP) to be used for all private link transformation for this ENI
-v4_meter_policy_id	 = IPv4 meter policy ID
-v6_meter_policy_id	 = IPv6 meter policy ID
+v4_meter_policy_id	     = IPv4 meter policy ID
+v6_meter_policy_id	     = IPv6 meter policy ID
+disable_fast_path_icmp_flow_redirection     = Disable handling fast path ICMP flow redirection packets
 ```
 
 ### 3.2.4 TAG
