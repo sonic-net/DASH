@@ -162,19 +162,29 @@ typedef enum _sai_eni_attr_t
 
 For debugging purposes, we will also need to add counters in order to give insights on how fast path works internally.
 
-#### Port level counter
+In order provide a unified way for retriving all counters for any DASH counters, all counters below will be generated as stats, because many DASH counters are not [regular data path counters that modeled in SAI](https://github.com/opencomputeproject/SAI/blob/master/inc/saicounter.h), which tracks packets and bytes.
 
-Port level counter will be added as port attribute extensions following the [SAI extension model](https://github.com/opencomputeproject/SAI/blob/master/doc/SAI-Extensions.md#extension-custom-attributes).
+#### Port stats attributes
 
-| Attribute name | Description |
-| -------------- | ----------- |
-| SAI_PORT_ATTR_FAST_PATH_ICMP_IN_COUNTER_ID | The number of fast path packets/bytes received |
-| SAI_PORT_ATTR_FAST_PATH_ENI_MISS_COUNTER_ID | The number of fast path packet received but could not find corresponding ENI to process |
-
-#### ENI level counter attributes
+Port level counter will be added as port stats extensions following the [SAI extension model](https://github.com/opencomputeproject/SAI/blob/master/doc/SAI-Extensions.md#extension-custom-attributes).
 
 | Attribute name | Description |
 | -------------- | ----------- |
-| SAI_ENI_ATTR_FAST_PATH_ICMP_IN_COUNTER_ID | The number of fast path packets/bytes received |
-| SAI_ENI_ATTR_FAST_PATH_FLOW_REDIRECTED_COUNTER_ID | The number of flows that redirected due to fast path packet received |
-| SAI_ENI_ATTR_FAST_PATH_FLOW_MISS_COUNTER_ID | The number of fast path packet received but could not find flow to update |
+| SAI_PORT_ATTR_LB_FAST_PATH_ICMP_IN_PKTS | The number of fast path packets received |
+| SAI_PORT_ATTR_LB_FAST_PATH_ICMP_IN_BYTES | The total bytes of fast path packets received |
+| SAI_PORT_ATTR_LB_FAST_PATH_ENI_MISS_PKTS | The number of fast path packet received but could not find corresponding ENI to process |
+| SAI_PORT_ATTR_LB_FAST_PATH_ENI_MISS_BYTES | The total bytes of fast path packet received but could not find corresponding ENI to process |
+
+#### ENI stats attributes
+
+| Attribute name | Description |
+| -------------- | ----------- |
+| SAI_ENI_ATTR_LB_FAST_PATH_ICMP_IN_PKTS | The number of fast path packets received |
+| SAI_ENI_ATTR_LB_FAST_PATH_ICMP_IN_BYTES | The total bytes of fast path packets received |
+
+#### Flow table stats attributes
+
+| Attribute name | Description |
+| -------------- | ----------- |
+| SAI_ENI_ATTR_LB_FAST_PATH_FLOW_REDIRECTED_COUNT | The number of flows that redirected due to fast path packet received |
+| SAI_ENI_ATTR_LB_FAST_PATH_FLOW_MISS_COUNT | The number of flows that is missing when trying to redirected by fast path packets |
