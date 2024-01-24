@@ -162,7 +162,7 @@ typedef enum _sai_eni_attr_t
 
 For debugging purposes, we will also need to add counters in order to give insights on how fast path works internally.
 
-In order provide a unified way for retriving all counters for any DASH counters, all counters below will be generated as stats, because many DASH counters are not [regular data path counters that modeled in SAI](https://github.com/opencomputeproject/SAI/blob/master/inc/saicounter.h), which tracks packets and bytes.
+In order provide a unified way for retrieving all counters for any DASH counters, all counters below will be added as stats, because many DASH counters are not [regular data path counters that modeled in SAI](https://github.com/opencomputeproject/SAI/blob/master/inc/saicounter.h), which tracks packets and bytes.
 
 #### Port stats attributes
 
