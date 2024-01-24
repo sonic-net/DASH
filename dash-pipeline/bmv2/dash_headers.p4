@@ -94,19 +94,32 @@ header ipv6_t {
 const bit<16> IPV6_HDR_SIZE=320/8;
 
 struct headers_t {
-    ethernet_t ethernet;
-    ipv4_t     ipv4;
-    ipv4options_t ipv4options;
-    ipv6_t     ipv6;
-    udp_t      udp;
-    tcp_t      tcp;
-    vxlan_t    vxlan;
-    nvgre_t    nvgre;
-    ethernet_t inner_ethernet;
-    ipv4_t     inner_ipv4;
-    ipv6_t     inner_ipv6;
-    udp_t      inner_udp;
-    tcp_t      inner_tcp;
+    /* Underlay 1 headers */
+    ethernet_t    u1_ethernet;
+    ipv4_t        u1_ipv4;
+    ipv4options_t u1_ipv4options;
+    ipv6_t        u1_ipv6;
+    udp_t         u1_udp;
+    tcp_t         u1_tcp;
+    vxlan_t       u1_vxlan;
+    nvgre_t       u1_nvgre;
+
+    /* Underlay 0 headers */
+    ethernet_t    u0_ethernet;
+    ipv4_t        u0_ipv4;
+    ipv4options_t u0_ipv4options;
+    ipv6_t        u0_ipv6;
+    udp_t         u0_udp;
+    tcp_t         u0_tcp;
+    vxlan_t       u0_vxlan;
+    nvgre_t       u0_nvgre;
+
+    /* Customer headers */
+    ethernet_t    customer_ethernet;
+    ipv4_t        customer_ipv4;
+    ipv6_t        customer_ipv6;
+    udp_t         customer_udp;
+    tcp_t         customer_tcp;
 }
 
 enum bit<16> dash_encapsulation_t {
