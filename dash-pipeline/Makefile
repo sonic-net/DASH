@@ -1,5 +1,12 @@
 SHELL = /bin/bash
 
+HAVE_VPP ?=
+ifeq ($(HAVE_VPP),y)
+VPP_LINK = veth4
+VPP_LINK_PEER = veth5
+SWITCH_PORT_VPP = --interface 2@$(VPP_LINK)
+endif
+
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
 
@@ -283,17 +290,18 @@ vpp:
 
 run-vpp-bash:
 	$(DOCKER_RUN_VPP) \
+	--privileged \
 	--name dash-vpp-$(USER) \
 	-w /dash/dash-pipeline/vpp-plugin $(DOCKER_VPP_IMG) \
 	/bin/bash
 
-run-vpp:
+run-vpp: $(VPP_LINK)
 	$(DOCKER_RUN_VPP) \
 	--privileged \
 	-u root \
 	--name dash-vpp-$(USER) \
 	-w /dash/dash-pipeline/vpp-plugin $(DOCKER_VPP_IMG) \
-	./vpp.sh
+	env HOST_INTERFACE=$(VPP_LINK_PEER) ./vpp.sh startup.conf
 
 kill-vpp:
 	-docker kill dash-vpp-$(USER)
@@ -314,6 +322,7 @@ run-switch: network
 		simple_switch_grpc \
 		--interface 0@veth0 \
 		--interface 1@veth2 \
+		$(SWITCH_PORT_VPP) \
 		--log-console \
 		--no-p4
 
@@ -701,7 +710,7 @@ docker-publish-dash-vpp:
 # BMV2-PKTGEN NETWORKING TARGETS
 ###############################
 
-network:veth0 veth2 disable-ipv6
+network:veth0 veth2 $(VPP_LINK) disable-ipv6
 
 veth0: /sys/class/net/veth0
 /sys/class/net/veth0:
@@ -720,13 +729,27 @@ veth2: /sys/class/net/veth2
 	sudo ip link set veth2 mtu 9500
 	sudo ip link set veth3 mtu 9500
 
+ifeq ($(HAVE_VPP),y)
+$(VPP_LINK): /sys/class/net/$(VPP_LINK)
+/sys/class/net/$(VPP_LINK):
+	sudo ip link add name $(VPP_LINK) type veth peer name $(VPP_LINK_PEER)
+	sudo ip link set dev $(VPP_LINK) up
+	sudo ip link set dev $(VPP_LINK_PEER) up
+	sudo ip link set $(VPP_LINK) mtu 9500
+	sudo ip link set $(VPP_LINK_PEER) mtu 9500
+endif
+
 disable-ipv6:
-	./disable_veth_ipv6.sh
+	VPP_LINK=$(VPP_LINK) VPP_LINK_PEER=$(VPP_LINK_PEER) ./disable_veth_ipv6.sh
 
 # Delete veth's, test existence to avoid needless use of sudo
 network-clean:
 	@-([ -e /sys/class/net/veth0 ] && sudo ip link delete dev veth0 && echo "Deleted veth0/1") || echo "No veth0, not deleting"
 	@-([ -e /sys/class/net/veth2 ] && sudo ip link delete dev veth2 && echo "Deleted veth2/3") || echo "No veth2, not deleting"
+ifeq ($(HAVE_VPP),y)
+	@-([ -e /sys/class/net/$(VPP_LINK) ] && sudo ip link delete dev $(VPP_LINK) \
+		&& echo "Deleted $(VPP_LINK)") || echo "No $(VPP_LINK), not deleting"
+endif
 
 ###############################
 # IXIA-C TARGETS
