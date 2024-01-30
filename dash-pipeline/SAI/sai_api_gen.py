@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 
-from typing import Iterator
-
-
 try:
     import os
     import json
     import argparse
     import copy
+    import re
     from jinja2 import Template, Environment, FileSystemLoader
-    from typing import (Type, Any, Dict, List, Optional, Callable)
+    from typing import (Type, Any, Dict, List, Optional, Callable, Iterator)
     import jsonpath_ng.ext as jsonpath_ext
     import jsonpath_ng as jsonpath
 except ImportError as ie:
@@ -1148,9 +1146,10 @@ class SAIGenerator:
     def __init__(self, dash_sai_ext: DASHSAIExtensions):
         self.dash_sai_ext: DASHSAIExtensions = dash_sai_ext
         self.sai_api_names: List[str] = []
-        self.generated_sai_api_extension_names: List[str] = []
-        self.generated_sai_type_extension_names: List[str] = []
-        self.generated_sai_object_entry_extension_names: List[str] = []
+        self.generated_sai_api_extension_lines: List[str] = []
+        self.generated_sai_type_extension_lines: List[str] = []
+        self.generated_sai_port_attibute_extension_lines: List[str] = []
+        self.generated_sai_object_entry_extension_lines: List[str] = []
         self.generated_header_file_names: List[str] = []
         self.generated_impl_file_names: List[str] = []
 
@@ -1158,13 +1157,16 @@ class SAIGenerator:
         print("\nGenerating all SAI APIs ...")
 
         for sai_api in self.dash_sai_ext.sai_apis:
-            self.generate_sai_api(sai_api)
+            self.generate_sai_api_extensions(sai_api)
 
-        self.generate_dash_sai_global_definitions()
-        self.generate_sai_enum()
+        self.generate_sai_global_extensions()
+        self.generate_sai_type_extensions()
+        self.generate_sai_port_extensions()
+        self.generate_sai_object_extensions()
+        self.generate_sai_enum_extensions()
         self.generate_sai_fixed_api_files()
 
-    def generate_sai_api(self, sai_api: DASHAPISet) -> None:
+    def generate_sai_api_extensions(self, sai_api: DASHAPISet) -> None:
         print("\nGenerating DASH SAI API definitions and implementation for API: " + sai_api.app_name + " ...")
 
         self.sai_api_names.append(sai_api.app_name)
@@ -1184,14 +1186,14 @@ class SAIGenerator:
         self.generated_header_file_names.append(sai_header_file_name)
 
         # Gather SAI API extension name and object types
-        self.generated_sai_api_extension_names.append('    SAI_API_' + sai_api.app_name.upper() + ',\n')
+        self.generated_sai_api_extension_lines.append('    SAI_API_' + sai_api.app_name.upper() + ',\n')
 
         for table in sai_api.tables:
-            self.generated_sai_type_extension_names.append('    SAI_OBJECT_TYPE_' + table.name.upper() + ',\n')
+            self.generated_sai_type_extension_lines.append('    SAI_OBJECT_TYPE_' + table.name.upper() + ',\n')
 
             if table.is_object == 'false':
-                self.generated_sai_object_entry_extension_names.append('    /** @validonly object_type == SAI_OBJECT_TYPE_' + table.name.upper() + ' */')
-                self.generated_sai_object_entry_extension_names.append('    sai_' + table.name + '_t ' + table.name + ';\n')
+                self.generated_sai_object_entry_extension_lines.append('    /** @validonly object_type == SAI_OBJECT_TYPE_' + table.name.upper() + ' */')
+                self.generated_sai_object_entry_extension_lines.append('    sai_' + table.name + '_t ' + table.name + ';\n')
 
         return
 
@@ -1201,26 +1203,52 @@ class SAIGenerator:
         SAITemplateRender('templates/saiapi.cpp.j2').render_to_file('lib/' + sai_impl_file_name, tables = sai_api.tables, app_name = sai_api.app_name, header_prefix = header_prefix)
         self.generated_impl_file_names.append(sai_impl_file_name)
 
-    def generate_dash_sai_global_definitions(self) -> None:
-        print("\nGenerating DASH SAI API global definitions ...")
-
-        # Update SAI extensions with API names and includes
+    def generate_sai_global_extensions(self) -> None:
+        print("\nGenerating SAI global extensions with API names and includes ...")
         with SAIFileUpdater('SAI/experimental/saiextensions.h') as f:
-            f.insert_before('Add new experimental APIs above this line', self.generated_sai_api_extension_names, new_line_only=True)
+            f.insert_before('Add new experimental APIs above this line', self.generated_sai_api_extension_lines, new_line_only=True)
             f.insert_after('new experimental object type includes', ['#include "{}"'.format(f) for f in self.generated_header_file_names], new_line_only=True)
 
-        # Update SAI type extensions with object types
+    def generate_sai_type_extensions(self) -> None:
+        print("\nGenerating SAI type extensions with object types ...")
         with SAIFileUpdater('SAI/experimental/saitypesextensions.h') as f:
-            f.insert_before('Add new experimental object types above this line', self.generated_sai_type_extension_names, new_line_only=True)
+            f.insert_before('Add new experimental object types above this line', self.generated_sai_type_extension_lines, new_line_only=True)
 
-        # Update SAI object struct for entries
+    def generate_sai_port_extensions(self) -> None:
+        print("\nGenerating SAI port extensions with port attributes ...")
+
+        # If any counter doesn't have any table assigned, they should be added as port attributes and track globally.
+        new_port_counters: List[SAICounter] = []
+        is_first_attr = False
+        with open('SAI/experimental/saiportextensions.h', 'r') as f:
+            content = f.read()
+
+            all_port_attrs = re.findall(r'SAI_PORT_ATTR_\w+', content)
+            is_first_attr = len(all_port_attrs) == 3
+
+            for sai_counter in self.dash_sai_ext.sai_counters:
+                if len(sai_counter.param_actions) == 0 and sai_counter.as_attr == False:
+                    sai_counter_port_attr_name = f"SAI_PORT_ATTR_{sai_counter.name.upper()}"
+                    if sai_counter_port_attr_name not in all_port_attrs:
+                        new_port_counters.append(sai_counter)
+
+        sai_counters_str = SAITemplateRender('templates/saicounter.j2').render(table_name = "port", sai_counters = new_port_counters, is_first_attr = is_first_attr)
+        sai_counters_lines = [s.rstrip(" \n") for s in sai_counters_str.split('\n')]
+        sai_counters_lines = sai_counters_lines[:-1] # Remove the last empty line, so we won't add extra empty line to the file.
+
+        with SAIFileUpdater('SAI/experimental/saiportextensions.h') as f:
+            f.insert_before('Add new experimental port attributes above this line', sai_counters_lines)
+
+    def generate_sai_object_extensions(self) -> None:
+        print("\nGenerating SAI object entry extensions ...")
         with SAIFileUpdater('SAI/inc/saiobject.h') as f:
-            f.insert_before('Add new experimental entries above this line', self.generated_sai_object_entry_extension_names, new_line_only=True)
+            f.insert_before('Add new experimental entries above this line', self.generated_sai_object_entry_extension_lines, new_line_only=True)
             f.insert_after('new experimental object type includes', ["#include <{}>".format(f) for f in self.generated_header_file_names], new_line_only=True)
 
         return
 
-    def generate_sai_enum(self) -> None:
+    def generate_sai_enum_extensions(self) -> None:
+        print("\nGenerating SAI enum extensions ...")
         new_sai_enums: List[SAIEnum] = []
         with open('SAI/experimental/saitypesextensions.h', 'r') as f:
             content = f.read()
