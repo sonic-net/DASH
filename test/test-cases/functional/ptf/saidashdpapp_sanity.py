@@ -3,15 +3,16 @@ from sai_base_test import *
 from p4_dash_utils import *
 
 @use_flow
-class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
-    """ Test saithrift vnet outbound"""
+class SaiThriftDpappPktTest(SaiHelperSimplified):
+    """ Test saithrift vnet outbound towards dpapp"""
 
     def setUp(self):
-        super(SaiThriftVnetOutboundUdpPktTest, self).setUp()
+        super(SaiThriftDpappPktTest, self).setUp()
         self.switch_id = 5
         self.outbound_vni = 60
         self.vnet_vni = 100
         self.eni_mac = "00:cc:cc:cc:cc:cc"
+        self.our_mac = "00:00:02:03:04:05"
         self.dst_ca_mac = "00:dd:dd:dd:dd:dd"
         self.vip = "172.16.1.100"
         self.outbound_vni = 100
@@ -20,16 +21,12 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         self.dst_ca_ip = "10.1.2.50"
         self.dst_pa_ip = "172.16.1.20"
         self.src_vm_pa_ip = "172.16.1.1"
+        self.dpapp_port = 2
 
         # SAI attribute name
         self.ip_addr_family_attr = 'ip4'
         # SAI address family
         self.sai_ip_addr_family = SAI_IP_ADDR_FAMILY_IPV4
-
-        self.dut_mac = get_mac("veth0")
-        self.neighbor_mac = get_mac("veth1")
-        set_internal_config(neighbor_mac = mac_in_bytes(self.neighbor_mac),
-                            mac = mac_in_bytes(self.dut_mac))
 
         # Flag to indicate whether configureVnet were successful or not.
         self.configured = False
@@ -157,77 +154,22 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
                                                            routing_actions_disabled_in_flow_resimulation = 0)
         assert(status == SAI_STATUS_SUCCESS)
 
+
         print(f"\n{self.__class__.__name__} configureVnet OK")
         self.configured = True
 
-    def trafficTest(self):
+    def trafficUdpTest(self):
 
         src_vm_ip = "10.1.1.10"
-
-        # check VIP drop
-        wrong_vip = "172.16.100.100"
-        inner_pkt = simple_udp_packet(eth_dst="02:02:02:02:02:02",
-                                        eth_src=self.eni_mac,
-                                        ip_dst=self.dst_ca_ip,
-                                        ip_src=src_vm_ip)
-        vxlan_pkt = simple_vxlan_packet(eth_dst=self.dut_mac,
-                                        eth_src=self.neighbor_mac,
-                                        ip_dst=wrong_vip,
-                                        ip_src=self.src_vm_pa_ip,
-                                        udp_sport=11638,
-                                        with_udp_chksum=False,
-                                        vxlan_vni=self.outbound_vni,
-                                        inner_frame=inner_pkt)
-        print("\tSending packet with wrong vip...")
-        send_packet(self, 0, vxlan_pkt)
-        print("\tVerifying drop...")
-        verify_no_other_packets(self)
-
-        # check routing drop
-        wrong_dst_ca = "10.200.2.50"
-        inner_pkt = simple_udp_packet(eth_dst="02:02:02:02:02:02",
-                                        eth_src=self.eni_mac,
-                                        ip_dst=wrong_dst_ca,
-                                        ip_src=src_vm_ip)
-        vxlan_pkt = simple_vxlan_packet(eth_dst=self.dut_mac,
-                                        eth_src=self.neighbor_mac,
-                                        ip_dst=self.vip,
-                                        ip_src=self.src_vm_pa_ip,
-                                        udp_sport=11638,
-                                        with_udp_chksum=False,
-                                        vxlan_vni=self.outbound_vni,
-                                        inner_frame=inner_pkt)
-        print("\tSending packet with wrong dst CA IP to verify routing drop...")
-        send_packet(self, 0, vxlan_pkt)
-        print("\tVerifying drop...")
-        verify_no_other_packets(self)
-
-        # check mapping drop
-        wrong_dst_ca = "10.1.211.211"
-        inner_pkt = simple_udp_packet(eth_dst="02:02:02:02:02:02",
-                                        eth_src=self.eni_mac,
-                                        ip_dst=wrong_dst_ca,
-                                        ip_src=src_vm_ip)
-        vxlan_pkt = simple_vxlan_packet(eth_dst=self.dut_mac,
-                                        eth_src=self.neighbor_mac,
-                                        ip_dst=self.vip,
-                                        ip_src=self.src_vm_pa_ip,
-                                        udp_sport=11638,
-                                        with_udp_chksum=False,
-                                        vxlan_vni=self.outbound_vni,
-                                        inner_frame=inner_pkt)
-        print("\tSending packet with wrong dst CA IP to verify mapping drop...")
-        send_packet(self, 0, vxlan_pkt)
-        print("\tVerifying drop...")
-        verify_no_other_packets(self)
+        outer_smac = "00:00:05:06:06:06"
 
         # check forwarding
         inner_pkt = simple_udp_packet(eth_dst="02:02:02:02:02:02",
                                         eth_src=self.eni_mac,
                                         ip_dst=self.dst_ca_ip,
                                         ip_src=src_vm_ip)
-        vxlan_pkt = simple_vxlan_packet(eth_dst=self.dut_mac,
-                                        eth_src=self.neighbor_mac,
+        vxlan_pkt = simple_vxlan_packet(eth_dst=self.our_mac,
+                                        eth_src=outer_smac,
                                         ip_dst=self.vip,
                                         ip_src=self.src_vm_pa_ip,
                                         udp_sport=11638,
@@ -239,8 +181,8 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
                                         eth_src=self.eni_mac,
                                         ip_dst=self.dst_ca_ip,
                                         ip_src=src_vm_ip)
-        vxlan_exp_pkt = simple_vxlan_packet(eth_dst=self.neighbor_mac,
-                                        eth_src=self.dut_mac,
+        vxlan_exp_pkt = simple_vxlan_packet(eth_dst="00:00:00:00:00:00",
+                                        eth_src="00:00:00:00:00:00",
                                         ip_dst=self.dst_pa_ip,
                                         ip_src=self.vip,
                                         udp_sport=0, # TODO: Fix sport in pipeline
@@ -251,14 +193,102 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         self.pkt_exp = vxlan_exp_pkt
         print("\tSending outbound packet...")
         send_packet(self, 0, vxlan_pkt)
-        print("\tVerifying packet...")
+        print("\tVerifying packet in dpapp port...")
         verify_packet(self, self.pkt_exp, 0)
-        print ("SaiThriftVnetOutboundUdpPktTest OK")
+        print ("SaiThriftDpappUdpPktTest OK")
+
+    def trafficTcpTest(self):
+
+        src_vm_ip = "10.1.1.10"
+        outer_smac = "00:00:05:06:06:06"
+        tcp_src_port = 0x1234
+        tcp_dst_port = 0x50
+
+        # customer packet: tcp SYN
+        inner_pkt = simple_tcp_packet(eth_dst="02:02:02:02:02:02",
+                                      eth_src=self.eni_mac,
+                                      ip_dst=self.dst_ca_ip,
+                                      ip_src=src_vm_ip,
+                                      tcp_sport=tcp_src_port,
+                                      tcp_dport=tcp_dst_port,
+                                      tcp_flags="S")
+        vxlan_pkt = simple_vxlan_packet(eth_dst=self.our_mac,
+                                        eth_src=outer_smac,
+                                        ip_dst=self.vip,
+                                        ip_src=self.src_vm_pa_ip,
+                                        udp_sport=11638,
+                                        with_udp_chksum=False,
+                                        vxlan_vni=self.outbound_vni,
+                                        inner_frame=inner_pkt)
+
+        inner_exp_pkt = simple_tcp_packet(eth_dst=self.dst_ca_mac,
+                                        eth_src=self.eni_mac,
+                                        ip_dst=self.dst_ca_ip,
+                                        ip_src=src_vm_ip,
+                                        tcp_sport=tcp_src_port,
+                                        tcp_dport=tcp_dst_port,
+                                        tcp_flags="S")
+        vxlan_exp_pkt = simple_vxlan_packet(eth_dst="00:00:00:00:00:00",
+                                        eth_src="00:00:00:00:00:00",
+                                        ip_dst=self.dst_pa_ip,
+                                        ip_src=self.vip,
+                                        udp_sport=0, # TODO: Fix sport in pipeline
+                                        with_udp_chksum=False,
+                                        vxlan_vni=self.vnet_vni,
+                                        inner_frame=inner_exp_pkt)
+
+        self.pkt_exp = vxlan_exp_pkt
+        print("\tSending outbound packet...")
+        send_packet(self, 0, vxlan_pkt)
+        print("\tVerifying packet in dpapp port...")
+        verify_packet(self, self.pkt_exp, 0)
+
+        # customer packet: tcp FIN
+        inner_pkt = simple_tcp_packet(eth_dst="02:02:02:02:02:02",
+                                      eth_src=self.eni_mac,
+                                      ip_dst=self.dst_ca_ip,
+                                      ip_src=src_vm_ip,
+                                      tcp_sport=tcp_src_port,
+                                      tcp_dport=tcp_dst_port,
+                                      tcp_flags="F")
+        vxlan_pkt = simple_vxlan_packet(eth_dst=self.our_mac,
+                                        eth_src=outer_smac,
+                                        ip_dst=self.vip,
+                                        ip_src=self.src_vm_pa_ip,
+                                        udp_sport=11638,
+                                        with_udp_chksum=False,
+                                        vxlan_vni=self.outbound_vni,
+                                        inner_frame=inner_pkt)
+
+        inner_exp_pkt = simple_tcp_packet(eth_dst=self.dst_ca_mac,
+                                        eth_src=self.eni_mac,
+                                        ip_dst=self.dst_ca_ip,
+                                        ip_src=src_vm_ip,
+                                        tcp_sport=tcp_src_port,
+                                        tcp_dport=tcp_dst_port,
+                                        tcp_flags="F")
+        vxlan_exp_pkt = simple_vxlan_packet(eth_dst="00:00:00:00:00:00",
+                                        eth_src="00:00:00:00:00:00",
+                                        ip_dst=self.dst_pa_ip,
+                                        ip_src=self.vip,
+                                        udp_sport=0, # TODO: Fix sport in pipeline
+                                        with_udp_chksum=False,
+                                        vxlan_vni=self.vnet_vni,
+                                        inner_frame=inner_exp_pkt)
+
+        self.pkt_exp = vxlan_exp_pkt
+        print("\tSending outbound packet TCP FIN ...")
+        send_packet(self, 0, vxlan_pkt)
+        print("\tVerifying packet in dpapp port...")
+        verify_packet(self, self.pkt_exp, 0)
+
+        print ("SaiThriftDpappTcpPktTest OK")
 
     def runTest(self):
 
         self.configureVnet()
-        self.trafficTest()
+        self.trafficUdpTest()
+        self.trafficTcpTest()
 
     def tearDown(self):
 
@@ -276,6 +306,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
             status &= sai_thrift_remove_dash_acl_group(self.client, self.in_acl_group_id)
             status &= sai_thrift_remove_direction_lookup_entry(self.client, self.dle)
             status &= sai_thrift_remove_vip_entry(self.client, self.vpe)
+            status &= sai_thrift_remove_route_entry(self.client, self.pa_route_entry)
             if self.configured:
                 # Skip remove status verification if the configuration creation failed
                 self.assertEqual(status, SAI_STATUS_SUCCESS)
@@ -286,127 +317,6 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
                 raise
         finally:
             # Run standard PTF teardown
-            super(SaiThriftVnetOutboundUdpPktTest, self).tearDown()
-
-        # restore default internal_config
-        set_internal_config(neighbor_mac = b'\x00\x00\x00\x00\x00\x00',
-                            mac = b'\x00\x00\x00\x00\x00\x00')
+            super(SaiThriftDpappPktTest, self).tearDown()
 
 
-class SaiThriftVnetOutboundUdpV6PktTest(SaiThriftVnetOutboundUdpPktTest):
-    """ Test saithrift vnet outbound ipv6"""
-
-    def setUp(self):
-        super(SaiThriftVnetOutboundUdpV6PktTest, self).setUp()
-        self.switch_id = 5
-        self.outbound_vni = 60
-        self.vnet_vni = 50
-        self.eni_mac = "00:aa:aa:aa:aa:aa"
-        self.dst_ca_mac = "00:bb:bb:bb:bb:bb"
-        self.vip = "172.16.1.200"
-        self.outbound_vni = 50
-        self.ca_prefix_addr = "2000:aaaa::"
-        self.ca_prefix_mask = "ffff:ffff:ffff:ffff:ffff:ffff:ffff:0"
-        self.dst_ca_ip = "2000:aaaa::232"
-        self.dst_pa_ip = "172.16.1.30"
-        self.src_vm_pa_ip = "172.16.1.2"
-
-        # SAI attribute name
-        self.ip_addr_family_attr = 'ip6'
-        # SAI address family
-        self.sai_ip_addr_family = SAI_IP_ADDR_FAMILY_IPV6
-
-    def trafficTest(self):
-
-        src_vm_ip = "2000:aaaa::10a"
-
-        # check VIP drop
-        wrong_vip = "172.16.100.100"
-        inner_pkt = simple_udpv6_packet(eth_dst="02:02:02:02:02:02",
-                                        eth_src=self.eni_mac,
-                                        ipv6_dst=self.dst_ca_ip,
-                                        ipv6_src=src_vm_ip)
-        vxlan_pkt = simple_vxlan_packet(eth_dst=self.dut_mac,
-                                        eth_src=self.neighbor_mac,
-                                        ip_dst=wrong_vip,
-                                        ip_src=self.src_vm_pa_ip,
-                                        udp_sport=11638,
-                                        with_udp_chksum=False,
-                                        vxlan_vni=self.outbound_vni,
-                                        inner_frame=inner_pkt)
-        print("\tSending packet with wrong vip...")
-        send_packet(self, 0, vxlan_pkt)
-        print("\tVerifying drop...")
-        verify_no_other_packets(self)
-
-        # check routing drop
-        wrong_dst_ca = "2000:bbbb::232"
-        inner_pkt = simple_udpv6_packet(eth_dst="02:02:02:02:02:02",
-                                        eth_src=self.eni_mac,
-                                        ipv6_dst=wrong_dst_ca,
-                                        ipv6_src=src_vm_ip)
-        vxlan_pkt = simple_vxlan_packet(eth_dst=self.dut_mac,
-                                        eth_src=self.neighbor_mac,
-                                        ip_dst=self.vip,
-                                        ip_src=self.src_vm_pa_ip,
-                                        udp_sport=11638,
-                                        with_udp_chksum=False,
-                                        vxlan_vni=self.outbound_vni,
-                                        inner_frame=inner_pkt)
-        print("\tSending packet with wrong dst CA IP to verify routing drop...")
-        send_packet(self, 0, vxlan_pkt)
-        print("\tVerifying drop...")
-        verify_no_other_packets(self)
-
-        # check mapping drop
-        wrong_dst_ca = "2000:aaaa::d3d3"
-        inner_pkt = simple_udpv6_packet(eth_dst="02:02:02:02:02:02",
-                                        eth_src=self.eni_mac,
-                                        ipv6_dst=wrong_dst_ca,
-                                        ipv6_src=src_vm_ip)
-        vxlan_pkt = simple_vxlan_packet(eth_dst=self.dut_mac,
-                                        eth_src=self.neighbor_mac,
-                                        ip_dst=self.vip,
-                                        ip_src=self.src_vm_pa_ip,
-                                        udp_sport=11638,
-                                        with_udp_chksum=False,
-                                        vxlan_vni=self.outbound_vni,
-                                        inner_frame=inner_pkt)
-        print("\tSending packet with wrong dst CA IP to verify mapping drop...")
-        send_packet(self, 0, vxlan_pkt)
-        print("\tVerifying drop...")
-        verify_no_other_packets(self)
-
-        # check forwarding
-        inner_pkt = simple_udpv6_packet(eth_dst="02:02:02:02:02:02",
-                                        eth_src=self.eni_mac,
-                                        ipv6_dst=self.dst_ca_ip,
-                                        ipv6_src=src_vm_ip)
-        vxlan_pkt = simple_vxlan_packet(eth_dst=self.dut_mac,
-                                        eth_src=self.neighbor_mac,
-                                        ip_dst=self.vip,
-                                        ip_src=self.src_vm_pa_ip,
-                                        udp_sport=11638,
-                                        with_udp_chksum=False,
-                                        vxlan_vni=self.outbound_vni,
-                                        inner_frame=inner_pkt)
-
-        inner_exp_pkt = simple_udpv6_packet(eth_dst=self.dst_ca_mac,
-                                        eth_src=self.eni_mac,
-                                        ipv6_dst=self.dst_ca_ip,
-                                        ipv6_src=src_vm_ip)
-        vxlan_exp_pkt = simple_vxlan_packet(eth_dst=self.neighbor_mac,
-                                        eth_src=self.dut_mac,
-                                        ip_dst=self.dst_pa_ip,
-                                        ip_src=self.vip,
-                                        udp_sport=0, # TODO: Fix sport in pipeline
-                                        with_udp_chksum=False,
-                                        vxlan_vni=self.vnet_vni,
-                                        inner_frame=inner_exp_pkt)
-
-        self.pkt_exp = vxlan_exp_pkt
-        print("\tSending outbound packet...")
-        send_packet(self, 0, vxlan_pkt)
-        print("\tVerifying packet...")
-        verify_packet(self, self.pkt_exp, 0)
-        print ("SaiThriftVnetOutboundUdpV6PktTest OK")
