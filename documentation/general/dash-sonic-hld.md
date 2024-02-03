@@ -447,7 +447,6 @@ DASH_ROUTING_TYPE_TABLE:{{routing_type}}: [
         "action_type": {{action_type}} 
         "encap_type": {{encap type}} (OPTIONAL)
         "vni": {{vni}} (OPTIONAL)
-        "tunnel_key": {{uint32}} (OPTIONAL)
     ]
 ```
 
@@ -457,8 +456,7 @@ key                      = DASH_ROUTING_TYPE_TABLE:routing_type; routing type ca
 action_name              = action name as string
 action_type              = action_type can be {maprouting, direct, staticencap, appliance, 4to6, mapdecap, decap, drop}
 encap_type               = encap type depends on the action_type - {vxlan, nvgre}
-vni                      = vni value associated with the corresponding action. Applicable if encap_type is specified. 
-tunnel_key               = tunnel key associated witht the corresponding action. Applicable if encap_type is specified.
+vni                      = vni value to be used as the key for encapsulation. Applicable if encap_type is specified. 
 ```
 
 ### 3.2.7 ROUTING APPLIANCE
@@ -1210,7 +1208,7 @@ For the inbound direction, after Route/ACL lookup, pipeline shall use the "under
             "name": "action2",
             "action_type": "staticencap",
             "encap_type": "nvgre"
-            "tunnel_key":"100"
+            "vni":"100"
         } ],         
         "OP": "SET"
     },
@@ -1307,7 +1305,7 @@ For the example configuration above, the following is a brief explanation of loo
             "name": "action2",
             "action_type": "staticencap",
             "encap_type": "nvgre",
-            "tunnel_key":"100"
+            "vni":"100"
         } ],         
         "OP": "SET",
     },
@@ -1321,7 +1319,7 @@ For the example configuration above, the following is a brief explanation of loo
             "name": "action2",
             "action_type": "staticencap",
             "encap_type": "nvgre",
-            "tunnel_key":"100"
+            "vni":"100"
         },
         { 
              "name": "action3",
