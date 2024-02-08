@@ -379,7 +379,7 @@ control dash_ingress(
         appliance.apply();
 
         // Save the original DSCP value
-        meta.eni_data.dscp = (bit<6>)hdr.ipv4.diffserv;
+        meta.eni_data.dscp = (bit<6>)hdr.u0_ipv4.diffserv;
 
         /* Outer header processing */
 
@@ -480,7 +480,7 @@ control dash_ingress(
 
         if (meta.eni_data.dscp != 0) {
             // ECN is zero.
-            hdr.ipv4.diffserv = (bit<8>)meta.eni_data.dscp;
+            hdr.u0_ipv4.diffserv = (bit<8>)meta.eni_data.dscp;
         }
 
         eni_meter.apply();
