@@ -39,6 +39,9 @@ struct eni_data_t {
     bit<32> pps;
     bit<32> flows;
     bit<1>  admin_state;
+    IPv6Address pl_sip;
+    IPv6Address pl_sip_mask;
+    IPv4Address pl_underlay_sip;
     bit<6>  dscp;
 }
 
@@ -75,6 +78,7 @@ struct metadata_t {
     bit<16> mapping_meter_class;
     bit<16> meter_class;
     bit<32> meter_bucket_index;
+    bit<16> tunnel_pointer;
 }
 
 #endif /* _SIRIUS_METADATA_P4_ */

@@ -1,0 +1,18 @@
+{% for counter in sai_counters %}
+    /**
+     * @brief DASH counter {{ counter.name | upper }}
+     *
+     * @type sai_object_id_t
+     * @flags CREATE_AND_SET
+     * @objects SAI_OBJECT_TYPE_COUNTER
+     * @allownull true
+     * @default SAI_NULL_OBJECT_ID
+     */
+    {% if is_first_attr == true %}
+    SAI_{{ table_name | upper }}_ATTR_{{ counter.name | upper }} = SAI_{{ table_name | upper }}_ATTR_EXTENSIONS_RANGE_START,
+    {% set is_first_attr = true %}
+    {% else %}
+    SAI_{{ table_name | upper }}_ATTR_{{ counter.name | upper }},
+    {% endif %}
+
+{% endfor %}

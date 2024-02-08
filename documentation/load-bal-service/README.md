@@ -6,8 +6,7 @@ This folder contains DASH Load Balancer Service design and requirements document
 
 | Document                                               | Description                                |
 | ------------------------------------------------------ | ------------------------------------------ |
-| [load-balancer-v3.md](load-balancer-v3.md) | DASH Load Balancer design document   |
-
+| [fast-path-icmp-flow-redirection.md](fast-path-icmp-flow-redirection.md) | DASH Load Balancer Fast Path ICMP flow redirection document   |
 
 ## Requirements
 
