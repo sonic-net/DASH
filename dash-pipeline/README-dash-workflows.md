@@ -386,7 +386,7 @@ make undeploy-ixiac  # Stop the containers
 #### DASH-specific info
 * [../test/test-cases/bmv2_model](../test/test-cases/bmv2_model) for ixia-c test cases
 * [../test/third-party/traffic_gen/README.md](../test/third-party/traffic_gen/README.md) for ixia-c configuration info
-* [../test/third-party/traffic_gen/deployment/README.md](../test/third-party/traffic_gen/deployment/README.md) for docker-compose configuration and diagram
+* [../test/third-party/traffic_gen/deployment/README.md](../test/third-party/traffic_gen/deployment/README.md) for `docker compose` configuration and diagram
 
 ## About Git Submodules
 See also:

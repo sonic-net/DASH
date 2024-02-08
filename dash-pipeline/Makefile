@@ -760,10 +760,3 @@ run-saichallenger-tutorials: deploy-ixiac
 	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
 	./run-tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) tutorial
 
-###############################
-# ENVIRONMENT SETUP TARGETS
-###############################
-
-install-docker-compose:
-	sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$$(uname -s)-$$(uname -m)" -o /usr/local/bin/docker-compose
-	sudo chmod +x /usr/local/bin/docker-compose
