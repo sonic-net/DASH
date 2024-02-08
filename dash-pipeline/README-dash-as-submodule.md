@@ -138,7 +138,7 @@ The community DASH bmv2 test workflow includes SW traffic-generators connected t
 
 If test ports other than `veth0/1` and `veth2/3` are used, some modifications of setup scripts may be required:
 * PTF tests using scapy for SW traffic generation can be parameterized to specify logical-to-physical port mappings.
-* Pytests using ixia-c SW traffic generator are set up using docker-compose topology files under [DASH/test/third-party/traffic_gen/deployment](https://github.com/sonic-net/DASH/tree/main/test/third-party/traffic_gen/deployment)
+* Pytests using ixia-c SW traffic generator are set up using `docker compose` topology files under [DASH/test/third-party/traffic_gen/deployment](https://github.com/sonic-net/DASH/tree/main/test/third-party/traffic_gen/deployment)
 
 ## Custom Tests
 You can use the tests under DASH by calling the appropriate DASH make targets from the parent project. You can also have private tests in your own project repository which you invoke from your Makefiles. We recommend if you write new tests which are generally applicable that you consider upstreaming to the Community repository.
