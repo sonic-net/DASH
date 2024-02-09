@@ -2,7 +2,7 @@
 # It's based on public p4lang/p4c docker but strips out uneeded backends.
 # See https://docs.docker.com/develop/develop-images/multistage-build/
 # :latest on 2024-Feb-01:
-FROM p4lang/p4c@1.2.4.8 as p4lang-p4c
+FROM p4lang/p4c:1.2.4.8 as p4lang-p4c
 LABEL maintainer="SONIC-DASH Community"
 LABEL description="DASH p4c-dpdk compiler, minimal"
 
