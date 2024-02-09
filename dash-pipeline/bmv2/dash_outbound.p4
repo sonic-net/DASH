@@ -74,8 +74,13 @@ control outbound(inout headers_t hdr,
                               overlay_sip_mask);
 
         /* encapsulation will be done in apply block based on dash_encapsulation */
+#ifndef DISABLE_128BIT_ARITHMETIC
+        // As of 2024-Feb-09, p4c-dpdk does not yet support arithmetic
+        // on 128-bit operands.  This lack of support extends to cast
+        // operations.
         meta.encap_data.underlay_dip = underlay_dip == 0 ? meta.encap_data.original_overlay_dip : (IPv4Address)underlay_dip;
         meta.encap_data.underlay_sip = underlay_sip == 0 ? meta.encap_data.original_overlay_sip : (IPv4Address)underlay_sip;
+#endif
         meta.encap_data.overlay_dmac = hdr.u0_ethernet.dst_addr;
         meta.encap_data.dash_encapsulation = dash_encapsulation;
         meta.encap_data.service_tunnel_key = tunnel_key;
