@@ -118,7 +118,7 @@ control dash_ingress(
                          @SaiVal[type="sai_ip_address_t"] IPv4Address pl_underlay_sip,
                          @SaiVal[type="sai_object_id_t"] bit<16> v4_meter_policy_id,
                          @SaiVal[type="sai_object_id_t"] bit<16> v6_meter_policy_id,
-                         @SaiVal[type="dash_tunnel_dscp_mode_t"] dash_tunnel_dscp_mode_t dash_tunnel_dscp_mode,
+                         @SaiVal[type="sai_dash_tunnel_dscp_mode_t"] dash_tunnel_dscp_mode_t dash_tunnel_dscp_mode,
                          @SaiVal[type="sai_uint8_t"] bit<6> dscp,
                          ACL_GROUPS_PARAM(inbound_v4),
                          ACL_GROUPS_PARAM(inbound_v6),
