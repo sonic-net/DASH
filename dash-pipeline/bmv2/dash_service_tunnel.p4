@@ -16,8 +16,12 @@ action service_tunnel_encode(inout headers_t hdr,
     hdr.u0_ipv6.payload_length = hdr.u0_ipv4.total_len - IPV4_HDR_SIZE;
     hdr.u0_ipv6.next_header = hdr.u0_ipv4.protocol;
     hdr.u0_ipv6.hop_limit = hdr.u0_ipv4.ttl;
+#ifndef DISABLE_128BIT_ARITHMETIC
+    // As of 2024-Feb-09, p4c-dpdk does not yet support arithmetic on
+    // 128-bit operands.
     hdr.u0_ipv6.dst_addr = ((IPv6Address)hdr.u0_ipv4.dst_addr & ~st_dst_mask) | (st_dst & st_dst_mask);
     hdr.u0_ipv6.src_addr = ((IPv6Address)hdr.u0_ipv4.src_addr & ~st_src_mask) | (st_src & st_src_mask);
+#endif
     
     hdr.u0_ipv4.setInvalid();
     hdr.u0_ethernet.ether_type = IPV6_ETHTYPE;

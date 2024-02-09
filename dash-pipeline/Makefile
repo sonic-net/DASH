@@ -139,8 +139,11 @@ p4c-dpdk-pna:
 	-v $(PWD)/dpdk-pna:/dpdk-pna \
 	-w / \
 	$(DOCKER_P4C_DPDK_IMG)  \
-	p4c-dpdk -DTARGET_DPDK_PNA -DPNA_CONNTRACK --pp $(P4_DPDK_OUTDIR)/dash_pipeline.pp.p4 \
+	p4c-dpdk \
+		-DTARGET_DPDK_PNA -DPNA_CONNTRACK -DDISABLE_128BIT_ARITHMETIC \
+		--pp $(P4_DPDK_OUTDIR)/dash_pipeline.pp.p4 \
 		-o $(P4_DPDK_OUTDIR)/dash_pipeline.spec --arch pna \
+		--context $(P4_DPDK_OUTDIR)/dash_pipeline.p4.context.json \
 		--bf-rt-schema $(P4_DPDK_OUTDIR)/dash_pipeline.p4.bfrt.json \
 		--p4runtime-files $(P4_DPDK_OUTDIR)/dash_pipeline.p4.p4info.txt \
 		$(P4_MAIN)
