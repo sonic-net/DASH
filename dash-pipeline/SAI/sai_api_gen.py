@@ -767,6 +767,7 @@ class SAIAPITableData(SAIObject):
         self.counters: List[SAICounter] = []
         self.with_counters: str = 'false'
         self.sai_attributes: List[SAIAPITableAttribute] = []
+        self.sai_stats: List[SAIAPITableAttribute] = []
 
         # Extra properties from annotations
         self.stage: Optional[str] = None
@@ -946,6 +947,8 @@ class SAIAPITableData(SAIObject):
         # Group all actions parameters and counters set by order with sequence kept the same.
         # Then merge them into a single list.
         sai_attributes_by_order = {}
+        sai_stats_by_order = {}
+
         for action_param in self.action_params:
             if action_param.skipattr != "true":
                 sai_attributes_by_order.setdefault(action_param.order, []).append(action_param)
@@ -953,11 +956,18 @@ class SAIAPITableData(SAIObject):
         for counter in self.counters:
             if counter.attr_type != "stats":
                 sai_attributes_by_order.setdefault(counter.order, []).append(counter)
+            else:
+                sai_stats_by_order.setdefault(counter.order, []).append(counter)
         
-        # Merge all attributes into a single list.
+        # Merge all attributes into a single list by their order.
         self.sai_attributes = []
         for order in sorted(sai_attributes_by_order.keys()):
             self.sai_attributes.extend(sai_attributes_by_order[order])
+
+        # Merge all stat counters into a single list by their order.
+        self.sai_stats = []
+        for order in sorted(sai_stats_by_order.keys()):
+            self.sai_stats.extend(sai_stats_by_order[order])
 
 
 class DASHAPISet(SAIObject):
@@ -1223,25 +1233,40 @@ class SAIGenerator:
 
         # If any counter doesn't have any table assigned, they should be added as port attributes and track globally.
         new_port_counters: List[SAICounter] = []
+        new_port_stats: List[SAICounter] = []
         is_first_attr = False
+        is_first_stat = False
         with open('SAI/experimental/saiportextensions.h', 'r') as f:
             content = f.read()
 
             all_port_attrs = re.findall(r'SAI_PORT_ATTR_\w+', content)
             is_first_attr = len(all_port_attrs) == 3
 
+            all_port_stats = re.findall(r'SAI_PORT_STAT_\w+', content)
+            is_first_stat = len(all_port_stats) == 3
+
             for sai_counter in self.dash_sai_ext.sai_counters:
-                if len(sai_counter.param_actions) == 0 and sai_counter.attr_type != "stats":
-                    sai_counter_port_attr_name = f"SAI_PORT_ATTR_{sai_counter.name.upper()}"
-                    if sai_counter_port_attr_name not in all_port_attrs:
-                        new_port_counters.append(sai_counter)
+                if len(sai_counter.param_actions) == 0:
+                    if sai_counter.attr_type != "stats":
+                        sai_counter_port_attr_name = f"SAI_PORT_ATTR_{sai_counter.name.upper()}"
+                        if sai_counter_port_attr_name not in all_port_attrs:
+                            new_port_counters.append(sai_counter)
+                    else:
+                        sai_counter_port_stat_name = f"SAI_PORT_STAT_{sai_counter.name.upper()}"
+                        if sai_counter_port_stat_name not in all_port_stats:
+                            new_port_stats.append(sai_counter)
 
         sai_counters_str = SAITemplateRender('templates/saicounter.j2').render(table_name = "port", sai_counters = new_port_counters, is_first_attr = is_first_attr)
         sai_counters_lines = [s.rstrip(" \n") for s in sai_counters_str.split('\n')]
         sai_counters_lines = sai_counters_lines[:-1] # Remove the last empty line, so we won't add extra empty line to the file.
 
+        sai_stats_str = SAITemplateRender('templates/saistat.j2').render(table_name = "port", sai_stats = new_port_stats, is_first_attr = is_first_attr)
+        sai_stats_lines = [s.rstrip(" \n") for s in sai_stats_str.split('\n')]
+        sai_stats_lines = sai_stats_lines[:-1] # Remove the last empty line, so we won't add extra empty line to the file.
+
         with SAIFileUpdater('SAI/experimental/saiportextensions.h') as f:
             f.insert_before('Add new experimental port attributes above this line', sai_counters_lines)
+            f.insert_before('Add new experimental port stats above this line', sai_stats_lines)
 
     def generate_sai_object_extensions(self) -> None:
         print("\nGenerating SAI object entry extensions ...")

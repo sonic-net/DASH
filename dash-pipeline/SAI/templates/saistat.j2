@@ -1,0 +1,10 @@
+{% for stat in sai_stats %}
+    /** DASH {{ table_name | lower }} {{ stat.name | upper }} stat count */
+    {% if is_first_attr == true %}
+    SAI_{{ table_name | upper }}_STAT_{{ stat.name | upper }} = SAI_{{ table_name | upper }}_STAT_EXTENSIONS_RANGE_START,
+    {% set is_first_attr = true %}
+    {% else %}
+    SAI_{{ table_name | upper }}_STAT_{{ stat.name | upper }},
+    {% endif %}
+
+{% endfor %}
