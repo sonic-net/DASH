@@ -660,6 +660,40 @@ static sai_status_t dash_sai_get_{{ table.name }}_attribute(
     return SAI_STATUS_FAILURE;
 }
 
+{% if table.sai_stats | length > 0 %}
+static sai_status_t dash_sai_get_{{ table.name }}_stats(
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+        _In_ uint32_t number_of_counters,
+        _In_ const sai_stat_id_t *counter_ids,
+        _Out_ uint64_t *counters)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_get_{{ table.name }}_stats NYI");
+    return SAI_STATUS_FAILURE;
+}
+
+static sai_status_t dash_sai_get_{{ table.name }}_stats_ext(
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+        _In_ uint32_t number_of_counters,
+        _In_ const sai_stat_id_t *counter_ids,
+        _In_ sai_stats_mode_t mode,
+        _Out_ uint64_t *counters)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_get_{{ table.name }}_stats_ext NYI");
+    return SAI_STATUS_FAILURE;
+}
+
+static sai_status_t dash_sai_clear_{{ table.name }}_stats(
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+        _In_ uint32_t number_of_counters,
+        _In_ const sai_stat_id_t *counter_ids)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_clear_{{ table.name }}_stats NYI");
+    return SAI_STATUS_FAILURE;
+}
+{% endif %}
 {% if table.name == 'route_entry' %}
 
 static sai_status_t dash_sai_set_{{ table.name | replace("entry", "entries") }}_attribute(
