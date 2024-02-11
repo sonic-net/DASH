@@ -1,10 +1,11 @@
+{% set sai_stats_extensions_ns = namespace(is_first_attr = is_first_attr) %}
 {% for stat in sai_stats %}
     /** DASH {{ table_name | lower }} {{ stat.name | upper }} stat count */
-    {% if is_first_attr == true %}
+    {% if sai_stats_extensions_ns.is_first_attr == true %}
     SAI_{{ table_name | upper }}_STAT_{{ stat.name | upper }} = SAI_{{ table_name | upper }}_STAT_EXTENSIONS_RANGE_START,
-    {% set is_first_attr = true %}
     {% else %}
     SAI_{{ table_name | upper }}_STAT_{{ stat.name | upper }},
     {% endif %}
+    {% set sai_stats_extensions_ns.is_first_attr = false %}
 
 {% endfor %}

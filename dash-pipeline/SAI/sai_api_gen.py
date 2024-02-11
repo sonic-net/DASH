@@ -1260,7 +1260,7 @@ class SAIGenerator:
         sai_counters_lines = [s.rstrip(" \n") for s in sai_counters_str.split('\n')]
         sai_counters_lines = sai_counters_lines[:-1] # Remove the last empty line, so we won't add extra empty line to the file.
 
-        sai_stats_str = SAITemplateRender('templates/saistat.j2').render(table_name = "port", sai_stats = new_port_stats, is_first_attr = is_first_attr)
+        sai_stats_str = SAITemplateRender('templates/headers/sai_stats_extensions.j2').render(table_name = "port", sai_stats = new_port_stats, is_first_attr = is_first_stat)
         sai_stats_lines = [s.rstrip(" \n") for s in sai_stats_str.split('\n')]
         sai_stats_lines = sai_stats_lines[:-1] # Remove the last empty line, so we won't add extra empty line to the file.
 
