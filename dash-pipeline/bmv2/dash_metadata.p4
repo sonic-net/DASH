@@ -72,6 +72,7 @@ struct metadata_t {
     bit<16> meter_class;
     bit<32> meter_bucket_index;
     bit<16> tunnel_pointer;
+    bit<32> tunnel1_id;
 }
 
 #endif /* _SIRIUS_METADATA_P4_ */
