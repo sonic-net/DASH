@@ -72,6 +72,8 @@ struct metadata_t {
     bit<16> meter_class;
     bit<32> meter_bucket_index;
     bit<16> tunnel_pointer;
+    bool is_fast_path_icmp_flow_redirection_packet;
+    bit<1> fast_path_icmp_flow_redirection_disabled;
 }
 
 #endif /* _SIRIUS_METADATA_P4_ */
