@@ -40,10 +40,12 @@ control dash_ingress(
     action accept() {
     }
 
+#ifdef TARGET_BMV2_V1MODEL
     @SaiCounter[name="lb_fast_path_icmp_in", attr_type="stats"]
     counter(1, CounterType.packets_and_bytes) port_lb_fast_path_icmp_in_counter;
     @SaiCounter[name="lb_fast_path_eni_miss", attr_type="stats"]
     counter(1, CounterType.packets_and_bytes) port_lb_fast_path_eni_miss_counter;
+#endif
     
     @SaiTable[name = "vip", api = "dash_vip"]
     table vip {
@@ -113,8 +115,10 @@ control dash_ingress(
    meta.stage4_dash_acl_group_id = ## prefix ##_stage4_dash_acl_group_id; \
    meta.stage5_dash_acl_group_id = ## prefix ##_stage5_dash_acl_group_id;
 
-    @SaiCounter[name="lb_fast_path_icmp_in", attr_type="stats"]
+#ifdef TARGET_BMV2_V1MODEL
+    @SaiCounter[name="lb_fast_path_icmp_in", attr_type="stats", action_names="set_eni_attrs"]
     counter(MAX_ENI, CounterType.packets_and_bytes) eni_lb_fast_path_icmp_in_counter;
+#endif
 
     action set_eni_attrs(bit<32> cps,
                          bit<32> pps,
@@ -163,7 +167,6 @@ control dash_ingress(
         }
         
         meta.fast_path_icmp_flow_redirection_disabled = disable_fast_path_icmp_flow_redirection;
-        eni_lb_fast_path_icmp_in_counter.count((bit<32>)meta.eni_id);
     }
 
     @SaiTable[name = "eni", api = "dash_eni", order=1, isobject="true"]
@@ -377,7 +380,9 @@ control dash_ingress(
 #endif // TARGET_DPDK_PNA
 
         if (meta.is_fast_path_icmp_flow_redirection_packet) {
+#ifdef TARGET_BMV2_V1MODEL
             port_lb_fast_path_icmp_in_counter.count(0);
+#endif
         }
 
         if (vip.apply().hit) {
@@ -386,7 +391,9 @@ control dash_ingress(
             meta.encap_data.underlay_sip = hdr.u0_ipv4.dst_addr;
         } else {
             if (meta.is_fast_path_icmp_flow_redirection_packet) {
+#ifdef TARGET_BMV2_V1MODEL
                 port_lb_fast_path_eni_miss_counter.count(0);
+#endif
             }
         }
 
@@ -404,7 +411,9 @@ control dash_ingress(
 
         if (!eni_ether_address_map.apply().hit) {
             if (meta.is_fast_path_icmp_flow_redirection_packet) {
+#ifdef TARGET_BMV2_V1MODEL
                 port_lb_fast_path_eni_miss_counter.count(0);
+#endif
             }
         }
 
@@ -448,6 +457,13 @@ control dash_ingress(
         if (meta.eni_data.admin_state == 0) {
             deny();
         }
+
+        if (meta.is_fast_path_icmp_flow_redirection_packet) {
+#ifdef TARGET_BMV2_V1MODEL
+            eni_lb_fast_path_icmp_in_counter.count((bit<32>)meta.eni_id);
+#endif
+        }
+
         acl_group.apply();
 
 

@@ -103,7 +103,8 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
                                          outbound_v6_stage2_dash_acl_group_id = 0,
                                          outbound_v6_stage3_dash_acl_group_id = 0,
                                          outbound_v6_stage4_dash_acl_group_id = 0,
-                                         outbound_v6_stage5_dash_acl_group_id = 0)
+                                         outbound_v6_stage5_dash_acl_group_id = 0,
+                                         disable_fast_path_icmp_flow_redirection = 0)
 
         self.eam = sai_thrift_eni_ether_address_map_entry_t(switch_id=self.switch_id, address = self.eni_mac)
         status = sai_thrift_create_eni_ether_address_map_entry(self.client,
