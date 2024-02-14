@@ -99,7 +99,9 @@ class TestSaiVnetOutboundRoutingEntry:
                     "SAI_ENI_ATTR_V4_METER_POLICY_ID",
                     "0",
                     "SAI_ENI_ATTR_V6_METER_POLICY_ID",
-                    "0"
+                    "0",
+                    "SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION",
+                    "False"
                 ]
             },
         ]
