@@ -174,6 +174,25 @@ control outbound(inout headers_t hdr,
                    meter_class_override);
     }
 
+    action set_private_link_nsg_mapping(@SaiVal[type="sai_ip_address_t"] IPv4Address underlay_dip,
+                                        IPv6Address overlay_sip,
+                                        IPv6Address overlay_dip,
+                                        @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t dash_encapsulation,
+                                        bit<24> tunnel_key,
+                                        bit<32> tunnel1_id,
+                                        bit<16> meter_class,
+                                        bit<1> meter_class_override) {
+        meta.tunnel1_id = tunnel1_id;
+
+        set_private_link_mapping(underlay_dip,
+                                 overlay_sip,
+                                 overlay_dip,
+                                 dash_encapsulation,
+                                 tunnel_key,
+                                 meter_class,
+                                 meter_class_override);
+    }
+
 #ifdef TARGET_BMV2_V1MODEL
     direct_counter(CounterType.packets_and_bytes) ca_to_pa_counter;
 #endif // TARGET_BMV2_V1MODEL
@@ -195,6 +214,7 @@ control outbound(inout headers_t hdr,
         actions = {
             set_tunnel_mapping;
             set_private_link_mapping;
+            set_private_link_nsg_mapping;
             @defaultonly drop;
         }
         const default_action = drop;
@@ -221,6 +241,30 @@ control outbound(inout headers_t hdr,
 
         actions = {
             set_vnet_attrs;
+        }
+    }
+
+    action set_tunnel1_attrs(IPv4Address underlay_dip,
+                             dash_encapsulation_t dash_encapsulation,
+                             bit<24> tunnel_key) {
+        tunnel_encap(hdr,
+                     meta,
+                     meta.encap_data.overlay_dmac,
+                     meta.encap_data.underlay_dmac,
+                     meta.encap_data.underlay_smac,
+                     underlay_dip,
+                     meta.encap_data.underlay_sip,
+                     dash_encapsulation,
+                     tunnel_key);
+    }
+
+    table tunnel1 {
+        key = {
+            meta.tunnel1_id : exact @SaiVal[type="sai_object_id_t"];
+        }
+
+        actions = {
+            set_tunnel1_attrs;
         }
     }
 
