@@ -104,7 +104,9 @@ class TestSaiVnetInboundRoutingEntry:
                     "SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE",
                     "SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL",
                     "SAI_ENI_ATTR_DSCP",
-                    "0"
+                    "0",
+                    "SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION",
+                    "False"
                 ]
             },
         ]

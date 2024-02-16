@@ -249,6 +249,7 @@ typedef enum _sai_{{ table.name }}_attr_t
 
 } sai_{{ table.name }}_attr_t;
 
+{% include 'templates/headers/sai_stats_enum.j2' %}
 {% endfor %}
 {% for table in sai_api.tables %}
 /**
@@ -335,6 +336,7 @@ typedef sai_status_t (*sai_get_{{ table.name }}_attribute_fn)(
         _In_ uint32_t attr_count,
         _Inout_ sai_attribute_t *attr_list);
 
+{% include 'templates/headers/sai_stats_api.j2' %}
 {% if table.is_object == 'false' %}
 /**
  * @brief Bulk create {{ sai_api.app_name }}_{{ table.name }}
@@ -392,6 +394,7 @@ typedef struct _sai_{{ sai_api.app_name }}_api_t
     sai_remove_{{ table.name }}_fn           {{ " " * space_offset }}remove_{{ table.name }};
     sai_set_{{ table.name }}_attribute_fn    {{ " " * space_offset }}set_{{ table.name }}_attribute;
     sai_get_{{ table.name }}_attribute_fn    {{ " " * space_offset }}get_{{ table.name }}_attribute;
+{% include 'templates/headers/sai_stats_api_list.j2' %}
 {% if table.is_object == 'true' %}
     sai_bulk_object_create_fn{{ " " * table_name_max }}create_{{ table.name }}s;
     sai_bulk_object_remove_fn{{ " " * table_name_max }}remove_{{ table.name }}s;

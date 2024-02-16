@@ -515,7 +515,7 @@ class SAICounter(SAIAPITableAttribute):
         self.bitwidth: int = 64
         self.isreadonly: str = "true"
         self.counter_type: str = "bytes"
-        self.as_attr: bool = False
+        self.attr_type: str = "stats"
         self.param_actions: List[str] = []
 
     def parse_p4rt(self, p4rt_counter: Dict[str, Any], var_ref_graph: P4VarRefGraph) -> None:
@@ -539,9 +539,8 @@ class SAICounter(SAIAPITableAttribute):
         print("Parsing counter: " + self.name)
         self.__parse_sai_counter_annotation(p4rt_counter)
 
-        # If this counter is marked as SAI attributes, then we need to generate dedicated SAI attributes for this counter.
-        # In this case, the type needs to be created based on the size.
-        if self.as_attr:
+        # If this counter needs to be generated as SAI attributes, we need to figure out the data type for the counter value.
+        if self.attr_type != "counter_id":
             counter_storage_type = SAITypeSolver.get_object_sai_type(self.bitwidth)
 
         # Otherwise, this counter should be linked to a SAI counter using an object ID.
@@ -594,28 +593,32 @@ class SAICounter(SAIAPITableAttribute):
                         continue
                     elif kv['key'] == 'action_names':
                         self.param_actions = str(kv['value']['stringValue']).split(",")
-                    elif kv['key'] == 'as_attr':
-                        self.as_attr = True if kv['value']['stringValue'] == "true" else False
+                    elif kv['key'] == 'attr_type':
+                        self.attr_type = str(kv['value']['stringValue'])
+                        if self.attr_type not in ["counter_attr", "counter_id", "stats"]:
+                            raise ValueError(f'Unknown counter attribute type: attr_type={self.attr_type}')
                     else:
                         raise ValueError("Unknown attr annotation " + kv['key'])
 
-    def generate_final_counter_on_type(self) -> 'Iterator[SAICounter]':
-        # If this counter is not used as an attribute, then we need to treat it as a counter object id.
-        if not self.as_attr:
+    def generate_counter_sai_attributes(self) -> 'Iterator[SAICounter]':
+        # If the SAI attribute type is counter id, we generate as standard SAI counter ID attributes, hence return as it is.
+        if self.attr_type == "counter_id":
             yield self
 
-        # Otherwise, we need to generate dedicated SAI attributes for this counter.
-        else:
-            if self.counter_type != 'both':
-                self.name = f"{self.name}_{self.counter_type}_counter"
-                yield self
-            else:
-                packets_counter = copy.deepcopy(self)
-                packets_counter.name = f"{packets_counter.name}_packets_counter"
-                yield packets_counter
+        counter_types = ['bytes', 'packets'] if self.counter_type == 'both' else [self.counter_type]
 
-                self.name = f"{self.name}_bytes_counter"
-                yield self
+        for index, counter_type in enumerate(counter_types):
+            counter = self
+            if index != len(counter_types) - 1:
+                counter = copy.deepcopy(self)
+            
+            counter.counter_type = counter_type
+            if counter.attr_type == "counter_attr":
+                counter.name = f"{counter.name}_{counter.counter_type}_counter"
+            else:
+                counter.name = f"{counter.name}_{counter.counter_type}"
+
+            yield counter
 
 
 @sai_parser_from_p4rt
@@ -764,6 +767,7 @@ class SAIAPITableData(SAIObject):
         self.counters: List[SAICounter] = []
         self.with_counters: str = 'false'
         self.sai_attributes: List[SAIAPITableAttribute] = []
+        self.sai_stats: List[SAIAPITableAttribute] = []
 
         # Extra properties from annotations
         self.stage: Optional[str] = None
@@ -940,20 +944,30 @@ class SAIAPITableData(SAIObject):
                             key.object_name = table_name
 
     def __build_sai_attributes_after_parsing(self):
-        # Group all actions parameters and counters with as_attr set by order with sequence kept the same.
+        # Group all actions parameters and counters set by order with sequence kept the same.
         # Then merge them into a single list.
         sai_attributes_by_order = {}
+        sai_stats_by_order = {}
+
         for action_param in self.action_params:
             if action_param.skipattr != "true":
                 sai_attributes_by_order.setdefault(action_param.order, []).append(action_param)
 
         for counter in self.counters:
-            sai_attributes_by_order.setdefault(counter.order, []).append(counter)
+            if counter.attr_type != "stats":
+                sai_attributes_by_order.setdefault(counter.order, []).append(counter)
+            else:
+                sai_stats_by_order.setdefault(counter.order, []).append(counter)
         
-        # Merge all attributes into a single list.
+        # Merge all attributes into a single list by their order.
         self.sai_attributes = []
         for order in sorted(sai_attributes_by_order.keys()):
             self.sai_attributes.extend(sai_attributes_by_order[order])
+
+        # Merge all stat counters into a single list by their order.
+        self.sai_stats = []
+        for order in sorted(sai_stats_by_order.keys()):
+            self.sai_stats.extend(sai_stats_by_order[order])
 
 
 class DASHAPISet(SAIObject):
@@ -1010,7 +1024,7 @@ class DASHSAIExtensions(SAIObject):
         all_p4rt_counters = p4rt_value[COUNTERS_TAG]
         for p4rt_counter in all_p4rt_counters:
             counter = SAICounter.from_p4rt(p4rt_counter, var_ref_graph)
-            self.sai_counters.extend(counter.generate_final_counter_on_type())
+            self.sai_counters.extend(counter.generate_counter_sai_attributes())
 
     def __parse_sai_apis_from_p4rt(self, program: Dict[str, Any], ignore_tables: List[str]) -> None:
         # Group all counters by action name.
@@ -1219,25 +1233,40 @@ class SAIGenerator:
 
         # If any counter doesn't have any table assigned, they should be added as port attributes and track globally.
         new_port_counters: List[SAICounter] = []
+        new_port_stats: List[SAICounter] = []
         is_first_attr = False
+        is_first_stat = False
         with open('SAI/experimental/saiportextensions.h', 'r') as f:
             content = f.read()
 
             all_port_attrs = re.findall(r'SAI_PORT_ATTR_\w+', content)
             is_first_attr = len(all_port_attrs) == 3
 
+            all_port_stats = re.findall(r'SAI_PORT_STAT_\w+', content)
+            is_first_stat = len(all_port_stats) == 3
+
             for sai_counter in self.dash_sai_ext.sai_counters:
-                if len(sai_counter.param_actions) == 0 and sai_counter.as_attr == False:
-                    sai_counter_port_attr_name = f"SAI_PORT_ATTR_{sai_counter.name.upper()}"
-                    if sai_counter_port_attr_name not in all_port_attrs:
-                        new_port_counters.append(sai_counter)
+                if len(sai_counter.param_actions) == 0:
+                    if sai_counter.attr_type != "stats":
+                        sai_counter_port_attr_name = f"SAI_PORT_ATTR_{sai_counter.name.upper()}"
+                        if sai_counter_port_attr_name not in all_port_attrs:
+                            new_port_counters.append(sai_counter)
+                    else:
+                        sai_counter_port_stat_name = f"SAI_PORT_STAT_{sai_counter.name.upper()}"
+                        if sai_counter_port_stat_name not in all_port_stats:
+                            new_port_stats.append(sai_counter)
 
         sai_counters_str = SAITemplateRender('templates/saicounter.j2').render(table_name = "port", sai_counters = new_port_counters, is_first_attr = is_first_attr)
         sai_counters_lines = [s.rstrip(" \n") for s in sai_counters_str.split('\n')]
         sai_counters_lines = sai_counters_lines[:-1] # Remove the last empty line, so we won't add extra empty line to the file.
 
+        sai_stats_str = SAITemplateRender('templates/headers/sai_stats_extensions.j2').render(table_name = "port", sai_stats = new_port_stats, is_first_attr = is_first_stat)
+        sai_stats_lines = [s.rstrip(" \n") for s in sai_stats_str.split('\n')]
+        sai_stats_lines = sai_stats_lines[:-1] # Remove the last empty line, so we won't add extra empty line to the file.
+
         with SAIFileUpdater('SAI/experimental/saiportextensions.h') as f:
             f.insert_before('Add new experimental port attributes above this line', sai_counters_lines)
+            f.insert_before('Add new experimental port stats above this line', sai_stats_lines)
 
     def generate_sai_object_extensions(self) -> None:
         print("\nGenerating SAI object entry extensions ...")

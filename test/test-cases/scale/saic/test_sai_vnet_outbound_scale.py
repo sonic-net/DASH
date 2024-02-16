@@ -115,7 +115,8 @@ class TestSaiVnetOutbound:
         ret = add_extra_attrs('SAI_OBJECT_TYPE_ENI', conf.items(), ["SAI_ENI_ATTR_V4_METER_POLICY_ID", "0", "SAI_ENI_ATTR_V6_METER_POLICY_ID", "0",
                               'SAI_ENI_ATTR_PL_SIP', '2001:0db8:85a3:0000:0000:8a2e:0370:7334', 'SAI_ENI_ATTR_PL_SIP_MASK',
                               '2001:0db8:85a3:0000:0000:0000:0000:0000', 'SAI_ENI_ATTR_PL_UNDERLAY_SIP', '10.0.0.18',
-                              "SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE", "SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL", "SAI_ENI_ATTR_DSCP", "0"])
+                              "SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE", "SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL", "SAI_ENI_ATTR_DSCP", "0",
+                              "SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION", "False"])
 
         ret = add_extra_attrs('SAI_OBJECT_TYPE_OUTBOUND_CA_TO_PA_ENTRY', ret, [ 'SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS', '0',
                               'SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS_OVERRIDE', 'True' ])

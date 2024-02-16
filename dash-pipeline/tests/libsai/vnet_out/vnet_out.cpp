@@ -197,6 +197,10 @@ int main(int argc, char **argv)
     attr.value.u32 = 0;
     attrs.push_back(attr);
 
+    attr.id = SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION;
+    attr.value.booldata = false;
+    attrs.push_back(attr);
+
     status = dash_eni_api->create_eni(&eni_id, switch_id, attrs.size(), attrs.data());
 
     if (status != SAI_STATUS_SUCCESS)
