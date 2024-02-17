@@ -10,9 +10,9 @@ ADD SAI/SAI/test/ptf /SAI/test/ptf
 # Install PTF test framework & test-cases from SAI repo
 ADD SAI/SAI/ptf /SAI/ptf/
 
-# Install dependencies required by lxml (from pyangbind->dpugen==0.0.5)
+# Install dependencies for dpugen==0.0.5
 RUN apt-get update && \
-    apt-get install -y libxml2-dev libxslt-dev
+    apt-get install -y python3-lxml
 
 # Install the python libraries
 RUN python3 -m pip install -r /tests/requirements.txt && \
