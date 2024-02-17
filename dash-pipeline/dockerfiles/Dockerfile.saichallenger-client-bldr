@@ -10,6 +10,10 @@ ADD SAI/SAI/test/ptf /SAI/test/ptf
 # Install PTF test framework & test-cases from SAI repo
 ADD SAI/SAI/ptf /SAI/ptf/
 
+# Install dependencies required by lxml (from pyangbind->dpugen==0.0.5)
+RUN apt-get update && \
+    apt-get install -y libxml2-dev libxslt-dev
+
 # Install the python libraries
 RUN python3 -m pip install -r /tests/requirements.txt && \
     pip3 install scapy \
