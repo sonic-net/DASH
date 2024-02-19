@@ -521,7 +521,7 @@ control dash_ingress(
 #endif
         }
 
-        if (meta.eni_data.dscp != 0) {
+        if (meta.eni_data.dscp_mode == dash_tunnel_dscp_mode_t.PIPE_MODEL) {
             // ECN is zero.
             hdr.u0_ipv4.diffserv = (bit<8>)meta.eni_data.dscp;
         }
