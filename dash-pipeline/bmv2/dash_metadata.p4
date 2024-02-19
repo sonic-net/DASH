@@ -43,6 +43,7 @@ struct eni_data_t {
     IPv6Address pl_sip_mask;
     IPv4Address pl_underlay_sip;
     bit<6>  dscp;
+    dash_tunnel_dscp_mode_t dscp_mode,
 }
 
 struct metadata_t {
