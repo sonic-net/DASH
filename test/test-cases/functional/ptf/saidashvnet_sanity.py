@@ -73,6 +73,8 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
                                          pl_underlay_sip = pl_underlay_sip,
                                          v4_meter_policy_id = 0,
                                          v6_meter_policy_id = 0,
+                                         dash_tunnel_dscp_mode=SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL,
+                                         dscp=0,
                                          # TODO: Enable ACL rule
                                          #inbound_v4_stage1_dash_acl_group_id = self.in_acl_group_id,
                                          #inbound_v4_stage2_dash_acl_group_id = self.in_acl_group_id,

@@ -28,6 +28,12 @@ struct conntrack_data_t {
     bool allow_out;
 }
 
+enum bit<16> dash_tunnel_dscp_mode_t {
+    INVALID = 0,
+    PRESERVE_MODEL = 1,
+    PIPE_MODEL = 2
+}
+
 struct eni_data_t {
     bit<32> cps;
     bit<32> pps;
@@ -36,6 +42,8 @@ struct eni_data_t {
     IPv6Address pl_sip;
     IPv6Address pl_sip_mask;
     IPv4Address pl_underlay_sip;
+    bit<6>  dscp;
+    dash_tunnel_dscp_mode_t dscp_mode;
 }
 
 struct metadata_t {

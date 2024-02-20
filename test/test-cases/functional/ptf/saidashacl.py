@@ -202,6 +202,8 @@ class SaiThriftDashAclTest(VnetAPI):
                                    pl_underlay_sip = pl_underlay_sip,
                                    v4_meter_policy_id=0,
                                    v6_meter_policy_id=0,
+                                   dash_tunnel_dscp_mode=SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL,
+                                   dscp=0,
                                    inbound_v4_stage1_dash_acl_group_id=self.in_v4_stage1_acl_group_id,
                                    inbound_v4_stage2_dash_acl_group_id=self.in_v4_stage2_acl_group_id,
                                    inbound_v4_stage3_dash_acl_group_id=self.in_v4_stage3_acl_group_id,
