@@ -47,7 +47,7 @@
 |  1.4  | 05/03/2023 |    Prince Sunny     | ACL Tagging, ACL Requirements             |
 |  1.5  | 05/22/2023 | Oleksandr Ivantsiv  | Update configuration examples             |
 |  1.6  | 06/01/2023 |    Prince Sunny     | Added FastPath                            |
-|  1.7  | 02/20/2023 |    Prince Sunny     | Introduce Route Group Table               |
+|  1.7  | 02/20/2024 |    Prince Sunny     | Introduce Route Group Table               |
 
 # About this Manual
 This document provides more detailed design of DASH APIs, DASH orchestration agent, Config and APP DB Schemas and other SONiC buildimage changes required to bring up SONiC image on an appliance card. General DASH HLD can be found at [dash_hld](./dash-high-level-design.md).
@@ -501,7 +501,7 @@ DASH_ENI_ROUTE_TABLE:{{eni}}:
 ```
 
 ```
-key                      = DASH_ENI_ROUTE_TABLE:eni ; ENI name as key; ENI can bind to an route group atomically (Overwrites any old bindings)
+key                      = DASH_ENI_ROUTE_TABLE:eni ; ENI name as key; ENI can bind to a route group table atomically (Overwrites any old bindings)
 ; field                  = value 
 group_id                 = Route Group Table Id (contains both IPv4 and IPv6 routes)
 ```
