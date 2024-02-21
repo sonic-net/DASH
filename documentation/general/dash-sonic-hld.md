@@ -1,6 +1,6 @@
 # SONiC-DASH HLD
 ## High Level Design Document
-### Rev 1.6
+### Rev 1.7
 
 # Table of Contents
 
@@ -47,6 +47,7 @@
 |  1.4  | 05/03/2023 |    Prince Sunny     | ACL Tagging, ACL Requirements             |
 |  1.5  | 05/22/2023 | Oleksandr Ivantsiv  | Update configuration examples             |
 |  1.6  | 06/01/2023 |    Prince Sunny     | Added FastPath                            |
+|  1.7  | 02/20/2023 |    Prince Sunny     | Introduce Route Group Table               |
 
 # About this Manual
 This document provides more detailed design of DASH APIs, DASH orchestration agent, Config and APP DB Schemas and other SONiC buildimage changes required to bring up SONiC image on an appliance card. General DASH HLD can be found at [dash_hld](./dash-high-level-design.md).
@@ -494,8 +495,25 @@ vm_vni                   = VM VNI that is used for setting direction. Also used 
 
 ### 3.2.9 ROUTE LPM TABLE - OUTBOUND
 
+```
+DASH_ENI_ROUTE_TABLE:{{eni}}:
+    "group_id": {{group_id}} 
+```
+
+```
+key                      = DASH_ENI_ROUTE_TABLE:eni ; ENI name as key; ENI can bind to an route group atomically (Overwrites any old bindings)
+; field                  = value 
+group_id                 = Route Group Table Id (contains both IPv4 and IPv6 routes)
+```
+
+```
+DASH_ROUTE_GROUP_TABLE:{{group_id}}
+    "guid": {{string}}
+    "version": {{string}}
+```
+
 ``` 
-DASH_ROUTE_TABLE:{{eni}}:{{prefix}} 
+DASH_ROUTE_TABLE:{{group_id}}:{{prefix}} 
     "action_type": {{routing_type}} 
     "vnet":{{vnet_name}} (OPTIONAL)
     "appliance":{{appliance_id}} (OPTIONAL)
@@ -509,7 +527,7 @@ DASH_ROUTE_TABLE:{{eni}}:{{prefix}}
 ```
   
 ```
-key                      = DASH_ROUTE_TABLE:eni:prefix ; ENI route table with CA prefix for packet Outbound
+key                      = DASH_ROUTE_TABLE:group_id:prefix ; Route route table with CA prefix for packet Outbound
 ; field                  = value 
 action_type              = routing_type              ; reference to routing type
 vnet                     = vnet name                 ; destination vnet name if routing_type is {vnet, vnet_direct}, a vnet other than eni's vnet means vnet peering
@@ -622,7 +640,20 @@ tx_counter         = uint64   ; Number of transmitted bytes (read-only)
 rx_counter         = uint64   ; Number of received bytes (read-only)
 ```
 
-### 3.2.13 DASH orchagent (Overlay)
+### 3.2.13 Underlay SRC IP (PA) Validation
+	
+```
+DASH_PA_VALIDATION_TABLE:{{vni}}
+        "addresses": {{list of underlay addresses}} 
+```
+
+```
+key                      = DASH_PA_VALIDATION_TABLE:vni; ENI and VNI as key;
+; field                  = value
+addresses                = list of addresses used for validating underlay source ip of incoming packets. 
+```
+
+### 3.2.14 DASH orchagent (Overlay)
 
 | APP_DB Table          | Key          | Field           | SAI Attributes/*objects*                        | Comment                                       |
 | --------------------- | ------------ | --------------- | ----------------------------------------------- | --------------------------------------------- |
@@ -700,7 +731,7 @@ rx_counter         = uint64   ; Number of received bytes (read-only)
 |                       |              | pa_validation   | SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION           | use PA_VALIDATE if true                       |
 |                       |              | metering_bucket |                                                 |                                               |
 
-### 3.2.14 Protobuf encoding
+### 3.2.15 Protobuf encoding
 
 For saving memory consumption([AppDBMemoryEstimation.xlsx](data/AppDBMemoryEstimation.xlsx)), the DASH table of APP_DB could be encoded as protobuf.
 
@@ -1013,7 +1044,20 @@ Refer DASH documentation for the test plan.
         "OP": "SET"
     },
     {
-        "DASH_ROUTE_TABLE:F4939FEFC47E:10.1.0.0/16": {
+        "DASH_ENI_ROUTE_TABLE:F4939FEFC47E": {
+	    "group_id":"group_id_1"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTE_GROUP_TABLE:group_id_1": {
+	    "guid":"group_id_1-test",
+            "version":"1"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTE_TABLE:group_id_1:10.1.0.0/16": {
 	    "prefix":"10.1.0.0/16",
             "action_type":"vnet",
             "vnet":"Vnet1"
@@ -1021,7 +1065,7 @@ Refer DASH documentation for the test plan.
         "OP": "SET"
     },
     {
-        "DASH_ROUTE_TABLE:F4939FEFC47E:10.1.0.0/24": {
+        "DASH_ROUTE_TABLE:group_id_1:10.1.0.0/24": {
             "action_type":"vnet_direct",
             "vnet":"Vnet1",
             "overlay_ip":"10.0.0.6"
@@ -1029,7 +1073,7 @@ Refer DASH documentation for the test plan.
         "OP": "SET"
     },
     {
-        "DASH_ROUTE_TABLE:F4939FEFC47E:30.0.0.0/16": {
+        "DASH_ROUTE_TABLE:group_id_1:30.0.0.0/16": {
             "action_type":"direct",
             "metering_policy_en":"false",
             "metering_class":"1000"
@@ -1037,7 +1081,7 @@ Refer DASH documentation for the test plan.
         "OP": "SET"
     },
     {
-        "DASH_ROUTE_TABLE:F4939FEFC47E:40.0.0.0/16": {
+        "DASH_ROUTE_TABLE:group_id_1:40.0.0.0/16": {
             "action_type":"direct",
             "metering_policy_en":"true",
             "metering_class":"1000"
@@ -1045,7 +1089,7 @@ Refer DASH documentation for the test plan.
         "OP": "SET"
     },
     {
-        "DASH_ROUTE_TABLE:F4939FEFC47E:10.2.5.0/24": {
+        "DASH_ROUTE_TABLE:group_id_1:10.2.5.0/24": {
             "action_type":"drop"
         },
         "OP": "SET"
@@ -1213,7 +1257,20 @@ For the inbound direction, after Route/ACL lookup, pipeline shall use the "under
         "OP": "SET"
     },
     {
-        "DASH_ROUTE_TABLE:F4939FEFC47E:50.1.2.0/24": {
+        "DASH_ENI_ROUTE_TABLE:F4939FEFC47E": {
+	    "group_id":"group_id_2"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTE_GROUP_TABLE:group_id_2": {
+	    "guid":"group_id_2-test",
+            "version":"1.1"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTE_TABLE:group_id_2:50.1.2.0/24": {
             "action_type":"servicetunnel",
             "overlay_sip":"fd00:108:0:d204:0:200::0",
             "overlay_dip":"2603:10e1:100:2::0",
@@ -1224,7 +1281,7 @@ For the inbound direction, after Route/ACL lookup, pipeline shall use the "under
         "OP": "SET"
     },
     {
-        "DASH_ROUTE_TABLE:F4939FEFC47E:60.1.2.1/32": {
+        "DASH_ROUTE_TABLE:group_id_2:60.1.2.1/32": {
             "action_type":"servicetunnel",
             "overlay_sip":"fd00:108:0:d204:0:200::0",
             "overlay_dip":"2603:10e1:100:2::0",
@@ -1234,7 +1291,7 @@ For the inbound direction, after Route/ACL lookup, pipeline shall use the "under
         "OP": "SET"
     },
     {
-        "DASH_ROUTE_TABLE:F4939FEFC47E:70.1.2.0/24": {
+        "DASH_ROUTE_TABLE:group_id_2:70.1.2.0/24": {
             "action_type":"servicetunnel",
             "overlay_sip":"fd00:108:0:d204:0:200::0",
             "overlay_dip":"2603:10e1:100:2::4601:203",
@@ -1349,7 +1406,20 @@ For the example configuration above, the following is a brief explanation of loo
         "OP": "SET"
     },
     {
-        "DASH_ROUTE_TABLE:F4939FEFC47E:10.1.0.8/32": {
+        "DASH_ENI_ROUTE_TABLE:F4939FEFC47E": {
+	    "group_id":"group_id_3"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTE_GROUP_TABLE:group_id_3": {
+	    "guid":"group_id_3-test",
+            "version":"1"
+        },
+        "OP": "SET"
+    },
+    {
+        "DASH_ROUTE_TABLE:group_id_3:10.1.0.8/32": {
             "action_type":"vnet",
             "vnet":"Vnet1",
             "metering_policy_en":"false",
@@ -1370,7 +1440,7 @@ For the example configuration above, the following is a brief explanation of loo
         "OP": "SET"
     },
     {
-        "DASH_ROUTE_TABLE:F4939FEFC47E:10.2.0.6/24": {
+        "DASH_ROUTE_TABLE:group_id_3:10.2.0.6/24": {
             "action_type":"vnet",
             "vnet":"Vnet1"
         },
