@@ -28,6 +28,12 @@ struct conntrack_data_t {
     bool allow_out;
 }
 
+enum bit<16> dash_tunnel_dscp_mode_t {
+    INVALID = 0,
+    PRESERVE_MODEL = 1,
+    PIPE_MODEL = 2
+}
+
 struct eni_data_t {
     bit<32> cps;
     bit<32> pps;
@@ -36,6 +42,8 @@ struct eni_data_t {
     IPv6Address pl_sip;
     IPv6Address pl_sip_mask;
     IPv4Address pl_underlay_sip;
+    bit<6>  dscp;
+    dash_tunnel_dscp_mode_t dscp_mode;
 }
 
 struct metadata_t {
@@ -71,6 +79,9 @@ struct metadata_t {
     bit<16> mapping_meter_class;
     bit<16> meter_class;
     bit<32> meter_bucket_index;
+    bit<16> tunnel_pointer;
+    bool is_fast_path_icmp_flow_redirection_packet;
+    bit<1> fast_path_icmp_flow_redirection_disabled;
 }
 
 #endif /* _SIRIUS_METADATA_P4_ */

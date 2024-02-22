@@ -158,7 +158,13 @@ dpu_config = [
       "SAI_ENI_ATTR_V4_METER_POLICY_ID",
       "0",
       "SAI_ENI_ATTR_V6_METER_POLICY_ID",
-      "0"
+      "0",
+      "SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE",
+      "SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL",
+      "SAI_ENI_ATTR_DSCP",
+      "0",
+      "SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION",
+      "False"
     ]
   },
     {
@@ -229,7 +235,13 @@ dpu_config = [
       "SAI_ENI_ATTR_V4_METER_POLICY_ID",
       "0",
       "SAI_ENI_ATTR_V6_METER_POLICY_ID",
-      "0"
+      "0",
+      "SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE",
+      "SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL",
+      "SAI_ENI_ATTR_DSCP",
+      "0",
+      "SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION",
+      "False"
     ]
   },
 

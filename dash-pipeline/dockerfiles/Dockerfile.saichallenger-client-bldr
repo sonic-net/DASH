@@ -1,6 +1,6 @@
 # Requires <url of sai-challenger branch> <commit sha> or something
-# sc-client:230607
-FROM sc-client
+# sc-client:240216
+FROM sc-client:buster
 
 ADD tests/ /tests/
 
@@ -9,6 +9,10 @@ ADD SAI/SAI/test/ptf /SAI/test/ptf
 
 # Install PTF test framework & test-cases from SAI repo
 ADD SAI/SAI/ptf /SAI/ptf/
+
+# Install dependencies for dpugen==0.0.5
+RUN apt-get update && \
+    apt-get install -y python3-lxml
 
 # Install the python libraries
 RUN python3 -m pip install -r /tests/requirements.txt && \

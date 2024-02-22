@@ -42,8 +42,11 @@ Available tags are:
 
 - `name`: Specify the preferred counter name in SAI API generation, e.g. `outbound_bytes_counter`.
 - `action_names`: The counters are usually updated in actions whenever a table is matched. However, v1model doesn't support conditional statements (if-else) in action blocks. Hence, to workaround, sometimes counters should be updated in the actions are updated in the control blocks after the action is called. This tag is used to specify the name of the actions that was supposed to update this counter. e.g. `action1,action2,...`
-- `as_attr`: When set to "true", the counters will be generated as an attribute of the SAI object. This is not a normal behavior in SAI, since SAI usually either use get stats APIs or directly use counter IDs. Currently, generating get stats APIs is not supported yet, hence when this is not set, the attribute will be ignored.
-- `order`: Specify the order of the generated attributes in the SAI API header file. This will be particularly useful, when a table has multiple actions, and we add parameters to one of them. The new attributes might be generated in the middle of existing attributes, which breaks ABI compatibility with older version of SAI APIs. When `as_attr` is set, it will be compared with the order of other attributes from match keys and action parameters in the same object too.
+- `attr_type`: Attribute type can be set to multiple values: `counter_attr`, `counter_id` and `stats`.
+  - `counter_attr`: The counters will be generated as attributes for directly fetching the counter value on the target SAI object.
+  - `counter_id`: The counters will be generated as counter ids on the target SAI objects.
+  - `stats`: The counters will be generated as SAI stats attributes. If any SAI objects has any stats attributes, SAI get stats API will be generated.
+- `order`: Specify the order of the generated attributes in the SAI API header file. This will be particularly useful, when a table has multiple actions, and we add parameters to one of them. The new attributes might be generated in the middle of existing attributes, which breaks ABI compatibility with older version of SAI APIs. When `attr_type` is set, it will be compared with the order of other attributes from match keys and action parameters in the same object too.
 
 #### `@SaiTable`: Tables
 

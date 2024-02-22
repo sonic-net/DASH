@@ -269,7 +269,7 @@ It is possible that a given packet can get a hit in route table and/or mapping t
 
 ## 2.5 FastPath
 
-This section captures the Sonic-Dash specifics of FastPath use-case. Detailed document on FastPath is captured here ([FastPath](https://github.com/sonic-net/DASH/blob/main/documentation/load-bal-service/load-balancer-v3.md))
+This section captures the Sonic-Dash specifics of FastPath use-case. Detailed document on FastPath is captured here ([FastPath](https://github.com/sonic-net/DASH/blob/main/documentation/load-bal-service/fast-path-icmp-flow-redirection.md))
 
 The following are the salient points and requirements. Detailed design for FastPath feature shall come as a separate PR. FastPath redirect packets shall be handled by a standalone application and use SAI APIs to update the appliance/dpu flows. 
 - FastPath kicks in when appliance receives an ICMP redirect that matches an existing unified flow
@@ -280,60 +280,6 @@ The following are the salient points and requirements. Detailed design for FastP
 	- Original Outbound packet shall have an inner IPv6 header and outer IPv4 (Src VIP-A and Dst VIP-B)
 	- After an ICMP redirect is received from VIP-B hosting MUX, the Outbound flow shall be fixed-up to have outer IPV4 dst address to use the Redirect IP of VIP-B. Same fixup for Inbound flow to change VIP-B to Redirect IP
 	- After an ICMP redirect is received from VIP-A hosting MUX, the Outbound flow shall be fixed-up to have outer IPV4 src address to use the Redirect IP of VIP-A. Same fixup for Inbound flow to change VIP-A to Redirect IP
-	- ICMP redirect shall have the original inner IPv6 address as the IP header's src and dst address. 
-	- Redirect info shall contain the transposed IPv6 address, src and dst ports, sequence number and the encap type (NVGRE in this case) in addition to redirect address. 
-		```
-			struct 
-			{
-		            uint32 Reserved;
-		            in6_addr Target;
-		            in6_addr Destination;
-		            uint8 Type;
-		            uint8 Length;
-		            uint8 Reserved2[6];            
-		            IPV6_HEADER Ipv6Header;
-		            uint16 SourcePort;
-		            uint16 DestinationPort;
-		            uint32 SequenceNumber;
-		        } Redirect;
-			
-			struct 
-			{ 
-			    uint32 Version; 
-			    uint16 AddrFamily; 
-			    uint16 EncapType; 
-			    uint32 EncapId; 
-			    union { 
-			        struct { 
-			            in_addr DipPAv4; 
-			            char VMMac[MAC_ADDR_SIZE]; 
-			        } Info4; 
-			        struct { 
-			            in6_addr DipPAv6; 
-			            char VMMac[MAC_ADDR_SIZE]; 
-			        } Info6; 
-		   	} Redirect_Info; 
-		```
-- Implementation can use the above struct as a type-cast reference (packed as metadata in the redirect packet) and map it to a flow. Full packet capture is available in this ([doc](https://github.com/sonic-net/DASH/blob/main/documentation/load-bal-service/load-balancer-v3.md)) 
-- Redirect packet format is as below:
-
-
-  |SLB IP|APPL IP|GRE|SLB MAC|VM MAC|IP|Inner Src IP|Inner Dst IP|ICMP|Target Addr|Dst Addr|Redirect Header|Custom format|
-  |------|-------|---|-------|------|--|------------|------------|----|-----------|--------|---------------|-------------|
- 
-- The following shall be used for translations
-
-| Field                         | Mapping                       |
-| ----------------------------- | ----------------------------- |
-| VM Mac                        | Source ENI                    |
-| Inner Src IP                  | Original Src IP               |
-| Inner Dst IP                  | Original Dst IP               |
-| Target Address                | Original Dst IP               |
-| Redirect Header               | Original IPv6 Header + TCP ports (5 tuple) |
-| Addr Family                   | AF_INET/AF_INET6              |
-| Encap Type                    | NVGRE 1/VXLAN 2               |
-| Encap Id                      | Redirect GRE Key/ VXLAN Id    |
-| Custom Redirect Info          | Redirect DIP and Dst Mac      |
 
 # 3 Modules Design
 
@@ -401,10 +347,11 @@ DASH_ENI_TABLE:{{eni}}
     "underlay_ip": {{ip_addr}}
     "admin_state": {{enabled/disabled}}
     "vnet": {{vnet_name}}
-    "pl_sip_encoding": {{string}} (OPTIONAL)
+    "pl_sip_encoding": {{ip_prefix}} (OPTIONAL)
     "pl_underlay_sip": {{ip_addr}} (OPTIONAL)
     "v4_meter_policy_id": {{string}} (OPTIONAL)
     "v6_meter_policy_id": {{string}} (OPTIONAL)
+    "disable_fast_path_icmp_flow_redirection": {{bool}} (OPTIONAL)
 ```
 ```
 key                      = DASH_ENI_TABLE:eni ; ENI MAC as key
@@ -414,11 +361,12 @@ qos                      = Associated Qos profile
 underlay_ip              = PA address for Inbound encapsulation to VM
 admin_state              = Enabled after all configurations are applied. 
 vnet                     = Vnet that ENI belongs to
-pl_sip_encoding          = Private Link encoding for IPv6 SIP transpositions; Format "0xfield_value/0xfull_mask". field_value must be used as a replacement to the
-			   first len(full_mask) bits of pl_sip. Last 32 bits are reserved for the IPv4 CA. Logic: ((pl_sip & !full_mask) | field_value).
+pl_sip_encoding          = Private Link encoding for IPv6 SIP transpositions; Format "field_value/full_mask" where both field_value and `full_mask` must be given as IPv6 addresses. field_value must be used as a replacement to the
+			   first (128-len(full_mask)) bits of pl_sip. Last 32 bits are reserved for the IPv4 CA. Logic: ((pl_sip & !full_mask) | field_value).
 pl_underlay_sip          = Underlay SIP (ST GW VIP) to be used for all private link transformation for this ENI
-v4_meter_policy_id	 = IPv4 meter policy ID
-v6_meter_policy_id	 = IPv6 meter policy ID
+v4_meter_policy_id	     = IPv4 meter policy ID
+v6_meter_policy_id	     = IPv6 meter policy ID
+disable_fast_path_icmp_flow_redirection     = Disable handling fast path ICMP flow redirection packets
 ```
 
 ### 3.2.4 TAG
@@ -508,7 +456,7 @@ key                      = DASH_ROUTING_TYPE_TABLE:routing_type; routing type ca
 action_name              = action name as string
 action_type              = action_type can be {maprouting, direct, staticencap, appliance, 4to6, mapdecap, decap, drop}
 encap_type               = encap type depends on the action_type - {vxlan, nvgre}
-vni                      = vni value associated with the corresponding action. Applicable if encap_type is specified. 
+vni                      = vni value to be used as the key for encapsulation. Applicable if encap_type is specified. 
 ```
 
 ### 3.2.7 ROUTING APPLIANCE
@@ -569,7 +517,7 @@ appliance                = appliance id              ; appliance id if routing_t
 overlay_ip               = ip_address                ; overly_ip to lookup if routing_type is {vnet_direct}, use dst ip from packet if not specified
 overlay_sip              = ip_address                ; overlay ipv6 src ip if routing_type is {servicetunnel}, transform last 32 bits from packet (src ip)
 overlay_dip              = ip_address                ; overlay ipv6 dst ip if routing_type is {servicetunnel}, transform last 32 bits from packet (dst ip) 
-underlay_sip             = ip_address                ; underlay ipv4 src ip if routing_type is {servicetunnel}; this is the ST GW VIP (for ST traffic) or custom VIP
+underlay_sip             = ip_address                ; underlay ipv4 src ip if routing_type is {servicetunnel,privatelink}; this is the ST GW VIP (for ST traffic) or custom VIP. If specified, overrides pl_underlay_sip from DASH_ENI_TABLE
 underlay_dip             = ip_address                ; underlay ipv4 dst ip to override if routing_type is {servicetunnel}, use dst ip from packet if not specified
 metering_policy_en	 = bool                      ; Metering policy lookup enable (optional), default = false
 metering_class           = class_id                  ; Metering class-id, used if metering policy lookup is not enabled
@@ -613,6 +561,7 @@ DASH_VNET_MAPPING_TABLE:{{vnet}}:{{ip_address}}
     "use_pl_sip_eni": {{bool}} (OPTIONAL)
     "overlay_sip":{{ip_address}} (OPTIONAL)
     "overlay_dip":{{ip_address}} (OPTIONAL)
+    "routing_appliance_id": {{uint32}} (OPTIONAL)
 ```
 ```
 key                      = DASH_VNET_MAPPING_TABLE:vnet:ip_address ; CA-PA mapping table for Vnet
@@ -625,6 +574,7 @@ override_meter           = bool                      ; override the metering cla
 use_dst_vni              = bool                      ; if true, use the destination VNET VNI for encap. If false or not specified, use source VNET's VNI
 overlay_sip              = ip_address                ; overlay src ip if routing_type is {privatelink}, transform last 32 bits from packet 
 overlay_dip              = ip_address                ; overlay dst ip if routing_type is {privatelink} 
+routing_appliance_id     = uint32                    ; ID of routing appliance to use if routing_type is {privatelinknsg}
 ```
 
 ### 3.2.12 METER
@@ -660,16 +610,16 @@ metering_class           = class_id     ; metering class-id
 ```
 DASH_METER:{{eni}}:{{metering_class_id}}
     “metadata”: {{string}} (OPTIONAL)
-    "tx_counter": {{bytes}}
-    "rx_counter": {{bytes}} 
+    "tx_counter": {{uint64}}
+    "rx_counter": {{uint64}} 
 ```
 
 ```
 key                = DASH_METER:eni:metering_class_id ; metering class id table per (ENI)
 ; field            = value
 metadata           = string   ; Optional metadata string
-tx_counter         = bytes    ; Number of transmitted bytes (read-only)
-rx_counter         = bytes    ; Number of received bytes (read-only)
+tx_counter         = uint64   ; Number of transmitted bytes (read-only)
+rx_counter         = uint64   ; Number of received bytes (read-only)
 ```
 
 ### 3.2.13 DASH orchagent (Overlay)
@@ -1102,10 +1052,10 @@ Refer DASH documentation for the test plan.
     },
     {
         "DASH_VNET_MAPPING_TABLE:Vnet1:10.0.0.6": {
-            "routing_type":"vnet_encap",
-            "underlay_ip":"2601:12:7a:1::1234",
-            "mac_address":"F9-22-83-99-22-A2"
-	    "metering_class":"1002"
+                "routing_type":"vnet_encap",
+                "underlay_ip":"2601:12:7a:1::1234",
+                "mac_address":"F9-22-83-99-22-A2"
+                "metering_class":"1002"
         },
         "OP": "SET"
     },
@@ -1133,7 +1083,8 @@ Refer DASH documentation for the test plan.
             "protocol": "0",
             "vnet":"Vnet1",
             "pa_validation": true
-	}
+        },
+        "OP": "SET"
     },
     {
         "DASH_ROUTE_RULE_TABLE:F4939FEFC47E:45654: {
@@ -1142,54 +1093,48 @@ Refer DASH documentation for the test plan.
             "protocol": "0",
             "vnet":"Vnet2",
             "pa_validation": true
-	}
+        },
+        "OP": "SET"
     },
     {
         "DASH_METER_POLICY: {
         "meter_policy_id": "245bea34-1000-0000-0000-0000082764ac",
-	    "ip_version": "ipv4"
-	}
+        "ip_version": "ipv4"
+        },
+        "OP": "SET"
     },
     {
         "DASH_METER_RULE: {
             "meter_policy_id": "245bea34-1000-0000-0000-0000082764ac",
-	    "rule_num": "1",
-	    "prioirty": "0",
-	    "ip_prefix": "40.0.0.1/32",
-	    "metering_class":"20000"
-	}
+            "rule_num": "1",
+            "prioirty": "0",
+            "ip_prefix": "40.0.0.1/32",
+            "metering_class":"20000"
+        },
         "OP": "SET"
     },
     {
-        "DASH_METER: {
-            "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
-	    "metadata":"ROUTE_DIRECT_VNET1",
-	    "metering_class": "1000"
-	}
+        "DASH_METER:497f23d7-f0ac-4c99-a98f-59b470e8c7bd:1000": {
+            "metadata":"ROUTE_DIRECT_VNET1",
+        },
         "OP": "SET"
     },
     {
-        "DASH_METER: {
-            "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
-	    "metadata":"MAPPING_VNET1_10010101",
-	    "metering_class": "1001"
-	}
+        "DASH_METER:497f23d7-f0ac-4c99-a98f-59b470e8c7bd:1001": {
+            "metadata":"MAPPING_VNET1_10010101",
+        },
         "OP": "SET"
     },
     {
-        "DASH_METER: {
-            "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
-	    "metadata":"MAPPING_VNET1_10000006",
-	    "metering_class": "1002"
-	}
+        "DASH_METER:497f23d7-f0ac-4c99-a98f-59b470e8c7bd:1002": {
+            "metadata":"MAPPING_VNET1_10000006",
+        },
         "OP": "SET"
     },
     {
-        "DASH_METER: {
-            "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
-	    "metadata":"ROUTE_DIRECT_POLICY_40000001",
-	    "metering_class": "20000"
-	}
+        "DASH_METER:497f23d7-f0ac-4c99-a98f-59b470e8c7bd:20000": {
+            "metadata":"ROUTE_DIRECT_POLICY_40000001",
+        },
         "OP": "SET"
     },
 ]
@@ -1255,15 +1200,15 @@ For the inbound direction, after Route/ACL lookup, pipeline shall use the "under
 [
     {
         "DASH_ROUTING_TYPE_TABLE:servicetunnel": [ 
-	{
-	     "name": "action1",
-             "action_type": "4to6",
-	},
-	{ 
-             "name": "action2",
-             "action_type": "staticencap",
-             "encap_type": "nvgre"
-	     "key":"100"
+        {
+            "name": "action1",
+            "action_type": "4to6",
+        },
+        { 
+            "name": "action2",
+            "action_type": "staticencap",
+            "encap_type": "nvgre"
+            "vni":"100"
         } ],         
         "OP": "SET"
     },
@@ -1271,10 +1216,10 @@ For the inbound direction, after Route/ACL lookup, pipeline shall use the "under
         "DASH_ROUTE_TABLE:F4939FEFC47E:50.1.2.0/24": {
             "action_type":"servicetunnel",
             "overlay_sip":"fd00:108:0:d204:0:200::0",
-	    "overlay_dip":"2603:10e1:100:2::0",
-	    "underlay_sip":"40.1.2.1"
-	    "metering_policy_en":"false",
-	    "metering_class":"50000"
+            "overlay_dip":"2603:10e1:100:2::0",
+            "underlay_sip":"40.1.2.1",
+            "metering_policy_en":"false",
+            "metering_class":"50000"
         },
         "OP": "SET"
     },
@@ -1282,9 +1227,9 @@ For the inbound direction, after Route/ACL lookup, pipeline shall use the "under
         "DASH_ROUTE_TABLE:F4939FEFC47E:60.1.2.1/32": {
             "action_type":"servicetunnel",
             "overlay_sip":"fd00:108:0:d204:0:200::0",
-	    "overlay_dip":"2603:10e1:100:2::0",
-	    "underlay_sip":"30.1.2.1",
-	    "underlay_dip":"25.1.2.1"
+            "overlay_dip":"2603:10e1:100:2::0",
+            "underlay_sip":"30.1.2.1",
+            "underlay_dip":"25.1.2.1"
         },
         "OP": "SET"
     },
@@ -1292,16 +1237,14 @@ For the inbound direction, after Route/ACL lookup, pipeline shall use the "under
         "DASH_ROUTE_TABLE:F4939FEFC47E:70.1.2.0/24": {
             "action_type":"servicetunnel",
             "overlay_sip":"fd00:108:0:d204:0:200::0",
-	    "overlay_dip":"2603:10e1:100:2::4601:203",
-	    "underlay_sip":"34.1.2.1"
+            "overlay_dip":"2603:10e1:100:2::4601:203",
+            "underlay_sip":"34.1.2.1"
         },
         "OP": "SET"
     },
     {
-        "DASH_METER: {
-            "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
-	    "metadata":"SERVICE_TUNNEL_ROUTE_50010200",
-	    "metering_class": "50000"
+        "DASH_METER:497f23d7-f0ac-4c99-a98f-59b470e8c7bd:50000" {
+            "metadata":"SERVICE_TUNNEL_ROUTE_50010200",
 	}
 	"OP": "SET"
     },
@@ -1354,29 +1297,31 @@ For the example configuration above, the following is a brief explanation of loo
 [
     {
         "DASH_ROUTING_TYPE_TABLE:privatelink": [ 
-	{
-	     "name": "action1",
-             "action_type": "4to6",
-	},
-	{ 
-             "name": "action2",
-             "action_type": "staticencap",
-             "encap_type": "nvgre"
-	     "key":"100"
+        {
+            "name": "action1",
+            "action_type": "4to6",
+        },
+        { 
+            "name": "action2",
+            "action_type": "staticencap",
+            "encap_type": "nvgre",
+            "vni":"100"
         } ],         
         "OP": "SET",
-	"DASH_ROUTING_TYPE_TABLE:privatelinknsg": [ 
-	{
-	     "name": "action1",
-             "action_type": "4to6",
-	},
-	{ 
-             "name": "action2",
-             "action_type": "staticencap",
-             "encap_type": "nvgre"
-	     "key":"100"
+    },
+    {
+        "DASH_ROUTING_TYPE_TABLE:privatelinknsg": [ 
+        {
+            "name": "action1",
+            "action_type": "4to6",
         },
-	{ 
+        { 
+            "name": "action2",
+            "action_type": "staticencap",
+            "encap_type": "nvgre",
+            "vni":"100"
+        },
+        { 
              "name": "action3",
              "action_type": "appliance",
         } ], 
@@ -1388,8 +1333,8 @@ For the example configuration above, the following is a brief explanation of loo
             "addresses": "100.8.1.2", 
             "encap_type": "vxlan",
             "vni": 101
-	},
-	"OP": "SET"
+        },
+        "OP": "SET"
     },
     {
         "DASH_ENI_TABLE:F4939FEFC47E": {
@@ -1398,7 +1343,7 @@ For the example configuration above, the following is a brief explanation of loo
 	    "underlay_ip": "25.1.1.1",
 	    "admin_state": "enabled",
 	    "vnet": "Vnet1",
-	    "pl_sip_encoding": "0x0020000000000a0b0c0d0a0b/0x002000000000ffffffffffff",
+	    "pl_sip_encoding": "2001:0:20::/::ffff:ffff",
 	    "pl_underlay_sip": "55.1.2.3"
         },
         "OP": "SET"
@@ -1406,9 +1351,9 @@ For the example configuration above, the following is a brief explanation of loo
     {
         "DASH_ROUTE_TABLE:F4939FEFC47E:10.1.0.8/32": {
             "action_type":"vnet",
-	    "vnet":"Vnet1"
-	    "metering_policy_en":"false",
-	    "metering_class":"60000"
+            "vnet":"Vnet1",
+            "metering_policy_en":"false",
+            "metering_class":"60000"
         },
         "OP": "SET"
     },
@@ -1417,10 +1362,10 @@ For the example configuration above, the following is a brief explanation of loo
             "routing_type":"privatelink",
             "mac_address":"F9-22-83-99-22-A2",
             "underlay_ip":"50.1.2.3",
-	    "overlay_sip":"fd40:108:0:d204:0:200::0",
-	    "overlay_dip":"2603:10e1:100:2::3401:203",
-	    "metering_class":"60001",
-	    "override_meter":"true"
+            "overlay_sip":"fd40:108:0:d204:0:200::0",
+            "overlay_dip":"2603:10e1:100:2::3401:203",
+            "metering_class":"60001",
+            "override_meter":"true"
         },
         "OP": "SET"
     },
@@ -1436,8 +1381,8 @@ For the example configuration above, the following is a brief explanation of loo
             "routing_type":"privatelink",
             "mac_address":"F9-22-83-99-22-A2",
             "underlay_ip":"50.2.2.6",
-	    "overlay_sip":"fd40:108:0:d204:0:200::0",
-	    "overlay_dip":"2603:10e1:100:2::3402:206",
+            "overlay_sip":"fd40:108:0:d204:0:200::0",
+            "overlay_dip":"2603:10e1:100:2::3402:206",
         },
         "OP": "SET"
     },
@@ -1446,26 +1391,23 @@ For the example configuration above, the following is a brief explanation of loo
             "routing_type":"privatelinknsg",
             "mac_address":"F9-22-83-99-22-A2",
             "underlay_ip":"50.2.2.6",
-	    "overlay_sip":"fd40:108:0:d204:0:200::0",
-	    "overlay_dip":"2603:10e1:100:2::3402:206",
-	    "routing_appliance_id":22
+            "overlay_sip":"fd40:108:0:d204:0:200::0",
+            "overlay_dip":"2603:10e1:100:2::3402:206",
+            "routing_appliance_id":22
         },
         "OP": "SET"
     },
-        "DASH_METER: {
-            "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
-	    "metadata":"ROUTE_VNET1_10010008",
-	    "metering_class": "60000"
-	}
-	"OP": "SET"
+    {
+        "DASH_METER:497f23d7-f0ac-4c99-a98f-59b470e8c7bd:60000": {
+            "metadata":"ROUTE_VNET1_10010008"
+        },
+        "OP": "SET"
     },
     {
-        "DASH_METER: {
-            "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
-	    "metadata":"PRIVATE_LINK_VNET1_10010008",
-	    "metering_class": "60001"
-	}
-	"OP": "SET"
+        "DASH_METER:497f23d7-f0ac-4c99-a98f-59b470e8c7bd:60001": {
+            "metadata":"PRIVATE_LINK_VNET1_10010008",
+        }
+        "OP": "SET"
     },
 ]
 ```
@@ -1478,10 +1420,10 @@ For the example configuration above, the following is a brief explanation of loo
 		c. Next lookup is in the mapping table and mapping table action here is "privatelink"
 		d. First Action for "privatelink" is 4to6 transposition
 		e. Packet gets transformed as: 
-		 	For Overlay SIP, using ENI's "pl_sip_encoding": "0x0020000000000a0b0c0d0a0b/0x002000000000ffffffffffff" -> Overlay SIP fd30:108:0:0a0b:0c0d:0a0b:a01:101 using the following logic:
-			1. fv = (fd40:108:0:d204:0:200::0 & !0x002000000000ffffffffffff) (first 96 bits based on provided mask length)
-			2. result = fv | 0x0020000000000a0b0c0d0a0b (first 96 bits based on the provided mask length)
-			3. result = result | source CA (last 32 bits if its set to 0 in mapping, implicit conversion)
+		 	For Overlay SIP, using ENI's "pl_sip_encoding": "2001:0:20::/::ffff:ffff" -> Overlay SIP fd41:108:20:d204::a01:101 using the following logic:
+			1. fv = (fd40:108:0:d204:0:200::0 & !::ffff:ffff) (Clear last len(mask) bits for source CA)
+			2. result = fv | 2001:0:20:: (Apply PL prefix)
+			3. result = result | 10.1.1.1 (insert source CA to last 32 bits)
 			Overlay DIP 2603:10e1:100:2::3401:203 (No transformation, provided as part of mapping)
 		f. Second Action is Static NVGRE encap with GRE key '100'. 
 		g. Underlay DIP shall be 50.1.2.3 (from mapping), Underlay SIP shall be 55.1.2.3 (from ENI)
@@ -1497,7 +1439,7 @@ For the example configuration above, the following is a brief explanation of loo
 		c. Next lookup is in the mapping table and mapping table action here is "privatelink"
 		d. First Action for "privatelink" is 4to6 transposition
 		e. Packet gets transformed as: 
-		 	For Overlay SIP, using ENI's "pl_sip_encoding": "0x0020000000000a0b0c0d0a0b/0x002000000000ffffffffffff" -> Overlay SIP fd30:108:0:0a0b:0c0d:0a0b:a01:102;	
+		 	For Overlay SIP, using ENI's "pl_sip_encoding": "2001:0:20::/::ffff:ffff" -> Overlay SIP fd41:108:20:d204::200:a02:6;	
 			Overlay DIP 2603:10e1:100:2::3402:206 (No transformation, provided as part of mapping)
 		f. Second Action is Static NVGRE encap with GRE key '100'. 
 		g. Underlay DIP shall be 50.2.2.6 (from mapping), Underlay SIP shall be 55.1.2.3 (from ENI)
@@ -1508,7 +1450,7 @@ For the example configuration above, the following is a brief explanation of loo
 		c. Next lookup is in the mapping table and mapping table action here is "privatelinknsg"
 		d. First Action for "privatelinknsg" is 4to6 transposition
 		e. Packet gets transformed as: 
-		 	For Overlay SIP, using ENI's "pl_sip_encoding": "0x0020000000000a0b0c0d0a0b/0x002000000000ffffffffffff" -> Overlay SIP fd30:108:0:0a0b:0c0d:0a0b:a01:102;	
+		 	For Overlay SIP, using ENI's "pl_sip_encoding": "2001:0:20::/::ffff:ffff" -> Overlay SIP fd41:108:20:d204::200:a02:9;	
 			Overlay DIP 2603:10e1:100:2::3402:206 (No transformation, provided as part of mapping)
 		f. Second Action is Static NVGRE encap with GRE key '100'. 
 		g. Underlay DIP shall be 50.2.2.6 (from mapping), Underlay SIP shall be 55.1.2.3 (from ENI)

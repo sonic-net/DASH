@@ -149,6 +149,14 @@ int main(int argc, char **argv)
     attr.value.oid = SAI_NULL_OBJECT_ID;
     attrs.push_back(attr);
 
+    attr.id = SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE;
+    attr.value.s32 = SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL;
+    attrs.push_back(attr);
+
+    attr.id = SAI_ENI_ATTR_DSCP;
+    attr.value.u8 = 0;
+    attrs.push_back(attr);
+
     std::unordered_map<uint32_t, uint16_t> acl_group_ids = {
       {SAI_ENI_ATTR_INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID, in_acl_group_id},
       {SAI_ENI_ATTR_INBOUND_V4_STAGE2_DASH_ACL_GROUP_ID, in_acl_group_id},
@@ -187,6 +195,10 @@ int main(int argc, char **argv)
 
     attr.id = SAI_ENI_ATTR_PL_UNDERLAY_SIP;
     attr.value.u32 = 0;
+    attrs.push_back(attr);
+
+    attr.id = SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION;
+    attr.value.booldata = false;
     attrs.push_back(attr);
 
     status = dash_eni_api->create_eni(&eni_id, switch_id, attrs.size(), attrs.data());

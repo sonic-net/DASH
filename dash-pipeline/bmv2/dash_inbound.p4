@@ -3,7 +3,6 @@
 
 #include "dash_headers.p4"
 #include "dash_service_tunnel.p4"
-#include "dash_vxlan.p4"
 #include "dash_acl.p4"
 #include "dash_conntrack.p4"
 
@@ -36,13 +35,15 @@ control inbound(inout headers_t hdr,
         ConntrackOut.apply(hdr, meta);
 #endif //PNA_CONNTRACK
 
-        vxlan_encap(hdr,
-                    meta.encap_data.underlay_dmac,
-                    meta.encap_data.underlay_smac,
-                    meta.encap_data.underlay_dip,
-                    meta.encap_data.underlay_sip,
-                    hdr.ethernet.dst_addr,
-                    meta.encap_data.vni);
+        tunnel_encap(hdr,
+                     meta,
+                     meta.encap_data.overlay_dmac,
+                     meta.encap_data.underlay_dmac,
+                     meta.encap_data.underlay_smac,
+                     meta.encap_data.underlay_dip,
+                     meta.encap_data.underlay_sip,
+                     dash_encapsulation_t.VXLAN,
+                     meta.encap_data.vni);
     }
 }
 

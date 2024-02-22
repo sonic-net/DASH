@@ -4,12 +4,13 @@
 #include "dash_headers.p4"
 #include "dash_metadata.p4"
 #include "dash_parser.p4"
-#include "dash_vxlan.p4"
-#include "dash_nvgre.p4"
+#include "dash_tunnel.p4"
 #include "dash_outbound.p4"
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"
 #include "underlay.p4"
+
+#define MAX_ENI 64
 
 control dash_ingress(
       inout headers_t hdr
@@ -39,10 +40,17 @@ control dash_ingress(
     action accept() {
     }
 
+#ifdef TARGET_BMV2_V1MODEL
+    @SaiCounter[name="lb_fast_path_icmp_in", attr_type="stats"]
+    counter(1, CounterType.packets_and_bytes) port_lb_fast_path_icmp_in_counter;
+    @SaiCounter[name="lb_fast_path_eni_miss", attr_type="stats"]
+    counter(1, CounterType.packets_and_bytes) port_lb_fast_path_eni_miss_counter;
+#endif
+    
     @SaiTable[name = "vip", api = "dash_vip"]
     table vip {
         key = {
-            hdr.ipv4.dst_addr : exact @SaiVal[name = "VIP", type="sai_ip_address_t"];
+            hdr.u0_ipv4.dst_addr : exact @SaiVal[name = "VIP", type="sai_ip_address_t"];
         }
 
         actions = {
@@ -64,7 +72,7 @@ control dash_ingress(
     @SaiTable[name = "direction_lookup", api = "dash_direction_lookup"]
     table direction_lookup {
         key = {
-            hdr.vxlan.vni : exact @SaiVal[name = "VNI"];
+            hdr.u0_vxlan.vni : exact @SaiVal[name = "VNI"];
         }
 
         actions = {
@@ -107,6 +115,11 @@ control dash_ingress(
    meta.stage4_dash_acl_group_id = ## prefix ##_stage4_dash_acl_group_id; \
    meta.stage5_dash_acl_group_id = ## prefix ##_stage5_dash_acl_group_id;
 
+#ifdef TARGET_BMV2_V1MODEL
+    @SaiCounter[name="lb_fast_path_icmp_in", attr_type="stats", action_names="set_eni_attrs"]
+    counter(MAX_ENI, CounterType.packets_and_bytes) eni_lb_fast_path_icmp_in_counter;
+#endif
+
     action set_eni_attrs(bit<32> cps,
                          bit<32> pps,
                          bit<32> flows,
@@ -119,10 +132,13 @@ control dash_ingress(
                          @SaiVal[type="sai_ip_address_t"] IPv4Address pl_underlay_sip,
                          @SaiVal[type="sai_object_id_t"] bit<16> v4_meter_policy_id,
                          @SaiVal[type="sai_object_id_t"] bit<16> v6_meter_policy_id,
+                         @SaiVal[type="sai_dash_tunnel_dscp_mode_t"] dash_tunnel_dscp_mode_t dash_tunnel_dscp_mode,
+                         @SaiVal[type="sai_uint8_t"] bit<6> dscp,
                          ACL_GROUPS_PARAM(inbound_v4),
                          ACL_GROUPS_PARAM(inbound_v6),
                          ACL_GROUPS_PARAM(outbound_v4),
-                         ACL_GROUPS_PARAM(outbound_v6)) {
+                         ACL_GROUPS_PARAM(outbound_v6),
+                         bit<1> disable_fast_path_icmp_flow_redirection) {
         meta.eni_data.cps             = cps;
         meta.eni_data.pps             = pps;
         meta.eni_data.flows           = flows;
@@ -131,6 +147,9 @@ control dash_ingress(
         meta.eni_data.pl_sip_mask     = pl_sip_mask;
         meta.eni_data.pl_underlay_sip = pl_underlay_sip;
         meta.encap_data.underlay_dip  = vm_underlay_dip;
+        if (dash_tunnel_dscp_mode == dash_tunnel_dscp_mode_t.PIPE_MODEL) {
+            meta.eni_data.dscp = dscp;
+        }
         /* vm_vni is the encap VNI used for tunnel between inbound DPU -> VM
          * and not a VNET identifier */
         meta.encap_data.vni           = vm_vni;
@@ -151,6 +170,8 @@ control dash_ingress(
             }
             meta.meter_policy_id = v4_meter_policy_id;
         }
+        
+        meta.fast_path_icmp_flow_redirection_disabled = disable_fast_path_icmp_flow_redirection;
     }
 
     @SaiTable[name = "eni", api = "dash_eni", order=1, isobject="true"]
@@ -208,7 +229,7 @@ control dash_ingress(
     action permit() {
     }
 
-    action vxlan_decap_pa_validate(@SaiVal[type="sai_object_id_t"] bit<16> src_vnet_id) {
+    action tunnel_decap_pa_validate(@SaiVal[type="sai_object_id_t"] bit<16> src_vnet_id) {
         meta.vnet_id = src_vnet_id;
     }
 
@@ -216,7 +237,7 @@ control dash_ingress(
     table pa_validation {
         key = {
             meta.vnet_id: exact @SaiVal[type="sai_object_id_t"];
-            hdr.ipv4.src_addr : exact @SaiVal[name = "sip", type="sai_ip_address_t"];
+            hdr.u0_ipv4.src_addr : exact @SaiVal[name = "sip", type="sai_ip_address_t"];
         }
 
         actions = {
@@ -231,12 +252,12 @@ control dash_ingress(
     table inbound_routing {
         key = {
             meta.eni_id: exact @SaiVal[type="sai_object_id_t"];
-            hdr.vxlan.vni : exact @SaiVal[name = "VNI"];
-            hdr.ipv4.src_addr : ternary @SaiVal[name = "sip", type="sai_ip_address_t"];
+            hdr.u0_vxlan.vni : exact @SaiVal[name = "VNI"];
+            hdr.u0_ipv4.src_addr : ternary @SaiVal[name = "sip", type="sai_ip_address_t"];
         }
         actions = {
-            vxlan_decap(hdr);
-            vxlan_decap_pa_validate;
+            tunnel_decap(hdr, meta);
+            tunnel_decap_pa_validate;
             @defaultonly deny;
         }
 
@@ -273,7 +294,7 @@ control dash_ingress(
     table meter_rule {
         key = {
             meta.meter_policy_id: exact @SaiVal[type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
-            hdr.ipv4.dst_addr : ternary @SaiVal[name = "dip", type="sai_ip_address_t"];
+            hdr.u0_ipv4.dst_addr : ternary @SaiVal[name = "dip", type="sai_ip_address_t"];
         }
 
      actions = {
@@ -286,9 +307,9 @@ control dash_ingress(
     // MAX_METER_BUCKET = MAX_ENI(64) * NUM_BUCKETS_PER_ENI(4096)
     #define MAX_METER_BUCKETS 262144
 #ifdef TARGET_BMV2_V1MODEL
-    @SaiCounter[name="outbound_bytes_counter", action_names="meter_bucket_action", as_attr="true"]
+    @SaiCounter[name="outbound", action_names="meter_bucket_action", attr_type="counter_attr"]
     counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_outbound;
-    @SaiCounter[name="inbound_bytes_counter", action_names="meter_bucket_action", as_attr="true"]
+    @SaiCounter[name="inbound", action_names="meter_bucket_action", attr_type="counter_attr"]
     counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_inbound;
 #endif // TARGET_BMV2_V1MODEL
     action meter_bucket_action(@SaiVal[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index) {
@@ -363,10 +384,22 @@ control dash_ingress(
 #endif  // DPDK_PNA_SEND_TO_PORT_FIX_MERGED
 #endif // TARGET_DPDK_PNA
 
+        if (meta.is_fast_path_icmp_flow_redirection_packet) {
+#ifdef TARGET_BMV2_V1MODEL
+            port_lb_fast_path_icmp_in_counter.count(0);
+#endif
+        }
+
         if (vip.apply().hit) {
             /* Use the same VIP that was in packet's destination if it's
                present in the VIP table */
-            meta.encap_data.underlay_sip = hdr.ipv4.dst_addr;
+            meta.encap_data.underlay_sip = hdr.u0_ipv4.dst_addr;
+        } else {
+            if (meta.is_fast_path_icmp_flow_redirection_packet) {
+#ifdef TARGET_BMV2_V1MODEL
+                port_lb_fast_path_eni_miss_counter.count(0);
+#endif
+            }
         }
 
         /* If Outer VNI matches with a reserved VNI, then the direction is Outbound - */
@@ -374,21 +407,31 @@ control dash_ingress(
 
         appliance.apply();
 
+        // Save the original DSCP value
+        meta.eni_data.dscp = (bit<6>)hdr.u0_ipv4.diffserv;
+
         /* Outer header processing */
 
         /* Put VM's MAC in the direction agnostic metadata field */
         meta.eni_addr = meta.direction == dash_direction_t.OUTBOUND  ?
-                                          hdr.inner_ethernet.src_addr :
-                                          hdr.inner_ethernet.dst_addr;
+                                          hdr.customer_ethernet.src_addr :
+                                          hdr.customer_ethernet.dst_addr;
 
-        eni_ether_address_map.apply();
+        if (!eni_ether_address_map.apply().hit) {
+            if (meta.is_fast_path_icmp_flow_redirection_packet) {
+#ifdef TARGET_BMV2_V1MODEL
+                port_lb_fast_path_eni_miss_counter.count(0);
+#endif
+            }
+        }
+
         if (meta.direction == dash_direction_t.OUTBOUND) {
-            vxlan_decap(hdr);
+            tunnel_decap(hdr, meta);
         } else if (meta.direction == dash_direction_t.INBOUND) {
             switch (inbound_routing.apply().action_run) {
-                vxlan_decap_pa_validate: {
+                tunnel_decap_pa_validate: {
                     pa_validation.apply();
-                    vxlan_decap(hdr);
+                    tunnel_decap(hdr, meta);
                 }
             }
         }
@@ -399,29 +442,36 @@ control dash_ingress(
         meta.ip_protocol = 0;
         meta.dst_ip_addr = 0;
         meta.src_ip_addr = 0;
-        if (hdr.ipv6.isValid()) {
-            meta.ip_protocol = hdr.ipv6.next_header;
-            meta.src_ip_addr = hdr.ipv6.src_addr;
-            meta.dst_ip_addr = hdr.ipv6.dst_addr;
+        if (hdr.customer_ipv6.isValid()) {
+            meta.ip_protocol = hdr.customer_ipv6.next_header;
+            meta.src_ip_addr = hdr.customer_ipv6.src_addr;
+            meta.dst_ip_addr = hdr.customer_ipv6.dst_addr;
             meta.is_overlay_ip_v6 = 1;
-        } else if (hdr.ipv4.isValid()) {
-            meta.ip_protocol = hdr.ipv4.protocol;
-            meta.src_ip_addr = (bit<128>)hdr.ipv4.src_addr;
-            meta.dst_ip_addr = (bit<128>)hdr.ipv4.dst_addr;
+        } else if (hdr.customer_ipv4.isValid()) {
+            meta.ip_protocol = hdr.customer_ipv4.protocol;
+            meta.src_ip_addr = (bit<128>)hdr.customer_ipv4.src_addr;
+            meta.dst_ip_addr = (bit<128>)hdr.customer_ipv4.dst_addr;
         }
 
-        if (hdr.tcp.isValid()) {
-            meta.src_l4_port = hdr.tcp.src_port;
-            meta.dst_l4_port = hdr.tcp.dst_port;
-        } else if (hdr.udp.isValid()) {
-            meta.src_l4_port = hdr.udp.src_port;
-            meta.dst_l4_port = hdr.udp.dst_port;
+        if (hdr.customer_tcp.isValid()) {
+            meta.src_l4_port = hdr.customer_tcp.src_port;
+            meta.dst_l4_port = hdr.customer_tcp.dst_port;
+        } else if (hdr.customer_udp.isValid()) {
+            meta.src_l4_port = hdr.customer_udp.src_port;
+            meta.dst_l4_port = hdr.customer_udp.dst_port;
         }
 
         eni.apply();
         if (meta.eni_data.admin_state == 0) {
             deny();
         }
+
+        if (meta.is_fast_path_icmp_flow_redirection_packet) {
+#ifdef TARGET_BMV2_V1MODEL
+            eni_lb_fast_path_icmp_in_counter.count((bit<32>)meta.eni_id);
+#endif
+        }
+
         acl_group.apply();
 
 
@@ -432,7 +482,7 @@ control dash_ingress(
         }
 
         /* Underlay routing */
-        meta.dst_ip_addr = (bit<128>)hdr.ipv4.dst_addr;
+        meta.dst_ip_addr = (bit<128>)hdr.u0_ipv4.dst_addr;
         underlay.apply(
               hdr
             , meta
@@ -469,6 +519,10 @@ control dash_ingress(
 #ifdef TARGET_BMV2_V1MODEL
             meter_bucket_inbound.count(meta.meter_bucket_index);
 #endif
+        }
+
+        if (meta.eni_data.dscp_mode == dash_tunnel_dscp_mode_t.PIPE_MODEL) {
+            hdr.u0_ipv4.diffserv = (bit<8>)meta.eni_data.dscp;
         }
 
         eni_meter.apply();

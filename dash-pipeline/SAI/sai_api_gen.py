@@ -5,8 +5,11 @@ try:
     import json
     import argparse
     import copy
+    import re
     from jinja2 import Template, Environment, FileSystemLoader
-    from typing import (Type, Any, Dict, List, Optional)
+    from typing import (Type, Any, Dict, List, Optional, Callable, Iterator)
+    import jsonpath_ng.ext as jsonpath_ext
+    import jsonpath_ng as jsonpath
 except ImportError as ie:
     print("Import failed for " + ie.name)
     exit(1)
@@ -37,6 +40,107 @@ KV_PAIR_LIST_TAG: str = 'kvPairList'
 SAI_VAL_TAG: str = 'SaiVal'
 SAI_COUNTER_TAG: str = 'SaiCounter'
 SAI_TABLE_TAG: str = 'SaiTable'
+
+#
+# P4 IR parser and analyzer:
+#
+class P4IRTree:
+    @staticmethod
+    def from_file(path: str) -> 'P4IRTree':
+        with open(path, 'r') as f:
+            return P4IRTree(json.load(f))
+
+    def __init__(self, program: Dict[str, Any]) -> None:
+        self.program = program
+
+    def walk(self, path: str, on_match: Callable[[Any, Any], None]) -> None:
+        jsonpath_exp = jsonpath_ext.parse(path)
+        for match in jsonpath_exp.find(self.program):
+            on_match(match)
+
+
+class P4IRVarInfo:
+    @staticmethod
+    def from_ir(ir_def_node: Any) -> 'P4IRVarInfo':
+        return P4IRVarInfo(
+            ir_def_node["Node_ID"],
+            ir_def_node["name"],
+            ir_def_node["Source_Info"]["source_fragment"],
+            ir_def_node["type"]["path"]["name"])
+
+    def __init__(self, ir_id: int, ir_name: str, code_name: str, type_name: str) -> None:
+        self.ir_id = ir_id
+        self.ir_name = ir_name
+        self.code_name = code_name
+        self.type_name = type_name
+
+    def __str__(self) -> str:
+        return f"ID = {self.ir_id}, Name = {self.ir_name}, VarName = {self.code_name}, Type = {self.type_name}"
+
+
+class P4IRVarRefInfo:
+    @staticmethod
+    def from_ir(ir_ref_node: Any, ir_var_info: P4IRVarInfo) -> 'P4IRVarRefInfo':
+        return P4IRVarRefInfo(
+            ir_var_info,
+            ir_ref_node["Node_ID"],
+            ir_ref_node["Node_Type"],
+            ir_ref_node["name"])
+
+    def __init__(self, var: P4IRVarInfo, caller_id: int, caller_type: str, caller: str) -> None:
+        self.var = var
+        self.caller_id = caller_id 
+        self.caller_type = caller_type
+        self.caller = caller
+
+    def __str__(self) -> str:
+        return f"VarName = {self.var.code_name}, CallerID = {self.caller_id}, CallerType = {self.caller_type}, Caller = {self.caller}"
+
+
+class P4VarRefGraph:
+    def __init__(self, ir: P4IRTree) -> None:
+        self.ir = ir
+        self.counters: Dict[str, P4IRVarInfo] = {}
+        self.var_refs: Dict[str, List[P4IRVarRefInfo]] = {}
+        self.__build_graph()
+
+    def __build_graph(self) -> None:
+        self.__build_counter_list()
+        self.__build_counter_caller_mapping()
+        pass
+
+    def __build_counter_list(self) -> None:
+        def on_counter_definition(match: jsonpath.DatumInContext) -> None:
+            ir_value = P4IRVarInfo.from_ir(match.value)
+            self.counters[ir_value.ir_name] = ir_value
+            print(f"Counter definition found: {ir_value}")
+
+        self.ir.walk('$..*[?Node_Type = "Declaration_Instance" & type.Node_Type = "Type_Name" & type.path.name = "counter"]', on_counter_definition)
+
+    def __build_counter_caller_mapping(self) -> None:
+        # Build the mapping from counter name to its caller.
+        def on_counter_invocation(match: jsonpath.DatumInContext) -> None:
+            var_ir_name: str = match.value["expr"]["path"]["name"]
+            if var_ir_name not in self.counters:
+                return
+
+            # Walk through the parent nodes to find the closest action or control block.
+            cur_node = match
+            while cur_node.context is not None:
+                cur_node = cur_node.context
+                if "Node_Type" not in cur_node.value:
+                    continue
+
+                if cur_node.value["Node_Type"] in ["P4Action", "P4Control"]:
+                    var = self.counters[var_ir_name]
+                    var_ref = P4IRVarRefInfo.from_ir(cur_node.value, var)
+                    self.var_refs.setdefault(var.code_name, []).append(var_ref)
+                    print(f"Counter reference found: {var_ref}")
+                    break
+
+        # Get all nodes with Node_Type =  and name = "counter". This will be the nodes that represent the counter calls.
+        self.ir.walk('$..*[?Node_Type = "Member" & member = "count"]', on_counter_invocation)
+
 
 #
 # SAI parser decorators:
@@ -214,6 +318,7 @@ class SAITypeSolver:
 class SAIObject:
     def __init__(self):
         # Properties from P4Runtime preamble
+        self.raw_name: str = ''
         self.name: str = ''
         self.id: int = 0
         self.alias: str = ''
@@ -233,18 +338,22 @@ class SAIObject:
         '''
         if PREAMBLE_TAG in p4rt_object:
             preamble = p4rt_object[PREAMBLE_TAG]
-            self.id = preamble['id']
-            self.name = preamble['name']
-            self.alias = preamble['alias']
+            self.id = int(preamble['id'])
+            self.name = str(preamble['name'])
+            self.alias = str(preamble['alias'])
         else:
-            self.id = p4rt_object['id'] if 'id' in p4rt_object else self.id
-            self.name = p4rt_object['name'] if 'name' in p4rt_object else self.name
+            self.id = int(p4rt_object['id']) if 'id' in p4rt_object else self.id
+            self.name = str(p4rt_object['name']) if 'name' in p4rt_object else self.name
 
         # We only care about the last piece of the name, which is the actual object name.
         if '.' in self.name:
             name_parts = self.name.split('.')
             self.name = name_parts[-1]
         
+        # We save the raw name here, because "name" can be override by annotation for API generation purpose, and the raw name will help us
+        # to find the correlated P4 infomation from either Runtime or IR.
+        self.raw_name = self.name
+
         return
 
     def _parse_sai_common_annotation(self, p4rt_anno: Dict[str, Any]) -> None:
@@ -256,10 +365,10 @@ class SAIObject:
             { "key": "type", "value": { "stringValue": "sai_ip_addr_family_t" } }
         '''
         if p4rt_anno['key'] == 'name':
-            self.name = p4rt_anno['value']['stringValue']
+            self.name = str(p4rt_anno['value']['stringValue'])
             return True
         elif p4rt_anno['key'] == 'order':
-            self.order = p4rt_anno['value']['int64Value']
+            self.order = str(p4rt_anno['value']['int64Value'])
             return True
 
         return False
@@ -282,7 +391,7 @@ class SAIEnumMember(SAIObject):
 
             { "name": "INVALID", "value": "AAA=" }
         '''
-        self.p4rt_value = p4rt_member["value"]
+        self.p4rt_value = str(p4rt_member["value"])
 
 
 @sai_parser_from_p4rt
@@ -313,7 +422,7 @@ class SAIEnum(SAIObject):
         print("Parsing enum: " + self.name)
 
         self.name = self.name[:-2]
-        self.bitwidth = p4rt_enum['underlyingType'][BITWIDTH_TAG]
+        self.bitwidth = int(p4rt_enum['underlyingType'][BITWIDTH_TAG])
         self.members = [SAIEnumMember.from_p4rt(enum_member) for enum_member in p4rt_enum[MEMBERS_TAG]]
 
         # Register enum type info.
@@ -362,19 +471,19 @@ class SAIAPITableAttribute(SAIObject):
                     if self._parse_sai_common_annotation(kv):
                         continue
                     elif kv['key'] == 'type':
-                        self.type = kv['value']['stringValue']
+                        self.type = str(kv['value']['stringValue'])
                     elif kv['key'] == 'default_value':  # "default" is a reserved keyword and cannot be used.
-                        self.default = kv['value']['stringValue']
+                        self.default = str(kv['value']['stringValue'])
                     elif kv['key'] == 'isresourcetype':
-                        self.isresourcetype = kv['value']['stringValue']
+                        self.isresourcetype = str(kv['value']['stringValue'])
                     elif kv['key'] == 'isreadonly':
-                        self.isreadonly = kv['value']['stringValue']
+                        self.isreadonly = str(kv['value']['stringValue'])
                     elif kv['key'] == 'objects':
-                        self.object_name = kv['value']['stringValue']
+                        self.object_name = str(kv['value']['stringValue'])
                     elif kv['key'] == 'skipattr':
-                        self.skipattr = kv['value']['stringValue']
+                        self.skipattr = str(kv['value']['stringValue'])
                     elif kv['key'] == 'match_type':
-                        self.match_type = kv['value']['stringValue']
+                        self.match_type = str(kv['value']['stringValue'])
                     else:
                         raise ValueError("Unknown attr annotation " + kv['key'])
 
@@ -390,6 +499,11 @@ class SAIAPITableAttribute(SAIObject):
         # Delete all vars with *_is_v6 in their names.
         return [v for v in vars if '_is_v6' not in v.name]
 
+    def set_sai_type(self, sai_type_info: SAITypeInfo) -> None:
+        self.type = sai_type_info.name
+        self.field = sai_type_info.sai_attribute_value_field
+        if self.default == None:
+            self.default = sai_type_info.default
 
 @sai_parser_from_p4rt
 class SAICounter(SAIAPITableAttribute):
@@ -401,10 +515,10 @@ class SAICounter(SAIAPITableAttribute):
         self.bitwidth: int = 64
         self.isreadonly: str = "true"
         self.counter_type: str = "bytes"
-        self.as_attr: bool = False
+        self.attr_type: str = "stats"
         self.param_actions: List[str] = []
 
-    def parse_p4rt(self, p4rt_counter: Dict[str, Any]) -> None:
+    def parse_p4rt(self, p4rt_counter: Dict[str, Any], var_ref_graph: P4VarRefGraph) -> None:
         '''
         This method parses the P4Runtime counter object and populates the SAI counter object.
 
@@ -422,18 +536,36 @@ class SAICounter(SAIAPITableAttribute):
                 "size": "262144"
             }
         '''
-        # print("Parsing counter: " + self.name)
+        print("Parsing counter: " + self.name)
         self.__parse_sai_counter_annotation(p4rt_counter)
 
-        counter_storage_type = SAITypeSolver.get_object_sai_type(self.bitwidth)
-        self.type = counter_storage_type.name
-        self.field = counter_storage_type.sai_attribute_value_field
+        # If this counter needs to be generated as SAI attributes, we need to figure out the data type for the counter value.
+        if self.attr_type != "counter_id":
+            counter_storage_type = SAITypeSolver.get_object_sai_type(self.bitwidth)
 
-        counter_unit = p4rt_counter['spec']['unit']
-        if counter_unit in ['BYTES', 'PACKETS', 'BOTH']:
+        # Otherwise, this counter should be linked to a SAI counter using an object ID.
+        # In this case, the type needs to be sai_object_id_t.
+        else:
+            counter_storage_type = SAITypeSolver.get_sai_type("sai_object_id_t")
+            self.name = f"{self.name}_counter_id"
+            self.isreadonly = "false"
+            self.object_name = "counter"
+        
+        self.set_sai_type(counter_storage_type)
+
+        counter_unit = str(p4rt_counter['spec']['unit']).lower()
+        if counter_unit in ['bytes', 'packets', 'both']:
             self.counter_type = counter_unit.lower()
         else:
             raise ValueError(f'Unknown counter unit: {counter_unit}')
+
+        # If actions are specified by annotation, then we skip finding the referenced actions from the IR.
+        if len(self.param_actions) == 0 and self.raw_name in var_ref_graph.var_refs:
+            for ref in var_ref_graph.var_refs[self.raw_name]:
+                if ref.caller_type == 'P4Action':
+                    self.param_actions.append(ref.caller)
+
+            print(f"Counter {self.name} is referenced by {self.param_actions}")
 
         return
 
@@ -460,11 +592,33 @@ class SAICounter(SAIAPITableAttribute):
                     if self._parse_sai_common_annotation(kv):
                         continue
                     elif kv['key'] == 'action_names':
-                        self.param_actions = kv['value']['stringValue'].split(",")
-                    elif kv['key'] == 'as_attr':
-                        self.as_attr = True if kv['value']['stringValue'] == "true" else False
+                        self.param_actions = str(kv['value']['stringValue']).split(",")
+                    elif kv['key'] == 'attr_type':
+                        self.attr_type = str(kv['value']['stringValue'])
+                        if self.attr_type not in ["counter_attr", "counter_id", "stats"]:
+                            raise ValueError(f'Unknown counter attribute type: attr_type={self.attr_type}')
                     else:
                         raise ValueError("Unknown attr annotation " + kv['key'])
+
+    def generate_counter_sai_attributes(self) -> 'Iterator[SAICounter]':
+        # If the SAI attribute type is counter id, we generate as standard SAI counter ID attributes, hence return as it is.
+        if self.attr_type == "counter_id":
+            yield self
+
+        counter_types = ['bytes', 'packets'] if self.counter_type == 'both' else [self.counter_type]
+
+        for index, counter_type in enumerate(counter_types):
+            counter = self
+            if index != len(counter_types) - 1:
+                counter = copy.deepcopy(self)
+            
+            counter.counter_type = counter_type
+            if counter.attr_type == "counter_attr":
+                counter.name = f"{counter.name}_{counter.counter_type}_counter"
+            else:
+                counter.name = f"{counter.name}_{counter.counter_type}"
+
+            yield counter
 
 
 @sai_parser_from_p4rt
@@ -496,13 +650,13 @@ class SAIAPITableKey(SAIAPITableAttribute):
             }
         '''
 
-        self.bitwidth = p4rt_table_key[BITWIDTH_TAG]
+        self.bitwidth = int(p4rt_table_key[BITWIDTH_TAG])
         # print("Parsing table key: " + self.name)
 
         if OTHER_MATCH_TYPE_TAG in p4rt_table_key:
-            self.match_type =  p4rt_table_key[OTHER_MATCH_TYPE_TAG].lower()
+            self.match_type =  str(p4rt_table_key[OTHER_MATCH_TYPE_TAG].lower())
         elif MATCH_TYPE_TAG in p4rt_table_key:
-            self.match_type =  p4rt_table_key[MATCH_TYPE_TAG].lower()
+            self.match_type =  str(p4rt_table_key[MATCH_TYPE_TAG].lower())
         else:
             raise ValueError(f'No valid match tag found')
 
@@ -514,11 +668,8 @@ class SAIAPITableKey(SAIAPITableAttribute):
             sai_type_info = SAITypeSolver.get_sai_type(self.type)
         else:
             sai_type_info = SAITypeSolver.get_match_key_sai_type(self.match_type, self.bitwidth)
-            self.type = sai_type_info.name
 
-        self.field = sai_type_info.sai_attribute_value_field
-        if self.default == None:
-            self.default = sai_type_info.default
+        self.set_sai_type(sai_type_info)
 
         return
 
@@ -583,7 +734,7 @@ class SAIAPITableActionParam(SAIAPITableAttribute):
 
             { "id": 1, "name": "dst_vnet_id", "bitwidth": 16 }
         '''
-        self.bitwidth = p4rt_table_action_param[BITWIDTH_TAG]
+        self.bitwidth = int(p4rt_table_action_param[BITWIDTH_TAG])
         # print("Parsing table action param: " + self.name)
 
         if STRUCTURED_ANNOTATIONS_TAG in p4rt_table_action_param:
@@ -594,11 +745,8 @@ class SAIAPITableActionParam(SAIAPITableAttribute):
             sai_type_info = SAITypeSolver.get_sai_type(self.type)
         else:
             sai_type_info = SAITypeSolver.get_object_sai_type(self.bitwidth)
-            self.type = sai_type_info.name
 
-        self.field = sai_type_info.sai_attribute_value_field
-        if self.default == None:
-            self.default = sai_type_info.default
+        self.set_sai_type(sai_type_info)
 
         return
 
@@ -619,6 +767,7 @@ class SAIAPITableData(SAIObject):
         self.counters: List[SAICounter] = []
         self.with_counters: str = 'false'
         self.sai_attributes: List[SAIAPITableAttribute] = []
+        self.sai_stats: List[SAIAPITableAttribute] = []
 
         # Extra properties from annotations
         self.stage: Optional[str] = None
@@ -691,15 +840,15 @@ class SAIAPITableData(SAIObject):
                     if self._parse_sai_common_annotation(kv):
                         continue
                     elif kv['key'] == 'isobject':
-                        self.is_object = kv['value']['stringValue']
+                        self.is_object = str(kv['value']['stringValue'])
                     elif kv['key'] == 'ignored':
                         self.ignored = True
                     elif kv['key'] == 'stage':
-                        self.stage = kv['value']['stringValue']
+                        self.stage = str(kv['value']['stringValue'])
                     elif kv['key'] == 'api':
-                        self.api_name = kv['value']['stringValue']
+                        self.api_name = str(kv['value']['stringValue'])
                     elif kv['key'] == 'api_type':
-                        self.api_type = kv['value']['stringValue']
+                        self.api_type = str(kv['value']['stringValue'])
 
         if self.is_object == None:
             self.is_object = 'false'
@@ -795,21 +944,30 @@ class SAIAPITableData(SAIObject):
                             key.object_name = table_name
 
     def __build_sai_attributes_after_parsing(self):
-        # Group all actions parameters and counters with as_attr set by order with sequence kept the same.
+        # Group all actions parameters and counters set by order with sequence kept the same.
         # Then merge them into a single list.
         sai_attributes_by_order = {}
+        sai_stats_by_order = {}
+
         for action_param in self.action_params:
             if action_param.skipattr != "true":
                 sai_attributes_by_order.setdefault(action_param.order, []).append(action_param)
 
         for counter in self.counters:
-            if counter.as_attr:
+            if counter.attr_type != "stats":
                 sai_attributes_by_order.setdefault(counter.order, []).append(counter)
+            else:
+                sai_stats_by_order.setdefault(counter.order, []).append(counter)
         
-        # Merge all attributes into a single list.
+        # Merge all attributes into a single list by their order.
         self.sai_attributes = []
         for order in sorted(sai_attributes_by_order.keys()):
             self.sai_attributes.extend(sai_attributes_by_order[order])
+
+        # Merge all stat counters into a single list by their order.
+        self.sai_stats = []
+        for order in sorted(sai_stats_by_order.keys()):
+            self.sai_stats.extend(sai_stats_by_order[order])
 
 
 class DASHAPISet(SAIObject):
@@ -846,27 +1004,27 @@ class DASHSAIExtensions(SAIObject):
         self.sai_apis: List[DASHAPISet] = []
 
     @staticmethod
-    def from_p4rt_file(p4rt_json_file_path: str, ignore_tables: List[str]) -> 'DASHSAIExtensions':
+    def from_p4rt_file(p4rt_json_file_path: str, ignore_tables: List[str], var_ref_graph: P4VarRefGraph) -> 'DASHSAIExtensions':
         print("Parsing SAI APIs BMv2 P4Runtime Json file: " + p4rt_json_file_path)
         with open(p4rt_json_file_path) as p4rt_json_file:
             p4rt = json.load(p4rt_json_file)
 
-        return DASHSAIExtensions.from_p4rt(p4rt, name = 'dash_sai_apis', ignore_tables = ignore_tables)
+        return DASHSAIExtensions.from_p4rt(p4rt, name = 'dash_sai_apis', ignore_tables = ignore_tables, var_ref_graph = var_ref_graph)
 
-    def parse_p4rt(self, p4rt_value: Dict[str, Any], ignore_tables: List[str]) -> None:
+    def parse_p4rt(self, p4rt_value: Dict[str, Any], ignore_tables: List[str], var_ref_graph) -> None:
         self.__parse_sai_enums_from_p4rt(p4rt_value)
-        self.__parse_sai_counters_from_p4rt(p4rt_value)
+        self.__parse_sai_counters_from_p4rt(p4rt_value, var_ref_graph)
         self.__parse_sai_apis_from_p4rt(p4rt_value, ignore_tables)
 
     def __parse_sai_enums_from_p4rt(self, p4rt_value: Dict[str, Any]) -> None:
         all_p4rt_enums = p4rt_value[TYPE_INFO_TAG][SERIALIZABLE_ENUMS_TAG]
         self.sai_enums = [SAIEnum.from_p4rt(enum_value, name = enum_name) for enum_name, enum_value in all_p4rt_enums.items()]
 
-    def __parse_sai_counters_from_p4rt(self, p4rt_value: Dict[str, Any]) -> None:
+    def __parse_sai_counters_from_p4rt(self, p4rt_value: Dict[str, Any], var_ref_graph: P4VarRefGraph) -> None:
         all_p4rt_counters = p4rt_value[COUNTERS_TAG]
         for p4rt_counter in all_p4rt_counters:
-            counter = SAICounter.from_p4rt(p4rt_counter)
-            self.sai_counters.append(counter)
+            counter = SAICounter.from_p4rt(p4rt_counter, var_ref_graph)
+            self.sai_counters.extend(counter.generate_counter_sai_attributes())
 
     def __parse_sai_apis_from_p4rt(self, program: Dict[str, Any], ignore_tables: List[str]) -> None:
         # Group all counters by action name.
@@ -1002,9 +1160,10 @@ class SAIGenerator:
     def __init__(self, dash_sai_ext: DASHSAIExtensions):
         self.dash_sai_ext: DASHSAIExtensions = dash_sai_ext
         self.sai_api_names: List[str] = []
-        self.generated_sai_api_extension_names: List[str] = []
-        self.generated_sai_type_extension_names: List[str] = []
-        self.generated_sai_object_entry_extension_names: List[str] = []
+        self.generated_sai_api_extension_lines: List[str] = []
+        self.generated_sai_type_extension_lines: List[str] = []
+        self.generated_sai_port_attibute_extension_lines: List[str] = []
+        self.generated_sai_object_entry_extension_lines: List[str] = []
         self.generated_header_file_names: List[str] = []
         self.generated_impl_file_names: List[str] = []
 
@@ -1012,13 +1171,16 @@ class SAIGenerator:
         print("\nGenerating all SAI APIs ...")
 
         for sai_api in self.dash_sai_ext.sai_apis:
-            self.generate_sai_api(sai_api)
+            self.generate_sai_api_extensions(sai_api)
 
-        self.generate_dash_sai_global_definitions()
-        self.generate_sai_enum()
+        self.generate_sai_global_extensions()
+        self.generate_sai_type_extensions()
+        self.generate_sai_port_extensions()
+        self.generate_sai_object_extensions()
+        self.generate_sai_enum_extensions()
         self.generate_sai_fixed_api_files()
 
-    def generate_sai_api(self, sai_api: DASHAPISet) -> None:
+    def generate_sai_api_extensions(self, sai_api: DASHAPISet) -> None:
         print("\nGenerating DASH SAI API definitions and implementation for API: " + sai_api.app_name + " ...")
 
         self.sai_api_names.append(sai_api.app_name)
@@ -1038,14 +1200,14 @@ class SAIGenerator:
         self.generated_header_file_names.append(sai_header_file_name)
 
         # Gather SAI API extension name and object types
-        self.generated_sai_api_extension_names.append('    SAI_API_' + sai_api.app_name.upper() + ',\n')
+        self.generated_sai_api_extension_lines.append('    SAI_API_' + sai_api.app_name.upper() + ',\n')
 
         for table in sai_api.tables:
-            self.generated_sai_type_extension_names.append('    SAI_OBJECT_TYPE_' + table.name.upper() + ',\n')
+            self.generated_sai_type_extension_lines.append('    SAI_OBJECT_TYPE_' + table.name.upper() + ',\n')
 
             if table.is_object == 'false':
-                self.generated_sai_object_entry_extension_names.append('    /** @validonly object_type == SAI_OBJECT_TYPE_' + table.name.upper() + ' */')
-                self.generated_sai_object_entry_extension_names.append('    sai_' + table.name + '_t ' + table.name + ';\n')
+                self.generated_sai_object_entry_extension_lines.append('    /** @validonly object_type == SAI_OBJECT_TYPE_' + table.name.upper() + ' */')
+                self.generated_sai_object_entry_extension_lines.append('    sai_' + table.name + '_t ' + table.name + ';\n')
 
         return
 
@@ -1055,26 +1217,67 @@ class SAIGenerator:
         SAITemplateRender('templates/saiapi.cpp.j2').render_to_file('lib/' + sai_impl_file_name, tables = sai_api.tables, app_name = sai_api.app_name, header_prefix = header_prefix)
         self.generated_impl_file_names.append(sai_impl_file_name)
 
-    def generate_dash_sai_global_definitions(self) -> None:
-        print("\nGenerating DASH SAI API global definitions ...")
-
-        # Update SAI extensions with API names and includes
+    def generate_sai_global_extensions(self) -> None:
+        print("\nGenerating SAI global extensions with API names and includes ...")
         with SAIFileUpdater('SAI/experimental/saiextensions.h') as f:
-            f.insert_before('Add new experimental APIs above this line', self.generated_sai_api_extension_names, new_line_only=True)
+            f.insert_before('Add new experimental APIs above this line', self.generated_sai_api_extension_lines, new_line_only=True)
             f.insert_after('new experimental object type includes', ['#include "{}"'.format(f) for f in self.generated_header_file_names], new_line_only=True)
 
-        # Update SAI type extensions with object types
+    def generate_sai_type_extensions(self) -> None:
+        print("\nGenerating SAI type extensions with object types ...")
         with SAIFileUpdater('SAI/experimental/saitypesextensions.h') as f:
-            f.insert_before('Add new experimental object types above this line', self.generated_sai_type_extension_names, new_line_only=True)
+            f.insert_before('Add new experimental object types above this line', self.generated_sai_type_extension_lines, new_line_only=True)
 
-        # Update SAI object struct for entries
+    def generate_sai_port_extensions(self) -> None:
+        print("\nGenerating SAI port extensions with port attributes ...")
+
+        # If any counter doesn't have any table assigned, they should be added as port attributes and track globally.
+        new_port_counters: List[SAICounter] = []
+        new_port_stats: List[SAICounter] = []
+        is_first_attr = False
+        is_first_stat = False
+        with open('SAI/experimental/saiportextensions.h', 'r') as f:
+            content = f.read()
+
+            all_port_attrs = re.findall(r'SAI_PORT_ATTR_\w+', content)
+            is_first_attr = len(all_port_attrs) == 3
+
+            all_port_stats = re.findall(r'SAI_PORT_STAT_\w+', content)
+            is_first_stat = len(all_port_stats) == 3
+
+            for sai_counter in self.dash_sai_ext.sai_counters:
+                if len(sai_counter.param_actions) == 0:
+                    if sai_counter.attr_type != "stats":
+                        sai_counter_port_attr_name = f"SAI_PORT_ATTR_{sai_counter.name.upper()}"
+                        if sai_counter_port_attr_name not in all_port_attrs:
+                            new_port_counters.append(sai_counter)
+                    else:
+                        sai_counter_port_stat_name = f"SAI_PORT_STAT_{sai_counter.name.upper()}"
+                        if sai_counter_port_stat_name not in all_port_stats:
+                            new_port_stats.append(sai_counter)
+
+        sai_counters_str = SAITemplateRender('templates/saicounter.j2').render(table_name = "port", sai_counters = new_port_counters, is_first_attr = is_first_attr)
+        sai_counters_lines = [s.rstrip(" \n") for s in sai_counters_str.split('\n')]
+        sai_counters_lines = sai_counters_lines[:-1] # Remove the last empty line, so we won't add extra empty line to the file.
+
+        sai_stats_str = SAITemplateRender('templates/headers/sai_stats_extensions.j2').render(table_name = "port", sai_stats = new_port_stats, is_first_attr = is_first_stat)
+        sai_stats_lines = [s.rstrip(" \n") for s in sai_stats_str.split('\n')]
+        sai_stats_lines = sai_stats_lines[:-1] # Remove the last empty line, so we won't add extra empty line to the file.
+
+        with SAIFileUpdater('SAI/experimental/saiportextensions.h') as f:
+            f.insert_before('Add new experimental port attributes above this line', sai_counters_lines)
+            f.insert_before('Add new experimental port stats above this line', sai_stats_lines)
+
+    def generate_sai_object_extensions(self) -> None:
+        print("\nGenerating SAI object entry extensions ...")
         with SAIFileUpdater('SAI/inc/saiobject.h') as f:
-            f.insert_before('Add new experimental entries above this line', self.generated_sai_object_entry_extension_names, new_line_only=True)
+            f.insert_before('Add new experimental entries above this line', self.generated_sai_object_entry_extension_lines, new_line_only=True)
             f.insert_after('new experimental object type includes', ["#include <{}>".format(f) for f in self.generated_header_file_names], new_line_only=True)
 
         return
 
-    def generate_sai_enum(self) -> None:
+    def generate_sai_enum_extensions(self) -> None:
+        print("\nGenerating SAI enum extensions ...")
         new_sai_enums: List[SAIEnum] = []
         with open('SAI/experimental/saitypesextensions.h', 'r') as f:
             content = f.read()
@@ -1113,6 +1316,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='P4 SAI API generator')
     parser.add_argument('filepath', type=str, help='Path to P4 program RUNTIME JSON file')
     parser.add_argument('apiname', type=str, help='Name of the new SAI API')
+    parser.add_argument('--ir', type=str, help="Path to P4 program IR JSON file")
     parser.add_argument('--print-sai-lib', type=bool)
     parser.add_argument('--ignore-tables', type=str, default='', help='Comma separated list of tables to ignore')
     args = parser.parse_args()
@@ -1124,8 +1328,11 @@ if __name__ == "__main__":
 
     os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
+    p4ir = P4IRTree.from_file(args.ir)
+    var_ref_graph = P4VarRefGraph(p4ir)
+
     # Parse SAI data from P4 runtime json file
-    dash_sai_exts = DASHSAIExtensions.from_p4rt_file(p4rt_file_path, args.ignore_tables.split(','))
+    dash_sai_exts = DASHSAIExtensions.from_p4rt_file(p4rt_file_path, args.ignore_tables.split(','), var_ref_graph)
     dash_sai_exts.post_parsing_process()
 
     if args.print_sai_lib:

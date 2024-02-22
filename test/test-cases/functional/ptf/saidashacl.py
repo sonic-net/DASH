@@ -202,6 +202,8 @@ class SaiThriftDashAclTest(VnetAPI):
                                    pl_underlay_sip = pl_underlay_sip,
                                    v4_meter_policy_id=0,
                                    v6_meter_policy_id=0,
+                                   dash_tunnel_dscp_mode=SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL,
+                                   dscp=0,
                                    inbound_v4_stage1_dash_acl_group_id=self.in_v4_stage1_acl_group_id,
                                    inbound_v4_stage2_dash_acl_group_id=self.in_v4_stage2_acl_group_id,
                                    inbound_v4_stage3_dash_acl_group_id=self.in_v4_stage3_acl_group_id,
@@ -221,7 +223,8 @@ class SaiThriftDashAclTest(VnetAPI):
                                    outbound_v6_stage2_dash_acl_group_id=self.out_v6_stage2_acl_group_id,
                                    outbound_v6_stage3_dash_acl_group_id=self.out_v6_stage3_acl_group_id,
                                    outbound_v6_stage4_dash_acl_group_id=0,
-                                   outbound_v6_stage5_dash_acl_group_id=0)
+                                   outbound_v6_stage5_dash_acl_group_id=0,
+                                   disable_fast_path_icmp_flow_redirection=0)
 
         self.eam = sai_thrift_eni_ether_address_map_entry_t(
             switch_id=self.switch_id, address=self.eni_mac)
