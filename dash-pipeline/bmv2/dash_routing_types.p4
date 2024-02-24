@@ -103,7 +103,7 @@ action route_service_tunnel(
     meta.encap_data.original_overlay_dip = hdr.u0_ipv4.src_addr;
     meta.encap_data.original_overlay_sip = hdr.u0_ipv4.dst_addr;
 
-    set_action_4to6(hdr = hdr,
+    set_action_nat46(hdr = hdr,
                     meta = meta,
                     sip = overlay_sip,
                     sip_mask = overlay_sip_mask,
@@ -163,7 +163,7 @@ action set_private_link_mapping(
                             underlay_dip = underlay_dip,
                             overlay_dmac = hdr.u0_ethernet.dst_addr);
 
-    set_action_4to6(hdr = hdr,
+    set_action_nat46(hdr = hdr,
                     meta = meta,
                     dip = overlay_dip,
                     dip_mask = 0xffffffffffffffffffffffff,

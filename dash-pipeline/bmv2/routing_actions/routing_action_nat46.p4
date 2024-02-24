@@ -1,7 +1,9 @@
-#ifndef _DASH_ROUTING_ACTION_4TO6_P4_
-#define _DASH_ROUTING_ACTION_4TO6_P4_
+#ifndef _DASH_ROUTING_ACTION_NAT46_P4_
+#define _DASH_ROUTING_ACTION_NAT46_P4_
 
-action set_action_4to6(
+#include "../dash_headers.p4"
+
+action set_action_nat46(
     in headers_t hdr,
     inout metadata_t meta,
     in IPv6Address sip,
@@ -9,13 +11,14 @@ action set_action_4to6(
     in IPv6Address dip,
     in IPv6Address dip_mask)
 {
-    meta.overlay_sip_4to6_value = sip;
-    meta.overlay_sip_4to6_mask = sip_mask;
-    meta.overlay_dip_4to6_value = dip;
-    meta.overlay_dip_4to6_mask = dip_mask;
+    meta.pending_actions = meta.pending_actions | dash_routing_actions_t.NAT46;
+    meta.nat46_sip = sip;
+    meta.nat46_sip_mask = sip_mask;
+    meta.overlay_dip_nat46_value = dip;
+    meta.overlay_dip_nat46_mask = dip_mask;
 }
 
-action do_action_4to6(
+action do_action_nat46(
     inout headers_t hdr,
     in metadata_t meta)
 {
@@ -29,12 +32,12 @@ action do_action_4to6(
 #ifndef DISABLE_128BIT_ARITHMETIC
     // As of 2024-Feb-09, p4c-dpdk does not yet support arithmetic on
     // 128-bit operands.
-    hdr.u0_ipv6.dst_addr = ((IPv6Address)hdr.u0_ipv4.dst_addr & ~meta.overlay_dip_4to6_mask) | (meta.overlay_dip_4to6_value & meta.overlay_dip_4to6_mask);
-    hdr.u0_ipv6.src_addr = ((IPv6Address)hdr.u0_ipv4.src_addr & ~meta.overlay_sip_4to6_mask) | (meta.overlay_sip_4to6_value & meta.overlay_sip_4to6_mask);
+    hdr.u0_ipv6.dst_addr = ((IPv6Address)hdr.u0_ipv4.dst_addr & ~meta.overlay_dip_nat46_mask) | (meta.overlay_dip_nat46_value & meta.overlay_dip_nat46_mask);
+    hdr.u0_ipv6.src_addr = ((IPv6Address)hdr.u0_ipv4.src_addr & ~meta.nat46_sip_mask) | (meta.nat46_sip & meta.nat46_sip_mask);
 #endif
     
     hdr.u0_ipv4.setInvalid();
     hdr.u0_ethernet.ether_type = IPV6_ETHTYPE;
 }
 
-#endif /* _DASH_ROUTING_ACTION_4TO6_P4_ */
+#endif /* _DASH_ROUTING_ACTION_NAT46_P4_ */

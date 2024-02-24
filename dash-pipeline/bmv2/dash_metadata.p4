@@ -81,16 +81,19 @@ struct metadata_t {
     bit<16> tunnel_pointer;
     bool is_fast_path_icmp_flow_redirection_packet;
     bit<1> fast_path_icmp_flow_redirection_disabled;
-    
-    // Action: 4to6
-    IPv6Address overlay_sip_4to6_value;
-    IPv6Address overlay_sip_4to6_mask;
-    IPv6Address overlay_dip_4to6_value;
-    IPv6Address overlay_dip_4to6_mask;
 
-    // Action: 6to4
-    IPv4Address overlay_sip_6to4_value;
-    IPv4Address overlay_dip_6to4_value;
+    // Actions
+    bit<32> pending_actions;
+    
+    // Action: nat46
+    IPv6Address nat46_sip;
+    IPv6Address nat46_sip_mask;
+    IPv6Address overlay_dip_nat46_value;
+    IPv6Address overlay_dip_nat46_mask;
+
+    // Action: nat64
+    IPv4Address nat64_sip;
+    IPv4Address overlay_dip_nat64_value;
 }
 
 #endif /* _SIRIUS_METADATA_P4_ */

@@ -1,6 +1,8 @@
 #ifndef _DASH_ROUTING_ACTION_STATIC_ENCAP_P4_
 #define _DASH_ROUTING_ACTION_STATIC_ENCAP_P4_
 
+#include "../dash_headers.p4"
+
 action set_action_static_encap(
     in headers_t hdr,
     inout metadata_t meta,
@@ -12,6 +14,8 @@ action set_action_static_encap(
     in EthernetAddress underlay_dmac = 0,
     in EthernetAddress overlay_dmac = 0)
 {
+    meta.pending_actions = meta.pending_actions | dash_routing_actions_t.STATIC_ENCAP;
+
     meta.encap_data.dash_encapsulation = encap;
     meta.encap_data.vni = vni == 0 ? meta.encap_data.vni : vni;
 
