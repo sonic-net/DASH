@@ -14,8 +14,8 @@ action set_action_nat46(
     meta.pending_actions = meta.pending_actions | dash_routing_actions_t.NAT46;
     meta.nat46_sip = sip;
     meta.nat46_sip_mask = sip_mask;
-    meta.overlay_dip_nat46_value = dip;
-    meta.overlay_dip_nat46_mask = dip_mask;
+    meta.nat46_dip = dip;
+    meta.nat46_dip_mask = dip_mask;
 }
 
 action do_action_nat46(
@@ -32,7 +32,7 @@ action do_action_nat46(
 #ifndef DISABLE_128BIT_ARITHMETIC
     // As of 2024-Feb-09, p4c-dpdk does not yet support arithmetic on
     // 128-bit operands.
-    hdr.u0_ipv6.dst_addr = ((IPv6Address)hdr.u0_ipv4.dst_addr & ~meta.overlay_dip_nat46_mask) | (meta.overlay_dip_nat46_value & meta.overlay_dip_nat46_mask);
+    hdr.u0_ipv6.dst_addr = ((IPv6Address)hdr.u0_ipv4.dst_addr & ~meta.nat46_dip_mask) | (meta.nat46_dip & meta.nat46_dip_mask);
     hdr.u0_ipv6.src_addr = ((IPv6Address)hdr.u0_ipv4.src_addr & ~meta.nat46_sip_mask) | (meta.nat46_sip & meta.nat46_sip_mask);
 #endif
     

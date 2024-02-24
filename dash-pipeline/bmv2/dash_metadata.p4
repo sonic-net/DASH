@@ -88,12 +88,12 @@ struct metadata_t {
     // Action: nat46
     IPv6Address nat46_sip;
     IPv6Address nat46_sip_mask;
-    IPv6Address overlay_dip_nat46_value;
-    IPv6Address overlay_dip_nat46_mask;
+    IPv6Address nat46_dip;
+    IPv6Address nat46_dip_mask;
 
     // Action: nat64
     IPv4Address nat64_sip;
-    IPv4Address overlay_dip_nat64_value;
+    IPv4Address nat64_dip;
 }
 
 #endif /* _SIRIUS_METADATA_P4_ */
