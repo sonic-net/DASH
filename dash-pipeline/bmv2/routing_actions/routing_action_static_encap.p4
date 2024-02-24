@@ -1,8 +1,6 @@
 #ifndef _DASH_ROUTING_ACTION_STATIC_ENCAP_P4_
 #define _DASH_ROUTING_ACTION_STATIC_ENCAP_P4_
 
-#include "../dash_headers.p4"
-
 action set_action_static_encap(
     in headers_t hdr,
     inout metadata_t meta,

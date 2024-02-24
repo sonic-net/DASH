@@ -1,8 +1,6 @@
 #ifndef _DASH_ROUTING_ACTION_NAT46_P4_
 #define _DASH_ROUTING_ACTION_NAT46_P4_
 
-#include "../dash_headers.p4"
-
 action set_action_nat46(
     in headers_t hdr,
     inout metadata_t meta,
@@ -12,6 +10,7 @@ action set_action_nat46(
     in IPv6Address dip_mask)
 {
     meta.pending_actions = meta.pending_actions | dash_routing_actions_t.NAT46;
+    
     meta.nat46_sip = sip;
     meta.nat46_sip_mask = sip_mask;
     meta.nat46_dip = dip;
