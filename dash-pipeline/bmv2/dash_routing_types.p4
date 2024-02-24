@@ -2,7 +2,7 @@
 #define _DASH_ROUTING_TYPES_P4_
 
 #include "dash_headers.p4"
-#include "dash_routing_actions.p4"
+#include "routing_actions/routing_actions.p4"
 
 action set_route_meter_attrs(
     inout metadata_t meta,

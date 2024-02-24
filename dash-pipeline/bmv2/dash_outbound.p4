@@ -4,6 +4,7 @@
 #include "dash_headers.p4"
 #include "dash_acl.p4"
 #include "dash_routing_types.p4"
+#include "dash_action_apply.p4"
 #include "dash_conntrack.p4"
 
 control outbound(inout headers_t hdr,
@@ -128,27 +129,6 @@ control outbound(inout headers_t hdr,
                         vnet.apply();
                     }
                 }
-
-                tunnel_encap(hdr,
-                             meta,
-                             meta.encap_data.overlay_dmac,
-                             meta.encap_data.underlay_dmac,
-                             meta.encap_data.underlay_smac,
-                             meta.encap_data.underlay_dip,
-                             meta.encap_data.underlay_sip,
-                             meta.encap_data.dash_encapsulation,
-                             meta.encap_data.vni);
-             }
-           route_service_tunnel: {
-                tunnel_encap(hdr,
-                             meta,
-                             meta.encap_data.overlay_dmac,
-                             meta.encap_data.underlay_dmac,
-                             meta.encap_data.underlay_smac,
-                             meta.encap_data.underlay_dip,
-                             meta.encap_data.underlay_sip,
-                             meta.encap_data.dash_encapsulation,
-                             meta.encap_data.vni);
              }
          }
     
