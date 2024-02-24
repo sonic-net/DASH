@@ -174,7 +174,6 @@ action set_private_link_mapping(
                     dip = overlay_dip,
                     dip_mask = 0xffffffffffffffffffffffff,
                     sip = (overlay_sip & ~meta.eni_data.pl_sip_mask) | meta.eni_data.pl_sip | (IPv6Address)hdr.u0_ipv4.src_addr,
-                    sip = overlay_sip,
                     sip_mask = 0xffffffffffffffffffffffff);
 #endif /* DISABLE_128BIT_ARITHMETIC */
 
