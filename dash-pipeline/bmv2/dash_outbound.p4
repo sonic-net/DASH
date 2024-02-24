@@ -4,8 +4,8 @@
 #include "dash_headers.p4"
 #include "dash_acl.p4"
 #include "dash_routing_types.p4"
-#include "dash_action_apply.p4"
 #include "dash_conntrack.p4"
+#include "stages/stage_action_apply.p4"
 
 control outbound(inout headers_t hdr,
                  inout metadata_t meta)
