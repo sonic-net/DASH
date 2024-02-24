@@ -151,6 +151,8 @@ control outbound(inout headers_t hdr,
                              meta.encap_data.vni);
              }
          }
+    
+        action_apply.apply(hdr, meta);
     }
 }
 

@@ -31,10 +31,56 @@ action set_action_static_encap(
     meta.encap_data.overlay_dmac = overlay_dmac == 0 ? meta.encap_data.overlay_dmac : overlay_dmac;
 }
 
-action do_action_static_encap(
+control do_action_static_encap(
     inout headers_t hdr,
-    in metadata_t meta)
+    inout metadata_t meta)
 {
+    apply {
+        if (meta.pending_actions & dash_routing_actions_t.STATIC_ENCAP == 0) {
+            return;
+        }
+        
+        if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {
+            if (meta.tunnel_pointer == 0) {
+                push_vxlan_tunnel_u0(hdr,
+                            meta.encap_data.overlay_dmac,
+                            meta.encap_data.underlay_dmac,
+                            meta.encap_data.underlay_smac,
+                            meta.encap_data.underlay_dip,
+                            meta.encap_data.underlay_sip,
+                            meta.encap_data.vni);
+            } else if (meta.tunnel_pointer == 1) {
+                push_vxlan_tunnel_u1(hdr,
+                            meta.encap_data.overlay_dmac,
+                            meta.encap_data.underlay_dmac,
+                            meta.encap_data.underlay_smac,
+                            meta.encap_data.underlay_dip,
+                            meta.encap_data.underlay_sip,
+                            meta.encap_data.vni);
+            }
+        }
+        else if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
+            if (meta.tunnel_pointer == 0) {
+                push_vxlan_tunnel_u0(hdr,
+                            meta.encap_data.overlay_dmac,
+                            meta.encap_data.underlay_dmac,
+                            meta.encap_data.underlay_smac,
+                            meta.encap_data.underlay_dip,
+                            meta.encap_data.underlay_sip,
+                            meta.encap_data.vni);
+            } else if (meta.tunnel_pointer == 1) {
+                push_vxlan_tunnel_u1(hdr,
+                            meta.encap_data.overlay_dmac,
+                            meta.encap_data.underlay_dmac,
+                            meta.encap_data.underlay_smac,
+                            meta.encap_data.underlay_dip,
+                            meta.encap_data.underlay_sip,
+                            meta.encap_data.vni);
+            }
+        }
+    
+        meta.tunnel_pointer = meta.tunnel_pointer + 1;
+    }
 }
 
 #endif /* _DASH_ROUTING_ACTION_STATIC_ENCAP_P4_ */
