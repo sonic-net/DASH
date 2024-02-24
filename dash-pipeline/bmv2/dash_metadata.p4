@@ -12,7 +12,6 @@ struct encap_data_t {
     EthernetAddress underlay_dmac;
     EthernetAddress overlay_dmac;
     dash_encapsulation_t dash_encapsulation;
-    bit<24> service_tunnel_key;
     IPv4Address original_overlay_sip;
     IPv4Address original_overlay_dip;
 }

@@ -83,7 +83,7 @@ control outbound(inout headers_t hdr,
 #endif
         meta.encap_data.overlay_dmac = hdr.u0_ethernet.dst_addr;
         meta.encap_data.dash_encapsulation = dash_encapsulation;
-        meta.encap_data.service_tunnel_key = tunnel_key;
+        meta.encap_data.vni = tunnel_key;
         set_route_meter_attrs(meter_policy_en, meter_class);
     }
 
