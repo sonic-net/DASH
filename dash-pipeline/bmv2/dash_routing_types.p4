@@ -110,13 +110,18 @@ action route_service_tunnel(
                     dip = overlay_dip,
                     dip_mask = overlay_dip_mask);
 
+#ifndef DISABLE_128BIT_ARITHMETIC
+    // As of 2024-Feb-09, p4c-dpdk does not yet support arithmetic on 128-bit operands.
+    // This lack of support extends to cast operations.
     set_action_static_encap(hdr = hdr,
                             meta = meta,
                             encap = dash_encapsulation,
                             vni = tunnel_key,
-                            underlay_sip = (IPv4Address)underlay_sip,
-                            underlay_dip = (IPv4Address)underlay_dip,
+                            underlay_sip = underlay_sip == 0 ? meta.encap_data.original_overlay_sip : (IPv4Address)underlay_sip,
+                            underlay_dip = underlay_dip == 0 ? meta.encap_data.original_overlay_dip : (IPv4Address)underlay_dip,
                             overlay_dmac = hdr.u0_ethernet.dst_addr);
+
+#endif
 
     set_route_meter_attrs(meta, meter_policy_en, meter_class);
 }
