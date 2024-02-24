@@ -163,18 +163,20 @@ action set_private_link_mapping(
                             underlay_dip = underlay_dip,
                             overlay_dmac = hdr.u0_ethernet.dst_addr);
 
+#ifndef DISABLE_128BIT_ARITHMETIC
+    // As of 2024-Feb-09, p4c-dpdk does not yet support arithmetic on
+    // 128-bit operands.
+    //
+    // Hence passing IPv6 addresses as arguments is not supported due to error below:
+    // error: DPDK target supports up-to 64-bit immediate values, 128w0xffffffffffffffffffffffff exceeds the limit.
     set_action_nat46(hdr = hdr,
                     meta = meta,
                     dip = overlay_dip,
                     dip_mask = 0xffffffffffffffffffffffff,
-#ifndef DISABLE_128BIT_ARITHMETIC
-                    // As of 2024-Feb-09, p4c-dpdk does not yet support arithmetic on
-                    // 128-bit operands.
                     sip = (overlay_sip & ~meta.eni_data.pl_sip_mask) | meta.eni_data.pl_sip | (IPv6Address)hdr.u0_ipv4.src_addr,
-#else
                     sip = overlay_sip,
-#endif /* DISABLE_128BIT_ARITHMETIC */
                     sip_mask = 0xffffffffffffffffffffffff);
+#endif /* DISABLE_128BIT_ARITHMETIC */
 
     set_mapping_meter_attr(meta, meter_class, meter_class_override);
 }
