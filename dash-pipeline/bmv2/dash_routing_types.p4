@@ -167,7 +167,13 @@ action set_private_link_mapping(
                     meta = meta,
                     dip = overlay_dip,
                     dip_mask = 0xffffffffffffffffffffffff,
+#ifndef DISABLE_128BIT_ARITHMETIC
+                    // As of 2024-Feb-09, p4c-dpdk does not yet support arithmetic on
+                    // 128-bit operands.
                     sip = (overlay_sip & ~meta.eni_data.pl_sip_mask) | meta.eni_data.pl_sip | (IPv6Address)hdr.u0_ipv4.src_addr,
+#else
+                    sip = overlay_sip,
+#endif /* DISABLE_128BIT_ARITHMETIC */
                     sip_mask = 0xffffffffffffffffffffffff);
 
     set_mapping_meter_attr(meta, meter_class, meter_class_override);
