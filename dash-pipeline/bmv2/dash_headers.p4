@@ -128,11 +128,4 @@ enum bit<16> dash_encapsulation_t {
     NVGRE = 2
 }
 
-enum bit<32> dash_routing_actions_t {
-    NONE = 0,
-    STATIC_ENCAP = (1 << 0),
-    NAT46 = (1 << 1),
-    NAT64 = (1 << 2)
-}
-
 #endif /* _SIRIUS_HEADERS_P4_ */

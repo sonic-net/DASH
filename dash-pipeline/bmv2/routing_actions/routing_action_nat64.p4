@@ -9,8 +9,9 @@ action set_action_nat64(
 {
     meta.pending_actions = meta.pending_actions | dash_routing_actions_t.NAT64;
     
-    meta.nat64_sip = src;
-    meta.nat64_dip = dst;
+    meta.overlay_data.is_ipv6 = false;
+    meta.overlay_data.sip = (IPv4ORv6Address)src;
+    meta.overlay_data.dip = (IPv4ORv6Address)dst;
 }
 
 control do_action_nat64(
@@ -21,6 +22,8 @@ control do_action_nat64(
         if (meta.pending_actions & dash_routing_actions_t.NAT64 == 0) {
             return;
         }
+
+        assert(meta.overlay_data.is_ipv6 == false);
 
         hdr.u0_ipv4.setValid();
         hdr.u0_ipv4.version = 4;
@@ -33,8 +36,8 @@ control do_action_nat64(
         hdr.u0_ipv4.protocol = hdr.u0_ipv6.next_header;
         hdr.u0_ipv4.ttl = hdr.u0_ipv6.hop_limit;
         hdr.u0_ipv4.hdr_checksum = 0;
-        hdr.u0_ipv4.dst_addr = meta.nat64_dip;
-        hdr.u0_ipv4.src_addr = meta.nat64_sip;
+        hdr.u0_ipv4.dst_addr = (IPv4Address)meta.overlay_data.dip;
+        hdr.u0_ipv4.src_addr = (IPv4Address)meta.overlay_data.sip;
 
         hdr.u0_ipv6.setInvalid();
         hdr.u0_ethernet.ether_type = IPV4_ETHTYPE;

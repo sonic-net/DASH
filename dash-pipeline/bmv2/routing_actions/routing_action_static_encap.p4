@@ -28,7 +28,7 @@ action set_action_static_encap(
     meta.encap_data.underlay_smac = underlay_smac == 0 ? meta.encap_data.underlay_smac : underlay_smac;
     meta.encap_data.underlay_dmac = underlay_dmac == 0 ? meta.encap_data.underlay_dmac : underlay_dmac;
     
-    meta.encap_data.overlay_dmac = overlay_dmac == 0 ? meta.encap_data.overlay_dmac : overlay_dmac;
+    meta.overlay_data.dmac = overlay_dmac == 0 ? meta.overlay_data.dmac : overlay_dmac;
 }
 
 control do_action_static_encap(
@@ -43,7 +43,7 @@ control do_action_static_encap(
         if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {
             if (meta.tunnel_pointer == 0) {
                 push_vxlan_tunnel_u0(hdr,
-                            meta.encap_data.overlay_dmac,
+                            meta.overlay_data.dmac,
                             meta.encap_data.underlay_dmac,
                             meta.encap_data.underlay_smac,
                             meta.encap_data.underlay_dip,
@@ -51,7 +51,7 @@ control do_action_static_encap(
                             meta.encap_data.vni);
             } else if (meta.tunnel_pointer == 1) {
                 push_vxlan_tunnel_u1(hdr,
-                            meta.encap_data.overlay_dmac,
+                            meta.overlay_data.dmac,
                             meta.encap_data.underlay_dmac,
                             meta.encap_data.underlay_smac,
                             meta.encap_data.underlay_dip,
@@ -62,7 +62,7 @@ control do_action_static_encap(
         else if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
             if (meta.tunnel_pointer == 0) {
                 push_vxlan_tunnel_u0(hdr,
-                            meta.encap_data.overlay_dmac,
+                            meta.overlay_data.dmac,
                             meta.encap_data.underlay_dmac,
                             meta.encap_data.underlay_smac,
                             meta.encap_data.underlay_dip,
@@ -70,7 +70,7 @@ control do_action_static_encap(
                             meta.encap_data.vni);
             } else if (meta.tunnel_pointer == 1) {
                 push_vxlan_tunnel_u1(hdr,
-                            meta.encap_data.overlay_dmac,
+                            meta.overlay_data.dmac,
                             meta.encap_data.underlay_dmac,
                             meta.encap_data.underlay_smac,
                             meta.encap_data.underlay_dip,

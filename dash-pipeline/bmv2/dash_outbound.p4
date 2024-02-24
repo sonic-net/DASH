@@ -129,8 +129,8 @@ control outbound(inout headers_t hdr,
                         vnet.apply();
                     }
                 }
-             }
-         }
+            }
+        }
     
         action_apply.apply(hdr, meta);
     }

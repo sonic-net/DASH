@@ -3,17 +3,11 @@
 
 #include "dash_headers.p4"
 
-struct encap_data_t {
-    bit<24> vni;
-    bit<24> dest_vnet_vni;
-    IPv4Address underlay_sip;
-    IPv4Address underlay_dip;
-    EthernetAddress underlay_smac;
-    EthernetAddress underlay_dmac;
-    EthernetAddress overlay_dmac;
-    dash_encapsulation_t dash_encapsulation;
-    IPv4Address original_overlay_sip;
-    IPv4Address original_overlay_dip;
+enum bit<32> dash_routing_actions_t {
+    NONE = 0,
+    STATIC_ENCAP = (1 << 0),
+    NAT46 = (1 << 1),
+    NAT64 = (1 << 2)
 }
 
 enum bit<16> dash_direction_t {
@@ -45,10 +39,30 @@ struct eni_data_t {
     dash_tunnel_dscp_mode_t dscp_mode;
 }
 
+struct encap_data_t {
+    bit<24> vni;
+    bit<24> dest_vnet_vni;
+    IPv4Address underlay_sip;
+    IPv4Address underlay_dip;
+    EthernetAddress underlay_smac;
+    EthernetAddress underlay_dmac;
+    dash_encapsulation_t dash_encapsulation;
+    IPv4Address original_overlay_sip;
+    IPv4Address original_overlay_dip;
+}
+
+struct overlay_rewrite_data_t {
+    bool is_ipv6;
+    EthernetAddress dmac;
+    IPv4ORv6Address sip;
+    IPv4ORv6Address dip;
+    IPv6Address sip_mask;
+    IPv6Address dip_mask;
+}
+
 struct metadata_t {
-    bool dropped;
+    // Lookup context
     dash_direction_t direction;
-    encap_data_t encap_data;
     EthernetAddress eni_addr;
     bit<16> vnet_id;
     bit<16> dst_vnet_id;
@@ -85,15 +99,10 @@ struct metadata_t {
     // Actions
     bit<32> pending_actions;
     
-    // Action: nat46
-    IPv6Address nat46_sip;
-    IPv6Address nat46_sip_mask;
-    IPv6Address nat46_dip;
-    IPv6Address nat46_dip_mask;
-
-    // Action: nat64
-    IPv4Address nat64_sip;
-    IPv4Address nat64_dip;
+    // Action data
+    bool dropped;
+    encap_data_t encap_data;
+    overlay_rewrite_data_t overlay_data;
 }
 
 #endif /* _SIRIUS_METADATA_P4_ */
