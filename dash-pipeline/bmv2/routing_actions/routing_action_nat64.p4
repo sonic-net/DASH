@@ -23,7 +23,7 @@ control do_action_nat64(
             return;
         }
 
-        assert(meta.overlay_data.is_ipv6 == false);
+        REQUIRES(meta.overlay_data.is_ipv6 == false);
 
         hdr.u0_ipv4.setValid();
         hdr.u0_ipv4.version = 4;

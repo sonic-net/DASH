@@ -27,7 +27,7 @@ control do_action_nat46(
             return;
         }
 
-        assert(meta.overlay_data.is_ipv6 == true);
+        REQUIRES(meta.overlay_data.is_ipv6 == true);
 
         hdr.u0_ipv6.setValid();
         hdr.u0_ipv6.version = 6;

@@ -1,5 +1,5 @@
-#ifndef _DASH_ACTION_APPLY_P4_
-#define _DASH_ACTION_APPLY_P4_
+#ifndef _DASH_STAGE_ACTION_APPLY_P4_
+#define _DASH_STAGE_ACTION_APPLY_P4_
 
 #include "../routing_actions/routing_actions.p4"
 
@@ -14,4 +14,4 @@ control action_apply(
     }
 }
 
-#endif /* _DASH_ACTION_APPLY_P4_ */
+#endif /* _DASH_STAGE_ACTION_APPLY_P4_ */
