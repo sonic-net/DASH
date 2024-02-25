@@ -8,6 +8,7 @@
 #include "dash_outbound.p4"
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"
+#include "stages/stage_routing_action_apply.p4"
 #include "underlay.p4"
 
 #define MAX_ENI 64
@@ -480,6 +481,8 @@ control dash_ingress(
         } else if (meta.direction == dash_direction_t.INBOUND) {
             inbound.apply(hdr, meta);
         }
+
+        stage_routing_action_apply.apply(hdr, meta);
 
         /* Underlay routing */
         meta.dst_ip_addr = (bit<128>)hdr.u0_ipv4.dst_addr;
