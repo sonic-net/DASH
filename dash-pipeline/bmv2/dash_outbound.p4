@@ -9,14 +9,7 @@
 control outbound(inout headers_t hdr,
                  inout metadata_t meta)
 {
-#ifdef TARGET_BMV2_V1MODEL
-    direct_counter(CounterType.packets_and_bytes) routing_counter;
-#elif TARGET_DPDK_PNA   // TARGET_BMV2_V1MODEL
-#ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
-    // See the #ifdef with same preprocessor symbol in dash_pipeline.p4
-    DirectCounter<bit<64>>(PNA_CounterType_t.PACKETS_AND_BYTES) routing_counter;
-#endif  // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
-#endif  // TARGET_DPDK_PNA
+    DEFINE_TABLE_COUNTER(routing_counter)
 
     @SaiTable[name = "outbound_routing", api = "dash_outbound_routing"]
     table routing {
@@ -35,24 +28,10 @@ control outbound(inout headers_t hdr,
         }
         const default_action = drop(meta);
 
-#ifdef TARGET_BMV2_V1MODEL
-        counters = routing_counter;
-#endif // TARGET_BMV2_V1MODEL
-#ifdef TARGET_DPDK_PNA
-#ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
-        pna_direct_counter = routing_counter;
-#endif // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
-#endif // TARGET_DPDK_PNA
+        ATTACH_TABLE_COUNTER(routing_counter)
     }
 
-#ifdef TARGET_BMV2_V1MODEL
-    direct_counter(CounterType.packets_and_bytes) ca_to_pa_counter;
-#endif // TARGET_BMV2_V1MODEL
-#ifdef TARGET_DPDK_PNA
-#ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
-    DirectCounter<bit<64>>(PNA_CounterType_t.PACKETS_AND_BYTES) ca_to_pa_counter;
-#endif  // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
-#endif  // TARGET_DPDK_PNA
+    DEFINE_TABLE_COUNTER(ca_to_pa_counter)
 
     @SaiTable[name = "outbound_ca_to_pa", api = "dash_outbound_ca_to_pa"]
     table ca_to_pa {
@@ -70,14 +49,7 @@ control outbound(inout headers_t hdr,
         }
         const default_action = drop(meta);
 
-#ifdef TARGET_BMV2_V1MODEL
-        counters = ca_to_pa_counter;
-#endif // TARGET_BMV2_V1MODEL
-#ifdef TARGET_DPDK_PNA
-#ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
-        pna_direct_counter = ca_to_pa_counter;
-#endif // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
-#endif // TARGET_DPDK_PNA
+        ATTACH_TABLE_COUNTER(ca_to_pa_counter)
     }
 
     action set_vnet_attrs(bit<24> vni) {
