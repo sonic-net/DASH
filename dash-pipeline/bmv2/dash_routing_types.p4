@@ -24,6 +24,7 @@ action set_mapping_meter_attr(
 
 // Routing Type - drop:
 action drop(inout metadata_t meta) {
+    meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
     meta.dropped = true;
 }
 
@@ -37,6 +38,7 @@ action route_vnet(
     bit<1> meter_policy_en,
     bit<16> meter_class)
 {
+    meta.target_stage = dash_pipeline_stage_t.OUTBOUND_MAPPING;
     meta.dst_vnet_id = dst_vnet_id;
     set_route_meter_attrs(meta, meter_policy_en, meter_class);
 }
@@ -54,6 +56,7 @@ action route_vnet_direct(
     bit<1> meter_policy_en,
     bit<16> meter_class)
 {
+    meta.target_stage = dash_pipeline_stage_t.OUTBOUND_MAPPING;
     meta.dst_vnet_id = dst_vnet_id;
     meta.lkup_dst_ip_addr = overlay_ip;
     meta.is_lkup_dst_ip_v6 = overlay_ip_is_v6;
@@ -69,6 +72,7 @@ action route_direct(
     bit<1> meter_policy_en,
     bit<16> meter_class)
 {
+    meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
     set_route_meter_attrs(meta, meter_policy_en, meter_class);
 }
 
@@ -100,6 +104,9 @@ action route_service_tunnel(
     /* assert(overlay_dip_is_v6 == 1 && overlay_sip_is_v6 == 1);
     assert(overlay_dip_mask_is_v6 == 1 && overlay_sip_mask_is_v6 == 1);
     assert(underlay_dip_is_v6 != 1 && underlay_sip_is_v6 != 1); */
+
+    meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+
     meta.encap_data.original_overlay_dip = hdr.u0_ipv4.src_addr;
     meta.encap_data.original_overlay_sip = hdr.u0_ipv4.dst_addr;
 
@@ -136,6 +143,8 @@ action set_tunnel_mapping(
     bit<16> meter_class,
     bit<1> meter_class_override)
 {
+    meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+
     if (use_dst_vnet_vni == 1)
         meta.vnet_id = meta.dst_vnet_id;
 
@@ -159,6 +168,8 @@ action set_private_link_mapping(
     bit<16> meter_class,
     bit<1> meter_class_override)
 {
+    meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+    
     push_action_static_encap(hdr = hdr,
                             meta = meta,
                             encap = dash_encapsulation,
