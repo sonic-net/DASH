@@ -12,7 +12,7 @@ action push_action_static_encap(
     in EthernetAddress underlay_dmac = 0,
     in EthernetAddress overlay_dmac = 0)
 {
-    meta.pending_actions = meta.pending_actions | dash_routing_actions_t.STATIC_ENCAP;
+    meta.routing_actions = meta.routing_actions | dash_routing_actions_t.STATIC_ENCAP;
 
     meta.encap_data.dash_encapsulation = encap;
     meta.encap_data.vni = vni == 0 ? meta.encap_data.vni : vni;
@@ -30,7 +30,7 @@ control do_action_static_encap(
     inout metadata_t meta)
 {
     apply {
-        if (meta.pending_actions & dash_routing_actions_t.STATIC_ENCAP == 0) {
+        if (meta.routing_actions & dash_routing_actions_t.STATIC_ENCAP == 0) {
             return;
         }
         

@@ -7,7 +7,7 @@ action push_action_nat64(
     in IPv4Address src,
     in IPv4Address dst)
 {
-    meta.pending_actions = meta.pending_actions | dash_routing_actions_t.NAT64;
+    meta.routing_actions = meta.routing_actions | dash_routing_actions_t.NAT64;
     
     meta.overlay_data.is_ipv6 = false;
     meta.overlay_data.sip = (IPv4ORv6Address)src;
@@ -19,7 +19,7 @@ control do_action_nat64(
     in metadata_t meta)
 {
     apply {
-        if (meta.pending_actions & dash_routing_actions_t.NAT64 == 0) {
+        if (meta.routing_actions & dash_routing_actions_t.NAT64 == 0) {
             return;
         }
 

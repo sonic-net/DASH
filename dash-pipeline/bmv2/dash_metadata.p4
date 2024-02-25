@@ -97,7 +97,7 @@ struct metadata_t {
     bit<1> fast_path_icmp_flow_redirection_disabled;
 
     // Actions
-    bit<32> pending_actions;
+    bit<32> routing_actions;
     
     // Action data
     bool dropped;

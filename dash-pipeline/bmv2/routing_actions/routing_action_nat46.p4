@@ -9,7 +9,7 @@ action push_action_nat46(
     in IPv6Address dip,
     in IPv6Address dip_mask)
 {
-    meta.pending_actions = meta.pending_actions | dash_routing_actions_t.NAT46;
+    meta.routing_actions = meta.routing_actions | dash_routing_actions_t.NAT46;
     
     meta.overlay_data.is_ipv6 = true;
     meta.overlay_data.sip = sip;
@@ -23,7 +23,7 @@ control do_action_nat46(
     in metadata_t meta)
 {
     apply {
-        if (meta.pending_actions & dash_routing_actions_t.NAT46 == 0) {
+        if (meta.routing_actions & dash_routing_actions_t.NAT46 == 0) {
             return;
         }
 
