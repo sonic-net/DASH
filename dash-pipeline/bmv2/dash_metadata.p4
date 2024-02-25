@@ -63,8 +63,6 @@ struct encap_data_t {
     EthernetAddress underlay_smac;
     EthernetAddress underlay_dmac;
     dash_encapsulation_t dash_encapsulation;
-    IPv4Address original_overlay_sip;
-    IPv4Address original_overlay_dip;
 }
 
 struct overlay_rewrite_data_t {
