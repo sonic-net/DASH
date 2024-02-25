@@ -1,7 +1,7 @@
 #ifndef _DASH_ROUTING_ACTION_NAT46_P4_
 #define _DASH_ROUTING_ACTION_NAT46_P4_
 
-action set_action_nat46(
+action push_action_nat46(
     in headers_t hdr,
     inout metadata_t meta,
     in IPv6Address sip,

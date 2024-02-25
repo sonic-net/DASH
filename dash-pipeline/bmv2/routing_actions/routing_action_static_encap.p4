@@ -1,7 +1,7 @@
 #ifndef _DASH_ROUTING_ACTION_STATIC_ENCAP_P4_
 #define _DASH_ROUTING_ACTION_STATIC_ENCAP_P4_
 
-action set_action_static_encap(
+action push_action_static_encap(
     in headers_t hdr,
     inout metadata_t meta,
     in dash_encapsulation_t encap = dash_encapsulation_t.VXLAN,

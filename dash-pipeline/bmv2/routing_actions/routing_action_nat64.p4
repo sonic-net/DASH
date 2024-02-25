@@ -1,7 +1,7 @@
 #ifndef _DASH_ROUTING_ACTION_NAT64_P4_
 #define _DASH_ROUTING_ACTION_NAT64_P4_
 
-action set_action_nat64(
+action push_action_nat64(
     in headers_t hdr,
     inout metadata_t meta,
     in IPv4Address src,

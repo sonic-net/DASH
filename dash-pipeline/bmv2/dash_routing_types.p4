@@ -103,7 +103,7 @@ action route_service_tunnel(
     meta.encap_data.original_overlay_dip = hdr.u0_ipv4.src_addr;
     meta.encap_data.original_overlay_sip = hdr.u0_ipv4.dst_addr;
 
-    set_action_nat46(hdr = hdr,
+    push_action_nat46(hdr = hdr,
                     meta = meta,
                     sip = overlay_sip,
                     sip_mask = overlay_sip_mask,
@@ -113,7 +113,7 @@ action route_service_tunnel(
 #ifndef DISABLE_128BIT_ARITHMETIC
     // As of 2024-Feb-09, p4c-dpdk does not yet support arithmetic on 128-bit operands.
     // This lack of support extends to cast operations.
-    set_action_static_encap(hdr = hdr,
+    push_action_static_encap(hdr = hdr,
                             meta = meta,
                             encap = dash_encapsulation,
                             vni = tunnel_key,
@@ -139,7 +139,7 @@ action set_tunnel_mapping(
     if (use_dst_vnet_vni == 1)
         meta.vnet_id = meta.dst_vnet_id;
 
-    set_action_static_encap(hdr = hdr,
+    push_action_static_encap(hdr = hdr,
                             meta = meta,
                             underlay_dip = underlay_dip,
                             overlay_dmac = overlay_dmac);
@@ -159,7 +159,7 @@ action set_private_link_mapping(
     bit<16> meter_class,
     bit<1> meter_class_override)
 {
-    set_action_static_encap(hdr = hdr,
+    push_action_static_encap(hdr = hdr,
                             meta = meta,
                             encap = dash_encapsulation,
                             vni = tunnel_key,
@@ -174,7 +174,7 @@ action set_private_link_mapping(
     //
     // Hence passing IPv6 addresses as arguments is not supported due to error below:
     // error: DPDK target supports up-to 64-bit immediate values, 128w0xffffffffffffffffffffffff exceeds the limit.
-    set_action_nat46(hdr = hdr,
+    push_action_nat46(hdr = hdr,
                     meta = meta,
                     dip = overlay_dip,
                     dip_mask = 0xffffffffffffffffffffffff,
