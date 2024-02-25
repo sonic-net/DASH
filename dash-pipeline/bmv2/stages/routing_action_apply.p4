@@ -3,7 +3,7 @@
 
 #include "../routing_actions/routing_actions.p4"
 
-control stage_routing_action_apply(
+control routing_action_apply(
     inout headers_t hdr,
     inout metadata_t meta)
 {
