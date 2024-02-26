@@ -8,6 +8,7 @@
 #include "dash_outbound.p4"
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"
+#include "dash_flow.p4"
 #include "underlay.p4"
 
 #define MAX_ENI 64
@@ -435,6 +436,7 @@ control dash_ingress(
                 }
             }
         }
+        Flow.apply(hdr, meta);
 
         /* At this point the processing is done on customer headers */
 
