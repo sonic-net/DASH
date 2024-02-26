@@ -121,7 +121,7 @@ control dash_ingress(
 #endif
 
     action set_eni_attrs(bit<32> cps,
-                         bit<32> pps,
+                         bit<32> bw,
                          bit<32> flows,
                          bit<1> admin_state,
                          @SaiVal[type="sai_ip_address_t"] IPv4Address vm_underlay_dip,
@@ -140,7 +140,7 @@ control dash_ingress(
                          ACL_GROUPS_PARAM(outbound_v6),
                          bit<1> disable_fast_path_icmp_flow_redirection) {
         meta.eni_data.cps             = cps;
-        meta.eni_data.pps             = pps;
+        meta.eni_data.bw              = bw;
         meta.eni_data.flows           = flows;
         meta.eni_data.admin_state     = admin_state;
         meta.eni_data.pl_sip          = pl_sip;
