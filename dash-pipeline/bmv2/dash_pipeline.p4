@@ -8,6 +8,8 @@
 #include "dash_outbound.p4"
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"
+#include "stages/direction_lookup.p4"
+#include "stages/eni_lookup.p4"
 #include "stages/routing_action_apply.p4"
 #include "stages/metering_update.p4"
 #include "underlay.p4"
@@ -45,8 +47,8 @@ control dash_ingress(
 #ifdef TARGET_BMV2_V1MODEL
     @SaiCounter[name="lb_fast_path_icmp_in", attr_type="stats"]
     counter(1, CounterType.packets_and_bytes) port_lb_fast_path_icmp_in_counter;
-    @SaiCounter[name="lb_fast_path_eni_miss", attr_type="stats"]
-    counter(1, CounterType.packets_and_bytes) port_lb_fast_path_eni_miss_counter;
+    @SaiCounter[name="lb_fast_path_vip_miss", attr_type="stats"]
+    counter(1, CounterType.packets_and_bytes) port_lb_fast_path_vip_miss_counter;
 #endif
     
     @SaiTable[name = "vip", api = "dash_vip"]
@@ -61,28 +63,6 @@ control dash_ingress(
         }
 
         const default_action = deny;
-    }
-
-    action set_outbound_direction() {
-        meta.direction = dash_direction_t.OUTBOUND;
-    }
-
-    action set_inbound_direction() {
-        meta.direction = dash_direction_t.INBOUND;
-    }
-
-    @SaiTable[name = "direction_lookup", api = "dash_direction_lookup"]
-    table direction_lookup {
-        key = {
-            hdr.u0_vxlan.vni : exact @SaiVal[name = "VNI"];
-        }
-
-        actions = {
-            set_outbound_direction;
-            @defaultonly set_inbound_direction;
-        }
-
-        const default_action = set_inbound_direction;
     }
 
     action set_appliance(EthernetAddress neighbor_mac,
@@ -227,23 +207,6 @@ control dash_ingress(
         const default_action = deny;
     }
 
-    action set_eni(@SaiVal[type="sai_object_id_t"] bit<16> eni_id) {
-        meta.eni_id = eni_id;
-    }
-
-    @SaiTable[name = "eni_ether_address_map", api = "dash_eni", order=0]
-    table eni_ether_address_map {
-        key = {
-            meta.eni_addr : exact @SaiVal[name = "address", type = "sai_mac_t"];
-        }
-
-        actions = {
-            set_eni;
-            @defaultonly deny;
-        }
-        const default_action = deny;
-    }
-
     action set_acl_group_attrs(@SaiVal[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
         if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
             if (meta.is_overlay_ip_v6 == 1) {
@@ -295,33 +258,20 @@ control dash_ingress(
         } else {
             if (meta.is_fast_path_icmp_flow_redirection_packet) {
 #ifdef TARGET_BMV2_V1MODEL
-                port_lb_fast_path_eni_miss_counter.count(0);
+                port_lb_fast_path_vip_miss_counter.count(0);
 #endif
             }
         }
 
-        /* If Outer VNI matches with a reserved VNI, then the direction is Outbound - */
-        direction_lookup.apply();
+        direction_lookup_stage.apply(hdr, meta);
 
         appliance.apply();
 
+        /* Outer header processing */
+        eni_lookup_stage.apply(hdr, meta);
+
         // Save the original DSCP value
         meta.eni_data.dscp = (bit<6>)hdr.u0_ipv4.diffserv;
-
-        /* Outer header processing */
-
-        /* Put VM's MAC in the direction agnostic metadata field */
-        meta.eni_addr = meta.direction == dash_direction_t.OUTBOUND  ?
-                                          hdr.customer_ethernet.src_addr :
-                                          hdr.customer_ethernet.dst_addr;
-
-        if (!eni_ether_address_map.apply().hit) {
-            if (meta.is_fast_path_icmp_flow_redirection_packet) {
-#ifdef TARGET_BMV2_V1MODEL
-                port_lb_fast_path_eni_miss_counter.count(0);
-#endif
-            }
-        }
 
         if (meta.direction == dash_direction_t.OUTBOUND) {
             tunnel_decap(hdr, meta);
