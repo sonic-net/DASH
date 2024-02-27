@@ -1,16 +1,25 @@
-
-
 # README
 
-DASH Flow SAI abstracts the flow state within DASH. In the quest for achieving cloud services, the control plane can generate a flow state table, performing operations such as adding, deleting, modifying, and querying. This specification guarantees alignment between the flow state table and flow states across different cloud providers and vendors. We propose an API to provide a vendor-neutral method for managing flow states, including uniform control of Programmable switches, SmartNICs, and Smart Switches.
+DASH Flow abstracts the flow state within DASH. In the quest for achieving cloud services, the control plane can generate a flow state table, performing operations such as adding, deleting, modifying, and obtaining. This design guarantees alignment between the flow entry and flow table across different cloud providers and vendors. We propose APIs to provide a vendor-neutral method for managing flow states, including uniform control of Programmable switches, SmartNICs, and Smart Switches.
 
-DASH Flow SAI accommodates multiple flow tables and diverse flow entry operations. Primarily, it negates differences between vendors' implementations, offering universal interfaces. However, it acknowledges performance variations between DASH and SAI deployed on smart devices. For example, it supplies APIs to handle single and batch flows, with entry count as a limiting factor.
+DASH flow SAI APIs accommodate multiple flow tables and diverse flow entry operations. Primarily, it negates differences between vendors' implementations, offering universal interfaces. However, it acknowledges performance variations between DASH and SAI deployed on smart devices. For example, it supplies APIs to handle single and batch flows, with the entry count as a limiting factor.
 
-With DASH Flow SAI, it's possible to achieve varied cloud services requiring flow states. For instance, a cloud load balancer can add a flow decision entry and retrieve the flow entry via the data plane. It also lays the groundwork for DASH to provide basic services, such as high availability.
+With DASH flow SAI APIs it's possible to achieve varied cloud services requiring flow states. For instance, a cloud load balancer can add a flow decision entry and retrieve the flow entry via the data plane. It also lays the groundwork for DASH to provide basic services, such as high availability.
 
+## Terminology
 
+- **Flow**: It represents a single direction of the match-action entry for a transport layer (e.g., TCP, UDP) connection.
+- **Flow entry**: Same as flow.
+- **Flow Key**: The key that is used to match the packet for finding its flow.
+- **Flow State**: The state of the flow, including the packet transformations and all other tracked states, such as TCP, HA, etc.
+- **Flow Table**: The table to store a set of flows.
 
-# DASH Flow SAI
+## Flow Table APIs
+
+## Flow APIs
+### Basic flow APIs
+### Bulk sync with bulk get APIs
+### Protobuf-based flow programming
 
 | API                                   | Description                                                  |
 | ------------------------------------- | :----------------------------------------------------------- |
@@ -25,13 +34,9 @@ With DASH Flow SAI, it's possible to achieve varied cloud services requiring flo
 | sai_dash_flow_get_entry               | Get single entry in a certain flow table                     |
 | sai_dash_flow_bulk_get_entry_callback | Request the vendor interate the flow_table and call the callback function |
 
-
-
 ## Flow state definition
 
 We define the flow state as a hash table as follows:
-
-
 
 ### SAI protobuf defination
 
@@ -43,8 +48,6 @@ typedef struct _sai_protobuf_t
   
 } sai_protobuf_t;
 ```
-
-
 
 ### Flow table attribute definiation
 
@@ -122,7 +125,7 @@ typedef struct _sai_dash_flow_key_t {
     sai_dash_ha_flow_l4_info_t l4_info;
   
     /* @brief VNI */
-  	sai_uint32_t vni;
+    sai_uint32_t vni;
       
 } sai_dash_flow_key_t;
 
@@ -164,13 +167,9 @@ typedef struct _sai_dash_ha_flow_icmp_info_t {
 
 ```
 
-
-
 ### Flow state attribute definiation
 
 The content of "attribute" and "protobuf" can be the same, but their usage differs. "Attribute" allows for incremental updates to a single property, while "protobuf" requires a full update.
-
-
 
 ```C++
 typedef enum _sai_flow_state_metadata_attr_t {
@@ -213,8 +212,6 @@ typedef enum _sai_flow_state_metadata_attr_t {
 } sai_flow_metadata_attr_t;
 
 ```
-
-
 
 ### Flow state protobuf definiation
 
