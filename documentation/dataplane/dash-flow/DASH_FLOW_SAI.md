@@ -913,7 +913,7 @@ uint32_t object_count = INT_MAX
 /* Allocate object_statuses and attr_count */
 sai_attribute_t sai_attrs_list[3][2];
 sai_attrs_list[0][0].id = SAI_FLOW_ENTRY_BULK_GET_OP_ATTR_FILTER_OP;
-sai_attrs_list[0][0].value = SAI_GREATER_THAN;
+sai_attrs_list[0][0].value = SAI_DASH_BULK_GET_FILTER_OP_LESS_THAN;
 sai_attrs_list[0][1].id = SAI_FLOW_ENTRY_BULK_GET_ATTR_FLOW_VERSION;
 sai_attrs_list[0][1].value = 5;
 
