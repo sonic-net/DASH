@@ -496,7 +496,7 @@ vm_vni                   = VM VNI that is used for setting direction. Also used 
 ### 3.2.9 ROUTE LPM TABLE - OUTBOUND
 
 ```
-DASH_ENI_ROUTE_TABLE:{{eni}}:
+DASH_ENI_ROUTE_TABLE:{{eni}}
     "group_id": {{group_id}} 
 ```
 
