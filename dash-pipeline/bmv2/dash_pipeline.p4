@@ -47,8 +47,6 @@ control dash_ingress(
 #ifdef TARGET_BMV2_V1MODEL
     @SaiCounter[name="lb_fast_path_icmp_in", attr_type="stats"]
     counter(1, CounterType.packets_and_bytes) port_lb_fast_path_icmp_in_counter;
-    @SaiCounter[name="lb_fast_path_vip_miss", attr_type="stats"]
-    counter(1, CounterType.packets_and_bytes) port_lb_fast_path_vip_miss_counter;
 #endif
     
     @SaiTable[name = "vip", api = "dash_vip"]
@@ -256,10 +254,8 @@ control dash_ingress(
                present in the VIP table */
             meta.encap_data.underlay_sip = hdr.u0_ipv4.dst_addr;
         } else {
+            // TODO: Count the packet drops due to VIP miss
             if (meta.is_fast_path_icmp_flow_redirection_packet) {
-#ifdef TARGET_BMV2_V1MODEL
-                port_lb_fast_path_vip_miss_counter.count(0);
-#endif
             }
         }
 
