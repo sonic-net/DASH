@@ -451,8 +451,8 @@ control dash_ingress(
 
         acl_group.apply();
 
-
         if (meta.direction == dash_direction_t.OUTBOUND) {
+            meta.target_stage = dash_pipeline_stage_t.OUTBOUND_ROUTING;
             outbound.apply(hdr, meta);
         } else if (meta.direction == dash_direction_t.INBOUND) {
             inbound.apply(hdr, meta);

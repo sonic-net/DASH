@@ -16,6 +16,22 @@ enum bit<16> dash_direction_t {
     INBOUND = 2
 }
 
+// Pipeline stages:
+enum bit<16> dash_pipeline_stage_t {
+    INVALID = 0,
+
+    // Inbound stages
+    INBOUND_STAGE_START = 100,
+
+    // Outbound stages
+    OUTBOUND_STAGE_START = 200,
+    OUTBOUND_ROUTING = 200, // OUTBOUND_STAGE_START
+    OUTBOUND_MAPPING = 201,
+
+    // Common stages
+    ROUTING_ACTION_APPLY = 300
+}
+
 struct conntrack_data_t {
     bool allow_in;
     bool allow_out;
@@ -95,6 +111,9 @@ struct metadata_t {
     bit<16> tunnel_pointer;
     bool is_fast_path_icmp_flow_redirection_packet;
     bit<1> fast_path_icmp_flow_redirection_disabled;
+
+    // Stage transition control
+    dash_pipeline_stage_t target_stage;
 
     // Actions
     bit<32> routing_actions;
