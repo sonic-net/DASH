@@ -188,24 +188,7 @@ control dash_ingress(
         const default_action = deny;
     }
 
-#ifdef TARGET_BMV2_V1MODEL
-    direct_counter(CounterType.packets_and_bytes) eni_counter;
-#endif // TARGET_BMV2_V1MODEL
-#ifdef TARGET_DPDK_PNA
-#ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
-    // Omit all direct counters for tables with ternary match keys,
-    // because the latest version of p4c-dpdk as of 2023-Jan-26 does
-    // not support this combination of features.  If you try to
-    // compile it with this code enabled, the error message looks like
-    // this:
-    //
-    // [--Werror=target-error] error: Direct counters and direct meters are unsupported for wildcard match table outbound_acl_stage1:dash_acl_rule|dash_acl
-    //
-    // This p4c issue is tracking this feature gap in p4c-dpdk:
-    // https://github.com/p4lang/p4c/issues/3868
-    DirectCounter<bit<64>>(PNA_CounterType_t.PACKETS_AND_BYTES) eni_counter;
-#endif // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
-#endif // TARGET_DPDK_PNA
+    DEFINE_TABLE_COUNTER(eni_counter)
 
     @SaiTable[ignored = "true"]
     table eni_meter {
@@ -217,14 +200,7 @@ control dash_ingress(
 
         actions = { NoAction; }
 
-#ifdef TARGET_BMV2_V1MODEL
-        counters = eni_counter;
-#endif // TARGET_BMV2_V1MODEL
-#ifdef TARGET_DPDK_PNA
-#ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
-        pna_direct_counter = eni_counter;
-#endif // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
-#endif // TARGET_DPDK_PNA
+        ATTACH_TABLE_COUNTER(eni_counter)
     }
 
     action permit() {
