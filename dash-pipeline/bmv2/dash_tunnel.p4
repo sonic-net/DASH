@@ -52,7 +52,7 @@ action push_vxlan_tunnel_ ## underlay_id ## (inout headers_t hdr, \
     hdr. ## underlay_id ## _vxlan.setValid(); \
     hdr. ## underlay_id ## _vxlan.reserved = 0; \
     hdr. ## underlay_id ## _vxlan.reserved_2 = 0; \
-    hdr. ## underlay_id ## _vxlan.flags = 0; \
+    hdr. ## underlay_id ## _vxlan.flags = 0x8; \
     hdr. ## underlay_id ## _vxlan.vni = tunnel_key; \
 }
 #endif

@@ -132,7 +132,7 @@ class TestSaiVnetInboundRoutingEntry:
                 },
                 "attributes": [
                     "SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION",
-                    "SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE",
+                    "SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE",
                     "SAI_INBOUND_ROUTING_ENTRY_ATTR_SRC_VNET_ID",
                     "$vnet"
                 ]
@@ -175,7 +175,7 @@ class TestSaiVnetInboundRoutingEntry:
                 },
                 "attribute": [
                     "SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION",
-                    "SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_CA_VALIDATE",
+                    "SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_CA_VALIDATE",
                 ]
             },
         ]
