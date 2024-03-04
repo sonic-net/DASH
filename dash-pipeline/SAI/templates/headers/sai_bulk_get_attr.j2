@@ -1,218 +1,41 @@
 {% if table.enable_bulk_get_api == 'true' %}
 /**
- * @brief Attribute ID (attributes to filter) for get_{{ table.name | replace("entry", "entries") }}
+ * @brief Bulk Get Op filter keywords for {{ table.name }} in get_{{ table.name | replace("entry", "entries")}}_attribute call
  */
-typedef enum _sai_{{ table.name }}_bulk_get_attr_t
+typedef enum _sai_{{ table.name }}_bulk_get_filter_t
 {
-    /**
-     * @brief Start of attributes
-     */
-    SAI_{{ table.name | upper }}_BULK_GET_ATTR_START,
-
-{% set ns = namespace(firstattr=false) %}
-{% if table.actions | length > 1 or ((table.actions | length == 1) and (((table.is_object == 'false') or (table['keys'] | length <= 1)) and ((table['action_params'] | length == 0))))  %}
-    /**
-     * @brief Action
-     *
-     * @type sai_{{ table.name }}_action_t
-     * @flags CREATE_AND_SET
-     * @default SAI_{{ table.name | upper }}_ACTION_{{ table.actions[0].name | upper }}
-     */
-    SAI_{{ table.name | upper }}_BULK_GET_ATTR_ACTION = SAI_{{ table.name | upper }}_BULK_GET_ATTR_START,
-
-{% set ns.firstattr = true %}
-{% endif %}
-{% if table['keys'] | length > 1 %}
 {% for key in table['keys'] %}
-{% if key.isattribute != 'false' %}
-    /**
-     * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.name }}
-     *
-     * @type {{ key.type }}
-     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
-{% if key.type == 'sai_uint16_t' %}
-     * @isvlan false
-{% endif %}
-{% if key.type == 'sai_object_id_t' %}
-     * @objects SAI_OBJECT_TYPE_{{ key.name | replace('_id', '') | upper }}
-{% endif %}
-{% if key.isresourcetype == 'true' %}
-     * @isresourcetype true
-{% endif %}
-     */
-{% if not ns.firstattr %}
-    SAI_{{ table.name | upper }}_BULK_GET_ATTR_{{ key.name | upper }} = SAI_{{ table.name | upper }}_BULK_GET_ATTR_START,
-{% set ns.firstattr = true %}
-{% else %}
-    SAI_{{ table.name | upper }}_BULK_GET_ATTR_{{ key.name | upper }},
-{% endif %}
+    /** Bulk get filter key word for {{ key.type }} {{ key.name | lower }} */
+    SAI_{{ table.name | upper }}_BULK_GET_FILTER_T_{{ key.name | upper }},
 
-{% if key.match_type == 'ternary' %}
-    /**
-     * @brief Ternary matched mask {{ key.name }}
-     *
-     * @type {{ key.type }}
-     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
-     */
-    SAI_{{ table.name | upper }}_BULK_GET_ATTR_{{ key.name | upper }}_MASK,
-
-{% endif %}
-{% endif %}
 {% endfor %}
-{% endif %}
 {% for sai_attr in table.sai_attributes %}
-{% if sai_attr.skipattr == 'true' %}
-{% else %}
-    /**
-     * @brief Action {% for action in sai_attr.param_actions %}{{ action }}{{ ", " if not loop.last else "" }}{% endfor %} parameter {{ sai_attr.name | upper }}
-     *
-     * @type {{ sai_attr.type }}
-{% if sai_attr.isreadonly == 'true' %}
-     * @flags READ_ONLY
-{% else %}
-     * @flags CREATE_AND_SET
-{% endif %}
-{% if sai_attr.type == 'sai_uint16_t' %}
-     * @isvlan false
-{% endif %}
-{% if sai_attr.type == 'sai_object_id_t' %}
-     * @objects SAI_OBJECT_TYPE_{{ sai_attr.object_name | upper }}
-     * @allownull true
-{% endif %}
-{% if sai_attr.isreadonly != 'true' %}
-     * @default {{ sai_attr.default }}
-{% endif %}
-{% if table.actions | length > 1 %}
-{% if sai_attr.param_actions | length > 0 %}
-     * @validonly {% for action in sai_attr.param_actions %}SAI_{{ table.name | upper }}_ATTR_ACTION == SAI_{{ table.name | upper }}_ACTION_{{ action | upper }}{{ " or " if not loop.last else "" }}{% endfor %}
+    /** Bulk get filter key word for SAI_{{ table.name | upper }}_ATTR_{{ sai_attr.name | upper }} */
+    SAI_{{ table.name | upper }}_BULK_GET_FILTER_T_{{  sai_attr.name  | upper }},
 
-{% endif %}
-{% endif %}
-{% if sai_attr.isresourcetype == 'true' %}
-     * @isresourcetype true
-{% endif %}
-     */
-{% if not ns.firstattr %}
-    SAI_{{ table.name | upper }}_BULK_GET_ATTR_{{ sai_attr.name | upper }} = SAI_{{ table.name | upper }}_BULK_GET_ATTR_START,
-{% set ns.firstattr = true %}
-{% else %}
-    SAI_{{ table.name | upper }}_BULK_GET_ATTR_{{ sai_attr.name | upper }},
-{% endif %}
-
-{% endif %}
 {% endfor %}
-{% if table.with_counters == 'true' %}
-    /**
-     * @brief Attach a counter
-     *
-     * When it is empty, then packet hits won't be counted
-     *
-     * @type sai_object_id_t
-     * @flags CREATE_AND_SET
-     * @objects SAI_OBJECT_TYPE_COUNTER
-     * @allownull true
-     * @default SAI_NULL_OBJECT_ID
-     */
-    SAI_{{ table.name | upper }}_BULK_GET_ATTR_COUNTER_ID,
-
-{% endif %}
-{% if table.is_object == 'true' %}
-{% if table['keys'] | selectattr('match_type', 'ne', 'exact') | list | length > 0 %}
-{% if table['keys'] | selectattr('match_type', 'eq', 'lpm') | list | length == 0 %}
-    /**
-     * @brief Rule priority in table
-     *
-     * @type sai_uint32_t
-     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
-     */
-    SAI_{{ table.name | upper }}_BULK_GET_ATTR_PRIORITY,
-
-{% endif %}
-{% endif %}
-{% endif %}
-{% if table.ipaddr_family_attr == 'true' %}
-    /**
-     * @brief IP address family for resource accounting
-     *
-     * @type sai_ip_addr_family_t
-     * @flags READ_ONLY
-     * @isresourcetype true
-     */
-    SAI_{{ table.name | upper }}_BULK_GET_ATTR_IP_ADDR_FAMILY,
-
-{% endif %}
-    /**
-     * @brief End of attributes
-     */
-    SAI_{{ table.name | upper }}_BULK_GET_ATTR_END,
-
-    /** Custom range base value */
-    SAI_{{ table.name | upper }}_BULK_GET_ATTR_CUSTOM_RANGE_START = 0x10000000,
-
-    /** End of custom range base */
-    SAI_{{ table.name | upper }}_BULK_GET_ATTR_CUSTOM_RANGE_END,
-
-} sai_{{ table.name }}_bulk_get_attr_t;
+} sai_{{ table.name }}_bulk_get_filter_t;
 
 /**
- * @brief Attribute ID (operation) for get_{{ table.name | replace("entry", "entries") }};
+ * @brief Bulk Get Op for {{ table.name }} in get_{{ table.name | replace("entry", "entries")}}_attribute call
  */
-typedef enum _sai_{{ table.name }}_bulk_get_op_attr_t
+typedef enum _sai_{{ table.name }}_bulk_get_op_t
 {
-    /**
-     * @brief Start of attributes
-     */
-    SAI_{{ table.name | upper }}_BULK_GET_OP_ATTR_START,
+    /**  Indicate the last OP of Bulk Get */
+    SAI_{{ table.name | upper }}_BULK_GET_OP_LAST_ITEM,
 
-    /**
-     * @brief Action operation parameter for normal return
-     *
-     * @type sai_uint32_t
-     * @flags CREATE_AND_SET
-     * @default 0
-     */
-    SAI_{{ table.name | upper }}_BULK_GET_OP_ATTR_NORMAL_RETURN,
+    /** Operation parameter for normal return */
+    SAI_{{ table.name | upper }}_BULK_GET_OP_NORMAL_RETURN,
 
-    /**
-     * @brief Action operation parameter for GRPC return (server IP address)
-     *
-     * @type sai_ip_address_t
-     * @flags CREATE_AND_SET
-     * @default 0.0.0.0
-     */
-    SAI_{{ table.name | upper }}_BULK_GET_OP_ATTR_GRPC_SERVER_IP,
+    /** Operation parameter for GRPC return (server IP address) */
+    SAI_{{ table.name | upper }}_BULK_GET_OP_GRPC_SERVER_IP,
 
-    /**
-     * @brief Action operation parameter for GRPC return (server port)
-     *
-     * @type sai_uint16_t
-     * @flags CREATE_AND_SET
-     * @isvlan false
-     * @default 0
-     */
-    SAI_{{ table.name | upper }}_BULK_GET_OP_ATTR_GRPC_SERVER_PORT,
+    /**  Operation parameter for GRPC return (server port) */
+    SAI_{{ table.name | upper }}_BULK_GET_OP_GRPC_SERVER_PORT,
 
-    /**
-     * @brief Action operation parameter for get filter operator
-     *
-     * @type sai_uint16_t
-     * @flags CREATE_AND_SET
-     * @isvlan false
-     * @default 0
-     */
-    SAI_{{ table.name | upper }}_BULK_GET_OP_ATTR_FILTER_OP,
+    /** Operation parameter for get filter operator */
+    SAI_{{ table.name | upper }}_BULK_GET_OP_FILTER_OP,
 
-    /**
-     * @brief End of attributes
-     */
-    SAI_{{ table.name | upper }}_BULK_GET_OP_ATTR_END,
-
-    /** Custom range base value */
-    SAI_{{ table.name | upper }}_BULK_GET_OP_ATTR_CUSTOM_RANGE_START = 0x10000000,
-
-    /** End of custom range base */
-    SAI_{{ table.name | upper }}_BULK_GET_OP_ATTR_CUSTOM_RANGE_END,
-
-} sai_{{ table.name }}_bulk_get_op_attr_t;
+} sai_{{ table.name }}_bulk_get_op_t;
 
 {% endif %}
