@@ -44,6 +44,7 @@
     #define DEFINE_COUNTER(name, count, ...)
     #define DEFINE_PACKET_COUNTER(name, count, ...)
     #define DEFINE_BYTE_COUNTER(name, count, ...)
+    #define DEFINE_HIT_COUNTER(name, count, ...)
     #define UPDATE_COUNTER(name, index)
 
     #ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
