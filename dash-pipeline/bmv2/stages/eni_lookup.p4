@@ -5,10 +5,7 @@ control eni_lookup_stage(
     inout headers_t hdr,
     inout metadata_t meta)
 {
-#ifdef TARGET_BMV2_V1MODEL
-    @SaiCounter[name="lb_fast_path_eni_miss", attr_type="stats"]
-    counter(1, CounterType.packets_and_bytes) port_lb_fast_path_eni_miss_counter;
-#endif
+    DEFINE_COUNTER(port_lb_fast_path_eni_miss_counter, 1, name="lb_fast_path_eni_miss", attr_type="stats")
 
     action set_eni(@SaiVal[type="sai_object_id_t"] bit<16> eni_id) {
         meta.eni_id = eni_id;
@@ -39,9 +36,7 @@ control eni_lookup_stage(
                                           
         if (!eni_ether_address_map.apply().hit) {
             if (meta.is_fast_path_icmp_flow_redirection_packet) {
-#ifdef TARGET_BMV2_V1MODEL
-                port_lb_fast_path_eni_miss_counter.count(0);
-#endif
+                UPDATE_COUNTER(port_lb_fast_path_eni_miss_counter, 0);
             }
         }
     }

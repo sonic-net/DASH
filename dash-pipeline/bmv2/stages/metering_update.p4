@@ -47,12 +47,8 @@ control metering_update_stage(
     
     // MAX_METER_BUCKET = MAX_ENI(64) * NUM_BUCKETS_PER_ENI(4096)
     #define MAX_METER_BUCKETS 262144
-#ifdef TARGET_BMV2_V1MODEL
-    @SaiCounter[name="outbound", action_names="meter_bucket_action", attr_type="counter_attr"]
-    counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_outbound;
-    @SaiCounter[name="inbound", action_names="meter_bucket_action", attr_type="counter_attr"]
-    counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_inbound;
-#endif // TARGET_BMV2_V1MODEL
+    DEFINE_BYTE_COUNTER(meter_bucket_outbound, MAX_METER_BUCKETS, name="outbound", action_names="meter_bucket_action", attr_type="counter_attr")
+    DEFINE_BYTE_COUNTER(meter_bucket_inbound, MAX_METER_BUCKETS, name="inbound", action_names="meter_bucket_action", attr_type="counter_attr")
     action meter_bucket_action(@SaiVal[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index) {
         meta.meter_bucket_index = meter_bucket_index;
     }
@@ -104,13 +100,9 @@ control metering_update_stage(
 
         meter_bucket.apply();
         if (meta.direction == dash_direction_t.OUTBOUND) {
-#ifdef TARGET_BMV2_V1MODEL
-            meter_bucket_outbound.count(meta.meter_bucket_index);
-#endif
+            UPDATE_COUNTER(meter_bucket_outbound, meta.meter_bucket_index);
         } else if (meta.direction == dash_direction_t.INBOUND) {
-#ifdef TARGET_BMV2_V1MODEL
-            meter_bucket_inbound.count(meta.meter_bucket_index);
-#endif
+            UPDATE_COUNTER(meter_bucket_inbound, meta.meter_bucket_index);
         }
 
         eni_meter.apply();
