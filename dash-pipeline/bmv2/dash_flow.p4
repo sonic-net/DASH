@@ -14,6 +14,7 @@ control Flow(inout headers_t hdr, inout metadata_t meta) {
     }
 
     action flow_entry_action(
+        @SaiVal[type="sai_object_id_t"] bit<64> flow_table_id,
         bit<32> flow_version,
         bit<32> flow_protobuf,
         bit<32> flow_bidirectional,
@@ -29,7 +30,7 @@ control Flow(inout headers_t hdr, inout metadata_t meta) {
     @SaiTable[name = "flow_table", api = "dash_flow", api_order = 0, isobject="true"]
     table flow_table {
         key = {
-            meta.eni_id : exact @SaiVal[type = "sai_object_id_t"];
+            meta.eni_id : exact @SaiVal[type = "sai_object_id_t"]; /* To-Do: Discuss what will be key? */
         }
         actions = {
             flow_table_action();
@@ -45,6 +46,7 @@ control Flow(inout headers_t hdr, inout metadata_t meta) {
             meta.src_l4_port : exact @SaiVal[name = "src_port", type = "sai_uint16_t"]; 
             meta.dst_l4_port : exact @SaiVal[name = "dst_port", type = "sai_uint16_t"]; 
             meta.direction : exact @SaiVal[name = "direction",  type = "sai_uint32_t"];
+            meta.eni_id : exact @SaiVal[type = "sai_object_id_t"];
         }
         actions = {
             flow_entry_action();
