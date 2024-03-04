@@ -8,6 +8,10 @@
 #include "dash_outbound.p4"
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"
+#include "stages/direction_lookup.p4"
+#include "stages/eni_lookup.p4"
+#include "stages/routing_action_apply.p4"
+#include "stages/metering_update.p4"
 #include "underlay.p4"
 
 #define MAX_ENI 64
@@ -43,8 +47,6 @@ control dash_ingress(
 #ifdef TARGET_BMV2_V1MODEL
     @SaiCounter[name="lb_fast_path_icmp_in", attr_type="stats"]
     counter(1, CounterType.packets_and_bytes) port_lb_fast_path_icmp_in_counter;
-    @SaiCounter[name="lb_fast_path_eni_miss", attr_type="stats"]
-    counter(1, CounterType.packets_and_bytes) port_lb_fast_path_eni_miss_counter;
 #endif
     
     @SaiTable[name = "vip", api = "dash_vip"]
@@ -59,28 +61,6 @@ control dash_ingress(
         }
 
         const default_action = deny;
-    }
-
-    action set_outbound_direction() {
-        meta.direction = dash_direction_t.OUTBOUND;
-    }
-
-    action set_inbound_direction() {
-        meta.direction = dash_direction_t.INBOUND;
-    }
-
-    @SaiTable[name = "direction_lookup", api = "dash_direction_lookup"]
-    table direction_lookup {
-        key = {
-            hdr.u0_vxlan.vni : exact @SaiVal[name = "VNI"];
-        }
-
-        actions = {
-            set_outbound_direction;
-            @defaultonly set_inbound_direction;
-        }
-
-        const default_action = set_inbound_direction;
     }
 
     action set_appliance(EthernetAddress neighbor_mac,
@@ -187,45 +167,6 @@ control dash_ingress(
         const default_action = deny;
     }
 
-#ifdef TARGET_BMV2_V1MODEL
-    direct_counter(CounterType.packets_and_bytes) eni_counter;
-#endif // TARGET_BMV2_V1MODEL
-#ifdef TARGET_DPDK_PNA
-#ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
-    // Omit all direct counters for tables with ternary match keys,
-    // because the latest version of p4c-dpdk as of 2023-Jan-26 does
-    // not support this combination of features.  If you try to
-    // compile it with this code enabled, the error message looks like
-    // this:
-    //
-    // [--Werror=target-error] error: Direct counters and direct meters are unsupported for wildcard match table outbound_acl_stage1:dash_acl_rule|dash_acl
-    //
-    // This p4c issue is tracking this feature gap in p4c-dpdk:
-    // https://github.com/p4lang/p4c/issues/3868
-    DirectCounter<bit<64>>(PNA_CounterType_t.PACKETS_AND_BYTES) eni_counter;
-#endif // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
-#endif // TARGET_DPDK_PNA
-
-    @SaiTable[ignored = "true"]
-    table eni_meter {
-        key = {
-            meta.eni_id : exact @SaiVal[type="sai_object_id_t"];
-            meta.direction : exact;
-            meta.dropped : exact;
-        }
-
-        actions = { NoAction; }
-
-#ifdef TARGET_BMV2_V1MODEL
-        counters = eni_counter;
-#endif // TARGET_BMV2_V1MODEL
-#ifdef TARGET_DPDK_PNA
-#ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
-        pna_direct_counter = eni_counter;
-#endif // DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
-#endif // TARGET_DPDK_PNA
-    }
-
     action permit() {
     }
 
@@ -261,88 +202,6 @@ control dash_ingress(
             @defaultonly deny;
         }
 
-        const default_action = deny;
-    }
-
-    action check_ip_addr_family(@SaiVal[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
-        if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
-            if (meta.is_overlay_ip_v6 == 1) {
-                meta.dropped = true;
-            }
-        } else {
-            if (meta.is_overlay_ip_v6 == 0) {
-                meta.dropped = true;
-            }
-        }
-    }
-
-    @SaiTable[name = "meter_policy", api = "dash_meter", order = 1, isobject="true"]
-    table meter_policy {
-        key = {
-            meta.meter_policy_id : exact;
-        }
-        actions = {
-            check_ip_addr_family;
-        }
-    }
-
-    action set_policy_meter_class(bit<16> meter_class) {
-        meta.policy_meter_class = meter_class;
-    }
-
-    @SaiTable[name = "meter_rule", api = "dash_meter", order = 2, isobject="true"]
-    table meter_rule {
-        key = {
-            meta.meter_policy_id: exact @SaiVal[type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
-            hdr.u0_ipv4.dst_addr : ternary @SaiVal[name = "dip", type="sai_ip_address_t"];
-        }
-
-     actions = {
-            set_policy_meter_class;
-            @defaultonly NoAction;
-        }
-        const default_action = NoAction();
-    }
-    
-    // MAX_METER_BUCKET = MAX_ENI(64) * NUM_BUCKETS_PER_ENI(4096)
-    #define MAX_METER_BUCKETS 262144
-#ifdef TARGET_BMV2_V1MODEL
-    @SaiCounter[name="outbound", action_names="meter_bucket_action", attr_type="counter_attr"]
-    counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_outbound;
-    @SaiCounter[name="inbound", action_names="meter_bucket_action", attr_type="counter_attr"]
-    counter(MAX_METER_BUCKETS, CounterType.bytes) meter_bucket_inbound;
-#endif // TARGET_BMV2_V1MODEL
-    action meter_bucket_action(@SaiVal[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index) {
-        meta.meter_bucket_index = meter_bucket_index;
-    }
-
-    @SaiTable[name = "meter_bucket", api = "dash_meter", order = 0, isobject="true"]
-    table meter_bucket {
-        key = {
-            meta.eni_id: exact @SaiVal[type="sai_object_id_t"];
-            meta.meter_class: exact;
-        }
-        actions = {
-            meter_bucket_action;
-            @defaultonly NoAction;
-        }
-        const default_action = NoAction();
-    }
-
-    action set_eni(@SaiVal[type="sai_object_id_t"] bit<16> eni_id) {
-        meta.eni_id = eni_id;
-    }
-
-    @SaiTable[name = "eni_ether_address_map", api = "dash_eni", order=0]
-    table eni_ether_address_map {
-        key = {
-            meta.eni_addr : exact @SaiVal[name = "address", type = "sai_mac_t"];
-        }
-
-        actions = {
-            set_eni;
-            @defaultonly deny;
-        }
         const default_action = deny;
     }
 
@@ -395,35 +254,20 @@ control dash_ingress(
                present in the VIP table */
             meta.encap_data.underlay_sip = hdr.u0_ipv4.dst_addr;
         } else {
+            // TODO: Count the packet drops due to VIP miss
             if (meta.is_fast_path_icmp_flow_redirection_packet) {
-#ifdef TARGET_BMV2_V1MODEL
-                port_lb_fast_path_eni_miss_counter.count(0);
-#endif
             }
         }
 
-        /* If Outer VNI matches with a reserved VNI, then the direction is Outbound - */
-        direction_lookup.apply();
+        direction_lookup_stage.apply(hdr, meta);
 
         appliance.apply();
 
+        /* Outer header processing */
+        eni_lookup_stage.apply(hdr, meta);
+
         // Save the original DSCP value
         meta.eni_data.dscp = (bit<6>)hdr.u0_ipv4.diffserv;
-
-        /* Outer header processing */
-
-        /* Put VM's MAC in the direction agnostic metadata field */
-        meta.eni_addr = meta.direction == dash_direction_t.OUTBOUND  ?
-                                          hdr.customer_ethernet.src_addr :
-                                          hdr.customer_ethernet.dst_addr;
-
-        if (!eni_ether_address_map.apply().hit) {
-            if (meta.is_fast_path_icmp_flow_redirection_packet) {
-#ifdef TARGET_BMV2_V1MODEL
-                port_lb_fast_path_eni_miss_counter.count(0);
-#endif
-            }
-        }
 
         if (meta.direction == dash_direction_t.OUTBOUND) {
             tunnel_decap(hdr, meta);
@@ -474,15 +318,18 @@ control dash_ingress(
 
         acl_group.apply();
 
-
         if (meta.direction == dash_direction_t.OUTBOUND) {
+            meta.target_stage = dash_pipeline_stage_t.OUTBOUND_ROUTING;
             outbound.apply(hdr, meta);
         } else if (meta.direction == dash_direction_t.INBOUND) {
             inbound.apply(hdr, meta);
         }
 
+        routing_action_apply.apply(hdr, meta);
+
         /* Underlay routing */
         meta.dst_ip_addr = (bit<128>)hdr.u0_ipv4.dst_addr;
+
         underlay.apply(
               hdr
             , meta
@@ -494,38 +341,11 @@ control dash_ingress(
     #endif // TARGET_DPDK_PNA        
         );
 
-        if (meta.meter_policy_en == 1) {
-            meter_policy.apply();
-            meter_rule.apply();
-        }
-
-        {
-            if (meta.meter_policy_en == 1) {
-                meta.meter_class = meta.policy_meter_class;
-            } else {
-                meta.meter_class = meta.route_meter_class;
-            }
-            if ((meta.meter_class == 0) || (meta.mapping_meter_class_override == 1)) {
-                meta.meter_class = meta.mapping_meter_class;
-            }
-        }
-
-        meter_bucket.apply();
-        if (meta.direction == dash_direction_t.OUTBOUND) {
-#ifdef TARGET_BMV2_V1MODEL
-            meter_bucket_outbound.count(meta.meter_bucket_index);
-#endif
-        } else if (meta.direction == dash_direction_t.INBOUND) {
-#ifdef TARGET_BMV2_V1MODEL
-            meter_bucket_inbound.count(meta.meter_bucket_index);
-#endif
-        }
-
         if (meta.eni_data.dscp_mode == dash_tunnel_dscp_mode_t.PIPE_MODEL) {
             hdr.u0_ipv4.diffserv = (bit<8>)meta.eni_data.dscp;
         }
 
-        eni_meter.apply();
+        metering_update_stage.apply(hdr, meta);
 
         if (meta.dropped) {
             drop_action();
