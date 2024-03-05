@@ -18,8 +18,6 @@ With DASH flow SAI APIs it's possible to achieve varied cloud services requiring
 
 In the DASH flow abstraction, we model flows as being stored within a flow table and managed through DASH flow SAI APIs.
 
-Each table should be associated with an ENI. [TO-DO] Discussion needed.
-
 Upon the arrival of new flows, whether individually or in batches, corresponding flow entries are added to the table. These entries may represent either bidirectional or unidirectional flows. For bidirectional flows, the implementation adds entries for both the original flow and its reverse, linking their reverse flow keys to each other. For unidirectional flows, the current direction is specified. If a reverse flow for a unidirectional flow is created later, the implementation must add reverse keys for both and link them accordingly.
 
 Flows can be modified and removed through the DASH flow SAI API and can also be aged by the hardware.
@@ -42,7 +40,7 @@ Here are the full DASH flow SAI APIs, and we will introduce their detailed defin
 | get_flow_entry_attribute         | Get attributes of a single entry in a certain flow table     |
 | create_flow_entries              | Add multiple entries to a certain flow table in bulk         |
 | remove_flow_entries              | Remove multiple entries in a certain flow table in bulk      |
-| get_flow_entries                 | Get multiple entries from a certain flow table in bulk       |
+| get_flow_entries_attribute       | Get multiple entries from a certain flow table in bulk       |
 
 ```c
 typedef struct _sai_dash_flow_api_t
@@ -53,7 +51,7 @@ typedef struct _sai_dash_flow_api_t
     sai_get_flow_entry_attribute_fn    get_flow_entry_attribute;
     sai_bulk_create_flow_entry_fn      create_flow_entries;
     sai_bulk_remove_flow_entry_fn      remove_flow_entries;
-    sai_bulk_get_flow_entry_fn         get_flow_entries;
+    sai_bulk_get_flow_entry_fn         get_flow_entries_attribute;
 
     sai_create_flow_table_fn           create_flow_table;
     sai_remove_flow_table_fn           remove_flow_table;
@@ -68,9 +66,6 @@ typedef struct _sai_dash_flow_api_t
 ## Flow Table APIs
 
 ```c
-/**
- * @brief Attribute ID for dash_flow_flow_table
- */
 typedef enum _sai_flow_table_attr_t
 {
     /**
@@ -145,6 +140,16 @@ typedef enum _sai_flow_table_attr_t
 
 } sai_flow_table_attr_t;
 
+/**
+ * @brief Create dash_flow_flow_table
+ *
+ * @param[out] flow_table_id Entry id
+ * @param[in] switch_id Switch id
+ * @param[in] attr_count Number of attributes
+ * @param[in] attr_list Array of attributes
+ *
+ * @return #SAI_STATUS_SUCCESS on success Failure status code on error
+ */
 typedef sai_status_t (*sai_create_flow_table_fn)(
         _Out_ sai_object_id_t *flow_table_id,
         _In_ sai_object_id_t switch_id,
@@ -182,6 +187,11 @@ typedef sai_status_t (*sai_set_flow_table_attribute_fn)(
  *
  * @return #SAI_STATUS_SUCCESS on success Failure status code on error
  */
+typedef sai_status_t (*sai_get_flow_table_attribute_fn)(
+        _In_ sai_object_id_t flow_table_id,
+        _In_ uint32_t attr_count,
+        _Inout_ sai_attribute_t *attr_list);
+
 ```
 
 ## Flow APIs
@@ -190,6 +200,9 @@ typedef sai_status_t (*sai_set_flow_table_attribute_fn)(
 
 ```c
 
+/**
+ * @brief Entry for flow_entry
+ */
 typedef struct _sai_flow_entry_t
 {
     /**
@@ -229,6 +242,13 @@ typedef struct _sai_flow_entry_t
      */
     sai_uint32_t direction;
 
+    /**
+     * @brief Exact matched key eni_id
+     *
+     * @objects SAI_OBJECT_TYPE_ENI
+     */
+    sai_object_id_t eni_id;
+
 } sai_flow_entry_t;
 
 /**
@@ -242,20 +262,31 @@ typedef enum _sai_flow_entry_attr_t
     SAI_FLOW_ENTRY_ATTR_START,
 
     /**
+     * @brief Action flow_entry_action parameter FLOW_TABLE_ID
+     *
+     * @type sai_object_id_t
+     * @flags CREATE_AND_SET
+     * @objects SAI_OBJECT_TYPE_FLOW_TABLE
+     * @allownull true
+     * @default SAI_NULL_OBJECT_ID
+     */
+    SAI_FLOW_ENTRY_ATTR_FLOW_TABLE_ID = SAI_FLOW_ENTRY_ATTR_START,
+
+    /**
      * @brief Action flow_entry_action parameter FLOW_VERSION
      *
      * @type sai_uint32_t
      * @flags CREATE_AND_SET
      * @default 0
      */
-    SAI_FLOW_ENTRY_ATTR_FLOW_VERSION = SAI_FLOW_ENTRY_ATTR_START,
+    SAI_FLOW_ENTRY_ATTR_FLOW_VERSION,
 
     /**
      * @brief Action flow_entry_action parameter FLOW_PROTOBUF
      *
-     * @type sai_uint32_t
+     * @type sai_u8_list_t
      * @flags CREATE_AND_SET
-     * @default 0
+     * @default empty
      */
     SAI_FLOW_ENTRY_ATTR_FLOW_PROTOBUF,
 
@@ -403,6 +434,50 @@ typedef sai_status_t (*sai_get_flow_entry_attribute_fn)(
         _In_ uint32_t attr_count,
         _Inout_ sai_attribute_t *attr_list);
 
+/**
+ * @brief Bulk create dash_flow_flow_entry
+ *
+ * @param[in] object_count Number of objects to create
+ * @param[in] flow_entry List of object to create
+ * @param[in] attr_count List of attr_count. Caller passes the number
+ *    of attribute for each object to create.
+ * @param[in] attr_list List of attributes for every object.
+ * @param[in] mode Bulk operation error handling mode.
+ * @param[out] object_statuses List of status for every object. Caller needs to
+ * allocate the buffer
+ *
+ * @return #SAI_STATUS_SUCCESS on success when all objects are created or
+ * #SAI_STATUS_FAILURE when any of the objects fails to create. When there is
+ * failure, Caller is expected to go through the list of returned statuses to
+ * find out which fails and which succeeds.
+ */
+typedef sai_status_t (*sai_bulk_create_flow_entry_fn)(
+        _In_ uint32_t object_count,
+        _In_ const sai_flow_entry_t *flow_entry,
+        _In_ const uint32_t *attr_count,
+        _In_ const sai_attribute_t **attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses);
+
+/**
+ * @brief Bulk remove dash_flow_flow_entry
+ *
+ * @param[in] object_count Number of objects to remove
+ * @param[in] flow_entry List of objects to remove
+ * @param[in] mode Bulk operation error handling mode.
+ * @param[out] object_statuses List of status for every object. Caller needs to
+ * allocate the buffer
+ *
+ * @return #SAI_STATUS_SUCCESS on success when all objects are removed or
+ * #SAI_STATUS_FAILURE when any of the objects fails to remove. When there is
+ * failure, Caller is expected to go through the list of returned statuses to
+ * find out which fails and which succeeds.
+ */
+typedef sai_status_t (*sai_bulk_remove_flow_entry_fn)(
+        _In_ uint32_t object_count,
+        _In_ const sai_flow_entry_t *flow_entry,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses);
 
 ```
 
@@ -410,238 +485,87 @@ typedef sai_status_t (*sai_get_flow_entry_attribute_fn)(
 
 ```c
 /**
- * @brief Attribute ID (attributes to filter) for get_flow_entries
+ * @brief Bulk Get Op filter keywords for flow_entry in get_flow_entries_attribute call
  */
-typedef enum _sai_flow_entry_bulk_get_attr_t
+typedef enum _sai_flow_entry_bulk_get_filter_t
 {
-    /**
-     * @brief Start of attributes
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_START,
+    /** Bulk get filter key word for sai_ip_address_t dip */
+    SAI_FLOW_ENTRY_BULK_GET_FILTER_T_DIP,
 
-    /**
-     * @brief Exact matched key dip
-     *
-     * @type sai_ip_address_t
-     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_DIP = SAI_FLOW_ENTRY_BULK_GET_ATTR_START,
+    /** Bulk get filter key word for sai_ip_address_t sip */
+    SAI_FLOW_ENTRY_BULK_GET_FILTER_T_SIP,
 
-    /**
-     * @brief Exact matched key sip
-     *
-     * @type sai_ip_address_t
-     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_SIP,
+    /** Bulk get filter key word for sai_uint16_t protocol */
+    SAI_FLOW_ENTRY_BULK_GET_FILTER_T_PROTOCOL,
 
-    /**
-     * @brief Exact matched key protocol
-     *
-     * @type sai_uint16_t
-     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
-     * @isvlan false
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_PROTOCOL,
+    /** Bulk get filter key word for sai_uint16_t src_port */
+    SAI_FLOW_ENTRY_BULK_GET_FILTER_T_SRC_PORT,
 
-    /**
-     * @brief Exact matched key src_port
-     *
-     * @type sai_uint16_t
-     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
-     * @isvlan false
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_SRC_PORT,
+    /** Bulk get filter key word for sai_uint16_t dst_port */
+    SAI_FLOW_ENTRY_BULK_GET_FILTER_T_DST_PORT,
 
-    /**
-     * @brief Exact matched key dst_port
-     *
-     * @type sai_uint16_t
-     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
-     * @isvlan false
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_DST_PORT,
+    /** Bulk get filter key word for sai_uint32_t direction */
+    SAI_FLOW_ENTRY_BULK_GET_FILTER_T_DIRECTION,
 
-    /**
-     * @brief Exact matched key direction
-     *
-     * @type sai_uint32_t
-     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_DIRECTION,
+    /** Bulk get filter key word for sai_object_id_t eni_id */
+    SAI_FLOW_ENTRY_BULK_GET_FILTER_T_ENI_ID,
 
-    /**
-     * @brief Action flow_entry_action parameter FLOW_VERSION
-     *
-     * @type sai_uint32_t
-     * @flags CREATE_AND_SET
-     * @default 0
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_FLOW_VERSION,
+    /** Bulk get filter key word for SAI_FLOW_ENTRY_ATTR_FLOW_TABLE_ID */
+    SAI_FLOW_ENTRY_BULK_GET_FILTER_T_FLOW_TABLE_ID,
 
-    /**
-     * @brief Action flow_entry_action parameter FLOW_PROTOBUF
-     *
-     * @type sai_uint32_t
-     * @flags CREATE_AND_SET
-     * @default 0
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_FLOW_PROTOBUF,
+    /** Bulk get filter key word for SAI_FLOW_ENTRY_ATTR_FLOW_VERSION */
+    SAI_FLOW_ENTRY_BULK_GET_FILTER_T_FLOW_VERSION,
 
-    /**
-     * @brief Action flow_entry_action parameter FLOW_BIDIRECTIONAL
-     *
-     * @type sai_uint32_t
-     * @flags CREATE_AND_SET
-     * @default 0
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_FLOW_BIDIRECTIONAL,
+    /** Bulk get filter key word for SAI_FLOW_ENTRY_ATTR_FLOW_PROTOBUF */
+    SAI_FLOW_ENTRY_BULK_GET_FILTER_T_FLOW_PROTOBUF,
 
-    /**
-     * @brief Action flow_entry_action parameter FLOW_DIRECTION
-     *
-     * @type sai_uint32_t
-     * @flags CREATE_AND_SET
-     * @default 0
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_FLOW_DIRECTION,
+    /** Bulk get filter key word for SAI_FLOW_ENTRY_ATTR_FLOW_BIDIRECTIONAL */
+    SAI_FLOW_ENTRY_BULK_GET_FILTER_T_FLOW_BIDIRECTIONAL,
 
-    /**
-     * @brief Action flow_entry_action parameter FLOW_REVERSE_KEY
-     *
-     * @type sai_uint32_t
-     * @flags CREATE_AND_SET
-     * @default 0
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_FLOW_REVERSE_KEY,
+    /** Bulk get filter key word for SAI_FLOW_ENTRY_ATTR_FLOW_DIRECTION */
+    SAI_FLOW_ENTRY_BULK_GET_FILTER_T_FLOW_DIRECTION,
 
-    /**
-     * @brief Action flow_entry_action parameter FLOW_POLICY_RESULT
-     *
-     * @type sai_uint32_t
-     * @flags CREATE_AND_SET
-     * @default 0
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_FLOW_POLICY_RESULT,
+    /** Bulk get filter key word for SAI_FLOW_ENTRY_ATTR_FLOW_REVERSE_KEY */
+    SAI_FLOW_ENTRY_BULK_GET_FILTER_T_FLOW_REVERSE_KEY,
 
-    /**
-     * @brief Action flow_entry_action parameter FLOW_DEST_PA
-     *
-     * @type sai_uint32_t
-     * @flags CREATE_AND_SET
-     * @default 0
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_FLOW_DEST_PA,
+    /** Bulk get filter key word for SAI_FLOW_ENTRY_ATTR_FLOW_POLICY_RESULT */
+    SAI_FLOW_ENTRY_BULK_GET_FILTER_T_FLOW_POLICY_RESULT,
 
-    /**
-     * @brief Action flow_entry_action parameter FLOW_METERING_CLASS
-     *
-     * @type sai_uint32_t
-     * @flags CREATE_AND_SET
-     * @default 0
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_FLOW_METERING_CLASS,
+    /** Bulk get filter key word for SAI_FLOW_ENTRY_ATTR_FLOW_DEST_PA */
+    SAI_FLOW_ENTRY_BULK_GET_FILTER_T_FLOW_DEST_PA,
 
-    /**
-     * @brief Action flow_entry_action parameter FLOW_REWRITE_INFO
-     *
-     * @type sai_uint32_t
-     * @flags CREATE_AND_SET
-     * @default 0
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_FLOW_REWRITE_INFO,
+    /** Bulk get filter key word for SAI_FLOW_ENTRY_ATTR_FLOW_METERING_CLASS */
+    SAI_FLOW_ENTRY_BULK_GET_FILTER_T_FLOW_METERING_CLASS,
 
-    /**
-     * @brief Action flow_entry_action parameter FLOW_VENDOR_METADATA
-     *
-     * @type sai_uint32_t
-     * @flags CREATE_AND_SET
-     * @default 0
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_FLOW_VENDOR_METADATA,
+    /** Bulk get filter key word for SAI_FLOW_ENTRY_ATTR_FLOW_REWRITE_INFO */
+    SAI_FLOW_ENTRY_BULK_GET_FILTER_T_FLOW_REWRITE_INFO,
 
-    /**
-     * @brief IP address family for resource accounting
-     *
-     * @type sai_ip_addr_family_t
-     * @flags READ_ONLY
-     * @isresourcetype true
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_IP_ADDR_FAMILY,
+    /** Bulk get filter key word for SAI_FLOW_ENTRY_ATTR_FLOW_VENDOR_METADATA */
+    SAI_FLOW_ENTRY_BULK_GET_FILTER_T_FLOW_VENDOR_METADATA,
 
-    /**
-     * @brief End of attributes
-     */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_END,
-
-    /** Custom range base value */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_CUSTOM_RANGE_START = 0x10000000,
-
-    /** End of custom range base */
-    SAI_FLOW_ENTRY_BULK_GET_ATTR_CUSTOM_RANGE_END,
-
-} sai_flow_entry_bulk_get_attr_t;
+} sai_flow_entry_bulk_get_filter_t;
 
 /**
- * @brief Attribute ID (operation) for get_flow_entries;
+ * @brief Bulk Get Op for flow_entry in get_flow_entries_attribute call
  */
-typedef enum _sai_flow_entry_bulk_get_op_attr_t
+typedef enum _sai_flow_entry_bulk_get_op_t
 {
-    /**
-     * @brief Start of attributes
-     */
-    SAI_FLOW_ENTRY_BULK_GET_OP_ATTR_START,
+    /**  Indicate the last OP of Bulk Get */
+    SAI_FLOW_ENTRY_BULK_GET_OP_LAST_ITEM,
 
-    /**
-     * @brief Action operation parameter for normal return
-     *
-     * @type sai_uint32_t
-     * @flags CREATE_AND_SET
-     * @default 0
-     */
-    SAI_FLOW_ENTRY_BULK_GET_OP_ATTR_NORMAL_RETURN,
+    /** Operation parameter for normal return */
+    SAI_FLOW_ENTRY_BULK_GET_OP_NORMAL_RETURN,
 
-    /**
-     * @brief Action operation parameter for GRPC return (server IP address)
-     *
-     * @type sai_ip_address_t
-     * @flags CREATE_AND_SET
-     * @default 0.0.0.0
-     */
-    SAI_FLOW_ENTRY_BULK_GET_OP_ATTR_GRPC_SERVER_IP,
+    /** Operation parameter for GRPC return (server IP address) */
+    SAI_FLOW_ENTRY_BULK_GET_OP_GRPC_SERVER_IP,
 
-    /**
-     * @brief Action operation parameter for GRPC return (server port)
-     *
-     * @type sai_uint16_t
-     * @flags CREATE_AND_SET
-     * @isvlan false
-     * @default 0
-     */
-    SAI_FLOW_ENTRY_BULK_GET_OP_ATTR_GRPC_SERVER_PORT,
+    /**  Operation parameter for GRPC return (server port) */
+    SAI_FLOW_ENTRY_BULK_GET_OP_GRPC_SERVER_PORT,
 
-    /**
-     * @brief Action operation parameter for get filter operator
-     *
-     * @type sai_uint16_t
-     * @flags CREATE_AND_SET
-     * @isvlan false
-     * @default 0
-     */
-    SAI_FLOW_ENTRY_BULK_GET_OP_ATTR_FILTER_OP,
+    /** Operation parameter for get filter operator */
+    SAI_FLOW_ENTRY_BULK_GET_OP_FILTER_OP,
 
-    /**
-     * @brief End of attributes
-     */
-    SAI_FLOW_ENTRY_BULK_GET_OP_ATTR_END,
-
-    /** Custom range base value */
-    SAI_FLOW_ENTRY_BULK_GET_OP_ATTR_CUSTOM_RANGE_START = 0x10000000,
-
-    /** End of custom range base */
-    SAI_FLOW_ENTRY_BULK_GET_OP_ATTR_CUSTOM_RANGE_END,
-
-} sai_flow_entry_bulk_get_op_attr_t;
+} sai_flow_entry_bulk_get_op_t;
 
 /**
  * @brief Bulk create dash_flow_flow_entry
@@ -668,7 +592,6 @@ typedef sai_status_t (*sai_bulk_create_flow_entry_fn)(
         _In_ sai_bulk_op_error_mode_t mode,
         _Out_ sai_status_t *object_statuses);
 
-
 /**
  * @brief Bulk remove dash_flow_flow_entry
  *
@@ -693,10 +616,12 @@ typedef sai_status_t (*sai_bulk_remove_flow_entry_fn)(
  * @brief Bulk get dash_flow_flow_entry
  *
  * @param[in] object_count Max number of objects to get
- * @param[inout] attr_count List of attr_count. Caller passes the number
+ * @param[in] flow_entry List of object to get
+ * @param[in] attr_count List of attr_count. Caller passes the number
  *    of attribute for each object to create.
  * @param[inout] attr_list List of attributes for every object.
- * @param[inout] object_statuses Status for each object.
+ * @param[in] mode Bulk operation error handling mode.
+ * @param[out] object_statuses Status for each object.
  *    If the allocated attribute count is not large enough,
  *    set the status to #SAI_STATUS_BUFFER_OVERFLOW.
  *
@@ -707,9 +632,12 @@ typedef sai_status_t (*sai_bulk_remove_flow_entry_fn)(
  */
 typedef sai_status_t (*sai_bulk_get_flow_entry_fn)(
         _In_ uint32_t object_count,
-        _Inout_ uint32_t *attr_count,
+        _In_ const sai_flow_entry_t *flow_entry,
+        _In_ const uint32_t *attr_count,
         _Inout_ sai_attribute_t **attr_list,
-        _Inout_ sai_status_t *object_statuses);
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses);
+
 
 ```
 
@@ -908,24 +836,24 @@ if (status != SAI_STATUS_SUCCESS) {
 Example: Get all version < 5 and return via GRPC
 
 ```c
-uint32_t object_count = INT_MAX
+uint32_t object_count = UINT32_MAX
 
 /* Allocate object_statuses and attr_count */
 sai_attribute_t sai_attrs_list[3][2];
-sai_attrs_list[0][0].id = SAI_FLOW_ENTRY_BULK_GET_OP_ATTR_FILTER_OP;
+sai_attrs_list[0][0].id = SAI_FLOW_ENTRY_BULK_GET_OP_FILTER_OP,;
 sai_attrs_list[0][0].value = SAI_DASH_BULK_GET_FILTER_OP_LESS_THAN;
 sai_attrs_list[0][1].id = SAI_FLOW_ENTRY_BULK_GET_ATTR_FLOW_VERSION;
 sai_attrs_list[0][1].value = 5;
 
-sai_attrs_list[1][0].id = SAI_FLOW_ENTRY_BULK_GET_OP_ATTR_GRPC_SERVER_IP;
+sai_attrs_list[1][0].id = SAI_FLOW_ENTRY_BULK_GET_OP_GRPC_SERVER_IP;
 sai_attrs_list[1][0].value = "10.10.10.10";
-sai_attrs_list[1][1].id = SAI_FLOW_ENTRY_BULK_GET_OP_ATTR_GRPC_SERVER_PORT;
+sai_attrs_list[1][1].id = SAI_FLOW_ENTRY_BULK_GET_OP_GRPC_SERVER_PORT;
 sai_attrs_list[1][1].value = "1234";
 
-sai_attrs_list[2][0].id = SAI_FLOW_ENTRY_BULK_GET_OP_ATTR_END;
+sai_attrs_list[2][0].id = SAI_FLOW_ENTRY_BULK_GET_OP_LAST_ITEM;
 sai_attrs_list[2][0].value = true;
 
-status = sai_bulk_get_flow_entry_fn(object_count, attr_count, attr_list, object_statuses);
+status = sai_bulk_get_flow_entry_fn(object_count, flow_entry, attr_count, attr_list, mode, object_statuses);
 
 ```
 
