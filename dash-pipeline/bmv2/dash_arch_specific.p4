@@ -28,6 +28,10 @@
         @SaiCounter[__VA_ARGS__] \
         counter(count, CounterType.bytes) name;
 
+    #define DEFINE_HIT_COUNTER(name, count, ...) \
+        @SaiCounter[__VA_ARGS__, no_suffix="true"] \
+        counter(count, CounterType.packets) name;
+
     #define UPDATE_COUNTER(name, index) \
         name.count((bit<32>)index)
     
@@ -40,6 +44,7 @@
     #define DEFINE_COUNTER(name, count, ...)
     #define DEFINE_PACKET_COUNTER(name, count, ...)
     #define DEFINE_BYTE_COUNTER(name, count, ...)
+    #define DEFINE_HIT_COUNTER(name, count, ...)
     #define UPDATE_COUNTER(name, index)
 
     #ifdef DPDK_SUPPORTS_DIRECT_COUNTER_ON_WILDCARD_KEY_TABLE
