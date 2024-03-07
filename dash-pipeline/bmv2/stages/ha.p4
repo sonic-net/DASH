@@ -67,7 +67,7 @@ control ha_stage(inout headers_t hdr,
     @SaiTable[api = "dash_ha", order=1, isobject="true"]
     table ha_scope {
         key = {
-            meta.ha.ha_scope_id : exact @SaiVal[type="sai_object_id_t"];
+            meta.ha.ha_scope_id : exact;
         }
         actions = {
             set_ha_scope_attr;

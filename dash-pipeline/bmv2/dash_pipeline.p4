@@ -103,7 +103,7 @@ control dash_ingress(
                          bit<32> pps,
                          bit<32> flows,
                          bit<1> admin_state,
-                         @SalVal[type="sai_object_id_t"] bit<16> ha_scope_id,
+                         @SaiVal[type="sai_object_id_t"] bit<16> ha_scope_id,
                          @SaiVal[type="sai_ip_address_t"] IPv4Address vm_underlay_dip,
                          @SaiVal[type="sai_uint32_t"] bit<24> vm_vni,
                          @SaiVal[type="sai_object_id_t"] bit<16> vnet_id,

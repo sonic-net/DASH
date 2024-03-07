@@ -113,7 +113,7 @@ enum bit<8> dash_ha_flow_sync_op_t {
 
 struct ha_data_t {
     //
-    // ENI HA settings
+    // HA scope settings
     //
     bit<16> ha_scope_id;
     bit<16> ha_set_id;

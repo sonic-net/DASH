@@ -97,8 +97,21 @@ HA scope is also defined as a SAI object and contains the following SAI attribut
 | Attribute name | Type | Description |
 | -------------- | ---- | ----------- |
 | SAI_HA_SCOPE_ATTR_HA_SET_ID | `sai_object_id_t` | The HA set ID for this scope. |
-| SAI_HA_SCOPE_ATTR_HA_ROLE | `sai_dash_ha_role_`t` | The HA role. |
+| SAI_HA_SCOPE_ATTR_HA_ROLE | `sai_dash_ha_role_t` | The HA role. |
 | SAI_HA_SCOPE_ATTR_FLOW_VERSION | `sai_uint32_t` | The flow version for new flows. |
+
+The HA role is defined as below:
+
+```c
+typedef enum _sai_dash_ha_role_t
+{
+    SAI_DASH_HA_ROLE_DEAD,
+    SAI_DASH_HA_ROLE_ACTIVE,
+    SAI_DASH_HA_ROLE_STANDBY,
+    SAI_DASH_HA_ROLE_STANDALONE,
+    SAI_DASH_HA_ROLE_SWITCHING_TO_ACTIVE,
+} sai_dash_ha_role_t;
+```
 
 ### 4.3. Flow table
 
@@ -148,7 +161,6 @@ stateDiagram-v2
     D --> M: Flow sync ack received
 ```
 
-
 For more information, please refer to DASH flow API documentation.
 
 ### 4.5. ENI
@@ -158,19 +170,6 @@ To provide the ENI-level HA control, each ENI will have the following SAI attrib
 | Attribute name | Type | Description |
 | -------------- | ---- | ----------- |
 | SAI_ENI_ATTR_HA_SCOPE_ID | `sai_object_id_t` | The HA scope ID of the ENI. |
-
-The HA role is defined as below:
-
-```c
-typedef enum _sai_dash_ha_role_t
-{
-    SAI_DASH_HA_ROLE_DEAD,
-    SAI_DASH_HA_ROLE_ACTIVE,
-    SAI_DASH_HA_ROLE_STANDBY,
-    SAI_DASH_HA_ROLE_STANDALONE,
-    SAI_DASH_HA_ROLE_SWITCHING_TO_ACTIVE,
-} sai_dash_ha_role_t;
-```
 
 ### 4.6. Event notifications
 
@@ -326,7 +325,7 @@ When a packet arrives, it will:
 
 1. From ENI, pick up the flow table id and HA scope id.
 2. From flow table, pick up the current flow info, such as if flow exists and synched.
-3. From HA scope id, pick up the HA set id, HA role and expected flow version if it will create a new flow.
+3. From HA scope, pick up the HA set id, HA role and expected flow version if it will create a new flow.
 4. From HA set, pick up the peer DPU information.
 
 Then, based on these information, the HA stage will make a decision on whether this packet should be forwarded directly, or going through slow path to get flow created or updated, or tunneled to its peer for flow sync or sending to active.
@@ -352,9 +351,9 @@ enum bit<8> dash_packet_type_t {
 
 // HA flow sync operations
 enum bit<8> dash_ha_flow_sync_op_t {
-    FLOW_CREATE = 0,
-    FLOW_UPDATE = 1,
-    FLOW_DELETE = 2
+    FLOW_CREATE = 0, // New flow creation.
+    FLOW_UPDATE = 1, // Flow resimulation or any other reason causing existing flow to be updated.
+    FLOW_DELETE = 2  // Flow deletion.
 };
 ```
 
