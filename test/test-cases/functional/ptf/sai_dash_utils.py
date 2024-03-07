@@ -140,6 +140,7 @@ class VnetAPI(VnetObjects):
             "pps": 100000,
             "flows": 100000,
             "admin_state": True,
+            "ha_scope_id": 0,
             "vm_underlay_dip": sai_ipaddress("0.0.0.0"),
             "vm_vni": 1,
             "vnet_id": 1,
