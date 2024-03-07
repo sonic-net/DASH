@@ -411,17 +411,17 @@ sequenceDiagram
     SDN->>S0N: Create ENI with HA set ID as dead state
     SDN->>S1N: Create ENI with HA set ID as dead state
 
-    S0N->>S0D: Create ENI with HA set ID as dead role<br>(sai: create_eni)
-    S1N->>S1D: Create ENI with HA set ID as dead role<br>(sai: create_eni)
+    S0N->>S0D: Create ENI with HA set ID as dead role<br>(sai:  create_ha_scope / create_eni)
+    S1N->>S1D: Create ENI with HA set ID as dead role<br>(sai: create_ha_scope / create_eni)
     Note over SDN,S1D: SDN controller programs the SDN policy for both ENI.
 
     SDN->>S0N: Update ENI with desired state as active.
     SDN->>S1N: Update ENI with desired state as empty.
     Note over S0N,S1N: hamgrd driving HA state machine
 
-    S1N->>S1D: Update ENI with standby role.<br>(sai: set_eni_attribute)
+    S1N->>S1D: Update ENI HA scope with standby role.<br>(sai: set_ha_scope_attribute)
     Note over S0N,S1N: hamgrd continue to drive<br>HA state machine
-    S0N->>S0D: Update ENI with active role.<br>(sai: set_eni_attribute)
+    S0N->>S0D: Update ENI HA scope with active role.<br>(sai: set_ha_scope_attribute)
 
     Note over S0N,S1N: hamgrd continue to drive HA<br>state machine and update<br>nexthop on all switches.
 ```
@@ -448,11 +448,11 @@ sequenceDiagram
     SDN->>S1N: Update ENI with desired state as active.
     Note over S0N,S1N: hamgrd gets approval from<br>upstream service and drives<br>HA state machine
 
-    S1N->>S1D: Update ENI with SwitchingToActive role.<br>(sai: set_eni_attribute)
+    S1N->>S1D: Update ENI HA scope with SwitchingToActive role.<br>(sai: set_ha_scope_attribute)
     Note over S0N,S1N: hamgrd continue to drive<br>HA state machine
-    S0N->>S0D: Update ENI with standby role.<br>(sai: set_eni_attribute)
+    S0N->>S0D: Update ENI HA scope with standby role.<br>(sai: set_ha_scope_attribute)
     Note over S0N,S1N: hamgrd continue to drive<br>HA state machine
-    S1N->>S1D: Update ENI with active role.<br>(sai: set_eni_attribute)
+    S1N->>S1D: Update ENI HA scope with active role.<br>(sai: set_ha_scope_attribute)
 
     Note over S0N,S1N: hamgrd continue to drive<br>HA state machine and<br>update nexthop on all switches.
 ```
@@ -477,7 +477,7 @@ sequenceDiagram
     S0N->>S0N: PMON detects DPU0 is dead.
     Note over S0N,S1N: hamgrd receives the health<br>signal and drives HA state<br>machine
 
-    S1N->>S1D: Update ENI with Standalone role.<br>(sai: set_eni_attribute)
+    S1N->>S1D: Update ENI HA scope with Standalone role.<br>(sai: set_ha_scope_attribute)
 
     Note over S0N,S1N: hamgrd continue to drive<br>HA state machine and<br>update nexthop on all switches.
 ```
@@ -505,12 +505,12 @@ sequenceDiagram
     Note over S0D,S1D: DPU starts data path probe to peer DPU.
 
     SDN->>S1N: Reconcile SDN policy for the new DPU.
-    S1N->>S1D: Create ENI with HA set ID as dead role<br>(sai: create_eni)
+    S1N->>S1D: Create ENI with HA set ID as dead role<br>(sai: create_ha_scope / create_eni)
     Note over S0N,S1N: hamgrd driving HA state machine.
 
-    S1N->>S1D: Update ENI with standby role.<br>(sai: set_eni_attribute)
+    S1N->>S1D: Update ENI HA scope with standby role.<br>(sai: set_ha_scope_attribute)
     Note over S0N,S1N: hamgrd continue to drive<br>HA state machine
-    S0N->>S0D: Update ENI with active role.<br>(sai: set_eni_attribute)
+    S0N->>S0D: Update ENI HA scope with active role.<br>(sai: set_ha_scope_attribute)
 
     Note over S0N,S1N: hamgrd continue to drive HA<br>state machine and update<br>nexthop on all switches.
 ```
