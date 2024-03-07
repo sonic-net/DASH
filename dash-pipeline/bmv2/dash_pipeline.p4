@@ -10,11 +10,10 @@
 #include "dash_conntrack.p4"
 #include "stages/direction_lookup.p4"
 #include "stages/eni_lookup.p4"
+#include "stages/ha.p4"
 #include "stages/routing_action_apply.p4"
 #include "stages/metering_update.p4"
 #include "underlay.p4"
-
-#define MAX_ENI 64
 
 control dash_ingress(
       inout headers_t hdr
@@ -92,12 +91,19 @@ control dash_ingress(
    meta.stage4_dash_acl_group_id = ## prefix ##_stage4_dash_acl_group_id; \
    meta.stage5_dash_acl_group_id = ## prefix ##_stage5_dash_acl_group_id;
 
-    DEFINE_COUNTER(eni_lb_fast_path_icmp_in_counter, MAX_ENI, name="lb_fast_path_icmp_in", attr_type="stats", action_names="set_eni_attrs")
+    DEFINE_COUNTER(eni_rx_counter, MAX_ENI, name="rx", attr_type="stats", action_names="set_eni_attrs", order=0)
+    DEFINE_COUNTER(eni_tx_counter, MAX_ENI, name="tx", attr_type="stats", action_names="set_eni_attrs", order=0)
+    DEFINE_COUNTER(eni_outbound_rx_counter, MAX_ENI, name="outbound_rx", attr_type="stats", action_names="set_eni_attrs", order=0)
+    DEFINE_COUNTER(eni_outbound_tx_counter, MAX_ENI, name="outbound_tx", attr_type="stats", action_names="set_eni_attrs", order=0)
+    DEFINE_COUNTER(eni_inbound_rx_counter, MAX_ENI, name="inbound_rx", attr_type="stats", action_names="set_eni_attrs", order=0)
+    DEFINE_COUNTER(eni_inbound_tx_counter, MAX_ENI, name="inbound_tx", attr_type="stats", action_names="set_eni_attrs", order=0)
+    DEFINE_COUNTER(eni_lb_fast_path_icmp_in_counter, MAX_ENI, name="lb_fast_path_icmp_in", attr_type="stats", action_names="set_eni_attrs", order=0)
 
     action set_eni_attrs(bit<32> cps,
                          bit<32> pps,
                          bit<32> flows,
                          bit<1> admin_state,
+                         @SalVal[type="sai_object_id_t"] bit<16> ha_scope_id,
                          @SaiVal[type="sai_ip_address_t"] IPv4Address vm_underlay_dip,
                          @SaiVal[type="sai_uint32_t"] bit<24> vm_vni,
                          @SaiVal[type="sai_object_id_t"] bit<16> vnet_id,
@@ -144,7 +150,8 @@ control dash_ingress(
             }
             meta.meter_policy_id = v4_meter_policy_id;
         }
-        
+
+        meta.ha.ha_scope_id = ha_scope_id;
         meta.fast_path_icmp_flow_redirection_disabled = disable_fast_path_icmp_flow_redirection;
     }
 
@@ -301,17 +308,23 @@ control dash_ingress(
         if (meta.eni_data.admin_state == 0) {
             deny();
         }
-
+        
+        UPDATE_COUNTER(eni_rx_counter, meta.eni_id);
         if (meta.is_fast_path_icmp_flow_redirection_packet) {
             UPDATE_COUNTER(eni_lb_fast_path_icmp_in_counter, meta.eni_id);
         }
 
+        ha_stage.apply(hdr, meta);
+
         acl_group.apply();
 
         if (meta.direction == dash_direction_t.OUTBOUND) {
+            UPDATE_COUNTER(eni_outbound_rx_counter, meta.eni_id);
+
             meta.target_stage = dash_pipeline_stage_t.OUTBOUND_ROUTING;
             outbound.apply(hdr, meta);
         } else if (meta.direction == dash_direction_t.INBOUND) {
+            UPDATE_COUNTER(eni_inbound_rx_counter, meta.eni_id);
             inbound.apply(hdr, meta);
         }
 
@@ -339,6 +352,14 @@ control dash_ingress(
 
         if (meta.dropped) {
             drop_action();
+        } else {
+            UPDATE_COUNTER(eni_tx_counter, meta.eni_id);
+
+            if (meta.direction == dash_direction_t.OUTBOUND) {
+                UPDATE_COUNTER(eni_outbound_tx_counter, meta.eni_id);
+            } else if (meta.direction == dash_direction_t.INBOUND) {
+                UPDATE_COUNTER(eni_inbound_tx_counter, meta.eni_id);
+            }
         }
     }
 }

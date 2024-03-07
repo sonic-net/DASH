@@ -3,6 +3,9 @@
 
 #include "dash_headers.p4"
 
+#define MAX_ENI 64
+#define MAX_HA_SET 1
+
 enum bit<32> dash_routing_actions_t {
     NONE = 0,
     STATIC_ENCAP = (1 << 0),
@@ -14,7 +17,18 @@ enum bit<16> dash_direction_t {
     INVALID = 0,
     OUTBOUND = 1,
     INBOUND = 2
-}
+};
+
+enum bit<8> dash_packet_source_t {
+    EXTERNAL = 0,
+    DPAPP = 1
+};
+
+enum bit<8> dash_packet_type_t {
+    REGULAR = 0,
+    FLOW_SYNC_REQ = 1,
+    FLOW_SYNC_ACK = 2
+};
 
 // Pipeline stages:
 enum bit<16> dash_pipeline_stage_t {
@@ -30,7 +44,7 @@ enum bit<16> dash_pipeline_stage_t {
 
     // Common stages
     ROUTING_ACTION_APPLY = 300
-}
+};
 
 struct conntrack_data_t {
     bool allow_in;
@@ -75,8 +89,58 @@ struct overlay_rewrite_data_t {
     IPv6Address sip_mask;
     IPv6Address dip_mask;
 }
+ 
+enum bit<8> dash_ha_role_t {
+    DEAD = 0,
+    ACTIVE = 1,
+    STANDBY = 2,
+    STANDALONE = 3,
+    SWITCHING_TO_ACTIVE = 4
+};
+
+enum bit<8> dash_ha_flow_sync_state_t {
+    FLOW_MISS = 0,
+    FLOW_CREATED = 1,
+    FLOW_SYNCED = 2,
+    FLOW_PENDING_DELETE = 3
+};
+
+enum bit<8> dash_ha_flow_sync_op_t {
+    FLOW_CREATE = 0,
+    FLOW_UPDATE = 1,
+    FLOW_DELETE = 2
+};
+
+struct ha_data_t {
+    //
+    // ENI HA settings
+    //
+    bit<16> ha_scope_id;
+    bit<16> ha_set_id;
+    dash_ha_role_t ha_role;
+
+    //
+    // HA set settings
+    //
+    bit<1> local_ip_is_v6;
+    IPv4ORv6Address local_ip;
+    bit<1> peer_ip_is_v6;
+    IPv4ORv6Address peer_ip;
+    bit<16> dp_channel_dst_port;
+    bit<16> dp_channel_src_port_min;
+    bit<16> dp_channel_src_port_max;
+
+    //
+    // HA packet/flow state
+    //
+    dash_ha_flow_sync_state_t flow_sync_state;
+}
 
 struct metadata_t {
+    // Packet type
+    dash_packet_source_t packet_source; // TODO: Parse packet source in parser.
+    dash_packet_type_t packet_type; // TODO: Parse packet type in parser.
+
     // Lookup context
     dash_direction_t direction;
     EthernetAddress eni_addr;
@@ -111,6 +175,9 @@ struct metadata_t {
     bit<16> tunnel_pointer;
     bool is_fast_path_icmp_flow_redirection_packet;
     bit<1> fast_path_icmp_flow_redirection_disabled;
+
+    // HA
+    ha_data_t ha;
 
     // Stage transition control
     dash_pipeline_stage_t target_stage;

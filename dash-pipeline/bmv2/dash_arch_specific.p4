@@ -82,4 +82,12 @@
     
 #endif // TARGET_DPDK_PNA
 
+//
+// Utility macros
+//
+
+// The second macro will have the value of x expanded before stringification.
+#define PP_STR_RAW(x) #x
+#define PP_STR(x) PP_STR_RAW(x)
+
 #endif // __DASH_TARGET_SPECIFIC__
