@@ -1,4 +1,4 @@
-# DASH High Availablility API
+# DASH High Availability API
 
 | Rev | Date | Author | Change Description |
 | --- | ---- | ------ | ------------------ |
@@ -53,7 +53,7 @@ For how the network topology is setup and how flow HA works, such as lifetime ma
 To support the [SmartSwitch HA workflows](https://github.com/sonic-net/SONiC/blob/master/doc/smart-switch/high-availability/smart-switch-ha-hld.md), from SAI perspective, there are a few key components involved:
 
 - **HA set**: It defines the peer DPU and data plane channel that used for inline flow sync.
-- **HA scope**: It controls the failover scope, such as HA role, such as active, standby or standalone, and expected flow version for new flows. Depends on the HA role of the ENI, the packet will be processed differently to get the flow sync'ed.
+- **HA scope**: It controls the failover scope, such as HA role, such as active, standby or standalone, and expected flow version for new flows. Depends on the HA role of the ENI, the packet will be processed differently to get the flow synched.
 - **Flow table**: It is the container of all flow entries. It can be attached to all ENIs in a DPU or being attached to a single DPU, depends on at which level we like to provide the flow HA, i.e. HA scope.
 - **Flow**: It is used to represent a network connection, which contains match conditions and packet transformations. In HA, each flow will have it own HA-related states, such flow version, flow sync state and etc.
 - **ENI**: In ENI-level HA, each ENI will be connected to a HA scope.
@@ -82,13 +82,13 @@ HA set is defined as a SAI object and contains the following SAI attributes:
 
 | Attribute name | Type | Description |
 | -------------- | ---- | ----------- |
-| SAI_HA_SET_ATTR_LOCAL_IP | sai_ip_address_t | The IP address of the local DPU. |
-| SAI_HA_SET_ATTR_PEER_IP | sai_ip_address_t | The IP address of the peer DPU. |
-| SAI_HA_SET_ATTR_DP_CHANNEL_DST_PORT | sai_uint16_t | The destination port of the data plane channel. |
-| SAI_HA_SET_ATTR_DP_CHANNEL_SRC_PORT_MIN | sai_uint16_t | The minimum source port of the data plane channel. |
-| SAI_HA_SET_ATTR_DP_CHANNEL_SRC_PORT_MAX | sai_uint16_t | The maximum source port of the data plane channel. |
-| SAI_HA_SET_ATTR_DP_CHANNEL_PROBE_INTERVAL_MS | sai_uint32_t | The interval of the data plane channel probe. |
-| SAI_HA_SET_ATTR_DP_CHANNEL_PROBE_FAIL_THRESHOLD | sai_uint32_t | The threshold of the data plane channel probe fail. |
+| SAI_HA_SET_ATTR_LOCAL_IP | `sai_ip_address_t` | The IP address of the local DPU. |
+| SAI_HA_SET_ATTR_PEER_IP | `sai_ip_address_t` | The IP address of the peer DPU. |
+| SAI_HA_SET_ATTR_DP_CHANNEL_DST_PORT | `sai_uint16_t` | The destination port of the data plane channel. |
+| SAI_HA_SET_ATTR_DP_CHANNEL_SRC_PORT_MIN | `sai_uint16_t` | The minimum source port of the data plane channel. |
+| SAI_HA_SET_ATTR_DP_CHANNEL_SRC_PORT_MAX | `sai_uint16_t` | The maximum source port of the data plane channel. |
+| SAI_HA_SET_ATTR_DP_CHANNEL_PROBE_INTERVAL_MS | `sai_uint32_t` | The interval of the data plane channel probe. |
+| SAI_HA_SET_ATTR_DP_CHANNEL_PROBE_FAIL_THRESHOLD | `sai_uint32_t` | The threshold of the data plane channel probe fail. |
 
 ### 4.2. HA Scope
 
@@ -96,9 +96,9 @@ HA scope is also defined as a SAI object and contains the following SAI attribut
 
 | Attribute name | Type | Description |
 | -------------- | ---- | ----------- |
-| SAI_HA_SCOPE_ATTR_HA_SET_ID | sai_object_id_t | The HA set ID for this scope. |
-| SAI_HA_SCOPE_ATTR_HA_ROLE | sai_dash_ha_role_t | The HA role. |
-| SAI_HA_SCOPE_ATTR_FLOW_VERSION | sai_uint32_t | The flow version for new flows. |
+| SAI_HA_SCOPE_ATTR_HA_SET_ID | `sai_object_id_t` | The HA set ID for this scope. |
+| SAI_HA_SCOPE_ATTR_HA_ROLE | `sai_dash_ha_role_`t` | The HA role. |
+| SAI_HA_SCOPE_ATTR_FLOW_VERSION | `sai_uint32_t` | The flow version for new flows. |
 
 ### 4.3. Flow table
 
@@ -112,8 +112,8 @@ To support HA, each flow contains the following SAI attributes:
 
 | Attribute name | Type | Description |
 | -------------- | ---- | ----------- |
-| SAI_FLOW_ATTR_FLOW_VERSION | sai_uint32_t | The flow version. |
-| SAI_FLOW_ATTR_FLOW_SYNC_STATE | sai_dash_ha_flow_sync_state_t | The flow sync state. |
+| SAI_FLOW_ATTR_FLOW_VERSION | `sai_uint32_t` | The flow version. |
+| SAI_FLOW_ATTR_FLOW_SYNC_STATE | `sai_dash_ha_flow_sync_state_t` | The flow sync state. |
 
 The flow sync state is defined as below:
 
@@ -127,7 +127,7 @@ typedef enum _sai_dash_ha_flow_sync_state_t
 } sai_dash_ha_flow_sync_state_t;
 ```
 
-The flow sync state is a small state machine that represents if the flow is sync'ed or not, so we can make the packet processing decision accordingly to achieve HA.
+The flow sync state is a small state machine that represents if the flow is synched or not, so we can make the packet processing decision accordingly to achieve HA.
 
 ```mermaid
 stateDiagram-v2
@@ -157,7 +157,7 @@ To provide the ENI-level HA control, each ENI will have the following SAI attrib
 
 | Attribute name | Type | Description |
 | -------------- | ---- | ----------- |
-| SAI_ENI_ATTR_HA_SCOPE_ID | sai_object_id_t | The HA scope ID of the ENI. |
+| SAI_ENI_ATTR_HA_SCOPE_ID | `sai_object_id_t` | The HA scope ID of the ENI. |
 
 The HA role is defined as below:
 
@@ -178,7 +178,7 @@ To receive the HA state updates from the DASH implementation, the following SAI 
 
 | Attribute name | Type | Description |
 | -------------- | ---- | ----------- |
-| SAI_SWITCH_ATTR_HA_SCOPE_EVENT_NOTIFY | sai_ha_scope_event_notification_fn | The callback function for receiving events on the HA scope. |
+| SAI_SWITCH_ATTR_HA_SCOPE_EVENT_NOTIFY | `sai_ha_scope_event_notification_fn` | The callback function for receiving events on the HA scope. |
 
 And the callback function and HA state changed event is defined as below:
 
@@ -257,7 +257,7 @@ To monitor the traffic on ENI level, the following stats are added:
 
 | SAI stats name | Description |
 | -------------- | ----------- |
-| SAI_ENI_STAT_(/OUTBOUND_/INBOUND_)RX_BYTES | Total bytes recevied on ENI (overall/outbound/inbound) pipeline. |
+| SAI_ENI_STAT_(/OUTBOUND_/INBOUND_)RX_BYTES | Total bytes received on ENI (overall/outbound/inbound) pipeline. |
 | SAI_ENI_STAT_(/OUTBOUND_/INBOUND_)RX_PACKETS | Total number of packets received on ENI (overall/outbound/inbound) pipeline. |
 | SAI_ENI_STAT_(/OUTBOUND_/INBOUND_)TX_BYTES | Total bytes sent by ENI (overall/outbound/inbound) pipeline. |
 | SAI_ENI_STAT_(/OUTBOUND_/INBOUND_)TX_PACKETS | Total number of packets sent by ENI (overall/outbound/inbound) pipeline. |
@@ -282,14 +282,14 @@ Here are the new stats added for monitoring flow operations on each ENI:
 
 Here are the new stats added for monitoring flow sync packets on each ENI:
 
-- The flow can be sync'ed inline with the packet, or on a timer such as idle timeout.
+- The flow can be synched inline with the packet, or on a timer such as idle timeout.
 
 | SAI stats name | Description |
 | -------------- | ----------- |
 | SAI_ENI_STAT_(INLINE/TIMED)_FLOW_SYNC_PACKET_RX_BYTES | The bytes of inline/timed flow sync packet received by the ENI. |
 | SAI_ENI_STAT_(INLINE/TIMED)_FLOW_SYNC_PACKET_RX_PACKETS | The number of inline/timed flow sync packets received by the ENI. |
-| SAI_ENI_STAT_(INLINE/TIMED)_FLOW_SYNC_PACKET_TX_BYTES | The bytes of inline/timed flow sync packet that this ENI sents. |
-| SAI_ENI_STAT_(INLINE/TIMED)_FLOW_SYNC_PACKET_TX_PACKETS | The number of inline/timed flow sync packets that this ENI sents. |
+| SAI_ENI_STAT_(INLINE/TIMED)_FLOW_SYNC_PACKET_TX_BYTES | The bytes of inline/timed flow sync packet that this ENI sent. |
+| SAI_ENI_STAT_(INLINE/TIMED)_FLOW_SYNC_PACKET_TX_PACKETS | The number of inline/timed flow sync packets that this ENI sent. |
 
 ##### 4.7.2.4. ENI-level flow sync operations counters
 
@@ -320,12 +320,12 @@ To illustrate how HA works in DASH, we implements HA in our behavior model. Howe
 
 ### 5.1. HA stage
 
-In the DASH pipeline, the HA can be considered as a substage of the conntrack lookup or a stage that follows the conntrack lookup.
+In the DASH pipeline, the HA can be considered as a sub-stage of the Conntrack Lookup stage or a stage that follows the Conntrack Lookup stage.
 
 When a packet arrives, it will:
 
 1. From ENI, pick up the flow table id and HA scope id.
-2. From flow table, pick up the current flow info, such as if flow exists and sync'ed.
+2. From flow table, pick up the current flow info, such as if flow exists and synched.
 3. From HA scope id, pick up the HA set id, HA role and expected flow version if it will create a new flow.
 4. From HA set, pick up the peer DPU information.
 
@@ -367,14 +367,14 @@ To simplify the scenario, let's say a packet arrives at the active DPU in active
 ![](./images/ha-bm-packet-flow.svg)
 
 1. (Green Lines) First, the packet for a new flow arrives to the active DPU. After ENI lookup, it will try to find the flow in the flow table. Due to flow being missing, the packet will go through the rest of the pipeline and eventually trapped into the data plane app.
-2. (Black Lines in Active DPU) The data plane app will get the lookup result from the packet and insert the flow entry in not sync'ed state to flow table using the DASH SAI flow APIs.
-3. (Red Line in Active DPU) The data plane app recirculate the packet back to the pipeline and hit the flow table again, because the flow is not sync'ed and this ENI is active side, HA stage will kick in and change this packet to a flow sync request packet, then forward it to its peer DPU.
+2. (Black Lines in Active DPU) The data plane app will get the lookup result from the packet and insert the flow entry in not synched state to flow table using the DASH SAI flow APIs.
+3. (Red Line in Active DPU) The data plane app recirculate the packet back to the pipeline and hit the flow table again, because the flow is not synched and this ENI is active side, HA stage will kick in and change this packet to a flow sync request packet, then forward it to its peer DPU.
 4. (Yellow Lines) The flow sync packet goes to the standby side, which will also hit the flow miss, skip the HA stage and trapped into data plane app.
-5. (Black Line in Standby DPU) The data plane app takes the flow decision from the flow sync packet, inserts the flow entry in sync'ed state.
-6. (Red Lines in Standby DPU) The data plane app recirculate the packet back to the pipeline and hit the flow table again, because the packet is a flow sync request and flow is in sync'ed state, HA stage will transform this packet into flow sync ack and sending it back to its active side.
-7. (Blue Lines) The packet goes back to the active side, which will hit the flow again. Since it is flow sync ack and flow is in not-sync'ed state, the packet will be trapped into data plane app again.
-8. (Black Line in Active DPU) The data plane app will update the flow sync state into sync'ed state and recirculate the packet again.
-9. (Purple Lines) The final packet will be sent to the pipeline again, hit the flow entry in sync'ed state, applying all the transformation and send out to the network.
+5. (Black Line in Standby DPU) The data plane app takes the flow decision from the flow sync packet, inserts the flow entry in synched state.
+6. (Red Lines in Standby DPU) The data plane app recirculate the packet back to the pipeline and hit the flow table again, because the packet is a flow sync request and flow is in synched state, HA stage will transform this packet into flow sync ack and sending it back to its active side.
+7. (Blue Lines) The packet goes back to the active side, which will hit the flow again. Since it is flow sync ack and flow is in not-synched state, the packet will be trapped into data plane app again.
+8. (Black Line in Active DPU) The data plane app will update the flow sync state into synched state and recirculate the packet again.
+9. (Purple Lines) The final packet will be sent to the pipeline again, hit the flow entry in synched state, applying all the transformation and send out to the network.
 
 ## 6. Workflows
 
