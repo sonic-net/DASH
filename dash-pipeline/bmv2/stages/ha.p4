@@ -57,11 +57,11 @@ control ha_stage(inout headers_t hdr,
     //
     action set_ha_scope_attr(
         @SalVal[type="sai_object_id_t"] bit<16> ha_set_id,
-        @SaiVal[type="sai_dash_ha_role_t"] dash_ha_role_t ha_role,
+        @SaiVal[type="sai_dash_ha_role_t"] dash_ha_role_t dash_ha_role,
         @SaiVal[isreadonly="true"] bit<32> flow_version
     ) {
         meta.ha.ha_set_id = ha_set_id;
-        meta.ha.ha_role = ha_role;
+        meta.ha.ha_role = dash_ha_role;
     }
 
     @SaiTable[api = "dash_ha", order=1, isobject="true"]
@@ -89,8 +89,8 @@ control ha_stage(inout headers_t hdr,
         bit<1> peer_ip_is_v6,
         @SaiVal[type="sai_ip_address_t"] IPv4ORv6Address peer_ip,
         bit<16> dp_channel_dst_port,
-        bit<16> dp_channel_src_port_min,
-        bit<16> dp_channel_src_port_max,
+        bit<16> dp_channel_min_src_port,
+        bit<16> dp_channel_max_src_port,
         bit<32> dp_channel_probe_interval_ms,
         bit<32> dp_channel_probe_fail_threshold
     ) {
@@ -98,8 +98,8 @@ control ha_stage(inout headers_t hdr,
         meta.ha.peer_ip = peer_ip;
         
         meta.ha.dp_channel_dst_port = dp_channel_dst_port;
-        meta.ha.dp_channel_src_port_min = dp_channel_src_port_min;
-        meta.ha.dp_channel_src_port_max = dp_channel_src_port_max;
+        meta.ha.dp_channel_src_port_min = dp_channel_min_src_port;
+        meta.ha.dp_channel_src_port_max = dp_channel_max_src_port;
     }
 
     @SaiTable[api = "dash_ha", order=0, isobject="true"]
