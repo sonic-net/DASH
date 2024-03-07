@@ -111,6 +111,7 @@ struct metadata_t {
     bit<16> tunnel_pointer;
     bool is_fast_path_icmp_flow_redirection_packet;
     bit<1> fast_path_icmp_flow_redirection_disabled;
+    bit<64> flow_table_id;
 
     // Stage transition control
     dash_pipeline_stage_t target_stage;
