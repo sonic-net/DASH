@@ -698,7 +698,7 @@ static sai_status_t dash_sai_clear_{{ table.name }}_stats(
 
 static sai_status_t dash_sai_get_{{ table.name | replace("entry", "entries") }}_attribute(
         _In_ uint32_t object_count,
-        _In_ const sai_flow_entry_t *flow_entry,
+        _In_ const sai_{{ table.name }}_t *{{ table.name }}, 
         _In_ const uint32_t *attr_count,
         _Inout_ sai_attribute_t **attr_list,
         _In_ sai_bulk_op_error_mode_t mode,

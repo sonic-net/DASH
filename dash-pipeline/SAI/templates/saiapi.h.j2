@@ -250,7 +250,7 @@ typedef enum _sai_{{ table.name }}_attr_t
 } sai_{{ table.name }}_attr_t;
 
 {% include 'templates/headers/sai_stats_enum.j2' %}
-{% include 'templates/headers/sai_bulk_get_attr.j2' %}
+{% include 'templates/headers/sai_bulk_get_enum.j2' %}
 {% endfor %}
 {% for table in sai_api.tables %}
 /**

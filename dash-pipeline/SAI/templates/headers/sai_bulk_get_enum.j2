@@ -38,4 +38,19 @@ typedef enum _sai_{{ table.name }}_bulk_get_op_t
 
 } sai_{{ table.name }}_bulk_get_op_t;
 
+typedef struct _sai_{{ table.name }}_filter_data_t
+{
+    sai_{{ table.name }}_bulk_get_filter_t filter;
+    sai_{{ table.name }}_bulk_get_op_t op;
+
+    /** @passparam portsnrlist */
+    sai_attribute_value_t value;
+} sai_{{ table.name }}_filter_data_t;
+
+typedef struct _sai_{{ table.name }}_target_server_data_t
+{
+    sai_ip_address_t server_ip;
+    sai_uint16_t server_port;
+} sai_{{ table.name }}_target_server_data_t;
+
 {% endif %}
