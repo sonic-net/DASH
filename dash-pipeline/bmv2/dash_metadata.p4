@@ -20,14 +20,16 @@ enum bit<16> dash_direction_t {
 };
 
 enum bit<8> dash_packet_source_t {
-    EXTERNAL = 0,
-    DPAPP = 1
+    EXTERNAL = 0,           // Packets from external sources.
+    DPAPP = 1               // Packets from data plane app.
 };
 
 enum bit<8> dash_packet_type_t {
-    REGULAR = 0,
-    FLOW_SYNC_REQ = 1,
-    FLOW_SYNC_ACK = 2
+    REGULAR = 0,            // Regular packets from external sources.
+    FLOW_SYNC_REQ = 1,      // Flow sync request packet.
+    FLOW_SYNC_ACK = 2,      // Flow sync ack packet.
+    DP_PROBE_REQ = 3,       // Data plane probe packet.
+    DP_PROBE_ACK = 4        // Data plane probe ack packet.
 };
 
 // Pipeline stages:
@@ -89,7 +91,8 @@ struct overlay_rewrite_data_t {
     IPv6Address sip_mask;
     IPv6Address dip_mask;
 }
- 
+
+// HA roles
 enum bit<8> dash_ha_role_t {
     DEAD = 0,
     ACTIVE = 1,
@@ -98,6 +101,7 @@ enum bit<8> dash_ha_role_t {
     SWITCHING_TO_ACTIVE = 4
 };
 
+// Flow sync state
 enum bit<8> dash_ha_flow_sync_state_t {
     FLOW_MISS = 0,
     FLOW_CREATED = 1,
@@ -105,23 +109,20 @@ enum bit<8> dash_ha_flow_sync_state_t {
     FLOW_PENDING_DELETE = 3
 };
 
+// HA flow sync operations
 enum bit<8> dash_ha_flow_sync_op_t {
-    FLOW_CREATE = 0,
-    FLOW_UPDATE = 1,
-    FLOW_DELETE = 2
+    FLOW_CREATE = 0, // New flow creation.
+    FLOW_UPDATE = 1, // Flow resimulation or any other reason causing existing flow to be updated.
+    FLOW_DELETE = 2  // Flow deletion.
 };
 
 struct ha_data_t {
-    //
     // HA scope settings
-    //
     bit<16> ha_scope_id;
     bit<16> ha_set_id;
     dash_ha_role_t ha_role;
 
-    //
     // HA set settings
-    //
     bit<1> local_ip_is_v6;
     IPv4ORv6Address local_ip;
     bit<1> peer_ip_is_v6;
@@ -130,9 +131,7 @@ struct ha_data_t {
     bit<16> dp_channel_src_port_min;
     bit<16> dp_channel_src_port_max;
 
-    //
     // HA packet/flow state
-    //
     dash_ha_flow_sync_state_t flow_sync_state;
 }
 
