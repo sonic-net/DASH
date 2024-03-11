@@ -259,6 +259,7 @@ control dash_ingress(
         eni_lookup_stage.apply(hdr, meta);
 
         // Save the original DSCP value
+        meta.eni_data.dscp_mode = dash_tunnel_dscp_mode_t.PRESERVE_MODEL;
         meta.eni_data.dscp = (bit<6>)hdr.u0_ipv4.diffserv;
 
         if (meta.direction == dash_direction_t.OUTBOUND) {
