@@ -337,9 +337,9 @@ To support the flow HA, due to the nature of having different type of packets, s
 ```c
 // Packet source
 enum bit<8> dash_packet_source_t {
-    EXTERNAL = 0,
-    DPAPP = 1,
-    PEER = 2,
+    EXTERNAL = 0,           // Packets from external sources.
+    DPAPP = 1,              // Packets from data plane app.
+    PEER = 2                // Packets from the paired DPU.
 };
 
 // Packet type

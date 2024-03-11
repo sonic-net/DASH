@@ -21,7 +21,8 @@ enum bit<16> dash_direction_t {
 
 enum bit<8> dash_packet_source_t {
     EXTERNAL = 0,           // Packets from external sources.
-    DPAPP = 1               // Packets from data plane app.
+    DPAPP = 1,              // Packets from data plane app.
+    PEER = 2                // Packets from the paired DPU.
 };
 
 enum bit<8> dash_packet_type_t {
