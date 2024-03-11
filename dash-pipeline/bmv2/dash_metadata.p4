@@ -104,10 +104,11 @@ enum bit<8> dash_ha_role_t {
 
 // Flow sync state
 enum bit<8> dash_ha_flow_sync_state_t {
-    FLOW_MISS = 0,
-    FLOW_CREATED = 1,
-    FLOW_SYNCED = 2,
-    FLOW_PENDING_DELETE = 3
+    FLOW_MISS = 0,                  // Flow not created yet
+    FLOW_CREATED = 1,               // Flow is created but not synched or waiting for ack
+    FLOW_SYNCED = 2,                // Flow has been synched to its peer
+    FLOW_PENDING_DELETE = 3,        // Flow is pending deletion, waiting for ack
+    FLOW_PENDING_RESIMULATION = 4   // Flow is marked as pending resimulation
 };
 
 // HA flow sync operations

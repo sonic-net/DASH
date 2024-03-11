@@ -136,7 +136,8 @@ typedef enum _sai_dash_ha_flow_sync_state_t
     SAI_DASH_HA_FLOW_SYNC_STATE_FLOW_MISS,
     SAI_DASH_HA_FLOW_SYNC_STATE_FLOW_CREATED,
     SAI_DASH_HA_FLOW_SYNC_STATE_FLOW_SYNCED,
-    SAI_DASH_HA_FLOW_SYNC_STATE_FLOW_PENDING_DELETE
+    SAI_DASH_HA_FLOW_SYNC_STATE_FLOW_PENDING_DELETE,
+    SAI_DASH_HA_FLOW_SYNC_STATE_FLOW_PENDING_RESIMULATION
 } sai_dash_ha_flow_sync_state_t;
 ```
 
@@ -148,15 +149,18 @@ stateDiagram-v2
     C: FLOW_CREATED
     S: FLOW_SYNCED
     D: FLOW_PENDING_DELETE
+    R: FLOW_PENDING_RESIMULATION
 
     M --> C: Flow created
     M --> S: Flow sync request<br>received on<br>standby node
 
     C --> S: Flow sync ack received
-    S --> C: Flow resimulated
+    S --> R: Flow resimulation requested
+    R --> C: Flow updated
 
     C --> D: Flow deleted
     S --> D: Flow deleted
+    R --> D: Flow deleted
 
     D --> M: Flow sync ack received
 ```
