@@ -484,6 +484,8 @@ class SAIAPITableAttribute(SAIObject):
                         self.skipattr = str(kv['value']['stringValue'])
                     elif kv['key'] == 'match_type':
                         self.match_type = str(kv['value']['stringValue'])
+                    elif kv['key'] == 'validonly':
+                        self.validonly = str(kv['value']['stringValue'])
                     else:
                         raise ValueError("Unknown attr annotation " + kv['key'])
 
