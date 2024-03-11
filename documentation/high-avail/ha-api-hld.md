@@ -344,9 +344,11 @@ enum bit<8> dash_packet_source_t {
 
 // Packet type
 enum bit<8> dash_packet_type_t {
-    REGULAR = 0,
-    FLOW_SYNC_REQ = 1,
-    FLOW_SYNC_ACK = 2
+    REGULAR = 0,            // Regular packets from external sources.
+    FLOW_SYNC_REQ = 1,      // Flow sync request packet.
+    FLOW_SYNC_ACK = 2,      // Flow sync ack packet.
+    DP_PROBE_REQ = 3,       // Data plane probe packet.
+    DP_PROBE_ACK = 4        // Data plane probe ack packet.
 };
 
 // HA flow sync operations
