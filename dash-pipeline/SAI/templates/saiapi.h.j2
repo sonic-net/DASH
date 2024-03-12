@@ -182,7 +182,7 @@ typedef enum _sai_{{ table.name }}_attr_t
      * @validonly {% for action in sai_attr.param_actions %}SAI_{{ table.name | upper }}_ATTR_ACTION == SAI_{{ table.name | upper }}_ACTION_{{ action | upper }}{{ " or " if not loop.last else "" }}{% endfor %}
 
 {% endif %}
-{% if sai_attr.validonly != 'true' %}
+{% if sai_attr.validonly | length > 0 %}
      * @validonly {{ sai_attr.validonly }}
 {% endif %}
 {% endif %}
