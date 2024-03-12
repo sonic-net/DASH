@@ -107,7 +107,7 @@ control dash_ingress(
                          @SaiVal[type="sai_object_id_t"] bit<16> v4_meter_policy_id,
                          @SaiVal[type="sai_object_id_t"] bit<16> v6_meter_policy_id,
                          @SaiVal[type="sai_dash_tunnel_dscp_mode_t"] dash_tunnel_dscp_mode_t dash_tunnel_dscp_mode,
-                         @SaiVal[type="sai_uint8_t", validonly="SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE == SAI_DASH_TUNNEL_DSCP_MODE_PIPE_MODEL"] bit<6> dscp,
+                         @SaiVal[type="sai_uint8_t",validonly="SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE == SAI_DASH_TUNNEL_DSCP_MODE_PIPE_MODEL"] bit<6> dscp,
                          ACL_GROUPS_PARAM(inbound_v4),
                          ACL_GROUPS_PARAM(inbound_v6),
                          ACL_GROUPS_PARAM(outbound_v4),
