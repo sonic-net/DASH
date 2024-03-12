@@ -22,6 +22,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         key = {
             meta.conntrack_data.flow_table.id : exact;
         }
+
         actions = {
             set_flow_table_attr;
         }
@@ -75,8 +76,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         @SaiVal[type="sai_u8_list_t"] bit<16> flow_protobuf,
         IPv4ORv6Address flow_target_server_ip,
         bit<16> flow_target_server_port, 
-        bit<64> flow_entry_filter
-        )
+        bit<64> flow_entry_filter)
     {
         meta.conntrack_data.flow_data.actions = dash_flow_action;
         // TODO: All action data should be set here.
@@ -93,6 +93,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
             meta.src_l4_port : exact @SaiVal[name = "src_port"]; 
             meta.dst_l4_port : exact @SaiVal[name = "dst_port"]; 
         }
+
         actions = {
             set_flow_entry_attr;
         }
