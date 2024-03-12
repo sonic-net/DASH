@@ -70,10 +70,10 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         bit<16> reverse_flow_dst_port,
 
         /* Extra flow metadata */ 
-        @SaiVal[type="sai_u8_list_t"] bit<16> flow_vendor_metadata,
+        @SaiVal[type="sai_u8_list_t"] bit<16> vendor_metadata,
+        @SaiVal[type="sai_u8_list_t"] bit<16> flow_data_pb,
 
         /* Mock attributes for special functions on flow table and flow */ 
-        @SaiVal[type="sai_u8_list_t"] bit<16> flow_protobuf,
         IPv4ORv6Address flow_target_server_ip,
         bit<16> flow_target_server_port, 
         bit<64> flow_entry_filter)
