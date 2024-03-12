@@ -35,7 +35,6 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         bit<32> flow_version,
         bit<1> flow_bidirectional,
         @SaiVal[type="sai_dash_direction_t"] dash_direction_t dash_direction,
-        bit<64> flow_reverse_key,
 
         /* Flow actions */
         @SaiVal[type="sai_dash_flow_action_t"] dash_flow_action_t dash_flow_action,
@@ -51,19 +50,31 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         /* Overlay rewrite metadata */
         EthernetAddress smac,
         IPv4ORv6Address sip,
+        bit<1> sip_is_v6,
         IPv4ORv6Address dip,
+        bit<1> dip_is_v6,
         IPv6Address sip_mask,
         IPv6Address dip_mask,
       
         /* Meter and policy metadata */ 
         bit<16> meter_class,
-        
+
+        /* Reverse flow key */ 
+        bit<8> reverse_flow_protocol,
+        IPv4ORv6Address reverse_flow_dst_ip,
+        bit<1> reverse_flow_dst_ip_is_v6,
+        IPv4ORv6Address reverse_flow_src_ip,
+        bit<1> reverse_flow_src_ip_is_v6,
+        bit<16> reverse_flow_src_port,
+        bit<16> reverse_flow_dst_port,
+
         /* Extra flow metadata */ 
         @SaiVal[type="sai_u8_list_t"] bit<16> flow_vendor_metadata,
 
         /* Mock attributes for special functions on flow table and flow */ 
         @SaiVal[type="sai_u8_list_t"] bit<16> flow_protobuf,
-        bit<64> flow_target_server,
+        IPv4ORv6Address flow_target_server_ip,
+        bit<16> flow_target_server_port, 
         bit<64> flow_entry_filter
         )
     {
