@@ -32,9 +32,35 @@ enum bit<16> dash_pipeline_stage_t {
     ROUTING_ACTION_APPLY = 300
 }
 
+enum bit<16> dash_flow_enabled_key_t {
+    NONE = 0,
+    PROTOCOL = (1 << 1),
+    SRC_IP = (1 << 2),
+    DST_IP = (1 << 3),
+    SRC_PORT = (1 << 4),
+    DST_PORT = (1 << 5)
+}
+
+struct flow_table_data_t {
+    bit<16> id;
+    bit<32> max_flow_count;
+    dash_flow_enabled_key_t flow_enabled_key;
+    bit<32> flow_ttl_in_milliseconds;
+}
+
+enum bit<32> dash_flow_action_t {
+    NONE = 0
+}
+
+struct flow_data_t {
+    dash_flow_action_t actions;
+}
+
 struct conntrack_data_t {
     bool allow_in;
     bool allow_out;
+    flow_table_data_t flow_table;
+    flow_data_t flow_data;
 }
 
 enum bit<16> dash_tunnel_dscp_mode_t {
@@ -92,7 +118,6 @@ struct metadata_t {
     IPv4ORv6Address dst_ip_addr;
     IPv4ORv6Address src_ip_addr;
     IPv4ORv6Address lkup_dst_ip_addr;
-    conntrack_data_t conntrack_data;
     bit<16> src_l4_port;
     bit<16> dst_l4_port;
     bit<16> stage1_dash_acl_group_id;
@@ -111,7 +136,9 @@ struct metadata_t {
     bit<16> tunnel_pointer;
     bool is_fast_path_icmp_flow_redirection_packet;
     bit<1> fast_path_icmp_flow_redirection_disabled;
-    bit<64> flow_table_id;
+
+    // Flow data
+    conntrack_data_t conntrack_data;
 
     // Stage transition control
     dash_pipeline_stage_t target_stage;
