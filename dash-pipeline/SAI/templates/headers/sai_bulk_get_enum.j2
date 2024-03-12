@@ -21,36 +21,37 @@ typedef enum _sai_{{ table.name }}_bulk_get_filter_t
  */
 typedef enum _sai_{{ table.name }}_bulk_get_op_t
 {
-    /**  Indicate the last OP of Bulk Get */
+    /** Indicate the last operation of the bulk get */
     SAI_{{ table.name | upper }}_BULK_GET_OP_LAST_ITEM,
 
-    /** Operation parameter for normal return */
-    SAI_{{ table.name | upper }}_BULK_GET_OP_NORMAL_RETURN,
+    /** Operation to compare the value is equal */
+    SAI_{{ table.name | upper }}_BULK_GET_OP_EQUAL_TO,
 
-    /** Operation parameter for GRPC return (server IP address) */
-    SAI_{{ table.name | upper }}_BULK_GET_OP_GRPC_SERVER_IP,
+    /** Operation to compare the value is greater than */
+    SAI_{{ table.name | upper }}_BULK_GET_OP_GREATER_THAN,
 
-    /**  Operation parameter for GRPC return (server port) */
-    SAI_{{ table.name | upper }}_BULK_GET_OP_GRPC_SERVER_PORT,
+    /** Operation to compare the value is greater than or equal to */
+    SAI_{{ table.name | upper }}_BULK_GET_OP_GREATER_THAN_OR_EQUAL_TO,
 
-    /** Operation parameter for get filter operator */
-    SAI_{{ table.name | upper }}_BULK_GET_OP_FILTER_OP,
+    /** Operation to compare the value is less than */
+    SAI_{{ table.name | upper }}_BULK_GET_OP_LESS_THAN,
+
+    /** Operation to compare the value is less than or equal to */
+    SAI_{{ table.name | upper }}_BULK_GET_OP_LESS_THAN_OR_EQUAL_TO,
 
 } sai_{{ table.name }}_bulk_get_op_t;
-
-typedef struct _sai_{{ table.name }}_filter_data_t
-{
-    sai_{{ table.name }}_bulk_get_filter_t filter;
-    sai_{{ table.name }}_bulk_get_op_t op;
-
-    /** @passparam portsnrlist */
-    sai_attribute_value_t value;
-} sai_{{ table.name }}_filter_data_t;
 
 typedef struct _sai_{{ table.name }}_target_server_data_t
 {
     sai_ip_address_t server_ip;
     sai_uint16_t server_port;
 } sai_{{ table.name }}_target_server_data_t;
+
+typedef struct _sai_flow_entry_filter_data_t
+{
+    sai_{{ table.name }}_bulk_get_filter_t filter;
+    sai_{{ table.name }}_bulk_get_op_t op;
+    sai_uint64_t value;
+} sai_{{ table.name }}_filter_data_t;
 
 {% endif %}

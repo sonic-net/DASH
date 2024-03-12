@@ -22,6 +22,8 @@ control Flow(inout headers_t hdr, inout metadata_t meta) {
         bit<2> flow_direction,
         bit<64> flow_reverse_key,
         @SaiVal[type="sai_u8_list_t"] bit<16> flow_vendor_metadata, 
+        bit<64> flow_target_server,
+        bit<64> flow_entry_filter,
         
         /* encap metadata */
         bit<24> vni,
