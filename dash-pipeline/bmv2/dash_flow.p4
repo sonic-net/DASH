@@ -42,11 +42,11 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         
         /* Encap metadata */
         @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t dash_encapsulation,
+        bit<24> vni,
         EthernetAddress underlay_smac,
         EthernetAddress underlay_dmac,
         IPv4ORv6Address underlay_sip,
         IPv4ORv6Address underlay_dip,
-        bit<24> vni,
        
         /* Overlay rewrite metadata */
         EthernetAddress smac,
