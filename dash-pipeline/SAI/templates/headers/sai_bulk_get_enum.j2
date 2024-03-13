@@ -1,21 +1,21 @@
-{% if table.enable_bulk_get_api == 'true' %}
+{% if table.enable_bulk_get_api %}
 /**
  * @brief Bulk Get Op filter keywords for {{ table.name }} in get_{{ table.name | replace("entry", "entries")}}_attribute call
  */
-typedef enum _sai_{{ table.name }}_bulk_get_filter_key_t
+typedef enum _sai_bulk_get_{{ table.name }}_filter_key_t
 {
 {% for key in table['keys'] %}
     /** Bulk get filter key word for {{ key.type }} {{ key.name | lower }} */
-    SAI_{{ table.name | upper }}_BULK_GET_FILTER_KEY_{{ key.name | upper }},
+    SAI_BULK_GET_{{ table.name | upper }}_FILTER_KEY_{{ key.name | upper }},
 
 {% endfor %}
 {% for sai_attr in table.sai_attributes %}
 {% if sai_attr.is_filter_key %}
     /** Bulk get filter key word for SAI_{{ table.name | upper }}_ATTR_{{ sai_attr.name | upper }} */
-    SAI_{{ table.name | upper }}_BULK_GET_FILTER_KEY_{{  sai_attr.name  | upper }},
+    SAI_BULK_GET_{{ table.name | upper }}_FILTER_KEY_{{  sai_attr.name  | upper }},
 
 {% endif %}
 {% endfor %}
-} sai_{{ table.name }}_bulk_get_filter_key_t;
+} sai_bulk_get_{{ table.name }}_filter_key_t;
 
 {% endif %}

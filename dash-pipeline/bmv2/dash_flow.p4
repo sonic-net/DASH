@@ -71,18 +71,13 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
 
         /* Extra flow metadata */ 
         @SaiVal[type="sai_u8_list_t"] bit<16> vendor_metadata,
-        @SaiVal[type="sai_u8_list_t"] bit<16> flow_data_pb,
-
-        /* Mock attributes for special functions on flow table and flow */ 
-        // TODO: move these to table attribute.
-        IPv4ORv6Address flow_target_server_ip,
-        bit<16> flow_target_server_port)
+        @SaiVal[type="sai_u8_list_t"] bit<16> flow_data_pb)
     {
         meta.conntrack_data.flow_data.actions = dash_flow_action;
         // TODO: All action data should be set here.
     }
 
-    @SaiTable[name = "flow", api = "dash_flow", api_order = 1, enable_bulk_get_api = "true"]
+    @SaiTable[name = "flow", api = "dash_flow", api_order = 1, enable_bulk_get_api = "true", enable_bulk_get_server = "true"]
     table flow_entry {
         key = {
             meta.conntrack_data.flow_table.id: exact @SaiVal[name = "flow_table_id", type="sai_object_id_t"];

@@ -225,39 +225,57 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% endif %}
 {% endif %}
 {% endif %}
-{% if table.enable_bulk_get_api == 'true' %}
+{% if table.enable_bulk_get_api %}
     /**
      * @brief Bulk get filter operation
      *
      * @type sai_bulk_get_filter_op_t
-     * @flags CREATE_AND_SET
+     * @flags READ_ONLY
      */
     SAI_{{ table.name | upper }}_ATTR_BULK_GET_FILTER_OP,
 
     /**
      * @brief Bulk get filter type
      *
-     * @type sai_{{ table.name | lower }}_bulk_get_filter_t
-     * @flags CREATE_AND_SET
+     * @type sai_bulk_get_{{ table.name | lower }}_filter_t
+     * @flags READ_ONLY
      */
-    SAI_{{ table.name | upper }}_ATTR_{{ table.name | upper }}_BULK_GET_FILTER_KEY,
+    SAI_{{ table.name | upper }}_ATTR_BULK_GET_{{ table.name | upper }}_FILTER_KEY,
 
     /**
      * @brief Bulk get filter value as integer
      *
      * @type sai_int64_t
-     * @flags CREATE_AND_SET
+     * @flags READ_ONLY
      */
-    SAI_{{ table.name | upper }}_ATTR_{{ table.name | upper }}_BULK_GET_FILTER_VALUE_INT,
+    SAI_{{ table.name | upper }}_ATTR_BULK_GET_FILTER_VALUE_INT,
 
     /**
      * @brief Bulk get filter value as IP
      *
      * @type sai_ip_address_t
-     * @flags CREATE_AND_SET
+     * @flags READ_ONLY
      */
-    SAI_{{ table.name | upper }}_ATTR_{{ table.name | upper }}_BULK_GET_FILTER_VALUE_IP,
+    SAI_{{ table.name | upper }}_ATTR_BULK_GET_FILTER_VALUE_IP,
 
+{% if table.enable_bulk_get_server %}
+    /**
+     * @brief Bulk get target server
+     *
+     * @type sai_ip_address_t
+     * @flags READ_ONLY
+     */
+    SAI_{{ table.name | upper }}_ATTR_BULK_GET_TARGET_SERVER_IP,
+
+    /**
+     * @brief Bulk get target server
+     *
+     * @type sai_uint16_t
+     * @flags READ_ONLY
+     */
+    SAI_{{ table.name | upper }}_ATTR_BULK_GET_TARGET_SERVER_PORT,
+
+{% endif %}
 {% endif %}
 {% if table.ipaddr_family_attr == 'true' %}
     /**
