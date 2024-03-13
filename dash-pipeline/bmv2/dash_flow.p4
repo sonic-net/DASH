@@ -17,7 +17,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         meta.conntrack_data.flow_table.flow_ttl_in_milliseconds = flow_ttl_in_milliseconds;
     }
 
-    @SaiTable[name = "flow_table", api = "dash_flow", api_order = 0, isobject="true"]
+    @SaiTable[name = "flow_table", api = "dash_flow", order = 0, isobject="true"]
     table flow_table {
         key = {
             meta.conntrack_data.flow_table.id : exact;
@@ -77,7 +77,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         // TODO: All action data should be set here.
     }
 
-    @SaiTable[name = "flow", api = "dash_flow", api_order = 1, enable_bulk_get_api = "true", enable_bulk_get_server = "true"]
+    @SaiTable[name = "flow", api = "dash_flow", order = 1, enable_bulk_get_api = "true", enable_bulk_get_server = "true"]
     table flow_entry {
         key = {
             meta.conntrack_data.flow_table.id: exact @SaiVal[name = "flow_table_id", type="sai_object_id_t"];
