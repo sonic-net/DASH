@@ -74,9 +74,9 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         @SaiVal[type="sai_u8_list_t"] bit<16> flow_data_pb,
 
         /* Mock attributes for special functions on flow table and flow */ 
+        // TODO: move these to table attribute.
         IPv4ORv6Address flow_target_server_ip,
-        bit<16> flow_target_server_port, 
-        bit<64> flow_entry_filter_key)
+        bit<16> flow_target_server_port)
     {
         meta.conntrack_data.flow_data.actions = dash_flow_action;
         // TODO: All action data should be set here.
