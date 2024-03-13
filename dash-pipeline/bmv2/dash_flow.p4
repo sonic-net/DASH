@@ -33,8 +33,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
     //
     action set_flow_entry_attr(
         /* Flow metadata */
-        bit<32> flow_version,
-        bit<1> is_bidirectional_flow,
+        @SaiVal[is_filter_key="true"] bit<32> flow_version,
         @SaiVal[type="sai_dash_direction_t"] dash_direction_t dash_direction,
 
         /* Flow actions */
@@ -60,7 +59,8 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         /* Meter and policy metadata */ 
         bit<16> meter_class,
 
-        /* Reverse flow key */ 
+        /* Reverse flow info */ 
+        bit<1> is_bidirectional_flow,
         bit<8> reverse_flow_protocol,
         IPv4ORv6Address reverse_flow_dst_ip,
         bit<1> reverse_flow_dst_ip_is_v6,
@@ -76,7 +76,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         /* Mock attributes for special functions on flow table and flow */ 
         IPv4ORv6Address flow_target_server_ip,
         bit<16> flow_target_server_port, 
-        bit<64> flow_entry_filter)
+        bit<64> flow_entry_filter_key)
     {
         meta.conntrack_data.flow_data.actions = dash_flow_action;
         // TODO: All action data should be set here.

@@ -446,6 +446,7 @@ class SAIAPITableAttribute(SAIObject):
         self.object_name: Optional[str] = None
         self.skipattr: Optional[str] = None
         self.match_type: str = ""
+        self.is_filter_key: bool = False
 
     def _parse_sai_table_attribute_annotation(self, p4rt_anno_list: Dict[str, Any]) -> None:
         '''
@@ -484,6 +485,8 @@ class SAIAPITableAttribute(SAIObject):
                         self.skipattr = str(kv['value']['stringValue'])
                     elif kv['key'] == 'match_type':
                         self.match_type = str(kv['value']['stringValue'])
+                    elif kv['key'] == 'is_filter_key':
+                        self.is_filter_key = str(kv['value']['stringValue']) == "true"
                     else:
                         raise ValueError("Unknown attr annotation " + kv['key'])
 
