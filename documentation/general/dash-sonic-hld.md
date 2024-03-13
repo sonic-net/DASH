@@ -1580,7 +1580,7 @@ For the example configuration above, the following is a brief explanation of loo
 ## 4.1 Motivation
 
 1. Provide a Proof of Concept (POC) for development and collaboration. Utilizing the typical SONiC workflow, we can leverage this virtual switch image to construct a virtual testbed, eliminating the need for a complete hardware device. This virtual DPU image enables the creation of a mixed hardware-software testbed or a software-only testbed, applicable to both the control plane and the data plane.
-2. Enable Continuous Integration(CI) via Azure Pipelines (AzP) for SONiC repositories, like sonic-buildimage, sonic-swss and so on.
+2. Enable Continuous Integration(CI) via Azure Pipelines (Azp) for SONiC repositories, like sonic-buildimage, sonic-swss and so on.
 
 ## 4.2 Architecture
 

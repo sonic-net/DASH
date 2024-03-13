@@ -720,3 +720,17 @@ Gan
 Ze
 AppDBMemoryEstimation
 Ivantsiv
+SAIRedis
+Dataflow
+POC
+Azp
+cpu
+dpdk
+eth
+VPP
+saidash
+saivs
+DTEL
+NPU
+SmartSwitch
+midplane
