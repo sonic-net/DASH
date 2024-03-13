@@ -1,31 +1,78 @@
 # SONiC-DASH HLD
 ## High Level Design Document
-### Rev 1.7
+### Rev 1.8
 
 # Table of Contents
 
-  * [Revision](#revision)
+- [About this Manual](#about-this-manual)
+- [Definitions/Abbreviation](#definitionsabbreviation)
+          - [Table 1: Abbreviations](#table-1-abbreviations)
+- [1 Requirements Overview](#1-requirements-overview)
+  - [1.1 Functional requirements](#11-functional-requirements)
+  - [1.2 CLI requirements](#12-cli-requirements)
+  - [1.3 Warm Restart requirements](#13-warm-restart-requirements)
+  - [1.4 Scaling requirements](#14-scaling-requirements)
+  - [1.5 Metering requirements](#15-metering-requirements)
+  - [1.6 Design Considerations](#16-design-considerations)
+  - [1.7 ACL requirements](#17-acl-requirements)
+- [2 Packet Flows](#2-packet-flows)
+  - [2.1 Outbound packet processing pipeline](#21-outbound-packet-processing-pipeline)
+  - [2.2 Inbound packet processing pipeline](#22-inbound-packet-processing-pipeline)
+  - [2.3 Service Tunnel (ST) and Private Link (PL) packet processing pipelines](#23-service-tunnel-st-and-private-link-pl-packet-processing-pipelines)
+  - [2.4 Metering](#24-metering)
+    - [2.4.1 Meter Policy](#241-meter-policy)
+    - [2.4.2 Outbound Traffic metering behavior](#242-outbound-traffic-metering-behavior)
+  - [2.5 FastPath](#25-fastpath)
+- [3 Modules Design](#3-modules-design)
+  - [3.1 Config DB](#31-config-db)
+    - [3.1.1 DEVICE Metadata Table](#311-device-metadata-table)
+  - [3.2 DASH APP DB](#32-dash-app-db)
+    - [3.2.1 VNET](#321-vnet)
+    - [3.2.2 QOS](#322-qos)
+    - [3.2.3 ENI](#323-eni)
+    - [3.2.4 TAG](#324-tag)
+    - [3.2.5 ACL](#325-acl)
+    - [3.2.6 ROUTING TYPE](#326-routing-type)
+    - [3.2.7 ROUTING APPLIANCE](#327-routing-appliance)
+    - [3.2.8 APPLIANCE](#328-appliance)
+    - [3.2.9 ROUTE LPM TABLE - OUTBOUND](#329-route-lpm-table---outbound)
+    - [3.2.10 ROUTE RULE TABLE - INBOUND](#3210-route-rule-table---inbound)
+    - [3.2.11 VNET MAPPING TABLE](#3211-vnet-mapping-table)
+    - [3.2.12 METER](#3212-meter)
+    - [3.2.13 Underlay SRC IP (PA) Validation](#3213-underlay-src-ip-pa-validation)
+    - [3.2.14 DASH orchagent (Overlay)](#3214-dash-orchagent-overlay)
+    - [3.2.15 Protobuf encoding](#3215-protobuf-encoding)
+  - [3.3 Module Interaction](#33-module-interaction)
+    - [3.3.1 DASH Schema Relationships](#331-dash-schema-relationships)
+      - [Canonical Test Data and schema transformations](#canonical-test-data-and-schema-transformations)
+    - [Figure - Schema Relationships](#figure---schema-relationships)
+    - [3.3.2 SONiC host containers](#332-sonic-host-containers)
+    - [3.3.3 DASHOrch (Overlay)](#333-dashorch-overlay)
+    - [3.3.4 SWSS Lite (Underlay)](#334-swss-lite-underlay)
+    - [3.3.5 Underlay Routing](#335-underlay-routing)
+    - [3.3.6 Encap behavior](#336-encap-behavior)
+    - [3.3.7 Memory footprints](#337-memory-footprints)
+      - [3.3.7.1 SONiC  memory usage](#3371-sonic--memory-usage)
+      - [3.3.7.2 SONiC docker containers memory usage](#3372-sonic-docker-containers-memory-usage)
+  - [3.4 CLI](#34-cli)
+  - [3.5 Test Plan](#35-test-plan)
+  - [3.6 Example configuration](#36-example-configuration)
+    - [3.6.1 VNET - VNET](#361-vnet---vnet)
+    - [3.6.2 Service Tunnel](#362-service-tunnel)
+    - [3.6.3 Private Link](#363-private-link)
+- [4 SONiC DASH virtual switch](#4-sonic-dash-virtual-switch)
+  - [4.1 Motivation](#41-motivation)
+  - [4.2 Architecture](#42-architecture)
+  - [4.3 Modules](#43-modules)
+    - [4.3.1 BMv2 (dataplane engine)](#431-bmv2-dataplane-engine)
+    - [4.3.2 Dataplane APP](#432-dataplane-app)
+    - [4.3.3 SAIRedis](#433-sairedis)
+    - [4.3.4 SWSS](#434-swss)
+    - [4.3.5 Underlay Service](#435-underlay-service)
+  - [4.4 Dataflow](#44-dataflow)
+    - [4.4.1 Data plane](#441-data-plane)
+    - [4.4.2 Control plane](#442-control-plane)
 
-  * [About this Manual](#about-this-manual)
-
-  * [Definitions/Abbreviation](#definitionsabbreviation)
- 
-  * [1 Requirements Overview](#1-requirements-overview)
-    * [1.1 Functional requirements](#11-functional-requirements)
-    * [1.2 CLI requirements](#12-cli-requirements)
-    * [1.3 Warm Restart requirements ](#13-warm-restart-requirements)
-    * [1.4 Scaling requirements ](#14-scaling-requirements)
-    * [1.5 Metering requirements ](#15-metering-requirements)
-    * [1.6 Design considerations ](#16-design-considerations)
-    * [1.7 ACL requirements ](#17-acl-requirements)
-  * [2 Packet Flows](#2-packet-flows)
-  * [3 Modules Design](#3-modules-design)
-    * [3.1 Config DB](#31-config-db)
-    * [3.2 Dash DB](#32-dash-app-db)
-    * [3.3 Module Interaction](#33-module-interaction)
-    * [3.4 CLI](#34-cli)
-    * [3.5 Test Plan](#35-test-plan)
-    * [3.6 Example Configuration](#36-example-configuration)
 
 ###### Revision
 
@@ -43,11 +90,12 @@
 |  1.0  | 10/10/2022 |    Prince Sunny     | ST and PL scenarios                       |
 |  1.1  | 01/09/2023 |    Prince Sunny     | Underlay Routing and ST/PL clarifications |
 |  1.2  | 02/12/2023 |  Vijay Srinivasan   | Metering schema and description           |
-|  1.3  | 04/12/2023 |     Ze Gan          | AppDB protobuf design                     |
+|  1.3  | 04/12/2023 |       Ze Gan        | AppDB protobuf design                     |
 |  1.4  | 05/03/2023 |    Prince Sunny     | ACL Tagging, ACL Requirements             |
 |  1.5  | 05/22/2023 | Oleksandr Ivantsiv  | Update configuration examples             |
 |  1.6  | 06/01/2023 |    Prince Sunny     | Added FastPath                            |
 |  1.7  | 02/20/2024 |    Prince Sunny     | Introduce Route Group Table               |
+|  1.8  | 03/13/2024 |       Ze Gan        | SONiC DASH Virtual Switch                 |
 
 # About this Manual
 This document provides more detailed design of DASH APIs, DASH orchestration agent, Config and APP DB Schemas and other SONiC buildimage changes required to bring up SONiC image on an appliance card. General DASH HLD can be found at [dash_hld](./dash-high-level-design.md).
@@ -1527,3 +1575,61 @@ For the example configuration above, the following is a brief explanation of loo
 		h. Third Action is Appliance Encap for id 22
 		i. Packet shall be encapsulated with Outer DIP as 100.8.1.2 and SIP as VIP of this originating appliance card with VNI of 101. 
 		j. Inbound flow shall be similar to PL and outer encap shall be of the SLB MUX and not of the NSG appliance.
+
+# 4 SONiC DASH virtual switch
+## 4.1 Motivation
+
+1. Provide a Proof of Concept (POC) for development and collaboration. Utilizing the typical SONiC workflow, we can leverage this virtual switch image to construct a virtual testbed, eliminating the need for a complete hardware device. This virtual DPU image enables the creation of a mixed hardware-software testbed or a software-only testbed, applicable to both the control plane and the data plane.
+2. Enable Continuous Integration(CI) via Azure Pipelines (AzP) for SONiC repositories, like sonic-buildimage, sonic-swss and so on.
+
+## 4.2 Architecture
+
+![BMv2 virtual SONiC](images/bmv2-virtual-sonic.svg)
+
+## 4.3 Modules
+
+### 4.3.1 BMv2 (dataplane engine)
+
+This component is the original P4 BMv2 container image, which serves as the implementation of the dataplane.
+It attaches three types of interfaces: Ethernet, eth, and cpu.
+- Ethernet is used as the system port. Protocol services like BGP and LLDP perform send/receive operations on these interfaces.
+- eth is used as the line port. These are native interfaces in KVM for communication between the inside and outside. The eth port and Ethernet port is one-to-one mapping.
+- cpu is used for the dpdk port. The dataplane APP directly manipulates the traffic on these ports.
+
+### 4.3.2 Dataplane APP
+
+In the physical DPU, this component is provided by vendors' DPDK application. However, in the virtual switch, our implementation is based on the VPP framework with the CPU interface to simulate it. This dataplane APP loads the generated shared library, saidash.so, which communicates with BMv2 via GRPC. Additionally, this component connects with sairedis through a shim SAI proxy.
+
+### 4.3.3 SAIRedis
+
+In the original virtual SONiC, SAIRedis will load the saivs.so. However, in the SONiC DASH virtual switch, it will load the sai proxy mentioned above.
+
+### 4.3.4 SWSS
+
+The SWSS on the virtual switch is almost the same as the one used in the physical switch (DPU). We don't need to make any special changes to it. However, due to some tedious historic issues, the SWSS on the virtual switch will make some extra SAI calls (like DTEL). To adapt to these calls, we will generate a corresponding mock SAI implementation in saidash.so.
+
+### 4.3.5 Underlay Service
+
+We plan to keep the underlay services, such as BGP, LLDP, and others. This is because we not only want to simulate a DPU but also provide an opportunity to use a virtual SONiC image to simulate a smart switch with a single DPU for simplified scenarios.
+
+## 4.4 Dataflow
+### 4.4.1 Data plane
+
+All data plane traffic will enter the BMv2 simple switch and be forwarded to the target port based on the P4 logic imported on BMv2.
+
+```text
+E.G.
+
+LLDP packet:
+  eth1<->Ethernet0<->LLDP process
+
+VNet packet:
+  eth1<->dash pipeline(BMv2)<->eth2
+
+TCP SYN packet:
+  eth1<->cpu0<->dataplane APP<->cpu0<->eth2
+```
+
+### 4.4.2 Control plane
+
+In the physical SmartSwitch, configuration is forwarded via GNMI in the NPU. So, in the virtual SONiC environment, the SWSS module is capable of receiving configuration from an external GNMI service through the management port, eth-midplane. However, in the single device mode, the GNMI service can also be run within the KVM and directly forward the configuration to the local SWSS module.
