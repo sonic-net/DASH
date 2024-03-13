@@ -130,7 +130,6 @@ class TestSaiVnetInbound:
         pprint(result)
 
     @pytest.mark.ptf
-    @pytest.mark.xfail(reason="https://github.com/sonic-net/DASH/issues/233")
     def test_vnet_inbound_traffic_check(self, dpu, dataplane):
         """Verify traffic forwarding in PTF style"""
 

@@ -41,7 +41,8 @@ class CreateDeleteEniTest(VnetAPI):
         self.eni_mac = '00:11:22:33:44:55'  # ENI MAC address
         self.vm_underlay_dip = sai_ipaddress('192.168.1.5')  # ENI VM underlay DIP
 
-        self.sip = '10.0.1.2'  # PA validation entry SIP address
+        self.sip = '10.0.1.0'  # PA validation entry SIP address
+        self.sip_mask = '255.255.255.0'
 
     def runTest(self):
         # Not all tests are interdependent,
@@ -53,10 +54,8 @@ class CreateDeleteEniTest(VnetAPI):
         self.createDirectionLookupTest()
         self.createEniTest()
         self.createEniEtherAddressMapTest()
-        if not test_param_get('target') == 'bmv2':
-            # Issue #233
-            self.createInboundRoutingEntryTest()
-            self.createPaValidationTest()
+        self.createInboundRoutingEntryTest()
+        self.createPaValidationTest()
         self.createOutboundRoutingEntryTest()
         self.createCa2PaEntryTest()
 
@@ -172,7 +171,7 @@ class CreateDeleteEniTest(VnetAPI):
 
         self.inbound_routing_entry = self.inbound_routing_decap_validate_create(
             eni_id=self.eni, vni=self.vm_vni,
-            sip=self.sip, sip_mask="255.255.255.0",
+            sip=self.sip, sip_mask=self.sip_mask,
             src_vnet_id=self.outbound_vnet
         )
 
@@ -786,20 +785,20 @@ class CreateDeleteEniTest(VnetAPI):
                                                               action=True,
                                                               src_vnet_id=True)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
-        self.assertEqual(attr['action'], SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE)
+        self.assertEqual(attr['action'], SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE)
         self.assertEqual(attr['src_vnet_id'], self.outbound_vnet)
 
         try:
             # set and verify new action
             sai_thrift_set_inbound_routing_entry_attribute(self.client,
                                                            inbound_routing_entry=self.inbound_routing_entry,
-                                                           action=SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP)
+                                                           action=SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP)
             self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
 
             attr = sai_thrift_get_inbound_routing_entry_attribute(self.client,
                                                                   inbound_routing_entry=self.inbound_routing_entry,
                                                                   action=True)
-            self.assertEqual(attr['action'], SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP)
+            self.assertEqual(attr['action'], SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP)
 
             # set and verify new src_vnet_id value
             test_vnet = self.vnet_create(vni=500)
@@ -818,7 +817,7 @@ class CreateDeleteEniTest(VnetAPI):
             sai_thrift_set_inbound_routing_entry_attribute(
                 self.client,
                 inbound_routing_entry=self.inbound_routing_entry,
-                action=SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE)
+                action=SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE)
             sai_thrift_set_inbound_routing_entry_attribute(self.client,
                                                            inbound_routing_entry=self.inbound_routing_entry,
                                                            src_vnet_id=self.outbound_vnet)
@@ -827,7 +826,7 @@ class CreateDeleteEniTest(VnetAPI):
                                                                   inbound_routing_entry=self.inbound_routing_entry,
                                                                   action=True,
                                                                   src_vnet_id=True)
-            self.assertEqual(attr['action'], SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE)
+            self.assertEqual(attr['action'], SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE)
             self.assertEqual(attr['src_vnet_id'], self.outbound_vnet)
 
     def outboundRoutingEntryAttributesTest(self):
@@ -977,7 +976,6 @@ class CreateDeleteEniTest(VnetAPI):
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
 
 
-@skipIf(test_param_get('target') == 'bmv2', "Blocked by Issue #233. Inbound Routing is not supported in BMv2.")
 class EniScaleTest(VnetAPI):
     """
     Verifies ENI scaling:
@@ -1083,7 +1081,6 @@ class EniScaleTest(VnetAPI):
         print("PASS")
 
 
-@skipIf(test_param_get('target') == 'bmv2', "Blocked by Issue #233. Inbound Routing is not supported in BMv2.")
 class CreateTwoSameEnisNegativeTest(VnetAPI):
     """
     Verifies failure in case of creation the same ENIs in one VNET

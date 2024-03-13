@@ -395,6 +395,11 @@ static sai_status_t dash_sai_create_{{ table.name }}(
         {% elif key.match_type == 'lpm' %}
         auto mf_lpm = mf->mutable_lpm();
         {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_lpm, {{key.bitwidth}});
+        {% elif key.match_type == 'ternary' %}
+        auto mf_ternary = mf->mutable_ternary();
+        {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_ternary, {{key.bitwidth}});
+        {{key.field}}SetMask(tableEntry->{{ key.name | lower }}_mask, mf_ternary, {{key.bitwidth}});
+        matchActionEntry->set_priority(tableEntry->priority);
         {% elif key.match_type == 'list' %}
         // BMv2 doesn't support "list" match type, and we are using "optional" match in v1model as our implementation.
         // Hence, here we only take the first item from the list and program it as optional match.
@@ -568,6 +573,11 @@ static sai_status_t dash_sai_remove_{{ table.name }}(
         {% elif key.match_type == 'lpm' %}
         auto mf_lpm = mf->mutable_lpm();
         {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_lpm, {{key.bitwidth}});
+        {% elif key.match_type == 'ternary' %}
+        auto mf_ternary = mf->mutable_ternary();
+        {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_ternary, {{key.bitwidth}});
+        {{key.field}}SetMask(tableEntry->{{ key.name | lower }}_mask, mf_ternary, {{key.bitwidth}});
+        matchActionEntry->set_priority(tableEntry->priority);
         {% elif key.match_type == 'list' %}
         // BMv2 doesn't support "list" match type, and we are using "optional" match in v1model as our implementation.
         // Hence, here we only take the first item from the list and program it as optional match.
