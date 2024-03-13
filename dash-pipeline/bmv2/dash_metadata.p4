@@ -38,9 +38,8 @@ struct conntrack_data_t {
 }
 
 enum bit<16> dash_tunnel_dscp_mode_t {
-    INVALID = 0,
-    PRESERVE_MODEL = 1,
-    PIPE_MODEL = 2
+    PRESERVE_MODEL = 0,
+    PIPE_MODEL = 1
 }
 
 struct eni_data_t {
