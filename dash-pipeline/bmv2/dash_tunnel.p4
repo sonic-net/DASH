@@ -240,7 +240,7 @@ PUSH_NVGRE_TUNNEL_DEF(u1, u0)
         } \
     } else if (dash_encapsulation == dash_encapsulation_t.NVGRE) { \
         if (meta.tunnel_pointer == 0) { \
-            push_vxlan_tunnel_u0(hdr, \
+            push_nvgre_tunnel_u0(hdr, \
                            overlay_dmac, \
                            underlay_dmac, \
                            underlay_smac, \
@@ -248,7 +248,7 @@ PUSH_NVGRE_TUNNEL_DEF(u1, u0)
                            underlay_sip, \
                            tunnel_key); \
         } else if (meta.tunnel_pointer == 1) { \
-            push_vxlan_tunnel_u1(hdr, \
+            push_nvgre_tunnel_u1(hdr, \
                            overlay_dmac, \
                            underlay_dmac, \
                            underlay_smac, \
