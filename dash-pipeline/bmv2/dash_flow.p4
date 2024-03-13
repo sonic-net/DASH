@@ -34,7 +34,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
     action set_flow_entry_attr(
         /* Flow metadata */
         bit<32> flow_version,
-        bit<1> flow_bidirectional,
+        bit<1> is_bidirectional_flow,
         @SaiVal[type="sai_dash_direction_t"] dash_direction_t dash_direction,
 
         /* Flow actions */
@@ -43,19 +43,19 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         /* Encap metadata */
         @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t dash_encapsulation,
         bit<24> vni,
-        EthernetAddress underlay_smac,
-        EthernetAddress underlay_dmac,
-        IPv4ORv6Address underlay_sip,
-        IPv4ORv6Address underlay_dip,
+        EthernetAddress underlay_src_mac,
+        EthernetAddress underlay_dst_mac,
+        IPv4ORv6Address underlay_src_ip,
+        IPv4ORv6Address underlay_dst_ip,
        
         /* Overlay rewrite metadata */
-        EthernetAddress smac,
-        IPv4ORv6Address sip,
-        bit<1> sip_is_v6,
-        IPv4ORv6Address dip,
-        bit<1> dip_is_v6,
-        IPv6Address sip_mask,
-        IPv6Address dip_mask,
+        EthernetAddress src_mac,
+        IPv4ORv6Address src_ip,
+        bit<1> src_ip_is_v6,
+        IPv4ORv6Address dst_ip,
+        bit<1> dst_ip_is_v6,
+        IPv6Address src_ip_mask,
+        IPv6Address dst_ip_mask,
       
         /* Meter and policy metadata */ 
         bit<16> meter_class,
@@ -85,8 +85,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
     @SaiTable[name = "flow", api = "dash_flow", api_order = 1, enable_bulk_get_api = "true"]
     table flow_entry {
         key = {
-            meta.conntrack_data.flow_table.id: exact @SaiVal[type="sai_object_id_t"];
-            meta.direction : exact @SaiVal[type="sai_dash_direction_t"];
+            meta.conntrack_data.flow_table.id: exact @SaiVal[name = "flow_table_id", type="sai_object_id_t"];
             meta.ip_protocol : exact @SaiVal[name = "protocol"]; 
             meta.src_ip_addr : exact @SaiVal[name = "src_ip"]; 
             meta.dst_ip_addr : exact @SaiVal[name = "dst_ip"]; 
