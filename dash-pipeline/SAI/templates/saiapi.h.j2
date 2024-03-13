@@ -243,12 +243,20 @@ typedef enum _sai_{{ table.name }}_attr_t
     SAI_{{ table.name | upper }}_ATTR_{{ table.name | upper }}_BULK_GET_FILTER_KEY,
 
     /**
-     * @brief Bulk get filter value
+     * @brief Bulk get filter value as integer
      *
-     * @type sai_{{ table.name | lower }}_bulk_get_filter_t
+     * @type sai_int64_t
      * @flags CREATE_AND_SET
      */
-    SAI_{{ table.name | upper }}_ATTR_{{ table.name | upper }}_BULK_GET_FILTER_VALUE,
+    SAI_{{ table.name | upper }}_ATTR_{{ table.name | upper }}_BULK_GET_FILTER_VALUE_INT,
+
+    /**
+     * @brief Bulk get filter value as IP
+     *
+     * @type sai_ip_address_t
+     * @flags CREATE_AND_SET
+     */
+    SAI_{{ table.name | upper }}_ATTR_{{ table.name | upper }}_BULK_GET_FILTER_VALUE_IP,
 
 {% endif %}
 {% if table.ipaddr_family_attr == 'true' %}
