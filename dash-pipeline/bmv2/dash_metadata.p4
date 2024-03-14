@@ -52,6 +52,14 @@ enum bit<32> dash_flow_action_t {
     NONE = 0
 }
 
+struct flow_key_t {
+    bit<8> ip_protocol;
+    IPv4ORv6Address src_ip_addr;
+    IPv4ORv6Address dst_ip_addr;
+    bit<16> src_l4_port;
+    bit<16> dst_l4_port;
+}
+
 struct flow_data_t {
     dash_flow_action_t actions;
 }
@@ -61,6 +69,7 @@ struct conntrack_data_t {
     bool allow_out;
     flow_table_data_t flow_table;
     flow_data_t flow_data;
+    flow_key_t flow_key;
 }
 
 enum bit<16> dash_tunnel_dscp_mode_t {
