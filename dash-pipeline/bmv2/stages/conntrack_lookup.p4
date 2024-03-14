@@ -1,7 +1,7 @@
-#ifndef _DASH_FLOW_P4_
-#define _DASH_FLOW_P4_
+#ifndef _DASH_STAGE_CONNTRACK_LOOKUP_P4
+#define _DASH_STAGE_CONNTRACK_LOOKUP_P4
 
-#include "dash_metadata.p4"
+#include "../dash_metadata.p4"
 
 control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
     //

@@ -8,7 +8,7 @@
 #include "dash_outbound.p4"
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"
-#include "dash_flow.p4"
+#include "stages/conntrack_lookup.p4"
 #include "stages/direction_lookup.p4"
 #include "stages/eni_lookup.p4"
 #include "stages/routing_action_apply.p4"
