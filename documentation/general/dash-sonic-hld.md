@@ -60,7 +60,7 @@
     - [3.6.1 VNET - VNET](#361-vnet---vnet)
     - [3.6.2 Service Tunnel](#362-service-tunnel)
     - [3.6.3 Private Link](#363-private-link)
-- [4 SONiC DASH virtual switch](#4-sonic-dash-virtual-switch)
+- [4 DASH SONiC KVM](#4-dash-sonic-kvm)
   - [4.1 Motivation](#41-motivation)
   - [4.2 Architecture](#42-architecture)
   - [4.3 Modules](#43-modules)
@@ -68,7 +68,7 @@
     - [4.3.2 Dataplane APP](#432-dataplane-app)
     - [4.3.3 SAIRedis](#433-sairedis)
     - [4.3.4 SWSS](#434-swss)
-    - [4.3.5 Underlay Service](#435-underlay-service)
+    - [4.3.5 Other SONiC Services](#435-other-sonic-services)
   - [4.4 Dataflow](#44-dataflow)
     - [4.4.1 Data plane](#441-data-plane)
     - [4.4.2 Control plane](#442-control-plane)
@@ -1576,7 +1576,7 @@ For the example configuration above, the following is a brief explanation of loo
 		i. Packet shall be encapsulated with Outer DIP as 100.8.1.2 and SIP as VIP of this originating appliance card with VNI of 101. 
 		j. Inbound flow shall be similar to PL and outer encap shall be of the SLB MUX and not of the NSG appliance.
 
-# 4 SONiC DASH virtual switch
+# 4 DASH SONiC KVM
 ## 4.1 Motivation
 
 1. Provide a Proof of Concept (POC) for development and collaboration. Utilizing the typical SONiC workflow, we can leverage this virtual switch image to construct a virtual testbed, eliminating the need for a complete hardware device. This virtual DPU image enables the creation of a mixed hardware-software testbed or a software-only testbed, applicable to both the control plane and the data plane.
@@ -1590,44 +1590,51 @@ For the example configuration above, the following is a brief explanation of loo
 
 ### 4.3.1 BMv2 (dataplane engine)
 
-This component is the original P4 BMv2 container image, which serves as the implementation of the dataplane.
-It attaches three types of interfaces: Ethernet, eth, and cpu.
+This component is the original P4 BMv2 container image, which serves as the data plane implementation - usually in hardware.
+It attaches three types of interfaces: system port(Ethernet), line port(eth), and DPDK port(CPU).
 - Ethernet is used as the system port. Protocol services like BGP and LLDP perform send/receive operations on these interfaces.
 - eth is used as the line port. These are native interfaces in KVM for communication between the inside and outside. The eth port and Ethernet port is one-to-one mapping.
-- cpu is used for the dpdk port. The dataplane APP directly manipulates the traffic on these ports.
+- CPU is used for the DPDK port. The dataplane APP directly manipulates the traffic on these ports.
 
 ### 4.3.2 Dataplane APP
 
-In the physical DPU, this component is provided by vendors' DPDK application. However, in the virtual switch, our implementation is based on the VPP framework with the CPU interface to simulate it. This dataplane APP loads the generated shared library, saidash.so, which communicates with BMv2 via GRPC. Additionally, this component connects with sairedis through a shim SAI proxy.
+Due to the P4 and BMv2 limitation, such as flow creation, flow resimulation and etc, in this virtual DPU, our implementation is based on the VPP framework with the CPU interface to enhance the dataplane engine for these extra functions in the dataplane app module. Meanwhile, this dataplane APP loads the generated shared library, saidash, which communicates with BMv2 via GRPC. For the SAI APIs that will not be used by DASH/DPU SONiC, the SAI implementation will be mocked, as long as SWSS could work, e.g. DTEL. Additionally, this component connects with sairedis through a shim SAI agent(dashsai server - remote dashsai client).
 
 ### 4.3.3 SAIRedis
 
-In the original virtual SONiC, SAIRedis will load the saivs.so. However, in the SONiC DASH virtual switch, it will load the sai proxy mentioned above.
+In the original virtual SONiC, SAIRedis will load the saivs. However, in the new SONiC DASH virtual DPU, it will load the remote dashsai client mentioned above.
 
 ### 4.3.4 SWSS
 
-The SWSS on the virtual switch is almost the same as the one used in the physical switch (DPU). We don't need to make any special changes to it. However, due to some tedious historic issues, the SWSS on the virtual switch will make some extra SAI calls (like DTEL). To adapt to these calls, we will generate a corresponding mock SAI implementation in saidash.so.
+The SWSS on the virtual switch is almost the same as the one used in the physical switch (DPU). We don't need to make any special changes to it. However, due to some tedious historic issues, the SWSS on the virtual switch will make some extra SAI calls (like DTEL). To adapt to these calls, we will generate a corresponding mock SAI implementation in saidash.
 
-### 4.3.5 Underlay Service
+### 4.3.5 Other SONiC Services
 
-We plan to keep the underlay services, such as BGP, LLDP, and others. This is because we not only want to simulate a DPU but also provide an opportunity to use a virtual SONiC image to simulate a smart switch with a single DPU for simplified scenarios.
+We plan to keep the other services, such as BGP, LLDP, and others. these services will be kept, so the KVM runs the same way as how SONiC runs on the real DPU.
 
 ## 4.4 Dataflow
 ### 4.4.1 Data plane
 
 All data plane traffic will enter the BMv2 simple switch and be forwarded to the target port based on the P4 logic imported on BMv2.
 
-```text
-E.G.
+Here is an example about the data plane
+```mermaid
+graph TD
 
-LLDP packet:
-  eth1<->Ethernet0<->LLDP process
+%% LLDP packet
+    eth1 --> packet_dispatcher{"Packet dispatcher"}
+    packet_dispatcher -->|LLDP| Ethernet0;
+    Ethernet0 --> lldp_process["LLDP process"];
 
-VNet packet:
-  eth1<->dash pipeline(BMv2)<->eth2
+%% Normal VNET packet
+    packet_dispatcher -->|DASH| dash_pipeline{"DASH Pipeline"}
+    dash_pipeline -->|VNet| eth2;
 
-TCP SYN packet:
-  eth1<->cpu0<->dataplane APP<->cpu0<->eth2
+%% TCP SYN packet
+    dash_pipeline -->|"TCP SYN"| cpu0_in[CPU0];
+    cpu0_in[CPU0] --> dataplane_app["Dataplane APP"];
+    dataplane_app["Dataplane APP"] --> cpu0_out[CPU0];
+    cpu0_out[CPU0] --> dash_pipeline
 ```
 
 ### 4.4.2 Control plane
