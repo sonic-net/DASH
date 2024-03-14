@@ -4,6 +4,9 @@
  */
 typedef enum _sai_bulk_get_{{ table.name }}_filter_key_t
 {
+    /** Default value for bulk get filter key */
+    SAI_BULK_GET_{{ table.name | upper }}_FILTER_KEY_INVAILD,
+
 {% for key in table['keys'] %}
     /** Bulk get filter key word for {{ key.type }} {{ key.name | lower }} */
     SAI_BULK_GET_{{ table.name | upper }}_FILTER_KEY_{{ key.name | upper }},
