@@ -225,65 +225,7 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% endif %}
 {% endif %}
 {% endif %}
-{% if table.enable_bulk_get_api %}
-    /**
-     * @brief Bulk get filter operation
-     *
-     * @type sai_bulk_get_filter_op_t
-     * @flags CREATE_AND_SET
-     * @default SAI_BULK_GET_FILTER_OP_END_OF_LIST
-     */
-    SAI_{{ table.name | upper }}_ATTR_BULK_GET_FILTER_OP,
-
-    /**
-     * @brief Bulk get filter type
-     *
-     * @type sai_bulk_get_{{ table.name | lower }}_filter_key_t
-     * @flags CREATE_AND_SET
-     * @default SAI_BULK_GET_{{ table.name | upper }}_FILTER_KEY_INVAILD
-     */
-    SAI_{{ table.name | upper }}_ATTR_BULK_GET_{{ table.name | upper }}_FILTER_KEY,
-
-    /**
-     * @brief Bulk get filter value as integer
-     *
-     * @type sai_uint64_t
-     * @flags CREATE_AND_SET
-     * @default 0
-     */
-    SAI_{{ table.name | upper }}_ATTR_BULK_GET_FILTER_VALUE_INT,
-
-    /**
-     * @brief Bulk get filter value as IP
-     *
-     * @type sai_ip_address_t
-     * @flags CREATE_AND_SET
-     * @default 0.0.0.0
-     */
-    SAI_{{ table.name | upper }}_ATTR_BULK_GET_FILTER_VALUE_IP,
-
-{% if table.enable_bulk_get_server %}
-    /**
-     * @brief Bulk get target server
-     *
-     * @type sai_ip_address_t
-     * @flags CREATE_AND_SET
-     * @default 0.0.0.0
-     */
-    SAI_{{ table.name | upper }}_ATTR_BULK_GET_TARGET_SERVER_IP,
-
-    /**
-     * @brief Bulk get target server
-     *
-     * @type sai_uint16_t
-     * @flags CREATE_AND_SET
-     * @isvlan false
-     * @default 0
-     */
-    SAI_{{ table.name | upper }}_ATTR_BULK_GET_TARGET_SERVER_PORT,
-
-{% endif %}
-{% endif %}
+{% include 'templates/headers/sai_bulk_get_attr.j2' %}
 {% if table.ipaddr_family_attr == 'true' %}
     /**
      * @brief IP address family for resource accounting
