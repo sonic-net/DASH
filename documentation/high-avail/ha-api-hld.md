@@ -14,6 +14,8 @@
    4. [4.4. Flow](#44-flow)
    5. [4.5. ENI](#45-eni)
    6. [4.6. Event notifications](#46-event-notifications)
+      1. [4.6.1. HA set event notifications](#461-ha-set-event-notifications)
+      2. [4.6.2. HA scope event notifications](#462-ha-scope-event-notifications)
    7. [4.7. Counters](#47-counters)
       1. [4.7.1. HA set stats](#471-ha-set-stats)
       2. [4.7.2. ENI stats](#472-eni-stats)
@@ -89,6 +91,7 @@ HA set is defined as a SAI object and contains the following SAI attributes:
 | SAI_HA_SET_ATTR_DP_CHANNEL_SRC_PORT_MAX | `sai_uint16_t` | The maximum source port of the data plane channel. |
 | SAI_HA_SET_ATTR_DP_CHANNEL_PROBE_INTERVAL_MS | `sai_uint32_t` | The interval of the data plane channel probe. |
 | SAI_HA_SET_ATTR_DP_CHANNEL_PROBE_FAIL_THRESHOLD | `sai_uint32_t` | The threshold of the data plane channel probe fail. |
+| SAI_HA_SET_ATTR_DP_CHANNEL_IS_ALIVE | `bool` | (Readonly) Is data plane channel alive. |
 
 ### 4.2. HA Scope
 
@@ -177,13 +180,71 @@ To provide the ENI-level HA control, each ENI will have the following SAI attrib
 
 ### 4.6. Event notifications
 
-To receive the HA state updates from the DASH implementation, the following SAI notification attributes are added on the switch object:
+To receive the HA related updates from the DASH implementation, the following SAI notification attributes are added on the switch object:
 
 | Attribute name | Type | Description |
 | -------------- | ---- | ----------- |
+| SAI_SWITCH_ATTR_HA_SET_EVENT_NOTIFY | `sai_ha_set_event_notification_fn` | The callback function for receiving events on the HA set. |
 | SAI_SWITCH_ATTR_HA_SCOPE_EVENT_NOTIFY | `sai_ha_scope_event_notification_fn` | The callback function for receiving events on the HA scope. |
 
-And the callback function and HA state changed event is defined as below:
+#### 4.6.1. HA set event notifications
+
+Whenever a HA set state is changed, it will be reported back via HA set event notification, such as data plane channel goes down. The detailed definition is shown as below:
+
+```c
+/**
+ * @brief HA set event type
+ */
+typedef enum _sai_ha_set_event_t
+{
+    /** Any HA set state is changed, such as data plane channel goes down. */
+    SAI_HA_SET_STATE_CHANGED,
+
+} sai_ha_set_event_t;
+
+/**
+ * @brief Notification data format received from SAI HA set callback
+ *
+ * @count attr[attr_count]
+ */
+typedef struct _sai_ha_set_event_data_t
+{
+    /** Event type */
+    sai_ha_set_event_t event_type;
+
+    /** HA set id */
+    sai_object_id_t ha_set_id;
+
+    /** Attributes count */
+    uint32_t attr_count;
+
+    /**
+     * @brief Attributes
+     *
+     * @objects SAI_OBJECT_TYPE_HA_SET
+     */
+    sai_attribute_t *attr;
+
+} sai_ha_set_event_data_t;
+
+/**
+ * @brief HA set event notification
+ *
+ * Passed as a parameter into sai_initialize_switch()
+ *
+ * @count data[count]
+ *
+ * @param[in] count Number of notifications
+ * @param[in] data Array of HA set events
+ */
+typedef void (*sai_ha_set_event_notification_fn)(
+        _In_ uint32_t count,
+        _In_ const sai_ha_set_event_data_t *ha_set_event_data);
+```
+
+#### 4.6.2. HA scope event notifications
+
+Similar to HA set, whenever any HA scope state is changed, it will be reported back via HA scope event notification. The detailed definition is shown as below:
 
 ```c
 /**
@@ -191,7 +252,7 @@ And the callback function and HA state changed event is defined as below:
  */
 typedef enum _sai_ha_scope_event_t
 {
-    /** Moved to a new HA state. */
+    /** Any HA scope state is changed, such as HA state. */
     SAI_HA_SCOPE_STATE_CHANGED,
 
 } sai_ha_scope_event_t;
