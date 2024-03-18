@@ -197,10 +197,8 @@ class TestSaiVnetRoute:
                                             udp_sport       = 0,
                                             with_udp_chksum = False,
                                             vxlan_vni       = VNET_VNI,
-                                            vxlan_flags     = 0,
+                                            vxlan_flags     = 0x8,
                                             inner_frame     = inner_exp_pkt)
-        vxlan_exp_pkt['IP'].chksum = 0
-
         # Send packets from port 0
         send_packet(dataplane, 0, vxlan_pkt, 10)
         time.sleep(0.5)

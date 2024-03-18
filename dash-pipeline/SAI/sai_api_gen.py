@@ -484,6 +484,8 @@ class SAIAPITableAttribute(SAIObject):
                         self.skipattr = str(kv['value']['stringValue'])
                     elif kv['key'] == 'match_type':
                         self.match_type = str(kv['value']['stringValue'])
+                    elif kv['key'] == 'validonly':
+                        self.validonly = str(kv['value']['stringValue'])
                     else:
                         raise ValueError("Unknown attr annotation " + kv['key'])
 
@@ -516,6 +518,7 @@ class SAICounter(SAIAPITableAttribute):
         self.isreadonly: str = "true"
         self.counter_type: str = "bytes"
         self.attr_type: str = "stats"
+        self.no_suffix: bool = ""
         self.param_actions: List[str] = []
 
     def parse_p4rt(self, p4rt_counter: Dict[str, Any], var_ref_graph: P4VarRefGraph) -> None:
@@ -597,6 +600,8 @@ class SAICounter(SAIAPITableAttribute):
                         self.attr_type = str(kv['value']['stringValue'])
                         if self.attr_type not in ["counter_attr", "counter_id", "stats"]:
                             raise ValueError(f'Unknown counter attribute type: attr_type={self.attr_type}')
+                    elif kv['key'] == 'no_suffix':
+                        self.no_suffix = str(kv['value']['stringValue']) == "true"
                     else:
                         raise ValueError("Unknown attr annotation " + kv['key'])
 
@@ -613,10 +618,11 @@ class SAICounter(SAIAPITableAttribute):
                 counter = copy.deepcopy(self)
             
             counter.counter_type = counter_type
+
             if counter.attr_type == "counter_attr":
-                counter.name = f"{counter.name}_{counter.counter_type}_counter"
+                counter.name = f"{counter.name}_{counter.counter_type}_counter" if not self.no_suffix else f"{counter.name}_counter"
             else:
-                counter.name = f"{counter.name}_{counter.counter_type}"
+                counter.name = f"{counter.name}_{counter.counter_type}" if not self.no_suffix else counter.name
 
             yield counter
 

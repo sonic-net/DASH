@@ -84,7 +84,6 @@ class TestAclInbound:
         udp.src_port.value = 11638
         udp.dst_port.value = 4789
 
-        #vxlan.flags.value = 
         vxlan.vni.value = 101
         vxlan.reserved0.value = 0
         vxlan.reserved1.value = 0
@@ -129,7 +128,7 @@ class TestAclInbound:
         print("\n======= Verify traffic with denied packets failing =======")
         print("\n======= Start traffic =======")
         su.start_traffic(dataplane, f2.name)
-        flow_names=[f1.name, f2.name, f3.name, f4.name]
+        flow_names=[f2.name, f3.name, f4.name]
         while(True):
             if (dataplane.is_traffic_stopped(flow_names)):
                 break

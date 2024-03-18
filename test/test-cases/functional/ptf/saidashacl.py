@@ -95,8 +95,6 @@ class AclRuleTest(object):
                                             with_udp_chksum=False,
                                             vxlan_vni=self.saithrift.vnet_vni,
                                             inner_frame=inner_exp_pkt)
-        vxlan_exp_pkt[IP].chksum = 0
-        vxlan_exp_pkt[IP][UDP][VXLAN].flags = 0
 
         pkt_exp = vxlan_exp_pkt
         print("Sending packet...\n", vxlan_pkt.__repr__())
