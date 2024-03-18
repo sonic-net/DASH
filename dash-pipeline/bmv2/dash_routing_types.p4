@@ -107,9 +107,6 @@ action route_service_tunnel(
 
     meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
 
-    meta.encap_data.original_overlay_dip = hdr.u0_ipv4.src_addr;
-    meta.encap_data.original_overlay_sip = hdr.u0_ipv4.dst_addr;
-
     push_action_nat46(hdr = hdr,
                     meta = meta,
                     sip = overlay_sip,
@@ -124,8 +121,8 @@ action route_service_tunnel(
                             meta = meta,
                             encap = dash_encapsulation,
                             vni = tunnel_key,
-                            underlay_sip = underlay_sip == 0 ? meta.encap_data.original_overlay_sip : (IPv4Address)underlay_sip,
-                            underlay_dip = underlay_dip == 0 ? meta.encap_data.original_overlay_dip : (IPv4Address)underlay_dip,
+                            underlay_sip = underlay_sip == 0 ? hdr.u0_ipv4.src_addr : (IPv4Address)underlay_sip,
+                            underlay_dip = underlay_dip == 0 ? hdr.u0_ipv4.dst_addr : (IPv4Address)underlay_dip,
                             overlay_dmac = hdr.u0_ethernet.dst_addr);
 
 #endif

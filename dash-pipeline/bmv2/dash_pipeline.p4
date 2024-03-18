@@ -45,10 +45,7 @@ control dash_ingress(
     action accept() {
     }
 
-#ifdef TARGET_BMV2_V1MODEL
-    @SaiCounter[name="lb_fast_path_icmp_in", attr_type="stats"]
-    counter(1, CounterType.packets_and_bytes) port_lb_fast_path_icmp_in_counter;
-#endif
+    DEFINE_COUNTER(port_lb_fast_path_icmp_in_counter, 1, name="lb_fast_path_icmp_in", attr_type="stats")
     
     @SaiTable[name = "vip", api = "dash_vip"]
     table vip {
@@ -96,10 +93,7 @@ control dash_ingress(
    meta.stage4_dash_acl_group_id = ## prefix ##_stage4_dash_acl_group_id; \
    meta.stage5_dash_acl_group_id = ## prefix ##_stage5_dash_acl_group_id;
 
-#ifdef TARGET_BMV2_V1MODEL
-    @SaiCounter[name="lb_fast_path_icmp_in", attr_type="stats", action_names="set_eni_attrs"]
-    counter(MAX_ENI, CounterType.packets_and_bytes) eni_lb_fast_path_icmp_in_counter;
-#endif
+    DEFINE_COUNTER(eni_lb_fast_path_icmp_in_counter, MAX_ENI, name="lb_fast_path_icmp_in", attr_type="stats", action_names="set_eni_attrs")
 
     action set_eni_attrs(bit<32> cps,
                          bit<32> pps,
@@ -115,7 +109,7 @@ control dash_ingress(
                          @SaiVal[type="sai_object_id_t"] bit<16> v4_meter_policy_id,
                          @SaiVal[type="sai_object_id_t"] bit<16> v6_meter_policy_id,
                          @SaiVal[type="sai_dash_tunnel_dscp_mode_t"] dash_tunnel_dscp_mode_t dash_tunnel_dscp_mode,
-                         @SaiVal[type="sai_uint8_t"] bit<6> dscp,
+                         @SaiVal[type="sai_uint8_t",validonly="SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE == SAI_DASH_TUNNEL_DSCP_MODE_PIPE_MODEL"] bit<6> dscp,
                          ACL_GROUPS_PARAM(inbound_v4),
                          ACL_GROUPS_PARAM(inbound_v6),
                          ACL_GROUPS_PARAM(outbound_v4),
@@ -248,9 +242,7 @@ control dash_ingress(
 #endif // TARGET_DPDK_PNA
 
         if (meta.is_fast_path_icmp_flow_redirection_packet) {
-#ifdef TARGET_BMV2_V1MODEL
-            port_lb_fast_path_icmp_in_counter.count(0);
-#endif
+            UPDATE_COUNTER(port_lb_fast_path_icmp_in_counter, 0);
         }
 
         if (vip.apply().hit) {
@@ -271,6 +263,7 @@ control dash_ingress(
         eni_lookup_stage.apply(hdr, meta);
 
         // Save the original DSCP value
+        meta.eni_data.dscp_mode = dash_tunnel_dscp_mode_t.PRESERVE_MODEL;
         meta.eni_data.dscp = (bit<6>)hdr.u0_ipv4.diffserv;
 
         if (meta.direction == dash_direction_t.OUTBOUND) {
@@ -317,9 +310,7 @@ control dash_ingress(
         conntrack_lookup_stage.apply(hdr, meta);
 
         if (meta.is_fast_path_icmp_flow_redirection_packet) {
-#ifdef TARGET_BMV2_V1MODEL
-            eni_lb_fast_path_icmp_in_counter.count((bit<32>)meta.eni_id);
-#endif
+            UPDATE_COUNTER(eni_lb_fast_path_icmp_in_counter, meta.eni_id);
         }
 
         acl_group.apply();

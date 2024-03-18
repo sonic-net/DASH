@@ -120,7 +120,7 @@ class UnderlayRouteTest(VnetApiEndpoints, VnetTrafficMixin):
 class Vnet2VnetInboundDecapPaValidateSinglePortTest(VnetApiEndpoints, VnetTrafficMixin):
     """
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP_PA_VALIDATE inbound routing entry action
+    TUNNEL_DECAP_PA_VALIDATE inbound routing entry action
     with underlay config (neighbour + next hop) but without underlay routes
 
     Verifies positive and negative scenarios
@@ -208,7 +208,7 @@ class Vnet2VnetInboundDecapPaValidateSinglePortOverlayIpv6Test(Vnet2VnetInboundD
     """
     Underlay IPv4 and Overlay IPv6 configs
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP_PA_VALIDATE inbound routing entry action
+    TUNNEL_DECAP_PA_VALIDATE inbound routing entry action
     with underlay config (neighbour + next hop) but without underlay routes
 
     Verifies positive and negative scenarios
@@ -223,7 +223,7 @@ class Vnet2VnetInboundDecapPaValidateSinglePortOverlayIpv6Test(Vnet2VnetInboundD
 class Vnet2VnetInboundDecapPaValidateTwoPortsTest(Vnet2VnetInboundDecapPaValidateSinglePortTest):
     """
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP_PA_VALIDATE inbound routing entry action
+    TUNNEL_DECAP_PA_VALIDATE inbound routing entry action
     with full underlay config (2 neighbours, 2 next-hops, 2 routes)
 
     Verifies positive scenario
@@ -243,7 +243,7 @@ class Vnet2VnetInboundDecapPaValidateTwoPortsOverlayIpv6Test(Vnet2VnetInboundDec
     """
     Underlay IPv4 and Overlay IPv6 configs
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP_PA_VALIDATE inbound routing entry action
+    TUNNEL_DECAP_PA_VALIDATE inbound routing entry action
     with full underlay config (2 neighbours, 2 next-hops, 2 routes)
 
     Verifies positive scenario
@@ -261,7 +261,7 @@ class Vnet2VnetInboundDecapPaValidateTwoPortsOverlayIpv6Test(Vnet2VnetInboundDec
 class Vnet2VnetInboundDecapSinglePortTest(Vnet2VnetInboundDecapPaValidateSinglePortTest):
     """
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP inbound routing entry action
+    TUNNEL_DECAP inbound routing entry action
     with underlay config (neighbour + next hop) but without underlay routes
 
     Verifies positive and negative scenarios
@@ -319,7 +319,7 @@ class Vnet2VnetInboundDecapSinglePortOverlayIpv6Test(Vnet2VnetInboundDecapSingle
     """
     Underlay IPv4 and Overlay IPv6 configs
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP inbound routing entry action
+    TUNNEL_DECAP inbound routing entry action
     with underlay config (neighbour + next hop) but without underlay routes
 
     Verifies positive and negative scenarios
@@ -334,7 +334,7 @@ class Vnet2VnetInboundDecapSinglePortOverlayIpv6Test(Vnet2VnetInboundDecapSingle
 class Vnet2VnetInboundDecapTwoPortsTest(Vnet2VnetInboundDecapSinglePortTest):
     """
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP inbound routing entry action
+    TUNNEL_DECAP inbound routing entry action
     with full underlay config (2 neighbours, 2 next-hops, 2 routes)
 
     Verifies positive scenario
@@ -354,7 +354,7 @@ class Vnet2VnetInboundDecapTwoPortsOverlayIpv6Test(Vnet2VnetInboundDecapSinglePo
     """
     Underlay IPv4 and Overlay IPv6 configs
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP inbound routing entry action
+    TUNNEL_DECAP inbound routing entry action
     with full underlay config (2 neighbours, 2 next-hops, 2 routes)
 
     Verifies positive scenario
@@ -1104,7 +1104,7 @@ class Vnet2VnetInboundMultiplePaValidatesMultipleEniTwoPortsOverlayIpv6Test(Vnet
 class Vnet2VnetSingleInboundRouteMultiplePaValidateSinglePortTest(VnetApiEndpoints, VnetTrafficMixin):
     """
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP_PA_VALIDATE inbound routing entry action with multiple PA validate entries
+    TUNNEL_DECAP_PA_VALIDATE inbound routing entry action with multiple PA validate entries
     with underlay config (neighbour + next hop) but without underlay routes
 
     Verifies positive and negative scenarios
@@ -1224,7 +1224,7 @@ class Vnet2VnetSingleInboundRouteMultiplePaValidateSinglePortIpv6Test(Vnet2VnetS
     """
     Underlay IPv4 and Overlay IPv6 configs
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP_PA_VALIDATE inbound routing entry action with multiple PA validate entries
+    TUNNEL_DECAP_PA_VALIDATE inbound routing entry action with multiple PA validate entries
     with underlay config (neighbour + next hop) but without underlay routes
 
     Verifies positive and negative scenarios
@@ -1320,7 +1320,7 @@ class Vnet2VnetSingleInboundRouteMultiplePaValidateSinglePortIpv6Test(Vnet2VnetS
 class Vnet2VnetSingleInboundRouteMultiplePaValidateTwoPortsTest(Vnet2VnetSingleInboundRouteMultiplePaValidateSinglePortTest):
     """
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP_PA_VALIDATE inbound routing entry action with multiple PA validate entries
+    TUNNEL_DECAP_PA_VALIDATE inbound routing entry action with multiple PA validate entries
     with full underlay config (2 neighbours + 2 next hops + 2 routes)
 
     Verifies positive and negative scenarios
@@ -1339,7 +1339,7 @@ class Vnet2VnetSingleInboundRouteMultiplePaValidateTwoPortsIpv6Test(Vnet2VnetSin
     """
     Underlay IPv4 and Overlay IPv6 configs
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP_PA_VALIDATE inbound routing entry action with multiple PA validate entries
+    TUNNEL_DECAP_PA_VALIDATE inbound routing entry action with multiple PA validate entries
     with underlay config (2 neighbours + 2 next hops + 2 routes)
 
     Verifies positive and negative scenarios

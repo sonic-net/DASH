@@ -48,19 +48,22 @@ control ConntrackIn(inout headers_t hdr,
           }
           restart_expire_timer(); // reset expiration timer for entry
           meta.conntrack_data.allow_in = true;
-          meta.encap_data.original_overlay_sip = original_overlay_sip;
-          meta.encap_data.original_overlay_dip = original_overlay_dip;
+          meta.overlay_data.is_ipv6 = false;
+          meta.overlay_data.sip = (IPv4ORv6Address)original_overlay_sip;
+          meta.overlay_data.dip = (IPv4ORv6Address)original_overlay_dip;
   }
 
   action conntrackIn_miss() {
           // TODO: Should this be ((hdr.tcp.flags & 0x2) != 0) instead?
           if (hdr.customer_tcp.flags == 0x2 /* SYN */) {
             if (meta.direction == dash_direction_t.OUTBOUND) {
-               // New PNA Extern
-               add_entry("conntrackIn_allow",
-                         {meta.encap_data.original_overlay_sip, meta.encap_data.original_overlay_dip},
-                         EXPIRE_TIME_PROFILE_LONG);
-               //adding failure to be eventually handled
+                if (meta.routing_actions & dash_routing_actions_t.NAT46 != 0) {
+                    // New PNA Extern
+                    add_entry("conntrackIn_allow",
+                                {(IPv4Address)meta.src_ip_addr, (IPv4Address)meta.dst_ip_addr},
+                                EXPIRE_TIME_PROFILE_LONG);
+                }
+                //adding failure to be eventually handled
             }
           }
   }

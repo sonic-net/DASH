@@ -183,6 +183,9 @@ typedef enum _sai_{{ table.name }}_attr_t
 
 {% endif %}
 {% endif %}
+{% if sai_attr.validonly | length > 0 %}
+     * @validonly {{ sai_attr.validonly }}
+{% endif %}
 {% if sai_attr.isresourcetype == 'true' %}
      * @isresourcetype true
 {% endif %}
