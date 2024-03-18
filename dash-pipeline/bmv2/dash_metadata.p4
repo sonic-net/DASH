@@ -61,6 +61,8 @@ struct flow_key_t {
 }
 
 struct flow_data_t {
+    bit<32> version;
+    dash_direction_t dash_direction;
     dash_flow_action_t actions;
 }
 
@@ -70,6 +72,8 @@ struct conntrack_data_t {
     flow_table_data_t flow_table;
     flow_data_t flow_data;
     flow_key_t flow_key;
+    flow_key_t reverse_flow_key;
+    bit<1> is_bidirectional_flow;
 }
 
 enum bit<16> dash_tunnel_dscp_mode_t {
