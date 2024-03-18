@@ -3,8 +3,8 @@
      * @brief Bulk get filter operation
      *
      * @type sai_bulk_get_filter_op_t
-     * @flags CREATE_AND_SET
-     * @default SAI_BULK_GET_FILTER_OP_END_OF_LIST
+     * @flags READ_ONLY
+     * @isresourcetype true
      */
     SAI_{{ table.name | upper }}_ATTR_BULK_GET_FILTER_OP,
 
@@ -12,8 +12,8 @@
      * @brief Bulk get filter type
      *
      * @type sai_bulk_get_{{ table.name | lower }}_filter_key_t
-     * @flags CREATE_AND_SET
-     * @default SAI_BULK_GET_{{ table.name | upper }}_FILTER_KEY_INVAILD
+     * @flags READ_ONLY
+     * @isresourcetype true
      */
     SAI_{{ table.name | upper }}_ATTR_BULK_GET_{{ table.name | upper }}_FILTER_KEY,
 
@@ -21,8 +21,8 @@
      * @brief Bulk get filter value as integer
      *
      * @type sai_uint64_t
-     * @flags CREATE_AND_SET
-     * @default 0
+     * @flags READ_ONLY
+     * @isresourcetype true
      */
     SAI_{{ table.name | upper }}_ATTR_BULK_GET_FILTER_VALUE_INT,
 
@@ -30,8 +30,8 @@
      * @brief Bulk get filter value as IP
      *
      * @type sai_ip_address_t
-     * @flags CREATE_AND_SET
-     * @default 0.0.0.0
+     * @flags READ_ONLY
+     * @isresourcetype true
      */
     SAI_{{ table.name | upper }}_ATTR_BULK_GET_FILTER_VALUE_IP,
 
@@ -40,8 +40,8 @@
      * @brief Bulk get target server
      *
      * @type sai_ip_address_t
-     * @flags CREATE_AND_SET
-     * @default 0.0.0.0
+     * @flags READ_ONLY
+     * @isresourcetype true
      */
     SAI_{{ table.name | upper }}_ATTR_BULK_GET_TARGET_SERVER_IP,
 
@@ -49,9 +49,9 @@
      * @brief Bulk get target server
      *
      * @type sai_uint16_t
-     * @flags CREATE_AND_SET
+     * @flags READ_ONLY
      * @isvlan false
-     * @default 0
+     * @isresourcetype true
      */
     SAI_{{ table.name | upper }}_ATTR_BULK_GET_TARGET_SERVER_PORT,
 
