@@ -393,7 +393,7 @@ message SaiFlowEntry {
 
 When a service intends to use DASH Flow SAI APIs, it should first establish a flow table via the `create_flow_table()` function. After the table creation, the programmer can add, delete, modify, or retrieve flow entries to/from the table. For instance, when DASH HA needs to perform bulk sync from the active DPU to the standby DPU, it should initially fetch the entry from the active DPU using `get_flow_entries`, then transmit the flow entries to the standby DPU via the control plane. The standby DPU subsequently calls `create_flow_entries()`to add entries to the corresponding flow table. 
 
-This example describes how to create a flow state table, and how to operate flow entries.
+These examples describe how to create a flow state table, and how to operate flow entries.
 
 ### Create Flow Table
 
