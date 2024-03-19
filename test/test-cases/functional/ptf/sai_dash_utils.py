@@ -137,7 +137,7 @@ class VnetAPI(VnetObjects):
 
         default_kwargs = {
             "cps": 10000,
-            "pps": 100000,
+            "bw": 100000,
             "flows": 100000,
             "admin_state": True,
             "vm_underlay_dip": sai_ipaddress("0.0.0.0"),

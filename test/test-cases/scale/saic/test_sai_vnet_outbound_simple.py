@@ -82,7 +82,7 @@ TEST_VNET_OUTBOUND_CONFIG = {
             'ADMIN_STATE': True,
             'CPS': 10000,
             'FLOWS': 10000,
-            'PPS': 100000,
+            'BW': 100000,
             'VM_UNDERLAY_DIP': "172.16.1.1",
             'VM_VNI': 9,
             'VNET_ID': '$vnet_#{0}'

@@ -3,7 +3,7 @@ import saichallenger.common.sai_dataplane.utils.traffic_utils as tu
 from collections import namedtuple
 
 
-def configure_vnet_outbound_packet_flows(sai_dp, vip, dir_lookup, ca_smac, ca_dip, pkt_count=1, pps=50, duration=0):
+def configure_vnet_outbound_packet_flows(sai_dp, vip, dir_lookup, ca_smac, ca_dip, pkt_count=1, bw=50, duration=0):
     """
     Define VNET Outbound routing flows.
 
@@ -14,7 +14,7 @@ def configure_vnet_outbound_packet_flows(sai_dp, vip, dir_lookup, ca_smac, ca_di
         ca_smac (namedtuple(name, 'count start step')): client source MAC.
         ca_dip (namedtuple(name, 'count start step')): client destination IP.
         pkt_count (int): count of packets to send per each flow. Default is 1.
-        pps (int): packet per second for each flow. Default is 50.
+        bw (int): BW in Mbit/s. Default is 50.
         duration (int): count in seconds to generate traffic for each flow. Default is 0.
     """
 
@@ -39,7 +39,7 @@ def configure_vnet_outbound_packet_flows(sai_dp, vip, dir_lookup, ca_smac, ca_di
                 flow = sai_dp.add_flow("flow {} > {} |vip#{}|dir_lookup#{}|ca_mac#{}|ca_dip#{}".format(
                                             sai_dp.configuration.ports[0].name, sai_dp.configuration.ports[1].name,
                                             vip_number, dir_lookup_number, ca_smac_number, ca_dip.start),
-                                       packet_count=ca_dip.count * pkt_count, pps=pps, seconds_count=duration)
+                                       packet_count=ca_dip.count * pkt_count, bw=bw, seconds_count=duration)
 
                 sai_dp.add_ethernet_header(flow, dst_mac="00:00:02:03:04:05", src_mac="00:00:05:06:06:06")
                 sai_dp.add_ipv4_header(flow, dst_ip=vip_val, src_ip="172.16.1.1")
@@ -62,7 +62,7 @@ def configure_vnet_outbound_packet_flows(sai_dp, vip, dir_lookup, ca_smac, ca_di
         print(f">>>: {flow.name}")
 
 
-def scale_vnet_outbound_flows(sai_dp, test_conf: dict, packets_per_flow=1, pps_per_flow=0, flow_duration=0):
+def scale_vnet_outbound_flows(sai_dp, test_conf: dict, packets_per_flow=1, bw_per_flow=0, flow_duration=0):
     """
     Get scale options and define VNET Outbound routing flows.
 
@@ -70,7 +70,7 @@ def scale_vnet_outbound_flows(sai_dp, test_conf: dict, packets_per_flow=1, pps_p
         sai_dp: sai_dataplane.
         test_conf (dict): test config.
         packets_per_flow (int): count of packets to send per each flow. Default is 1.
-        pps_per_flow (int): packet per second for each flow. Default is 10.
+        bw_per_flow (int): packet per second for each flow. Default is 10.
         flow_duration (int): count in seconds to generate traffic for each flow. Default is 0.
     """
 
@@ -91,7 +91,7 @@ def scale_vnet_outbound_flows(sai_dp, test_conf: dict, packets_per_flow=1, pps_p
     ca_dip = dict_helper(ca_dip_tup, test_conf['DASH_OUTBOUND_CA_TO_PA']['ocpe']['DIP'], "0.0.0.1")
 
     configure_vnet_outbound_packet_flows(sai_dp, vip, dir_lookup, ca_smac, ca_dip,
-                                         pkt_count=packets_per_flow, pps=pps_per_flow, duration=flow_duration)
+                                         pkt_count=packets_per_flow, bw=bw_per_flow, duration=flow_duration)
 
 
 def check_flows_all_packets_metrics(sai_dp, flows, name="Flow group", exp_tx=None, exp_rx=None, show=False):
@@ -220,13 +220,13 @@ def check_flows_all_seconds_metrics(sai_dp, flows, name="Flow group", seconds=No
                     flow.name, snappi.FlowDuration.FIXED_SECONDS))
             return False, None
     if not exp_tx:
-        exp_tx = sum([flow.rate.pps for flow in flows]) // len(flows) * seconds * len(flows)
+        exp_tx = sum([flow.rate.bw for flow in flows]) // len(flows) * seconds * len(flows)
     if not exp_rx:
         exp_rx = exp_tx
     if not delta:
-        # default delta is 10% of exp_tx. If it 0 (seconds < 10) then delta == pps
+        # default delta is 10% of exp_tx. If it 0 (seconds < 10) then delta == bw
         tmp_delta = exp_tx // 10
-        delta = tmp_delta if tmp_delta > 0 else (sum([flow.rate.pps for flow in flows]) // len(flows))
+        delta = tmp_delta if tmp_delta > 0 else (sum([flow.rate.bw for flow in flows]) // len(flows))
 
     act_tx = 0
     act_rx = 0
@@ -274,13 +274,13 @@ def check_flow_seconds_metrics(sai_dp, flow: snappi.Flow, seconds=None, exp_tx=N
                     flow.name, flow.duration.choice, snappi.FlowDuration.FIXED_SECONDS))
             return False, None
     if not exp_tx:
-        exp_tx = flow.rate.pps * seconds
+        exp_tx = flow.rate.bw * seconds
     if not exp_rx:
         exp_rx = exp_tx
     if not delta:
-        # default delta is 10% of exp_tx. If it 0 (seconds < 10) then delta == pps
+        # default delta is 10% of exp_tx. If it 0 (seconds < 10) then delta == bw
         tmp_delta = exp_tx // 10
-        delta = tmp_delta if tmp_delta > 0 else flow.rate.pps
+        delta = tmp_delta if tmp_delta > 0 else flow.rate.bw
 
     req = sai_dp.api.metrics_request()
     req.flow.flow_names = [ flow.name ]

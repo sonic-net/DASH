@@ -63,7 +63,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         pl_underlay_sip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
                 addr=sai_thrift_ip_addr_t(ip4="10.0.0.18"))
         self.eni = sai_thrift_create_eni(self.client, cps=10000,
-                                         pps=100000, flows=100000,
+                                         bw=100000, flows=100000,
                                          admin_state=True,
                                          vm_underlay_dip=vm_underlay_dip,
                                          vm_vni=9,

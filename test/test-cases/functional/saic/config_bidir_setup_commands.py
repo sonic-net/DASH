@@ -3,7 +3,7 @@
 ###############################################################
 
 TOTALPACKETS = 1000
-PPS = 100
+BW = 100
 PACKET_LENGTH = 128
 ENI_IP = "1.1.0.1"
 NETWORK_IP1 = "1.128.0.1"
@@ -92,7 +92,7 @@ dpu_config = [
     "type": "SAI_OBJECT_TYPE_ENI",
     "attributes": [
       "SAI_ENI_ATTR_CPS", "10000",
-      "SAI_ENI_ATTR_PPS", "100000",
+      "SAI_ENI_ATTR_BW", "100000",
       "SAI_ENI_ATTR_FLOWS", "100000",
       "SAI_ENI_ATTR_ADMIN_STATE", "True",
       "SAI_ENI_ATTR_VM_UNDERLAY_DIP", ENI_VTEP_IP,
@@ -134,7 +134,7 @@ dpu_config = [
     "type": "SAI_OBJECT_TYPE_ENI",
     "attributes": [
       "SAI_ENI_ATTR_CPS", "10000",
-      "SAI_ENI_ATTR_PPS", "100000",
+      "SAI_ENI_ATTR_BW", "100000",
       "SAI_ENI_ATTR_FLOWS", "100000",
       "SAI_ENI_ATTR_ADMIN_STATE", "True",
       "SAI_ENI_ATTR_VM_UNDERLAY_DIP", NETWORK_VTEP_IP,
@@ -176,7 +176,7 @@ dpu_config = [
     "type": "SAI_OBJECT_TYPE_ENI",
     "attributes": [
       "SAI_ENI_ATTR_CPS", "10000",
-      "SAI_ENI_ATTR_PPS", "100000",
+      "SAI_ENI_ATTR_BW", "100000",
       "SAI_ENI_ATTR_FLOWS", "100000",
       "SAI_ENI_ATTR_ADMIN_STATE", "True",
       "SAI_ENI_ATTR_VM_UNDERLAY_DIP", NETWORK_VTEP_IP,
