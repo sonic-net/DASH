@@ -640,7 +640,7 @@ rx_counter         = uint64   ; Number of received bytes (read-only)
 | DASH_QOS_TABLE        |              |                 |                                                 |                                               |
 |                       | qos_name     |                 |                                                 |                                               |
 |                       |              | qos_id          |                                                 |                                               |
-|                       |              | bw              | SAI_ENI_ATTR_PPS                                |                                               |
+|                       |              | bw              | SAI_ENI_ATTR_BW                                 |                                               |
 |                       |              | cps             | SAI_ENI_ATTR_CPS                                |                                               |
 |                       |              | flows           | SAI_ENI_ATTR_FLOWS                              |                                               |
 | DASH_ENI_TABLE        |              |                 | *SAI_OBJECT_TYPE_ENI*                           |                                               |
