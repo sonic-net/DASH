@@ -282,7 +282,7 @@ typedef enum _sai_bulk_get_flow_entry_filter_key_t
 
 Its declaration is similar to that of the generic bulk get and it can support using filters or returning data via GRPC must adhere to the following requirements in different senarios.
 
-- Without both filter and GRPC
+- **Without both filter and GRPC**
 
   Consistent with the standard bulk get, it is necessary to pre-provide the `flow_entry` count and `flow entry`, with memory allocation for the corresponding `attr_count` and `attr_list` allocated in advance. Additionally, it is necessary to explicitly indicate that there are no query conditions by setting SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP to SAI_BULK_GET_FILTER_OP_END_OF_LIST in the first ATTR_LIST.
 
@@ -292,7 +292,7 @@ Its declaration is similar to that of the generic bulk get and it can support us
   | :--------------------------------------------------------- | ------------------------------------------------------------ |
   | x = 0                                                      | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP: SAI_BULK_GET_FILTER_OP_END_OF_LIST |
 
-- With filter
+- **With filter**
 
   ​	The `flow_entry` count represents the maximum number of flow entries desired, and space for the flow entries, attr_count, and attr_list should be allocated in advance.
 
@@ -308,7 +308,7 @@ Its declaration is similar to that of the generic bulk get and it can support us
 
 ​	
 
-- With GRPC
+- **With GRPC**
 
   If you wish to use GRPC, the GRPC IP address and port should be specified in the attr_list (SAI_FLOW_ENTRY_ATTR_BULK_GET_TARGET_SERVER_IP, SAI_FLOW_ENTRY_ATTR_BULK_GET_TARGET_SERVER_PORT).
 
@@ -321,11 +321,11 @@ Its declaration is similar to that of the generic bulk get and it can support us
 
   
 
-- With both filter and GRPC
+- **With both filter and GRPC**
 
   There is no need to allocate the memory in advance.
 
-  For the filter conditions, they should be passed in using `attr_count` and `attr_lis`t. Since `attr_list` is two-dimensional, each row represents a query condition, consisting of SAI_FLOW_ENTRY_ATTR_BULK_GET_FLOW_ENTRY_FILTER_KEY, SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP, SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_VALUE_[INT, IP]. Different rows will undergo AND operations. The last row must end with a standalone SAI_BULK_GET_FILTER_OP_END_OF_LIST. 
+  For the filter conditions, they should be passed in using `attr_count` and `attr_list`. Since `attr_list` is two-dimensional, each row represents a query condition, consisting of SAI_FLOW_ENTRY_ATTR_BULK_GET_FLOW_ENTRY_FILTER_KEY, SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP, SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_VALUE_[INT, IP]. Different rows will undergo AND operations. The last row must end with a standalone SAI_BULK_GET_FILTER_OP_END_OF_LIST. 
 
   If you wish to use GRPC, the GRPC IP address and port should be specified in the attr_list (SAI_FLOW_ENTRY_ATTR_BULK_GET_TARGET_SERVER_IP, SAI_FLOW_ENTRY_ATTR_BULK_GET_TARGET_SERVER_PORT).
 
