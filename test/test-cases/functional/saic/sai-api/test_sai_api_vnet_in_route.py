@@ -39,7 +39,7 @@ class TestSaiVnetInboundRoutingEntry:
                 "attributes": [
                     "SAI_ENI_ATTR_CPS",
                     "10000",
-                    "SAI_ENI_ATTR_PPS",
+                    "SAI_ENI_ATTR_BW",
                     "100000",
                     "SAI_ENI_ATTR_FLOWS",
                     "100000",
