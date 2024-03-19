@@ -542,11 +542,22 @@ status = get_flow_entries_attribute(object_count, flow_entry, attr_count, attr_l
 ### Remove flow entry
 
 ```c
+sai_flow_entry_t flow_entry;
+flow_entry.flow_table_id = 0x123456789abc; /* Not a key, only indicate its table id */
+flow_entry.ip_protocol = 6;
+flow_entry.src_ip_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
+inet_pton(AF_INET, "192.168.1.1", &flow_entry.src_ip_addr.addr.ip4);
+flow_entry.dst_ip_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
+inet_pton(AF_INET, "192.168.1.2", &flow_entry.dst_ip_addr.addr.ip4);
+flow_entry.src_l4_port = 12345;
+flow_entry.dst_l4_port = 80;
+
 status = remove_flow_entry(flow_entry);
 ```
 
 ### Remove flow table
 
 ```c
+sai_object_id_t flow_table_id = 0x112233;
 status = remove_flow_table(flow_table_id);
 ```
