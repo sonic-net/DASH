@@ -1,4 +1,5 @@
 # DASH Flow API HLD
+
 | Rev | Date | Author | Change Description |
 | --- | ---- | ------ | ------------------ |
 | 0.1 | 03/20/2024 | Zhixiong Niu | Initial version |
@@ -8,7 +9,6 @@
 ## Introduction
 
 DASH supports the storage and processing of millions of flow states. To further enhance the DASH flow processing capabilities, we offer a DASH flow abstraction layer to facilitate vendor-neutral flow management. This layer ensures uniform control over flows across programmable switches, DPUs, and smart switches. The DASH flow abstraction provides concepts of flow tables and flow entries, as well as APIs to manage the flows. Cloud providers can build their services on top of the DASH flow abstraction layer. For example, a cloud load balancer can add a flow decision entry and retrieve it via the DASH flow API. This also lays the foundation for DASH to offer basic services, such as high availability.
-
 
 ## Terminology
 
@@ -27,8 +27,6 @@ Upon the arrival of new flows, whether individually or in batches, corresponding
 Flows can be modified and removed through the DASH flow SAI API and can also be aged by the hardware.
 
 For more use cases, please refer to [Smart Switch HA HLD](https://github.com/sonic-net/SONiC/blob/master/doc/smart-switch/high-availability/smart-switch-ha-hld.md).
-
-
 
 ## Flow Table APIs
 
@@ -70,8 +68,6 @@ typedef enum _sai_dash_flow_enabled_key_t
 
 } sai_dash_flow_enabled_key_t;
 ```
-
-
 
 ## Flow APIs
 
@@ -205,7 +201,7 @@ These are the related attributes of flow rewrite.
 
 Compared to the generic bulk_get function, in the flow API, when using bulk get, filters can be added to obtain the desired flow entries. This is primarily because DASH supports millions of flows, and in most cases, it is not feasible to retrieve all flows with a single bulk get. Filters must be used to obtain only the necessary flows. Additionally, the flow entry bulk get supports returning results to a specified server and port using GRPC. Compared to direct returns, using GRPC for the return can enhance the efficiency of bulk get responses.
 
-Please note, the flow bulk get function is named `get_flow_entries_attribute`. 
+Please note, the flow bulk get function is named `get_flow_entries_attribute`.
 
 ```c
 typedef sai_status_t get_flow_entries_attribute (
@@ -216,6 +212,7 @@ typedef sai_status_t get_flow_entries_attribute (
         _In_ sai_bulk_op_error_mode_t mode,
         _Out_ sai_status_t *object_statuses);
 ```
+
 Here are the attributes for flow entry bulk get.
 
 | Attribute name                                     | Type                                   | Description                                                  |
@@ -287,25 +284,23 @@ Its declaration is similar to that of the generic bulk get and it can support us
 
   Below is an example of an input attr_list to claim there is no filter:
 
-  | attr_list [x, y]<br />sai_attr_id_t: sai_attribute_value_t | y = 0                                                        |
-  | :--------------------------------------------------------- | ------------------------------------------------------------ |
-  | x = 0                                                      | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP: SAI_BULK_GET_FILTER_OP_END_OF_LIST |
+| attr_list [x, y] sai_attr_id_t: sai_attribute_value_t | y = 0                                                        |
+|-----------------------------------------------------------|--------------------------------------------------------------|
+| x = 0                                                     | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP: SAI_BULK_GET_FILTER_OP_END_OF_LIST |
 
 - **With filter**
 
-  ​	The `flow_entry` count represents the maximum number of flow entries desired, and space for the flow entries, attr_count, and attr_list should be allocated in advance.
+  ​The `flow_entry` count represents the maximum number of flow entries desired, and space for the flow entries, attr_count, and attr_list should be allocated in advance.
 
-  ​	For the filter conditions, they should be passed in using `attr_count` and `attr_lis`t. Since `attr_list` is two-dimensional, each row represents a query condition, consisting of SAI_FLOW_ENTRY_ATTR_BULK_GET_FLOW_ENTRY_FILTER_KEY, SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP, SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_VALUE_[INT, IP]. Different rows will undergo AND operations. The last row must end with a standalone SAI_BULK_GET_FILTER_OP_END_OF_LIST. 
+  ​For the filter conditions, they should be passed in using `attr_count` and `attr_lis`t. Since `attr_list` is two-dimensional, each row represents a query condition, consisting of SAI_FLOW_ENTRY_ATTR_BULK_GET_FLOW_ENTRY_FILTER_KEY, SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP, SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_VALUE_[INT, IP]. Different rows will undergo AND operations. The last row must end with a standalone SAI_BULK_GET_FILTER_OP_END_OF_LIST.
 
   Below is an example of an input attr_list for a filter:
 
-  | attr_list [x, y]<br />sai_attr_id_t: sai_attribute_value_t | y = 0                                                        | y = 1                                                       | y = 2                                                        |
-| :--------------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------- | ------------------------------------------------------------ |
-  | x = 0                                                      | SAI_FLOW_ENTRY_ATTR_BULK_GET_FLOW_ENTRY_FILTER_KEY: key_attribute_value0 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP: op_attribute_value0 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_VALUE_[INT, IP]: filter_value_attribute_value0 |
-| x = 1                                                      | SAI_FLOW_ENTRY_ATTR_BULK_GET_FLOW_ENTRY_FILTER_KEY: key_attribute_value1 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP: op_attribute_value1 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_VALUE_[INT, IP]:filter_value_attribute_value1 |
-| x = 2                                                      | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP: SAI_BULK_GET_FILTER_OP_END_OF_LIST |                                                             |                                                              |
-
-​	
+| attr_list [x, y] sai_attr_id_t: sai_attribute_value_t | y = 0 | y = 1 | y = 2 |
+|-------------------------------------------------------|--------|--------|--------|
+| x = 0 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FLOW_ENTRY_FILTER_KEY: key_attribute_value0 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP: op_attribute_value0 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_VALUE_[INT, IP]: filter_value_attribute_value0 |
+| x = 1 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FLOW_ENTRY_FILTER_KEY: key_attribute_value1 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP: op_attribute_value1 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_VALUE_[INT, IP]: filter_value_attribute_value1 |
+| x = 2 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP: SAI_BULK_GET_FILTER_OP_END_OF_LIST | | |
 
 - **With GRPC**
 
@@ -313,31 +308,27 @@ Its declaration is similar to that of the generic bulk get and it can support us
 
   Below is an example of an input attr_list for a GRPC return:
 
-  | attr_list [x, y]<br />sai_attr_id_t: sai_attribute_value_t | y = 0                                                        | y = 1                                                        |
-  | :--------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-  | x = 0                                                      | SAI_FLOW_ENTRY_ATTR_BULK_GET_TARGET_SERVER_IP: server_ip_value | SAI_FLOW_ENTRY_ATTR_BULK_GET_TARGET_SERVER_PORT: server_port_value |
-  | x = 1                                                      | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP: SAI_BULK_GET_FILTER_OP_END_OF_LIST |                                                              |
-
-  
+| attr_list [x, y] sai_attr_id_t: sai_attribute_value_t | y = 0                                                        | y = 1                                                        |
+|------------------------------------------------------------|--------------------------------------------------------------|--------------------------------------------------------------|
+| x = 0                                                      | SAI_FLOW_ENTRY_ATTR_BULK_GET_TARGET_SERVER_IP: server_ip_value | SAI_FLOW_ENTRY_ATTR_BULK_GET_TARGET_SERVER_PORT: server_port_value |
+| x = 1                                                      | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP: SAI_BULK_GET_FILTER_OP_END_OF_LIST |                                                              |
 
 - **With both filter and GRPC**
 
   There is no need to allocate the memory in advance.
 
-  For the filter conditions, they should be passed in using `attr_count` and `attr_list`. Since `attr_list` is two-dimensional, each row represents a query condition, consisting of SAI_FLOW_ENTRY_ATTR_BULK_GET_FLOW_ENTRY_FILTER_KEY, SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP, SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_VALUE_[INT, IP]. Different rows will undergo AND operations. The last row must end with a standalone SAI_BULK_GET_FILTER_OP_END_OF_LIST. 
+  For the filter conditions, they should be passed in using `attr_count` and `attr_list`. Since `attr_list` is two-dimensional, each row represents a query condition, consisting of SAI_FLOW_ENTRY_ATTR_BULK_GET_FLOW_ENTRY_FILTER_KEY, SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP, SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_VALUE_[INT, IP]. Different rows will undergo AND operations. The last row must end with a standalone SAI_BULK_GET_FILTER_OP_END_OF_LIST.
 
   If you wish to use GRPC, the GRPC IP address and port should be specified in the attr_list (SAI_FLOW_ENTRY_ATTR_BULK_GET_TARGET_SERVER_IP, SAI_FLOW_ENTRY_ATTR_BULK_GET_TARGET_SERVER_PORT).
 
   Below is an example of an input attr_list for a GRPC return with filter:
 
-  | attr_list [x, y]<br />sai_attr_id_t: sai_attribute_value_t | y = 0                                                        | y = 1                                                        | y = 2                                                        |
-  | :--------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-  | x = 0                                                      | SAI_FLOW_ENTRY_ATTR_BULK_GET_FLOW_ENTRY_FILTER_KEY: key_attribute_value0 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP: op_attribute_value0  | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_VALUE_[INT, IP]: filter_value_attribute_value0 |
-  | x = 1                                                      | SAI_FLOW_ENTRY_ATTR_BULK_GET_FLOW_ENTRY_FILTER_KEY: key_attribute_value1 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP: op_attribute_value1  | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_VALUE_[INT, IP]:filter_value_attribute_value1 |
-  | x = 2                                                      | SAI_FLOW_ENTRY_ATTR_BULK_GET_TARGET_SERVER_IP: server_ip_value | SAI_FLOW_ENTRY_ATTR_BULK_GET_TARGET_SERVER_PORT: server_port_value |                                                              |
-  | x = 3                                                      | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP: SAI_BULK_GET_FILTER_OP_END_OF_LIST |                                                              |                                                              |
-
-  
+| attr_list [x, y] sai_attr_id_t: sai_attribute_value_t | y = 0 | y = 1 | y = 2 |
+|------------------------------------------------------------|-------|-------|-------|
+| x = 0 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FLOW_ENTRY_FILTER_KEY: key_attribute_value0 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP: op_attribute_value0 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_VALUE_[INT, IP]: filter_value_attribute_value0 |
+| x = 1 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FLOW_ENTRY_FILTER_KEY: key_attribute_value1 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP: op_attribute_value1 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_VALUE_[INT, IP]: filter_value_attribute_value1 |
+| x = 2 | SAI_FLOW_ENTRY_ATTR_BULK_GET_TARGET_SERVER_IP: server_ip_value | SAI_FLOW_ENTRY_ATTR_BULK_GET_TARGET_SERVER_PORT: server_port_value |       |
+| x = 3 | SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP: SAI_BULK_GET_FILTER_OP_END_OF_LIST |       |       |
 
 #### Extra flow metadata
 
@@ -347,8 +338,6 @@ Here are some extra metadata for different purposes.
 | ----------------------------------- | --------------- | ------------------------------------------------------------ |
 | SAI_FLOW_ENTRY_ATTR_VENDOR_METADATA | `sai_u8_list_t` | Vendor-specific metadata that can be attached to the flow entry for custom processing. |
 | SAI_FLOW_ENTRY_ATTR_FLOW_DATA_PB    | `sai_u8_list_t` | The flow data protocol buffer enables high-efficiency creation, retrieval, and communication for a flow entry. |
-
-
 
 ### Protobuf-based flow programming
 
@@ -386,11 +375,9 @@ message SaiFlowEntry {
 }
 ```
 
-
-
 ## Examples
 
-When a service intends to use DASH Flow SAI APIs, it should first establish a flow table via the `create_flow_table()` function. After the table creation, the programmer can add, delete, modify, or retrieve flow entries to/from the table. For instance, when DASH HA needs to perform bulk sync from the active DPU to the standby DPU, it should initially fetch the entry from the active DPU using `get_flow_entries`, then transmit the flow entries to the standby DPU via the control plane. The standby DPU subsequently calls `create_flow_entries()`to add entries to the corresponding flow table. 
+When a service intends to use DASH Flow SAI APIs, it should first establish a flow table via the `create_flow_table()` function. After the table creation, the programmer can add, delete, modify, or retrieve flow entries to/from the table. For instance, when DASH HA needs to perform bulk sync from the active DPU to the standby DPU, it should initially fetch the entry from the active DPU using `get_flow_entries`, then transmit the flow entries to the standby DPU via the control plane. The standby DPU subsequently calls `create_flow_entries()`to add entries to the corresponding flow table.
 
 These examples describe how to create a flow state table, and how to operate flow entries.
 
@@ -486,6 +473,7 @@ status = get_flow_entry_attribute(flow_entry, attr_count, attr_list);
 ```
 
 ### Retrieve Flow Entries
+
 Example: Retrieve flow entries by filtering for all versions greater than 3 and less than 5, and return the results via GRPC.
 
 ```c
