@@ -7,6 +7,7 @@ extern "C" {
 
 #include <set>
 #include <map>
+#include <string>
 
 namespace dash
 {
