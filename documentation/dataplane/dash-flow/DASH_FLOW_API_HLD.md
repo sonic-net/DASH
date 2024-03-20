@@ -4,7 +4,7 @@
 | --- | ---- | ------ | ------------------ |
 | 0.1 | 03/20/2024 | Zhixiong Niu | Initial version |
 
-[toc]
+[TOC]
 
 ## Introduction
 
@@ -290,9 +290,9 @@ Its declaration is similar to that of the generic bulk get and it can support us
 
 - **With filter**
 
-  ​The `flow_entry` count represents the maximum number of flow entries desired, and space for the flow entries, attr_count, and attr_list should be allocated in advance.
+  The `flow_entry` count represents the maximum number of flow entries desired, and space for the flow entries, attr_count, and attr_list should be allocated in advance.
 
-  ​For the filter conditions, they should be passed in using `attr_count` and `attr_lis`t. Since `attr_list` is two-dimensional, each row represents a query condition, consisting of SAI_FLOW_ENTRY_ATTR_BULK_GET_FLOW_ENTRY_FILTER_KEY, SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP, SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_VALUE_[INT, IP]. Different rows will undergo AND operations. The last row must end with a standalone SAI_BULK_GET_FILTER_OP_END_OF_LIST.
+  For the filter conditions, they should be passed in using `attr_count` and `attr_lis`t. Since `attr_list` is two-dimensional, each row represents a query condition, consisting of SAI_FLOW_ENTRY_ATTR_BULK_GET_FLOW_ENTRY_FILTER_KEY, SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_OP, SAI_FLOW_ENTRY_ATTR_BULK_GET_FILTER_VALUE_[INT, IP]. Different rows will undergo AND operations. The last row must end with a standalone SAI_BULK_GET_FILTER_OP_END_OF_LIST.
 
   Below is an example of an input attr_list for a filter:
 
