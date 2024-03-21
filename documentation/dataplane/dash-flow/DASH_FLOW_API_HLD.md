@@ -10,9 +10,11 @@
 
 DASH supports the storage and processing of millions of flow states. To further enhance the DASH flow processing capabilities, we offer a DASH flow abstraction layer to facilitate vendor-neutral flow management. This layer ensures uniform control over flows across programmable switches, DPUs, and smart switches. The DASH flow abstraction provides concepts of flow tables and flow entries, as well as APIs to manage the flows. Cloud providers can build their services on top of the DASH flow abstraction layer. For example, a cloud load balancer can add a flow decision entry and retrieve it via the DASH flow API. This also lays the foundation for DASH to offer basic services, such as high availability.
 
+[To-do] What flow api can do? E.g. Redirect, re-simluate, dataplane app;  update target Senairos Different Senarios: 
+
 ## Terminology
 
-- **Flow**: It represents a single direction of the match-action entry for a transport layer (e.g., TCP, UDP) connection.
+- **Flow**: It represents a single direction of the match-action entry for a connection.
 - **Flow entry**: Same as flow.
 - **Flow Key**: The key that is used to match the packet for finding its flow.
 - **Flow State**: The state of the flow, including the packet transformations and all other tracked states, such as TCP, HA, etc.
@@ -21,6 +23,8 @@ DASH supports the storage and processing of millions of flow states. To further 
 ## Model
 
 In the DASH flow abstraction, we model flows as being stored within a flow table and managed through DASH flow SAI APIs.
+
+[To-Do] How to store? Figure ? Not bind with ENI, draw.io, Flow-entry, Flow-key, Flow state, Flow Table Relationship
 
 Upon the arrival of new flows, whether individually or in batches, corresponding flow entries are added to the table. These entries may represent either bidirectional or unidirectional flows. For bidirectional flows, the implementation adds entries for both the original flow and its reverse, linking their reverse flow keys to each other. For unidirectional flows, the current direction is specified. If a reverse flow for a unidirectional flow is created later, the implementation must add reverse keys for both and link them accordingly.
 
@@ -173,16 +177,16 @@ When configuring a flow_entry, it can be specified whether it is unidirectional 
 
 These are the related attributes of flow encapsulation.
 
-| Attribute name                           | Type                       | Description                                                  |
-| ---------------------------------------- | -------------------------- | ------------------------------------------------------------ |
-| SAI_FLOW_ENTRY_ATTR_DEST_VNET_VNI        | `sai_uint32_t`             | Destination VNI                                              |
-| SAI_FLOW_ENTRY_ATTR_UNDERLAY_SIP         | `sai_uint32_t`             | Source IP address in the underlay network                    |
-| SAI_FLOW_ENTRY_ATTR_UNDERLAY_DIP         | `sai_uint32_t`             | Destination IP address in the underlay network               |
-| SAI_FLOW_ENTRY_ATTR_UNDERLAY_SMAC        | `sai_mac_t`                | Source MAC address in the underlay network                   |
-| SAI_FLOW_ENTRY_ATTR_UNDERLAY_DMAC        | `sai_mac_t`                | Destination MAC address in the underlay network              |
-| SAI_FLOW_ENTRY_ATTR_DASH_ENCAPSULATION   | `sai_dash_encapsulation_t` | Encapsulation method for DASH traffic                        |
-| SAI_FLOW_ENTRY_ATTR_ORIGINAL_OVERLAY_SIP | `sai_uint32_t`             | Original source IP address before encapsulation in overlay network |
-| SAI_FLOW_ENTRY_ATTR_ORIGINAL_OVERLAY_DIP | `sai_uint32_t`             | Original destination IP address before encapsulation in overlay network |
+| Attribute name                         | Type                       | Description                                     |
+| -------------------------------------- | -------------------------- | ----------------------------------------------- |
+| SAI_FLOW_ENTRY_ATTR_DEST_VNET_VNI      | `sai_uint32_t`             | Destination VNI                                 |
+| SAI_FLOW_ENTRY_ATTR_UNDERLAY_SIP       | `sai_uint32_t`             | Source IP address in the underlay network       |
+| SAI_FLOW_ENTRY_ATTR_UNDERLAY_DIP       | `sai_uint32_t`             | Destination IP address in the underlay network  |
+| SAI_FLOW_ENTRY_ATTR_UNDERLAY_SMAC      | `sai_mac_t`                | Source MAC address in the underlay network      |
+| SAI_FLOW_ENTRY_ATTR_UNDERLAY_DMAC      | `sai_mac_t`                | Destination MAC address in the underlay network |
+| SAI_FLOW_ENTRY_ATTR_DASH_ENCAPSULATION | `sai_dash_encapsulation_t` | Encapsulation method for DASH traffic           |
+|                                        |                            |                                                 |
+|                                        |                            |                                                 |
 
 #### Flow rewrite
 
@@ -527,6 +531,8 @@ status = get_flow_entries_attribute(object_count, flow_entry, attr_count, attr_l
 ```
 
 ### Remove flow entry
+
+[TO-DO] Remove two direction flows
 
 ```c
 sai_flow_entry_t flow_entry;
