@@ -66,6 +66,34 @@ struct flow_data_t {
     dash_flow_action_t actions;
 }
 
+enum bit<8> dash_flow_entry_bulk_get_session_filter_key_t
+{
+    INVAILD = 0,
+    FLOW_TABLE_ID = 1,
+    IP_PROTOCOL = 2,
+    SRC_IP_ADDR = 3,
+    DST_IP_ADDR = 4,
+    SRC_L4_PORT = 5,
+    DST_L4_PORT = 6,
+    KEY_VERSION = 7
+}
+
+enum bit<8> dash_flow_entry_bulk_get_session_op_key_t
+{
+    FILTER_OP_INVALID = 0,
+    FILTER_OP_EQUAL_TO = 1,
+    FILTER_OP_GREATER_THAN = 2,
+    FILTER_OP_GREATER_THAN_OR_EQUAL_TO = 3,
+    FILTER_OP_LESS_THAN = 4,
+    FILTER_OP_LESS_THAN_OR_EQUAL_TO = 5
+}
+
+struct dash_flow_entry_bulk_get_session_t {
+    bit<16> id;
+    dash_flow_entry_bulk_get_session_filter_key_t filter_key;
+    dash_flow_entry_bulk_get_session_op_key_t filter_op; 
+}
+
 struct conntrack_data_t {
     bool allow_in;
     bool allow_out;
@@ -74,6 +102,7 @@ struct conntrack_data_t {
     flow_key_t flow_key;
     flow_key_t reverse_flow_key;
     bit<1> is_bidirectional_flow;
+    dash_flow_entry_bulk_get_session_t bulk_get_session;
 }
 
 enum bit<16> dash_tunnel_dscp_mode_t {

@@ -228,7 +228,6 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% endif %}
 {% endif %}
 {% endif %}
-{% include 'templates/headers/sai_bulk_get_attr.j2' %}
 {% if table.ipaddr_family_attr == 'true' %}
     /**
      * @brief IP address family for resource accounting
@@ -254,7 +253,6 @@ typedef enum _sai_{{ table.name }}_attr_t
 } sai_{{ table.name }}_attr_t;
 
 {% include 'templates/headers/sai_stats_enum.j2' %}
-{% include 'templates/headers/sai_bulk_get_enum.j2' %}
 {% endfor %}
 {% for table in sai_api.tables %}
 /**
