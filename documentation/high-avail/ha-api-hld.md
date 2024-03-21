@@ -23,6 +23,9 @@
          2. [4.7.2.2. ENI-level flow operation counters](#4722-eni-level-flow-operation-counters)
          3. [4.7.2.3. ENI-level flow sync packet counters](#4723-eni-level-flow-sync-packet-counters)
          4. [4.7.2.4. ENI-level flow sync operations counters](#4724-eni-level-flow-sync-operations-counters)
+   8. [4.8. Capability](#48-capability)
+      1. [4.8.1. Topology related capabilities](#481-topology-related-capabilities)
+      2. [4.8.2. Stats related capabilities](#482-stats-related-capabilities)
 5. [5. HA in DASH behavior model](#5-ha-in-dash-behavior-model)
    1. [5.1. HA stage](#51-ha-stage)
    2. [5.2. Packet type and flow operations](#52-packet-type-and-flow-operations)
@@ -373,6 +376,37 @@ Here are the new stats added for monitoring flow sync operations on each ENI:
 | SAI_ENI_STAT_(INLINE/TIMED)\_FLOW\_(CREATE/UPDATE/DELETE)_ACK_RECV | The number of inline/timed flow create/update/delete ack that the ENI is received. |
 | SAI_ENI_STAT_(INLINE/TIMED)\_FLOW\_(CREATE/UPDATE/DELETE)_ACK_FAILED | The number of inline/timed flow create/update/delete ack that the ENI is received but failed to process. |
 | SAI_ENI_STAT_(INLINE/TIMED)\_FLOW\_(CREATE/UPDATE/DELETE)_ACK_IGNORED | The number of inline/timed flow create/update/delete ack that the ENI is received but its flow operation is processed as ignored. |
+
+### 4.8. Capability
+
+To check which type of topology is supported in the DASH implementation, the following read only attributes is added on the switch level for capability queries:
+
+#### 4.8.1. Topology related capabilities
+
+| Attribute name | Type | Description |
+| -------------- | ---- | ----------- |
+| SAI_SWITCH_ATTR_DASH_CAPS_MAX_HA_SET_COUNT | `sai_uint32_t` | The max number of HA set can be created. |
+| SAI_SWITCH_ATTR_DASH_CAPS_MAX_HA_SCOPE_COUNT_PER_HA_SET | `sai_uint32_t` | The max number of HA scope that can be created within a single HA set. |
+| SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_TABLE_COUNT | `sai_uint32_t` | The max number of flow tables that can be created. |
+
+Here are some examples of how to use these capability to represent the topologies:
+
+| Topology | MAX_HA_SET_COUNT | MAX_HA_SCOPE_COUNT_PER_HA_SET | MAX_FLOW_TABLE_COUNT |
+| -------- | ---------------- | ----------------------------- | -------------------- |
+| ENI level HA with DPU level pairing | 1 | (max # of ENI supported) | 1 |
+| DPU level HA | 1 | 1 | 1 |
+
+#### 4.8.2. Stats related capabilities
+
+Stats related capabilities can help with 2 things:
+
+1. Specify which stats is supported now, so we can start pulling to avoid errors.
+2. Return internal debug stats to help with troubleshooting.
+
+| Attribute name | Type | Description |
+| -------------- | ---- | ----------- |
+| SAI_SWITCH_ATTR_DASH_CAPS_SUPPORTED_HA_SET_STATS | `sai_s32_list_t` | The list of supported HA set stats. |
+| SAI_SWITCH_ATTR_DASH_CAPS_SUPPORTED_ENI_STATS | `sai_s32_list_t` | The list of supported ENI stats. |
 
 ## 5. HA in DASH behavior model
 
