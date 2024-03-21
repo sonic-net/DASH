@@ -75,7 +75,7 @@ Or, with even more complicated topology, such as each ENI owns 2 dedicated flow 
 
 ![](./images/ha-components-complex.svg)
 
-> Note: The graphs here is to show the flexibiilty of these concepts, but not require all the possible topologies to be supported by the DASH providers.
+> Note: The graphs here is to show the flexibiilty of these concepts, but not require all the possible topology to be supported by the DASH providers.
 
 ## 4. SAI APIs
 
@@ -389,7 +389,7 @@ To check which type of topology is supported in the DASH implementation, the fol
 | SAI_SWITCH_ATTR_DASH_CAPS_MAX_HA_SCOPE_COUNT_PER_HA_SET | `sai_uint32_t` | The max number of HA scope that can be created within a single HA set. |
 | SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_TABLE_COUNT | `sai_uint32_t` | The max number of flow tables that can be created. |
 
-Here are some examples of how to use these capability to represent the topologies:
+Here are some examples of how to use these capability to represent the topology:
 
 | Topology | MAX_HA_SET_COUNT | MAX_HA_SCOPE_COUNT_PER_HA_SET | MAX_FLOW_TABLE_COUNT |
 | -------- | ---------------- | ----------------------------- | -------------------- |
