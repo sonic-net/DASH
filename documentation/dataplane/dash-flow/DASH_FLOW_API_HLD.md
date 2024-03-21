@@ -22,7 +22,6 @@
       - [Reverse flow key](#reverse-flow-key)
       - [Flow encap](#flow-encap)
       - [Flow rewrite](#flow-rewrite)
-      - [](#)
     - [Flow Bulk Get Session](#flow-bulk-get-session)
     - [Protobuf-based flow programming](#protobuf-based-flow-programming)
   - [Examples](#examples)
@@ -56,8 +55,6 @@ Cloud providers can build their services on top of the DASH flow to cater to var
 
 ![dash_flow_model](dash_flow_model.svg)
 
-
-
 The figure above illustrates the flow abstraction model. We represent flows as being stored within a flow table and managed through DASH flow SAI APIs. Flow entries, which contain the state information of flows, are organized within these flow tables. The key of a flow entry is utilized to retrieve its associated flow state. It's important to note that the ENI and flow table are not directly linked; for example, a single table can contain flow entries associated with various ENIs, and flows with the same ENI may span multiple flow tables. The choice of arrangement depends on specific scenarios.
 
 Upon the arrival of new flows, whether individually or in batches, corresponding flow entries are added to the table. These entries may represent either bidirectional or unidirectional flows. For bidirectional flows, the implementation adds entries for both the original flow and its reverse, linking their reverse flow keys to each other. For unidirectional flows, the current direction is specified. If a reverse flow for a unidirectional flow is created later, the user can add reverse keys for both and link them accordingly. 
@@ -65,8 +62,6 @@ Upon the arrival of new flows, whether individually or in batches, corresponding
 Flows can be modified and removed through the DASH flow SAI API and can also be aged by the hardware.
 
 For more use cases, please refer to [Smart Switch HA HLD](https://github.com/sonic-net/SONiC/blob/master/doc/smart-switch/high-availability/smart-switch-ha-hld.md).
-
-
 
 ## Flow Table APIs
 
@@ -235,8 +230,6 @@ These are the related attributes of flow rewrite.
 | SAI_FLOW_ENTRY_ATTR_SIP_MASK | `sai_ip_address_t` | Subnet mask for the source IP address.                       |
 | SAI_FLOW_ENTRY_ATTR_DIP_MASK | `sai_ip_address_t` | Subnet mask for the destination IP address.                  |
 
-#### 
-
 ### Flow Bulk Get Session
 
 We also define a flow entry bulk session for transferring data to a server via gRPC. It also supports filter operations to determine the range of data to be transferred. The APIs are define below.
@@ -346,14 +339,12 @@ message SaiFlowEntry {
   string underlay_dip = 13; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_DIP
   string underlay_smac = 14; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_SMAC
   string underlay_dmac = 15; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_DMAC
-  string original_overlay_sip = 16; // SAI_FLOW_ENTRY_ATTR_ORIGINAL_OVERLAY_SIP
-  string original_overlay_dip = 17; // SAI_FLOW_ENTRY_ATTR_ORIGINAL_OVERLAY_DIP
-  bool is_ipv6 = 18; // SAI_FLOW_ENTRY_ATTR_IS_IPV6
-  string d_mac = 19; // SAI_FLOW_ENTRY_ATTR_D_MAC
-  string sip = 20; // SAI_FLOW_ENTRY_ATTR_SIP
-  string dip = 21; // SAI_FLOW_ENTRY_ATTR_DIP
-  string sip_mask = 22; // SAI_FLOW_ENTRY_ATTR_SIP_MASK
-  string dip_mask = 23; // SAI_FLOW_ENTRY_ATTR_DIP_MASK
+  bool is_ipv6 = 16; // SAI_FLOW_ENTRY_ATTR_IS_IPV6
+  string d_mac = 17; // SAI_FLOW_ENTRY_ATTR_D_MAC
+  string sip = 18; // SAI_FLOW_ENTRY_ATTR_SIP
+  string dip = 19; // SAI_FLOW_ENTRY_ATTR_DIP
+  string sip_mask = 20; // SAI_FLOW_ENTRY_ATTR_SIP_MASK
+  string dip_mask = 21; // SAI_FLOW_ENTRY_ATTR_DIP_MASK
 }
 ```
 
