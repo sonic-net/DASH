@@ -12,7 +12,7 @@ action push_vxlan_tunnel_ ## underlay_id ## (inout headers_t hdr, \
                                        in IPv4Address underlay_dip, \
                                        in IPv4Address underlay_sip, \
                                        in bit<24> tunnel_key) { \
-    hdr. ## overlay_id ## _ethernet.dst_addr = overlay_dmac; \
+    hdr. ## overlay_id ## _ethernet.dst_addr = (overlay_dmac == 0) ? hdr. ## overlay_id ## _ethernet.dst_addr : overlay_dmac; \
     hdr. ## underlay_id ## _ethernet.setValid(); \
     hdr. ## underlay_id ## _ethernet.dst_addr = underlay_dmac; \
     hdr. ## underlay_id ## _ethernet.src_addr = underlay_smac; \
