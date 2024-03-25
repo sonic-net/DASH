@@ -49,7 +49,7 @@ Cloud providers can build their services on top of the DASH flow to cater to var
 
 ## Model
 
-![dash_flow_model](dash-flow-api-model.svg)
+![dash_flow_model](images/dash-flow-api-model.svg)
 
 The figure above illustrates the flow abstraction model. We represent flows as being stored within a flow table and managed through DASH flow SAI APIs. Flow entries, which contain the state information of flows, are organized within these flow tables. The key of a flow entry is utilized to retrieve its associated flow state. It's important to note that the ENI and flow table are not directly linked; for example, a single table can contain flow entries associated with various ENIs, and flows with the same ENI may span multiple flow tables. The choice of arrangement depends on specific scenarios.
 
@@ -190,6 +190,7 @@ These are the basic attributes of flow entry.
 | SAI_FLOW_ENTRY_ATTR_DASH_DIRECTION   | `sai_dash_direction_t`   | Direction of the DASH flow                                   |
 | SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION | `sai_dash_flow_action_t` | Action to be applied on the flow                             |
 | SAI_FLOW_ENTRY_ATTR_METER_CLASS      | `sai_uint16_t`           | Meter class for flow entry, used for traffic metering and policing. |
+| SAI_FLOW_SYNC_SESSION_STATE          |                          |                                                              |
 
 #### Reverse flow key
 
