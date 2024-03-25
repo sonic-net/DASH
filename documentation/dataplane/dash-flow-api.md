@@ -439,9 +439,6 @@ status = create_flow_entries(flow_table_id, flow_count, flow_key, attr_count, at
 ### Retrieve flow entry
 
 ```c
-uint32_t attr_count = ...; 
-sai_attribute_t attr_list[] = ...;
-
 sai_flow_entry_t flow_entry;
 flow_entry.flow_table_id = 0x112233;
 flow_entry.ip_protocol = 6;
@@ -453,7 +450,6 @@ flow_entry.src_l4_port = 12345;
 flow_entry.dst_l4_port = 80;
 
 status = get_flow_entry_attribute(flow_entry, attr_count, attr_list);
-
 ```
 
 ### Retrieve flow entries via flow entry bulk get session
