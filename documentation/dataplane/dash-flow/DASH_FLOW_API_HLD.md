@@ -1,5 +1,3 @@
-
-
 # DASH Flow API HLD
 
 | Rev | Date | Author | Change Description |
@@ -34,10 +32,9 @@
     - [Remove flow entry](#remove-flow-entry)
     - [Remove flow table](#remove-flow-table)
 
-
 ## Introduction
 
-DASH supports the storage and processing of millions of flow states. To further enhance the DASH flow processing capabilities, we offer a DASH flow abstraction layer to facilitate vendor-neutral flow management. This layer ensures uniform control over flows across programmable switches, DPUs, and smart switches. The DASH flow abstraction provides concepts of flow tables and flow entries, as well as APIs to manage the flows. 
+DASH supports the storage and processing of millions of flow states. To further enhance the DASH flow processing capabilities, we offer a DASH flow abstraction layer to facilitate vendor-neutral flow management. This layer ensures uniform control over flows across programmable switches, DPUs, and smart switches. The DASH flow abstraction provides concepts of flow tables and flow entries, as well as APIs to manage the flows.
 
 Cloud providers can build their services on top of the DASH flow to cater to various scenarios. They use the DASH flow to achieve SDN, re-simulation, dataplane applications, cloud gateways, and load balancing for their flow operations. This also lays the foundation for DASH to offer basic services based on foundational services, such as flow-level high availability.
 
@@ -51,13 +48,11 @@ Cloud providers can build their services on top of the DASH flow to cater to var
 
 ## Model
 
-
-
 ![dash_flow_model](dash_flow_model.svg)
 
 The figure above illustrates the flow abstraction model. We represent flows as being stored within a flow table and managed through DASH flow SAI APIs. Flow entries, which contain the state information of flows, are organized within these flow tables. The key of a flow entry is utilized to retrieve its associated flow state. It's important to note that the ENI and flow table are not directly linked; for example, a single table can contain flow entries associated with various ENIs, and flows with the same ENI may span multiple flow tables. The choice of arrangement depends on specific scenarios.
 
-Upon the arrival of new flows, whether individually or in batches, corresponding flow entries are added to the table. These entries may represent either bidirectional or unidirectional flows. For bidirectional flows, the implementation adds entries for both the original flow and its reverse, linking their reverse flow keys to each other. For unidirectional flows, the current direction is specified. If a reverse flow for a unidirectional flow is created later, the user can add reverse keys for both and link them accordingly. 
+Upon the arrival of new flows, whether individually or in batches, corresponding flow entries are added to the table. These entries may represent either bidirectional or unidirectional flows. For bidirectional flows, the implementation adds entries for both the original flow and its reverse, linking their reverse flow keys to each other. For unidirectional flows, the current direction is specified. If a reverse flow for a unidirectional flow is created later, the user can add reverse keys for both and link them accordingly.
 
 Flows can be modified and removed through the DASH flow SAI API and can also be aged by the hardware.
 
@@ -270,8 +265,6 @@ In the attributes, we enable the specification of the gRPC server and port. For 
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_IP   | `sai_ip_address_t`                                  | The IP address to use for the bulk get session.           |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_PORT | `sai_uint16_t`                                      | The port to use for the bulk get session.                 |
 
-
-
 ```c
 typedef enum _sai_dash_flow_entry_bulk_get_session_filter_key_t
 {
@@ -311,8 +304,6 @@ typedef enum _sai_dash_flow_entry_bulk_get_session_op_key_t
 
 } sai_dash_flow_entry_bulk_get_session_op_key_t;
 ```
-
-
 
 ### Protobuf-based flow programming
 
