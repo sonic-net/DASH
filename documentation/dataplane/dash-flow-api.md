@@ -20,13 +20,14 @@
       - [Reverse flow key](#reverse-flow-key)
       - [Flow encap](#flow-encap)
       - [Flow rewrite](#flow-rewrite)
+    - [Extra flow metadata](#extra-flow-metadata)
     - [Flow Bulk Get Session](#flow-bulk-get-session)
     - [Protobuf-based flow programming](#protobuf-based-flow-programming)
     - [Capability](#capability)
   - [Examples](#examples)
     - [Create flow table](#create-flow-table)
-    - [Create flow key](#create-flow-key)
-    - [Create attribute and flow entry](#create-attribute-and-flow-entry)
+    - [Create flow entry key](#create-flow-entry-key)
+    - [Create flow entry](#create-flow-entry)
     - [Add flow entries](#add-flow-entries)
     - [Retrieve flow entry](#retrieve-flow-entry)
     - [Retrieve flow entries via flow entry bulk get session](#retrieve-flow-entries-via-flow-entry-bulk-get-session)
@@ -232,6 +233,15 @@ These are the related attributes of flow rewrite.
 | SAI_FLOW_ENTRY_ATTR_SIP_MASK | `sai_ip_address_t` | Subnet mask for the source IP address.                       |
 | SAI_FLOW_ENTRY_ATTR_DIP_MASK | `sai_ip_address_t` | Subnet mask for the destination IP address.                  |
 
+### Extra flow metadata
+
+Here are some extra metadata for different purposes.
+
+| Attribute name                      | Type            | Description                                                  |
+| ----------------------------------- | --------------- | ------------------------------------------------------------ |
+| SAI_FLOW_ENTRY_ATTR_VENDOR_METADATA | `sai_u8_list_t` | Vendor-specific metadata that can be attached to the flow entry for custom processing. |
+| SAI_FLOW_ENTRY_ATTR_FLOW_DATA_PB    | `sai_u8_list_t` | The flow data protocol buffer enables high-efficiency creation, retrieval, and communication for a flow entry. |
+
 ### Flow Bulk Get Session
 
 To manage data transfer to a server via gRPC, we introduce a flow entry bulk session that incorporates filtering capabilities to precisely define the data range for transfer. The procedure for setting up these filters is straightforward:
@@ -333,7 +343,7 @@ Although the content of both attributes and protobuf may be identical, their app
 ```protobuf
 syntax = "proto3";
 
-message SaiFlowEntry {
+message SaiDashFlowMetadata {
   uint32 version = 1; // SAI_FLOW_ENTRY_ATTR_VERSION
   uint32 dash_flow_action = 2; // SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION
   uint32 meter_class = 3; // SAI_FLOW_ENTRY_ATTR_METER_CLASS
@@ -359,7 +369,12 @@ message SaiFlowEntry {
 
 ### Capability
 
-Ffffffff
+|                                                    | Type           | Description                                                  |
+| -------------------------------------------------- | -------------- | ------------------------------------------------------------ |
+| SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_TABLE_COUNT     | `sai_uint32_t` | The max number of flow tables that can be created            |
+| SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_ENTRY_COUNT     | `sai_uint32_t` | The max number of flow entries that can be created in a flow table |
+| SAI_SWITCH_ATTR_DASH_CAPS_BULK_GET_SESSION         | `bool`         | Indicates if it supports bulk get sessions                   |
+| SAI_SWITCH_ATTR_DASH_CAPS_BIDIRECTIONAL_FLOW_ENTRY | `bool`         | Indicates if it supports bi-directional flow entry           |
 
 ## Examples
 
@@ -379,12 +394,12 @@ attr_list[0].value = SAI_DASH_FLOW_ENABLED_KEY_PROTOCOL |
                          SAI_DASH_FLOW_ENABLED_KEY_SRC_PORT | 
                          SAI_DASH_FLOW_ENABLED_KEY_DST_PORT;
 ...  
-sai_object_id_t flow_table_id;
 
+sai_object_id_t flow_table_id;
 sai_status_t status = create_flow_table(&flow_table_id, switch_id, attr_count, attr_list);
 ```
 
-### Create flow key
+### Create flow entry key
 
 ```c
 
@@ -398,10 +413,9 @@ flow_entry.dst_ip_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
 inet_pton(AF_INET, "192.168.1.2", &flow_entry.dst_ip_addr.addr.ip4);
 flow_entry.src_l4_port = 12345;
 flow_entry.dst_l4_port = 80;
-
 ```
 
-### Create attribute and flow entry
+### Create flow entry
 
 ```c
 SaiDashFlowMetadata flow_metadata = SAI_DASH_FLOW_METADATA__INIT;
@@ -413,12 +427,11 @@ unsigned len = sai_dash_flow_metadata__get_packed_size(&flow_metadata);
 uint8_t *buf = malloc(len);
 sai_dash_flow_metadata__pack(&flow_metadata, buf);
 
-uint32_t attr_count = 1;
 sai_attribute_t sai_attrs_list[1];
-sai_attrs_list[0].id = SAI_FLOW_ENTRY_ATTR_FLOW_PROTOBUF;
+sai_attrs_list[0].id = SAI_FLOW_ENTRY_ATTR_FLOW_DATA_PB;
 sai_attr_list[0].value = buf;
 
-sai_status_t status = create_flow_entry(&flow_entry_example, attr_count, attr_list);
+sai_status_t status = create_flow_entry(&flow_entry, 1, attr_list);
 
 free(buf);
 ```
@@ -433,7 +446,6 @@ sai_attribute_t *attr_list[] = ...;
 sai_status_t object_statuses[] = ...; 
 
 status = create_flow_entries(flow_table_id, flow_count, flow_key, attr_count, attr_list, SAI_BULK_OP_ERROR_MODE_IGNORE_ERROR, object_statuses);
-
 ```
 
 ### Retrieve flow entry
