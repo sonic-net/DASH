@@ -461,7 +461,7 @@ status = get_flow_entry_attribute(flow_entry, attr_count, attr_list);
 Example: Retrieve flow entries by filtering for all versions greater than 3 and less than 5, and return the results via GRPC.
 
 ```c
-/* Filter Version > 3 */
+/* Filter: Flow Entry Version > 3 */
 sai_attribute_t filter1_attr_list[3];
 filter1_attr_list[0].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY;
 filter1_attr_list[0].value = SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_KEY_VERSION;
@@ -473,7 +473,7 @@ filter1_attr_list[2].value = 3;
 sai_object_id_t filter1_id;
 status = create_flow_entry_bulk_get_session_filter(&filter1_id, switch_id, 3, filter1_attr_list);
 
-/* Filter Version < 5 */
+/* Filter: Flow Entry Version < 5 */
 sai_attribute_t filter2_attr_list[3];
 filter2_attr_list[0].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY;
 filter2_attr_list[0].value = SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_KEY_VERSION;
