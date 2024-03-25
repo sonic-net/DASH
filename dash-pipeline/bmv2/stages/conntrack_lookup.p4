@@ -52,7 +52,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         
         /* Overlay rewrite metadata */
         bit<1> is_ipv6,
-        EthernetAddress dmac,
+        EthernetAddress dst_mac,
         IPv4ORv6Address sip,
         IPv4ORv6Address dip,
         IPv6Address sip_mask,
@@ -92,7 +92,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
 
         /* Set overlay rewrite metadata */
         meta.overlay_data.is_ipv6 = (is_ipv6 == 1);
-        meta.overlay_data.dmac = dmac;
+        meta.overlay_data.dmac = dst_mac;
         meta.overlay_data.sip = sip;
         meta.overlay_data.dip = dip;
         meta.overlay_data.sip_mask = sip_mask;
