@@ -36,7 +36,7 @@
 
 DASH supports the storage and processing of millions of flow states. To further enhance the DASH flow processing capabilities, we offer a DASH flow abstraction layer to facilitate vendor-neutral flow management. This layer ensures uniform control over flows across programmable switches, DPUs, and smart switches. The DASH flow abstraction provides concepts of flow tables and flow entries, as well as APIs to manage the flows.
 
-Cloud providers can build their services on top of the DASH flow to cater to various scenarios. They use the DASH flow to achieve SDN, re-simulation, dataplane applications, cloud gateways, and load balancing for their flow operations. This also lays the foundation for DASH to offer basic services based on foundational services, such as flow-level high availability.
+Cloud providers can build their services on top of the DASH flow to cater to various scenarios. They use the DASH flow to achieve SDN, re-simulation, dataplane applications, cloud gateways, and load balancing for their flow operations. This also lays the foundation for DASH to offer foundational services, such as flow-level high availability and debuggability.
 
 ## Terminology
 
