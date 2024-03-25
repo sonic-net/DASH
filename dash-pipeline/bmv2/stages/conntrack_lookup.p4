@@ -63,6 +63,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
 
         /* Reverse flow info */ 
         bit<1> is_bidirectional_flow,
+        EthernetAddress reverse_eni_addr,
         bit<8> reverse_ip_protocol,
         IPv4ORv6Address src_ip_addr,
         IPv4ORv6Address dst_ip_addr, 
@@ -113,12 +114,12 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
     table flow_entry {
         key = {
             meta.conntrack_data.flow_table.id: exact @SaiVal[name = "flow_table_id", type="sai_object_id_t"];
+            meta.conntrack_data.eni_addr : exact;
             meta.conntrack_data.flow_key.ip_protocol : exact;
             meta.conntrack_data.flow_key.src_ip_addr : exact;
             meta.conntrack_data.flow_key.dst_ip_addr : exact;
             meta.conntrack_data.flow_key.src_l4_port : exact;
             meta.conntrack_data.flow_key.dst_l4_port : exact;
-            meta.eni_addr : exact;
         }
 
         actions = {
@@ -127,24 +128,48 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
     }
     
     //
-    // Flow bulk get session:
+    // Flow bulk get session filter:
     //
-    action set_flow_entry_bulk_get_session_attr(
-        /* Filter 1 */
+    action set_flow_entry_bulk_get_session_filter_attr(
         @SaiVal[type="sai_dash_flow_entry_bulk_get_session_filter_key_t"] dash_flow_entry_bulk_get_session_filter_key_t dash_flow_entry_bulk_get_session_filter_key, 
         @SaiVal[type="sai_dash_flow_entry_bulk_get_session_op_key_t"] dash_flow_entry_bulk_get_session_op_key_t  dash_flow_entry_bulk_get_session_op_key,
         bit<64> int_value,
-        IPv4ORv6Address ip_value,
-
-        /* GRPC Session server IP and port */
-        IPv4ORv6Address bulk_get_session_ip,
-        bit<16> bulk_get_session_port)
+        IPv4ORv6Address ip_value)
     {
-        // To-Do
     }
 
-    @SaiTable[name = "flow_entry_bulk_get_session", api = "dash_flow", order = 2, isobject="true"]
-    table flow_entry_bulk_get_session{
+    //
+    // Flow bulk get session:
+    //
+    action set_flow_entry_bulk_get_session_attr(
+        /* GRPC Session server IP and port */
+        IPv4ORv6Address bulk_get_session_ip,
+        bit<16> bulk_get_session_port,
+
+        /* Session filters */ 
+        @SaiVal[type="sai_object_id_t"] bit<16> first_flow_entry_bulk_get_session_filter_id,
+        @SaiVal[type="sai_object_id_t"] bit<16> second_flow_entry_bulk_get_session_filter_id,
+        @SaiVal[type="sai_object_id_t"] bit<16> third_flow_entry_bulk_get_session_filter_id,
+        @SaiVal[type="sai_object_id_t"] bit<16> fourth_flow_entry_bulk_get_session_filter_id,
+        @SaiVal[type="sai_object_id_t"] bit<16> fifth_flow_entry_bulk_get_session_filter_id)
+    {
+    }
+
+     
+
+    @SaiTable[name = "flow_entry_bulk_get_session_filter", api = "dash_flow", order = 2, isobject="true"]
+    table flow_entry_bulk_get_session_filter {
+        key = {
+            meta.conntrack_data.bulk_get_session_filter_id: exact @SaiVal[name = "bulk_get_session_filter_id", type="sai_object_id_t"];
+        }
+
+        actions = {
+            set_flow_entry_bulk_get_session_filter_attr;
+        }
+    }
+
+   @SaiTable[name = "flow_entry_bulk_get_session", api = "dash_flow", order = 3, isobject="true"]
+    table flow_entry_bulk_get_session {
         key = {
             meta.conntrack_data.bulk_get_session_id: exact @SaiVal[name = "bulk_get_session_id", type="sai_object_id_t"];
         }
@@ -156,9 +181,9 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
 
     apply {
         flow_table.apply();
-        
-        if (meta.conntrack_data.flow_table.flow_enabled_key & dash_flow_enabled_key_t.ENI  != 0) {
-            meta.conntrack_data.flow_data.version = meta.version;
+
+        if (meta.conntrack_data.flow_table.flow_enabled_key & dash_flow_enabled_key_t.ENI_ADDR  != 0) {
+            meta.conntrack_data.flow_key.eni_addr = meta.eni_addr;
         }
         if (meta.conntrack_data.flow_table.flow_enabled_key & dash_flow_enabled_key_t.PROTOCOL  != 0) {
             meta.conntrack_data.flow_key.ip_protocol = meta.ip_protocol;
@@ -179,7 +204,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         }
 
         flow_entry.apply();
-
+        flow_entry_bulk_get_session_filter.apply();
         flow_entry_bulk_get_session.apply();
     }
 }
