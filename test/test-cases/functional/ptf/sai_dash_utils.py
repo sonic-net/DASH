@@ -442,8 +442,8 @@ class VnetAPI(VnetObjects):
                                                src_mac=neighbor.peer.mac)
             nhop = self.nexthop_create(rif, neighbor.ip)
             self.neighbor_create(rif, neighbor.ip, neighbor.mac)
-            if add_routes is True:
-                self.route_create(neighbor.ip_prefix, nhop)
+            #if add_routes is True:
+            #    self.route_create(neighbor.ip_prefix, nhop)
 
 
 class VnetApiEndpoints(VnetAPI):

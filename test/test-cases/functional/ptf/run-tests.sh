@@ -3,7 +3,7 @@
 
 SCRIPT=$(basename $0)
 TARGET="bmv2"  # TODO: add no target by default and remove -H
-TRAFFIC="bidir"
+TRAFFIC="monodir"
 CONNECTION="tcp"
 TEST_DIR="$(dirname $0)"
 EXTRA_PARAMETERS=""
