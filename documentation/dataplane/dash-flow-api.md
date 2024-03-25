@@ -184,13 +184,13 @@ The attributes of the flow entry can be divided into different categories. Pleas
 
 These are the basic attributes of flow entry.
 
-| Attribute name                       | Type                     | Description                                                  |
-| ------------------------------------ | ------------------------ | ------------------------------------------------------------ |
-| SAI_FLOW_ENTRY_ATTR_VERSION          | `sai_uint32_t`           | Version of the flow entry                                    |
-| SAI_FLOW_ENTRY_ATTR_DASH_DIRECTION   | `sai_dash_direction_t`   | Direction of the DASH flow                                   |
-| SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION | `sai_dash_flow_action_t` | Action to be applied on the flow                             |
-| SAI_FLOW_ENTRY_ATTR_METER_CLASS      | `sai_uint16_t`           | Meter class for flow entry, used for traffic metering and policing. |
-| SAI_FLOW_SYNC_SESSION_STATE          |                          |                                                              |
+| Attribute name                       | Type                                                         | Description                                                  |
+| ------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| SAI_FLOW_ENTRY_ATTR_VERSION          | `sai_uint32_t`                                               | Version of the flow entry                                    |
+| SAI_FLOW_ENTRY_ATTR_DASH_DIRECTION   | `sai_dash_direction_t`                                       | Direction of the DASH flow                                   |
+| SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION | `sai_dash_flow_action_t`                                     | Action to be applied on the flow                             |
+| SAI_FLOW_ENTRY_ATTR_METER_CLASS      | `sai_uint16_t`                                               | Meter class for flow entry, used for traffic metering and policing. |
+| SAI_FLOW_SYNC_SESSION_STATE          | @type `sai_object_id_t` @objects: `DASH_FLOW_SYNC_SESSION_STATE` | Indicates the flow sync session state                        |
 
 #### Reverse flow key
 
@@ -199,6 +199,7 @@ When configuring a flow_entry, it can be specified whether it is unidirectional 
 | Attribute name                            | Type               | Description                                 |
 | ----------------------------------------- | ------------------ | ------------------------------------------- |
 | SAI_FLOW_ENTRY_ATTR_IS_BIDIRECTIONAL_FLOW | `bool`             | Indicates if the flow is bidirectional      |
+| SAI_FLOW_ENTRY_ATTR_REVERSE_ENI_ADDR      | `sai_mac_t`        | Eni mac addr for the recerse flow           |
 | SAI_FLOW_ENTRY_ATTR_REVERSE_IP_PROTOCOL   | `sai_uint8_t`      | IP protocol number for the reverse flow     |
 | SAI_FLOW_ENTRY_ATTR_REVERSE_IP_ADDR       | `sai_ip_address_t` | Source IP address for the reverse flow      |
 | SAI_FLOW_ENTRY_ATTR_REVERSE_IP_ADDR       | `sai_ip_address_t` | Destination IP address for the reverse flow |
@@ -225,7 +226,7 @@ These are the related attributes of flow rewrite.
 | Attribute name               | Type               | Description                                                  |
 | ---------------------------- | ------------------ | ------------------------------------------------------------ |
 | SAI_FLOW_ENTRY_ATTR_IS_IPV6  | `bool`             | Indicates whether the flow is IPv6 (true) or IPv4 (false).   |
-| SAI_FLOW_ENTRY_ATTR_D_MAC    | `sai_mac_t`        | Destination MAC address for the flow entry.                  |
+| SAI_FLOW_ENTRY_ATTR_DST_MAC  | `sai_mac_t`        | Destination MAC address for the flow entry.                  |
 | SAI_FLOW_ENTRY_ATTR_SIP      | `sai_ip_address_t` | Source IP address for the flow entry, supporting both IPv4 and IPv6. |
 | SAI_FLOW_ENTRY_ATTR_DIP      | `sai_ip_address_t` | Destination IP address for the flow entry, supporting both IPv4 and IPv6. |
 | SAI_FLOW_ENTRY_ATTR_SIP_MASK | `sai_ip_address_t` | Subnet mask for the source IP address.                       |
@@ -233,43 +234,30 @@ These are the related attributes of flow rewrite.
 
 ### Flow Bulk Get Session
 
-We also define a flow entry bulk session for transferring data to a server via gRPC. It also supports filter operations to determine the range of data to be transferred. The APIs are define below.
+To manage data transfer to a server via gRPC, we introduce a flow entry bulk session that incorporates filtering capabilities to precisely define the data range for transfer. The procedure for setting up these filters is straightforward:
 
-| Function                                  | Description                                                 |
-| ----------------------------------------- | ----------------------------------------------------------- |
-| create_flow_entry_bulk_get_session        | Add a single new session for flow entry bulk get feature    |
-| remove_flow_entry_bulk_get_session        | Remove a single new session for flow entry bulk get feature |
-| set_flow_entry_bulk_get_session_attribute | Set attributes for a single session                         |
-| get_flow_entry_bulk_get_session_attribute | Get attributes of a single session                          |
-| create_flow_entry_bulk_get_sessions       | Add multiple new sessions for flow entry bulk get feature   |
-| remove_flow_entry_bulk_get_sessions       | Remove multiple sessions for flow entry bulk get feature    |
+1. Initially, create up to five flow bulk get session filters based on the specific needs for filtering the flows.
+2. Subsequently, establish a flow bulk get session filter and integrate these filters as attributes.
 
-In the attributes, we enable the specification of the gRPC server and port. For flow entry filtering, we provide support for a total of five filter operations. Each filter operation requires the specification of a filter key, operation (op), and value. The value can be either an INT or an IP address. Different filters are combined using an *AND* operation for filtering purposes.
+For example, consider the scenario where it's necessary to select all flow entries with a version less than 5 and greater than version 3. In this case, two distinct filters should be defined to meet the criteria and then create the flow entry bulk session.
 
-| Attribute Name                                             | Type                                                | Description                                               |
-| ---------------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------------- |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FILTER_KEY1           | `sai_dash_flow_entry_bulk_get_session_filter_key_t` | Specifies the first filter key for the bulk get session.  |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FILTER_OP1            | `sai_dash_flow_entry_bulk_get_session_op_key_t`     | Operation to apply for the first filter key.              |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_INT_VALUE1            | `sai_uint64_t`                                      | Integer value for the first filter condition.             |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_IP_VALUE1             | `sai_ip_address_t`                                  | IP address value for the first filter condition.          |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FILTER_KEY2           | `sai_dash_flow_entry_bulk_get_session_filter_key_t` | Specifies the second filter key for the bulk get session. |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FILTER_OP2            | `sai_dash_flow_entry_bulk_get_session_op_key_t`     | Operation to apply for the second filter key.             |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_INT_VALUE2            | `sai_uint64_t`                                      | Integer value for the second filter condition.            |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_IP_VALUE2             | `sai_ip_address_t`                                  | IP address value for the second filter condition.         |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FILTER_KEY3           | `sai_dash_flow_entry_bulk_get_session_filter_key_t` | Specifies the third filter key for the bulk get session.  |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FILTER_OP3            | `sai_dash_flow_entry_bulk_get_session_op_key_t`     | Operation to apply for the third filter key.              |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_INT_VALUE3            | `sai_uint64_t`                                      | Integer value for the third filter condition.             |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_IP_VALUE3             | `sai_ip_address_t`                                  | IP address value for the third filter condition.          |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FILTER_KEY4           | `sai_dash_flow_entry_bulk_get_session_filter_key_t` | Specifies the fourth filter key for the bulk get session. |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FILTER_OP4            | `sai_dash_flow_entry_bulk_get_session_op_key_t`     | Operation to apply for the fourth filter key.             |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_INT_VALUE4            | `sai_uint64_t`                                      | Integer value for the fourth filter condition.            |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_IP_VALUE4             | `sai_ip_address_t`                                  | IP address value for the fourth filter condition.         |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FILTER_KEY5           | `sai_dash_flow_entry_bulk_get_session_filter_key_t` | Specifies the fifth filter key for the bulk get session.  |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FILTER_OP5            | `sai_dash_flow_entry_bulk_get_session_op_key_t`     | Operation to apply for the fifth filter key.              |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_INT_VALUE5            | `sai_uint64_t`                                      | Integer value for the fifth filter condition.             |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_IP_VALUE5             | `sai_ip_address_t`                                  | IP address value for the fifth filter condition.          |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_IP   | `sai_ip_address_t`                                  | The IP address to use for the bulk get session.           |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_PORT | `sai_uint16_t`                                      | The port to use for the bulk get session.                 |
+The filter, defined as an object, is specified as follows:
+
+| Function                                         | Description                                                  |
+| ------------------------------------------------ | ------------------------------------------------------------ |
+| create_flow_entry_bulk_get_session_filter        | Add a single new filter for flow entry bulk get session feature. |
+| remove_flow_entry_bulk_get_session_filter        | Remove a single filter for flow entry bulk get session feature. |
+| set_flow_entry_bulk_get_session_filter_attribute | Set attributes for a single filter in flow entry bulk get session. |
+| get_flow_entry_bulk_get_session_filter_attribute | Get attributes of a single filter in flow entry bulk get session. |
+| create_flow_entry_bulk_get_session_filters       | Add multiple new filters for flow entry bulk get session feature. |
+| remove_flow_entry_bulk_get_session_filters       | Remove multiple filters for flow entry bulk get session feature. |
+
+| Attribute Name                                               | Type                                                | Description                                                 |
+| ------------------------------------------------------------ | --------------------------------------------------- | ----------------------------------------------------------- |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY | `sai_dash_flow_entry_bulk_get_session_filter_key_t` | Key of the filter                                           |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_OP_KEY | `sai_dash_flow_entry_bulk_get_session_op_key_t`     | Operation of the filter                                     |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_INT_VALUE        | `sai_uint64_t`                                      | INT Value of the filter (Mutually exclusive with IP Value.) |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_IP_VALUE         | `sai_ip_address_t`                                  | IP Value of the filter (Mutually exclusive with INT Value.) |
 
 ```c
 typedef enum _sai_dash_flow_entry_bulk_get_session_filter_key_t
@@ -277,6 +265,8 @@ typedef enum _sai_dash_flow_entry_bulk_get_session_filter_key_t
     SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_INVAILD,
 
     SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_FLOW_TABLE_ID,
+
+    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_ENI_ADDR,
 
     SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_IP_PROTOCOL,
 
@@ -311,6 +301,29 @@ typedef enum _sai_dash_flow_entry_bulk_get_session_op_key_t
 } sai_dash_flow_entry_bulk_get_session_op_key_t;
 ```
 
+Upon establishing the bulk get session filters, we can initiate a flow bulk get session, which is defined as follows:
+
+| Function                                  | Description                                                 |
+| ----------------------------------------- | ----------------------------------------------------------- |
+| create_flow_entry_bulk_get_session        | Add a single new session for flow entry bulk get feature    |
+| remove_flow_entry_bulk_get_session        | Remove a single new session for flow entry bulk get feature |
+| set_flow_entry_bulk_get_session_attribute | Set attributes for a single session                         |
+| get_flow_entry_bulk_get_session_attribute | Get attributes of a single session                          |
+| create_flow_entry_bulk_get_sessions       | Add multiple new sessions for flow entry bulk get feature   |
+| remove_flow_entry_bulk_get_sessions       | Remove multiple sessions for flow entry bulk get feature    |
+
+In the attributes, we allow specifying the gRPC server and port. For filtering flow entries, we support up to five filters. Each filter is a bulk get session filter object, and different filters are combined using an *AND* operation. If no filters are specified, the bulk get session returns all flow entries.
+
+| Attribute Name                                               | Type                                                         | Description                                                  |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_IP     | `sai_ip_address_t`                                           | The IP address to use for the bulk get session.              |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_PORT   | `sai_uint16_t`                                               | The port to use for the bulk get session.                    |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FIRST_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID | @type: `sai_object_id_t` @objects `SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER` | Action set_flow_entry_bulk_get_session_attr parameter BULK_GET_SESSION_IP |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_SECOND_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID | @type: `sai_object_id_t` @objects `SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER` | Action set_flow_entry_bulk_get_session_attr parameter BULK_GET_SESSION_PORT |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_THIRD_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID | @type: `sai_object_id_t` @objects `SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER` | Action set_flow_entry_bulk_get_session_attr parameter FIRST_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FOURTH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID | @type: `sai_object_id_t` @objects `SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER` | Action set_flow_entry_bulk_get_session_attr parameter SECOND_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FIFTH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID | @type: `sai_object_id_t` @objects `SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER` | Action set_flow_entry_bulk_get_session_attr parameter THIRD_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID |
+
 ### Protobuf-based flow programming
 
 In addition to the flow state attributes, the flow state can be represented using protobuf for high-efficiency. The attribute of the flow entry is SAI_FLOW_ENTRY_ATTR_FLOW_DATA_PB.
@@ -321,31 +334,32 @@ Although the content of both attributes and protobuf may be identical, their app
 syntax = "proto3";
 
 message SaiFlowEntry {
-  uint64 flow_table_id = 1;
-  uint32 version = 2; // SAI_FLOW_ENTRY_ATTR_VERSION
-  DashEncapsulation dash_flow_action = 3; // SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION combined with dash_encapsulation for simplicity
-  uint32 meter_class = 4; // SAI_FLOW_ENTRY_ATTR_METER_CLASS
-  bool is_bidirectional_flow = 5; // SAI_FLOW_ENTRY_ATTR_IS_BIDIRECTIONAL_FLOW
-  uint8 reverse_ip_protocol = 6; // SAI_FLOW_ENTRY_ATTR_REVERSE_IP_PROTOCOL
-  string reverse_src_ip_addr = 7; // SAI_FLOW_ENTRY_ATTR_REVERSE_IP_ADDR for source
-  string reverse_dst_ip_addr = 8; // SAI_FLOW_ENTRY_ATTR_REVERSE_IP_ADDR for destination
-  uint32 reverse_src_l4_port = 9; // SAI_FLOW_ENTRY_ATTR_REVERSE_SRC_L4_PORT
-  uint32 reverse_dst_l4_port = 10; // SAI_FLOW_ENTRY_ATTR_REVERSE_DST_L4_PORT
-  uint32 dest_vnet_vni = 11; // SAI_FLOW_ENTRY_ATTR_DEST_VNET_VNI
-  string underlay_sip = 12; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_SIP
-  string underlay_dip = 13; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_DIP
-  string underlay_smac = 14; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_SMAC
-  string underlay_dmac = 15; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_DMAC
-  bool is_ipv6 = 16; // SAI_FLOW_ENTRY_ATTR_IS_IPV6
-  string d_mac = 17; // SAI_FLOW_ENTRY_ATTR_D_MAC
-  string sip = 18; // SAI_FLOW_ENTRY_ATTR_SIP
-  string dip = 19; // SAI_FLOW_ENTRY_ATTR_DIP
-  string sip_mask = 20; // SAI_FLOW_ENTRY_ATTR_SIP_MASK
-  string dip_mask = 21; // SAI_FLOW_ENTRY_ATTR_DIP_MASK
+  uint32 version = 1; // SAI_FLOW_ENTRY_ATTR_VERSION
+  uint32 dash_flow_action = 2; // SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION
+  uint32 meter_class = 3; // SAI_FLOW_ENTRY_ATTR_METER_CLASS
+  bool is_bidirectional_flow = 4; // SAI_FLOW_ENTRY_ATTR_IS_BIDIRECTIONAL_FLOW
+  uint8 reverse_ip_protocol = 5; // SAI_FLOW_ENTRY_ATTR_REVERSE_IP_PROTOCOL
+  string reverse_src_ip_addr = 6; // SAI_FLOW_ENTRY_ATTR_REVERSE_IP_ADDR for source
+  string reverse_dst_ip_addr = 7; // SAI_FLOW_ENTRY_ATTR_REVERSE_IP_ADDR for destination
+  uint32 reverse_src_l4_port = 8; // SAI_FLOW_ENTRY_ATTR_REVERSE_SRC_L4_PORT
+  uint32 reverse_dst_l4_port = 9; // SAI_FLOW_ENTRY_ATTR_REVERSE_DST_L4_PORT
+  uint32 dest_vnet_vni = 10; // SAI_FLOW_ENTRY_ATTR_DEST_VNET_VNI
+  string underlay_sip = 11; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_SIP
+  string underlay_dip = 12; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_DIP
+  string underlay_smac = 13; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_SMAC
+  string underlay_dmac = 14; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_DMAC
+  bool is_ipv6 = 15; // SAI_FLOW_ENTRY_ATTR_IS_IPV6
+  string dst_mac = 16; // SAI_FLOW_ENTRY_ATTR_DEST_MAC
+  string sip = 17; // SAI_FLOW_ENTRY_ATTR_SIP
+  string dip = 18; // SAI_FLOW_ENTRY_ATTR_DIP
+  string sip_mask = 19; // SAI_FLOW_ENTRY_ATTR_SIP_MASK
+  string dip_mask = 20; // SAI_FLOW_ENTRY_ATTR_DIP_MASK
 }
 ```
 
 ### Capability
+
+Ffffffff
 
 ## Examples
 
@@ -447,30 +461,43 @@ status = get_flow_entry_attribute(flow_entry, attr_count, attr_list);
 Example: Retrieve flow entries by filtering for all versions greater than 3 and less than 5, and return the results via GRPC.
 
 ```c
-sai_attribute_t attr_list[3];
+/* Filter Version > 3 */
+sai_attribute_t filter1_attr_list[3];
+filter1_attr_list[0].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY;
+filter1_attr_list[0].value = SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_KEY_VERSION;
+filter1_attr_list[1].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_OP_KEY;
+filter1_attr_list[1].value = SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_OP_KEY_FILTER_OP_GREATER_THAN,;
+filter1_attr_list[2].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_INT_VALUE;
+filter1_attr_list[2].value = 3;
 
-attr_list[0].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FILTER_KEY1,;
-attr_list[0].value = SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_KEY_VERSION;
-attr_list[1].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FILTER_OP1;
-attr_list[1].value = SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_OP_KEY_FILTER_OP_GREATER_THAN,;
-attr_list[2].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_INT_VALUE1;
-attr_list[2].value = 3;
+sai_object_id_t filter1_id;
+status = create_flow_entry_bulk_get_session_filter(&filter1_id, switch_id, 3, filter1_attr_list);
 
-attr_list[3].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FILTER_KEY2,;
-attr_list[3].value = SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_KEY_VERSION;
-attr_list[4].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FILTER_OP2;
-attr_list[4].value = SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_OP_KEY_FILTER_OP_LESS_THAN;
-attr_list[5].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_INT_VALUE2;
-attr_list[5].value = 5;
+/* Filter Version < 5 */
+sai_attribute_t filter2_attr_list[3];
+filter2_attr_list[0].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY;
+filter2_attr_list[0].value = SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_KEY_VERSION;
+filter2_attr_list[1].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_OP_KEY;
+filter2_attr_list[1].value = SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_OP_KEY_FILTER_OP_LESS_THAN;
+filter2_attr_list[2].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_INT_VALUE;
+filter2_attr_list[2].value = 5;
 
-attr_list[6].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_IP;
-inet_pton(AF_INET, "10.0.0.1", &attr_list[6].value.addr.ip4);
-attr_list[7].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_PORT;
-attr_list[7].value = 1000;
+sai_object_id_t filter2_id;
+status = create_flow_entry_bulk_get_session_filter(&filter2_id, switch_id, 3, filter2_attr_list);
+
+/* Session */
+sai_attribute_t session_attr_list[4];
+session_attr_list[0].value.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
+inet_pton(AF_INET, "10.0.0.1", &(session_attr_list[0].value.addr.ip4));
+session_attr_list[1].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_PORT;
+session_attr_list[1].value = 1000;
+session_attr_list[2].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FIRST_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID;
+session_attr_list[2].value = filter1_id;
+session_attr_list[3].id = SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_SECOND_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID;
+session_attr_list[3].value = filter2_id;
 
 sai_object_id_t flow_entry_bulk_get_session_id;
-status = create_flow_entry_bulk_get_session(&flow_entry_bulk_get_session_id, 0, 8, attr_list);
-
+status = create_flow_entry_bulk_get_session(&flow_entry_bulk_get_session_id, switch_id, 4, session_attr_list);
 ```
 
 ### Remove flow entry
