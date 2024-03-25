@@ -369,7 +369,7 @@ message SaiDashFlowMetadata {
 
 ### Capability
 
-|                                                    | Type           | Description                                                  |
+| Attribute Name                                     | Type           | Description                                                  |
 | -------------------------------------------------- | -------------- | ------------------------------------------------------------ |
 | SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_TABLE_COUNT     | `sai_uint32_t` | The max number of flow tables that can be created            |
 | SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_ENTRY_COUNT     | `sai_uint32_t` | The max number of flow entries that can be created in a flow table |
