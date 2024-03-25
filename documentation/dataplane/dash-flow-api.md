@@ -127,9 +127,6 @@ Please note that there is an attribute in the *flow_table* that can specify whic
 The *flow_table_id* is used to designate the flow table for the flow only, which is not used in match and action.
 
 ```c
-/**
- * @brief Entry for flow_entry
- */
 typedef struct _sai_flow_entry_t
 {
     /**
@@ -145,6 +142,11 @@ typedef struct _sai_flow_entry_t
      * @objects SAI_OBJECT_TYPE_FLOW_TABLE
      */
     sai_object_id_t flow_table_id;
+
+    /**
+     * @brief Exact matched key eni_addr
+     */
+    sai_mac_t eni_addr;
 
     /**
      * @brief Exact matched key ip_protocol
