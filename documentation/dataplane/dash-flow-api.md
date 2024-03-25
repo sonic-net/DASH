@@ -22,6 +22,7 @@
       - [Flow rewrite](#flow-rewrite)
     - [Flow Bulk Get Session](#flow-bulk-get-session)
     - [Protobuf-based flow programming](#protobuf-based-flow-programming)
+    - [Capability](#capability)
   - [Examples](#examples)
     - [Create flow table](#create-flow-table)
     - [Create flow key](#create-flow-key)
@@ -86,15 +87,17 @@ typedef enum _sai_dash_flow_enabled_key_t
 {
     SAI_DASH_FLOW_ENABLED_KEY_NONE = 0,
 
-    SAI_DASH_FLOW_ENABLED_KEY_PROTOCOL = 1 << 0,
+    SAI_DASH_FLOW_ENABLED_KEY_ENI_ADDR = 1 << 1,
 
-    SAI_DASH_FLOW_ENABLED_KEY_SRC_IP = 1 << 1,
+    SAI_DASH_FLOW_ENABLED_KEY_PROTOCOL = 1 << 2,
 
-    SAI_DASH_FLOW_ENABLED_KEY_DST_IP = 1 << 2,
+    SAI_DASH_FLOW_ENABLED_KEY_SRC_IP = 1 << 3,
 
-    SAI_DASH_FLOW_ENABLED_KEY_SRC_PORT = 1 << 3,
+    SAI_DASH_FLOW_ENABLED_KEY_DST_IP = 1 << 4,
 
-    SAI_DASH_FLOW_ENABLED_KEY_DST_PORT = 1 << 4,
+    SAI_DASH_FLOW_ENABLED_KEY_SRC_PORT = 1 << 5,
+
+    SAI_DASH_FLOW_ENABLED_KEY_DST_PORT = 1 << 6,
 
 } sai_dash_flow_enabled_key_t;
 ```
@@ -338,6 +341,8 @@ message SaiFlowEntry {
   string dip_mask = 21; // SAI_FLOW_ENTRY_ATTR_DIP_MASK
 }
 ```
+
+### Capability
 
 ## Examples
 
