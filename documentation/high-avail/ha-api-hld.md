@@ -218,15 +218,8 @@ typedef struct _sai_ha_set_event_data_t
     /** HA set id */
     sai_object_id_t ha_set_id;
 
-    /** Attributes count */
-    uint32_t attr_count;
-
-    /**
-     * @brief Attributes
-     *
-     * @objects SAI_OBJECT_TYPE_HA_SET
-     */
-    sai_attribute_t *attr;
+    /** Is data plane channel alive from data plane channel probing */
+    bool dp_channel_is_alive;
 
 } sai_ha_set_event_data_t;
 
@@ -273,15 +266,11 @@ typedef struct _sai_ha_scope_event_data_t
     /** HA scope id */
     sai_object_id_t ha_scope_id;
 
-    /** Attributes count */
-    uint32_t attr_count;
+    /** HA role */
+    sai_dash_ha_role_t ha_role;
 
-    /**
-     * @brief Attributes
-     *
-     * @objects SAI_OBJECT_TYPE_HA_SCOPE
-     */
-    sai_attribute_t *attr;
+    /** Flow version */
+    sai_uint32_t flow_version;
 
 } sai_ha_scope_event_data_t;
 
