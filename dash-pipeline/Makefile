@@ -92,7 +92,7 @@ sai-submodule:
 # P4 Source code compile TARGETS
 ######################################
 
-P4_SRC=$(wildcard bmv2/*.p4)
+P4_SRC=$(wildcard bmv2/**/*.p4)
 P4_MAIN=bmv2/dash_pipeline.p4
 P4_OUTDIR=bmv2/dash_pipeline.bmv2
 P4_ARTIFACTS=$(P4_OUTDIR)/dash_pipeline.json $(P4_OUTDIR)/dash_pipeline_p4rt.txt

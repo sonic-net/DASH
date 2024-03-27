@@ -44,6 +44,8 @@ class TestSaiVnetOutboundRoutingEntry:
                     "100000",
                     "SAI_ENI_ATTR_ADMIN_STATE",
                     "True",
+                    "SAI_ENI_ATTR_HA_SCOPE_ID",
+                    "0",
                     "SAI_ENI_ATTR_VM_UNDERLAY_DIP",
                     "10.10.9.10",
                     "SAI_ENI_ATTR_VM_VNI",

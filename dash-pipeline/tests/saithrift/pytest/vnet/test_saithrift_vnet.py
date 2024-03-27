@@ -44,6 +44,7 @@ def test_sai_thrift_create_eni(saithrift_client):
         eni = sai_thrift_create_eni(saithrift_client, cps=10000,
                                     pps=100000, flows=100000,
                                     admin_state=True,
+                                    ha_scope_id=0,
                                     vm_underlay_dip=vm_underlay_dip,
                                     vm_vni=9,
                                     vnet_id=vnet,

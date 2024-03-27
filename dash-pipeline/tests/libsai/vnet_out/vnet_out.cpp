@@ -126,6 +126,10 @@ int main(int argc, char **argv)
     attr.value.booldata = true;
     attrs.push_back(attr);
 
+    attr.id = SAI_ENI_ATTR_HA_SCOPE_ID;
+    attr.value.oid = SAI_NULL_OBJECT_ID;
+    attrs.push_back(attr);
+
     attr.id = SAI_ENI_ATTR_VM_UNDERLAY_DIP;
     sai_ip_addr_t u_dip_addr = {.ip4 = 0x010310ac};
     sai_ip_address_t u_dip = {.addr_family = SAI_IP_ADDR_FAMILY_IPV4,

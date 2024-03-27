@@ -6,6 +6,7 @@ Accton
 ACK
 Ack
 ack
+ack'ed
 acl
 ACL
 ACLs
@@ -304,6 +305,7 @@ IxLoad
 ixload
 IxNetwork
 IxNetworkWeb
+Jiang
 Jinja
 jitter
 journaled
@@ -372,6 +374,7 @@ NonSynStateful
 NorthBound
 Novus
 NPL
+NPU
 NPUS
 NSG
 NSGs
@@ -471,11 +474,13 @@ README
 READMEs
 README's
 reconvergence
+RECV
 RedirectRuleResimulatedUf
 redis
 renderer
 repo
 repos
+REQ
 resimulated
 resimulation
 responder
@@ -534,6 +539,7 @@ SmartAppliances
 SmartNIC
 SmartNic
 SmartNICs
+SmartSwitch
 SmartSwitches
 snappi
 SNAT
