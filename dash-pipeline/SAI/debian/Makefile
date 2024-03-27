@@ -16,6 +16,8 @@ libsai-dev_$(VERSION)_amd64.deb: ../SAI/inc/*.h ../SAI/experimental/*.h
 	dpkg-deb --build --root-owner-group libsai-dev_$(VERSION)_amd64
 
 libsai_$(VERSION)_amd64.deb: ../lib/libsai.so
+	mkdir -p -m 755 libsai_$(VERSION)_amd64/etc/dash
+	install -vCD ../../bmv2/dash_pipeline.bmv2/* libsai_$(VERSION)_amd64/etc/dash/
 	mkdir -p -m 755 libsai_$(VERSION)_amd64/usr/lib/x86_64-linux-gnu/
 	find -type d |xargs chmod go-w
 	install -vCD ../lib/libsai.so libsai_$(VERSION)_amd64/usr/lib/x86_64-linux-gnu/libsai.so
