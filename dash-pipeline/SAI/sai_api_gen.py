@@ -446,6 +446,7 @@ class SAIAPITableAttribute(SAIObject):
         self.object_name: Optional[str] = None
         self.skipattr: Optional[str] = None
         self.match_type: str = ""
+        self.is_filter_key: bool = False
 
     def _parse_sai_table_attribute_annotation(self, p4rt_anno_list: Dict[str, Any]) -> None:
         '''
@@ -484,6 +485,8 @@ class SAIAPITableAttribute(SAIObject):
                         self.skipattr = str(kv['value']['stringValue'])
                     elif kv['key'] == 'match_type':
                         self.match_type = str(kv['value']['stringValue'])
+                    elif kv['key'] == 'is_filter_key':
+                        self.is_filter_key = str(kv['value']['stringValue']) == "true"
                     elif kv['key'] == 'validonly':
                         self.validonly = str(kv['value']['stringValue'])
                     else:
@@ -779,6 +782,8 @@ class SAIAPITableData(SAIObject):
         self.stage: Optional[str] = None
         self.is_object: Optional[str] = None
         self.api_type: Optional[str] = None
+        self.enable_bulk_get_api: bool = False
+        self.enable_bulk_get_server: bool = False
 
     def parse_p4rt(self,
                    p4rt_table: Dict[str, Any],
@@ -855,6 +860,10 @@ class SAIAPITableData(SAIObject):
                         self.api_name = str(kv['value']['stringValue'])
                     elif kv['key'] == 'api_type':
                         self.api_type = str(kv['value']['stringValue'])
+                    elif kv['key'] == 'enable_bulk_get_api':
+                        self.enable_bulk_get_api = str(kv['value']['stringValue']) == "true"
+                    elif kv['key'] == 'enable_bulk_get_server':
+                        self.enable_bulk_get_server = str(kv['value']['stringValue']) == "true"
 
         if self.is_object == None:
             self.is_object = 'false'

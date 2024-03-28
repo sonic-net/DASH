@@ -8,6 +8,7 @@
 #include "dash_outbound.p4"
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"
+#include "stages/conntrack_lookup.p4"
 #include "stages/direction_lookup.p4"
 #include "stages/eni_lookup.p4"
 #include "stages/routing_action_apply.p4"
@@ -98,6 +99,7 @@ control dash_ingress(
                          bit<32> pps,
                          bit<32> flows,
                          bit<1> admin_state,
+                         @SaiVal[type="sai_object_id_t"] bit<16> flow_table_id,
                          @SaiVal[type="sai_ip_address_t"] IPv4Address vm_underlay_dip,
                          @SaiVal[type="sai_uint32_t"] bit<24> vm_vni,
                          @SaiVal[type="sai_object_id_t"] bit<16> vnet_id,
@@ -144,6 +146,8 @@ control dash_ingress(
             }
             meta.meter_policy_id = v4_meter_policy_id;
         }
+
+        meta.conntrack_data.flow_table.id = flow_table_id;
         
         meta.fast_path_icmp_flow_redirection_disabled = disable_fast_path_icmp_flow_redirection;
     }
@@ -302,6 +306,8 @@ control dash_ingress(
         if (meta.eni_data.admin_state == 0) {
             deny();
         }
+
+        conntrack_lookup_stage.apply(hdr, meta);
 
         if (meta.is_fast_path_icmp_flow_redirection_packet) {
             UPDATE_COUNTER(eni_lb_fast_path_icmp_in_counter, meta.eni_id);
