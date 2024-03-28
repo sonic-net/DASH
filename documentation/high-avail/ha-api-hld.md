@@ -392,10 +392,7 @@ Stats related capabilities can help with 2 things:
 1. Specify which stats is supported now, so we can start pulling to avoid errors.
 2. Return internal debug stats to help with troubleshooting.
 
-| Attribute name | Type | Description |
-| -------------- | ---- | ----------- |
-| SAI_SWITCH_ATTR_DASH_CAPS_SUPPORTED_HA_SET_STATS | `sai_s32_list_t` | The list of supported HA set stats. |
-| SAI_SWITCH_ATTR_DASH_CAPS_SUPPORTED_ENI_STATS | `sai_s32_list_t` | The list of supported ENI stats. |
+To query the HA stats related capabilities, we will use the existing SAI stats capabilities. For more details on the API, please refer to the [SAI object APIs](https://github.com/opencomputeproject/SAI/blob/master/inc/saiobject.h).
 
 ## 5. HA in DASH behavior model
 
