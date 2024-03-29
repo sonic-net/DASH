@@ -1,6 +1,6 @@
 # DASH Private Link and Private Link NSG HLD
 
-Azure Private Link provides private connectivity from a virtual network to Azure platform as a service, by providing an 1-to-1 VNET mapping to the service. In addition, it is also used by ExpressRoute for providing the similar functionality for on-prem network.
+Azure Private Link provides private connectivity from a virtual network to Azure platform as a service, by providing an 1-to-1 VNET mapping to the service.
 
 This doc is used to capture the requirements for implementing the Private Link and Private Link NSG in the context of DASH APIs.
 
@@ -144,7 +144,7 @@ A new tunnel next hop table needs to be added with the following attributes:
 
 The VM-to-PLS direction is modeled as outbound pipeline in DASH.
 
-To demostrate how the DASH pipeline works, let's say, we have a VM in with IP 10.0.0.1, trying to reach the Private Endpoint in their VNET with IP 10.0.1.1, and the VM Outbound VNI is 1000000.
+To demonstrate how the DASH pipeline works, let's say, we have a VM in with IP 10.0.0.1, trying to reach the Private Endpoint in their VNET with IP 10.0.1.1, and the VM Outbound VNI is 1000000.
 
 #### 5.1.1. Private Link
 
@@ -172,7 +172,7 @@ For private link, the packet will go through the pipeline with following setup:
    | --- | --- | --- |
    | entry_attr.SAI_ENI_ATTR_PL_UNDERLAY_SIP | `sai_ip_address_t` | 2.2.2.1 |
 
-3. **ConnTrack Lookup**: If flow already exists, we directly apply the transformation from the flow, otherwise, move on.
+3. **Conntrack Lookup**: If flow already exists, we directly apply the transformation from the flow, otherwise, move on.
 4. **ACL**: No changes in the ACL stage, it will work just like the other cases.
 5. **Routing**: The inner destination IP (a.k.a. overlay dip) will be used for finding the route entry. This will trigger the maprouting action to run, which makes the packet entering Mapping stage.
 
@@ -204,7 +204,7 @@ For private link, the packet will go through the pipeline with following setup:
    | entry_attr.SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS | `sai_uint16_t` | 60001 |
 
 7. **Metering**: The last action we need to do is to find the corresponding metering rule.
-8. **ConnTrack Update**: Both forwarding and reverse flows will be created by this stage.
+8. **Conntrack Update**: Both forwarding and reverse flows will be created by this stage.
 9. **Metering Update**: Metering update will update the metering counter based on the rules that we found before.
 10. **Underlay routing**: Underlay routing will move the packet to the right port and forward it out.
 
@@ -246,7 +246,7 @@ The packet will go through the DASH pipeline as below:
 
    The ENI entry that we are using will be the same as before. Hence, omitted here.
 
-3. **ConnTrack Lookup**: The return packet transformation will be handled by reverse flow.
+3. **Conntrack Lookup**: The return packet transformation will be handled by reverse flow.
 4. **Metering Update**: Metering update will update the metering counter based on the rules that we saved in the reverse flow.
 5. **Underlay routing**: Underlay routing will move the packet to the right port and forward it out.
 
