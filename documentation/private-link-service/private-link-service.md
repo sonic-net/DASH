@@ -102,7 +102,7 @@ For more information, please refer to [SmartSwitch HA design doc](https://github
 
 ## 4. SAI API design
 
-The following SAI API only includes the ones that used for setting up the PL / PL NSG scenarios. The flow resimulation related APIs that used by PL will be captured by the dedicated flow resimulation doc.
+The following SAI API only includes the SAI updates that used for setting up the PL / PL NSG scenarios.
 
 ### 4.1. DASH ENI attributes
 
