@@ -530,12 +530,14 @@ sharding
 SInce
 SKU
 SKUs
+SLA
 SLB
 SMAC
 SmartAppliances
 SmartNIC
 SmartNic
 SmartNICs
+SmartSwitch
 SmartSwitches
 snappi
 SNAT

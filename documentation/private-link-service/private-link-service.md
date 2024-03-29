@@ -32,10 +32,10 @@ This doc is used to capture the requirements for implementing the Private Link a
 
 | Term | Explanation |
 | --- | --- |
-| PL | PrivateLink: <https://azure.microsoft.com/en-us/products/private-link>. |
+| PL | Private Link: <https://azure.microsoft.com/en-us/products/private-link>. |
 | NSG | Network Security Group. |
 | PE | Private endpoint. |
-| PLS | PrivateLink Service. This is the term for private endpoint from server side. Customer can create their private link service, then expose them to their VNETs as a private endpoint.  |
+| PLS | Private Link Service. This is the term for private endpoint from server side. Customer can create their private link service, then expose them to their VNETs as a private endpoint.  |
 
 ## 2. SDN transformation
 
@@ -154,8 +154,8 @@ For private link, the packet will go through the pipeline with following setup:
 
    | SAI field name | Type | Value |
    | --- | --- | --- |
-   | entry.vni | `sai_uint32_t` | 1000000 |
-   | entry_attr.SAI_DIRECTION_LOOKUP_ENTRY_ATTR_ACTION | `sai_direction_lookup_entry_action_t` | SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION |
+   | entry.vni | `sai_uint32_t` | `1000000` |
+   | entry_attr.SAI_DIRECTION_LOOKUP_ENTRY_ATTR_ACTION | `sai_direction_lookup_entry_action_t` | `SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION` |
 
 2. **ENI Lookup**: Then, we will use the inner MAC address to find the ENI pipeline. Then, the outer encap will be decap’ed, leaving inner packet going through the rest of pipeline.
 
@@ -163,7 +163,7 @@ For private link, the packet will go through the pipeline with following setup:
 
    | SAI field name | Type | Value |
    | --- | --- | --- |
-   | entry.address | `sai_mac_t` | 11-22-33-44-55-66 |
+   | entry.address | `sai_mac_t` | `11-22-33-44-55-66` |
    | entry_attr.SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID | `sai_object_id_t` | (SAI object ID of the ENI) |
 
    Then, we use the ENI id to find the ENI, which contains the PL underlay source IP as below:
@@ -176,32 +176,32 @@ For private link, the packet will go through the pipeline with following setup:
 4. **ACL**: No changes in the ACL stage, it will work just like the other cases.
 5. **Routing**: The inner destination IP (a.k.a. overlay dip) will be used for finding the route entry. This will trigger the maprouting action to run, which makes the packet entering Mapping stage.
 
-   The routing stage could also have underlay source ip defined, but the `PL_UNDERLAY_SIP` will be used first, whenever the routing type is set to privatelink.
+   The routing stage could also have underlay source ip defined, but the `PL_UNDERLAY_SIP` will be used first, whenever the routing type is set to `privatelink`.
 
    The outbound routing entry will look like as below:
 
    | SAI field name | Type | Value |
    | --- | --- | --- |
    | entry.eni_id | `sai_object_id_t` | (SAI object ID of the ENI) |
-   | entry.destination | `sai_ip_prefix_t` | 10.0.1.0/24 |
-   | entry_attr.SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION | `sai_outbound_routing_entry_action_t` | SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET |
+   | entry.destination | `sai_ip_prefix_t` | `10.0.1.0/24` |
+   | entry_attr.SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION | `sai_outbound_routing_entry_action_t` | `SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET` |
    | entry_attr.SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID | `sai_object_id_t` | (SAI object ID of the destination VNET) |
-   | entry_attr.SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS | `sai_uint16_t` | 60000 |
+   | entry_attr.SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS | `sai_uint16_t` | `60000` |
 
 6. **Mapping - VNET**: The inner destination IP will be used for finding the outbound CA-PA mapping entry, of which the routing type will be set to private link.
 
    | SAI field name | Type | Value |
    | --- | --- | --- |
    | entry.dst_vnet_id | `sai_object_id_t` | (SAI object ID of the destination VNET) |
-   | entry.dip | `sai_ip_address_t` | 10.0.1.1 |
-   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION | `sai_outbound_ca_to_pa_entry_action_t` | SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING |
-   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP | `sai_ip_address_t` | 3.3.3.1 |
-   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC | `sai_mac_t` | 99-88-77-66-55-44 |
-   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP | `sai_ip_address_t` | 9988:: |
-   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP_MASK | `sai_ip_address_t` | FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:: |
-   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP | `sai_ip_address_t` | 1122:3344:5566:7788::303:301/128 |
-   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP_MASK | `sai_ip_address_t` | FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF |
-   | entry_attr.SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS | `sai_uint16_t` | 60001 |
+   | entry.dip | `sai_ip_address_t` | `10.0.1.1` |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION | `sai_outbound_ca_to_pa_entry_action_t` | `SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING` |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP | `sai_ip_address_t` | `3.3.3.1` |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC | `sai_mac_t` | `99-88-77-66-55-44` |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP | `sai_ip_address_t` | `9988::` |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP_MASK | `sai_ip_address_t` | `FFFF:FFFF:FFFF:FFFF:FFFF:FFFF::` |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP | `sai_ip_address_t` | `1122:3344:5566:7788::303:301/128` |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP_MASK | `sai_ip_address_t` | `FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF` |
+   | entry_attr.SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS | `sai_uint16_t` | `60001` |
 
 7. **Metering**: The last action we need to do is to find the corresponding metering rule.
 8. **Conntrack Update**: Both forwarding and reverse flows will be created by this stage.
@@ -222,15 +222,15 @@ And we can use the following things to specify the tunnel information:
 
    | SAI field name | Type | Value |
    | --- | --- | --- |
-   | entry_attr.SAI_DASH_TUNNEL_ENTRY_ATTR_DASH_ENCAPSULATION | `sai_dash_encapsulation_t` | SAI_DASH_ENCAPSULATION_VXLAN |
-   | entry_attr.SAI_DASH_TUNNEL_ENTRY_ATTR_VNI | `sai_uint32_t` | 2000000 |
+   | entry_attr.SAI_DASH_TUNNEL_ENTRY_ATTR_DASH_ENCAPSULATION | `sai_dash_encapsulation_t` | `SAI_DASH_ENCAPSULATION_VXLAN` |
+   | entry_attr.SAI_DASH_TUNNEL_ENTRY_ATTR_VNI | `sai_uint32_t` | `2000000` |
 
 2. **Tunnel Next Hop Table**: The tunnel next hop table will be used to specify the tunnel next hop information.
 
    | SAI field name | Type | Value |
    | --- | --- | --- |
    | entry_attr.SAI_DASH_TUNNEL_NEXT_HOP_ENTRY_ATTR_TUNNEL_ID | `sai_object_id_t` | (SAI object ID of the NSG tunnel) |
-   | entry_attr.SAI_DASH_TUNNEL_NEXT_HOP_ENTRY_ATTR_DIP | `sai_ip_address_t` | 100.0.1.1 |
+   | entry_attr.SAI_DASH_TUNNEL_NEXT_HOP_ENTRY_ATTR_DIP | `sai_ip_address_t` | `100.0.1.1` |
 
 ### 5.2. PLS-to-VM direction
 
