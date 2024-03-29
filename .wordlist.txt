@@ -37,6 +37,7 @@ AspNet
 assignees
 asyncE
 atlassian
+attr
 ATTR
 auditability
 autogenerate
@@ -421,6 +422,7 @@ performant
 pingmesh
 PIR
 pluggable
+PLS
 PLVision's
 PKTS
 pmon
