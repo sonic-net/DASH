@@ -112,7 +112,7 @@ For more information, please refer to the HA design docs.
 
 As the high-level workflow shows, the flow resimulation will make the network packet go through the slow path. Hence, the more flows being resimulated, the less new connections we could make every second.
 
-This means at least, flow resimulation will share the limit of CPS, hence New connection + Flow resimulated <= 3Mps on a 200Gb card.
+This means at least, flow resimulation will share the limit of CPS, hence New connection + Flow resimulated <= 3M/s on a 200Gb card.
 
 Since flow resimulation without rate limiting can cause serious impact of CPS performance, or even completely kill the CPS path, to avoid flow resimulation from seriously impacting the CPS path, a limit shall be added on the ENI level to limit the max number of flows that can be resimulated per seconds as below.
 
@@ -185,13 +185,13 @@ On routing entry:
 
 | Attribute name | Type | Description |
 | -------------- | ---- | ----------- |
-| SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTION_DIABLED_IN_FLOW_RESIMULATION_FLAG | `sai_uint64_t` | Routing actions that need to be disabled in flow resimulation. |
+| SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTION_DISABLED_IN_FLOW_RESIMULATION_FLAG | `sai_uint64_t` | Routing actions that need to be disabled in flow resimulation. |
 
 On CA-PA mapping entry:
 
 | Attribute name | Type | Description |
 | -------------- | ---- | ----------- |
-| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ROUTING_ACTION_DIABLED_IN_FLOW_RESIMULATION_FLAG | `sai_uint64_t` | Routing actions that need to be disabled in flow resimulation. |
+| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ROUTING_ACTION_DISABLED_IN_FLOW_RESIMULATION_FLAG | `sai_uint64_t` | Routing actions that need to be disabled in flow resimulation. |
 
 ### 6.5. Counters
 
