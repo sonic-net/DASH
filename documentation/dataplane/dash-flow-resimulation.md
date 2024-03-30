@@ -134,7 +134,7 @@ In corner case of mapping update and ends up with different routing type, the re
 
 After flow is updated by LB fast path packet, the flow will not be resimulated by any type of flow resimulation request anymore.
 
-For example, in PrivateLink case, after fast path updates the flow, it will be pointed to the backend VM of PLS. If we resimulate the flow, it will start to point to the PLS PA again, which could be new and break the flow.
+For example, in Private Link case, after fast path updates the flow, it will be pointed to the backend VM of PLS. If we resimulate the flow, it will start to point to the PLS PA again, which could be new and break the flow.
 
 ## 6. SAI API Design
 
