@@ -130,14 +130,15 @@ In DASH, the packet shall be metered following the approach below.
 
 When a packet arrives at an ENI, it will go through the steps below to find its metering bucket:
 
-1. Init: AggregatedMeterClassOR = 0, AggregatedMeterClassAND = UINT16_MAX.
-2. Conntrack Lookup: In Conntrack Lookup stage, if a valid flow is hit, the meter class stored in that flow shall be used for locating the metering bucket.
-3. Policy match stages (Routing/Mapping): When flow is missing, the packet will go to slow path and walk through all the policy match stages. Depends on the stage it goes through, it will pick up the meter class OR bits and AND bits, and these 2 bits shall be aggregated separately:
-   1. AggregatedMeterClassOR = AggregatedMeterClassOR | MeterClassOR 
-   2. AggregatedMeterClassAND = AggregatedMeterClassAND & MeterClassAND 
-4. After policy match stages: Now we calculates the meter class as below:
-   1. MeterClass = AggregatedMeterClassOR & AggregatedMeterClassAND
-5. Metering: If MeterClass is 0 at this moment, meter policy will be used for determining which meter class shall be used:
+1. **Init**: `AggregatedMeterClassOR` = 0, `AggregatedMeterClassAND` = UINT16_MAX.
+2. **Conntrack Lookup**: In Conntrack Lookup stage, if a valid flow is hit, the meter class stored in that flow shall be used for locating the metering bucket.
+3. **Policy match stages (Routing/Mapping)**: When flow is missing, the packet will go to slow path and walk through all the policy match stages. Depends on the stage it goes through, it will pick up the meter class OR bits and AND bits, and these 2 bits shall be aggregated separately:
+   1. `AggregatedMeterClassOR` = `AggregatedMeterClassOR` | `MeterClassOR`
+   2. `AggregatedMeterClassAND` = `AggregatedMeterClassAND` & `MeterClassAND`
+4. **After policy match stages**: Now we calculates the meter class as below:
+   1. `MeterClass` = `AggregatedMeterClassOR` & `AggregatedMeterClassAND`
+   2. This allows us to use the info from routing entry to override the some meter class bits set in the mapping.
+5. **Metering**: If `MeterClass` is 0 at this moment, meter policy will be used for determining which meter class shall be used:
    1. Meter policy v4 or v6 will be selected based on the IP family of the original overlay packet.
    2. The overlay destination (outbound pipeline) / source (inbound pipeline) IP will be used for ternary match against the meter rules in the meter policy to find the meter class.
-6. The final meter class will be used for update the counters in meter bucket. If final meter class is 0, no meter bucket will be updated.
+6. **Meter Update**: The final meter class will be used for update the counters in meter bucket. If final meter class is 0, no meter bucket will be updated.
