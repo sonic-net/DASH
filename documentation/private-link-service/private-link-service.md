@@ -1,32 +1,33 @@
 # DASH Private Link and Private Link NSG HLD
 
-Azure Private Link provides private connectivity from a virtual network to Azure platform as a service, by providing an 1-to-1 VNET mapping to the service.
-
-This doc is used to capture the requirements for implementing the Private Link and Private Link NSG in the context of DASH APIs.
+| Rev | Date | Author | Change Description |
+| --- | ---- | ------ | ------------------ |
+| 0.1 | 03/29/2024 | Riff Jiang | Initial version |
 
 1. [1. Terminology](#1-terminology)
-2. [2. SDN transformation](#2-sdn-transformation)
-   1. [2.1. Private Link](#21-private-link)
-      1. [2.1.1. VM-to-PLS direction](#211-vm-to-pls-direction)
-      2. [2.1.2. PLS-to-VM direction](#212-pls-to-vm-direction)
-   2. [2.2. Private Link NSG](#22-private-link-nsg)
-      1. [2.2.1. VM-to-PLS direction](#221-vm-to-pls-direction)
-      2. [2.2.2. PLS-to-VM direction](#222-pls-to-vm-direction)
-   3. [2.3. Load balancer fast path support](#23-load-balancer-fast-path-support)
-   4. [2.4. Non-required features](#24-non-required-features)
-3. [3. Resource modeling, requirement, and SLA](#3-resource-modeling-requirement-and-sla)
-   1. [3.1. Scaling requirements](#31-scaling-requirements)
-   2. [3.2. Reliability requirements](#32-reliability-requirements)
-4. [4. SAI API design](#4-sai-api-design)
-   1. [4.1. DASH ENI attributes](#41-dash-eni-attributes)
-   2. [4.2. DASH CA-PA mapping attributes](#42-dash-ca-pa-mapping-attributes)
-   3. [4.3. DASH tunnel table and attributes](#43-dash-tunnel-table-and-attributes)
-5. [5. DASH pipeline behavior](#5-dash-pipeline-behavior)
-   1. [5.1. VM-to-PLS direction (Outbound)](#51-vm-to-pls-direction-outbound)
-      1. [5.1.1. Private Link](#511-private-link)
-      2. [5.1.2. Private Link NSG](#512-private-link-nsg)
-   2. [5.2. PLS-to-VM direction](#52-pls-to-vm-direction)
-6. [6. DASH database schema](#6-dash-database-schema)
+2. [2. Background](#2-background)
+3. [3. SDN transformation](#3-sdn-transformation)
+   1. [3.1. Private Link](#31-private-link)
+      1. [3.1.1. VM-to-PLS direction](#311-vm-to-pls-direction)
+      2. [3.1.2. PLS-to-VM direction](#312-pls-to-vm-direction)
+   2. [3.2. Private Link NSG](#32-private-link-nsg)
+      1. [3.2.1. VM-to-PLS direction](#321-vm-to-pls-direction)
+      2. [3.2.2. PLS-to-VM direction](#322-pls-to-vm-direction)
+   3. [3.3. Load balancer fast path support](#33-load-balancer-fast-path-support)
+   4. [3.4. Non-required features](#34-non-required-features)
+4. [4. Resource modeling, requirement, and SLA](#4-resource-modeling-requirement-and-sla)
+   1. [4.1. Scaling requirements](#41-scaling-requirements)
+   2. [4.2. Reliability requirements](#42-reliability-requirements)
+5. [5. SAI API design](#5-sai-api-design)
+   1. [5.1. DASH ENI attributes](#51-dash-eni-attributes)
+   2. [5.2. DASH CA-PA mapping attributes](#52-dash-ca-pa-mapping-attributes)
+   3. [5.3. DASH tunnel table and attributes](#53-dash-tunnel-table-and-attributes)
+6. [6. DASH pipeline behavior](#6-dash-pipeline-behavior)
+   1. [6.1. VM-to-PLS direction (Outbound)](#61-vm-to-pls-direction-outbound)
+      1. [6.1.1. Private Link](#611-private-link)
+      2. [6.1.2. Private Link NSG](#612-private-link-nsg)
+   2. [6.2. PLS-to-VM direction](#62-pls-to-vm-direction)
+7. [7. DASH database schema](#7-dash-database-schema)
 
 ## 1. Terminology
 
@@ -37,35 +38,41 @@ This doc is used to capture the requirements for implementing the Private Link a
 | PE | Private endpoint. |
 | PLS | Private Link Service. This is the term for private endpoint from server side. Customer can create their private link service, then expose them to their VNETs as a private endpoint.  |
 
-## 2. SDN transformation
+## 2. Background
 
-### 2.1. Private Link
+Azure Private Link provides private connectivity from a virtual network to Azure platform as a service, by providing an 1-to-1 VNET mapping to the service.
 
-#### 2.1.1. VM-to-PLS direction
+This doc is used to capture the requirements for implementing the Private Link and Private Link NSG in the context of DASH APIs.
+
+## 3. SDN transformation
+
+### 3.1. Private Link
+
+#### 3.1.1. VM-to-PLS direction
 
 When a packet coming from the VM and being sent to PLS, it will be transformed as below:
 
 ![PL VM-to-PLS direction](./images/private-link-vm-to-pls.svg)
 
-#### 2.1.2. PLS-to-VM direction
+#### 3.1.2. PLS-to-VM direction
 
 And the return packet from PLS to VM, will be transformed as below:
 
 ![PL PLS-to-VM direction](./images/private-link-pls-to-vm.svg)
 
-### 2.2. Private Link NSG
+### 3.2. Private Link NSG
 
-#### 2.2.1. VM-to-PLS direction
+#### 3.2.1. VM-to-PLS direction
 
 When NSG appliance is enabled, the VM-to-PLS packet will have an additional outer encap that tunnels the packet to NSG appliance as below:
 
 ![PL NSG VM-to-PLS direction](./images/private-link-nsg-vm-to-pls.svg)
 
-#### 2.2.2. PLS-to-VM direction
+#### 3.2.2. PLS-to-VM direction
 
 The return packet will be the same as Private Link, coming directly from PLS bypassing the NSG appliance.
 
-### 2.3. Load balancer fast path support
+### 3.3. Load balancer fast path support
 
 The Fast Path here is not ER Fast Path, but the fast path that required by PLS.
 
@@ -76,13 +83,13 @@ Fast path ICMP flow redirection will take effect just like the VM-to-VM case.
 
 For more information on how Fast Path works, please refer to [Fast Path design doc](../load-bal-service/fast-path-icmp-flow-redirection.md).
 
-### 2.4. Non-required features
+### 3.4. Non-required features
 
 - RST on connection idle timeout.
 
-## 3. Resource modeling, requirement, and SLA
+## 4. Resource modeling, requirement, and SLA
 
-### 3.1. Scaling requirements
+### 4.1. Scaling requirements
 
 | Metric | Requirement |
 | --- | --- |
@@ -94,17 +101,17 @@ For more information on how Fast Path works, please refer to [Fast Path design d
 | # of tunnels | (TBD) |
 | # of next hop in each tunnel | (TBD)  |
 
-### 3.2. Reliability requirements
+### 4.2. Reliability requirements
 
 The flows replication follows the SmartSwitch HA design.
 
 For more information, please refer to [SmartSwitch HA design doc](https://github.com/sonic-net/SONiC/blob/master/doc/smart-switch/high-availability/smart-switch-ha-hld.md).
 
-## 4. SAI API design
+## 5. SAI API design
 
 The following SAI API only includes the SAI updates that used for setting up the PL / PL NSG scenarios.
 
-### 4.1. DASH ENI attributes
+### 5.1. DASH ENI attributes
 
 The following attributes will be added on ENI:
 
@@ -112,7 +119,7 @@ The following attributes will be added on ENI:
 | --- | --- | --- |
 | SAI_ENI_ATTR_PL_UNDERLAY_SIP | sai_ip_address_t | Underlay IP that will be used for private link routing type. |
 
-### 4.2. DASH CA-PA mapping attributes
+### 5.2. DASH CA-PA mapping attributes
 
 The following attributes will be added to CA-to-PA entry, for supporting service rewrites for PL/PL NSG:
 
@@ -122,7 +129,7 @@ The following attributes will be added to CA-to-PA entry, for supporting service
 | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP_MASK | sai_ip_address_t | Used with overlay dip to support dst prefix rewrite. |
 | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_TUNNEL_ID | sai_object_id_t | Used to specify the tunnel. |
 
-### 4.3. DASH tunnel table and attributes
+### 5.3. DASH tunnel table and attributes
 
 A new tunnel table needs to be added with the following attributes:
 
@@ -138,15 +145,15 @@ A new tunnel next hop table needs to be added with the following attributes:
 | SAI_DASH_TUNNEL_NEXT_HOP_ENTRY_ATTR_TUNNEL_ID | sai_object_id_t | Tunnel Id |
 | SAI_DASH_TUNNEL_NEXT_HOP_ENTRY_ATTR_DIP | sai_ip_address_t | Destination IP in the tunnel |
 
-## 5. DASH pipeline behavior
+## 6. DASH pipeline behavior
 
-### 5.1. VM-to-PLS direction (Outbound)
+### 6.1. VM-to-PLS direction (Outbound)
 
 The VM-to-PLS direction is modeled as outbound pipeline in DASH.
 
 To demonstrate how the DASH pipeline works, let's say, we have a VM in with IP 10.0.0.1, trying to reach the Private Endpoint in their VNET with IP 10.0.1.1, and the VM Outbound VNI is 1000000.
 
-#### 5.1.1. Private Link
+#### 6.1.1. Private Link
 
 For private link, the packet will go through the pipeline with following setup:
 
@@ -208,7 +215,7 @@ For private link, the packet will go through the pipeline with following setup:
 9. **Metering Update**: Metering update will update the metering counter based on the rules that we found before.
 10. **Underlay routing**: Underlay routing will move the packet to the right port and forward it out.
 
-#### 5.1.2. Private Link NSG
+#### 6.1.2. Private Link NSG
 
 The changes needed for PL NSG is mostly the same as PL. In addition, on the VNET mapping, we need to provide the extra tunnel info.
 
@@ -232,7 +239,7 @@ And we can use the following things to specify the tunnel information:
    | entry_attr.SAI_DASH_TUNNEL_NEXT_HOP_ENTRY_ATTR_TUNNEL_ID | `sai_object_id_t` | (SAI object ID of the NSG tunnel) |
    | entry_attr.SAI_DASH_TUNNEL_NEXT_HOP_ENTRY_ATTR_DIP | `sai_ip_address_t` | `100.0.1.1` |
 
-### 5.2. PLS-to-VM direction
+### 6.2. PLS-to-VM direction
 
 On the return path, we will leverage the reverse flow that is created by the outbound side to process the packet and forward it back to the original source.
 
@@ -250,6 +257,6 @@ The packet will go through the DASH pipeline as below:
 4. **Metering Update**: Metering update will update the metering counter based on the rules that we saved in the reverse flow.
 5. **Underlay routing**: Underlay routing will move the packet to the right port and forward it out.
 
-## 6. DASH database schema
+## 7. DASH database schema
 
 For the DASH database schema, please refer to the [SONIC-DASH HLD](https://github.com/sonic-net/SONiC/blob/master/doc/dash/dash-sonic-hld.md).
