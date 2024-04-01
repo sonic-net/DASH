@@ -386,7 +386,7 @@ However, since we only support DPU level pairing with a single flow table and th
 
 | Attribute name | Type | Description |
 | -------------- | ---- | ----------- |
-| SAI_SWITCH_ATTR_DASH_CAPS_HA_CONTROLLER_NEEDED | `bool` | If `true`, the DASH host will own driving the HA state machine. |
+| SAI_SWITCH_ATTR_DASH_CAPS_HA_OWNER_NEEDED | `bool` | If `true`, the DASH host will own driving the HA state machine. |
 | SAI_SWITCH_ATTR_DASH_CAPS_HA_SCOPE | `sai_dash_caps_ha_scope_t` | HA scope that supported by the DASH implementation. |
 
 The HA scope capability enum is defined as below:
