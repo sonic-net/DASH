@@ -382,7 +382,7 @@ To describe how the topology looks like, we need to use at least 4 different att
 - \# of ENI per HA scope that can be created
 - \# of flow table that can be created
 
-However, since we only support DPU level pairing with a single flow table and the topologies we supported at this moment is limited, the topology related capability is added as high level modes, instead of individual attributes:
+However, since we only support DPU level pairing with a single flow table and the topology we supported at this moment is limited, the topology related capability is added as high level modes, instead of individual attributes:
 
 | Attribute name | Type | Description |
 | -------------- | ---- | ----------- |
