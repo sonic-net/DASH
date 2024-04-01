@@ -399,7 +399,7 @@ typedef enum _sai_dash_caps_ha_scope_t
 } sai_dash_caps_ha_scope_t;
 ```
 
-And there is how the topology looks like for each mode:
+And here is how the topology looks like for type of HA scope:
 
 | HA scope | DPU | ENI |
 | --- | --- | --- |
