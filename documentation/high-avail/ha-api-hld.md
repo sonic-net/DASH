@@ -2,7 +2,10 @@
 
 | Rev | Date | Author | Change Description |
 | --- | ---- | ------ | ------------------ |
-| 0.1 | 03/02/2024 | Riff Jiang | Initial version |
+| 0.1 | 03/02/2024 | Riff Jiang | Initial version. |
+| 0.2 | 03/15/2024 | Riff Jiang | Added HA set notification. |
+| 0.3 | 03/21/2024 | Riff Jiang | Added capabilities for HA topology and stats. |
+| 0.4 | 04/01/2024 | Riff Jiang | Added capabilities for HA owner, simplified capabilities for HA topology. |
 
 1. [1. Terminology](#1-terminology)
 2. [2. Background](#2-background)
@@ -372,18 +375,38 @@ To check which type of topology is supported in the DASH implementation, the fol
 
 #### 4.8.1. Topology related capabilities
 
+To describe how the topology looks like, we need to use at least 4 different attributes:
+
+- \# of HA set that can be created
+- \# of HA scope per HA set that can be created
+- \# of ENI per HA scope that can be created
+- \# of flow table that can be created
+
+However, since we only support DPU level pairing with a single flow table and the topologies we supported at this moment is limited, the topology related capability is added as high level modes, instead of individual attributes:
+
 | Attribute name | Type | Description |
 | -------------- | ---- | ----------- |
-| SAI_SWITCH_ATTR_DASH_CAPS_MAX_HA_SET_COUNT | `sai_uint32_t` | The max number of HA set can be created. |
-| SAI_SWITCH_ATTR_DASH_CAPS_MAX_HA_SCOPE_COUNT_PER_HA_SET | `sai_uint32_t` | The max number of HA scope that can be created within a single HA set. |
-| SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_TABLE_COUNT | `sai_uint32_t` | The max number of flow tables that can be created. |
+| SAI_SWITCH_ATTR_DASH_CAPS_HA_CONTROLLER_NEEDED | `bool` | If `true`, the DASH host will own driving the HA state machine. |
+| SAI_SWITCH_ATTR_DASH_CAPS_HA_SCOPE | `sai_dash_caps_ha_scope_t` | HA scope that supported by the DASH implementation. |
 
-Here are some examples of how to use these capability to represent the topology:
+The HA scope capability enum is defined as below:
 
-| Topology | MAX_HA_SET_COUNT | MAX_HA_SCOPE_COUNT_PER_HA_SET | MAX_FLOW_TABLE_COUNT |
-| -------- | ---------------- | ----------------------------- | -------------------- |
-| ENI level HA with DPU level pairing | 1 | (max # of ENI supported) | 1 |
-| DPU level HA | 1 | 1 | 1 |
+```c++
+typedef enum _sai_dash_caps_ha_scope_t
+{
+    DPU,
+    ENI,
+} sai_dash_caps_ha_scope_t;
+```
+
+And there is how the topology looks like for each mode:
+
+| HA scope | DPU | ENI |
+| --- | --- | --- |
+| \# of HA set | 1 | 1 |
+| \# of HA scope per HA set | 1 | (Max \# of ENI) |
+| \# of ENI per HA scope | (Max \# of ENI) | 1 |
+| \# of flow table | 1 | 1 |
 
 #### 4.8.2. Stats related capabilities
 
