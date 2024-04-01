@@ -5,30 +5,30 @@
 | 0.1 | 03/30/2024 | Riff Jiang | Initial version |
 
 1. [1. Background](#1-background)
-2. [Resource modeling, requirement, and SLA](#resource-modeling-requirement-and-sla)
-   1. [Resource modeling](#resource-modeling)
-   2. [Scaling requirement](#scaling-requirement)
-   3. [Reliability requirements](#reliability-requirements)
-3. [SAI API design](#sai-api-design)
-   1. [Meter bucket](#meter-bucket)
-   2. [Policy-based meter attributes](#policy-based-meter-attributes)
-      1. [Route attributes](#route-attributes)
-      2. [Mapping attributes](#mapping-attributes)
-      3. [Tunnel attributes](#tunnel-attributes)
-      4. [Inbound route rule attributes](#inbound-route-rule-attributes)
-   3. [Global meter policy](#global-meter-policy)
-      1. [ENI](#eni)
-      2. [Meter policy](#meter-policy)
-      3. [Meter rule](#meter-rule)
-4. [Metering bucket selection in DASH pipeline](#metering-bucket-selection-in-dash-pipeline)
+2. [2. Resource modeling, requirement, and SLA](#2-resource-modeling-requirement-and-sla)
+   1. [2.1. Resource modeling](#21-resource-modeling)
+   2. [2.2. Scaling requirement](#22-scaling-requirement)
+   3. [2.3. Reliability requirements](#23-reliability-requirements)
+3. [3. SAI API design](#3-sai-api-design)
+   1. [3.1. Meter bucket](#31-meter-bucket)
+   2. [3.2. Policy-based meter attributes](#32-policy-based-meter-attributes)
+      1. [3.2.1. Route attributes](#321-route-attributes)
+      2. [3.2.2. Mapping attributes](#322-mapping-attributes)
+      3. [3.2.3. Tunnel attributes](#323-tunnel-attributes)
+      4. [3.2.4. Inbound route rule attributes](#324-inbound-route-rule-attributes)
+   3. [3.3. Global meter policy](#33-global-meter-policy)
+      1. [3.3.1. ENI](#331-eni)
+      2. [3.3.2. Meter policy](#332-meter-policy)
+      3. [3.3.3. Meter rule](#333-meter-rule)
+4. [4. Metering bucket selection in DASH pipeline](#4-metering-bucket-selection-in-dash-pipeline)
 
 ## 1. Background
 
 To support billing, DASH introduced metering related objects as traffic counters. These counters are only used for billing purposes and not related to traffic policer or shaping.
 
-## Resource modeling, requirement, and SLA
+## 2. Resource modeling, requirement, and SLA
 
-### Resource modeling
+### 2.1. Resource modeling
 
 - Each ENI will allocates a set of metering bucket for billing purposes.
 - Metering bucket is indexed by a UINT16 number called metering class, which starts from 1. Meter class 0 will be reversed and considered as not set.
@@ -38,7 +38,7 @@ To support billing, DASH introduced metering related objects as traffic counters
   - On the outbound direction, it shall count the packets before the SDN transformation.
   - On the inbound direction, it shall count the packets after the SDN transformation.
 
-### Scaling requirement
+### 2.2. Scaling requirement
 
 The scaling requirement for metering are listed as below:
 
@@ -47,17 +47,17 @@ The scaling requirement for metering are listed as below:
 | # of meter buckets per ENI | 4095 (2^12 – 1, 0 is considered as not set) |
 | # of meter rules per meter policy | (TBD)  |
 
-### Reliability requirements
+### 2.3. Reliability requirements
 
 In HA setup, the metering info should be stored as part of flow and replicated to the standby side. Whenever the primary failover, the metering class id should be still the same for each flow.
 
 The high level flow replication follows the same approach as the SmartSwitch HA design, hence omitted here.
 
-## SAI API design
+## 3. SAI API design
 
 The following attributes will be involved in determining the final metering buckets in DASH.
 
-### Meter bucket
+### 3.1. Meter bucket
 
 | Attribute | Type | Default Value | Description |
 | --- | --- | --- | --- |
@@ -71,50 +71,50 @@ To fetch the metering data from each meter bucket, we are going to leverage the 
 | SAI_METER_BUCKET_STAT_OUTBOUND_BYTES | Total outbound traffic in bytes. |
 | SAI_METER_BUCKET_STAT_INBOUND_BYTES | Total inbound traffic in bytes. |
 
-### Policy-based meter attributes
+### 3.2. Policy-based meter attributes
 
-#### Route attributes
+#### 3.2.1. Route attributes
 
 | Attribute | Type | Default Value | Description |
 | --- | --- | --- | --- |
 | SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR | sai_uint16_t | 0 | Meter class OR bits. |
 | SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND | sai_uint16_t | UINT16_MAX | Meter class AND bits. |
 
-#### Mapping attributes
+#### 3.2.2. Mapping attributes
 
 | Attribute | Type | Default Value | Description |
 | --- | --- | --- | --- |
 | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS_OR | sai_uint16_t | 0 | Meter class OR bits. |
 
-#### Tunnel attributes
+#### 3.2.3. Tunnel attributes
 
 | Attribute | Type | Default Value | Description |
 | --- | --- | --- | --- |
 | SAI_DASH_TUNNEL_ATTR_METER_CLASS_OR | sai_uint16_t | 0 | Meter class OR bits. |
 
-#### Inbound route rule attributes
+#### 3.2.4. Inbound route rule attributes
 
 | Attribute | Type | Default Value | Description |
 | --- | --- | --- | --- |
 | SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR | sai_uint16_t | 0 | Meter class OR bits. |
 | SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND | sai_uint16_t | UINT16_MAX | Meter class AND bits. |
 
-### Global meter policy
+### 3.3. Global meter policy
 
-#### ENI
+#### 3.3.1. ENI
 
 | Attribute | Type | Default Value | Description |
 | --- | --- | --- | --- |
 | SAI_ENI_ATTR_V4_METER_POLICY_ID | sai_object_id_t | SAI_NULL_OBJECT_ID | Global IPv4 meter policy ID for this ENI. |
 | SAI_ENI_ATTR_V6_METER_POLICY_ID | sai_object_id_t | SAI_NULL_OBJECT_ID | Global IPv6 meter policy ID for this ENI. |
 
-#### Meter policy
+#### 3.3.2. Meter policy
 
 | Attribute | Type | Default Value | Description |
 | --- | --- | --- | --- |
 | SAI_METER_POLICY_ATTR_IP_ADDR_FAMILY | sai_ip_addr_family_t | SAI_IP_ADDR_FAMILY_IPV4 | IP address family of the metering policy |
 
-#### Meter rule
+#### 3.3.3. Meter rule
 
 | Attribute | Type | Default Value | Description |
 | --- | --- | --- | --- |
@@ -124,7 +124,7 @@ To fetch the metering data from each meter bucket, we are going to leverage the 
 | SAI_METER_RULE_ATTR_DIP_MASK | sai_ip_address_t | NA | Destination IP mask for ternary match. |
 | SAI_METER_RULE_ATTR_PRIORITY | sai_uint32_t | NA | Priority required for ternary match. |
 
-## Metering bucket selection in DASH pipeline
+## 4. Metering bucket selection in DASH pipeline
 
 In DASH, the packet shall be metered following the approach below.
 
