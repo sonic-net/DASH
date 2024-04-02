@@ -133,7 +133,6 @@ Please note that there is an attribute in the *flow_table* that can specify whic
 The *flow_table_id* is used to designate the flow table for the flow only, which is not used in match and action.
 
 ```c
-/* To-do name can be different with metadata.p4 */
 typedef struct _sai_flow_entry_t
 {
     /**
@@ -346,28 +345,36 @@ Although the content of both attributes and protobuf may be identical, their app
 ```protobuf
 syntax = "proto3";
 
-/* To-do add flow key without table id */
-message SaiDashFlowMetadata {
+message SaiDashFlowKey {
+  uint64 eni_mac = 1;
+  string src_addr = 2;
+  string dst_addr = 3;
+  uint32 src_port = 4;
+  uint32 dst_port = 5;
+}
+
+message SaiDashFlowState {
   uint32 version = 1; // SAI_FLOW_ENTRY_ATTR_VERSION
   uint32 dash_flow_action = 2; // SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION
   uint32 meter_class = 3; // SAI_FLOW_ENTRY_ATTR_METER_CLASS
   bool is_bidirectional_flow = 4; // SAI_FLOW_ENTRY_ATTR_IS_BIDIRECTIONAL_FLOW
-  uint8 reverse_ip_protocol = 5; // SAI_FLOW_ENTRY_ATTR_REVERSE_IP_PROTOCOL
-  string reverse_src_ip_addr = 6; // SAI_FLOW_ENTRY_ATTR_REVERSE_IP_ADDR for source
-  string reverse_dst_ip_addr = 7; // SAI_FLOW_ENTRY_ATTR_REVERSE_IP_ADDR for destination
-  uint32 reverse_src_l4_port = 8; // SAI_FLOW_ENTRY_ATTR_REVERSE_SRC_L4_PORT
-  uint32 reverse_dst_l4_port = 9; // SAI_FLOW_ENTRY_ATTR_REVERSE_DST_L4_PORT
-  uint32 dest_vnet_vni = 10; // SAI_FLOW_ENTRY_ATTR_DEST_VNET_VNI
-  string underlay_sip = 11; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_SIP
-  string underlay_dip = 12; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_DIP
-  string underlay_smac = 13; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_SMAC
-  string underlay_dmac = 14; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_DMAC
-  bool is_ipv6 = 15; // SAI_FLOW_ENTRY_ATTR_IS_IPV6
-  string dst_mac = 16; // SAI_FLOW_ENTRY_ATTR_DEST_MAC
-  string sip = 17; // SAI_FLOW_ENTRY_ATTR_SIP
-  string dip = 18; // SAI_FLOW_ENTRY_ATTR_DIP
-  string sip_mask = 19; // SAI_FLOW_ENTRY_ATTR_SIP_MASK
-  string dip_mask = 20; // SAI_FLOW_ENTRY_ATTR_DIP_MASK
+  uint32 dest_vnet_vni = 5; // SAI_FLOW_ENTRY_ATTR_DEST_VNET_VNI
+  string underlay_sip = 6; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_SIP
+  string underlay_dip = 7; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_DIP
+  string underlay_smac = 8; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_SMAC
+  string underlay_dmac = 9; // SAI_FLOW_ENTRY_ATTR_UNDERLAY_DMAC
+  bool is_ipv6 = 10; // SAI_FLOW_ENTRY_ATTR_IS_IPV6
+  string dst_mac = 11; // SAI_FLOW_ENTRY_ATTR_DEST_MAC
+  string sip = 12; // SAI_FLOW_ENTRY_ATTR_SIP
+  string dip = 13; // SAI_FLOW_ENTRY_ATTR_DIP
+  string sip_mask = 14; // SAI_FLOW_ENTRY_ATTR_SIP_MASK
+  string dip_mask = 15; // SAI_FLOW_ENTRY_ATTR_DIP_MASK
+}
+
+message FlowMetadata {
+  SaiDashFlowKey flow_key = 1;
+  SaiDashFlowKey reverse_flow_key = 2;
+  SaiDashFlowState flow_state = 3;
 }
 ```
 
@@ -410,7 +417,6 @@ sai_status_t status = create_flow_table(&flow_table_id, switch_id, attr_count, a
 ### Create flow entry key
 
 ```c
-
 sai_flow_entry_t flow_entry;
 
 flow_entry.flow_table_id = 0x112233;
