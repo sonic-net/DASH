@@ -53,6 +53,15 @@
         ]
     },
     {
+        "name": "rg",
+        "op": "create",
+        "type": "SAI_OBJECT_TYPE_ROUTING_GROUP",
+        "attributes": [
+            "SAI_ROUTING_GROUP_ATTR_ADMIN_STATE",
+            "True"
+        ]
+    },
+    {
         "name": "eni",
         "op": "create",
         "type": "SAI_OBJECT_TYPE_ENI",
@@ -73,6 +82,8 @@
             "9",
             "SAI_ENI_ATTR_VNET_ID",
             "$vnet",
+            "SAI_ENI_ATTR_ROUTING_GROUP_ID",
+            "$rg",
             "SAI_ENI_ATTR_PL_SIP",
             "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
             "SAI_ENI_ATTR_PL_SIP_MASK",
@@ -152,7 +163,7 @@
         "type": "SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY",
         "key": {
             "switch_id": "$SWITCH_ID",
-            "eni_id": "$eni",
+            "routing_group_id": "$rg",
             "destination": "10.1.0.0/16"
         },
         "attributes": [

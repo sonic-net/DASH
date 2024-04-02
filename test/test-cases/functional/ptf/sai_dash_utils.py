@@ -172,6 +172,7 @@ class VnetAPI(VnetObjects):
             "outbound_v6_stage4_dash_acl_group_id": 0,
             "outbound_v6_stage5_dash_acl_group_id": 0,
             "disable_fast_path_icmp_flow_redirection": 0,
+            "routing_group_id": 0,
         }
         default_kwargs.update(kwargs)
 
@@ -237,6 +238,21 @@ class VnetAPI(VnetObjects):
     def vnet_remove(self, vnet_id):
         sai_thrift_remove_vnet(self.client, vnet_id)
 
+    def routing_group_create(self, admin_state):
+        """
+        Create routing group
+        """
+
+        routing_group_id = sai_thrift_create_routing_group(self.client, admin_state=admin_state)
+        self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
+        self.assertNotEqual(routing_group_id, 0)
+        self.add_teardown_obj(self.routing_group_remove, routing_group_id)
+
+        return routing_group_id
+
+    def routing_group_remove(self, routing_group_id):
+        sai_thrift_remove_routing_group(self.client, routing_group_id)
+
     def inbound_routing_decap_validate_create(self, eni_id, vni, sip, sip_mask, src_vnet_id):
         """
         Create inbound routing entry with
@@ -294,14 +310,14 @@ class VnetAPI(VnetObjects):
     def pa_validation_remove(self, pa_validation_entry):
         sai_thrift_remove_pa_validation_entry(self.client, pa_validation_entry)
 
-    def outbound_routing_vnet_direct_create(self, eni_id, lpm, dst_vnet_id,
+    def outbound_routing_vnet_direct_create(self, routing_group_id, lpm, dst_vnet_id,
                                             overlay_ip, counter_id=None):
         """
         Create outband vnet direct routing entry
         """
 
         outbound_routing_entry = sai_thrift_outbound_routing_entry_t(
-            switch_id=self.switch_id, eni_id=eni_id,
+            switch_id=self.switch_id, routing_group_id=routing_group_id,
             destination=sai_ipprefix(lpm))
         sai_thrift_create_outbound_routing_entry(self.client,
                                                  outbound_routing_entry, dst_vnet_id=dst_vnet_id,
@@ -313,13 +329,13 @@ class VnetAPI(VnetObjects):
 
         return outbound_routing_entry
 
-    def outbound_routing_direct_create(self, eni_id, lpm, counter_id=None):
+    def outbound_routing_direct_create(self, routing_group_id, lpm, counter_id=None):
         """
         Create outband vnet direct routing entry
         """
 
         outbound_routing_entry = sai_thrift_outbound_routing_entry_t(
-            switch_id=self.switch_id, eni_id=eni_id,
+            switch_id=self.switch_id, routing_group_id=routing_group_id,
             destination=sai_ipprefix(lpm))
         sai_thrift_create_outbound_routing_entry(self.client, outbound_routing_entry, counter_id=counter_id,
                                                  action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_DIRECT,
@@ -329,13 +345,13 @@ class VnetAPI(VnetObjects):
 
         return outbound_routing_entry
 
-    def outbound_routing_vnet_create(self, eni_id, lpm, dst_vnet_id, counter_id=None):
+    def outbound_routing_vnet_create(self, routing_group_id, lpm, dst_vnet_id, counter_id=None):
         """
         Create outbound vnet routing entry
         """
 
         outbound_routing_entry = sai_thrift_outbound_routing_entry_t(
-            switch_id=self.switch_id, eni_id=eni_id,
+            switch_id=self.switch_id, routing_group_id=routing_group_id,
             destination=sai_ipprefix(lpm))
         sai_thrift_create_outbound_routing_entry(self.client,
                                                  outbound_routing_entry, dst_vnet_id=dst_vnet_id,

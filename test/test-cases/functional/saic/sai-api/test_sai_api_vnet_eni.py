@@ -24,6 +24,22 @@ class TestSaiVnetEni:
         print("\n======= SAI commands RETURN values create =======")
         pprint(results)
         
+        # Create Routing Group
+        commands = [
+            {
+                "name": "rg",
+                "op": "create",
+                "type": "SAI_OBJECT_TYPE_ROUTING_GROUP",
+                "attributes": [
+                    "SAI_ROUTING_GROUP_ATTR_ADMIN_STATE",
+                    "True"
+                ]
+            },
+        ]
+        results = [*dpu.process_commands(commands)]
+        print("\n======= SAI commands RETURN values create =======")
+        pprint(results)
+
         commands = [
             {
                 "name": "eni_id",
@@ -46,6 +62,8 @@ class TestSaiVnetEni:
                     "9",
                     "SAI_ENI_ATTR_VNET_ID",
                     "$vnet",
+                    "SAI_ENI_ATTR_ROUTING_GROUP_ID",
+                    "$rg",
                     "SAI_ENI_ATTR_PL_SIP",
                     "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
                     "SAI_ENI_ATTR_PL_SIP_MASK",
@@ -173,6 +191,18 @@ class TestSaiVnetEni:
         print("\n======= SAI commands RETURN values remove =======")
         pprint(results)
         
+        commands = [
+            {
+                "name": "rg",
+                "op": "remove",
+                "type": "SAI_OBJECT_TYPE_ROUTING_GROUP"
+            },
+        ]
+
+        results = [*dpu.process_commands(commands)]
+        print("\n======= SAI commands RETURN values remove =======")
+        pprint(results)
+
         commands = [
             {
                 "name": "vnet",

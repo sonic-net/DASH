@@ -69,6 +69,8 @@ struct eni_data_t {
     IPv4Address pl_underlay_sip;
     bit<6> dscp;
     dash_tunnel_dscp_mode_t dscp_mode;
+    bit<16> routing_group_id;
+    bool routing_group_admin_state;
 }
 
 struct meter_context_t {
