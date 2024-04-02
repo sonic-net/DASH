@@ -387,16 +387,16 @@ However, since we only support DPU level pairing with a single flow table and th
 | Attribute name | Type | Description |
 | -------------- | ---- | ----------- |
 | SAI_SWITCH_ATTR_DASH_CAPS_HA_OWNER_NEEDED | `bool` | If `true`, the DASH host will own driving the HA state machine. |
-| SAI_SWITCH_ATTR_DASH_CAPS_HA_SCOPE | `sai_dash_caps_ha_scope_t` | HA scope that supported by the DASH implementation. |
+| SAI_SWITCH_ATTR_DASH_CAPS_HA_SCOPE_LEVEL | `sai_dash_caps_ha_scope_level_t` | HA scope that supported by the DASH implementation. |
 
 The HA scope capability enum is defined as below:
 
 ```c++
-typedef enum _sai_dash_caps_ha_scope_t
+typedef enum _sai_dash_caps_ha_scope_level_t
 {
-    DPU,
+    Card,
     ENI,
-} sai_dash_caps_ha_scope_t;
+} sai_dash_caps_ha_scope_level_t;
 ```
 
 And here is how the topology looks like for type of HA scope:
