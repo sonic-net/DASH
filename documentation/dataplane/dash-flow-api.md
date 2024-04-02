@@ -290,7 +290,7 @@ typedef enum _sai_dash_flow_entry_bulk_get_session_filter_key_t
 
     SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_DST_PORT,
 
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_KEY_VERSION,
+    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_FLOW_VERSION,
 
 } sai_dash_flow_entry_bulk_get_session_filter_key_t;
 ```
@@ -371,7 +371,7 @@ message SaiDashFlowState {
   string dip_mask = 15; // SAI_FLOW_ENTRY_ATTR_DIP_MASK
 }
 
-message FlowMetadata {
+message SaiDashFlowEntry {
   SaiDashFlowKey flow_key = 1;
   SaiDashFlowKey reverse_flow_key = 2;
   SaiDashFlowState flow_state = 3;
