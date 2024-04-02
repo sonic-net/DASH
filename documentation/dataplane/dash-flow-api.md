@@ -266,12 +266,13 @@ The filter, defined as an object, is specified as follows:
 | create_flow_entry_bulk_get_session_filters       | Add multiple new filters for flow entry bulk get session feature. |
 | remove_flow_entry_bulk_get_session_filters       | Remove multiple filters for flow entry bulk get session feature. |
 
-| Attribute Name                                               | Type                                                | Description                                                 |
-| ------------------------------------------------------------ | --------------------------------------------------- | ----------------------------------------------------------- |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY | `sai_dash_flow_entry_bulk_get_session_filter_key_t` | Key of the filter                                           |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_OP_KEY | `sai_dash_flow_entry_bulk_get_session_op_key_t`     | Operation of the filter                                     |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_INT_VALUE        | `sai_uint64_t`                                      | INT Value of the filter (Mutually exclusive with IP Value.) |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_IP_VALUE         | `sai_ip_address_t`                                  | IP Value of the filter (Mutually exclusive with INT Value.) |
+| Attribute Name                                               | Type                                                | Description                                                  |
+| ------------------------------------------------------------ | --------------------------------------------------- | ------------------------------------------------------------ |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY | `sai_dash_flow_entry_bulk_get_session_filter_key_t` | Key of the filter                                            |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_OP_KEY | `sai_dash_flow_entry_bulk_get_session_op_key_t`     | Operation of the filter                                      |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_INT_VALUE        | `sai_uint64_t`                                      | INT Value of the filter , ``@validonly SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY == SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_IP_PROTO || SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY == SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_SRC_PORT || SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY == SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_DST_PORT ||  SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY == SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_FLOW_VERSION` |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_IP_VALUE         | `sai_ip_address_t`                                  | IP Value of the filter, `@validonly SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY == SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_SRC_ADDR || SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY == SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_DST_ADDR` |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_MAC_VALUE        | `sai_mac_t`                                         | Mac Value of the filter, `@validonly SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY == SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_ENI_MAC` |
 
 ```c
 typedef enum _sai_dash_flow_entry_bulk_get_session_filter_key_t
@@ -432,14 +433,12 @@ flow_entry.dst_port = 80;
 ### Create flow entry
 
 ```c
-SaiDashFlowMetadata flow_metadata = SAI_DASH_FLOW_METADATA__INIT;
-flow_metadata.version = 1;
-flow_metadata.metering_class = 1001;
+SaiDashFlowEntry flow_entry_pb = SAI_DASH_FLOW_ENTRY__INIT;
 ...
 
-unsigned len = sai_dash_flow_metadata__get_packed_size(&flow_metadata);
+unsigned len = sai_dash_flow_entry__get_packed_size(&flow_entry_pb);
 uint8_t *buf = malloc(len);
-sai_dash_flow_metadata__pack(&flow_metadata, buf);
+sai_dash_flow_entry__pack(&flow_entry_pb, buf);
 
 sai_attribute_t sai_attrs_list[1];
 sai_attrs_list[0].id = SAI_FLOW_ENTRY_ATTR_FLOW_DATA_PB;
