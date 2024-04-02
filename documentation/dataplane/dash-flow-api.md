@@ -9,8 +9,7 @@
 - [DASH Flow API HLD](#dash-flow-api-hld)
   - [Table of Contents](#table-of-contents)
   - [Introduction](#introduction)
-  - [Terminology](#terminology)
-  - [Model](#model)
+  - [Overview](#overview)
   - [Flow Table APIs](#flow-table-apis)
   - [Flow APIs](#flow-apis)
     - [Basic flow APIs](#basic-flow-apis)
@@ -20,7 +19,7 @@
       - [Reverse flow key](#reverse-flow-key)
       - [Flow encap](#flow-encap)
       - [Flow rewrite](#flow-rewrite)
-    - [Extra flow metadata](#extra-flow-metadata)
+    - [Extra flow metadata /To-Do notication/](#extra-flow-metadata-to-do-notication)
     - [Flow Bulk Get Session](#flow-bulk-get-session)
     - [Protobuf-based flow programming](#protobuf-based-flow-programming)
     - [Capability](#capability)
@@ -38,17 +37,24 @@
 
 DASH supports the storage and processing of millions of flow states. To further enhance the DASH flow processing capabilities, we offer a DASH flow abstraction layer to facilitate vendor-neutral flow management. This layer ensures uniform control over flows across programmable switches, DPUs, and smart switches. The DASH flow abstraction provides concepts of flow tables and flow entries, as well as APIs to manage the flows.
 
-Cloud providers can build their services on top of the DASH flow to cater to various scenarios. They use the DASH flow to achieve SDN, re-simulation, dataplane applications, cloud gateways, and load balancing for their flow operations. This also lays the foundation for DASH to offer foundational services, such as flow-level high availability and debuggability.
+The DASH flow APIs enable the creation, removal, retrieval, and configuration of flow tables, entries, and bulk sync sessions with flow filters.
 
-## Terminology
+Cloud providers can leverage DASH flow to develop services tailored to a diverse array of scenarios. Examples of achievable functionalities include:
 
-- **Flow**: It represents a single direction of the match-action entry for a connection.
-- **Flow entry**: Same as flow.
+- **Dataplane Applications**: Such as cloud gateways, load balancers, etc.
+- **Flow Management**: Including flow offloading and updating, with tasks like flow redirection and resimulation, etc.
+- **Dataplane Debugging**: Diagnosing the behaviors of different flows.
+- **Foundational Flow Services**: Flow state high availability, etc.
+
+## Overview
+
+- **Flow/flow entry**: It represents a single direction of the match-action entry for a connection.
+
 - **Flow Key**: The key that is used to match the packet for finding its flow.
-- **Flow State**: The state of the flow, including the packet transformations and all other tracked states, such as TCP, HA, etc.
-- **Flow Table**: The table to store a set of flows.
 
-## Model
+- **Flow State**: The state of the flow, including the packet transformations and all other tracked states, such as TCP, HA, etc.
+
+- **Flow Table**: The table to store a set of flows.
 
 ![dash_flow_model](images/dash-flow-api-model.svg)
 
@@ -109,15 +115,14 @@ typedef enum _sai_dash_flow_enabled_key_t
 
 The flow_entry APIs are defined as follows:
 
-| API                        | Description                                                  |
-| -------------------------- | :----------------------------------------------------------- |
-| create_flow_entry          | Add a single new entry to a certain flow table               |
-| remove_flow_entry          | Remove a single entry in a certain flow table. Note that the flow removal process deletes two flows if it is a bi-directional flow. If you wish to remove a flow in only one direction, you should set the flow to be uni-directional in advance. |
-| set_flow_entry_attribute   | Set attributes for a single entry in a certain flow table    |
-| get_flow_entry_attribute   | Get attributes of a single entry in a certain flow table     |
-| create_flow_entries        | Add multiple entries to a certain flow table in bulk         |
-| remove_flow_entries        | Remove multiple entries from a specific flow table in bulk. Note that the flow removal process deletes two flows if it is a bi-directional flow. If you wish to remove a flow in only one direction, you should set the flow to be uni-directional in advance. |
-| get_flow_entries_attribute | Get multiple entries from a certain flow table in bulk       |
+| API                      | Description                                                  |
+| ------------------------ | :----------------------------------------------------------- |
+| create_flow_entry        | Add a single new entry to a certain flow table               |
+| remove_flow_entry        | Remove a single entry in a certain flow table. Note that the flow removal process deletes two flows if it is a bi-directional flow. If you wish to remove a flow in only one direction, you should set the flow to be uni-directional in advance. |
+| set_flow_entry_attribute | Set attributes for a single entry in a certain flow table    |
+| get_flow_entry_attribute | Get attributes of a single entry in a certain flow table     |
+| create_flow_entries      | Add multiple entries to a certain flow table in bulk         |
+| remove_flow_entries      | Remove multiple entries from a specific flow table in bulk. Note that the flow removal process deletes two flows if it is a bi-directional flow. If you wish to remove a flow in only one direction, you should set the flow to be uni-directional in advance. |
 
 ### Keys of flow entry
 
@@ -128,6 +133,7 @@ Please note that there is an attribute in the *flow_table* that can specify whic
 The *flow_table_id* is used to designate the flow table for the flow only, which is not used in match and action.
 
 ```c
+/* To-do name can be different with metadata.p4 */
 typedef struct _sai_flow_entry_t
 {
     /**
@@ -145,34 +151,34 @@ typedef struct _sai_flow_entry_t
     sai_object_id_t flow_table_id;
 
     /**
-     * @brief Exact matched key eni_addr
+     * @brief Exact matched key eni_mac
      */
-    sai_mac_t eni_addr;
+    sai_mac_t eni_mac;
 
     /**
      * @brief Exact matched key ip_protocol
      */
-    sai_uint8_t ip_protocol;
+    sai_uint8_t ip_proto;
 
     /**
      * @brief Exact matched key src_ip_addr
      */
-    sai_ip_address_t src_ip_addr;
+    sai_ip_address_t src_addr;
 
     /**
      * @brief Exact matched key dst_ip_addr
      */
-    sai_ip_address_t dst_ip_addr;
+    sai_ip_address_t dst_addr;
 
     /**
      * @brief Exact matched key src_l4_port
      */
-    sai_uint16_t src_l4_port;
+    sai_uint16_t src_port;
 
     /**
      * @brief Exact matched key dst_l4_port
      */
-    sai_uint16_t dst_l4_port;
+    sai_uint16_t dst_port;
 
 } sai_flow_entry_t;
 ```
@@ -185,13 +191,12 @@ The attributes of the flow entry can be divided into different categories. Pleas
 
 These are the basic attributes of flow entry.
 
-| Attribute name                       | Type                                                         | Description                                                  |
-| ------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| SAI_FLOW_ENTRY_ATTR_VERSION          | `sai_uint32_t`                                               | Version of the flow entry                                    |
-| SAI_FLOW_ENTRY_ATTR_DASH_DIRECTION   | `sai_dash_direction_t`                                       | Direction of the DASH flow                                   |
-| SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION | `sai_dash_flow_action_t`                                     | Action to be applied on the flow                             |
-| SAI_FLOW_ENTRY_ATTR_METER_CLASS      | `sai_uint16_t`                                               | Meter class for flow entry, used for traffic metering and policing. |
-| SAI_FLOW_SYNC_SESSION_STATE          | @type `sai_object_id_t` @objects: `DASH_FLOW_SYNC_SESSION_STATE` | Indicates the flow sync session state                        |
+| Attribute name                       | Type                     | Description                                                  |
+| ------------------------------------ | ------------------------ | ------------------------------------------------------------ |
+| SAI_FLOW_ENTRY_ATTR_VERSION          | `sai_uint32_t`           | Version of the flow entry                                    |
+| SAI_FLOW_ENTRY_ATTR_DASH_DIRECTION   | `sai_dash_direction_t`   | Direction of the DASH flow                                   |
+| SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION | `sai_dash_flow_action_t` | Action to be applied on the flow                             |
+| SAI_FLOW_ENTRY_ATTR_METER_CLASS      | `sai_uint16_t`           | Meter class for flow entry, used for traffic metering and policing. |
 
 #### Reverse flow key
 
@@ -200,12 +205,12 @@ When configuring a flow_entry, it can be specified whether it is unidirectional 
 | Attribute name                            | Type               | Description                                 |
 | ----------------------------------------- | ------------------ | ------------------------------------------- |
 | SAI_FLOW_ENTRY_ATTR_IS_BIDIRECTIONAL_FLOW | `bool`             | Indicates if the flow is bidirectional      |
-| SAI_FLOW_ENTRY_ATTR_REVERSE_ENI_ADDR      | `sai_mac_t`        | Eni mac addr for the recerse flow           |
-| SAI_FLOW_ENTRY_ATTR_REVERSE_IP_PROTOCOL   | `sai_uint8_t`      | IP protocol number for the reverse flow     |
+| SAI_FLOW_ENTRY_ATTR_REVERSE_ENI_MAC       | `sai_mac_t`        | Eni mac addr for the recerse flow           |
+| SAI_FLOW_ENTRY_ATTR_REVERSE_IP_PROTO      | `sai_uint8_t`      | IP protocol number for the reverse flow     |
 | SAI_FLOW_ENTRY_ATTR_REVERSE_IP_ADDR       | `sai_ip_address_t` | Source IP address for the reverse flow      |
 | SAI_FLOW_ENTRY_ATTR_REVERSE_IP_ADDR       | `sai_ip_address_t` | Destination IP address for the reverse flow |
-| SAI_FLOW_ENTRY_ATTR_REVERSE_SRC_L4_PORT   | `sai_uint16_t`     | L4 source port for the reverse flow         |
-| SAI_FLOW_ENTRY_ATTR_REVERSE_DST_L4_PORT   | `sai_uint16_t`     | L4 destination port for the reverse flow    |
+| SAI_FLOW_ENTRY_ATTR_REVERSE_SRC_PORT      | `sai_uint16_t`     | L4 source port for the reverse flow         |
+| SAI_FLOW_ENTRY_ATTR_REVERSE_DST_PORT      | `sai_uint16_t`     | L4 destination port for the reverse flow    |
 
 #### Flow encap
 
@@ -233,7 +238,7 @@ These are the related attributes of flow rewrite.
 | SAI_FLOW_ENTRY_ATTR_SIP_MASK | `sai_ip_address_t` | Subnet mask for the source IP address.                       |
 | SAI_FLOW_ENTRY_ATTR_DIP_MASK | `sai_ip_address_t` | Subnet mask for the destination IP address.                  |
 
-### Extra flow metadata
+### Extra flow metadata /To-Do notication/
 
 Here are some extra metadata for different purposes.
 
@@ -274,19 +279,17 @@ typedef enum _sai_dash_flow_entry_bulk_get_session_filter_key_t
 {
     SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_INVAILD,
 
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_FLOW_TABLE_ID,
+    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_ENI_MAC,
 
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_ENI_ADDR,
+    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_IP_PROTO,
 
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_IP_PROTOCOL,
+    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_SRC_ADDR,
 
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_SRC_IP_ADDR,
+    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_DST_ADDR,
 
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_DST_IP_ADDR,
+    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_SRC_PORT,
 
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_SRC_L4_PORT,
-
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_DST_L4_PORT,
+    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_DST_PORT,
 
     SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_KEY_VERSION,
 
@@ -324,7 +327,7 @@ Upon establishing the bulk get session filters, we can initiate a flow bulk get 
 
 In the attributes, we allow specifying the gRPC server and port. For filtering flow entries, we support up to five filters. Each filter is a bulk get session filter object, and different filters are combined using an *AND* operation. If no filters are specified, the bulk get session returns all flow entries.
 
-| Attribute Name                                               | Type                                                         | Description                                                  |
+| Attribute Name /To-do target server/                         | Type                                                         | Description                                                  |
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_IP     | `sai_ip_address_t`                                           | The IP address to use for the bulk get session.              |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_PORT   | `sai_uint16_t`                                               | The port to use for the bulk get session.                    |
@@ -343,6 +346,7 @@ Although the content of both attributes and protobuf may be identical, their app
 ```protobuf
 syntax = "proto3";
 
+/* To-do add flow key without table id */
 message SaiDashFlowMetadata {
   uint32 version = 1; // SAI_FLOW_ENTRY_ATTR_VERSION
   uint32 dash_flow_action = 2; // SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION
@@ -369,12 +373,16 @@ message SaiDashFlowMetadata {
 
 ### Capability
 
-| Attribute Name                                     | Type           | Description                                                  |
-| -------------------------------------------------- | -------------- | ------------------------------------------------------------ |
-| SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_TABLE_COUNT     | `sai_uint32_t` | The max number of flow tables that can be created            |
-| SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_ENTRY_COUNT     | `sai_uint32_t` | The max number of flow entries that can be created in a flow table |
-| SAI_SWITCH_ATTR_DASH_CAPS_BULK_GET_SESSION         | `bool`         | Indicates if it supports bulk get sessions                   |
-| SAI_SWITCH_ATTR_DASH_CAPS_BIDIRECTIONAL_FLOW_ENTRY | `bool`         | Indicates if it supports bi-directional flow entry           |
+| Attribute Name                                     | Type           | Description                                        |
+| -------------------------------------------------- | -------------- | -------------------------------------------------- |
+| SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_TABLE_COUNT     | `sai_uint32_t` | The max number of flow tables that can be created  |
+| SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_ENTRY_COUNT     | `sai_uint32_t` | The max number of flow entries for all tables      |
+| SAI_SWITCH_ATTR_DASH_CAPS_BULK_GET_SESSION         | `bool`         | Indicates if it supports bulk get sessions         |
+| SAI_SWITCH_ATTR_DASH_CAPS_BIDIRECTIONAL_FLOW_ENTRY | `bool`         | Indicates if it supports bi-directional flow entry |
+| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_CREATE              | `bool`         | Indicates if it supports flow create               |
+| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_REMOVE              | `bool`         | Indicates if it supports flow remove               |
+| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_SET                 | `bool`         | Indicates if it supports flow set                  |
+| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_GET                 | `bool`         | Indicates if it supports flow get                  |
 
 ## Examples
 
@@ -406,13 +414,13 @@ sai_status_t status = create_flow_table(&flow_table_id, switch_id, attr_count, a
 sai_flow_entry_t flow_entry;
 
 flow_entry.flow_table_id = 0x112233;
-flow_entry.ip_protocol = 6;
-flow_entry.src_ip_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
+flow_entry.ip_proto = 6;
+flow_entry.src_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
 inet_pton(AF_INET, "192.168.1.1", &flow_entry.src_ip_addr.addr.ip4);
-flow_entry.dst_ip_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
+flow_entry.dst_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
 inet_pton(AF_INET, "192.168.1.2", &flow_entry.dst_ip_addr.addr.ip4);
-flow_entry.src_l4_port = 12345;
-flow_entry.dst_l4_port = 80;
+flow_entry.src_port = 12345;
+flow_entry.dst_port = 80;
 ```
 
 ### Create flow entry
@@ -453,13 +461,13 @@ status = create_flow_entries(flow_table_id, flow_count, flow_key, attr_count, at
 ```c
 sai_flow_entry_t flow_entry;
 flow_entry.flow_table_id = 0x112233;
-flow_entry.ip_protocol = 6;
-flow_entry.src_ip_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
+flow_entry.ip_proto = 6;
+flow_entry.src_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
 inet_pton(AF_INET, "192.168.1.1", &flow_entry.src_ip_addr.addr.ip4);
-flow_entry.dst_ip_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
+flow_entry.dst_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
 inet_pton(AF_INET, "192.168.1.2", &flow_entry.dst_ip_addr.addr.ip4);
-flow_entry.src_l4_port = 12345;
-flow_entry.dst_l4_port = 80;
+flow_entry.src_port = 12345;
+flow_entry.dst_port = 80;
 
 status = get_flow_entry_attribute(flow_entry, attr_count, attr_list);
 ```
@@ -515,13 +523,13 @@ status = create_flow_entry_bulk_get_session(&flow_entry_bulk_get_session_id, swi
 
 sai_flow_entry_t flow_entry;
 flow_entry.flow_table_id = 0x112233;
-flow_entry.ip_protocol = 6;
-flow_entry.src_ip_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
+flow_entry.ip_proto = 6;
+flow_entry.src_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
 inet_pton(AF_INET, "192.168.1.1", &flow_entry.src_ip_addr.addr.ip4);
-flow_entry.dst_ip_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
+flow_entry.dst_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
 inet_pton(AF_INET, "192.168.1.2", &flow_entry.dst_ip_addr.addr.ip4);
-flow_entry.src_l4_port = 12345;
-flow_entry.dst_l4_port = 80;
+flow_entry.src_port = 12345;
+flow_entry.dst_port = 80;
 
 status = remove_flow_entry(flow_entry);
 ```
