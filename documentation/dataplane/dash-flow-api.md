@@ -21,6 +21,9 @@
       - [Flow rewrite](#flow-rewrite)
     - [Extra flow metadata /To-Do notication/](#extra-flow-metadata-to-do-notication)
     - [Flow Bulk Get Session](#flow-bulk-get-session)
+      - [Flow Bulk Get Session filter](#flow-bulk-get-session-filter)
+      - [Flow Bulk Get Session API](#flow-bulk-get-session-api)
+      - [Bulk Get Session Event Notifiations](#bulk-get-session-event-notifiations)
     - [Protobuf-based flow programming](#protobuf-based-flow-programming)
     - [Capability](#capability)
   - [Examples](#examples)
@@ -248,6 +251,8 @@ Here are some extra metadata for different purposes.
 
 ### Flow Bulk Get Session
 
+#### Flow Bulk Get Session filter
+
 To manage data transfer to a server via gRPC, we introduce a flow entry bulk session that incorporates filtering capabilities to precisely define the data range for transfer. The procedure for setting up these filters is straightforward:
 
 1. Initially, create up to five flow bulk get session filters based on the specific needs for filtering the flows.
@@ -314,6 +319,8 @@ typedef enum _sai_dash_flow_entry_bulk_get_session_op_key_t
 } sai_dash_flow_entry_bulk_get_session_op_key_t;
 ```
 
+#### Flow Bulk Get Session API
+
 Upon establishing the bulk get session filters, we can initiate a flow bulk get session, which is defined as follows:
 
 | Function                                  | Description                                                 |
@@ -336,6 +343,53 @@ In the attributes, we allow specifying the gRPC server and port. For filtering f
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_THIRD_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID | @type: `sai_object_id_t` @objects `SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER` | Action set_flow_entry_bulk_get_session_attr parameter FIRST_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FOURTH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID | @type: `sai_object_id_t` @objects `SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER` | Action set_flow_entry_bulk_get_session_attr parameter SECOND_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FIFTH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID | @type: `sai_object_id_t` @objects `SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER` | Action set_flow_entry_bulk_get_session_attr parameter THIRD_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID |
+
+#### Bulk Get Session Event Notifiations
+
+| Attribute name                                     | Type                                              | Description                                                  |
+| -------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
+| SAI_SWITCH_ATTR_FLOW_BULK_GET_SESSION_EVENT_NOTIFY | `sai_flow_bulk_get_session_event_notification_fn` | The callback function for receiving events on flow bulk get session event notification. |
+
+```c
+/**
+ * @brief bulk flow get event type
+ */
+typedef enum _sai_flow_bulk_get_session_event_t
+{
+    /** The bulk get finished */
+    SAI_FLOW_BULK_GET_SESSION_FINISHED,
+
+} sai_flow_bulk_get_session_event_t;
+
+/**
+ * @brief Notification data format received from SAI HA set callback
+ *
+ * @count attr[attr_count]
+ */
+typedef struct _sai_flow_bulk_get_session_event_data_t
+{
+    /** Event type */
+    sai_flow_bulk_get_session_event_t event_type;
+
+    /** Session id */
+    sai_object_id_t flow_bulk_session_id;
+
+} sai_flow_bulk_get_session_event_data_t;
+
+/**
+ * @brief dash flow get bulk session notification
+ *
+ * Passed as a parameter into sai_initialize_switch()
+ *
+ * @count data[count]
+ *
+ * @param[in] count Number of notifications
+ * @param[in] data Array of HA set events
+ */
+typedef void (*sai_flow_bulk_get_session_event_notification_fn)(
+        _In_ uint32_t count,
+        _In_ const sai_flow_bulk_get_session_event_data_t *flow_bulk_get_session_event_data);
+```
 
 ### Protobuf-based flow programming
 
