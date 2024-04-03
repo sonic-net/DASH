@@ -19,7 +19,7 @@
       - [Reverse flow key](#reverse-flow-key)
       - [Flow encap](#flow-encap)
       - [Flow rewrite](#flow-rewrite)
-    - [Extra flow metadata /To-Do notication/](#extra-flow-metadata-to-do-notication)
+    - [Extra flow metadata](#extra-flow-metadata)
     - [Flow Bulk Get Session](#flow-bulk-get-session)
       - [Flow Bulk Get Session filter](#flow-bulk-get-session-filter)
       - [Flow Bulk Get Session API](#flow-bulk-get-session-api)
@@ -240,7 +240,7 @@ These are the related attributes of flow rewrite.
 | SAI_FLOW_ENTRY_ATTR_SIP_MASK | `sai_ip_address_t` | Subnet mask for the source IP address.                       |
 | SAI_FLOW_ENTRY_ATTR_DIP_MASK | `sai_ip_address_t` | Subnet mask for the destination IP address.                  |
 
-### Extra flow metadata /To-Do notication/
+### Extra flow metadata
 
 Here are some extra metadata for different purposes.
 
@@ -334,7 +334,7 @@ Upon establishing the bulk get session filters, we can initiate a flow bulk get 
 
 In the attributes, we allow specifying the gRPC server and port. For filtering flow entries, we support up to five filters. Each filter is a bulk get session filter object, and different filters are combined using an *AND* operation. If no filters are specified, the bulk get session returns all flow entries.
 
-| Attribute Name /To-do target server/                         | Type                                                         | Description                                                  |
+| Attribute Name                                               | Type                                                         | Description                                                  |
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_IP     | `sai_ip_address_t`                                           | The IP address to use for the bulk get session.              |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_PORT   | `sai_uint16_t`                                               | The port to use for the bulk get session.                    |
