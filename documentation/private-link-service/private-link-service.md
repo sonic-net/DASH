@@ -127,6 +127,19 @@ The following attributes will be added to CA-to-PA entry, for supporting service
 | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP_MASK | sai_ip_address_t | Used with overlay dip to support dst prefix rewrite. |
 | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_TUNNEL_ID | sai_object_id_t | Used to specify the tunnel. |
 
+The PL and PL NSG will share the same routing type on the CA-PA mapping entry:
+
+```c
+typedef enum _sai_outbound_ca_to_pa_entry_action_t
+{
+    // ...
+
+    SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING,
+
+    // ...
+} sai_outbound_ca_to_pa_entry_action_t;
+```
+
 ### 5.3. DASH tunnel table and attributes
 
 A new tunnel table needs to be added with the following attributes:
