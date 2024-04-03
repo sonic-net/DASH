@@ -17,11 +17,11 @@
       2. [3.2.2. Mapping attributes](#322-mapping-attributes)
       3. [3.2.3. Tunnel attributes](#323-tunnel-attributes)
       4. [3.2.4. Inbound route rule attributes](#324-inbound-route-rule-attributes)
-   3. [3.4. Global meter policy](#34-global-meter-policy)
-      1. [3.4.1. ENI](#341-eni)
-      2. [3.4.2. Meter policy](#342-meter-policy)
-      3. [3.4.3. Meter rule](#343-meter-rule)
-   4. [3.3. Capability](#33-capability)
+   3. [3.3. Global meter policy](#33-global-meter-policy)
+      1. [3.3.1. ENI](#331-eni)
+      2. [3.3.2. Meter policy](#332-meter-policy)
+      3. [3.3.3. Meter rule](#333-meter-rule)
+   4. [3.4. Capability](#34-capability)
 4. [4. Metering bucket selection in DASH pipeline](#4-metering-bucket-selection-in-dash-pipeline)
 
 ## 1. Background
@@ -101,22 +101,22 @@ To fetch the metering data from each meter bucket, we are going to leverage the 
 | SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR | `sai_uint32_t` | 0 | Meter class OR bits. |
 | SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND | `sai_uint32_t` | UINT32_MAX | Meter class AND bits. |
 
-### 3.4. Global meter policy
+### 3.3. Global meter policy
 
-#### 3.4.1. ENI
+#### 3.3.1. ENI
 
 | Attribute | Type | Default Value | Description |
 | --- | --- | --- | --- |
 | SAI_ENI_ATTR_V4_METER_POLICY_ID | `sai_object_id_t` | SAI_NULL_OBJECT_ID | Global IPv4 meter policy ID for this ENI. |
 | SAI_ENI_ATTR_V6_METER_POLICY_ID | `sai_object_id_t` | SAI_NULL_OBJECT_ID | Global IPv6 meter policy ID for this ENI. |
 
-#### 3.4.2. Meter policy
+#### 3.3.2. Meter policy
 
 | Attribute | Type | Default Value | Description |
 | --- | --- | --- | --- |
 | SAI_METER_POLICY_ATTR_IP_ADDR_FAMILY | `sai_ip_addr_family_t` | SAI_IP_ADDR_FAMILY_IPV4 | IP address family of the metering policy |
 
-#### 3.4.3. Meter rule
+#### 3.3.3. Meter rule
 
 | Attribute | Type | Default Value | Description |
 | --- | --- | --- | --- |
@@ -126,7 +126,7 @@ To fetch the metering data from each meter bucket, we are going to leverage the 
 | SAI_METER_RULE_ATTR_DIP_MASK | `sai_ip_address_t` | NA | Destination IP mask for ternary match. |
 | SAI_METER_RULE_ATTR_PRIORITY | `sai_uint32_t` | NA | Priority required for ternary match. |
 
-### 3.3. Capability
+### 3.4. Capability
 
 To enable the DASH providers be able to tell the host how much metering buckets are supported, we are going to introduce a new capability attributes:
 
