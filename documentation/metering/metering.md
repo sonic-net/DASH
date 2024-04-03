@@ -3,6 +3,7 @@
 | Rev | Date | Author | Change Description |
 | --- | ---- | ------ | ------------------ |
 | 0.1 | 03/30/2024 | Riff Jiang | Initial version |
+| 0.2 | 04/03/2024 | Riff Jiang | Updated meter class from 16 bits to 32 bits. Added capability for meter bucket. |
 
 1. [1. Background](#1-background)
 2. [2. Resource modeling, requirement, and SLA](#2-resource-modeling-requirement-and-sla)
