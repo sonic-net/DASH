@@ -74,9 +74,7 @@ The return packet will be the same as Private Link, coming directly from PLS byp
 
 ### 3.3. Load balancer fast path support
 
-The Fast Path here is not ER Fast Path, but the fast path that required by PLS.
-
-Fast path ICMP flow redirection will take effect just like the VM-to-VM case.
+The fast path here is not the DASH hardware fast path, but the [load balancer fast path ICMP flow redirection](../load-bal-service/fast-path-icmp-flow-redirection.md).
 
 1. If PL NSG is not used, it changes the flow just like regular PL case.
 2. If PL NSG is used, it updates the PL encap, and **removes** the outer NSG encap.
