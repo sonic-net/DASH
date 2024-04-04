@@ -203,15 +203,16 @@ Whenever a HA set state is changed, it will be reported back via HA set event no
  */
 typedef enum _sai_ha_set_event_t
 {
-    /** Any HA set state is changed, such as data plane channel goes down. */
-    SAI_HA_SET_STATE_CHANGED,
+    /** Data plane channel goes up. */
+    SAI_HA_SET_DP_CHANNEL_UP,
+
+    /** Data plane channel goes down. */
+    SAI_HA_SET_DP_CHANNEL_DOWN,
 
 } sai_ha_set_event_t;
 
 /**
  * @brief Notification data format received from SAI HA set callback
- *
- * @count attr[attr_count]
  */
 typedef struct _sai_ha_set_event_data_t
 {
@@ -220,9 +221,6 @@ typedef struct _sai_ha_set_event_data_t
 
     /** HA set id */
     sai_object_id_t ha_set_id;
-
-    /** Is data plane channel alive from data plane channel probing */
-    bool dp_channel_is_alive;
 
 } sai_ha_set_event_data_t;
 
@@ -247,25 +245,10 @@ Similar to HA set, whenever any HA scope state is changed, it will be reported b
 
 ```c
 /**
- * @brief HA scope event type
- */
-typedef enum _sai_ha_scope_event_t
-{
-    /** Any HA scope state is changed, such as HA state. */
-    SAI_HA_SCOPE_STATE_CHANGED,
-
-} sai_ha_scope_event_t;
-
-/**
  * @brief Notification data format received from SAI HA scope callback
- *
- * @count attr[attr_count]
  */
 typedef struct _sai_ha_scope_event_data_t
 {
-    /** Event type */
-    sai_ha_scope_event_t event_type;
-
     /** HA scope id */
     sai_object_id_t ha_scope_id;
 
