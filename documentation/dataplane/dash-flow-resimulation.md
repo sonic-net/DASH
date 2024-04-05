@@ -35,6 +35,8 @@
 | CA | Customer Address |
 | PA | Provider Address |
 | CPS | Connection Per Second |
+| PLS | Private Link Service |
+| LB | Load Balancer |
 
 ## 2. Background
 
@@ -86,10 +88,8 @@ Flow resimulation uses the ENI and each policy, which follows the same resource 
 | # of CA-PA mappings per card | 8M |
 | CPS + Flow resimulation | 3M |
 | Max # of flows to update per second | Configurable on ENI level |
-| # of full flow resimulation request per minute | (TBD) |
-| # of policy-based flow resimulation request per minute | (TBD) |
-| Max latency of completing full flow resimulation request<br>(marking-phase only, not complete all flow updates) | (TBD) |
-| Max latency of completing policy-based flow resimulation request<br>(marking-phase only, not complete all flow updates) | (TBD)  |
+| Max latency of completing full flow resimulation API call | (TBD) |
+| Max latency of completing policy-based flow resimulation API call | (TBD)  |
 
 ### 5.3. Reliability requirements
 
