@@ -212,4 +212,4 @@ We also add 2 dedicated counters for flow resimulation. The reason is that we al
 | SAI stats name | Description |
 | --- | --- |
 | SAI_ENI_STAT_FLOW_UPDATED_BY_RESIMULATION | Total flow updated by resimulation on ENI. |
-| SAI_ENI_STAT_FLOW_UPDATE_BY_RESIMULATION _FAILED | Total flow failed to update by resimulation on ENI. |
+| SAI_ENI_STAT_FLOW_UPDATE_BY_RESIMULATION_FAILED | Total flow failed to update by resimulation on ENI. |
