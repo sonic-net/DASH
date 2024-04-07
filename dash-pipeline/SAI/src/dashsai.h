@@ -97,7 +97,7 @@ namespace dash
 
         public: // default attributes helper
 
-            static std::vector<const sai_attribute_t> populateDefaultAttributes(
+            static std::vector<sai_attribute_t> populateDefaultAttributes(
                     _In_ sai_object_type_t objectType,
                     _In_ uint32_t attr_count,
                     _In_ const sai_attribute_t *attr_list);

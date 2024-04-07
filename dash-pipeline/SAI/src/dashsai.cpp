@@ -803,7 +803,7 @@ sai_status_t DashSai::get(
  *
  * @return List of attributes with possible added attributes with default values.
  */
-std::vector<const sai_attribute_t> DashSai::populateDefaultAttributes(
+std::vector<sai_attribute_t> DashSai::populateDefaultAttributes(
         _In_ sai_object_type_t objectType,
         _In_ uint32_t attr_count,
         _In_ const sai_attribute_t *attr_list)
@@ -812,7 +812,7 @@ std::vector<const sai_attribute_t> DashSai::populateDefaultAttributes(
 
     // populate existing attributes
 
-    std::vector<const sai_attribute_t> attrs(attr_list, attr_list + attr_count);
+    std::vector<sai_attribute_t> attrs(attr_list, attr_list + attr_count);
 
     auto* info = sai_metadata_get_object_type_info(objectType);
 
