@@ -21,7 +21,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
 {
     DASH_LOG_ENTER();
 
-    auto attrs = DashSai::populateDefaultAttributes((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_count, attr_list);
+    auto attrs = dash::DashSai::populateDefaultAttributes((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_count, attr_list);
     attr_count = (uint32_t)attrs.size();
     attr_list = attrs.data();
 
@@ -370,7 +370,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
 {
     DASH_LOG_ENTER();
 
-    auto attrs = DashSai::populateDefaultAttributes((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_count, attr_list);
+    auto attrs = dash::DashSai::populateDefaultAttributes((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_count, attr_list);
     attr_count = (uint32_t)attrs.size();
     attr_list = attrs.data();
 
