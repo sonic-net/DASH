@@ -21,6 +21,10 @@ static sai_status_t dash_sai_create_{{ table.name }}(
 {
     DASH_LOG_ENTER();
 
+    attrs vec = DashSai::populateDefaultAttributes((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_count, attr_list);
+    attr_count = (uint32_t)attrs.size();
+    attr_list = attrs.data();
+
     std::shared_ptr<p4::v1::TableEntry> matchActionEntry;
     pi_p4_id_t tableId = 0;
     // There shall be one and only one action_type
@@ -365,6 +369,10 @@ static sai_status_t dash_sai_create_{{ table.name }}(
         _In_ const sai_attribute_t *attr_list)
 {
     DASH_LOG_ENTER();
+
+    attrs vec = DashSai::populateDefaultAttributes((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_count, attr_list);
+    attr_count = (uint32_t)attrs.size();
+    attr_list = attrs.data();
 
     std::shared_ptr<p4::v1::TableEntry> matchActionEntry = std::make_shared<p4::v1::TableEntry>();
     pi_p4_id_t tableId = {{table.id}};
