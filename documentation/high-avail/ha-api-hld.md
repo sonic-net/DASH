@@ -22,6 +22,8 @@
       2. [4.6.2. HA scope event notifications](#462-ha-scope-event-notifications)
    7. [4.7. Counters](#47-counters)
       1. [4.7.1. HA set stats](#471-ha-set-stats)
+         1. [4.7.1.1. Data plane channel related stats](#4711-data-plane-channel-related-stats)
+         2. [4.7.1.2. Control plane data channel related stats](#4712-control-plane-data-channel-related-stats)
       2. [4.7.2. ENI stats](#472-eni-stats)
          1. [4.7.2.1. ENI-level traffic counters](#4721-eni-level-traffic-counters)
          2. [4.7.2.2. ENI-level flow operation counters](#4722-eni-level-flow-operation-counters)
@@ -100,6 +102,8 @@ HA set is defined as a SAI object and contains the following SAI attributes:
 | SAI_HA_SET_ATTR_DP_CHANNEL_PROBE_INTERVAL_MS | `sai_uint32_t` | The interval of the data plane channel probe. |
 | SAI_HA_SET_ATTR_DP_CHANNEL_PROBE_FAIL_THRESHOLD | `sai_uint32_t` | The threshold of the data plane channel probe fail. |
 | SAI_HA_SET_ATTR_DP_CHANNEL_IS_ALIVE | `bool` | (Read-only) Is data plane channel alive. |
+| SAI_HA_SET_ATTR_FLOW_RECONCILE_REQUESTED | `bool` | When set to true, flow reconcile will be initiated. |
+| SAI_HA_SET_ATTR_FLOW_RECONCILE_NEEDED | `bool` | (Read-only) If true, flow reconcile is needed. |
 
 ### 4.2. HA Scope
 
@@ -110,8 +114,6 @@ HA scope is also defined as a SAI object and contains the following SAI attribut
 | SAI_HA_SCOPE_ATTR_HA_SET_ID | `sai_object_id_t` | The HA set ID for this scope. |
 | SAI_HA_SCOPE_ATTR_HA_ROLE | `sai_dash_ha_role_t` | The HA role. |
 | SAI_HA_SCOPE_ATTR_FLOW_VERSION | `sai_uint32_t` | The flow version for new flows. |
-| SAI_HA_SCOPE_ATTR_FLOW_RECONCILE_NEEDED | `bool` | (Read-only) If true, flow reconcile is needed. |
-| SAI_HA_SCOPE_ATTR_FLOW_RECONCILE_REQUESTED | `bool` | When set to true, flow reconcile will be initiated. |
 
 The HA role is defined as below:
 
@@ -213,6 +215,9 @@ typedef enum _sai_ha_set_event_t
     /** Data plane channel goes down. */
     SAI_HA_SET_DP_CHANNEL_DOWN,
 
+    /** Flow reconcile is needed */
+    SAI_HA_SCOPE_FLOW_RECONCILE_NEEDED,
+
 } sai_ha_set_event_t;
 
 /**
@@ -249,26 +254,10 @@ Similar to HA set, whenever any HA scope state is changed, it will be reported b
 
 ```c
 /**
- * @brief HA scope event type
- */
-typedef enum _sai_ha_scope_event_t
-{
-    /** HA scope state is changed. */
-    SAI_HA_SCOPE_STATE_CHANGED,
-
-    /** Flow reconcile is needed */
-    SAI_HA_SCOPE_FLOW_RECONCILE_NEEDED,
-
-} sai_ha_scope_event_t;
-
-/**
  * @brief Notification data format received from SAI HA scope callback
  */
 typedef struct _sai_ha_scope_event_data_t
 {
-    /** Event type */
-    sai_ha_scope_event_t event_type;
-
     /** HA scope id */
     sai_object_id_t ha_scope_id;
 
@@ -301,7 +290,9 @@ To check how HA works, we will provide the following counters, which follows the
 
 #### 4.7.1. HA set stats
 
-Here are the new stats we added for monitoring HA on HA set (DPU pair):
+Here are the new stats we added for monitoring HA on HA set (DPU pair).
+
+##### 4.7.1.1. Data plane channel related stats
 
 | SAI stats name | Description |
 | -------------- | ----------- |
@@ -310,6 +301,26 @@ Here are the new stats we added for monitoring HA on HA set (DPU pair):
 | SAI_HA_SET_STAT_DP_PROBE_(REQ/ACK)_TX_BYTES | The bytes of data plane probes that this HA set sent. |
 | SAI_HA_SET_STAT_DP_PROBE_(REQ/ACK)_TX_PACKETS | The number of packets of data plane probes that this HA set sent. |
 | SAI_HA_SET_STAT_DP_PROBE_FAILED | The number of probes that failed. The failure rate = the number of failed probes / the number of tx packets. |
+
+##### 4.7.1.2. Control plane data channel related stats
+
+| Name | Description |
+| --- | --- |
+| SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_ATTEMPTED | Number of connect calls for establishing the data channel. |
+| SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_RECEIVED | Number of connect calls received to estabilish the data channel. |
+| SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_SUCCEEDED | Number of connect calls that succeeded. |
+| SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_FAILED | Number of connect calls that failed because of any reason other than timeout / unreachable. |
+| SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_REJECTED | Number of connect calls that rejected due to certs and etc. |
+| SAI_HA_SET_STAT_CP_DATA_CHANNEL_TIMEOUT_COUNT | Number of connect calls that failed due to timeout / unreachable. |
+
+Besides the channel status, we should also have the following counters for the bulk sync messages:
+
+| Name | Description |
+| --- | --- |
+| SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_RECV | Number of messages we received for bulk sync via data channel. |
+| SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_SENT | Number of messages we sent for bulk sync via data channel. |
+| SAI_HA_SET_STAT_BULK_SYNC_FLOW_RECV | Number of flows received from bulk sync message. A single bulk sync message can contain many flow records. |
+| SAI_HA_SET_STAT_BULK_SYNC_FLOW_SENT | Number of flows sent via bulk sync message. A single bulk sync message can contain many flow records. |
 
 #### 4.7.2. ENI stats
 
