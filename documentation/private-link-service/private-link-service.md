@@ -125,7 +125,7 @@ The following attributes will be added to CA-to-PA entry, for supporting service
 | --- | --- | --- |
 | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP_MASK | sai_ip_address_t | Used with overlay sip to support src prefix rewrite. |
 | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP_MASK | sai_ip_address_t | Used with overlay dip to support dst prefix rewrite. |
-| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_TUNNEL_ID | sai_object_id_t | Used to specify the tunnel. |
+| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_TUNNEL_ID | sai_object_id_t | Used to specify the tunnel. It can be a tunnel next hop id or the tunnel id, depending on if multiple dips as ECMP group is required. |
 
 The PL and PL NSG will share the same routing type on the CA-PA mapping entry:
 
@@ -142,19 +142,29 @@ typedef enum _sai_outbound_ca_to_pa_entry_action_t
 
 ### 5.3. DASH tunnel table and attributes
 
-A new tunnel table needs to be added with the following attributes:
-
-| Attribute name | Type | Description |
-| --- | --- | --- |
-| SAI_DASH_TUNNEL_ENTRY_ATTR_DASH_ENCAPSULATION | sai_dash_encapsulation_t | Encapsulation type, such as VxLan, NvGRE. |
-| SAI_DASH_TUNNEL_ENTRY_ATTR_VNI | sai_uint32_t | VNI used in the encap. |
-
 A new tunnel next hop table needs to be added with the following attributes:
 
 | Attribute name | Type | Description |
 | --- | --- | --- |
-| SAI_DASH_TUNNEL_NEXT_HOP_ENTRY_ATTR_TUNNEL_ID | sai_object_id_t | Tunnel Id |
-| SAI_DASH_TUNNEL_NEXT_HOP_ENTRY_ATTR_DIP | sai_ip_address_t | Destination IP in the tunnel |
+| SAI_DASH_TUNNEL_ENTRY_ATTR_DASH_ENCAPSULATION | sai_dash_encapsulation_t | Encapsulation type, such as VxLan, NvGRE. Optional. If not specified, the encap from tunnel will be used. |
+| SAI_DASH_TUNNEL_ENTRY_ATTR_VNI | sai_uint32_t | VNI used in the encap. Optional. If not specified, the VNI from tunnel will be used. |
+| SAI_DASH_TUNNEL_NEXT_HOP_ENTRY_ATTR_DIP | sai_ip_address_t | Destination IP of the next hop. |
+
+When multiple DIPs are required, the tunnel table and tunnel member will be used to specify the tunnel with multiple next hop information:
+
+- A new tunnel table needs to be added with the following attributes:
+
+  | Attribute name | Type | Description |
+  | --- | --- | --- |
+  | SAI_DASH_TUNNEL_ENTRY_ATTR_DASH_ENCAPSULATION | sai_dash_encapsulation_t | Encapsulation type, such as VxLan, NvGRE. |
+  | SAI_DASH_TUNNEL_ENTRY_ATTR_VNI | sai_uint32_t | VNI used in the encap. |
+
+- A new tunnel member table needs to be added to create the bindings between tunnel and next hop:
+
+  | Attribute name | Type | Description |
+  | --- | --- | --- |
+  | SAI_DASH_TUNNEL_MEMBER_ENTRY_ATTR_TUNNEL_ID | sai_object_id_t | Tunnel Id |
+  | SAI_DASH_TUNNEL_MEMBER_ENTRY_ATTR_TUNNEL_NEXT_HOP_ID | sai_object_id_t | Tunnel next hop id |
 
 ## 6. DASH pipeline behavior
 
