@@ -244,21 +244,13 @@ The changes needed for PL NSG is mostly the same as PL. In addition, on the VNET
 | --- | --- | --- |
 | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_TUNNEL_ID | `sai_object_id_t` | (SAI object ID of the NSG tunnel) |
 
-And we can use the following things to specify the tunnel information:
+And we can use the tunnel next hop table to specify the tunnel information:
 
-1. **Tunnel Table**: The tunnel table will be used to specify the tunnel information.
-
-   | SAI field name | Type | Value |
-   | --- | --- | --- |
-   | entry_attr.SAI_DASH_TUNNEL_ENTRY_ATTR_DASH_ENCAPSULATION | `sai_dash_encapsulation_t` | `SAI_DASH_ENCAPSULATION_VXLAN` |
-   | entry_attr.SAI_DASH_TUNNEL_ENTRY_ATTR_VNI | `sai_uint32_t` | `2000000` |
-
-2. **Tunnel Next Hop Table**: The tunnel next hop table will be used to specify the tunnel next hop information.
-
-   | SAI field name | Type | Value |
-   | --- | --- | --- |
-   | entry_attr.SAI_DASH_TUNNEL_NEXT_HOP_ENTRY_ATTR_TUNNEL_ID | `sai_object_id_t` | (SAI object ID of the NSG tunnel) |
-   | entry_attr.SAI_DASH_TUNNEL_NEXT_HOP_ENTRY_ATTR_DIP | `sai_ip_address_t` | `100.0.1.1` |
+| SAI field name | Type | Value |
+| --- | --- | --- |
+| entry_attr.SAI_DASH_TUNNEL_ENTRY_ATTR_DASH_ENCAPSULATION | `sai_dash_encapsulation_t` | `SAI_DASH_ENCAPSULATION_VXLAN` |
+| entry_attr.SAI_DASH_TUNNEL_ENTRY_ATTR_VNI | `sai_uint32_t` | `2000000` |
+| entry_attr.SAI_DASH_TUNNEL_NEXT_HOP_ENTRY_ATTR_DIP | `sai_ip_address_t` | `100.0.1.1` |
 
 ### 6.2. PLS-to-VM direction
 
