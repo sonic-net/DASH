@@ -6,6 +6,7 @@
 | 0.2 | 03/15/2024 | Riff Jiang | Added HA set notification. |
 | 0.3 | 03/21/2024 | Riff Jiang | Added capabilities for HA topology and stats. |
 | 0.4 | 04/01/2024 | Riff Jiang | Added capabilities for HA owner, simplified capabilities for HA topology. |
+| 0.5 | 04/08/2024 | Riff Jiang | Added support for bulk sync and flow reconcile for planned and unplanned switchover. |
 
 1. [1. Terminology](#1-terminology)
 2. [2. Background](#2-background)
@@ -92,6 +93,7 @@ HA set is defined as a SAI object and contains the following SAI attributes:
 | -------------- | ---- | ----------- |
 | SAI_HA_SET_ATTR_LOCAL_IP | `sai_ip_address_t` | The IP address of the local DPU. |
 | SAI_HA_SET_ATTR_PEER_IP | `sai_ip_address_t` | The IP address of the peer DPU. |
+| SAI_HA_SET_ATTR_CP_DATA_CHANNEL_PORT | `sai_uint16_t` | The port of the control plane data channel. |
 | SAI_HA_SET_ATTR_DP_CHANNEL_DST_PORT | `sai_uint16_t` | The destination port of the data plane channel. |
 | SAI_HA_SET_ATTR_DP_CHANNEL_SRC_PORT_MIN | `sai_uint16_t` | The minimum source port of the data plane channel. |
 | SAI_HA_SET_ATTR_DP_CHANNEL_SRC_PORT_MAX | `sai_uint16_t` | The maximum source port of the data plane channel. |
@@ -108,6 +110,8 @@ HA scope is also defined as a SAI object and contains the following SAI attribut
 | SAI_HA_SCOPE_ATTR_HA_SET_ID | `sai_object_id_t` | The HA set ID for this scope. |
 | SAI_HA_SCOPE_ATTR_HA_ROLE | `sai_dash_ha_role_t` | The HA role. |
 | SAI_HA_SCOPE_ATTR_FLOW_VERSION | `sai_uint32_t` | The flow version for new flows. |
+| SAI_HA_SCOPE_ATTR_FLOW_RECONCILE_NEEDED | `bool` | (Read-only) If true, flow reconcile is needed. |
+| SAI_HA_SCOPE_ATTR_FLOW_RECONCILE_REQUESTED | `bool` | When set to true, flow reconcile will be initiated. |
 
 The HA role is defined as below:
 
@@ -245,10 +249,26 @@ Similar to HA set, whenever any HA scope state is changed, it will be reported b
 
 ```c
 /**
+ * @brief HA scope event type
+ */
+typedef enum _sai_ha_scope_event_t
+{
+    /** HA scope state is changed. */
+    SAI_HA_SCOPE_STATE_CHANGED,
+
+    /** Flow reconcile is needed */
+    SAI_HA_SCOPE_FLOW_RECONCILE_NEEDED,
+
+} sai_ha_scope_event_t;
+
+/**
  * @brief Notification data format received from SAI HA scope callback
  */
 typedef struct _sai_ha_scope_event_data_t
 {
+    /** Event type */
+    sai_ha_scope_event_t event_type;
+
     /** HA scope id */
     sai_object_id_t ha_scope_id;
 
