@@ -150,7 +150,7 @@ A new tunnel next hop table needs to be added with the following attributes:
 | SAI_DASH_TUNNEL_ENTRY_ATTR_VNI | sai_uint32_t | VNI used in the encap. Optional. If not specified, the VNI from tunnel will be used. |
 | SAI_DASH_TUNNEL_NEXT_HOP_ENTRY_ATTR_DIP | sai_ip_address_t | Destination IP of the next hop. |
 
-When multiple DIPs are required, the tunnel table and tunnel member will be used to specify the tunnel with multiple next hop information:
+When multiple destination IPs are required as ECMP group, the tunnel table and tunnel member will be used to specify the tunnel with multiple next hop information:
 
 - A new tunnel table needs to be added with the following attributes:
 
