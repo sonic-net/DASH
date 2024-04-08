@@ -95,7 +95,7 @@ HA set is defined as a SAI object and contains the following SAI attributes:
 | -------------- | ---- | ----------- |
 | SAI_HA_SET_ATTR_LOCAL_IP | `sai_ip_address_t` | The IP address of the local DPU. |
 | SAI_HA_SET_ATTR_PEER_IP | `sai_ip_address_t` | The IP address of the peer DPU. |
-| SAI_HA_SET_ATTR_CP_DATA_CHANNEL_PORT | `sai_uint16_t` | The port of the control plane data channel. |
+| SAI_HA_SET_ATTR_CP_DATA_CHANNEL_PORT | `sai_uint16_t` | The port used for control plane data channel. |
 | SAI_HA_SET_ATTR_DP_CHANNEL_DST_PORT | `sai_uint16_t` | The destination port of the data plane channel. |
 | SAI_HA_SET_ATTR_DP_CHANNEL_SRC_PORT_MIN | `sai_uint16_t` | The minimum source port of the data plane channel. |
 | SAI_HA_SET_ATTR_DP_CHANNEL_SRC_PORT_MAX | `sai_uint16_t` | The maximum source port of the data plane channel. |
@@ -317,9 +317,10 @@ Besides the channel status, we should also have the following counters for the b
 
 | Name | Description |
 | --- | --- |
-| SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_RECV | Number of messages we received for bulk sync via data channel. |
+| SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_RECEIVED | Number of messages we received for bulk sync via data channel. |
 | SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_SENT | Number of messages we sent for bulk sync via data channel. |
-| SAI_HA_SET_STAT_BULK_SYNC_FLOW_RECV | Number of flows received from bulk sync message. A single bulk sync message can contain many flow records. |
+| SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_SEND_FAILED | Number of messages we failed to sent for bulk sync via data channel. |
+| SAI_HA_SET_STAT_BULK_SYNC_FLOW_RECEIVED | Number of flows received from bulk sync message. A single bulk sync message can contain many flow records. |
 | SAI_HA_SET_STAT_BULK_SYNC_FLOW_SENT | Number of flows sent via bulk sync message. A single bulk sync message can contain many flow records. |
 
 #### 4.7.2. ENI stats
