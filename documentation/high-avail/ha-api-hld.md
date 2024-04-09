@@ -216,9 +216,6 @@ typedef enum _sai_ha_set_event_t
     /** Data plane channel goes down. */
     SAI_HA_SET_DP_CHANNEL_DOWN,
 
-    /** Flow reconcile is needed */
-    SAI_HA_SCOPE_FLOW_RECONCILE_NEEDED,
-
 } sai_ha_set_event_t;
 
 /**
