@@ -7,6 +7,7 @@
 | 0.3 | 03/21/2024 | Riff Jiang | Added capabilities for HA topology and stats. |
 | 0.4 | 04/01/2024 | Riff Jiang | Added capabilities for HA owner, simplified capabilities for HA topology. |
 | 0.5 | 04/08/2024 | Riff Jiang | Added support for bulk sync. |
+| 0.6 | 04/09/2024 | Riff Jiang | Added support for flow reconcile for planned and unplanned switchover. |
 
 1. [1. Terminology](#1-terminology)
 2. [2. Background](#2-background)
@@ -102,6 +103,8 @@ HA set is defined as a SAI object and contains the following SAI attributes:
 | SAI_HA_SET_ATTR_DP_CHANNEL_PROBE_INTERVAL_MS | `sai_uint32_t` | The interval of the data plane channel probe. |
 | SAI_HA_SET_ATTR_DP_CHANNEL_PROBE_FAIL_THRESHOLD | `sai_uint32_t` | The threshold of the data plane channel probe fail. |
 | SAI_HA_SET_ATTR_DP_CHANNEL_IS_ALIVE | `bool` | (Read-only) Is data plane channel alive. |
+| SAI_HA_SET_ATTR_FLOW_RECONCILE_REQUESTED | `bool` | When set to true, flow reconcile will be initiated. |
+| SAI_HA_SET_ATTR_FLOW_RECONCILE_NEEDED | `bool` | (Read-only) If true, flow reconcile is needed. |
 
 ### 4.2. HA Scope
 
@@ -213,6 +216,9 @@ typedef enum _sai_ha_set_event_t
     /** Data plane channel goes down. */
     SAI_HA_SET_DP_CHANNEL_DOWN,
 
+    /** Flow reconcile is needed */
+    SAI_HA_SCOPE_FLOW_RECONCILE_NEEDED,
+
 } sai_ha_set_event_t;
 
 /**
@@ -249,10 +255,26 @@ Similar to HA set, whenever any HA scope state is changed, it will be reported b
 
 ```c
 /**
+ * @brief HA set event type
+ */
+typedef enum _sai_ha_scope_event_t
+{
+    /** HA scope state changed */
+    SAI_HA_SCOPE_STATE_CHANGED,
+
+    /** Flow reconcile is needed */
+    SAI_HA_SCOPE_FLOW_RECONCILE_NEEDED,
+
+} sai_ha_scope_event_t;
+
+/**
  * @brief Notification data format received from SAI HA scope callback
  */
 typedef struct _sai_ha_scope_event_data_t
 {
+    /** Event type */
+    sai_ha_scope_event_t event_type;
+
     /** HA scope id */
     sai_object_id_t ha_scope_id;
 
