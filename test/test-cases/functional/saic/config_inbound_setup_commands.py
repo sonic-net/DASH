@@ -295,7 +295,7 @@ dpu_config = [
       "SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR",
       "0",
       "SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND",
-      "0xffffffff"
+      "-1"
     ]
   },
     {
@@ -318,7 +318,7 @@ dpu_config = [
       "SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR",
       "0",
       "SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND",
-      "0xffffffff"
+      "-1"
     ]
   },
   {
