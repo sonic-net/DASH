@@ -67,8 +67,15 @@ struct eni_data_t {
     IPv6Address pl_sip;
     IPv6Address pl_sip_mask;
     IPv4Address pl_underlay_sip;
-    bit<6>  dscp;
+    bit<6> dscp;
     dash_tunnel_dscp_mode_t dscp_mode;
+}
+
+struct meter_context_t {
+    bit<32> meter_class_or;
+    bit<32> meter_class_and;
+    bit<16> meter_policy_id;
+    IPv4ORv6Address meter_policy_lookup_ip;
 }
 
 struct encap_data_t {
@@ -162,17 +169,10 @@ struct metadata_t {
     bit<16> stage3_dash_acl_group_id;
     bit<16> stage4_dash_acl_group_id;
     bit<16> stage5_dash_acl_group_id;
-    bit<1> meter_policy_en;
-    bit<1> mapping_meter_class_override;
-    bit<16> meter_policy_id;
-    bit<16> policy_meter_class;
-    bit<16> route_meter_class;
-    bit<16> mapping_meter_class;
-    bit<16> meter_class;
-    bit<32> meter_bucket_index;
     bit<16> tunnel_pointer;
     bool is_fast_path_icmp_flow_redirection_packet;
     bit<1> fast_path_icmp_flow_redirection_disabled;
+    meter_context_t meter_context;
 
     // HA
     ha_data_t ha;
@@ -187,6 +187,7 @@ struct metadata_t {
     bool dropped;
     encap_data_t encap_data;
     overlay_rewrite_data_t overlay_data;
+    bit<32> meter_class;
 }
 
 #endif /* _SIRIUS_METADATA_P4_ */
