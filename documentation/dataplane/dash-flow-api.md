@@ -18,7 +18,7 @@
       - [Flow basic metadata](#flow-basic-metadata)
       - [Reverse flow key](#reverse-flow-key)
       - [Flow encap related attributes](#flow-encap-related-attributes)
-      - [Flow rewrite](#flow-rewrite)
+      - [Flow overlay rewrite related attributes](#flow-overlay-rewrite-related-attributes)
     - [Extra flow metadata](#extra-flow-metadata)
     - [Flow Bulk Get Session](#flow-bulk-get-session)
       - [Flow Bulk Get Session filter](#flow-bulk-get-session-filter)
@@ -258,7 +258,7 @@ Here are some extra metadata for different purposes.
 
 #### Flow Bulk Get Session filter
 
-To manage data transfer to a server via gRPC, we introduce a flow entry bulk session that incorporates filtering capabilities to precisely define the data range for transfer. The procedure for setting up these filters is straightforward:
+To manage data transfer to a server via gRPC or event notification, we introduce a flow entry bulk session that incorporates filtering capabilities to precisely define the data range for transfer. The procedure for setting up these filters is straightforward:
 
 1. Initially, create up to five flow bulk get session filters based on the specific needs for filtering the flows.
 2. Subsequently, establish a flow bulk get session filter and integrate these filters as attributes.
@@ -287,7 +287,7 @@ The filter, defined as an object, is specified as follows:
 ```c
 typedef enum _sai_dash_flow_entry_bulk_get_session_filter_key_t
 {
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_INVAILD,
+    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_NONE,
 
     SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_ENI_MAC,
 
@@ -302,6 +302,8 @@ typedef enum _sai_dash_flow_entry_bulk_get_session_filter_key_t
     SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_DST_PORT,
 
     SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_FLOW_VERSION,
+
+    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_AGED,
 
 } sai_dash_flow_entry_bulk_get_session_filter_key_t;
 ```
@@ -337,17 +339,33 @@ Upon establishing the bulk get session filters, we can initiate a flow bulk get 
 | create_flow_entry_bulk_get_sessions       | Add multiple new sessions for flow entry bulk get feature   |
 | remove_flow_entry_bulk_get_sessions       | Remove multiple sessions for flow entry bulk get feature    |
 
-In the attributes, we allow specifying the gRPC server and port. For filtering flow entries, we support up to five filters. Each filter is a bulk get session filter object, and different filters are combined using an *AND* operation. If no filters are specified, the bulk get session returns all flow entries.
+In the attributes, we allow specifying the gRPC server and port when the mode is gRPC. For filtering flow entries, we support up to five filters. Each filter is a bulk get session filter object, and different filters are combined using an *AND* operation. If no filters are specified, the bulk get session returns all flow entries.
 
 | Attribute Name                                               | Type                                                         | Description                                                  |
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_IP     | `sai_ip_address_t`                                           | The IP address to use for the bulk get session.              |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_PORT   | `sai_uint16_t`                                               | The port to use for the bulk get session.                    |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_FLOW_TABLE | `sai_object_id_t`                                            | Flow table to bulk get                                       |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_MODE   | `sai_dash_flow_entry_bulk_get_session_mode_t`                | Sepcify bulk get mode                                        |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_ENTRY_LIMITATION   | `sai_uint32_t`                                               | Specify a maximum limit for the bulk get session             |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_GRPC_IP | `sai_ip_address_t`                                           | The IP address to use for the bulk get session.              |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_GRPC_PORT | `sai_uint16_t`                                               | The port to use for the bulk get session.                    |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FIRST_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID | @type: `sai_object_id_t` @objects `SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER` | Action set_flow_entry_bulk_get_session_attr parameter BULK_GET_SESSION_IP |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_SECOND_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID | @type: `sai_object_id_t` @objects `SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER` | Action set_flow_entry_bulk_get_session_attr parameter BULK_GET_SESSION_PORT |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_THIRD_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID | @type: `sai_object_id_t` @objects `SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER` | Action set_flow_entry_bulk_get_session_attr parameter FIRST_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FOURTH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID | @type: `sai_object_id_t` @objects `SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER` | Action set_flow_entry_bulk_get_session_attr parameter SECOND_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FIFTH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID | @type: `sai_object_id_t` @objects `SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER` | Action set_flow_entry_bulk_get_session_attr parameter THIRD_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID |
+
+```c
+typedef enum _sai_dash_flow_entry_bulk_get_session_mode_t
+
+{
+  SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_GRPC,
+
+  SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_EVENT,
+  
+  SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_EVENT_WITHOUT_FLOW_STATE,
+
+} sai_dash_flow_entry_bulk_get_session_mode_t;
+```
 
 #### Bulk Get Session Event Notifiations
 
@@ -361,8 +379,9 @@ In the attributes, we allow specifying the gRPC server and port. For filtering f
  */
 typedef enum _sai_flow_bulk_get_session_event_t
 {
-    /** The bulk get finished */
     SAI_FLOW_BULK_GET_SESSION_FINISHED,
+
+    SAI_FLOW_BULK_GET_SESSION_FLOW_ENTRY,
 
 } sai_flow_bulk_get_session_event_t;
 
@@ -373,11 +392,15 @@ typedef enum _sai_flow_bulk_get_session_event_t
  */
 typedef struct _sai_flow_bulk_get_session_event_data_t
 {
-    /** Event type */
     sai_flow_bulk_get_session_event_t event_type;
 
-    /** Session id */
     sai_object_id_t flow_bulk_session_id;
+  
+    sai_flow_entry_t *flow_entry;
+  
+    uint32_t attr_count; 
+  
+    sai_attribute_t *attr_list; 
 
 } sai_flow_bulk_get_session_event_data_t;
 
@@ -389,7 +412,7 @@ typedef struct _sai_flow_bulk_get_session_event_data_t
  * @count data[count]
  *
  * @param[in] count Number of notifications
- * @param[in] data Array of HA set events
+ * @param[in] data Array of flow bulk get session events
  */
 typedef void (*sai_flow_bulk_get_session_event_notification_fn)(
         _In_ uint32_t count,
