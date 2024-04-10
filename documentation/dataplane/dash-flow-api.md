@@ -198,7 +198,7 @@ These are the basic attributes of flow entry.
 | SAI_FLOW_ENTRY_ATTR_VERSION          | `sai_uint32_t`           | Version of the flow entry                                    |
 | SAI_FLOW_ENTRY_ATTR_DASH_DIRECTION   | `sai_dash_direction_t`   | Direction of the DASH flow                                   |
 | SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION | `sai_dash_flow_action_t` | Action to be applied on the flow                             |
-| SAI_FLOW_ENTRY_ATTR_METER_CLASS      | `sai_uint16_t`           | Meter class for flow entry, used for traffic metering and policing. |
+| SAI_FLOW_ENTRY_ATTR_METER_CLASS      | `sai_uint32_t`           | Meter class for flow entry, used for traffic metering and policing. |
 
 #### Reverse flow key
 
@@ -209,8 +209,8 @@ When configuring a flow_entry, it can be specified whether it is unidirectional 
 | SAI_FLOW_ENTRY_ATTR_IS_BIDIRECTIONAL_FLOW | `bool`             | Indicates if the flow is bidirectional      |
 | SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_ENI_MAC  | `sai_mac_t`        | Eni mac addr for the recerse flow           |
 | SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_IP_PROTO | `sai_uint8_t`      | IP protocol number for the reverse flow     |
-| SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_IP_ADDR  | `sai_ip_address_t` | Source IP address for the reverse flow      |
-| SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_IP_ADDR  | `sai_ip_address_t` | Destination IP address for the reverse flow |
+| SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_SRC_IP   | `sai_ip_address_t` | Source IP address for the reverse flow      |
+| SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_DST_IP   | `sai_ip_address_t` | Destination IP address for the reverse flow |
 | SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_SRC_PORT | `sai_uint16_t`     | L4 source port for the reverse flow         |
 | SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_DST_PORT | `sai_uint16_t`     | L4 destination port for the reverse flow    |
 
@@ -218,20 +218,20 @@ When configuring a flow_entry, it can be specified whether it is unidirectional 
 
 These are the related attributes of flow encapsulation.
 
-| Attribute name                         | Type                       | Description                                     |
-| -------------------------------------- | -------------------------- | ----------------------------------------------- |
-| SAI_FLOW_ENTRY_ATTR_UNDERLAY_VNI       | `sai_uint32_t`             | Destination VNI in the underlay network         |
-| SAI_FLOW_ENTRY_ATTR_UNDERLAY_SIP       | `sai_uint32_t`             | Source IP address in the underlay network       |
-| SAI_FLOW_ENTRY_ATTR_UNDERLAY_DIP       | `sai_uint32_t`             | Destination IP address in the underlay network  |
-| SAI_FLOW_ENTRY_ATTR_UNDERLAY_SMAC      | `sai_mac_t`                | Source MAC address in the underlay network      |
-| SAI_FLOW_ENTRY_ATTR_UNDERLAY_DMAC      | `sai_mac_t`                | Destination MAC address in the underlay network |
-| SAI_FLOW_ENTRY_ATTR_UNDERLAY_DASH_ENCAPSULATION | `sai_dash_encapsulation_t` | Encapsulation method for DASH traffic in the underlay network|
-| SAI_FLOW_ENTRY_ATTR_UNDERLAY2_VNI       | `sai_uint32_t`             | Destination VNI in the 2nd underlay network         |
-| SAI_FLOW_ENTRY_ATTR_UNDERLAY2_SIP       | `sai_uint32_t`             | Source IP address in the 2nd underlay network       |
-| SAI_FLOW_ENTRY_ATTR_UNDERLAY2_DIP       | `sai_uint32_t`             | Destination IP address in the 2nd underlay network  |
-| SAI_FLOW_ENTRY_ATTR_UNDERLAY2_SMAC      | `sai_mac_t`                | Source MAC address in the 2nd underlay network      |
-| SAI_FLOW_ENTRY_ATTR_UNDERLAY2_DMAC      | `sai_mac_t`                | Destination MAC address in the 2nd underlay network |
-| SAI_FLOW_ENTRY_ATTR_UNDERLAY2_DASH_ENCAPSULATION | `sai_dash_encapsulation_t` | Encapsulation method for DASH traffic in the 2nd underlay network |
+| Attribute name                                   | Type                       | Description                                                  |
+| ------------------------------------------------ | -------------------------- | ------------------------------------------------------------ |
+| SAI_FLOW_ENTRY_ATTR_UNDERLAY0_VNI                | `sai_uint32_t`             | Destination VNI in the underlay network                      |
+| SAI_FLOW_ENTRY_ATTR_UNDERLAY0_SIP                | `sai_uint32_t`             | Source IP address in the underlay network                    |
+| SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DIP                | `sai_uint32_t`             | Destination IP address in the underlay network               |
+| SAI_FLOW_ENTRY_ATTR_UNDERLAY0_SMAC               | `sai_mac_t`                | Source MAC address in the underlay network                   |
+| SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DMAC               | `sai_mac_t`                | Destination MAC address in the underlay network              |
+| SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DASH_ENCAPSULATION | `sai_dash_encapsulation_t` | Encapsulation method for DASH traffic in the underlay network |
+| SAI_FLOW_ENTRY_ATTR_UNDERLAY1_VNI                | `sai_uint32_t`             | Destination VNI in the 2nd underlay network                  |
+| SAI_FLOW_ENTRY_ATTR_UNDERLAY1_SIP                | `sai_uint32_t`             | Source IP address in the 2nd underlay network                |
+| SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DIP                | `sai_uint32_t`             | Destination IP address in the 2nd underlay network           |
+| SAI_FLOW_ENTRY_ATTR_UNDERLAY1_SMAC               | `sai_mac_t`                | Source MAC address in the 2nd underlay network               |
+| SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DMAC               | `sai_mac_t`                | Destination MAC address in the 2nd underlay network          |
+| SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DASH_ENCAPSULATION | `sai_dash_encapsulation_t` | Encapsulation method for DASH traffic in the 2nd underlay network |
 
 #### Flow overlay rewrite related attributes
 
