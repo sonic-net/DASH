@@ -121,7 +121,7 @@ class TestSaiVnetOutbound:
         ret = add_extra_attrs('SAI_OBJECT_TYPE_OUTBOUND_CA_TO_PA_ENTRY', ret, [ 'SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS_OR', '0' ])
 
         ret = add_extra_attrs('SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY', ret, [ 'SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR', '0',
-                                                                               'SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND', '0xffffffff' ])
+                                                                               'SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND', '-1' ])
 
         return ret
 
