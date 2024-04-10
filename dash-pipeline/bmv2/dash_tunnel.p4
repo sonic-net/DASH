@@ -211,7 +211,7 @@ PUSH_VXLAN_TUNNEL_DEF(u1, u0)
 PUSH_NVGRE_TUNNEL_DEF(u0, customer)
 PUSH_NVGRE_TUNNEL_DEF(u1, u0)
 
-#define tunnel_encap(hdr, \
+#define do_tunnel_encap(hdr, \
                     meta, \
                     overlay_dmac, \
                     underlay_dmac, \
@@ -266,7 +266,7 @@ PUSH_NVGRE_TUNNEL_DEF(u1, u0)
    reparse it.
    It is also assumed, that if DASH pushes more than one tunnel,
    they won't need to pop them */
-action tunnel_decap(inout headers_t hdr, inout metadata_t meta) {
+action do_tunnel_decap(inout headers_t hdr, inout metadata_t meta) {
     hdr.u0_ethernet.setInvalid();
     hdr.u0_ipv4.setInvalid();
     hdr.u0_ipv6.setInvalid();
