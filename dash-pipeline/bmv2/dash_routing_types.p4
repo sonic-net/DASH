@@ -193,4 +193,30 @@ action set_private_link_mapping(
     set_mapping_meter_attr(meta, meter_class, meter_class_override);
 }
 
+action set_private_link_nsg_mapping(
+    inout headers_t hdr,
+    inout metadata_t meta, 
+    @SaiVal[type="sai_ip_address_t"] IPv4Address underlay_dip,
+    IPv6Address overlay_sip,
+    IPv6Address overlay_dip,
+    @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t dash_encapsulation,
+    bit<24> tunnel_key,
+    bit<16> meter_class,
+    bit<1> meter_class_override,
+    bit<16> tunnel1_id)
+{
+    meta.tunnel1_id = tunnel1_id;
+
+    set_private_link_mapping(
+            hdr,
+            meta,
+            underlay_dip,
+	    overlay_sip,
+	    overlay_dip,
+	    dash_encapsulation,
+	    tunnel_key,
+	    meter_class,
+	    meter_class_override);
+}
+
 #endif /* _DASH_ROUTING_TYPES_P4_ */

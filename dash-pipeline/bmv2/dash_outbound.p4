@@ -6,6 +6,7 @@
 #include "dash_conntrack.p4"
 #include "stages/outbound_routing.p4"
 #include "stages/outbound_mapping.p4"
+#include "stages/tunnel1.p4"
 
 control outbound(inout headers_t hdr,
                  inout metadata_t meta)
@@ -37,6 +38,8 @@ control outbound(inout headers_t hdr,
 
         outbound_routing_stage.apply(hdr, meta);
         outbound_mapping_stage.apply(hdr, meta);
+
+        tunnel1_stage.apply(hdr, meta);
     }
 }
 
