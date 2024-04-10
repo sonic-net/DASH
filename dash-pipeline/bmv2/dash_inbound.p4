@@ -34,7 +34,7 @@ control inbound(inout headers_t hdr,
         ConntrackOut.apply(hdr, meta);
 #endif //PNA_CONNTRACK
 
-        tunnel_encap(hdr,
+        do_tunnel_encap(hdr,
                      meta,
                      meta.overlay_data.dmac,
                      meta.encap_data.underlay_dmac,

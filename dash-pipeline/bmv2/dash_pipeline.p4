@@ -171,7 +171,16 @@ control dash_ingress(
     action permit() {
     }
 
-    action tunnel_decap_pa_validate(@SaiVal[type="sai_object_id_t"] bit<16> src_vnet_id) {
+    action vxlan_decap() {}
+    action vxlan_decap_pa_validate() {}
+
+    action tunnel_decap(inout headers_t hdr,
+                        inout metadata_t meta) {
+    }
+
+    action tunnel_decap_pa_validate(inout headers_t hdr,
+                                    inout metadata_t meta,
+                                    @SaiVal[type="sai_object_id_t"] bit<16> src_vnet_id) {
         meta.vnet_id = src_vnet_id;
     }
 
@@ -198,8 +207,10 @@ control dash_ingress(
             hdr.u0_ipv4.src_addr : ternary @SaiVal[name = "sip", type="sai_ip_address_t"];
         }
         actions = {
+            vxlan_decap;                // Deprecated, but cannot be removed until SWSS is updated.
+            vxlan_decap_pa_validate;    // Deprecated, but cannot be removed until SWSS is updated.
             tunnel_decap(hdr, meta);
-            tunnel_decap_pa_validate;
+            tunnel_decap_pa_validate(hdr, meta);
             @defaultonly deny;
         }
 
@@ -270,12 +281,12 @@ control dash_ingress(
         meta.eni_data.dscp = (bit<6>)hdr.u0_ipv4.diffserv;
 
         if (meta.direction == dash_direction_t.OUTBOUND) {
-            tunnel_decap(hdr, meta);
+            do_tunnel_decap(hdr, meta);
         } else if (meta.direction == dash_direction_t.INBOUND) {
             switch (inbound_routing.apply().action_run) {
                 tunnel_decap_pa_validate: {
                     pa_validation.apply();
-                    tunnel_decap(hdr, meta);
+                    do_tunnel_decap(hdr, meta);
                 }
             }
         }
