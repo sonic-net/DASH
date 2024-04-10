@@ -131,7 +131,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         status = sai_thrift_create_outbound_routing_entry(self.client, self.ore,
                                                           action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET,
                                                           dst_vnet_id=self.vnet,
-                                                          meter_policy_en=False, meter_class=0)
+                                                          meter_class_or=0, meter_class_and=0xffffffff)
         assert(status == SAI_STATUS_SUCCESS)
 
         underlay_dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,

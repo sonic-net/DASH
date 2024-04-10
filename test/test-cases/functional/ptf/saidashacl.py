@@ -243,7 +243,7 @@ class SaiThriftDashAclTest(VnetAPI):
 
         self.create_entry(sai_thrift_create_outbound_routing_entry, sai_thrift_remove_outbound_routing_entry,
                           self.ore, action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET, dst_vnet_id=self.vnet,
-                          meter_policy_en=False, meter_class=0)
+                          meter_class_or=0, meter_class_and=0xffffffff)
 
         underlay_dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
                                                addr=sai_thrift_ip_addr_t(ip4=self.dst_pa_ip))
