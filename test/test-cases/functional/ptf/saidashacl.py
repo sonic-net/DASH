@@ -252,7 +252,7 @@ class SaiThriftDashAclTest(VnetAPI):
 
         self.create_entry(sai_thrift_create_outbound_ca_to_pa_entry, sai_thrift_remove_outbound_ca_to_pa_entry,
                           self.ocpe, underlay_dip=underlay_dip, overlay_dmac=self.dst_ca_mac, use_dst_vnet_vni=True,
-                          meter_class=0, meter_class_override=False)
+                          meter_class_or=0)
 
     def setupTest(self):
         self.tests.append(AclRuleTest(self,

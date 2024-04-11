@@ -139,7 +139,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         self.ocpe = sai_thrift_outbound_ca_to_pa_entry_t(switch_id=self.switch_id, dst_vnet_id=self.vnet, dip=dip)
         status = sai_thrift_create_outbound_ca_to_pa_entry(self.client, self.ocpe, underlay_dip = underlay_dip,
                                                            overlay_dmac=self.dst_ca_mac, use_dst_vnet_vni = True,
-                                                           meter_class=0, meter_class_override=False)
+                                                           meter_class_or=0)
         assert(status == SAI_STATUS_SUCCESS)
 
         print(f"\n{self.__class__.__name__} configureVnet OK")

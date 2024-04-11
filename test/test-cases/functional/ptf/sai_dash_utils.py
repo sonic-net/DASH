@@ -359,7 +359,7 @@ class VnetAPI(VnetObjects):
                                                   underlay_dip=sai_ipaddress(underlay_dip),
                                                   use_dst_vnet_vni=use_dst_vnet_vni,
                                                   overlay_dmac=overlay_dmac,
-                                                  meter_class=0, meter_class_override=False)
+                                                  meter_class_or=0)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_ca_to_pa_remove, ca_to_pa_entry)
 
