@@ -249,7 +249,8 @@ class VnetAPI(VnetObjects):
             sip_mask=sai_ipaddress(sip_mask), priority=1)
         sai_thrift_create_inbound_routing_entry(self.client, inbound_routing_entry,
                                                 action=SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE,
-                                                src_vnet_id=src_vnet_id)
+                                                src_vnet_id=src_vnet_id,
+                                                meter_class_or=0, meter_class_and=-1)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.inbound_routing_remove, inbound_routing_entry)
         return inbound_routing_entry
@@ -265,7 +266,8 @@ class VnetAPI(VnetObjects):
             eni_id=eni_id, sip=sai_ipaddress(sip),
             sip_mask=sai_ipaddress(sip_mask), priority=1)
         sai_thrift_create_inbound_routing_entry(self.client, inbound_routing_entry,
-                                                action=SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP)
+                                                action=SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP,
+                                                meter_class_or=0, meter_class_and=-1)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.inbound_routing_remove, inbound_routing_entry)
         return inbound_routing_entry
