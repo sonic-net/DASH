@@ -187,7 +187,7 @@ struct metadata_t {
     bool dropped;
     encap_data_t encap_data;
     overlay_rewrite_data_t overlay_data;
-    bit<16> tunnel1_id;
+    bit<16> dash_tunnel_id;
 }
 
 #endif /* _SIRIUS_METADATA_P4_ */

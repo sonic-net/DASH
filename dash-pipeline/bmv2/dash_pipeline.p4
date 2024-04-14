@@ -13,6 +13,7 @@
 #include "stages/ha.p4"
 #include "stages/routing_action_apply.p4"
 #include "stages/metering_update.p4"
+#include "stages/tunnel_stage.p4"
 #include "underlay.p4"
 
 control dash_ingress(
@@ -330,6 +331,8 @@ control dash_ingress(
         }
 
         routing_action_apply.apply(hdr, meta);
+
+        tunnel_stage.apply(hdr, meta);
 
         /* Underlay routing */
         meta.dst_ip_addr = (bit<128>)hdr.u0_ipv4.dst_addr;

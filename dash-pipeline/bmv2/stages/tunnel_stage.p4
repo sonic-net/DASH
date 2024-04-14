@@ -1,11 +1,11 @@
-#ifndef _DASH_STAGE_TUNNEL1_P4_
-#define _DASH_STAGE_TUNNEL1_P4_
+#ifndef _DASH_STAGE_TUNNEL_P4_
+#define _DASH_STAGE_TUNNEL_P4_
 
-control tunnel1_stage(
+control tunnel_stage(
     inout headers_t hdr,
     inout metadata_t meta)
 {
-    action set_tunnel1_attrs(
+    action set_tunnel_attrs(
             @SaiVal[type="sai_ip_address_t"]
             IPv4Address underlay_dip,
             @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"]
@@ -20,22 +20,22 @@ control tunnel1_stage(
                             overlay_dmac = hdr.u0_ethernet.dst_addr);
     }
 
-    @SaiTable[name = "tunnel1", api = "dash_tunnel", order = 0, isobject="true"]
-    table tunnel1 {
+    @SaiTable[name = "dash_tunnel", api = "dash_tunnel", order = 0, isobject="true"]
+    table tunnel {
         key = {
-            meta.tunnel1_id : exact @SaiVal[type="sai_object_id_t"];
+            meta.dash_tunnel_id : exact @SaiVal[type="sai_object_id_t"];
         }
 
         actions = {
-            set_tunnel1_attrs;
+            set_tunnel_attrs;
         }
     }
 
     apply {
-        if (tunnel1.apply().hit) {
+        if (tunnel.apply().hit) {
             do_action_static_encap.apply(hdr, meta);
         }
     }
 }
 
-#endif /* _DASH_STAGE_TUNNEL1_P4_ */
+#endif /* _DASH_STAGE_TUNNEL_P4_ */

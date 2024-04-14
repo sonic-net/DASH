@@ -203,9 +203,9 @@ action set_private_link_nsg_mapping(
     bit<24> tunnel_key,
     bit<16> meter_class,
     bit<1> meter_class_override,
-    bit<16> tunnel1_id)
+    @SaiVal[type="sai_object_id_t"] bit<16> dash_tunnel_id)
 {
-    meta.tunnel1_id = tunnel1_id;
+    meta.dash_tunnel_id = dash_tunnel_id;
 
     set_private_link_mapping(
             hdr,
