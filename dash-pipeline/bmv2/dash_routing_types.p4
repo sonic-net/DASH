@@ -36,8 +36,11 @@ action route_vnet(
     inout metadata_t meta,
     @SaiVal[type="sai_object_id_t"] bit<16> dst_vnet_id,
     bit<1> meter_policy_en,
-    bit<16> meter_class)
+    bit<16> meter_class,
+    @SaiVal[type="sai_object_id_t"] bit<16> dash_tunnel_id)
 {
+    meta.dash_tunnel_id = dash_tunnel_id;
+
     meta.target_stage = dash_pipeline_stage_t.OUTBOUND_MAPPING;
     meta.dst_vnet_id = dst_vnet_id;
     set_route_meter_attrs(meta, meter_policy_en, meter_class);
@@ -54,8 +57,11 @@ action route_vnet_direct(
     @SaiVal[type="sai_ip_address_t"]
     IPv4ORv6Address overlay_ip,
     bit<1> meter_policy_en,
-    bit<16> meter_class)
+    bit<16> meter_class,
+    @SaiVal[type="sai_object_id_t"] bit<16> dash_tunnel_id)
 {
+    meta.dash_tunnel_id = dash_tunnel_id;
+
     meta.target_stage = dash_pipeline_stage_t.OUTBOUND_MAPPING;
     meta.dst_vnet_id = dst_vnet_id;
     meta.lkup_dst_ip_addr = overlay_ip;
@@ -70,8 +76,11 @@ action route_direct(
     inout headers_t hdr,
     inout metadata_t meta,
     bit<1> meter_policy_en,
-    bit<16> meter_class)
+    bit<16> meter_class,
+    @SaiVal[type="sai_object_id_t"] bit<16> dash_tunnel_id)
 {
+    meta.dash_tunnel_id = dash_tunnel_id;
+
     meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
     set_route_meter_attrs(meta, meter_policy_en, meter_class);
 }
@@ -98,8 +107,11 @@ action route_service_tunnel(
     dash_encapsulation_t dash_encapsulation,
     bit<24> tunnel_key,
     bit<1> meter_policy_en,
-    bit<16> meter_class)
+    bit<16> meter_class,
+    @SaiVal[type="sai_object_id_t"] bit<16> dash_tunnel_id)
 {
+    meta.dash_tunnel_id = dash_tunnel_id;
+
     /* Assume the overlay addresses provided are always IPv6 and the original are IPv4 */
     /* assert(overlay_dip_is_v6 == 1 && overlay_sip_is_v6 == 1);
     assert(overlay_dip_mask_is_v6 == 1 && overlay_sip_mask_is_v6 == 1);
@@ -138,8 +150,11 @@ action set_tunnel_mapping(
     EthernetAddress overlay_dmac,
     bit<1> use_dst_vnet_vni,
     bit<16> meter_class,
-    bit<1> meter_class_override)
+    bit<1> meter_class_override,
+    @SaiVal[type="sai_object_id_t"] bit<16> dash_tunnel_id)
 {
+    meta.dash_tunnel_id = dash_tunnel_id;
+
     meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
 
     if (use_dst_vnet_vni == 1)
@@ -163,8 +178,11 @@ action set_private_link_mapping(
     @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t dash_encapsulation,
     bit<24> tunnel_key,
     bit<16> meter_class,
-    bit<1> meter_class_override)
+    bit<1> meter_class_override,
+    @SaiVal[type="sai_object_id_t"] bit<16> dash_tunnel_id)
 {
+    meta.dash_tunnel_id = dash_tunnel_id;
+
     meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
     
     push_action_static_encap(hdr = hdr,
@@ -191,32 +209,6 @@ action set_private_link_mapping(
 #endif /* DISABLE_128BIT_ARITHMETIC */
 
     set_mapping_meter_attr(meta, meter_class, meter_class_override);
-}
-
-action set_private_link_nsg_mapping(
-    inout headers_t hdr,
-    inout metadata_t meta, 
-    @SaiVal[type="sai_ip_address_t"] IPv4Address underlay_dip,
-    IPv6Address overlay_sip,
-    IPv6Address overlay_dip,
-    @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t dash_encapsulation,
-    bit<24> tunnel_key,
-    bit<16> meter_class,
-    bit<1> meter_class_override,
-    @SaiVal[type="sai_object_id_t"] bit<16> dash_tunnel_id)
-{
-    meta.dash_tunnel_id = dash_tunnel_id;
-
-    set_private_link_mapping(
-            hdr,
-            meta,
-            underlay_dip,
-	    overlay_sip,
-	    overlay_dip,
-	    dash_encapsulation,
-	    tunnel_key,
-	    meter_class,
-	    meter_class_override);
 }
 
 #endif /* _DASH_ROUTING_TYPES_P4_ */

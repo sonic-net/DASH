@@ -20,7 +20,6 @@ control outbound_mapping_stage(inout headers_t hdr,
         actions = {
             set_tunnel_mapping(hdr, meta);
             set_private_link_mapping(hdr, meta);
-            set_private_link_nsg_mapping(hdr, meta);
             @defaultonly drop(meta);
         }
         const default_action = drop(meta);
