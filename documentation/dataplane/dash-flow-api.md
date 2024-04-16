@@ -163,22 +163,22 @@ typedef struct _sai_flow_entry_t
     sai_uint8_t ip_proto;
 
     /**
-     * @brief Exact matched key src_ip_addr
+     * @brief Exact matched key src_ip
      */
-    sai_ip_address_t src_addr;
+    sai_ip_address_t src_ip;
 
     /**
-     * @brief Exact matched key dst_ip_addr
+     * @brief Exact matched key dst_ip
      */
-    sai_ip_address_t dst_addr;
+    sai_ip_address_t dst_ip;
 
     /**
-     * @brief Exact matched key src_l4_port
+     * @brief Exact matched key src_port
      */
     sai_uint16_t src_port;
 
     /**
-     * @brief Exact matched key dst_l4_port
+     * @brief Exact matched key dst_port
      */
     sai_uint16_t dst_port;
 
@@ -281,7 +281,7 @@ The filter, defined as an object, is specified as follows:
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY | `sai_dash_flow_entry_bulk_get_session_filter_key_t` | Key of the filter                                            |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_OP_KEY | `sai_dash_flow_entry_bulk_get_session_op_key_t`     | Operation of the filter                                      |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_INT_VALUE        | `sai_uint64_t`                                      | INT Value of the filter , ``@validonly SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY == SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_IP_PROTO || SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY == SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_SRC_PORT || SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY == SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_DST_PORT ||  SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY == SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_FLOW_VERSION` |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_IP_VALUE         | `sai_ip_address_t`                                  | IP Value of the filter, `@validonly SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY == SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_SRC_ADDR || SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY == SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_DST_ADDR` |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_IP_VALUE         | `sai_ip_address_t`                                  | IP Value of the filter, `@validonly SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY == SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_SRC_IP || SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY == SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_DST_IP` |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_MAC_VALUE        | `sai_mac_t`                                         | Mac Value of the filter, `@validonly SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY == SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_ENI_MAC` |
 
 ```c
@@ -293,9 +293,9 @@ typedef enum _sai_dash_flow_entry_bulk_get_session_filter_key_t
 
     SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_IP_PROTO,
 
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_SRC_ADDR,
+    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_SRC_IP,
 
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_DST_ADDR,
+    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_DST_IP,
 
     SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_SRC_PORT,
 
@@ -430,8 +430,8 @@ syntax = "proto3";
 
 message SaiDashFlowKey {
   uint64 eni_mac = 1;
-  string src_addr = 2;
-  string dst_addr = 3;
+  string src_ip = 2;
+  string dst_ip = 3;
   uint32 src_port = 4;
   uint32 dst_port = 5;
 }
@@ -508,10 +508,10 @@ sai_flow_entry_t flow_entry;
 
 flow_entry.flow_table_id = 0x112233;
 flow_entry.ip_proto = 6;
-flow_entry.src_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
-inet_pton(AF_INET, "192.168.1.1", &flow_entry.src_ip_addr.addr.ip4);
-flow_entry.dst_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
-inet_pton(AF_INET, "192.168.1.2", &flow_entry.dst_ip_addr.addr.ip4);
+flow_entry.src_ip.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
+inet_pton(AF_INET, "192.168.1.1", &flow_entry.src_ip.addr.ip4);
+flow_entry.dst_ip.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
+inet_pton(AF_INET, "192.168.1.2", &flow_entry.dst_ip.addr.ip4);
 flow_entry.src_port = 12345;
 flow_entry.dst_port = 80;
 ```
@@ -553,9 +553,9 @@ status = create_flow_entries(flow_table_id, flow_count, flow_key, attr_count, at
 sai_flow_entry_t flow_entry;
 flow_entry.flow_table_id = 0x112233;
 flow_entry.ip_proto = 6;
-flow_entry.src_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
+flow_entry.src_ip.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
 inet_pton(AF_INET, "192.168.1.1", &flow_entry.src_ip_addr.addr.ip4);
-flow_entry.dst_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
+flow_entry.dst_ip.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
 inet_pton(AF_INET, "192.168.1.2", &flow_entry.dst_ip_addr.addr.ip4);
 flow_entry.src_port = 12345;
 flow_entry.dst_port = 80;
@@ -615,10 +615,10 @@ status = create_flow_entry_bulk_get_session(&flow_entry_bulk_get_session_id, swi
 sai_flow_entry_t flow_entry;
 flow_entry.flow_table_id = 0x112233;
 flow_entry.ip_proto = 6;
-flow_entry.src_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
-inet_pton(AF_INET, "192.168.1.1", &flow_entry.src_ip_addr.addr.ip4);
-flow_entry.dst_addr.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
-inet_pton(AF_INET, "192.168.1.2", &flow_entry.dst_ip_addr.addr.ip4);
+flow_entry.src_ip.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
+inet_pton(AF_INET, "192.168.1.1", &flow_entry.src_ip.addr.ip4);
+flow_entry.dst_ip.addr_family = SAI_IP_ADDR_FAMILY_IPV4;
+inet_pton(AF_INET, "192.168.1.2", &flow_entry.dst_ip.addr.ip4);
 flow_entry.src_port = 12345;
 flow_entry.dst_port = 80;
 
