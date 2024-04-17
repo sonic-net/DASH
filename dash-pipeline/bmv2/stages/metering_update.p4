@@ -89,10 +89,12 @@ control metering_update_stage(
         }
         meter_bucket.apply();
 
-        if (meta.direction == dash_direction_t.OUTBOUND) {
-            UPDATE_COUNTER(meter_bucket_outbound, meta.meter_class);
-        } else if (meta.direction == dash_direction_t.INBOUND) {
-            UPDATE_COUNTER(meter_bucket_inbound, meta.meter_class);
+        if (meta.meter_class != 0) {
+            if (meta.direction == dash_direction_t.OUTBOUND) {
+                UPDATE_COUNTER(meter_bucket_outbound, meta.meter_class);
+            } else if (meta.direction == dash_direction_t.INBOUND) {
+                UPDATE_COUNTER(meter_bucket_inbound, meta.meter_class);
+            }
         }
 
         eni_meter.apply();
