@@ -4,6 +4,8 @@
 control ha_stage(inout headers_t hdr,
                  inout metadata_t meta)
 {
+    DEFINE_HIT_COUNTER(flow_updated_by_resimulation_counter, MAX_ENI, name="flow_updated_by_resimulation", attr_type="stats", action_names="set_eni_attrs", order=1)
+    DEFINE_HIT_COUNTER(flow_update_by_resimulation_failed_counter, MAX_ENI, name="flow_update_by_resimulation_failed", attr_type="stats", action_names="set_eni_attrs", order=1)
     //
     // HA scope:
     //

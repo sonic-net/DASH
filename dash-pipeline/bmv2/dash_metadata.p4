@@ -7,7 +7,6 @@
 #define MAX_HA_SET 1
 
 enum bit<32> dash_routing_actions_t {
-    NONE = 0,
     STATIC_ENCAP = (1 << 0),
     NAT = (1 << 1),
     NAT46 = (1 << 2),
