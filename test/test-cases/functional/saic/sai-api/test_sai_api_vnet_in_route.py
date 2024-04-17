@@ -136,7 +136,11 @@ class TestSaiVnetInboundRoutingEntry:
                     "SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION",
                     "SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE",
                     "SAI_INBOUND_ROUTING_ENTRY_ATTR_SRC_VNET_ID",
-                    "$vnet"
+                    "$vnet",
+                    "SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR",
+                    "0",
+                    "SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND",
+                    "-1"
                 ]
             },
         ]

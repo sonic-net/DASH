@@ -118,11 +118,11 @@ class TestSaiVnetOutbound:
                               "SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE", "SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL", "SAI_ENI_ATTR_DSCP", "0",
                               "SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION", "False", "SAI_ENI_ATTR_HA_SCOPE_ID", "0"])
 
-        ret = add_extra_attrs('SAI_OBJECT_TYPE_OUTBOUND_CA_TO_PA_ENTRY', ret, [ 'SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS', '0',
-                              'SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS_OVERRIDE', 'True' ])
+        ret = add_extra_attrs('SAI_OBJECT_TYPE_OUTBOUND_CA_TO_PA_ENTRY', ret, [ 'SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS_OR', '0' ])
 
-        ret = add_extra_attrs('SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY', ret, [ 'SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_POLICY_EN', 'True',
-                              'SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS', '0' ])
+        ret = add_extra_attrs('SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY', ret, [ 'SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR', '0',
+                                                                               'SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND', '-1' ])
+
         return ret
 
     def make_remove_vnet_config(self):

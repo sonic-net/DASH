@@ -138,17 +138,23 @@ control dash_ingress(
         if (meta.is_overlay_ip_v6 == 1) {
             if (meta.direction == dash_direction_t.OUTBOUND) {
                 ACL_GROUPS_COPY_TO_META(outbound_v6);
+                meta.meter_context.meter_policy_lookup_ip = meta.dst_ip_addr;
             } else {
                 ACL_GROUPS_COPY_TO_META(inbound_v6);
+                meta.meter_context.meter_policy_lookup_ip = meta.src_ip_addr;
             }
-            meta.meter_policy_id = v6_meter_policy_id;
+
+            meta.meter_context.meter_policy_id = v6_meter_policy_id;
         } else {
             if (meta.direction == dash_direction_t.OUTBOUND) {
                 ACL_GROUPS_COPY_TO_META(outbound_v4);
+                meta.meter_context.meter_policy_lookup_ip = meta.dst_ip_addr;
             } else {
                 ACL_GROUPS_COPY_TO_META(inbound_v4);
+                meta.meter_context.meter_policy_lookup_ip = meta.src_ip_addr;
             }
-            meta.meter_policy_id = v4_meter_policy_id;
+
+            meta.meter_context.meter_policy_id = v4_meter_policy_id;
         }
 
         meta.ha.ha_scope_id = ha_scope_id;
@@ -175,13 +181,19 @@ control dash_ingress(
     action vxlan_decap_pa_validate() {}
 
     action tunnel_decap(inout headers_t hdr,
-                        inout metadata_t meta) {
+                        inout metadata_t meta,
+                        bit<32> meter_class_or,
+                        @SaiVal[default_value="4294967295"] bit<32> meter_class_and) {
+        set_meter_attrs(meta, meter_class_or, meter_class_and);
     }
 
     action tunnel_decap_pa_validate(inout headers_t hdr,
                                     inout metadata_t meta,
-                                    @SaiVal[type="sai_object_id_t"] bit<16> src_vnet_id) {
+                                    @SaiVal[type="sai_object_id_t"] bit<16> src_vnet_id,
+                                    bit<32> meter_class_or,
+                                    @SaiVal[default_value="4294967295"] bit<32> meter_class_and) {
         meta.vnet_id = src_vnet_id;
+        set_meter_attrs(meta, meter_class_or, meter_class_and);
     }
 
     @SaiTable[name = "pa_validation", api = "dash_pa_validation"]
@@ -280,16 +292,15 @@ control dash_ingress(
         meta.eni_data.dscp_mode = dash_tunnel_dscp_mode_t.PRESERVE_MODEL;
         meta.eni_data.dscp = (bit<6>)hdr.u0_ipv4.diffserv;
 
-        if (meta.direction == dash_direction_t.OUTBOUND) {
-            do_tunnel_decap(hdr, meta);
-        } else if (meta.direction == dash_direction_t.INBOUND) {
+        if (meta.direction == dash_direction_t.INBOUND) {
             switch (inbound_routing.apply().action_run) {
                 tunnel_decap_pa_validate: {
                     pa_validation.apply();
-                    do_tunnel_decap(hdr, meta);
                 }
             }
         }
+
+        do_tunnel_decap(hdr, meta);
 
         /* At this point the processing is done on customer headers */
 

@@ -701,8 +701,8 @@ class SAIAPITableAction(SAIObject):
                 },
                 "params": [
                     { "id": 1, "name": "dst_vnet_id", "bitwidth": 16 },
-                    { "id": 2, "name": "meter_policy_en", "bitwidth": 1 },
-                    { "id": 3, "name": "meter_class", "bitwidth": 16 }
+                    { "id": 2, "name": "meter_class_or", "bitwidth": 32 },
+                    { "id": 3, "name": "meter_class_and", "bitwidth": 32 }
                 ]
             }
         '''

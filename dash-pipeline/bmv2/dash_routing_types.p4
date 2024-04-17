@@ -4,22 +4,13 @@
 #include "dash_headers.p4"
 #include "routing_actions/routing_actions.p4"
 
-action set_route_meter_attrs(
+action set_meter_attrs(
     inout metadata_t meta,
-    bit<1> meter_policy_en,
-    bit<16> meter_class)
+    bit<32> meter_class_or,
+    bit<32> meter_class_and)
 {
-    meta.meter_policy_en = meter_policy_en;
-    meta.route_meter_class = meter_class;
-}
-
-action set_mapping_meter_attr(
-    inout metadata_t meta,
-    in bit<16> meter_class,
-    in bit<1> meter_class_override)
-{
-    meta.mapping_meter_class = meter_class;
-    meta.mapping_meter_class_override = meter_class_override;
+    meta.meter_context.meter_class_or = meta.meter_context.meter_class_or | meter_class_or;
+    meta.meter_context.meter_class_and = meta.meter_context.meter_class_and & meter_class_and;
 }
 
 // Routing Type - drop:
@@ -35,12 +26,12 @@ action route_vnet(
     inout headers_t hdr,
     inout metadata_t meta,
     @SaiVal[type="sai_object_id_t"] bit<16> dst_vnet_id,
-    bit<1> meter_policy_en,
-    bit<16> meter_class)
+    bit<32> meter_class_or,
+    @SaiVal[default_value="4294967295"] bit<32> meter_class_and)
 {
     meta.target_stage = dash_pipeline_stage_t.OUTBOUND_MAPPING;
     meta.dst_vnet_id = dst_vnet_id;
-    set_route_meter_attrs(meta, meter_policy_en, meter_class);
+    set_meter_attrs(meta, meter_class_or, meter_class_and);
 }
 
 // Routing Type - vnet_direct:
@@ -53,14 +44,14 @@ action route_vnet_direct(
     bit<1> overlay_ip_is_v6,
     @SaiVal[type="sai_ip_address_t"]
     IPv4ORv6Address overlay_ip,
-    bit<1> meter_policy_en,
-    bit<16> meter_class)
+    bit<32> meter_class_or,
+    @SaiVal[default_value="4294967295"] bit<32> meter_class_and)
 {
     meta.target_stage = dash_pipeline_stage_t.OUTBOUND_MAPPING;
     meta.dst_vnet_id = dst_vnet_id;
     meta.lkup_dst_ip_addr = overlay_ip;
     meta.is_lkup_dst_ip_v6 = overlay_ip_is_v6;
-    set_route_meter_attrs(meta, meter_policy_en, meter_class);
+    set_meter_attrs(meta, meter_class_or, meter_class_and);
 }
 
 // Routing Type - direct:
@@ -69,11 +60,11 @@ action route_vnet_direct(
 action route_direct(
     inout headers_t hdr,
     inout metadata_t meta,
-    bit<1> meter_policy_en,
-    bit<16> meter_class)
+    bit<32> meter_class_or,
+    @SaiVal[default_value="4294967295"] bit<32> meter_class_and)
 {
     meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
-    set_route_meter_attrs(meta, meter_policy_en, meter_class);
+    set_meter_attrs(meta, meter_class_or, meter_class_and);
 }
 
 // Routing Type - servicetunnel
@@ -97,8 +88,8 @@ action route_service_tunnel(
     @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"]
     dash_encapsulation_t dash_encapsulation,
     bit<24> tunnel_key,
-    bit<1> meter_policy_en,
-    bit<16> meter_class)
+    bit<32> meter_class_or,
+    @SaiVal[default_value="4294967295"] bit<32> meter_class_and)
 {
     /* Assume the overlay addresses provided are always IPv6 and the original are IPv4 */
     /* assert(overlay_dip_is_v6 == 1 && overlay_sip_is_v6 == 1);
@@ -127,7 +118,7 @@ action route_service_tunnel(
 
 #endif
 
-    set_route_meter_attrs(meta, meter_policy_en, meter_class);
+    set_meter_attrs(meta, meter_class_or, meter_class_and);
 }
 
 // Routing type - vnet_encap:
@@ -137,8 +128,7 @@ action set_tunnel_mapping(
     @SaiVal[type="sai_ip_address_t"] IPv4Address underlay_dip,
     EthernetAddress overlay_dmac,
     bit<1> use_dst_vnet_vni,
-    bit<16> meter_class,
-    bit<1> meter_class_override)
+    bit<32> meter_class_or)
 {
     meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
 
@@ -150,7 +140,7 @@ action set_tunnel_mapping(
                             underlay_dip = underlay_dip,
                             overlay_dmac = overlay_dmac);
 
-    set_mapping_meter_attr(meta, meter_class, meter_class_override);
+    set_meter_attrs(meta, meter_class_or, 0xffffffff);
 }
 
 // Routing type - privatelink:
@@ -162,8 +152,7 @@ action set_private_link_mapping(
     IPv6Address overlay_dip,
     @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t dash_encapsulation,
     bit<24> tunnel_key,
-    bit<16> meter_class,
-    bit<1> meter_class_override)
+    bit<32> meter_class_or)
 {
     meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
     
@@ -190,7 +179,7 @@ action set_private_link_mapping(
                     sip_mask = 0xffffffffffffffffffffffff);
 #endif /* DISABLE_128BIT_ARITHMETIC */
 
-    set_mapping_meter_attr(meta, meter_class, meter_class_override);
+    set_meter_attrs(meta, meter_class_or, 0xffffffff);
 }
 
 #endif /* _DASH_ROUTING_TYPES_P4_ */
