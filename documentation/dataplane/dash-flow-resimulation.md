@@ -185,13 +185,13 @@ On routing entry:
 
 | Attribute name | Type | Description |
 | -------------- | ---- | ----------- |
-| SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTION_DISABLED_IN_FLOW_RESIMULATION_FLAG | `sai_uint64_t` | Routing actions that need to be disabled in flow resimulation. |
+| SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION | `sai_uint64_t` | Routing actions that need to be disabled in flow resimulation. |
 
 On CA-PA mapping entry:
 
 | Attribute name | Type | Description |
 | -------------- | ---- | ----------- |
-| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ROUTING_ACTION_DISABLED_IN_FLOW_RESIMULATION_FLAG | `sai_uint64_t` | Routing actions that need to be disabled in flow resimulation. |
+| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION | `sai_uint64_t` | Routing actions that need to be disabled in flow resimulation. |
 
 ### 6.5. Counters
 
