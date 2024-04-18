@@ -172,7 +172,7 @@ class VnetAPI(VnetObjects):
             "outbound_v6_stage4_dash_acl_group_id": 0,
             "outbound_v6_stage5_dash_acl_group_id": 0,
             "disable_fast_path_icmp_flow_redirection": 0,
-            "flow_resimulation_requested": 0,
+            "full_flow_resimulation_requested": False,
             "max_resimulated_flow_per_second": 0
         }
         default_kwargs.update(kwargs)
