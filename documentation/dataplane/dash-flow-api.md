@@ -193,13 +193,13 @@ The attributes of the flow entry can be divided into different categories. Pleas
 
 These are the basic attributes of flow entry.
 
-| Attribute name                            | Type                     | Description                                                  |
-| ----------------------------------------- | ------------------------ | ------------------------------------------------------------ |
-| SAI_FLOW_ENTRY_ATTR_VERSION               | `sai_uint32_t`           | Version of the flow entry                                    |
-| SAI_FLOW_ENTRY_ATTR_DASH_DIRECTION        | `sai_dash_direction_t`   | Direction of the DASH flow                                   |
-| SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION      | `sai_dash_flow_action_t` | Action to be applied on the flow                             |
-| SAI_FLOW_ENTRY_ATTR_METER_CLASS           | `sai_uint32_t`           | Meter class for flow entry, used for traffic metering and policing. |
-| SAI_FLOW_ENTRY_ATTR_IS_BIDIRECTIONAL_FLOW | `bool`                   | Indicates if the flow is bidirectional                       |
+| Attribute name                             | Type                     | Description                                                  |
+| ------------------------------------------ | ------------------------ | ------------------------------------------------------------ |
+| SAI_FLOW_ENTRY_ATTR_VERSION                | `sai_uint32_t`           | Version of the flow entry                                    |
+| SAI_FLOW_ENTRY_ATTR_DASH_DIRECTION         | `sai_dash_direction_t`   | Direction of the DASH flow                                   |
+| SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION       | `sai_dash_flow_action_t` | Action to be applied on the flow                             |
+| SAI_FLOW_ENTRY_ATTR_METER_CLASS            | `sai_uint32_t`           | Meter class for flow entry, used for traffic metering and policing |
+| SAI_FLOW_ENTRY_ATTR_IS_UNIDIRECTIONAL_FLOW | `bool`                   | Indicates if the flow is  unidirectional or bidirectional    |
 
 #### Reverse flow key
 
@@ -482,17 +482,17 @@ message SaiDashFlowEntry {
 
 ### Capability
 
-| Attribute Name                                     | Type                          | Description                                        |
-| -------------------------------------------------- | ----------------------------- | -------------------------------------------------- |
-| SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_TABLE_COUNT     | `sai_uint32_t`                | The max number of flow tables that can be created  |
-| SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_ENTRY_COUNT     | `sai_uint32_t`                | The max number of flow entries for all tables      |
-| SAI_SWITCH_ATTR_DASH_CAPS_SUPPORTED_ENABLED_KEY    | `sai_dash_flow_enabled_key_t` | Indicates what flow key mask can be used           |
-| SAI_SWITCH_ATTR_DASH_CAPS_BULK_GET_SESSION         | `bool`                        | Indicates if it supports bulk get sessions         |
-| SAI_SWITCH_ATTR_DASH_CAPS_BIDIRECTIONAL_FLOW_ENTRY | `bool`                        | Indicates if it supports bi-directional flow entry |
-| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_CREATE              | `bool`                        | Indicates if it supports flow create               |
-| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_REMOVE              | `bool`                        | Indicates if it supports flow remove               |
-| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_SET                 | `bool`                        | Indicates if it supports flow set                  |
-| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_GET                 | `bool`                        | Indicates if it supports flow get                  |
+| Attribute Name                                      | Type                          | Description                                         |
+| --------------------------------------------------- | ----------------------------- | --------------------------------------------------- |
+| SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_TABLE_COUNT      | `sai_uint32_t`                | The max number of flow tables that can be created   |
+| SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_ENTRY_COUNT      | `sai_uint32_t`                | The max number of flow entries for all tables       |
+| SAI_SWITCH_ATTR_DASH_CAPS_SUPPORTED_ENABLED_KEY     | `sai_dash_flow_enabled_key_t` | Indicates what flow key mask can be used            |
+| SAI_SWITCH_ATTR_DASH_CAPS_BULK_GET_SESSION          | `bool`                        | Indicates if it supports bulk get sessions          |
+| SAI_SWITCH_ATTR_DASH_CAPS_UNIDIRECTIONAL_FLOW_ENTRY | `bool`                        | Indicates if it supports uni-directional flow entry |
+| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_CREATE               | `bool`                        | Indicates if it supports flow create                |
+| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_REMOVE               | `bool`                        | Indicates if it supports flow remove                |
+| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_SET                  | `bool`                        | Indicates if it supports flow set                   |
+| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_GET                  | `bool`                        | Indicates if it supports flow get                   |
 
 ## Examples
 
