@@ -132,7 +132,7 @@ To enable the DASH providers be able to tell the host how much metering buckets 
 
 | Attribute | Type | Description |
 | --- | --- | --- |
-| SAI_SWITCH_ATTR_DASH_CAPS_MAX_METER_BUCKET_COUNT | `sai_uint32_t` | Max number of meter buckets supported by the DASH implementation. |
+| SAI_SWITCH_ATTR_DASH_CAPS_MAX_METER_BUCKET_COUNT_PER_ENI | `sai_uint32_t` | Max number of meter buckets per ENI supported by the DASH implementation. |
 
 ## 4. Metering bucket selection in DASH pipeline
 
