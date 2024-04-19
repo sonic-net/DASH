@@ -26,7 +26,7 @@ control outbound(inout headers_t hdr,
         }
 
 #ifdef STATEFUL_P4
-            ConntrackIn.apply(1);
+        ConntrackIn.apply(1);
 #endif /* STATEFUL_P4 */
 
 #ifdef PNA_CONNTRACK

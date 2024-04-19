@@ -6,7 +6,7 @@ control outbound_pre_routing_action_apply_stage(
     inout metadata_t meta)
 {
     apply {
-        // Outbound pre-routing action apply stage is added here for certain post processing before applying the final actions.
+        // Outbound pre-routing action apply stage is added here for certain pre processing before applying the final actions.
         if (meta.target_stage != dash_pipeline_stage_t.OUTBOUND_PRE_ROUTING_ACTION_APPLY) {
             return;
         }
