@@ -224,6 +224,10 @@ int main(int argc, char **argv)
     eam.address[4] = 0xcc;
     eam.address[5] = 0xcc;
 
+    attr.id = SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ACTION;
+    attr.value.u32 = SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ACTION_SET_ENI;
+    attrs.push_back(attr);
+
     attr.id = SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID;
     attr.value.u16 = eni_id;
     attrs.push_back(attr);
