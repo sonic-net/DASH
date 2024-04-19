@@ -438,6 +438,8 @@
             "address": "00:CC:CC:CC:00:00"
         },
         "attributes": [
+            "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ACTION",
+            "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ACTION_SET_ENI",
             "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID",
             "$eni"
         ]
@@ -451,6 +453,8 @@
             "address": "00:0a:04:06:06:06"
         },
         "attributes": [
+            "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ACTION",
+            "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ACTION_SET_ENI",
             "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID",
             "$eni"
         ]
