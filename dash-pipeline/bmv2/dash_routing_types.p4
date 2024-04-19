@@ -15,7 +15,7 @@ action set_meter_attrs(
 
 // Routing Type - drop:
 action drop(inout metadata_t meta) {
-    meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+    meta.target_stage = dash_pipeline_stage_t.OUTBOUND_PRE_ROUTING_ACTION_APPLY;
     meta.dropped = true;
 }
 
@@ -63,7 +63,7 @@ action route_direct(
     bit<32> meter_class_or,
     @SaiVal[default_value="4294967295"] bit<32> meter_class_and)
 {
-    meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+    meta.target_stage = dash_pipeline_stage_t.OUTBOUND_PRE_ROUTING_ACTION_APPLY;
     set_meter_attrs(meta, meter_class_or, meter_class_and);
 }
 
@@ -96,7 +96,7 @@ action route_service_tunnel(
     assert(overlay_dip_mask_is_v6 == 1 && overlay_sip_mask_is_v6 == 1);
     assert(underlay_dip_is_v6 != 1 && underlay_sip_is_v6 != 1); */
 
-    meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+    meta.target_stage = dash_pipeline_stage_t.OUTBOUND_PRE_ROUTING_ACTION_APPLY;
 
     push_action_nat46(hdr = hdr,
                     meta = meta,
@@ -130,7 +130,7 @@ action set_tunnel_mapping(
     bit<1> use_dst_vnet_vni,
     bit<32> meter_class_or)
 {
-    meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+    meta.target_stage = dash_pipeline_stage_t.OUTBOUND_PRE_ROUTING_ACTION_APPLY;
 
     if (use_dst_vnet_vni == 1)
         meta.vnet_id = meta.dst_vnet_id;
@@ -154,7 +154,7 @@ action set_private_link_mapping(
     bit<24> tunnel_key,
     bit<32> meter_class_or)
 {
-    meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+    meta.target_stage = dash_pipeline_stage_t.OUTBOUND_PRE_ROUTING_ACTION_APPLY;
     
     push_action_static_encap(hdr = hdr,
                             meta = meta,
