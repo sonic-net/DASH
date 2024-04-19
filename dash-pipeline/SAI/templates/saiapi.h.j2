@@ -103,7 +103,7 @@ typedef enum _sai_{{ table.name }}_attr_t
     SAI_{{ table.name | upper }}_ATTR_START,
 
 {% set ns = namespace(firstattr=false) %}
-{% if table.actions | length > 1 or table.is_object == 'false'  %}
+{% if table.actions | length > 1 or table.is_object == 'false' %}
     /**
      * @brief Action
      *
