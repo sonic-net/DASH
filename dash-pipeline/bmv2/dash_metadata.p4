@@ -190,6 +190,7 @@ struct metadata_t {
     bool dropped;
     encap_data_t encap_data;
     overlay_rewrite_data_t overlay_data;
+    bit<16> dash_tunnel_id;
     bit<32> meter_class;
 }
 
