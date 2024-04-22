@@ -129,8 +129,8 @@ class TestSaiVnetOutboundRoutingEntry:
                     "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION", "SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET",
                     "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID", "$vnet",
                     "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_TUNNEL_ID", "SAI_NULL_OBJECT_ID",
-                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_POLICY_EN", "False",
-                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS", "0"
+                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR", "0",
+                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND", "-1"
                 ]
             },
         ]
@@ -169,8 +169,8 @@ class TestSaiVnetOutboundRoutingEntry:
                     "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION", "SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET",
                     "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID", "$vnet",
                     "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_TUNNEL_ID", "SAI_NULL_OBJECT_ID",
-                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_POLICY_EN", "False",
-                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS", "0"
+                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR", "0",
+                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND", "-1"
                 ]
             },
         ]
