@@ -26,7 +26,7 @@ action route_vnet(
     inout headers_t hdr,
     inout metadata_t meta,
     @SaiVal[type="sai_object_id_t"] bit<16> dst_vnet_id,
-    @SaiVal[type="sai_object_id_t"] bit<16> dash_tunnel_id)
+    @SaiVal[type="sai_object_id_t"] bit<16> dash_tunnel_id,
     bit<32> meter_class_or,
     @SaiVal[default_value="4294967295"] bit<32> meter_class_and)
 {
@@ -47,7 +47,7 @@ action route_vnet_direct(
     bit<1> overlay_ip_is_v6,
     @SaiVal[type="sai_ip_address_t"]
     IPv4ORv6Address overlay_ip,
-    @SaiVal[type="sai_object_id_t"] bit<16> dash_tunnel_id)
+    @SaiVal[type="sai_object_id_t"] bit<16> dash_tunnel_id,
     bit<32> meter_class_or,
     @SaiVal[default_value="4294967295"] bit<32> meter_class_and)
 {
