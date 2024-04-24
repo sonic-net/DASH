@@ -137,7 +137,8 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         underlay_dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
                                                addr=sai_thrift_ip_addr_t(ip4=self.dst_pa_ip))
         self.ocpe = sai_thrift_outbound_ca_to_pa_entry_t(switch_id=self.switch_id, dst_vnet_id=self.vnet, dip=dip)
-        status = sai_thrift_create_outbound_ca_to_pa_entry(self.client, self.ocpe, underlay_dip = underlay_dip,
+        status = sai_thrift_create_outbound_ca_to_pa_entry(self.client, self.ocpe, action=SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING,
+                                                           underlay_dip = underlay_dip,
                                                            overlay_dmac=self.dst_ca_mac, use_dst_vnet_vni = True,
                                                            meter_class_or=0)
         assert(status == SAI_STATUS_SUCCESS)
