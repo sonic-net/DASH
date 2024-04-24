@@ -219,10 +219,10 @@ control dash_ingress(
             hdr.u0_ipv4.src_addr : ternary @SaiVal[name = "sip", type="sai_ip_address_t"];
         }
         actions = {
-            vxlan_decap;                // Deprecated, but cannot be removed until SWSS is updated.
-            vxlan_decap_pa_validate;    // Deprecated, but cannot be removed until SWSS is updated.
             tunnel_decap(hdr, meta);
             tunnel_decap_pa_validate(hdr, meta);
+            vxlan_decap;                // Deprecated, but cannot be removed until SWSS is updated.
+            vxlan_decap_pa_validate;    // Deprecated, but cannot be removed until SWSS is updated.
             @defaultonly deny;
         }
 
