@@ -847,7 +847,25 @@ std::vector<sai_attribute_t> DashSai::populateDefaultAttributes(
 
         if (md->isvalidonly)
         {
-            if (sai_metadata_is_validonly_met(md, (uint32_t)attrs.size(), attrs.data()) == false)
+            bool haveActionAttribute = false;
+
+            for (size_t i = 0; i < md->validonlylength; i++)
+            {
+                auto *condmd = sai_metadata_get_attr_metadata(objectType, md->validonly[i].attrid);
+
+                if (condmd && strstr(condmd->attridname, "_ATTR_ACTION"))
+                {
+                    haveActionAttribute = true;
+                    break;
+                }
+            }
+
+            if (haveActionAttribute == false)
+            {
+                // always set default attribute in this case, even if condition is not set
+                // (see github discussion https://github.com/sonic-net/DASH/pull/547)
+            }
+            else if (sai_metadata_is_validonly_met(md, (uint32_t)attrs.size(), attrs.data()) == false)
             {
                 // attribute is valid only, but condition is not met based on current attributes
                 continue;
