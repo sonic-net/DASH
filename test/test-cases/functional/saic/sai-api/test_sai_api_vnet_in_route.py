@@ -45,6 +45,8 @@ class TestSaiVnetInboundRoutingEntry:
                     "100000",
                     "SAI_ENI_ATTR_ADMIN_STATE",
                     "True",
+                    "SAI_ENI_ATTR_HA_SCOPE_ID",
+                    "0",
                     "SAI_ENI_ATTR_VM_UNDERLAY_DIP",
                     "10.10.2.10",
                     "SAI_ENI_ATTR_VM_VNI",
@@ -132,9 +134,13 @@ class TestSaiVnetInboundRoutingEntry:
                 },
                 "attributes": [
                     "SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION",
-                    "SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE",
+                    "SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE",
                     "SAI_INBOUND_ROUTING_ENTRY_ATTR_SRC_VNET_ID",
-                    "$vnet"
+                    "$vnet",
+                    "SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR",
+                    "0",
+                    "SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND",
+                    "-1"
                 ]
             },
         ]
@@ -175,7 +181,7 @@ class TestSaiVnetInboundRoutingEntry:
                 },
                 "attribute": [
                     "SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION",
-                    "SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_CA_VALIDATE",
+                    "SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_CA_VALIDATE",
                 ]
             },
         ]

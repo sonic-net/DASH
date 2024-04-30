@@ -12,7 +12,7 @@ action push_vxlan_tunnel_ ## underlay_id ## (inout headers_t hdr, \
                                        in IPv4Address underlay_dip, \
                                        in IPv4Address underlay_sip, \
                                        in bit<24> tunnel_key) { \
-    hdr. ## overlay_id ## _ethernet.dst_addr = overlay_dmac; \
+    hdr. ## overlay_id ## _ethernet.dst_addr = (overlay_dmac == 0) ? hdr. ## overlay_id ## _ethernet.dst_addr : overlay_dmac; \
     hdr. ## underlay_id ## _ethernet.setValid(); \
     hdr. ## underlay_id ## _ethernet.dst_addr = underlay_dmac; \
     hdr. ## underlay_id ## _ethernet.src_addr = underlay_smac; \
@@ -52,7 +52,7 @@ action push_vxlan_tunnel_ ## underlay_id ## (inout headers_t hdr, \
     hdr. ## underlay_id ## _vxlan.setValid(); \
     hdr. ## underlay_id ## _vxlan.reserved = 0; \
     hdr. ## underlay_id ## _vxlan.reserved_2 = 0; \
-    hdr. ## underlay_id ## _vxlan.flags = 0; \
+    hdr. ## underlay_id ## _vxlan.flags = 0x8; \
     hdr. ## underlay_id ## _vxlan.vni = tunnel_key; \
 }
 #endif
@@ -211,7 +211,7 @@ PUSH_VXLAN_TUNNEL_DEF(u1, u0)
 PUSH_NVGRE_TUNNEL_DEF(u0, customer)
 PUSH_NVGRE_TUNNEL_DEF(u1, u0)
 
-#define tunnel_encap(hdr, \
+#define do_tunnel_encap(hdr, \
                     meta, \
                     overlay_dmac, \
                     underlay_dmac, \
@@ -240,7 +240,7 @@ PUSH_NVGRE_TUNNEL_DEF(u1, u0)
         } \
     } else if (dash_encapsulation == dash_encapsulation_t.NVGRE) { \
         if (meta.tunnel_pointer == 0) { \
-            push_vxlan_tunnel_u0(hdr, \
+            push_nvgre_tunnel_u0(hdr, \
                            overlay_dmac, \
                            underlay_dmac, \
                            underlay_smac, \
@@ -248,7 +248,7 @@ PUSH_NVGRE_TUNNEL_DEF(u1, u0)
                            underlay_sip, \
                            tunnel_key); \
         } else if (meta.tunnel_pointer == 1) { \
-            push_vxlan_tunnel_u1(hdr, \
+            push_nvgre_tunnel_u1(hdr, \
                            overlay_dmac, \
                            underlay_dmac, \
                            underlay_smac, \
@@ -266,7 +266,7 @@ PUSH_NVGRE_TUNNEL_DEF(u1, u0)
    reparse it.
    It is also assumed, that if DASH pushes more than one tunnel,
    they won't need to pop them */
-action tunnel_decap(inout headers_t hdr, inout metadata_t meta) {
+action do_tunnel_decap(inout headers_t hdr, inout metadata_t meta) {
     hdr.u0_ethernet.setInvalid();
     hdr.u0_ipv4.setInvalid();
     hdr.u0_ipv6.setInvalid();

@@ -43,6 +43,7 @@ CXXFLAGS_COMMON+= -Wno-switch-default
 CXXFLAGS_COMMON+= -Wconversion
 CXXFLAGS_COMMON+= -Wno-psabi
 CXXFLAGS_COMMON+= -Wno-unused-label
+CXXFLAGS_COMMON+= -Wno-unused-result
 
 # Sources from OCP SAI Repo:
 SAI_DIR=../SAI/meta/

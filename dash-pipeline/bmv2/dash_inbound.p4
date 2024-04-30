@@ -4,6 +4,7 @@
 #include "dash_headers.p4"
 #include "dash_service_tunnel.p4"
 #include "dash_acl.p4"
+#include "routing_actions/routing_actions.p4"
 #include "dash_conntrack.p4"
 
 control inbound(inout headers_t hdr,
@@ -11,15 +12,13 @@ control inbound(inout headers_t hdr,
 {
     apply {
 #ifdef STATEFUL_P4
-            ConntrackIn.apply(0);
+        ConntrackIn.apply(0);
 #endif /* STATEFUL_P4 */
 #ifdef PNA_CONNTRACK
         ConntrackIn.apply(hdr, meta);
 
-        if (meta.encap_data.original_overlay_sip != 0) {
-            service_tunnel_decode(hdr,
-                                  meta.encap_data.original_overlay_sip,
-                                  meta.encap_data.original_overlay_dip);
+        if ((IPv4Address)meta.overlay_data.sip != 0) {
+            do_action_nat64.apply(hdr, meta);
         }
 #endif // PNA_CONNTRACK
 
@@ -35,9 +34,9 @@ control inbound(inout headers_t hdr,
         ConntrackOut.apply(hdr, meta);
 #endif //PNA_CONNTRACK
 
-        tunnel_encap(hdr,
+        do_tunnel_encap(hdr,
                      meta,
-                     meta.encap_data.overlay_dmac,
+                     meta.overlay_data.dmac,
                      meta.encap_data.underlay_dmac,
                      meta.encap_data.underlay_smac,
                      meta.encap_data.underlay_dip,

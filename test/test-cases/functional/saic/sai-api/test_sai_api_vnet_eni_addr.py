@@ -23,6 +23,8 @@ class TestSaiVnetEniAddr:
                     "address": "00:AA:AA:AA:AB:00"
                 },
                 "attributes": [
+                    "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ACTION",
+                    "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ACTION_SET_ENI",
                     "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID",
                     "1"
                 ]
@@ -59,6 +61,8 @@ class TestSaiVnetEniAddr:
                     "address": "00:AA:AA:AA:BB:00"
                 },
                 "attributes": [
+                    "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ACTION",
+                    "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ACTION_SET_ENI",
                     "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID",
                     "$eni_id"
                 ]

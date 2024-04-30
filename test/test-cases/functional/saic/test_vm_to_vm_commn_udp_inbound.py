@@ -80,7 +80,6 @@ class TestUdpInbound:
         udp1.src_port.value = 11638
         udp1.dst_port.value = 4789
 
-        #vxlan.flags.value = 
         vxlan1.vni.value = 11
         vxlan1.reserved0.value = 0
         vxlan1.reserved1.value = 0
@@ -119,7 +118,6 @@ class TestUdpInbound:
         udp.src_port.value = 11638
         udp.dst_port.value = 4789
 
-        #vxlan.flags.value = 
         vxlan.vni.value = 101
         vxlan.reserved0.value = 0
         vxlan.reserved1.value = 0

@@ -65,6 +65,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         self.eni = sai_thrift_create_eni(self.client, cps=10000,
                                          bw=100000, flows=100000,
                                          admin_state=True,
+                                         ha_scope_id=0,
                                          vm_underlay_dip=vm_underlay_dip,
                                          vm_vni=9,
                                          vnet_id=self.vnet,
@@ -130,7 +131,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         status = sai_thrift_create_outbound_routing_entry(self.client, self.ore,
                                                           action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET,
                                                           dst_vnet_id=self.vnet,
-                                                          meter_policy_en=False, meter_class=0)
+                                                          meter_class_or=0, meter_class_and=-1)
         assert(status == SAI_STATUS_SUCCESS)
 
         underlay_dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
@@ -138,7 +139,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         self.ocpe = sai_thrift_outbound_ca_to_pa_entry_t(switch_id=self.switch_id, dst_vnet_id=self.vnet, dip=dip)
         status = sai_thrift_create_outbound_ca_to_pa_entry(self.client, self.ocpe, underlay_dip = underlay_dip,
                                                            overlay_dmac=self.dst_ca_mac, use_dst_vnet_vni = True,
-                                                           meter_class=0, meter_class_override=False)
+                                                           meter_class_or=0)
         assert(status == SAI_STATUS_SUCCESS)
 
         print(f"\n{self.__class__.__name__} configureVnet OK")
@@ -232,10 +233,6 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
                                         with_udp_chksum=False,
                                         vxlan_vni=self.vnet_vni,
                                         inner_frame=inner_exp_pkt)
-        # TODO: Fix IP chksum
-        vxlan_exp_pkt[IP].chksum = 0
-        # TODO: Fix UDP length
-        vxlan_exp_pkt[IP][UDP][VXLAN].flags = 0
 
         self.pkt_exp = vxlan_exp_pkt
         print("\tSending outbound packet...")
@@ -390,10 +387,6 @@ class SaiThriftVnetOutboundUdpV6PktTest(SaiThriftVnetOutboundUdpPktTest):
                                         with_udp_chksum=False,
                                         vxlan_vni=self.vnet_vni,
                                         inner_frame=inner_exp_pkt)
-        # TODO: Fix IP chksum
-        vxlan_exp_pkt[IP].chksum = 0
-        # TODO: Fix UDP length
-        vxlan_exp_pkt[IP][UDP][VXLAN].flags = 0
 
         self.pkt_exp = vxlan_exp_pkt
         print("\tSending outbound packet...")

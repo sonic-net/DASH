@@ -234,9 +234,8 @@ class TestSaiVnetOutbound:
                                             udp_sport       = 0, # TODO: Fix sport in pipeline
                                             with_udp_chksum = False,
                                             vxlan_vni       = VNET_VNI,
-                                            vxlan_flags     = 0,
+                                            vxlan_flags     = 0x8,
                                             inner_frame     = inner_exp_pkt)
-        vxlan_exp_pkt['IP'].chksum = 0
 
         print("\nSending outbound packet...\n\n", vxlan_pkt.__repr__())
         send_packet(dataplane, 0, vxlan_pkt)

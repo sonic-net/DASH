@@ -77,10 +77,8 @@ class TestSaiVnetRoute:
                                             udp_sport       = 0,
                                             with_udp_chksum = False,
                                             vxlan_vni       = 100,
-                                            vxlan_flags     = 0,
+                                            vxlan_flags     = 0x8,
                                             inner_frame     = inner_exp_pkt_one)
-        vxlan_exp_pkt_one['IP'].chksum = 0
-
         # Send packet two
         inner_pkt_two = simple_udp_packet(eth_dst = "00:00:00:09:03:14",
                                       eth_src = "00:0a:04:06:06:06",
@@ -107,9 +105,8 @@ class TestSaiVnetRoute:
                                             udp_sport       = 0,
                                             with_udp_chksum = False,
                                             vxlan_vni       = 100,
-                                            vxlan_flags     = 0,
+                                            vxlan_flags     = 0x8,
                                             inner_frame     = inner_exp_pkt_two)
-        vxlan_exp_pkt_two['IP'].chksum = 0
 
         # Send packets from both ports 
         send_packet(dataplane, 0, vxlan_pkt_one, 10)
@@ -147,10 +144,8 @@ class TestSaiVnetRoute:
                                             udp_sport       = 0,
                                             with_udp_chksum = False,
                                             vxlan_vni       = 100,
-                                            vxlan_flags     = 0,
+                                            vxlan_flags     = 0x8,
                                             inner_frame     = inner_exp_pkt_one)
-        vxlan_exp_pkt_one['IP'].chksum = 0
-
         # Send packet two
         inner_pkt_two = simple_udp_packet(eth_dst = "00:00:00:09:03:14",
                                       eth_src = "00:0a:04:06:06:06",
@@ -177,10 +172,8 @@ class TestSaiVnetRoute:
                                             udp_sport       = 0,
                                             with_udp_chksum = False,
                                             vxlan_vni       = 100,
-                                            vxlan_flags     = 0,
+                                            vxlan_flags     = 0x8,
                                             inner_frame     = inner_exp_pkt_two)
-        vxlan_exp_pkt_two['IP'].chksum = 0
-
         # Send packets from both ports 
         send_packet(dataplane, 0, vxlan_pkt_one, 10)
         time.sleep(0.5)

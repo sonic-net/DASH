@@ -103,6 +103,8 @@ dpu_config = [
       "100000",
       "SAI_ENI_ATTR_ADMIN_STATE",
       "True",
+      "SAI_ENI_ATTR_HA_SCOPE_ID",
+      "0",
       "SAI_ENI_ATTR_VM_UNDERLAY_DIP",
       ENI_VTEP_IP,
       "SAI_ENI_ATTR_VM_VNI",
@@ -180,6 +182,8 @@ dpu_config = [
       "100000",
       "SAI_ENI_ATTR_ADMIN_STATE",
       "True",
+      "SAI_ENI_ATTR_HA_SCOPE_ID",
+      "0",
       "SAI_ENI_ATTR_VM_UNDERLAY_DIP",
       NETWORK_VTEP_IP,
       "SAI_ENI_ATTR_VM_VNI",
@@ -254,6 +258,8 @@ dpu_config = [
       "address": INNER_SRC_MAC
     },
     "attributes": [
+      "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ACTION",
+      "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ACTION_SET_ENI",
       "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID",
       "$eni_#1"
     ]
@@ -267,6 +273,8 @@ dpu_config = [
       "address": INNER_DST_MAC
     },
     "attributes": [
+      "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ACTION",
+      "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ACTION_SET_ENI",
       "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID",
       "$eni_#2"
     ]
@@ -285,9 +293,13 @@ dpu_config = [
     },
     "attributes": [
       "SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION",
-      "SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE",
+      "SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE",
       "SAI_INBOUND_ROUTING_ENTRY_ATTR_SRC_VNET_ID",
-      "$vnet_#1"
+      "$vnet_#1",
+      "SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR",
+      "0",
+      "SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND",
+      "-1"
     ]
   },
     {
@@ -304,9 +316,13 @@ dpu_config = [
     },
     "attributes": [
       "SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION",
-      "SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE",
+      "SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE",
       "SAI_INBOUND_ROUTING_ENTRY_ATTR_SRC_VNET_ID",
-      "$vnet_#1"
+      "$vnet_#1",
+      "SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR",
+      "0",
+      "SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND",
+      "-1"
     ]
   },
   {
