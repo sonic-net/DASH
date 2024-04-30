@@ -851,7 +851,7 @@ std::vector<sai_attribute_t> DashSai::populateDefaultAttributes(
 
             for (size_t i = 0; i < md->validonlylength; i++)
             {
-                auto *condmd = sai_metadata_get_attr_metadata(objectType, md->validonly[i].attrid);
+                auto *condmd = sai_metadata_get_attr_metadata(objectType, md->validonly[i]->attrid);
 
                 if (condmd && strstr(condmd->attridname, "_ATTR_ACTION"))
                 {
