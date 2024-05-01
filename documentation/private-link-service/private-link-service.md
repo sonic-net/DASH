@@ -3,6 +3,7 @@
 | Rev | Date | Author | Change Description |
 | --- | ---- | ------ | ------------------ |
 | 0.1 | 03/29/2024 | Riff Jiang | Initial version |
+| 0.2 | 05/1/2024 | Riff Jiang | Add PL SIP and PL SIP mask on ENI |
 
 1. [1. Terminology](#1-terminology)
 2. [2. Background](#2-background)
@@ -116,6 +117,8 @@ The following attributes will be added on ENI:
 | Attribute name | Type | Description |
 | --- | --- | --- |
 | SAI_ENI_ATTR_PL_UNDERLAY_SIP | sai_ip_address_t | Underlay IP that will be used for private link routing type. |
+| SAI_ENI_ATTR_PL_SIP | sai_ip_address_t | IP that will be used to encode overlay source IP for private link routing type. |
+| SAI_ENI_ATTR_PL_SIP_MASK | sai_ip_address_t | IP mask that will be used to encode overlay source IP for private link routing type. |
 
 ### 5.2. DASH CA-PA mapping attributes
 
@@ -194,11 +197,13 @@ For private link, the packet will go through the pipeline with following setup:
    | entry.address | `sai_mac_t` | `11-22-33-44-55-66` |
    | entry_attr.SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID | `sai_object_id_t` | (SAI object ID of the ENI) |
 
-   Then, we use the ENI id to find the ENI, which contains the PL underlay source IP as below:
+   Then, we use the ENI id to find the ENI, which contains the PL underlay source IP and source IP encoding as below:
 
    | SAI field name | Type | Value |
    | --- | --- | --- |
    | entry_attr.SAI_ENI_ATTR_PL_UNDERLAY_SIP | `sai_ip_address_t` | 2.2.2.1 |
+   | entry_attr.SAI_ENI_ATTR_PL_SIP | `sai_ip_address_t` | 88:: |
+   | entry_attr.SAI_ENI_ATTR_PL_SIP_MASK | `sai_ip_address_t` | FF:: |
 
 3. **Conntrack Lookup**: If flow already exists, we directly apply the transformation from the flow, otherwise, move on.
 4. **ACL**: No changes in the ACL stage, it will work just like the other cases.
@@ -225,11 +230,19 @@ For private link, the packet will go through the pipeline with following setup:
    | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION | `sai_outbound_ca_to_pa_entry_action_t` | `SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING` |
    | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP | `sai_ip_address_t` | `3.3.3.1` |
    | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC | `sai_mac_t` | `99-88-77-66-55-44` |
-   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP | `sai_ip_address_t` | `9988::` |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP | `sai_ip_address_t` | `9900::` |
    | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP_MASK | `sai_ip_address_t` | `FFFF:FFFF:FFFF:FFFF:FFFF:FFFF::` |
    | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP | `sai_ip_address_t` | `1122:3344:5566:7788::303:301/128` |
    | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP_MASK | `sai_ip_address_t` | `FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF` |
    | entry_attr.SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS | `sai_uint16_t` | `60001` |
+
+   With the PL SIP and PL SIP mask information from the ENI, the overlay SIP will be encoded as below:
+
+   ```c
+   Overlay SIP = (
+      ((Original SIP & ~SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP_MASK) | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP)
+   ) & ~SAI_ENI_ATTR_PL_SIP_MASK) | SAI_ENI_ATTR_PL_SIP
+   ```
 
 7. **Metering**: The last action we need to do is to find the corresponding metering rule.
 8. **Conntrack Update**: Both forwarding and reverse flows will be created by this stage.
