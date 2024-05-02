@@ -239,8 +239,8 @@ For private link, the packet will go through the pipeline with following setup:
    With the PL SIP and PL SIP mask information from the ENI, the overlay SIP will be encoded as below:
 
    ```c
-   Overlay SIP = (
-      ((Original SIP & ~SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP_MASK) | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP)
+   OverlaySIP = (
+      ((OriginalOverlaySIP & ~SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP_MASK) | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP)
    ) & ~SAI_ENI_ATTR_PL_SIP_MASK) | SAI_ENI_ATTR_PL_SIP
    ```
 
