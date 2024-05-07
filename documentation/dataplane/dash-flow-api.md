@@ -198,8 +198,8 @@ These are the basic attributes of flow entry.
 | SAI_FLOW_ENTRY_ATTR_VERSION                | `sai_uint32_t`           | Version of the flow entry                                    |
 | SAI_FLOW_ENTRY_ATTR_DASH_DIRECTION         | `sai_dash_direction_t`   | Direction of the DASH flow                                   |
 | SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION       | `sai_dash_flow_action_t` | Action to be applied on the flow                             |
-| SAI_FLOW_ENTRY_ATTR_METER_CLASS            | `sai_uint32_t`           | Meter class for flow entry, used for traffic metering and policing |
-| SAI_FLOW_ENTRY_ATTR_IS_UNIDIRECTIONAL_FLOW | `bool`                   | Indicates if the flow is  unidirectional or bidirectional    |
+| SAI_FLOW_ENTRY_ATTR_METER_CLASS            | `sai_uint32_t`           | Meter class for flow entry, used for traffic metering and policing. |
+| SAI_FLOW_ENTRY_ATTR_IS_UNIDIRECTIONAL_FLOW | `bool`                   | Indicates if the flow is unidirectional                      |
 
 #### Reverse flow key
 
@@ -223,8 +223,6 @@ These are the related attributes of flow encapsulation.
 | SAI_FLOW_ENTRY_ATTR_UNDERLAY0_VNI                | `sai_uint32_t`             | Destination VNI in the underlay network                      |
 | SAI_FLOW_ENTRY_ATTR_UNDERLAY0_SIP                | `sai_uint32_t`             | Source IP address in the underlay network                    |
 | SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DIP                | `sai_uint32_t`             | Destination IP address in the underlay network               |
-| SAI_FLOW_ENTRY_ATTR_UNDERLAY0_SMAC               | `sai_mac_t`                | Source MAC address in the underlay network                   |
-| SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DMAC               | `sai_mac_t`                | Destination MAC address in the underlay network              |
 | SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DASH_ENCAPSULATION | `sai_dash_encapsulation_t` | Encapsulation method for DASH traffic in the underlay network |
 | SAI_FLOW_ENTRY_ATTR_UNDERLAY1_VNI                | `sai_uint32_t`             | Destination VNI in the 2nd underlay network                  |
 | SAI_FLOW_ENTRY_ATTR_UNDERLAY1_SIP                | `sai_uint32_t`             | Source IP address in the 2nd underlay network                |
@@ -446,15 +444,16 @@ message SaiDashFlowKey {
   uint64 eni_mac = 1;  // ENI MAC address
   IpAddress src_ip = 2;  // Source IP address
   IpAddress dst_ip = 3;  // Destination IP address
-  uint32 src_port = 4;  // Source port
-  uint32 dst_port = 5;  // Destination port
+  uint8 ip_proto = 4; // IP Protocol
+  uint32 src_port = 5;  // Source port
+  uint32 dst_port = 6;  // Destination port
 }
 
 message SaiDashFlowState {
   uint32 version = 1;  // SAI_FLOW_ENTRY_ATTR_VERSION
   uint32 dash_flow_action = 2;  // SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION
   uint32 meter_class = 3;  // SAI_FLOW_ENTRY_ATTR_METER_CLASS
-  bool is_bidirectional_flow = 4;  // SAI_FLOW_ENTRY_ATTR_IS_BIDIRECTIONAL_FLOW
+  bool is_unidirectional_flow = 4;  // SAI_FLOW_ENTRY_ATTR_IS_UNIDIRECTIONAL_FLOW
   uint32 underlay_vni = 5;  // SAI_FLOW_ENTRY_ATTR_UNDERLAY_VNI
   IpAddress underlay_sip = 6;  // Underlay source IP address
   IpAddress underlay_dip = 7;  // Underlay destination IP address
@@ -482,17 +481,17 @@ message SaiDashFlowEntry {
 
 ### Capability
 
-| Attribute Name                                      | Type                          | Description                                         |
-| --------------------------------------------------- | ----------------------------- | --------------------------------------------------- |
-| SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_TABLE_COUNT      | `sai_uint32_t`                | The max number of flow tables that can be created   |
-| SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_ENTRY_COUNT      | `sai_uint32_t`                | The max number of flow entries for all tables       |
-| SAI_SWITCH_ATTR_DASH_CAPS_SUPPORTED_ENABLED_KEY     | `sai_dash_flow_enabled_key_t` | Indicates what flow key mask can be used            |
-| SAI_SWITCH_ATTR_DASH_CAPS_BULK_GET_SESSION          | `bool`                        | Indicates if it supports bulk get sessions          |
-| SAI_SWITCH_ATTR_DASH_CAPS_UNIDIRECTIONAL_FLOW_ENTRY | `bool`                        | Indicates if it supports uni-directional flow entry |
-| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_CREATE               | `bool`                        | Indicates if it supports flow create                |
-| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_REMOVE               | `bool`                        | Indicates if it supports flow remove                |
-| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_SET                  | `bool`                        | Indicates if it supports flow set                   |
-| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_GET                  | `bool`                        | Indicates if it supports flow get                   |
+| Attribute Name                                      | Type                          | Description                                        |
+| --------------------------------------------------- | ----------------------------- | -------------------------------------------------- |
+| SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_TABLE_COUNT      | `sai_uint32_t`                | The max number of flow tables that can be created  |
+| SAI_SWITCH_ATTR_DASH_CAPS_MAX_FLOW_ENTRY_COUNT      | `sai_uint32_t`                | The max number of flow entries for all tables      |
+| SAI_SWITCH_ATTR_DASH_CAPS_SUPPORTED_ENABLED_KEY     | `sai_dash_flow_enabled_key_t` | Indicates what flow key mask can be used           |
+| SAI_SWITCH_ATTR_DASH_CAPS_BULK_GET_SESSION          | `bool`                        | Indicates if it supports bulk get sessions         |
+| SAI_SWITCH_ATTR_DASH_CAPS_UNIDIRECTIONAL_FLOW_ENTRY | `bool`                        | Indicates if it supports unidirectional flow entry |
+| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_CREATE               | `bool`                        | Indicates if it supports flow create               |
+| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_REMOVE               | `bool`                        | Indicates if it supports flow remove               |
+| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_SET                  | `bool`                        | Indicates if it supports flow set                  |
+| SAI_SWITCH_ATTR_DASH_CAPS_FLOW_GET                  | `bool`                        | Indicates if it supports flow get                  |
 
 ## Examples
 
