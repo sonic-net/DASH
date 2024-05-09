@@ -23,7 +23,7 @@
     - [Flow Bulk Get Session](#flow-bulk-get-session)
       - [Flow Bulk Get Session filter](#flow-bulk-get-session-filter)
       - [Flow Bulk Get Session API](#flow-bulk-get-session-api)
-      - [Bulk Get Session Event Notifiations](#bulk-get-session-event-notifiations)
+      - [Bulk Get Session Event Notification](#bulk-get-session-event-notification)
     - [Protobuf-based flow programming](#protobuf-based-flow-programming)
     - [Capability](#capability)
   - [Examples](#examples)
@@ -207,7 +207,7 @@ When configuring a flow_entry, it can be specified whether it is unidirectional 
 
 | Attribute name                            | Type               | Description                                 |
 | ----------------------------------------- | ------------------ | ------------------------------------------- |
-| SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_ENI_MAC  | `sai_mac_t`        | Eni mac addr for the recerse flow           |
+| SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_ENI_MAC  | `sai_mac_t`        | Eni mac addr for the reverse flow           |
 | SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_IP_PROTO | `sai_uint8_t`      | IP protocol number for the reverse flow     |
 | SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_SRC_IP   | `sai_ip_address_t` | Source IP address for the reverse flow      |
 | SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_DST_IP   | `sai_ip_address_t` | Destination IP address for the reverse flow |
@@ -342,7 +342,7 @@ In the attributes, we allow specifying the gRPC server and port when the mode is
 | Attribute Name                                               | Type                                                         | Description                                                  |
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_FLOW_TABLE | `sai_object_id_t`                                            | Flow table to bulk get                                       |
-| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_MODE   | `sai_dash_flow_entry_bulk_get_session_mode_t`                | Sepcify bulk get mode                                        |
+| SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_MODE   | `sai_dash_flow_entry_bulk_get_session_mode_t`                | Specify bulk get mode                                        |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_ENTRY_LIMITATION   | `sai_uint32_t`                                               | Specify a maximum limit for the bulk get session             |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_GRPC_IP | `sai_ip_address_t`                                           | The IP address to use for the bulk get session.              |
 | SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_GRPC_PORT | `sai_uint16_t`                                               | The port to use for the bulk get session.                    |
@@ -365,7 +365,7 @@ typedef enum _sai_dash_flow_entry_bulk_get_session_mode_t
 } sai_dash_flow_entry_bulk_get_session_mode_t;
 ```
 
-#### Bulk Get Session Event Notifiations
+#### Bulk Get Session Event Notification
 
 | Attribute name                                     | Type                                              | Description                                                  |
 | -------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
@@ -431,17 +431,12 @@ message MacAddress {
 }
 
 message IpAddress {
-  enum AddressType {
-    IPV4 = 0;
-    IPV6 = 1;
-  }
-
-  AddressType type = 1;  // IP address type (IPv4 or IPv6)
-  bytes address = 2;  // IP address bytes
+  uint16 type = 1;  // IP address type (IPv4 = 2 or IPv6 = 10)
+  bytes address = 2 [(validate.rules).bytes.len = {const: 4 | const: 16}];  // IP address bytes, 4 bytes for IPv4, 16 bytes for IPv6
 }
 
 message SaiDashFlowKey {
-  uint64 eni_mac = 1;  // ENI MAC address
+  bytes eni_mac = 1;  // ENI MAC address, using bytes to match MacAddress structure
   IpAddress src_ip = 2;  // Source IP address
   IpAddress dst_ip = 3;  // Destination IP address
   uint8 ip_proto = 4; // IP Protocol
@@ -451,24 +446,25 @@ message SaiDashFlowKey {
 
 message SaiDashFlowState {
   uint32 version = 1;  // SAI_FLOW_ENTRY_ATTR_VERSION
-  uint32 dash_flow_action = 2;  // SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION
-  uint32 meter_class = 3;  // SAI_FLOW_ENTRY_ATTR_METER_CLASS
-  bool is_unidirectional_flow = 4;  // SAI_FLOW_ENTRY_ATTR_IS_UNIDIRECTIONAL_FLOW
-  uint32 underlay_vni = 5;  // SAI_FLOW_ENTRY_ATTR_UNDERLAY_VNI
-  IpAddress underlay_sip = 6;  // Underlay source IP address
-  IpAddress underlay_dip = 7;  // Underlay destination IP address
-  MacAddress underlay_smac = 8;  // Underlay source MAC address
-  MacAddress underlay_dmac = 9;  // Underlay destination MAC address
-  uint32 underlay2_vni = 10;  // SAI_FLOW_ENTRY_ATTR_UNDERLAY2_VNI
-  IpAddress underlay2_sip = 11;  // Underlay2 source IP address
-  IpAddress underlay2_dip = 12;  // Underlay2 destination IP address
-  MacAddress underlay2_smac = 13;  // Underlay2 source MAC address
-  MacAddress underlay2_dmac = 14;  // Underlay2 destination MAC address
-  MacAddress dst_mac = 15;  // Destination MAC address
-  IpAddress sip = 16;  // Source IP address
-  IpAddress dip = 17;  // Destination IP address
-  bytes sip_mask = 18;  // Source IP mask
-  bytes dip_mask = 19;  // Destination IP mask
+  uint16 dash_direction = 2; // SAI_FLOW_ENTRY_ATTR_DASH_DIRECTION
+  uint32 dash_flow_action = 3;  // SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION
+  uint32 meter_class = 4;  // SAI_FLOW_ENTRY_ATTR_METER_CLASS
+  bool is_unidirectional_flow = 5;  // SAI_FLOW_ENTRY_ATTR_IS_UNIDIRECTIONAL_FLOW
+  uint32 underlay0_vni = 6;  // SAI_FLOW_ENTRY_ATTR_UNDERLAY0_VNI
+  IpAddress underlay0_sip = 7;  // SAI_FLOW_ENTRY_ATTR_UNDERLAY0_SIP
+  IpAddress underlay0_dip = 8;  // SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DIP
+  uint16 underlay0_dash_encapsulation = 9; // SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DASH_ENCAPSULATION
+  uint32 underlay1_vni = 10;  // SAI_FLOW_ENTRY_ATTR_UNDERLAY1_VNI
+  IpAddress underlay1_sip = 11;  // SAI_FLOW_ENTRY_ATTR_UNDERLAY1_SIP
+  IpAddress underlay1_dip = 12;  // SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DIP
+  MacAddress underlay1_smac = 13;  // SAI_FLOW_ENTRY_ATTR_UNDERLAY1_SMAC
+  MacAddress underlay1_dmac = 14;  // SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DMAC
+  uint16 underlay1_dash_encapsulation = 15; // SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DASH_ENCAPSULATION
+  MacAddress dst_mac = 16;  // SAI_FLOW_ENTRY_ATTR_DST_MAC
+  IpAddress sip = 17;  // SAI_FLOW_ENTRY_ATTR_SIP
+  IpAddress dip = 18;  // SAI_FLOW_ENTRY_ATTR_DIP
+  bytes sip_mask = 19;  // SAI_FLOW_ENTRY_ATTR_SIP_MASK
+  bytes dip_mask = 20;  // SAI_FLOW_ENTRY_ATTR_DIP_MASK
 }
 
 message SaiDashFlowEntry {
@@ -505,7 +501,8 @@ These examples describe how to create a flow state table, and how to operate flo
 uint32_t attr_count = 3; 
 sai_attribute_t attr_list[3];
 attr_list[0].id = SAI_FLOW_TABLE_ATTR_DASH_FLOW_ENABLED_KEY;
-attr_list[0].value = SAI_DASH_FLOW_ENABLED_KEY_PROTOCOL | 
+attr_list[0].value = SAI_DASH_FLOW_ENABLED_KEY_PROTOCOL |
+                         SAI_DASH_FLOW_ENABLED_KEY_ENI_ADDR |
                          SAI_DASH_FLOW_ENABLED_KEY_SRC_IP | 
                          SAI_DASH_FLOW_ENABLED_KEY_DST_IP | 
                          SAI_DASH_FLOW_ENABLED_KEY_SRC_PORT | 
