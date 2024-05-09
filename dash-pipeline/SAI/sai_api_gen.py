@@ -368,7 +368,7 @@ class SAIObject:
             self.name = str(p4rt_anno['value']['stringValue'])
             return True
         elif p4rt_anno['key'] == 'order':
-            self.order = str(p4rt_anno['value']['int64Value'])
+            self.order = int(p4rt_anno['value']['int64Value'])
             return True
 
         return False

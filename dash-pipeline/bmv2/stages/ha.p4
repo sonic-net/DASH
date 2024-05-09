@@ -60,7 +60,7 @@ control ha_stage(inout headers_t hdr,
         @SaiVal[type="sai_dash_ha_role_t"] dash_ha_role_t dash_ha_role,
         @SaiVal[isreadonly="true"] bit<32> flow_version,
         bit<1> flow_reconcile_requested,
-        @SaiVal[isreadonly="true"] bit<1> flow_reconcile_needed,
+        @SaiVal[isreadonly="true"] bit<1> flow_reconcile_needed
     ) {
         meta.ha.ha_set_id = ha_set_id;
         meta.ha.ha_role = dash_ha_role;
