@@ -22,14 +22,16 @@
       1. [4.6.1. HA set event notifications](#461-ha-set-event-notifications)
       2. [4.6.2. HA scope event notifications](#462-ha-scope-event-notifications)
    7. [4.7. Counters](#47-counters)
-      1. [4.7.1. HA set stats](#471-ha-set-stats)
-         1. [4.7.1.1. Data plane channel related stats](#4711-data-plane-channel-related-stats)
-         2. [4.7.1.2. Control plane data channel related stats](#4712-control-plane-data-channel-related-stats)
-      2. [4.7.2. ENI stats](#472-eni-stats)
-         1. [4.7.2.1. ENI-level traffic counters](#4721-eni-level-traffic-counters)
-         2. [4.7.2.2. ENI-level flow operation counters](#4722-eni-level-flow-operation-counters)
-         3. [4.7.2.3. ENI-level flow sync packet counters](#4723-eni-level-flow-sync-packet-counters)
-         4. [4.7.2.4. ENI-level flow sync operations counters](#4724-eni-level-flow-sync-operations-counters)
+      1. [4.7.1. Port stats](#471-port-stats)
+      2. [4.7.2. HA set stats](#472-ha-set-stats)
+         1. [4.7.2.1. Data plane channel related stats](#4721-data-plane-channel-related-stats)
+         2. [4.7.2.2. Control plane data channel related stats](#4722-control-plane-data-channel-related-stats)
+      3. [4.7.3. ENI stats](#473-eni-stats)
+         1. [4.7.3.1. ENI-level traffic counters](#4731-eni-level-traffic-counters)
+         2. [4.7.3.2. ENI-level flow operation counters](#4732-eni-level-flow-operation-counters)
+         3. [4.7.3.3. ENI-level flow sync packet counters](#4733-eni-level-flow-sync-packet-counters)
+         4. [4.7.3.4. ENI-level flow sync operations counters](#4734-eni-level-flow-sync-operations-counters)
+         5. [4.7.3.5. ENI-level drop counters](#4735-eni-level-drop-counters)
    8. [4.8. Capability](#48-capability)
       1. [4.8.1. Topology related capabilities](#481-topology-related-capabilities)
       2. [4.8.2. Stats related capabilities](#482-stats-related-capabilities)
@@ -302,11 +304,20 @@ typedef void (*sai_ha_scope_event_notification_fn)(
 
 To check how HA works, we will provide the following counters, which follows the [SmartSwitch HA detailed design doc](https://github.com/sonic-net/SONiC/blob/master/doc/smart-switch/high-availability/smart-switch-ha-detailed-design.md).
 
-#### 4.7.1. HA set stats
+#### 4.7.1. Port stats
+
+Since the packet could be dropped before it hits any ENI, e.g. ENI is not found, we have the follow counters added for showing these packet drops:
+
+| SAI stats name | Description |
+| -------------- | ----------- |
+| SAI_PORT_STAT_ENI_MISS_DROP_PKTS | Number of packets that are dropped due to ENI not found. |
+| SAI_PORT_STAT_VIP_MISS_DROP_PKTS | Number of packets that are dropped due to VIP not found. |
+
+#### 4.7.2. HA set stats
 
 Here are the new stats we added for monitoring HA on HA set (DPU pair).
 
-##### 4.7.1.1. Data plane channel related stats
+##### 4.7.2.1. Data plane channel related stats
 
 | SAI stats name | Description |
 | -------------- | ----------- |
@@ -316,7 +327,7 @@ Here are the new stats we added for monitoring HA on HA set (DPU pair).
 | SAI_HA_SET_STAT_DP_PROBE_(REQ/ACK)_TX_PACKETS | The number of packets of data plane probes that this HA set sent. |
 | SAI_HA_SET_STAT_DP_PROBE_FAILED | The number of probes that failed. The failure rate = the number of failed probes / the number of tx packets. |
 
-##### 4.7.1.2. Control plane data channel related stats
+##### 4.7.2.2. Control plane data channel related stats
 
 | Name | Description |
 | --- | --- |
@@ -337,9 +348,9 @@ Besides the channel status, we should also have the following counters for the b
 | SAI_HA_SET_STAT_BULK_SYNC_FLOW_RECEIVED | Number of flows received from bulk sync message. A single bulk sync message can contain many flow records. |
 | SAI_HA_SET_STAT_BULK_SYNC_FLOW_SENT | Number of flows sent via bulk sync message. A single bulk sync message can contain many flow records. |
 
-#### 4.7.2. ENI stats
+#### 4.7.3. ENI stats
 
-##### 4.7.2.1. ENI-level traffic counters
+##### 4.7.3.1. ENI-level traffic counters
 
 To monitor the traffic on ENI level, the following stats are added:
 
@@ -352,7 +363,7 @@ To monitor the traffic on ENI level, the following stats are added:
 
 The packet size of all the counters should contain the size of both the customer packet and the encap, to reflect the real traffic size. For the traffic volume of the customer packet only, they are counted using metering buckets.
 
-##### 4.7.2.2. ENI-level flow operation counters
+##### 4.7.3.2. ENI-level flow operation counters
 
 Here are the new stats added for monitoring flow operations on each ENI:
 
@@ -366,7 +377,7 @@ Here are the new stats added for monitoring flow operations on each ENI:
 | SAI_ENI_STAT_FLOW_DELETE_FAILED | Total flow failed to delete on ENI. |
 | SAI_ENI_STAT_FLOW_AGED | Total flow aged out on ENI. A flow is aged out doesn't mean the flow entry is deleted. It could be marked as pending deletion and get deleted later. |
 
-##### 4.7.2.3. ENI-level flow sync packet counters
+##### 4.7.3.3. ENI-level flow sync packet counters
 
 Here are the new stats added for monitoring flow sync packets on each ENI:
 
@@ -379,7 +390,7 @@ Here are the new stats added for monitoring flow sync packets on each ENI:
 | SAI_ENI_STAT_(INLINE/TIMED)_FLOW_SYNC_PACKET_TX_BYTES | The bytes of inline/timed flow sync packet that this ENI sent. |
 | SAI_ENI_STAT_(INLINE/TIMED)_FLOW_SYNC_PACKET_TX_PACKETS | The number of inline/timed flow sync packets that this ENI sent. |
 
-##### 4.7.2.4. ENI-level flow sync operations counters
+##### 4.7.3.4. ENI-level flow sync operations counters
 
 Here are the new stats added for monitoring flow sync operations on each ENI:
 
@@ -397,6 +408,17 @@ Here are the new stats added for monitoring flow sync operations on each ENI:
 | SAI_ENI_STAT_(INLINE/TIMED)\_FLOW\_(CREATE/UPDATE/DELETE)_ACK_RECV | The number of inline/timed flow create/update/delete ack that the ENI is received. |
 | SAI_ENI_STAT_(INLINE/TIMED)\_FLOW\_(CREATE/UPDATE/DELETE)_ACK_FAILED | The number of inline/timed flow create/update/delete ack that the ENI is received but failed to process. |
 | SAI_ENI_STAT_(INLINE/TIMED)\_FLOW\_(CREATE/UPDATE/DELETE)_ACK_IGNORED | The number of inline/timed flow create/update/delete ack that the ENI is received but its flow operation is processed as ignored. |
+
+##### 4.7.3.5. ENI-level drop counters
+
+When the packet is landed on the ENI going throught each match stages, it might be dropped due to no entries can be matched, such as routing or CA-PA mapping. In order to show these drops, we should have the following counters:
+
+| SAI stats name | Description |
+| -------------- | ----------- |
+| SAI_ENI_STAT_OUTBOUND_ROUTING_ENTRY_MISS_DROP_PKTS | Number of packets that are dropped due to outbound routing entry not found. |
+| SAI_ENI_STAT_OUTBOUND_CA_PA_ENTRY_MISS_DROP_PKTS | Number of packets that are dropped due to outbound routing entry not found. |
+| SAI_ENI_STAT_TUNNEL_MISS_DROP_PKTS | Number of packets that are dropped due to outbound routing entry not found. |
+| SAI_ENI_STAT_INBOUND_ROUTING_MISS_DROP_PKTS | Number of packets that are dropped due to outbound routing entry not found. |
 
 ### 4.8. Capability
 
