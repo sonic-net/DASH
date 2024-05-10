@@ -411,7 +411,7 @@ Here are the new stats added for monitoring flow sync operations on each ENI:
 
 ##### 4.7.3.5. ENI-level drop counters
 
-When the packet is landed on the ENI going throught each match stages, it might be dropped due to no entries can be matched, such as routing or CA-PA mapping. In order to show these drops, we should have the following counters:
+When the packet is landed on the ENI going through each match stages, it might be dropped due to no entries can be matched, such as routing or CA-PA mapping. In order to show these drops, we should have the following counters:
 
 | SAI stats name | Description |
 | -------------- | ----------- |
