@@ -502,9 +502,13 @@ message SaiDashFlowEntry {
 
 ## Examples
 
-When a service intends to use DASH Flow SAI APIs, it should first establish a flow table via the `create_flow_table()` function. After the table creation, the programmer can add, delete, modify, or retrieve flow entries to/from the table. For instance, when DASH HA needs to perform bulk sync from the active DPU to the standby DPU, it should initially fetch the entry from the active DPU using `get_flow_entries`, then transmit the flow entries to the standby DPU via the control plane. The standby DPU subsequently calls `create_flow_entries()`to add entries to the corresponding flow table.
+When a service intends to use the DASH Flow SAI APIs, it should first establish a flow table via the `create_flow_table()` function. After the table creation, the programmer can add, delete, modify, or retrieve flow entries from the table using the DASH flow API. It can also use `flow_entry_bulk_get_session` to retrieve flows with filters, allowing it to handle flows in batches under specific conditions.
 
-These examples describe how to create a flow state table, and how to operate flow entries.
+![dash_flow_example](images/dash-flow-api-example.svg)
+
+For instance, the figure above shows an example of a DASH flow HA between two DPUs. First, both DPUs should create flow tables for initialization via `create_flow_table`. When performing Inline Sync, DPU1 and DPU2 use `create_flow_entry` to create new flows as new flows arrive. When DASH flow HA needs to perform bulk sync from the active DPU to the standby DPU, it should initially fetch the entry from the active DPU using `create_flow_entry_bulk_get_session` to create a bulk get session to transfer the flows to DPU2 via gRPC. Then, the standby DPU subsequently calls `create_flow_entries()` to add entries to the corresponding flow table.
+
+Below are detailed examples to use the DASH flow API.
 
 ### Create flow table
 
