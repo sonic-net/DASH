@@ -11,11 +11,10 @@
 #include "stages/conntrack_lookup.p4"
 #include "stages/direction_lookup.p4"
 #include "stages/eni_lookup.p4"
+#include "stages/ha.p4"
 #include "stages/routing_action_apply.p4"
 #include "stages/metering_update.p4"
 #include "underlay.p4"
-
-#define MAX_ENI 64
 
 control dash_ingress(
       inout headers_t hdr
@@ -93,13 +92,20 @@ control dash_ingress(
    meta.stage4_dash_acl_group_id = ## prefix ##_stage4_dash_acl_group_id; \
    meta.stage5_dash_acl_group_id = ## prefix ##_stage5_dash_acl_group_id;
 
-    DEFINE_COUNTER(eni_lb_fast_path_icmp_in_counter, MAX_ENI, name="lb_fast_path_icmp_in", attr_type="stats", action_names="set_eni_attrs")
+    DEFINE_COUNTER(eni_rx_counter, MAX_ENI, name="rx", attr_type="stats", action_names="set_eni_attrs", order=0)
+    DEFINE_COUNTER(eni_tx_counter, MAX_ENI, name="tx", attr_type="stats", action_names="set_eni_attrs", order=0)
+    DEFINE_COUNTER(eni_outbound_rx_counter, MAX_ENI, name="outbound_rx", attr_type="stats", action_names="set_eni_attrs", order=0)
+    DEFINE_COUNTER(eni_outbound_tx_counter, MAX_ENI, name="outbound_tx", attr_type="stats", action_names="set_eni_attrs", order=0)
+    DEFINE_COUNTER(eni_inbound_rx_counter, MAX_ENI, name="inbound_rx", attr_type="stats", action_names="set_eni_attrs", order=0)
+    DEFINE_COUNTER(eni_inbound_tx_counter, MAX_ENI, name="inbound_tx", attr_type="stats", action_names="set_eni_attrs", order=0)
+    DEFINE_COUNTER(eni_lb_fast_path_icmp_in_counter, MAX_ENI, name="lb_fast_path_icmp_in", attr_type="stats", action_names="set_eni_attrs", order=0)
 
     action set_eni_attrs(bit<32> cps,
                          bit<32> pps,
                          bit<32> flows,
                          bit<1> admin_state,
                          @SaiVal[type="sai_object_id_t"] bit<16> flow_table_id,
+                         @SaiVal[type="sai_object_id_t"] bit<16> ha_scope_id,
                          @SaiVal[type="sai_ip_address_t"] IPv4Address vm_underlay_dip,
                          @SaiVal[type="sai_uint32_t"] bit<24> vm_vni,
                          @SaiVal[type="sai_object_id_t"] bit<16> vnet_id,
@@ -134,21 +140,27 @@ control dash_ingress(
         if (meta.is_overlay_ip_v6 == 1) {
             if (meta.direction == dash_direction_t.OUTBOUND) {
                 ACL_GROUPS_COPY_TO_META(outbound_v6);
+                meta.meter_context.meter_policy_lookup_ip = meta.dst_ip_addr;
             } else {
                 ACL_GROUPS_COPY_TO_META(inbound_v6);
+                meta.meter_context.meter_policy_lookup_ip = meta.src_ip_addr;
             }
-            meta.meter_policy_id = v6_meter_policy_id;
+
+            meta.meter_context.meter_policy_id = v6_meter_policy_id;
         } else {
             if (meta.direction == dash_direction_t.OUTBOUND) {
                 ACL_GROUPS_COPY_TO_META(outbound_v4);
+                meta.meter_context.meter_policy_lookup_ip = meta.dst_ip_addr;
             } else {
                 ACL_GROUPS_COPY_TO_META(inbound_v4);
+                meta.meter_context.meter_policy_lookup_ip = meta.src_ip_addr;
             }
-            meta.meter_policy_id = v4_meter_policy_id;
+
+            meta.meter_context.meter_policy_id = v4_meter_policy_id;
         }
 
         meta.conntrack_data.flow_table.id = flow_table_id;
-        
+        meta.ha.ha_scope_id = ha_scope_id;
         meta.fast_path_icmp_flow_redirection_disabled = disable_fast_path_icmp_flow_redirection;
     }
 
@@ -168,8 +180,23 @@ control dash_ingress(
     action permit() {
     }
 
-    action tunnel_decap_pa_validate(@SaiVal[type="sai_object_id_t"] bit<16> src_vnet_id) {
+    action vxlan_decap() {}
+    action vxlan_decap_pa_validate() {}
+
+    action tunnel_decap(inout headers_t hdr,
+                        inout metadata_t meta,
+                        bit<32> meter_class_or,
+                        @SaiVal[default_value="4294967295"] bit<32> meter_class_and) {
+        set_meter_attrs(meta, meter_class_or, meter_class_and);
+    }
+
+    action tunnel_decap_pa_validate(inout headers_t hdr,
+                                    inout metadata_t meta,
+                                    @SaiVal[type="sai_object_id_t"] bit<16> src_vnet_id,
+                                    bit<32> meter_class_or,
+                                    @SaiVal[default_value="4294967295"] bit<32> meter_class_and) {
         meta.vnet_id = src_vnet_id;
+        set_meter_attrs(meta, meter_class_or, meter_class_and);
     }
 
     @SaiTable[name = "pa_validation", api = "dash_pa_validation"]
@@ -196,7 +223,9 @@ control dash_ingress(
         }
         actions = {
             tunnel_decap(hdr, meta);
-            tunnel_decap_pa_validate;
+            tunnel_decap_pa_validate(hdr, meta);
+            vxlan_decap;                // Deprecated, but cannot be removed until SWSS is updated.
+            vxlan_decap_pa_validate;    // Deprecated, but cannot be removed until SWSS is updated.
             @defaultonly deny;
         }
 
@@ -266,16 +295,15 @@ control dash_ingress(
         meta.eni_data.dscp_mode = dash_tunnel_dscp_mode_t.PRESERVE_MODEL;
         meta.eni_data.dscp = (bit<6>)hdr.u0_ipv4.diffserv;
 
-        if (meta.direction == dash_direction_t.OUTBOUND) {
-            tunnel_decap(hdr, meta);
-        } else if (meta.direction == dash_direction_t.INBOUND) {
+        if (meta.direction == dash_direction_t.INBOUND) {
             switch (inbound_routing.apply().action_run) {
                 tunnel_decap_pa_validate: {
                     pa_validation.apply();
-                    tunnel_decap(hdr, meta);
                 }
             }
         }
+
+        do_tunnel_decap(hdr, meta);
 
         /* At this point the processing is done on customer headers */
 
@@ -308,17 +336,23 @@ control dash_ingress(
         }
 
         conntrack_lookup_stage.apply(hdr, meta);
-
+        
+        UPDATE_COUNTER(eni_rx_counter, meta.eni_id);
         if (meta.is_fast_path_icmp_flow_redirection_packet) {
             UPDATE_COUNTER(eni_lb_fast_path_icmp_in_counter, meta.eni_id);
         }
 
+        ha_stage.apply(hdr, meta);
+
         acl_group.apply();
 
         if (meta.direction == dash_direction_t.OUTBOUND) {
+            UPDATE_COUNTER(eni_outbound_rx_counter, meta.eni_id);
+
             meta.target_stage = dash_pipeline_stage_t.OUTBOUND_ROUTING;
             outbound.apply(hdr, meta);
         } else if (meta.direction == dash_direction_t.INBOUND) {
+            UPDATE_COUNTER(eni_inbound_rx_counter, meta.eni_id);
             inbound.apply(hdr, meta);
         }
 
@@ -346,6 +380,14 @@ control dash_ingress(
 
         if (meta.dropped) {
             drop_action();
+        } else {
+            UPDATE_COUNTER(eni_tx_counter, meta.eni_id);
+
+            if (meta.direction == dash_direction_t.OUTBOUND) {
+                UPDATE_COUNTER(eni_outbound_tx_counter, meta.eni_id);
+            } else if (meta.direction == dash_direction_t.INBOUND) {
+                UPDATE_COUNTER(eni_inbound_tx_counter, meta.eni_id);
+            }
         }
     }
 }

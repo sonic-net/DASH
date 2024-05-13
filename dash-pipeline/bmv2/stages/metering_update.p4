@@ -20,22 +20,22 @@ control metering_update_stage(
     @SaiTable[name = "meter_policy", api = "dash_meter", order = 1, isobject="true"]
     table meter_policy {
         key = {
-            meta.meter_policy_id : exact;
+            meta.meter_context.meter_policy_id : exact;
         }
         actions = {
             check_ip_addr_family;
         }
     }
 
-    action set_policy_meter_class(bit<16> meter_class) {
-        meta.policy_meter_class = meter_class;
+    action set_policy_meter_class(bit<32> meter_class) {
+        meta.meter_class = meter_class;
     }
 
     @SaiTable[name = "meter_rule", api = "dash_meter", order = 2, isobject="true"]
     table meter_rule {
         key = {
-            meta.meter_policy_id: exact @SaiVal[type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
-            hdr.u0_ipv4.dst_addr : ternary @SaiVal[name = "dip", type="sai_ip_address_t"];
+            meta.meter_context.meter_policy_id: exact @SaiVal[type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
+            meta.meter_context.meter_policy_lookup_ip: ternary @SaiVal[name = "dip", type="sai_ip_address_t"];
         }
 
      actions = {
@@ -47,11 +47,9 @@ control metering_update_stage(
     
     // MAX_METER_BUCKET = MAX_ENI(64) * NUM_BUCKETS_PER_ENI(4096)
     #define MAX_METER_BUCKETS 262144
-    DEFINE_BYTE_COUNTER(meter_bucket_outbound, MAX_METER_BUCKETS, name="outbound", action_names="meter_bucket_action", attr_type="counter_attr")
-    DEFINE_BYTE_COUNTER(meter_bucket_inbound, MAX_METER_BUCKETS, name="inbound", action_names="meter_bucket_action", attr_type="counter_attr")
-    action meter_bucket_action(@SaiVal[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index) {
-        meta.meter_bucket_index = meter_bucket_index;
-    }
+    DEFINE_BYTE_COUNTER(meter_bucket_outbound, MAX_METER_BUCKETS, name="outbound", action_names="meter_bucket_action", attr_type="stats")
+    DEFINE_BYTE_COUNTER(meter_bucket_inbound, MAX_METER_BUCKETS, name="inbound", action_names="meter_bucket_action", attr_type="stats")
+    action meter_bucket_action() {}
 
     @SaiTable[name = "meter_bucket", api = "dash_meter", order = 0, isobject="true"]
     table meter_bucket {
@@ -82,27 +80,21 @@ control metering_update_stage(
     }
     
     apply {
-        if (meta.meter_policy_en == 1) {
+        meta.meter_class = meta.meter_context.meter_class_or & meta.meter_context.meter_class_and;
+
+        // If the meter class is 0 from the SDN policies, we go through the metering policy.
+        if (meta.meter_class == 0) {
             meter_policy.apply();
             meter_rule.apply();
         }
-
-        {
-            if (meta.meter_policy_en == 1) {
-                meta.meter_class = meta.policy_meter_class;
-            } else {
-                meta.meter_class = meta.route_meter_class;
-            }
-            if ((meta.meter_class == 0) || (meta.mapping_meter_class_override == 1)) {
-                meta.meter_class = meta.mapping_meter_class;
-            }
-        }
-
         meter_bucket.apply();
-        if (meta.direction == dash_direction_t.OUTBOUND) {
-            UPDATE_COUNTER(meter_bucket_outbound, meta.meter_bucket_index);
-        } else if (meta.direction == dash_direction_t.INBOUND) {
-            UPDATE_COUNTER(meter_bucket_inbound, meta.meter_bucket_index);
+
+        if (meta.meter_class != 0) {
+            if (meta.direction == dash_direction_t.OUTBOUND) {
+                UPDATE_COUNTER(meter_bucket_outbound, meta.meter_class);
+            } else if (meta.direction == dash_direction_t.INBOUND) {
+                UPDATE_COUNTER(meter_bucket_inbound, meta.meter_class);
+            }
         }
 
         eni_meter.apply();

@@ -65,6 +65,8 @@
       "100000",
       "SAI_ENI_ATTR_ADMIN_STATE",
       "True",
+      "SAI_ENI_ATTR_HA_SCOPE_ID",
+      "True",
       "SAI_ENI_ATTR_VM_UNDERLAY_DIP",
       "10.10.2.10",
       "SAI_ENI_ATTR_VM_VNI",
@@ -138,6 +140,8 @@
       "address": "00:AA:AA:AA:AA:00"
     },
     "attributes": [
+      "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ACTION",
+      "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ACTION_SET_ENI",
       "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID",
       "$eni_id"
     ]
@@ -158,7 +162,11 @@
       "SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION",
       "SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE",
       "SAI_INBOUND_ROUTING_ENTRY_ATTR_SRC_VNET_ID",
-      "$vnet_1"
+      "$vnet_1",
+      "SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR",
+      "0",
+      "SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND",
+      "-1"
     ]
   },
   {

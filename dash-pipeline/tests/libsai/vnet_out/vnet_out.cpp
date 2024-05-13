@@ -126,6 +126,10 @@ int main(int argc, char **argv)
     attr.value.booldata = true;
     attrs.push_back(attr);
 
+    attr.id = SAI_ENI_ATTR_HA_SCOPE_ID;
+    attr.value.oid = SAI_NULL_OBJECT_ID;
+    attrs.push_back(attr);
+
     attr.id = SAI_ENI_ATTR_VM_UNDERLAY_DIP;
     sai_ip_addr_t u_dip_addr = {.ip4 = 0x010310ac};
     sai_ip_address_t u_dip = {.addr_family = SAI_IP_ADDR_FAMILY_IPV4,
@@ -219,6 +223,10 @@ int main(int argc, char **argv)
     eam.address[3] = 0xcc;
     eam.address[4] = 0xcc;
     eam.address[5] = 0xcc;
+
+    attr.id = SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ACTION;
+    attr.value.u32 = SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ACTION_SET_ENI;
+    attrs.push_back(attr);
 
     attr.id = SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID;
     attr.value.u16 = eni_id;

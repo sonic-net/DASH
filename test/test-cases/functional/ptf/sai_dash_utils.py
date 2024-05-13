@@ -140,6 +140,7 @@ class VnetAPI(VnetObjects):
             "pps": 100000,
             "flows": 100000,
             "admin_state": True,
+            "ha_scope_id": 0,
             "vm_underlay_dip": sai_ipaddress("0.0.0.0"),
             "vm_vni": 1,
             "vnet_id": 1,
@@ -248,7 +249,8 @@ class VnetAPI(VnetObjects):
             sip_mask=sai_ipaddress(sip_mask), priority=1)
         sai_thrift_create_inbound_routing_entry(self.client, inbound_routing_entry,
                                                 action=SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE,
-                                                src_vnet_id=src_vnet_id)
+                                                src_vnet_id=src_vnet_id,
+                                                meter_class_or=0, meter_class_and=-1)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.inbound_routing_remove, inbound_routing_entry)
         return inbound_routing_entry
@@ -264,7 +266,8 @@ class VnetAPI(VnetObjects):
             eni_id=eni_id, sip=sai_ipaddress(sip),
             sip_mask=sai_ipaddress(sip_mask), priority=1)
         sai_thrift_create_inbound_routing_entry(self.client, inbound_routing_entry,
-                                                action=SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP)
+                                                action=SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP,
+                                                meter_class_or=0, meter_class_and=-1)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.inbound_routing_remove, inbound_routing_entry)
         return inbound_routing_entry
@@ -304,7 +307,7 @@ class VnetAPI(VnetObjects):
                                                  outbound_routing_entry, dst_vnet_id=dst_vnet_id,
                                                  action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT,
                                                  overlay_ip=sai_ipaddress(overlay_ip), counter_id=counter_id,
-                                                 meter_policy_en=False, meter_class=0)
+                                                 meter_class_or=0, meter_class_and=-1)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_routing_vnet_direct_remove, outbound_routing_entry)
 
@@ -320,7 +323,7 @@ class VnetAPI(VnetObjects):
             destination=sai_ipprefix(lpm))
         sai_thrift_create_outbound_routing_entry(self.client, outbound_routing_entry, counter_id=counter_id,
                                                  action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_DIRECT,
-                                                 meter_policy_en=False, meter_class=0)
+                                                 meter_class_or=0, meter_class_and=-1)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_routing_vnet_direct_remove, outbound_routing_entry)
 
@@ -338,7 +341,7 @@ class VnetAPI(VnetObjects):
                                                  outbound_routing_entry, dst_vnet_id=dst_vnet_id,
                                                  counter_id=counter_id,
                                                  action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET,
-                                                 meter_policy_en=False, meter_class=0)
+                                                 meter_class_or=0, meter_class_and=-1)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_routing_vnet_direct_remove, outbound_routing_entry)
 
@@ -358,7 +361,7 @@ class VnetAPI(VnetObjects):
                                                   underlay_dip=sai_ipaddress(underlay_dip),
                                                   use_dst_vnet_vni=use_dst_vnet_vni,
                                                   overlay_dmac=overlay_dmac,
-                                                  meter_class=0, meter_class_override=False)
+                                                  meter_class_or=0)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_ca_to_pa_remove, ca_to_pa_entry)
 
@@ -442,8 +445,8 @@ class VnetAPI(VnetObjects):
                                                src_mac=neighbor.peer.mac)
             nhop = self.nexthop_create(rif, neighbor.ip)
             self.neighbor_create(rif, neighbor.ip, neighbor.mac)
-            if add_routes is True:
-                self.route_create(neighbor.ip_prefix, nhop)
+            #if add_routes is True:
+            #    self.route_create(neighbor.ip_prefix, nhop)
 
 
 class VnetApiEndpoints(VnetAPI):

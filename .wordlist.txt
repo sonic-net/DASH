@@ -6,6 +6,7 @@ Accton
 ACK
 Ack
 ack
+ack'ed
 acl
 ACL
 ACLs
@@ -37,6 +38,7 @@ AspNet
 assignees
 asyncE
 atlassian
+attr
 ATTR
 auditability
 autogenerate
@@ -304,6 +306,7 @@ IxLoad
 ixload
 IxNetwork
 IxNetworkWeb
+Jiang
 Jinja
 jitter
 journaled
@@ -372,6 +375,7 @@ NonSynStateful
 NorthBound
 Novus
 NPL
+NPU
 NPUS
 NSG
 NSGs
@@ -421,6 +425,7 @@ performant
 pingmesh
 PIR
 pluggable
+PLS
 PLVision's
 PKTS
 pmon
@@ -471,11 +476,14 @@ README
 READMEs
 README's
 reconvergence
+RECV
 RedirectRuleResimulatedUf
 redis
 renderer
 repo
 repos
+REQ
+resimulate
 resimulated
 resimulation
 responder
@@ -528,12 +536,14 @@ sharding
 SInce
 SKU
 SKUs
+SLA
 SLB
 SMAC
 SmartAppliances
 SmartNIC
 SmartNic
 SmartNICs
+SmartSwitch
 SmartSwitches
 snappi
 SNAT
