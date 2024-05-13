@@ -98,16 +98,18 @@ typedef enum _sai_dash_flow_enabled_key_t
     SAI_DASH_FLOW_ENABLED_KEY_NONE = 0,
 
     SAI_DASH_FLOW_ENABLED_KEY_ENI_ADDR = 1 << 1,
+  
+    SAI_DASH_FLOW_ENABLED_KEY_VNI = 1 << 2,
 
-    SAI_DASH_FLOW_ENABLED_KEY_PROTOCOL = 1 << 2,
+    SAI_DASH_FLOW_ENABLED_KEY_PROTOCOL = 1 << 3,
 
-    SAI_DASH_FLOW_ENABLED_KEY_SRC_IP = 1 << 3,
+    SAI_DASH_FLOW_ENABLED_KEY_SRC_IP = 1 << 4,
 
-    SAI_DASH_FLOW_ENABLED_KEY_DST_IP = 1 << 4,
+    SAI_DASH_FLOW_ENABLED_KEY_DST_IP = 1 << 5,
 
-    SAI_DASH_FLOW_ENABLED_KEY_SRC_PORT = 1 << 5,
+    SAI_DASH_FLOW_ENABLED_KEY_SRC_PORT = 1 << 6,
 
-    SAI_DASH_FLOW_ENABLED_KEY_DST_PORT = 1 << 6,
+    SAI_DASH_FLOW_ENABLED_KEY_DST_PORT = 1 << 7,
 
 } sai_dash_flow_enabled_key_t;
 ```
@@ -156,6 +158,11 @@ typedef struct _sai_flow_entry_t
      * @brief Exact matched key eni_mac
      */
     sai_mac_t eni_mac;
+  
+    /**
+     * @brief Exact matched key vni
+     */
+    sai_uint32_t vni;
 
     /**
      * @brief Exact matched key ip_protocol
@@ -208,6 +215,7 @@ When configuring a flow_entry, it can be specified whether it is unidirectional 
 | Attribute name                            | Type               | Description                                 |
 | ----------------------------------------- | ------------------ | ------------------------------------------- |
 | SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_ENI_MAC  | `sai_mac_t`        | Eni mac addr for the reverse flow           |
+| SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_VNI      | `sai_uint32_t`     | VNI for reverse flow                        |
 | SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_IP_PROTO | `sai_uint8_t`      | IP protocol number for the reverse flow     |
 | SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_SRC_IP   | `sai_ip_address_t` | Source IP address for the reverse flow      |
 | SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_DST_IP   | `sai_ip_address_t` | Destination IP address for the reverse flow |
@@ -288,6 +296,8 @@ typedef enum _sai_dash_flow_entry_bulk_get_session_filter_key_t
     SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_NONE,
 
     SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_ENI_MAC,
+  
+    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_VNI,
 
     SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_IP_PROTO,
 
@@ -437,11 +447,12 @@ message IpAddress {
 
 message SaiDashFlowKey {
   bytes eni_mac = 1;  // ENI MAC address, using bytes to match MacAddress structure
-  IpAddress src_ip = 2;  // Source IP address
-  IpAddress dst_ip = 3;  // Destination IP address
-  uint8 ip_proto = 4; // IP Protocol
-  uint32 src_port = 5;  // Source port
-  uint32 dst_port = 6;  // Destination port
+  uint32 vni = 2; // VNI
+  IpAddress src_ip = 3;  // Source IP address
+  IpAddress dst_ip = 4;  // Destination IP address
+  uint8 ip_proto = 5; // IP Protocol
+  uint32 src_port = 6;  // Source port
+  uint32 dst_port = 7;  // Destination port
 }
 
 message SaiDashFlowState {
@@ -503,6 +514,7 @@ sai_attribute_t attr_list[3];
 attr_list[0].id = SAI_FLOW_TABLE_ATTR_DASH_FLOW_ENABLED_KEY;
 attr_list[0].value = SAI_DASH_FLOW_ENABLED_KEY_PROTOCOL |
                          SAI_DASH_FLOW_ENABLED_KEY_ENI_ADDR |
+                         SAI_DASH_FLOW_ENABLED_KEY_VNI |
                          SAI_DASH_FLOW_ENABLED_KEY_SRC_IP | 
                          SAI_DASH_FLOW_ENABLED_KEY_DST_IP | 
                          SAI_DASH_FLOW_ENABLED_KEY_SRC_PORT | 
