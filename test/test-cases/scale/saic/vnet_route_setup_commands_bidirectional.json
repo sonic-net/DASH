@@ -509,6 +509,8 @@
             "dip": "10.1.2.50"
         },
         "attributes": [
+            "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION",
+            "SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING",
             "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP",
             "172.16.1.20",
             "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC",
@@ -529,6 +531,8 @@
             "dip": "172.19.1.100"
         },
         "attributes": [
+            "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION",
+            "SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING",
             "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP",
             "10.10.2.15",
             "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC",
@@ -549,6 +553,8 @@
             "dip": "171.18.1.100"
         },
         "attributes": [
+            "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION",
+            "SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING",
             "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP",
             "10.11.1.15",
             "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC",
@@ -569,6 +575,8 @@
             "dip": "12.1.2.50"
         },
         "attributes": [
+            "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION",
+            "SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING",
             "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP",
             "170.16.1.20",
             "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC",
