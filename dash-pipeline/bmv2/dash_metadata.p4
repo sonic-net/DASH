@@ -55,11 +55,12 @@ enum bit<16> dash_pipeline_stage_t {
 enum bit<16> dash_flow_enabled_key_t {
     NONE = 0,
     ENI_ADDR = (1 << 1),
-    PROTOCOL = (1 << 2),
-    SRC_IP = (1 << 3),
-    DST_IP = (1 << 4),
-    SRC_PORT = (1 << 5),
-    DST_PORT = (1 << 6)
+    VNI = (1 << 2),
+    PROTOCOL = (1 << 3),
+    SRC_IP = (1 << 4),
+    DST_IP = (1 << 5),
+    SRC_PORT = (1 << 6),
+    DST_PORT = (1 << 7)
 }
 
 struct flow_table_data_t {
@@ -74,12 +75,13 @@ enum bit<32> dash_flow_action_t {
 }
 
 struct flow_key_t {
-    EthernetAddress eni_addr;
-    bit<8> ip_protocol;
-    IPv4ORv6Address src_ip_addr;
-    IPv4ORv6Address dst_ip_addr;
-    bit<16> src_l4_port;
-    bit<16> dst_l4_port;
+    EthernetAddress eni_mac;
+    bit<8> ip_proto;
+    bit<16> vnet_id;
+    IPv4ORv6Address src_ip;
+    IPv4ORv6Address dst_ip;
+    bit<16> src_port;
+    bit<16> dst_port;
 }
 
 struct flow_data_t {
@@ -115,11 +117,11 @@ struct conntrack_data_t {
     bool allow_in;
     bool allow_out;
     flow_table_data_t flow_table;
-    EthernetAddress eni_addr; 
+    EthernetAddress eni_mac; 
     flow_data_t flow_data;
     flow_key_t flow_key;
     flow_key_t reverse_flow_key;
-    bit<1> is_bidirectional_flow;
+    bit<1> is_unidirectional_flow;
     bit<16> bulk_get_session_id;
     bit<16> bulk_get_session_filter_id;
 }
@@ -150,12 +152,18 @@ struct meter_context_t {
 
 struct encap_data_t {
     bit<24> vni;
-    bit<24> dest_vnet_vni;
     IPv4Address underlay_sip;
     IPv4Address underlay_dip;
+    dash_encapsulation_t dash_encapsulation;
     EthernetAddress underlay_smac;
     EthernetAddress underlay_dmac;
-    dash_encapsulation_t dash_encapsulation;
+    
+    bit<24> underlay1_vni;
+    IPv4Address underlay1_sip;
+    IPv4Address underlay1_dip;
+    dash_encapsulation_t underlay1_dash_encapsulation;
+    EthernetAddress underlay1_smac;
+    EthernetAddress underlay1_dmac;
 }
 
 struct overlay_rewrite_data_t {
