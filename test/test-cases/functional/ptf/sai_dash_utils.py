@@ -359,6 +359,7 @@ class VnetAPI(VnetObjects):
                                                               dst_vnet_id=dst_vnet_id,
                                                               dip=sai_ipaddress(dip))
         sai_thrift_create_outbound_ca_to_pa_entry(self.client, ca_to_pa_entry,
+                                                  action=SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING,
                                                   underlay_dip=sai_ipaddress(underlay_dip),
                                                   use_dst_vnet_vni=use_dst_vnet_vni,
                                                   overlay_dmac=overlay_dmac,

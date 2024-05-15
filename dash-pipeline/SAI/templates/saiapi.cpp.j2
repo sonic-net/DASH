@@ -21,6 +21,10 @@ static sai_status_t dash_sai_create_{{ table.name }}(
 {
     DASH_LOG_ENTER();
 
+    auto attrs = dash::DashSai::populateDefaultAttributes((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_count, attr_list);
+    attr_count = (uint32_t)attrs.size();
+    attr_list = attrs.data();
+
     std::shared_ptr<p4::v1::TableEntry> matchActionEntry;
     pi_p4_id_t tableId = 0;
     // There shall be one and only one action_type
@@ -366,6 +370,10 @@ static sai_status_t dash_sai_create_{{ table.name }}(
 {
     DASH_LOG_ENTER();
 
+    auto attrs = dash::DashSai::populateDefaultAttributes((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_count, attr_list);
+    attr_count = (uint32_t)attrs.size();
+    attr_list = attrs.data();
+
     std::shared_ptr<p4::v1::TableEntry> matchActionEntry = std::make_shared<p4::v1::TableEntry>();
     pi_p4_id_t tableId = {{table.id}};
     matchActionEntry->set_table_id(tableId);
@@ -443,22 +451,25 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     // Search the action
     for (uint32_t i = 0; i < attr_count; i++)
     {
-        switch(attr_list[i].value.s32)
+        if (SAI_{{ table.name | upper }}_ATTR_ACTION == attr_list[i].id)
         {
-            {% for action in table.actions %}
-            case SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}:
+            switch(attr_list[i].value.s32)
             {
-                actionId = {{action.id}};
-                //expectedParams = {{ action.params|length }};
-                break;
+                {% for action in table.actions %}
+                case SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}:
+                {
+                    actionId = {{action.id}};
+                    //expectedParams = {{ action.params|length }};
+                    break;
+                }
+                {% endfor %}
+                default:
+                    DASH_LOG_ERROR("attribute value [%d] %d not supported yet", i, attr_list[i].value.s32);
+                    break;
             }
-            {% endfor %}
-            default:
-                DASH_LOG_ERROR("attribute value [%d] %d not supported yet", i, attr_list[i].value.s32);
-                break;
+            // only one action
+            break;
         }
-        // only one action
-        break;
     }
     {% endif %}
     action->set_action_id(actionId);

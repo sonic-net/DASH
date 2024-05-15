@@ -38,6 +38,7 @@ AspNet
 assignees
 asyncE
 atlassian
+attr
 ATTR
 auditability
 autogenerate
@@ -424,6 +425,7 @@ performant
 pingmesh
 PIR
 pluggable
+PLS
 PLVision's
 PKTS
 pmon
@@ -481,6 +483,7 @@ renderer
 repo
 repos
 REQ
+resimulate
 resimulated
 resimulation
 responder
@@ -533,6 +536,7 @@ sharding
 SInce
 SKU
 SKUs
+SLA
 SLB
 SMAC
 SmartAppliances
