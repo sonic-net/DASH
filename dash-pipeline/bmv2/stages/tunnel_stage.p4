@@ -16,7 +16,7 @@ control tunnel_stage(
                             encap = dash_encapsulation,
                             vni = tunnel_key,
                             underlay_sip = hdr.u0_ipv4.src_addr,
-                            underlay_dip = underlay_dip,
+                            underlay_dip = dip,
                             overlay_dmac = hdr.u0_ethernet.dst_addr);
     }
 
