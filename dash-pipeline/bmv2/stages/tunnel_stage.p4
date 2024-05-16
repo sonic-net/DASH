@@ -7,7 +7,7 @@ control tunnel_stage(
 {
     action set_tunnel_attrs(
             @SaiVal[type="sai_ip_address_t"]
-            IPv4Address underlay_dip,
+            IPv4Address dip,
             @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"]
             dash_encapsulation_t dash_encapsulation,
             bit<24> tunnel_key) {
