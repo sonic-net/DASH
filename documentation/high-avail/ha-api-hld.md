@@ -6,6 +6,7 @@
 | 0.2 | 03/15/2024 | Riff Jiang | Added HA set notification. |
 | 0.3 | 03/21/2024 | Riff Jiang | Added capabilities for HA topology and stats. |
 | 0.4 | 04/01/2024 | Riff Jiang | Added capabilities for HA owner, simplified capabilities for HA topology. |
+| 0.5 | 04/08/2024 | Riff Jiang | Added support for bulk sync. |
 
 1. [1. Terminology](#1-terminology)
 2. [2. Background](#2-background)
@@ -21,6 +22,8 @@
       2. [4.6.2. HA scope event notifications](#462-ha-scope-event-notifications)
    7. [4.7. Counters](#47-counters)
       1. [4.7.1. HA set stats](#471-ha-set-stats)
+         1. [4.7.1.1. Data plane channel related stats](#4711-data-plane-channel-related-stats)
+         2. [4.7.1.2. Control plane data channel related stats](#4712-control-plane-data-channel-related-stats)
       2. [4.7.2. ENI stats](#472-eni-stats)
          1. [4.7.2.1. ENI-level traffic counters](#4721-eni-level-traffic-counters)
          2. [4.7.2.2. ENI-level flow operation counters](#4722-eni-level-flow-operation-counters)
@@ -92,6 +95,7 @@ HA set is defined as a SAI object and contains the following SAI attributes:
 | -------------- | ---- | ----------- |
 | SAI_HA_SET_ATTR_LOCAL_IP | `sai_ip_address_t` | The IP address of the local DPU. |
 | SAI_HA_SET_ATTR_PEER_IP | `sai_ip_address_t` | The IP address of the peer DPU. |
+| SAI_HA_SET_ATTR_CP_DATA_CHANNEL_PORT | `sai_uint16_t` | The port used for control plane data channel. |
 | SAI_HA_SET_ATTR_DP_CHANNEL_DST_PORT | `sai_uint16_t` | The destination port of the data plane channel. |
 | SAI_HA_SET_ATTR_DP_CHANNEL_SRC_PORT_MIN | `sai_uint16_t` | The minimum source port of the data plane channel. |
 | SAI_HA_SET_ATTR_DP_CHANNEL_SRC_PORT_MAX | `sai_uint16_t` | The maximum source port of the data plane channel. |
@@ -281,7 +285,9 @@ To check how HA works, we will provide the following counters, which follows the
 
 #### 4.7.1. HA set stats
 
-Here are the new stats we added for monitoring HA on HA set (DPU pair):
+Here are the new stats we added for monitoring HA on HA set (DPU pair).
+
+##### 4.7.1.1. Data plane channel related stats
 
 | SAI stats name | Description |
 | -------------- | ----------- |
@@ -290,6 +296,27 @@ Here are the new stats we added for monitoring HA on HA set (DPU pair):
 | SAI_HA_SET_STAT_DP_PROBE_(REQ/ACK)_TX_BYTES | The bytes of data plane probes that this HA set sent. |
 | SAI_HA_SET_STAT_DP_PROBE_(REQ/ACK)_TX_PACKETS | The number of packets of data plane probes that this HA set sent. |
 | SAI_HA_SET_STAT_DP_PROBE_FAILED | The number of probes that failed. The failure rate = the number of failed probes / the number of tx packets. |
+
+##### 4.7.1.2. Control plane data channel related stats
+
+| Name | Description |
+| --- | --- |
+| SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_ATTEMPTED | Number of connect called to establish the data channel. |
+| SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_RECEIVED | Number of connect calls received to establish the data channel. |
+| SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_SUCCEEDED | Number of connect calls that succeeded. |
+| SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_FAILED | Number of connect calls that failed because of any reason other than timeout / unreachable. |
+| SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_REJECTED | Number of connect calls that rejected due to certs and etc. |
+| SAI_HA_SET_STAT_CP_DATA_CHANNEL_TIMEOUT_COUNT | Number of connect calls that failed due to timeout / unreachable. |
+
+Besides the channel status, we should also have the following counters for the bulk sync messages:
+
+| Name | Description |
+| --- | --- |
+| SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_RECEIVED | Number of messages we received for bulk sync via data channel. |
+| SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_SENT | Number of messages we sent for bulk sync via data channel. |
+| SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_SEND_FAILED | Number of messages we failed to sent for bulk sync via data channel. |
+| SAI_HA_SET_STAT_BULK_SYNC_FLOW_RECEIVED | Number of flows received from bulk sync message. A single bulk sync message can contain many flow records. |
+| SAI_HA_SET_STAT_BULK_SYNC_FLOW_SENT | Number of flows sent via bulk sync message. A single bulk sync message can contain many flow records. |
 
 #### 4.7.2. ENI stats
 
