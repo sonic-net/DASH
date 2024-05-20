@@ -4,7 +4,7 @@ DASH_GENERIC_QUAD(BUFFER_POOL,buffer_pool);
 DASH_GENERIC_QUAD(INGRESS_PRIORITY_GROUP,ingress_priority_group);
 DASH_GENERIC_QUAD(BUFFER_PROFILE,buffer_profile);
 
-sai_buffer_api_t redis_buffer_api = {
+sai_buffer_api_t dash_sai_buffer_api_impl = {
 
     DASH_GENERIC_QUAD_API(buffer_pool)
 

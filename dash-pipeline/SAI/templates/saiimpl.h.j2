@@ -11,8 +11,8 @@ DASH_PRIVATE extern sai_policer_api_t                 dash_sai_policer_api_impl;
 DASH_PRIVATE extern sai_port_api_t                    dash_sai_port_api_impl;
 DASH_PRIVATE extern sai_router_interface_api_t        dash_sai_router_interface_api_impl;
 DASH_PRIVATE extern sai_switch_api_t                  dash_sai_switch_api_impl;
-DASH_PRIVATE extern sai_dtel_api_t                    dash_sai_dtel_api;
-DASH_PRIVATE extern sai_buffer_api_t                  dash_sai_buffer_api;
+DASH_PRIVATE extern sai_dtel_api_t                    dash_sai_dtel_api_impl;
+DASH_PRIVATE extern sai_buffer_api_t                  dash_sai_buffer_api_impl;
 
 {% for api in api_names %}
 DASH_PRIVATE extern sai_{{ api }}_api_t dash_sai_{{ api }}_api_impl;
