@@ -2,6 +2,7 @@
 #define _DASH_STAGE_ACTION_APPLY_P4_
 
 #include "../routing_actions/routing_actions.p4"
+#include "tunnel_stage.p4"
 
 control routing_action_apply(
     inout headers_t hdr,
@@ -15,6 +16,8 @@ control routing_action_apply(
         // because it requires the transforms on the inner packet to be finished in order to
         // get the correct inner packet size and other informations.
         do_action_static_encap.apply(hdr, meta);
+
+        tunnel_stage.apply(hdr, meta);
     }
 }
 
