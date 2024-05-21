@@ -7,7 +7,7 @@ control outbound_routing_stage(inout headers_t hdr,
                                inout metadata_t meta)
 {
 
-    action set_routing_group_version(bit<1> admin_state) {
+    action set_routing_group_attr(bit<1> admin_state) {
         meta.eni_data.routing_group_admin_state = (bool)admin_state;
     }
 
@@ -18,7 +18,7 @@ control outbound_routing_stage(inout headers_t hdr,
         }
 
         actions = {
-            set_routing_group_version;
+            set_routing_group_attr;
             @defaultonly drop(meta);
         }
     }
