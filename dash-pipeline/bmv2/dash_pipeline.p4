@@ -290,7 +290,7 @@ control dash_ingress(
                     pa_validation.apply();
                 }
                 deny: {
-                    UPDATE_COUNTER(inbound_routing_entry_miss_drop, meta.eni_id);
+                    UPDATE_ENI_COUNTER(inbound_routing_entry_miss_drop);
                 }
             }
         }
@@ -331,9 +331,9 @@ control dash_ingress(
             deny();
         }
         
-        UPDATE_COUNTER(eni_rx, meta.eni_id);
+        UPDATE_ENI_COUNTER(eni_rx);
         if (meta.is_fast_path_icmp_flow_redirection_packet) {
-            UPDATE_COUNTER(eni_lb_fast_path_icmp_in, meta.eni_id);
+            UPDATE_ENI_COUNTER(eni_lb_fast_path_icmp_in);
         }
 
         ha_stage.apply(hdr, meta);
@@ -341,12 +341,12 @@ control dash_ingress(
         acl_group.apply();
 
         if (meta.direction == dash_direction_t.OUTBOUND) {
-            UPDATE_COUNTER(eni_outbound_rx, meta.eni_id);
+            UPDATE_ENI_COUNTER(eni_outbound_rx);
 
             meta.target_stage = dash_pipeline_stage_t.OUTBOUND_ROUTING;
             outbound.apply(hdr, meta);
         } else if (meta.direction == dash_direction_t.INBOUND) {
-            UPDATE_COUNTER(eni_inbound_rx, meta.eni_id);
+            UPDATE_ENI_COUNTER(eni_inbound_rx);
             inbound.apply(hdr, meta);
         }
 
@@ -375,12 +375,12 @@ control dash_ingress(
         if (meta.dropped) {
             drop_action();
         } else {
-            UPDATE_COUNTER(eni_tx, meta.eni_id);
+            UPDATE_ENI_COUNTER(eni_tx);
 
             if (meta.direction == dash_direction_t.OUTBOUND) {
-                UPDATE_COUNTER(eni_outbound_tx, meta.eni_id);
+                UPDATE_ENI_COUNTER(eni_outbound_tx);
             } else if (meta.direction == dash_direction_t.INBOUND) {
-                UPDATE_COUNTER(eni_inbound_tx, meta.eni_id);
+                UPDATE_ENI_COUNTER(eni_inbound_tx);
             }
         }
     }

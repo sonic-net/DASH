@@ -34,7 +34,7 @@ control outbound_routing_stage(inout headers_t hdr,
         }
 
         if (!routing.apply().hit) {
-            UPDATE_COUNTER(outbound_routing_entry_miss_drop, meta.eni_id);
+            UPDATE_ENI_COUNTER(outbound_routing_entry_miss_drop);
         }
     }
 }

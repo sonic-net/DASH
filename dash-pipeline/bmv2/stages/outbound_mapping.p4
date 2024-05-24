@@ -52,7 +52,7 @@ control outbound_mapping_stage(inout headers_t hdr,
                 vnet.apply();
             }
             drop: {
-                UPDATE_COUNTER(outbound_ca_pa_entry_miss_drop, meta.eni_id);
+                UPDATE_ENI_COUNTER(outbound_ca_pa_entry_miss_drop);
             }
         }
     }
