@@ -5,54 +5,6 @@ control ha_stage(inout headers_t hdr,
                  inout metadata_t meta)
 {
     //
-    // ENI-level flow operation counters:
-    //
-    DEFINE_HIT_COUNTER(flow_created_counter, MAX_ENI, name="flow_created", attr_type="stats", action_names="set_eni_attrs", order=1)
-    DEFINE_HIT_COUNTER(flow_create_failed_counter, MAX_ENI, name="flow_create_failed", attr_type="stats", action_names="set_eni_attrs", order=1)
-    DEFINE_HIT_COUNTER(flow_updated_counter, MAX_ENI, name="flow_updated", attr_type="stats", action_names="set_eni_attrs", order=1)
-    DEFINE_HIT_COUNTER(flow_update_failed_counter, MAX_ENI, name="flow_update_failed", attr_type="stats", action_names="set_eni_attrs", order=1)
-    DEFINE_HIT_COUNTER(flow_deleted_counter, MAX_ENI, name="flow_deleted", attr_type="stats", action_names="set_eni_attrs", order=1)
-    DEFINE_HIT_COUNTER(flow_delete_failed_counter, MAX_ENI, name="flow_delete_failed", attr_type="stats", action_names="set_eni_attrs", order=1)
-    DEFINE_HIT_COUNTER(flow_aged_counter, MAX_ENI, name="flow_aged", attr_type="stats", action_names="set_eni_attrs", order=1)
-
-    //
-    // ENI-level data plane flow sync packet counters:
-    //
-    DEFINE_COUNTER(inline_sync_packet_rx_counter, MAX_ENI, name="inline_sync_packet_rx", attr_type="stats", action_names="set_eni_attrs", order=2)
-    DEFINE_COUNTER(inline_sync_packet_tx_counter, MAX_ENI, name="inline_sync_packet_tx", attr_type="stats", action_names="set_eni_attrs", order=2)
-    DEFINE_COUNTER(timed_sync_packet_rx_counter, MAX_ENI, name="timed_sync_packet_rx", attr_type="stats", action_names="set_eni_attrs", order=2)
-    DEFINE_COUNTER(timed_sync_packet_tx_counter, MAX_ENI, name="timed_sync_packet_tx", attr_type="stats", action_names="set_eni_attrs", order=2)
-
-    //
-    // ENI-level data plane flow sync request counters:
-    // - Depends on implementations, the flow sync request could be batched, hence they need to tracked separately.
-    // - The counters are defined as combination of following things:
-    //   - 3 flow sync operations: create, update, delete.
-    //   - 2 ways of sync: Inline sync and timed sync.
-    //   - Request result: succeeded, failed (unexpected) and ignored (expected and ok to ignore, e.g., more packets arrives before flow sync is acked).
-    //
-    #define DEFINE_ENI_FLOW_SYNC_COUNTERS(counter_name) \
-        DEFINE_HIT_COUNTER(inline_ ## counter_name ## _req_sent_counter, MAX_ENI, name=PP_STR(inline_ ## counter_name ## _req_sent), attr_type="stats", action_names="set_eni_attrs", order=2) \
-        DEFINE_HIT_COUNTER(inline_ ## counter_name ## _req_recv_counter, MAX_ENI, name=PP_STR(inline_ ## counter_name ## _req_recv), attr_type="stats", action_names="set_eni_attrs", order=2) \
-        DEFINE_HIT_COUNTER(inline_ ## counter_name ## _req_failed_counter, MAX_ENI, name=PP_STR(inline_ ## counter_name ## _req_failed), attr_type="stats", action_names="set_eni_attrs", order=2) \
-        DEFINE_HIT_COUNTER(inline_ ## counter_name ## _req_ignored_counter, MAX_ENI, name=PP_STR(inline_ ## counter_name ## _req_failed), attr_type="stats", action_names="set_eni_attrs", order=2) \
-        DEFINE_HIT_COUNTER(inline_ ## counter_name ## _ack_recv_counter, MAX_ENI, name=PP_STR(inline_ ## counter_name ## _ack_recv), attr_type="stats", action_names="set_eni_attrs", order=2) \
-        DEFINE_HIT_COUNTER(inline_ ## counter_name ## _ack_failed_counter, MAX_ENI, name=PP_STR(inline_ ## counter_name ## _ack_failed_recv), attr_type="stats", action_names="set_eni_attrs", order=2) \
-        DEFINE_HIT_COUNTER(inline_ ## counter_name ## _ack_ignored_counter, MAX_ENI, name=PP_STR(inline_ ## counter_name ## _ack_ignored_recv), attr_type="stats", action_names="set_eni_attrs", order=2) \
-        \
-        DEFINE_HIT_COUNTER(timed_ ## counter_name ## _req_sent_counter, MAX_ENI, name=PP_STR(timed_ ## counter_name ## _req_sent), attr_type="stats", action_names="set_eni_attrs", order=2) \
-        DEFINE_HIT_COUNTER(timed_ ## counter_name ## _req_recv_counter, MAX_ENI, name=PP_STR(timed_ ## counter_name ## _req_recv), attr_type="stats", action_names="set_eni_attrs", order=2) \
-        DEFINE_HIT_COUNTER(timed_ ## counter_name ## _req_failed_counter, MAX_ENI, name=PP_STR(timed_ ## counter_name ## _req_failed), attr_type="stats", action_names="set_eni_attrs", order=2) \
-        DEFINE_HIT_COUNTER(timed_ ## counter_name ## _req_ignored_counter, MAX_ENI, name=PP_STR(timed_ ## counter_name ## _req_failed), attr_type="stats", action_names="set_eni_attrs", order=2) \
-        DEFINE_HIT_COUNTER(timed_ ## counter_name ## _ack_recv_counter, MAX_ENI, name=PP_STR(timed_ ## counter_name ## _ack_recv), attr_type="stats", action_names="set_eni_attrs", order=2) \
-        DEFINE_HIT_COUNTER(timed_ ## counter_name ## _ack_failed_counter, MAX_ENI, name=PP_STR(timed_ ## counter_name ## _ack_failed_recv), attr_type="stats", action_names="set_eni_attrs", order=2) \
-        DEFINE_HIT_COUNTER(timed_ ## counter_name ## _ack_ignored_counter, MAX_ENI, name=PP_STR(timed_ ## counter_name ## _ack_ignored_recv), attr_type="stats", action_names="set_eni_attrs", order=2)
-
-    DEFINE_ENI_FLOW_SYNC_COUNTERS(flow_create)
-    DEFINE_ENI_FLOW_SYNC_COUNTERS(flow_update)
-    DEFINE_ENI_FLOW_SYNC_COUNTERS(flow_delete)
-
-    //
     // HA scope:
     //
     action set_ha_scope_attr(

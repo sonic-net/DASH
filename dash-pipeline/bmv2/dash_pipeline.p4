@@ -3,6 +3,7 @@
 
 #include "dash_headers.p4"
 #include "dash_metadata.p4"
+#include "dash_counters.p4"
 #include "dash_parser.p4"
 #include "dash_tunnel.p4"
 #include "dash_outbound.p4"
@@ -43,9 +44,6 @@ control dash_ingress(
     action accept() {
     }
 
-    DEFINE_PACKET_COUNTER(vip_miss_drop_counter, 1, name="vip_miss_drop", attr_type="stats")
-    DEFINE_COUNTER(port_lb_fast_path_icmp_in_counter, 1, name="lb_fast_path_icmp_in", attr_type="stats")
-    
     @SaiTable[name = "vip", api = "dash_vip"]
     table vip {
         key = {
@@ -91,14 +89,6 @@ control dash_ingress(
    meta.stage3_dash_acl_group_id = ## prefix ##_stage3_dash_acl_group_id; \
    meta.stage4_dash_acl_group_id = ## prefix ##_stage4_dash_acl_group_id; \
    meta.stage5_dash_acl_group_id = ## prefix ##_stage5_dash_acl_group_id;
-
-    DEFINE_COUNTER(eni_rx_counter, MAX_ENI, name="rx", attr_type="stats", action_names="set_eni_attrs", order=0)
-    DEFINE_COUNTER(eni_tx_counter, MAX_ENI, name="tx", attr_type="stats", action_names="set_eni_attrs", order=0)
-    DEFINE_COUNTER(eni_outbound_rx_counter, MAX_ENI, name="outbound_rx", attr_type="stats", action_names="set_eni_attrs", order=0)
-    DEFINE_COUNTER(eni_outbound_tx_counter, MAX_ENI, name="outbound_tx", attr_type="stats", action_names="set_eni_attrs", order=0)
-    DEFINE_COUNTER(eni_inbound_rx_counter, MAX_ENI, name="inbound_rx", attr_type="stats", action_names="set_eni_attrs", order=0)
-    DEFINE_COUNTER(eni_inbound_tx_counter, MAX_ENI, name="inbound_tx", attr_type="stats", action_names="set_eni_attrs", order=0)
-    DEFINE_COUNTER(eni_lb_fast_path_icmp_in_counter, MAX_ENI, name="lb_fast_path_icmp_in", attr_type="stats", action_names="set_eni_attrs", order=0)
 
     action set_eni_attrs(bit<32> cps,
                          bit<32> pps,
@@ -212,8 +202,6 @@ control dash_ingress(
         const default_action = deny;
     }
 
-    DEFINE_PACKET_COUNTER(inbound_routing_entry_miss_drop, MAX_ENI, attr_type="stats", action_names="set_eni_attrs", order=3)
-
     @SaiTable[name = "inbound_routing", api = "dash_inbound_routing"]
     table inbound_routing {
         key = {
@@ -271,7 +259,7 @@ control dash_ingress(
 #endif // TARGET_DPDK_PNA
 
         if (meta.is_fast_path_icmp_flow_redirection_packet) {
-            UPDATE_COUNTER(port_lb_fast_path_icmp_in_counter, 0);
+            UPDATE_COUNTER(port_lb_fast_path_icmp_in, 0);
         }
 
         if (vip.apply().hit) {
@@ -279,7 +267,7 @@ control dash_ingress(
                present in the VIP table */
             meta.encap_data.underlay_sip = hdr.u0_ipv4.dst_addr;
         } else {
-            UPDATE_COUNTER(vip_miss_drop_counter, 0);
+            UPDATE_COUNTER(vip_miss_drop, 0);
 
             if (meta.is_fast_path_icmp_flow_redirection_packet) {
             }
@@ -335,7 +323,7 @@ control dash_ingress(
         }
 
         if (!eni.apply().hit) {
-            UPDATE_COUNTER(eni_miss_drop_counter, 0);
+            UPDATE_COUNTER(eni_miss_drop, 0);
             deny();
         }
 
@@ -343,9 +331,9 @@ control dash_ingress(
             deny();
         }
         
-        UPDATE_COUNTER(eni_rx_counter, meta.eni_id);
+        UPDATE_COUNTER(eni_rx, meta.eni_id);
         if (meta.is_fast_path_icmp_flow_redirection_packet) {
-            UPDATE_COUNTER(eni_lb_fast_path_icmp_in_counter, meta.eni_id);
+            UPDATE_COUNTER(eni_lb_fast_path_icmp_in, meta.eni_id);
         }
 
         ha_stage.apply(hdr, meta);
@@ -353,12 +341,12 @@ control dash_ingress(
         acl_group.apply();
 
         if (meta.direction == dash_direction_t.OUTBOUND) {
-            UPDATE_COUNTER(eni_outbound_rx_counter, meta.eni_id);
+            UPDATE_COUNTER(eni_outbound_rx, meta.eni_id);
 
             meta.target_stage = dash_pipeline_stage_t.OUTBOUND_ROUTING;
             outbound.apply(hdr, meta);
         } else if (meta.direction == dash_direction_t.INBOUND) {
-            UPDATE_COUNTER(eni_inbound_rx_counter, meta.eni_id);
+            UPDATE_COUNTER(eni_inbound_rx, meta.eni_id);
             inbound.apply(hdr, meta);
         }
 
@@ -387,12 +375,12 @@ control dash_ingress(
         if (meta.dropped) {
             drop_action();
         } else {
-            UPDATE_COUNTER(eni_tx_counter, meta.eni_id);
+            UPDATE_COUNTER(eni_tx, meta.eni_id);
 
             if (meta.direction == dash_direction_t.OUTBOUND) {
-                UPDATE_COUNTER(eni_outbound_tx_counter, meta.eni_id);
+                UPDATE_COUNTER(eni_outbound_tx, meta.eni_id);
             } else if (meta.direction == dash_direction_t.INBOUND) {
-                UPDATE_COUNTER(eni_inbound_tx_counter, meta.eni_id);
+                UPDATE_COUNTER(eni_inbound_tx, meta.eni_id);
             }
         }
     }
