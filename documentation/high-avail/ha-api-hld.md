@@ -310,8 +310,8 @@ Since the packet could be dropped before it hits any ENI, e.g. ENI is not found,
 
 | SAI stats name | Description |
 | -------------- | ----------- |
-| SAI_PORT_STAT_ENI_MISS_DROP_PKTS | Number of packets that are dropped due to ENI not found. |
-| SAI_PORT_STAT_VIP_MISS_DROP_PKTS | Number of packets that are dropped due to VIP not found. |
+| SAI_PORT_STAT_ENI_MISS_DROP_PACKETS | Number of packets that are dropped due to ENI not found. |
+| SAI_PORT_STAT_VIP_MISS_DROP_PACKETS | Number of packets that are dropped due to VIP not found. |
 
 #### 4.7.2. HA set stats
 
@@ -415,10 +415,10 @@ When the packet is landed on the ENI going through each match stages, it might b
 
 | SAI stats name | Description |
 | -------------- | ----------- |
-| SAI_ENI_STAT_OUTBOUND_ROUTING_ENTRY_MISS_DROP_PKTS | Number of packets that are dropped due to outbound routing entry not found. |
-| SAI_ENI_STAT_OUTBOUND_CA_PA_ENTRY_MISS_DROP_PKTS | Number of packets that are dropped due to outbound routing entry not found. |
-| SAI_ENI_STAT_TUNNEL_MISS_DROP_PKTS | Number of packets that are dropped due to outbound routing entry not found. |
-| SAI_ENI_STAT_INBOUND_ROUTING_MISS_DROP_PKTS | Number of packets that are dropped due to outbound routing entry not found. |
+| SAI_ENI_STAT_OUTBOUND_ROUTING_ENTRY_MISS_DROP_PACKETS | Number of packets that are dropped due to outbound routing entry not found. |
+| SAI_ENI_STAT_OUTBOUND_CA_PA_ENTRY_MISS_DROP_PACKETS | Number of packets that are dropped due to outbound routing entry not found. |
+| SAI_ENI_STAT_TUNNEL_MISS_DROP_PACKETS | Number of packets that are dropped due to outbound routing entry not found. |
+| SAI_ENI_STAT_INBOUND_ROUTING_MISS_DROP_PACKETS| Number of packets that are dropped due to outbound routing entry not found. |
 
 ### 4.8. Capability
 

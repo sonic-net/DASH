@@ -43,6 +43,7 @@ control dash_ingress(
     action accept() {
     }
 
+    DEFINE_PACKET_COUNTER(vip_miss_drop_counter, 1, name="vip_miss_drop", attr_type="stats")
     DEFINE_COUNTER(port_lb_fast_path_icmp_in_counter, 1, name="lb_fast_path_icmp_in", attr_type="stats")
     
     @SaiTable[name = "vip", api = "dash_vip"]
@@ -211,6 +212,8 @@ control dash_ingress(
         const default_action = deny;
     }
 
+    DEFINE_PACKET_COUNTER(inbound_routing_entry_miss_drop, MAX_ENI, attr_type="stats", action_names="set_eni_attrs", order=3)
+
     @SaiTable[name = "inbound_routing", api = "dash_inbound_routing"]
     table inbound_routing {
         key = {
@@ -276,7 +279,8 @@ control dash_ingress(
                present in the VIP table */
             meta.encap_data.underlay_sip = hdr.u0_ipv4.dst_addr;
         } else {
-            // TODO: Count the packet drops due to VIP miss
+            UPDATE_COUNTER(vip_miss_drop_counter, 0);
+
             if (meta.is_fast_path_icmp_flow_redirection_packet) {
             }
         }
@@ -296,6 +300,9 @@ control dash_ingress(
             switch (inbound_routing.apply().action_run) {
                 tunnel_decap_pa_validate: {
                     pa_validation.apply();
+                }
+                deny: {
+                    UPDATE_COUNTER(inbound_routing_entry_miss_drop, meta.eni_id);
                 }
             }
         }
@@ -327,7 +334,11 @@ control dash_ingress(
             meta.dst_l4_port = hdr.customer_udp.dst_port;
         }
 
-        eni.apply();
+        if (!eni.apply().hit) {
+            UPDATE_COUNTER(eni_miss_drop_counter, 0);
+            deny();
+        }
+
         if (meta.eni_data.admin_state == 0) {
             deny();
         }
