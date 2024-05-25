@@ -36,13 +36,13 @@ DEFINE_COUNTER(port_lb_fast_path_eni_miss_drop, 1, attr_type="stats")
 #define UPDATE_ENI_COUNTER(name) \
     UPDATE_COUNTER(name, meta.eni_id)
 
-DEFINE_ENI_COUNTER(eni_rx, name="rx", order=0)
-DEFINE_ENI_COUNTER(eni_tx, name="tx", order=0)
-DEFINE_ENI_COUNTER(eni_outbound_rx, name="outbound_rx", order=0)
-DEFINE_ENI_COUNTER(eni_outbound_tx, name="outbound_tx", order=0)
-DEFINE_ENI_COUNTER(eni_inbound_rx, name="inbound_rx", order=0)
-DEFINE_ENI_COUNTER(eni_inbound_tx, name="inbound_tx", order=0)
-DEFINE_ENI_COUNTER(eni_lb_fast_path_icmp_in, name="lb_fast_path_icmp_in", order=0)
+DEFINE_ENI_COUNTER(eni_rx, order=0, name="rx")
+DEFINE_ENI_COUNTER(eni_tx, order=0, name="tx")
+DEFINE_ENI_COUNTER(eni_outbound_rx, order=0, name="outbound_rx")
+DEFINE_ENI_COUNTER(eni_outbound_tx, order=0, name="outbound_tx")
+DEFINE_ENI_COUNTER(eni_inbound_rx, order=0, name="inbound_rx")
+DEFINE_ENI_COUNTER(eni_inbound_tx, order=0, name="inbound_tx")
+DEFINE_ENI_COUNTER(eni_lb_fast_path_icmp_in, order=0, name="lb_fast_path_icmp_in")
 
 //
 // ENI-level flow operation counters:
