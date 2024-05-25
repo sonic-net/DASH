@@ -1,8 +1,8 @@
 //
 // This file is used for defining the global and ENI counters inside DASH.
 //
-// These counters are added here, because they are special and working more like "global" counters, and spreaded across the pipoeline.
-// This helps us to have a better view and helps us maintaining the ABI compatibiity of these counters.
+// These counters are added here, because they are special and working more like "global" counters, and spread across the pipeline.
+// This helps us to have a better view and helps us maintaining the ABI compatibility of these counters.
 //
 // The other counters will go with its table, such as HA set, because they are only used in logic that is related to that single table.
 // 
@@ -93,7 +93,7 @@ DEFINE_ENI_FLOW_SYNC_COUNTERS(flow_update)
 DEFINE_ENI_FLOW_SYNC_COUNTERS(flow_delete)
 
 //
-// ENI-level drop counters
+// ENI-level drop counters:
 //
 DEFINE_ENI_PACKET_COUNTER(outbound_routing_entry_miss_drop, order=3)
 DEFINE_ENI_PACKET_COUNTER(outbound_ca_pa_entry_miss_drop, order=3)
