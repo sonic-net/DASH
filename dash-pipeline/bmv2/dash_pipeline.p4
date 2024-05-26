@@ -177,7 +177,6 @@ control dash_ingress(
         pre_pipeline_stage.apply(hdr, meta);
         direction_lookup_stage.apply(hdr, meta);
         eni_lookup_stage.apply(hdr, meta);
-        do_tunnel_decap(hdr, meta);
 
         if (!eni.apply().hit) {
             UPDATE_COUNTER(eni_miss_drop, 0);
@@ -200,6 +199,8 @@ control dash_ingress(
             UPDATE_ENI_COUNTER(eni_lb_fast_path_icmp_in);
         }
 
+        do_tunnel_decap(hdr, meta);
+        
         ha_stage.apply(hdr, meta);
 
         acl_group.apply();
