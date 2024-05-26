@@ -19,7 +19,9 @@
  *
  * @file    saiexperimental{{ sai_api.app_name | replace('_', '') }}.h
  *
- * @brief   This module defines SAI P4 extension  interface
+ * @brief   This module defines SAI extensions for {{ sai_api.app_name | replace('_', ' ') | upper }}
+ *
+ * @warning This module is a SAI experimental module
  */
 
 #if !defined (__SAIEXPERIMENTAL{{ sai_api.app_name | replace('_', '') | upper }}_H_)
@@ -28,7 +30,7 @@
 #include <saitypesextensions.h>
 
 /**
- * @defgroup SAIEXPERIMENTAL{{ sai_api.app_name | upper}} SAI - Extension specific API definitions
+ * @defgroup SAIEXPERIMENTAL{{ sai_api.app_name | upper}} SAI - Experimental: {{ sai_api.app_name | replace('_', ' ') | upper }} specific API definitions
  *
  * @{
  */
