@@ -7,6 +7,7 @@ from .dash_p4_counter import DashP4Counter
 from .dash_p4_table import DashP4Table
 from .dash_p4_table_action import DashP4TableAction
 from ..p4ir import P4VarRefGraph
+from ..sai_spec import *
 
 
 @dash_p4rt_parser
@@ -112,3 +113,11 @@ class DashP4SAIExtensions(DashP4Object):
         all_table_names = [table.name for api in self.table_groups for table in api.tables]
         for table_group in self.table_groups:
             table_group.post_parsing_process(all_table_names)
+
+    def to_sai(self) -> SaiSpec:
+        sai_spec = SaiSpec()
+
+        for dash_api in self.apis:
+            sai_spec.add_api_group(dash_api.to_sai())
+            
+        return sai_spec
