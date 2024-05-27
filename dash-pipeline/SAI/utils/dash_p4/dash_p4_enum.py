@@ -2,6 +2,7 @@ from typing import List
 from .common import *
 from .sai_type_solver import SAITypeSolver
 from .dash_p4_enum_member import DashP4EnumMember
+from ..sai_spec import SaiEnum
 
 
 @dash_p4rt_parser
@@ -58,4 +59,11 @@ class DashP4Enum(DashP4Object):
             "s32",
             default="SAI_" + self.name.upper() + "_" + self.members[0].name.upper(),
             is_enum=True,
+        )
+
+    def to_sai(self) -> SaiEnum:
+        return SaiEnum(
+            f"sai_{self.name}_t",
+            "",
+            members=[member.to_sai() for member in self.members],
         )

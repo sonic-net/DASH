@@ -116,8 +116,5 @@ class DashP4SAIExtensions(DashP4Object):
 
     def to_sai(self) -> SaiSpec:
         sai_spec = SaiSpec()
-
-        for dash_api in self.apis:
-            sai_spec.add_api_group(dash_api.to_sai())
-            
+        sai_spec.api_groups = [api_group.to_sai() for api_group in self.table_groups]
         return sai_spec

@@ -5,6 +5,7 @@ from .dash_p4_counter import *
 from .dash_p4_table_action_param import *
 from .dash_p4_table_key import *
 from .dash_p4_table_action import *
+from ..sai_spec import SaiApi
 
 
 @dash_p4rt_parser
@@ -252,3 +253,75 @@ class DashP4Table(DashP4Object):
         self.sai_stats = []
         for order in sorted(sai_stats_by_order.keys()):
             self.sai_stats.extend(sai_stats_by_order[order])
+
+    def to_sai(self) -> SaiApi:
+        sai_api = SaiApi(self.name, "", self.is_object != "false")
+
+        self.create_sai_action_enum(sai_api)
+        self.create_sai_attributes(sai_api)
+        self.create_sai_stats(sai_api)
+
+        return sai_api
+    
+    def create_sai_action_enum(self, sai_api: SaiApi) -> None:
+        # If the table represents an SAI object, it should not have an action enum.
+        # If the table has only 1 action, we don't need to create the action enum.
+        if len(self.actions) <= 1 and self.is_object != "false":
+            return
+
+        action_enum_members = [
+            f"SAI_{self.name.upper()}_ACTION_{action.name.upper()}"
+            for action in self.actions
+        ]
+
+        action_enum = SaiEnum(
+            name = f"SAI_{self.name.upper()}_ATTR_ACTION",
+            description = f"Attribute data for SAI_{ self.name.upper() }_ATTR_ACTION",
+            members = action_enum_members
+        )
+
+        sai_api.enums.append(action_enum)
+
+    def create_sai_stats(self, sai_api: SaiApi) -> None:
+        sai_api.stats = [counter.to_sai() for counter in self.counters if counter.attr_type == "stats"]
+
+    def create_sai_attributes(self, sai_api: SaiApi) -> None:
+        sai_api.attributes = [attr.to_sai() for attr in self.sai_attributes if attr.skipattr != "true"]
+
+        # If the table has an counter attached, we need to create a counter attribute for it.
+        # The counter attribute only counts that packets that hits any entry, but not the packet that misses all entries.
+        if self.with_counters == 'true':
+            counter_attr = SaiAttribute(
+                name = f"SAI_{self.name.upper()}_ATTR_COUNTER_ID",
+                description = "Attach a counter. When it is empty, then packet hits won't be counted.",
+                type = "sai_object_id_t",
+                default = "SAI_NULL_OBJECT_ID"
+                object_name = "SAI_OBJECT_TYPE_COUNTER",
+                allownull = True,
+            )
+
+            sai_api.attributes.append(counter_attr)
+
+        # If any match key in this table supports priority, we need to add a priority attribute.
+        if any([key.match_type != "exact" for key in self.keys]) and all([key.match_type != "lpm" for key in self.keys]):
+            priority_attr = SaiAttribute(
+                name = f"SAI_{self.name.upper()}_ATTR_PRIORITY",
+                description = "Rule priority in table",
+                type = "sai_uint32_t",
+                flags = "MANDATORY_ON_CREATE | CREATE_ONLY"
+            )
+
+            sai_api.attributes.append(priority_attr)
+
+        # If any match key contains an IP address, we need to add an IP address family attribute
+        # for IPv4 and IPv6 support.
+        if self.ipaddr_family_attr == 'true':
+            ip_addr_family_attr = SaiAttribute(
+                name = f"SAI_{self.name.upper()}_ATTR_IP_ADDR_FAMILY",
+                description = "IP address family for resource accounting",
+                type = "sai_ip_addr_family_t",
+                flags = "READ_ONLY",
+                isresourcetype = True
+            )
+            
+            sai_api.attributes.append(ip_addr_family_attr)

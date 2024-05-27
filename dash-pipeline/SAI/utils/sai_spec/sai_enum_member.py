@@ -7,6 +7,6 @@ class SaiEnumMember(SaiCommon):
     This class represents a single SAI enum member.
     """
 
-    def __init__(self, name: str, description: str):
+    def __init__(self, name: str, description: str, value: str):
         super().__init__(name, description)
-        self.value: str = ""
+        self.value: str = value

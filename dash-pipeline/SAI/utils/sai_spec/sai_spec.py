@@ -9,6 +9,3 @@ class SaiSpec:
 
     def __init__(self):
         self.api_groups: List[SaiApiGroup] = []
-
-    def add_api_group(self, api_group: SaiApiGroup):
-        self.api_groups.append(api_group)

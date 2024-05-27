@@ -1,6 +1,7 @@
 from typing import List, Optional
 from .common import *
 from .sai_type_solver import SAITypeInfo
+from ..sai_spec import SaiAttribute
 
 
 class DashP4TableAttribute(DashP4Object):
@@ -88,3 +89,17 @@ class DashP4TableAttribute(DashP4Object):
         self.field = sai_type_info.sai_attribute_value_field
         if self.default == None:
             self.default = sai_type_info.default
+
+    def to_sai(self) -> SaiAttribute:
+        sai_flags = "READ_ONLY" if self.isreadonly == "true" else "CREATE_AND_SET"
+
+        return SaiAttribute(
+            name = self.name,
+            description = "",
+            type = self.type,
+            attr_value_field = self.field,
+            default = self.default,
+            isresourcetype = self.isresourcetype == "true",
+            flags = sai_flags,
+            object_name = self.object_name,
+        )

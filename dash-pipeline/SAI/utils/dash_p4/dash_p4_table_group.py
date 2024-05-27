@@ -1,6 +1,7 @@
 from typing import List, Optional
 from .common import *
 from .dash_p4_table import DashP4Table
+from ..sai_spec import SaiApiGroup
 
 
 class DashP4TableGroup(DashP4Object):
@@ -26,3 +27,8 @@ class DashP4TableGroup(DashP4Object):
     def post_parsing_process(self, all_table_names: List[str]) -> None:
         for table in self.tables:
             table.post_parsing_process(all_table_names)
+
+    def to_sai(self) -> SaiApiGroup:
+        sai_api_group = SaiApiGroup(self.app_name, "")
+        sai_api_group.sai_apis = [table.to_sai() for table in self.tables if not table.ignored]
+        return sai_api_group
