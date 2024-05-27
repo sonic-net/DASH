@@ -114,7 +114,25 @@ class DashP4SAIExtensions(DashP4Object):
         for table_group in self.table_groups:
             table_group.post_parsing_process(all_table_names)
 
+    #
+    # Functions for generating SAI specs:
+    #
     def to_sai(self) -> SaiSpec:
         sai_spec = SaiSpec()
         sai_spec.api_groups = [api_group.to_sai() for api_group in self.table_groups]
+        self.create_sai_port_counters(sai_spec.port_extenstion)
         return sai_spec
+
+    def create_sai_port_counters(self, api_ext: SaiApiExtension) -> None:
+        for counter in self.counters:
+            # If the counter is associated to any table actions, the counter will be generated as part of that table.
+            # Otherwise, the counters will be generated as part of the port level counter or stats.
+            if len(counter.param_actions) > 0:
+                continue
+
+            sai_counter = counter.to_sai("port")
+
+            if counter.attr_type != "stats":
+                api_ext.attributes.append(sai_counter)
+            else:
+                api_ext.stats.append(sai_counter)
