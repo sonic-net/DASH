@@ -25,8 +25,23 @@ class DashP4TableGroup(DashP4Object):
         self.tables.append(table)
 
     def post_parsing_process(self, all_table_names: List[str]) -> None:
+        self._deduplicate_tables()
+
         for table in self.tables:
             table.post_parsing_process(all_table_names)
+    
+    def _deduplicate_tables(self) -> None:
+        table_names = set()
+
+        tables = []
+        for table in self.tables:
+            if table.name in table_names:
+                table.ignored = True
+            else:
+                table_names.add(table.name)
+                tables.append(table)
+
+        self.tables = tables
 
     def to_sai(self) -> SaiApiGroup:
         sai_api_group = SaiApiGroup(self.app_name, "")

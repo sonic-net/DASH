@@ -9,6 +9,7 @@ try:
     import jinja2
     import typing
     import base64
+    import yaml
     import jsonpath_ng.ext as jsonpath_ext
     import jsonpath_ng as jsonpath
     from utils.dash_p4 import DashP4SAIExtensions
@@ -27,6 +28,7 @@ if __name__ == "__main__":
     parser.add_argument("--ir", type=str, help="Path to P4 program IR JSON file")
     parser.add_argument("--print-sai-lib", type=bool)
     parser.add_argument("--ignore-tables", type=str, default="", help="Comma separated list of tables to ignore")
+    parser.add_argument("--output-sai-spec", type=str, help="Path to output SAI spec file")
     args = parser.parse_args()
 
     p4rt_file_path = os.path.realpath(args.filepath)
@@ -48,6 +50,13 @@ if __name__ == "__main__":
     if args.print_sai_lib:
         print("Dumping parsed SAI data:")
         print(json.dumps(dash_sai_exts, indent=2))
+
+    # Output SAI spec
+    sai_spec = dash_sai_exts.to_sai()
+    if args.output_sai_spec:
+        output_sai_spec_path = os.path.realpath(args.output_sai_spec)
+        with open(output_sai_spec_path, "w") as f:
+            f.write(yaml.dump(sai_spec, indent=2, sort_keys=False))
 
     # Generate and update all SAI files
     SAIGenerator(dash_sai_exts).generate()
