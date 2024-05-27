@@ -1,5 +1,6 @@
 !!python/object:utils.sai_spec.sai_spec.SaiSpec
-types: []
+api_types: []
+object_types: []
 enums:
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
   name: sai_dash_tunnel_dscp_mode_t
