@@ -3,7 +3,7 @@ from .common import *
 from .dash_p4_table import DashP4Table
 
 
-class DashP4API(DashP4Object):
+class DashP4TableGroup(DashP4Object):
     """
     This class holds all parsed DASH p4 API info for a specific API group, such as routing or CA-PA mapping.
     """

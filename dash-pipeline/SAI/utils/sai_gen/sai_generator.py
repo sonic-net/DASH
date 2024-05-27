@@ -20,8 +20,8 @@ class SAIGenerator:
     def generate(self) -> None:
         print("\nGenerating all SAI APIs ...")
 
-        for dash_api in self.dash_sai_ext.apis:
-            self.generate_sai_api_extensions(dash_api)
+        for table_group in self.dash_sai_ext.table_groups:
+            self.generate_sai_api_extensions(table_group)
 
         self.generate_sai_global_extensions()
         self.generate_sai_type_extensions()
@@ -30,7 +30,7 @@ class SAIGenerator:
         self.generate_sai_enum_extensions()
         self.generate_sai_fixed_api_files()
 
-    def generate_sai_api_extensions(self, sai_api: DashP4API) -> None:
+    def generate_sai_api_extensions(self, sai_api: DashP4TableGroup) -> None:
         print(
             "\nGenerating DASH SAI API definitions and implementation for API: "
             + sai_api.app_name
@@ -47,7 +47,7 @@ class SAIGenerator:
         # Generate SAI API implementation for all APIs.
         self.generate_sai_impl_file_for_api(sai_api)
 
-    def generate_dash_sai_definitions_for_api(self, sai_api: DashP4API) -> None:
+    def generate_dash_sai_definitions_for_api(self, sai_api: DashP4TableGroup) -> None:
         # SAI header file
         sai_header_file_name = (
             "saiexperimental" + sai_api.app_name.replace("_", "") + ".h"
@@ -79,7 +79,7 @@ class SAIGenerator:
 
         return
 
-    def generate_sai_impl_file_for_api(self, sai_api: DashP4API) -> None:
+    def generate_sai_impl_file_for_api(self, sai_api: DashP4TableGroup) -> None:
         sai_impl_file_name = "sai" + sai_api.app_name.replace("_", "") + ".cpp"
         header_prefix = "experimental" if sai_api.api_type != "underlay" else ""
         SAITemplateRenderer("templates/saiapi.cpp.j2").render_to_file(
@@ -217,7 +217,7 @@ class SAIGenerator:
                 "lib/%s" % filename, api_names=self.dash_p4_names
             )
 
-    def __get_uniq_sai_api(self, sai_api: DashP4API) -> None:
+    def __get_uniq_sai_api(self, sai_api: DashP4TableGroup) -> None:
         """Only keep one table per group(with same table name)"""
         groups = set()
         sai_api = copy.deepcopy(sai_api)

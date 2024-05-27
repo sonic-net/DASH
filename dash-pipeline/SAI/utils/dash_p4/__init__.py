@@ -19,7 +19,7 @@
 #          |- SAIAPITableActionParam -| : Information of a single P4 table action parameter used by the action.
 #
 from .dash_sai_extensions import DashP4SAIExtensions
-from .dash_p4_api_group import DashP4API
+from .dash_p4_table_group import DashP4TableGroup
 from .dash_p4_table import DashP4Table
 from .dash_p4_table_action import DashP4TableAction
 from .dash_p4_table_key import DashP4TableKey

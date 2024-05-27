@@ -1,7 +1,7 @@
 import json
 from typing import List
 from .common import *
-from .dash_p4_api_group import DashP4API
+from .dash_p4_table_group import DashP4TableGroup
 from .dash_p4_enum import DashP4Enum
 from .dash_p4_counter import DashP4Counter
 from .dash_p4_table import DashP4Table
@@ -19,7 +19,7 @@ class DashP4SAIExtensions(DashP4Object):
         super().__init__()
         self.enums: List[DashP4Enum] = []
         self.counters: List[DashP4Counter] = []
-        self.apis: List[DashP4API] = []
+        self.table_groups: List[DashP4TableGroup] = []
 
     @staticmethod
     def from_p4rt_file(
@@ -81,18 +81,18 @@ class DashP4SAIExtensions(DashP4Object):
             if sai_api_table_data.ignored:
                 continue
 
-            for dash_api in self.apis:
-                if dash_api.app_name == sai_api_table_data.api_name:
-                    dash_api.add_table(sai_api_table_data)
+            for table_group in self.table_groups:
+                if table_group.app_name == sai_api_table_data.api_name:
+                    table_group.add_table(sai_api_table_data)
                     break
             else:
-                new_api = DashP4API(sai_api_table_data.api_name)
+                new_api = DashP4TableGroup(sai_api_table_data.api_name)
                 new_api.add_table(sai_api_table_data)
-                self.apis.append(new_api)
+                self.table_groups.append(new_api)
 
         # Sort all parsed tables by API order, so we can always generate the APIs in the same order for keeping ABI compatibility.
-        for dash_api in self.apis:
-            dash_api.tables.sort(key=lambda x: x.order)
+        for table_group in self.table_groups:
+            table_group.tables.sort(key=lambda x: x.order)
 
     def __parse_sai_table_action(
         self,
@@ -109,6 +109,6 @@ class DashP4SAIExtensions(DashP4Object):
         return action_data
 
     def post_parsing_process(self) -> None:
-        all_table_names = [table.name for api in self.apis for table in api.tables]
-        for dash_api in self.apis:
-            dash_api.post_parsing_process(all_table_names)
+        all_table_names = [table.name for api in self.table_groups for table in api.tables]
+        for table_group in self.table_groups:
+            table_group.post_parsing_process(all_table_names)
