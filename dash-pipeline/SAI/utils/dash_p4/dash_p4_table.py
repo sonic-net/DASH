@@ -275,18 +275,27 @@ class DashP4Table(DashP4Object):
         ]
 
         action_enum = SaiEnum(
-            name = f"SAI_{self.name.upper()}_ATTR_ACTION",
+            name = f"sai_{self.name.upper()}_action_t",
             description = f"Attribute data for SAI_{ self.name.upper() }_ATTR_ACTION",
             members = action_enum_members
         )
 
         sai_api.enums.append(action_enum)
 
+        sai_attr_action = SaiAttribute(
+            name = f"SAI_{self.name.upper()}_ATTR_ACTION",
+            description = "Action",
+            type = f"sai_{self.name.lower()}_action_t",
+            flags = "MANDATORY_ON_CREATE | CREATE_ONLY"
+        )
+
+        sai_api.attributes.append(sai_attr_action)
+
     def create_sai_stats(self, sai_api: SaiApi) -> None:
         sai_api.stats = [counter.to_sai() for counter in self.counters if counter.attr_type == "stats"]
 
     def create_sai_attributes(self, sai_api: SaiApi) -> None:
-        sai_api.attributes = [attr.to_sai() for attr in self.sai_attributes if attr.skipattr != "true"]
+        sai_api.attributes.extend([attr.to_sai() for attr in self.sai_attributes if attr.skipattr != "true"])
 
         # If the table has an counter attached, we need to create a counter attribute for it.
         # The counter attribute only counts that packets that hits any entry, but not the packet that misses all entries.
@@ -302,16 +311,17 @@ class DashP4Table(DashP4Object):
 
             sai_api.attributes.append(counter_attr)
 
-        # If any match key in this table supports priority, we need to add a priority attribute.
-        if any([key.match_type != "exact" for key in self.keys]) and all([key.match_type != "lpm" for key in self.keys]):
-            priority_attr = SaiAttribute(
-                name = f"SAI_{self.name.upper()}_ATTR_PRIORITY",
-                description = "Rule priority in table",
-                type = "sai_uint32_t",
-                flags = "MANDATORY_ON_CREATE | CREATE_ONLY"
-            )
+        if self.is_object == "true":
+            # If any match key in this table supports priority, we need to add a priority attribute.
+            if any([key.match_type != "exact" for key in self.keys]) and all([key.match_type != "lpm" for key in self.keys]):
+                priority_attr = SaiAttribute(
+                    name = f"SAI_{self.name.upper()}_ATTR_PRIORITY",
+                    description = "Rule priority in table",
+                    type = "sai_uint32_t",
+                    flags = "MANDATORY_ON_CREATE | CREATE_ONLY"
+                )
 
-            sai_api.attributes.append(priority_attr)
+                sai_api.attributes.append(priority_attr)
 
         # If any match key contains an IP address, we need to add an IP address family attribute
         # for IPv4 and IPv6 support.
