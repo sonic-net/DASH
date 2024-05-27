@@ -1,14 +1,14 @@
 from typing import List
 from .common import *
-from .sai_api_table_action_param import *
-from .sai_api_counter import *
-from .sai_enum import *
-from .sai_api_table_key import *
-from .sai_api_table_action import *
+from .dash_p4_enum import *
+from .dash_p4_counter import *
+from .dash_p4_table_action_param import *
+from .dash_p4_table_key import *
+from .dash_p4_table_action import *
 
 
-@sai_parser_from_p4rt
-class SAIAPITable(SAIObject):
+@dash_p4rt_parser
+class DashP4Table(DashP4Object):
     """
     This class represents a single SAI API set and provides parser from the P4Runtime table object
     """
@@ -18,13 +18,13 @@ class SAIAPITable(SAIObject):
         self.ignored: bool = False
         self.api_name: str = ""
         self.ipaddr_family_attr: str = "false"
-        self.keys: List[SAIAPITableKey] = []
-        self.actions: List[SAIAPITableAction] = []
-        self.action_params: List[SAIAPITableActionParam] = []
-        self.counters: List[SAIAPICounter] = []
+        self.keys: List[DashP4TableKey] = []
+        self.actions: List[DashP4TableAction] = []
+        self.action_params: List[DashP4TableActionParam] = []
+        self.counters: List[DashP4Counter] = []
         self.with_counters: str = "false"
-        self.sai_attributes: List[SAIAPIAttribute] = []
-        self.sai_stats: List[SAIAPIAttribute] = []
+        self.sai_attributes: List[DashP4TableAttribute] = []
+        self.sai_stats: List[DashP4TableAttribute] = []
 
         # Extra properties from annotations
         self.stage: Optional[str] = None
@@ -35,7 +35,7 @@ class SAIAPITable(SAIObject):
         self,
         p4rt_table: Dict[str, Any],
         program: Dict[str, Any],
-        all_actions: Dict[int, SAIAPITableAction],
+        all_actions: Dict[int, DashP4TableAction],
         ignore_tables: List[str],
     ) -> None:
         """
@@ -124,10 +124,10 @@ class SAIAPITable(SAIObject):
 
     def __parse_table_keys(self, p4rt_table: Dict[str, Any]) -> None:
         for p4rt_table_key in p4rt_table[MATCH_FIELDS_TAG]:
-            table_key = SAIAPITableKey.from_p4rt(p4rt_table_key)
+            table_key = DashP4TableKey.from_p4rt(p4rt_table_key)
             self.keys.append(table_key)
 
-        self.keys = SAIAPIAttribute.link_ip_is_v6_vars(self.keys)
+        self.keys = DashP4TableAttribute.link_ip_is_v6_vars(self.keys)
 
         for p4rt_table_key in self.keys:
             if (
@@ -153,7 +153,7 @@ class SAIAPITable(SAIObject):
         return
 
     def __parse_table_actions(
-        self, p4rt_table: Dict[str, Any], all_actions: List[SAIAPITableAction]
+        self, p4rt_table: Dict[str, Any], all_actions: List[DashP4TableAction]
     ) -> None:
         for p4rt_table_action in p4rt_table[ACTION_REFS_TAG]:
             action_id = p4rt_table_action["id"]
@@ -165,7 +165,7 @@ class SAIAPITable(SAIObject):
                 self.actions.append(action)
                 self.__merge_action_info_to_table(action)
 
-    def __merge_action_info_to_table(self, action: SAIAPITableAction) -> None:
+    def __merge_action_info_to_table(self, action: DashP4TableAction) -> None:
         """
         Merge objects used by an action into the table for SAI attributes generation.
 
@@ -175,7 +175,7 @@ class SAIAPITable(SAIObject):
         self.__merge_action_params_to_table_params(action)
         self.__merge_action_counters_to_table_counters(action)
 
-    def __merge_action_params_to_table_params(self, action: SAIAPITableAction) -> None:
+    def __merge_action_params_to_table_params(self, action: DashP4TableAction) -> None:
         for action_param in action.params:
             # skip v4/v6 selector, as they are linked via parameter property.
             if "_is_v6" in action_param.name:
@@ -192,7 +192,7 @@ class SAIAPITable(SAIObject):
                 self.action_params.append(action_param)
 
     def __merge_action_counters_to_table_counters(
-        self, action: SAIAPITableAction
+        self, action: DashP4TableAction
     ) -> None:
         for counter in action.counters:
             for table_counter in self.counters:

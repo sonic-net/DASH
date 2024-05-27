@@ -10,7 +10,7 @@ try:
     import typing
     import jsonpath_ng.ext as jsonpath_ext
     import jsonpath_ng as jsonpath
-    from utils.dash_sai import DASHSAIExtensions
+    from utils.dash_p4 import DashP4SAIExtensions
     from utils.p4ir import P4IRTree, P4VarRefGraph
     from utils.sai_gen import SAIGenerator
 except ImportError as ie:
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     var_ref_graph = P4VarRefGraph(p4ir)
 
     # Parse SAI data from P4 runtime json file
-    dash_sai_exts = DASHSAIExtensions.from_p4rt_file(
+    dash_sai_exts = DashP4SAIExtensions.from_p4rt_file(
         p4rt_file_path, args.ignore_tables.split(","), var_ref_graph
     )
     dash_sai_exts.post_parsing_process()

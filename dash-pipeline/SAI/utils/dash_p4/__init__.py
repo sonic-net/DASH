@@ -18,12 +18,12 @@
 #       |- SAIAPITableAction  <-------| : Information of a single P4 table action defined used by the table.
 #          |- SAIAPITableActionParam -| : Information of a single P4 table action parameter used by the action.
 #
-from .dash_sai_extensions import DASHSAIExtensions
-from .dash_sai_api_set import DASHAPISet
-from .sai_api_table import SAIAPITable
-from .sai_api_table_action import SAIAPITableAction
-from .sai_api_table_key import SAIAPITableKey
-from .sai_api_table_action_param import SAIAPITableActionParam
-from .sai_api_counter import SAIAPICounter
-from .sai_enum import SAIEnum
-from .sai_enum_member import SAIEnumMember
+from .dash_sai_extensions import DashP4SAIExtensions
+from .dash_p4_api_group import DashP4API
+from .dash_p4_table import DashP4Table
+from .dash_p4_table_action import DashP4TableAction
+from .dash_p4_table_key import DashP4TableKey
+from .dash_p4_table_action_param import DashP4TableActionParam
+from .dash_p4_counter import DashP4Counter
+from .dash_p4_enum import DashP4Enum
+from .dash_p4_enum_member import DashP4EnumMember

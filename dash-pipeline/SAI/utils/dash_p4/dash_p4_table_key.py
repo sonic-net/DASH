@@ -1,10 +1,10 @@
 from .common import *
-from .sai_api_attribute import *
+from .dash_p4_table_attribute import *
 from .sai_type_solver import *
 
 
-@sai_parser_from_p4rt
-class SAIAPITableKey(SAIAPIAttribute):
+@dash_p4rt_parser
+class DashP4TableKey(DashP4TableAttribute):
     """
     This class represents a single SAI API table key and provides parser from the P4Runtime table key object.
     """
@@ -43,8 +43,7 @@ class SAIAPITableKey(SAIAPIAttribute):
         else:
             raise ValueError(f"No valid match tag found")
 
-        if STRUCTURED_ANNOTATIONS_TAG in p4rt_table_key:
-            self._parse_sai_table_attribute_annotation(p4rt_table_key)
+        self._parse_sai_table_attribute_annotation(p4rt_table_key)
 
         # If type is specified, use it. Otherwise, try to find the proper type using default heuristics.
         if self.type != None:

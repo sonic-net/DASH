@@ -1,8 +1,8 @@
 from .common import *
 
 
-@sai_parser_from_p4rt
-class SAIEnumMember(SAIObject):
+@dash_p4rt_parser
+class DashP4EnumMember(DashP4Object):
     """
     This class represents a single SAI enum member and provides parser from the P4Runtime enum member object
     """

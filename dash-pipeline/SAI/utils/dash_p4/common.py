@@ -35,7 +35,7 @@ SAI_TABLE_TAG: str = "SaiTable"
 #
 # SAI parser decorators:
 #
-def sai_parser_from_p4rt(cls: Type["SAIObject"]):
+def dash_p4rt_parser(cls: Type["DashP4Object"]):
     @staticmethod
     def create(p4rt_value, *args, **kwargs):
         sai_object = cls()
@@ -58,7 +58,7 @@ def sai_parser_from_p4rt(cls: Type["SAIObject"]):
     return cls
 
 
-class SAIObject:
+class DashP4Object:
     def __init__(self):
         # Properties from P4Runtime preamble
         self.raw_name: str = ""
@@ -69,7 +69,7 @@ class SAIObject:
 
     def parse_basic_info_if_exists(self, p4rt_object: Dict[str, Any]) -> None:
         """
-        This method parses basic info, such as id and name, from either the object itself or the P4Runtime preamble object and populates the SAI object.
+        This method parses basic info, such as id and name, from either the object itself or the P4Runtime preamble object.
 
         Example P4Runtime preamble object:
 
@@ -79,6 +79,10 @@ class SAIObject:
                 "alias": "outbound.acl.stage1:dash_acl_rule|dash_acl"
             },
         """
+        # We save the raw name here, because "name" can be override by annotation for API generation purpose, and the raw name will help us
+        # to find the correlated P4 infomation from either Runtime or IR.
+        self.raw_name = self.name
+
         if PREAMBLE_TAG in p4rt_object:
             preamble = p4rt_object[PREAMBLE_TAG]
             self.id = int(preamble["id"])
@@ -92,10 +96,6 @@ class SAIObject:
         if "." in self.name:
             name_parts = self.name.split(".")
             self.name = name_parts[-1]
-
-        # We save the raw name here, because "name" can be override by annotation for API generation purpose, and the raw name will help us
-        # to find the correlated P4 infomation from either Runtime or IR.
-        self.raw_name = self.name
 
         return
 

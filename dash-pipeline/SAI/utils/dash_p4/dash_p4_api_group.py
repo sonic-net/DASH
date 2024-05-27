@@ -1,19 +1,19 @@
 from typing import List, Optional
 from .common import *
-from .sai_api_table import SAIAPITable
+from .dash_p4_table import DashP4Table
 
 
-class DASHAPISet(SAIObject):
+class DashP4API(DashP4Object):
     """
-    This class holds all parsed SAI API info for a specific API set, such as routing or CA-PA mapping.
+    This class holds all parsed DASH p4 API info for a specific API group, such as routing or CA-PA mapping.
     """
 
     def __init__(self, api_name: str):
         self.app_name: str = api_name
         self.api_type: Optional[str] = None
-        self.tables: List[SAIAPITable] = []
+        self.tables: List[DashP4Table] = []
 
-    def add_table(self, table: SAIAPITable) -> None:
+    def add_table(self, table: DashP4Table) -> None:
         if self.api_type == None:
             self.api_type = table.api_type
         elif self.api_type != table.api_type:
