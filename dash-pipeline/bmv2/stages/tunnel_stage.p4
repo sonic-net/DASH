@@ -33,7 +33,14 @@ control tunnel_stage(
 
     apply {
         if (tunnel.apply().hit) {
-            do_action_static_encap.apply(hdr, meta);
+            do_tunnel_encap(hdr, meta,
+                        meta.overlay_data.dmac,
+                        meta.tunnel_data.underlay_dmac,
+                        meta.tunnel_data.underlay_smac,
+                        meta.tunnel_data.underlay_dip,
+                        meta.tunnel_data.underlay_sip,
+                        meta.tunnel_data.dash_encapsulation,
+                        meta.tunnel_data.vni);
         }
     }
 }
