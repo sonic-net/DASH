@@ -143,3 +143,18 @@ class DashP4Counter(DashP4TableAttribute):
                 )
 
             yield counter
+
+    #
+    # Functions for generating SAI specs.
+    #
+    def _get_sai_name(self, table_name: str) -> str:
+        if self.attr_type == "stats":
+            return f"SAI_{table_name.upper()}_STAT_{self.name.upper()}"
+
+        return f"SAI_{table_name.upper()}_{self.name.upper()}"
+    
+    def _get_sai_description(self, table_name: str):
+        if self.attr_type == "stats":
+            return f"DASH {table_name.upper()} {self.name.upper()} stat count"
+
+        return f"Counter attribute {self.name.upper()}"

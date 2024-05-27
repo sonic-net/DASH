@@ -5,7 +5,7 @@ from .dash_p4_counter import *
 from .dash_p4_table_action_param import *
 from .dash_p4_table_key import *
 from .dash_p4_table_action import *
-from ..sai_spec import SaiApi, SaiEnum, SaiEnumMember, SaiAttribute
+from ..sai_spec import SaiApi, SaiStruct, SaiEnum, SaiEnumMember, SaiAttribute
 
 
 @dash_p4rt_parser
@@ -126,6 +126,10 @@ class DashP4Table(DashP4Object):
     def __parse_table_keys(self, p4rt_table: Dict[str, Any]) -> None:
         for p4rt_table_key in p4rt_table[MATCH_FIELDS_TAG]:
             table_key = DashP4TableKey.from_p4rt(p4rt_table_key)
+
+            if self.is_object != "false":
+                table_key.is_entry_key = False
+
             self.keys.append(table_key)
 
         self.keys = DashP4TableAttribute.link_ip_is_v6_vars(self.keys)
@@ -254,14 +258,16 @@ class DashP4Table(DashP4Object):
         for order in sorted(sai_stats_by_order.keys()):
             self.sai_stats.extend(sai_stats_by_order[order])
 
+    #
+    # Functions for generating SAI specs:
+    #
     def to_sai(self) -> SaiApi:
         sai_api = SaiApi(self.name, "", self.is_object != "false")
 
         self.create_sai_action_enum(sai_api)
+        self.create_sai_structs(sai_api)
         self.create_sai_attributes(sai_api)
         self.create_sai_stats(sai_api)
-
-        # TODO: Struct
 
         return sai_api
 
@@ -300,11 +306,25 @@ class DashP4Table(DashP4Object):
         )
         sai_api.attributes.append(sai_attr_action)
 
+    def create_sai_structs(self, sai_api: SaiApi) -> None:
+        # The entry struct is only needed for non-object tables.
+        if self.is_object != "false":
+            return
+
+        sai_struct_members = [attr.to_sai(self.name) for attr in self.keys if attr.skipattr != "true"]
+
+        sai_struct = SaiStruct(
+            name=f"sai_{self.name.lower()}_entry_t",
+            description=f"Entry for {self.name.lower()}",
+            members=sai_struct_members,
+        )
+
+        sai_api.structs.append(sai_struct)
+
     def create_sai_stats(self, sai_api: SaiApi) -> None:
         sai_api.stats = [
-            counter.to_sai(self.name)
-            for counter in self.counters
-            if counter.attr_type == "stats"
+            sai_stat.to_sai(self.name)
+            for sai_stat in self.sai_stats
         ]
 
     def create_sai_attributes(self, sai_api: SaiApi) -> None:

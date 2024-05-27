@@ -91,17 +91,20 @@ class DashP4TableAttribute(DashP4Object):
             self.default = sai_type_info.default
 
     #
-    # Functions for generating SAI spec
+    # Functions for generating SAI specs.
     #
     def to_sai(self, table_name: str) -> SaiAttribute:
+        name = self._get_sai_name(table_name)
+        description = self._get_sai_description(table_name)
+
         default_value = None if self.isreadonly == "true" else self.default
         object_name = f"SAI_OBJECT_TYPE_{self.object_name.upper()}" if self.object_name else None
         sai_flags = "READ_ONLY" if self.isreadonly == "true" else "CREATE_AND_SET"
         allow_null = True if self.type == "sai_object_id_t" else False
 
         return SaiAttribute(
-            name = f"SAI_{table_name.upper()}_{self.name.upper()}",
-            description = "",
+            name = name,
+            description = description,
             type = self.type,
             attr_value_field = self.field,
             default = default_value,
@@ -110,3 +113,9 @@ class DashP4TableAttribute(DashP4Object):
             object_name = object_name,
             allow_null = allow_null,
         )
+
+    def _get_sai_name(self, table_name: str) -> str:
+        return f"SAI_{table_name.upper()}_{self.name.upper()}"
+    
+    def _get_sai_description(self, table_name: str):
+        return f"Action parameter {self.name.upper()}"
