@@ -25,4 +25,4 @@ class DashP4EnumMember(DashP4Object):
         self.enum_value = int.from_bytes(decoded_bytes, byteorder="big")
 
     def to_sai(self) -> SaiEnumMember:
-        return SaiEnumMember(self.name, "", self.enum_value)
+        return SaiEnumMember(self.name, "", str(self.enum_value))

@@ -1,4 +1,137 @@
 !!python/object:utils.sai_spec.sai_spec.SaiSpec
+types: []
+enums:
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_tunnel_dscp_mode_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: PRESERVE_MODEL
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: PIPE_MODEL
+    description: ''
+    value: '1'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_ha_role_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: DEAD
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: ACTIVE
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: STANDBY
+    description: ''
+    value: '2'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: STANDALONE
+    description: ''
+    value: '3'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SWITCHING_TO_ACTIVE
+    description: ''
+    value: '4'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_encapsulation_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: INVALID
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: VXLAN
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: NVGRE
+    description: ''
+    value: '2'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_direction_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: INVALID
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: OUTBOUND
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: INBOUND
+    description: ''
+    value: '2'
+port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtension
+  attributes: []
+  stats:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_PORT_STAT_ENI_MISS_DROP_PACKETS
+    description: DASH PORT ENI_MISS_DROP_PACKETS stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_PORT_STAT_LB_FAST_PATH_ENI_MISS_DROP_BYTES
+    description: DASH PORT LB_FAST_PATH_ENI_MISS_DROP_BYTES stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_PORT_STAT_LB_FAST_PATH_ENI_MISS_DROP_PACKETS
+    description: DASH PORT LB_FAST_PATH_ENI_MISS_DROP_PACKETS stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_PORT_STAT_VIP_MISS_DROP_PACKETS
+    description: DASH PORT VIP_MISS_DROP_PACKETS stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_PORT_STAT_LB_FAST_PATH_ICMP_IN_BYTES
+    description: DASH PORT LB_FAST_PATH_ICMP_IN_BYTES stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_PORT_STAT_LB_FAST_PATH_ICMP_IN_PACKETS
+    description: DASH PORT LB_FAST_PATH_ICMP_IN_PACKETS stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
 api_groups:
 - !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
   name: dash_acl
@@ -2382,66 +2515,3 @@ api_groups:
       object_name: null
       allow_null: false
     stats: []
-port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtension
-  attributes: []
-  stats:
-  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_PORT_STAT_ENI_MISS_DROP_PACKETS
-    description: DASH PORT ENI_MISS_DROP_PACKETS stat count
-    type: sai_uint64_t
-    attr_value_field: u64
-    default: null
-    isresourcetype: false
-    flags: READ_ONLY
-    object_name: null
-    allow_null: false
-  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_PORT_STAT_LB_FAST_PATH_ENI_MISS_DROP_BYTES
-    description: DASH PORT LB_FAST_PATH_ENI_MISS_DROP_BYTES stat count
-    type: sai_uint64_t
-    attr_value_field: u64
-    default: null
-    isresourcetype: false
-    flags: READ_ONLY
-    object_name: null
-    allow_null: false
-  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_PORT_STAT_LB_FAST_PATH_ENI_MISS_DROP_PACKETS
-    description: DASH PORT LB_FAST_PATH_ENI_MISS_DROP_PACKETS stat count
-    type: sai_uint64_t
-    attr_value_field: u64
-    default: null
-    isresourcetype: false
-    flags: READ_ONLY
-    object_name: null
-    allow_null: false
-  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_PORT_STAT_VIP_MISS_DROP_PACKETS
-    description: DASH PORT VIP_MISS_DROP_PACKETS stat count
-    type: sai_uint64_t
-    attr_value_field: u64
-    default: null
-    isresourcetype: false
-    flags: READ_ONLY
-    object_name: null
-    allow_null: false
-  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_PORT_STAT_LB_FAST_PATH_ICMP_IN_BYTES
-    description: DASH PORT LB_FAST_PATH_ICMP_IN_BYTES stat count
-    type: sai_uint64_t
-    attr_value_field: u64
-    default: null
-    isresourcetype: false
-    flags: READ_ONLY
-    object_name: null
-    allow_null: false
-  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_PORT_STAT_LB_FAST_PATH_ICMP_IN_PACKETS
-    description: DASH PORT LB_FAST_PATH_ICMP_IN_PACKETS stat count
-    type: sai_uint64_t
-    attr_value_field: u64
-    default: null
-    isresourcetype: false
-    flags: READ_ONLY
-    object_name: null
-    allow_null: false

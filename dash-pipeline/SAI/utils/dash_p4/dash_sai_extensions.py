@@ -119,9 +119,14 @@ class DashP4SAIExtensions(DashP4Object):
     #
     def to_sai(self) -> SaiSpec:
         sai_spec = SaiSpec()
-        sai_spec.api_groups = [api_group.to_sai() for api_group in self.table_groups]
+        self.create_sai_enums(sai_spec)
         self.create_sai_port_counters(sai_spec.port_extenstion)
+        sai_spec.api_groups = [api_group.to_sai() for api_group in self.table_groups]
         return sai_spec
+    
+    def create_sai_enums(self, sai_spec: SaiSpec):
+        for enum in self.enums:
+            sai_spec.enums.append(enum.to_sai())
 
     def create_sai_port_counters(self, api_ext: SaiApiExtension) -> None:
         for counter in self.counters:
