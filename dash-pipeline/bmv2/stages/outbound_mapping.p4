@@ -3,8 +3,6 @@
 
 #include "../dash_routing_types.p4"
 
-DEFINE_PACKET_COUNTER(outbound_ca_pa_entry_miss_drop, MAX_ENI, attr_type="stats", action_names="set_eni_attrs", order=3)
-
 control outbound_mapping_stage(inout headers_t hdr,
                       inout metadata_t meta)
 {
@@ -54,7 +52,7 @@ control outbound_mapping_stage(inout headers_t hdr,
                 vnet.apply();
             }
             drop: {
-                UPDATE_COUNTER(outbound_ca_pa_entry_miss_drop, meta.eni_id);
+                UPDATE_ENI_COUNTER(outbound_ca_pa_entry_miss_drop);
             }
         }
     }
