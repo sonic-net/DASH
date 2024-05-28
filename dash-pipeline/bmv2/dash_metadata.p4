@@ -9,9 +9,11 @@
 enum bit<32> dash_routing_actions_t {
     NONE = 0,
     STATIC_ENCAP = (1 << 0),
-    NAT46 = (1 << 1),
-    NAT64 = (1 << 2)
-}
+    NAT = (1 << 1),
+    NAT46 = (1 << 2),
+    NAT64 = (1 << 3),
+    NAT_PORT = (1 << 4)
+};
 
 enum bit<16> dash_direction_t {
     INVALID = 0,
@@ -44,6 +46,7 @@ enum bit<16> dash_pipeline_stage_t {
     OUTBOUND_STAGE_START = 200,
     OUTBOUND_ROUTING = 200, // OUTBOUND_STAGE_START
     OUTBOUND_MAPPING = 201,
+    OUTBOUND_PRE_ROUTING_ACTION_APPLY = 280,
 
     // Common stages
     ROUTING_ACTION_APPLY = 300

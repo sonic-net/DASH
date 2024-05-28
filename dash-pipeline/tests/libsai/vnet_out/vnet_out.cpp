@@ -43,6 +43,12 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    // check if dtel create will work
+
+    sai_dtel_api_t *dtel_api;
+    status = sai_api_query((sai_api_t)SAI_API_DTEL, (void**)&dtel_api);
+    QUERY_STATUS_CHECK(status, SAI_API_DTEL);
+
     sai_dash_direction_lookup_api_t *dash_direction_lookup_api;
     status = sai_api_query((sai_api_t)SAI_API_DASH_DIRECTION_LOOKUP, (void**)&dash_direction_lookup_api);
     QUERY_STATUS_CHECK(status, SAI_API_DASH_DIRECTION_LOOKUP);

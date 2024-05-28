@@ -204,7 +204,7 @@ class SAITypeSolver:
         "sai_ip_addr_family_t": SAITypeInfo("sai_ip_addr_family_t", "u32", default="SAI_IP_ADDR_FAMILY_IPV4"),
         "sai_uint32_t": SAITypeInfo("sai_uint32_t", "u32", default="0"),
         "sai_uint64_t": SAITypeInfo("sai_uint64_t", "u64", default="0"),
-        "sai_mac_t": SAITypeInfo("sai_mac_t", "mac", default="0:0:0:0:0:0"),
+        "sai_mac_t": SAITypeInfo("sai_mac_t", "mac", default="vendor"),
         "sai_ip_prefix_t": SAITypeInfo("sai_ip_prefix_t", "ipPrefix", default="0"),
         "sai_u8_list_t": SAITypeInfo("sai_u8_list_t", "u8list", default="empty"),
         "sai_u16_list_t": SAITypeInfo("sai_u16_list_t", "u16list", default="empty"),
@@ -368,7 +368,7 @@ class SAIObject:
             self.name = str(p4rt_anno['value']['stringValue'])
             return True
         elif p4rt_anno['key'] == 'order':
-            self.order = str(p4rt_anno['value']['int64Value'])
+            self.order = int(p4rt_anno['value']['int64Value'])
             return True
 
         return False

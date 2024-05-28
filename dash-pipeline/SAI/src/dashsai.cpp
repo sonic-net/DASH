@@ -789,3 +789,118 @@ sai_status_t DashSai::get(
 
     return SAI_STATUS_NOT_IMPLEMENTED;
 }
+
+/**
+ * @brief Populate default attributes.
+ *
+ * Since BMv2 dont's support default attributes, we will add to existing
+ * attributes all the ones that have default values, except those that
+ * have valid only condition not met, since then BMv2 will fail.
+ *
+ * @objectType object type for list of attributes
+ * @attr_count attributes count
+ * @attr_list attributes list
+ *
+ * @return List of attributes with possible added attributes with default values.
+ */
+std::vector<sai_attribute_t> DashSai::populateDefaultAttributes(
+        _In_ sai_object_type_t objectType,
+        _In_ uint32_t attr_count,
+        _In_ const sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
+
+    // populate existing attributes
+
+    std::vector<sai_attribute_t> attrs(attr_list, attr_list + attr_count);
+
+    auto* info = sai_metadata_get_object_type_info(objectType);
+
+    if (info == nullptr)
+    {
+        DASH_LOG_ERROR("failed to get metadata info for object type %d", objectType);
+        return attrs;
+    }
+
+    // iterate over all possible attributes
+
+    for (size_t idx = 0; idx < info->attrmetadatalength; idx++)
+    {
+        auto* md = info->attrmetadata[idx];
+
+        auto* attr = sai_metadata_get_attr_by_id(md->attrid, (uint32_t)attrs.size(), attrs.data());
+
+        if (attr)
+            continue;   // attribute already exists on current attribute list
+
+        if (md->isconditional)
+            continue;   // conditional attributes should be populated by user
+
+        if (md->isreadonly)
+            continue;   // can't be read only
+
+        if (md->ismandatoryoncreate)
+            continue;   // can't be mandatory on create
+
+        if (md->defaultvaluetype == SAI_DEFAULT_VALUE_TYPE_NONE)
+            continue;   // there is no default value
+
+        if (md->isvalidonly)
+        {
+            bool haveActionAttribute = false;
+
+            for (size_t i = 0; i < md->validonlylength; i++)
+            {
+                auto *condmd = sai_metadata_get_attr_metadata(objectType, md->validonly[i]->attrid);
+
+                if (condmd && strstr(condmd->attridname, "_ATTR_ACTION"))
+                {
+                    haveActionAttribute = true;
+                    break;
+                }
+            }
+
+            if (haveActionAttribute == false)
+            {
+                // always set default attribute in this case, even if condition is not set
+                // (see github discussion https://github.com/sonic-net/DASH/pull/547)
+            }
+            else if (sai_metadata_is_validonly_met(md, (uint32_t)attrs.size(), attrs.data()) == false)
+            {
+                // attribute is valid only, but condition is not met based on current attributes
+                continue;
+            }
+        }
+
+        if (md->defaultvaluetype == SAI_DEFAULT_VALUE_TYPE_CONST)
+        {
+            sai_attribute_t a;
+
+            a.id = md->attrid;
+            a.value = *md->defaultvalue;
+
+            DASH_LOG_NOTICE("adding %s with default value", md->attridname);
+
+            attrs.push_back(a);
+
+        }
+        else if (md->defaultvaluetype == SAI_DEFAULT_VALUE_TYPE_EMPTY_LIST)
+        {
+            sai_attribute_t a;
+
+            a.id = md->attrid;
+            a.value.objlist.count = 0;
+            a.value.objlist.list = nullptr;
+
+            DASH_LOG_NOTICE("adding %s with default value", md->attridname);
+
+            attrs.push_back(a);
+        }
+        else
+        {
+            DASH_LOG_WARN("skipping default value for %s, default value type %d is not supported", md->attridname, md->defaultvaluetype);
+        }
+    }
+
+    return attrs;
+}

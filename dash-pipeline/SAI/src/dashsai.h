@@ -95,6 +95,13 @@ namespace dash
             bool removeFromTable(
                     _In_ sai_object_id_t id);
 
+        public: // default attributes helper
+
+            static std::vector<sai_attribute_t> populateDefaultAttributes(
+                    _In_ sai_object_type_t objectType,
+                    _In_ uint32_t attr_count,
+                    _In_ const sai_attribute_t *attr_list);
+
         private: // private helper methods
 
             static std::shared_ptr<p4::config::v1::P4Info> parse_p4info(
