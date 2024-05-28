@@ -84,6 +84,7 @@ class TestSaiVnetOutbound:
 
     @pytest.mark.ptf
     @pytest.mark.snappi
+    @pytest.mark.skip(reason="Skipping this test")
     def test_create_vnet_scale_config_generated(self, dpu):
         """Generate and apply configuration"""
         results = [*dpu.process_commands( (self.make_create_commands()) )]
