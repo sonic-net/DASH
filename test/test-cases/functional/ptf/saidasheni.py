@@ -34,7 +34,7 @@ class CreateDeleteEniTest(VnetAPI):
         super(CreateDeleteEniTest, self).setUp()
 
         self.cps = 10000         # ENI connections per second
-        self.pps = 100000        # ENI packets per seconds
+        self.bw = 1000           # ENI BW
         self.flows = 100000      # ENI flows
         self.admin_state = True  # ENI admin state
         self.vm_vni = 10         # ENI VM VNI
@@ -123,7 +123,7 @@ class CreateDeleteEniTest(VnetAPI):
         """
 
         self.eni = self.eni_create(cps=self.cps,
-                                   pps=self.pps,
+                                   bw=self.bw,
                                    flows=self.flows,
                                    admin_state=self.admin_state,
                                    vm_underlay_dip=self.vm_underlay_dip,
@@ -314,7 +314,7 @@ class CreateDeleteEniTest(VnetAPI):
         attr = sai_thrift_get_eni_attribute(self.client,
                                             self.eni,
                                             cps=True,
-                                            pps=True,
+                                            bw=True,
                                             flows=True,
                                             admin_state=True,
                                             vm_underlay_dip=True,
@@ -343,7 +343,7 @@ class CreateDeleteEniTest(VnetAPI):
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
 
         self.assertEqual(attr['cps'], self.cps)
-        self.assertEqual(attr['pps'], self.pps)
+        self.assertEqual(attr['bw'], self.bw)
         self.assertEqual(attr['flows'], self.flows)
         self.assertEqual(attr['admin_state'], self.admin_state)
         self.assertEqual(attr['vm_underlay_dip'].addr.ip4, self.vm_underlay_dip.addr.ip4)
@@ -378,7 +378,7 @@ class CreateDeleteEniTest(VnetAPI):
         """
 
         test_cps = self.cps * 2
-        test_pps = self.pps * 2
+        test_bw = self.bw * 2
         test_flows = self.flows * 2
         test_admin_state = False
         test_vm_vni = 5
@@ -398,12 +398,12 @@ class CreateDeleteEniTest(VnetAPI):
             attr = sai_thrift_get_eni_attribute(self.client, self.eni, cps=True)
             self.assertEqual(attr['cps'], test_cps)
 
-            # set and verify new pps value
-            sai_thrift_set_eni_attribute(self.client, self.eni, pps=test_pps)
+            # set and verify new bw value
+            sai_thrift_set_eni_attribute(self.client, self.eni, bw=test_bw)
             self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
 
-            attr = sai_thrift_get_eni_attribute(self.client, self.eni, pps=True)
-            self.assertEqual(attr['pps'], test_pps)
+            attr = sai_thrift_get_eni_attribute(self.client, self.eni, bw=True)
+            self.assertEqual(attr['bw'], test_bw)
 
             # set and verify new flow value
             sai_thrift_set_eni_attribute(self.client, self.eni, flows=test_flows)
@@ -593,7 +593,7 @@ class CreateDeleteEniTest(VnetAPI):
         finally:
             # set ENI attributes to the original values
             sai_thrift_set_eni_attribute(self.client, self.eni, cps=self.cps)
-            sai_thrift_set_eni_attribute(self.client, self.eni, pps=self.pps)
+            sai_thrift_set_eni_attribute(self.client, self.eni, bw=self.bw)
             sai_thrift_set_eni_attribute(self.client, self.eni, flows=self.flows)
             sai_thrift_set_eni_attribute(self.client, self.eni, admin_state=self.admin_state)
             sai_thrift_set_eni_attribute(self.client, self.eni, vm_underlay_dip=self.vm_underlay_dip)
@@ -633,7 +633,7 @@ class CreateDeleteEniTest(VnetAPI):
             attr = sai_thrift_get_eni_attribute(self.client,
                                                 self.eni,
                                                 cps=True,
-                                                pps=True,
+                                                bw=True,
                                                 flows=True,
                                                 admin_state=True,
                                                 vm_underlay_dip=True,
@@ -662,7 +662,7 @@ class CreateDeleteEniTest(VnetAPI):
             self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
 
             self.assertEqual(attr['cps'], self.cps)
-            self.assertEqual(attr['pps'], self.pps)
+            self.assertEqual(attr['bw'], self.bw)
             self.assertEqual(attr['flows'], self.flows)
             self.assertEqual(attr['admin_state'], self.admin_state)
             self.assertEqual(attr['vm_underlay_dip'].addr.ip4, self.vm_underlay_dip.addr.ip4)
@@ -705,12 +705,12 @@ class CreateDeleteEniTest(VnetAPI):
         try:
             # create test eni to verify set method
             test_cps = 500
-            test_pps = 500
+            test_bw = 500
             test_flows = 500
             test_vm_underlay_ip = sai_ipaddress('172.0.15.15')
 
             test_eni = self.eni_create(cps=test_cps,
-                                pps=test_pps,
+                                bw=test_bw,
                                 flows=test_flows,
                                 admin_state=True,
                                 vm_underlay_dip=test_vm_underlay_ip,

@@ -67,7 +67,7 @@ class TestAclInbound:
         # send n packets and stop
         f2.duration.fixed_packets.packets = TOTALPACKETS
         # send n packets per second
-        f2.rate.pps = PPS
+        f2.rate.bw = BW
         f2.metrics.enable = True
 
         outer_eth, ip, udp, vxlan, inner_eth, inner_ip , inner_udp= (

@@ -79,7 +79,7 @@ TEST_VNET_INBOUND_CONFIG = {
             'ADMIN_STATE': True,
             'CPS': 10000,
             'FLOWS': 10000,
-            'PPS': 100000,
+            'BW': 100000,
             'VM_UNDERLAY_DIP': PA_VALIDATION_DIP,
             'VM_VNI': VM_VNI,
             'VNET_ID': '$vnet_1'}

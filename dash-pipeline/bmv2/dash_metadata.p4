@@ -64,7 +64,7 @@ enum bit<16> dash_tunnel_dscp_mode_t {
 
 struct eni_data_t {
     bit<32> cps;
-    bit<32> pps;
+    bit<32> bw;
     bit<32> flows;
     bit<1>  admin_state;
     IPv6Address pl_sip;

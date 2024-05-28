@@ -71,7 +71,7 @@ class TestUdpBidir:
         # send n packets and stop
         f1.duration.fixed_packets.packets = TOTALPACKETS
         # send n packets per second
-        f1.rate.pps = PPS
+        f1.rate.bw = BW
         f1.metrics.enable = True
 
         outer_eth1, ip1, udp1, vxlan1, inner_eth1, inner_ip1, inner_udp1= (
@@ -110,7 +110,7 @@ class TestUdpBidir:
         # send n packets and stop
         f2.duration.fixed_packets.packets = TOTALPACKETS
         # send n packets per second
-        f2.rate.pps = PPS
+        f2.rate.bw = BW
         f2.metrics.enable = True
 
         outer_eth, ip, udp, vxlan, inner_eth, inner_ip , inner_udp= (
@@ -150,7 +150,7 @@ class TestUdpBidir:
         # send n packets and stop
         f3.duration.fixed_packets.packets = TOTALPACKETS
         # send n packets per second
-        f3.rate.pps = PPS
+        f3.rate.bw = BW
         f3.metrics.enable = True
 
         outer_eth, ip, udp, vxlan, inner_eth, inner_ip , inner_udp= (
@@ -190,7 +190,7 @@ class TestUdpBidir:
         # send n packets and stop
         f4.duration.fixed_packets.packets = TOTALPACKETS
         # send n packets per second
-        f4.rate.pps = PPS
+        f4.rate.bw = BW
         f4.metrics.enable = True
 
         outer_eth, ip, udp, vxlan, inner_eth, inner_ip , inner_udp= (

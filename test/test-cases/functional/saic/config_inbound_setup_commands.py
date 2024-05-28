@@ -3,7 +3,7 @@
 ###############################################################
 
 TOTALPACKETS = 1000
-PPS = 100
+BW = 100
 PACKET_LENGTH = 128
 ENI_IP = "1.1.0.1"
 NETWORK_IP1 = "1.128.0.1"
@@ -97,7 +97,7 @@ dpu_config = [
     "attributes": [
       "SAI_ENI_ATTR_CPS",
       "10000",
-      "SAI_ENI_ATTR_PPS",
+      "SAI_ENI_ATTR_BW",
       "100000",
       "SAI_ENI_ATTR_FLOWS",
       "100000",
@@ -176,7 +176,7 @@ dpu_config = [
     "attributes": [
       "SAI_ENI_ATTR_CPS",
       "10000",
-      "SAI_ENI_ATTR_PPS",
+      "SAI_ENI_ATTR_BW",
       "100000",
       "SAI_ENI_ATTR_FLOWS",
       "100000",

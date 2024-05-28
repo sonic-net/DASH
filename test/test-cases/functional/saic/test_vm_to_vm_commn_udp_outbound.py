@@ -36,8 +36,8 @@ Topology Used :
 ###############################################################
 
 TOTALPACKETS = 1000
-PPS = 100
-TRAFFIC_SLEEP_TIME = (TOTALPACKETS / PPS) + 2 
+BW = 100
+TRAFFIC_SLEEP_TIME = (TOTALPACKETS / BW) + 2 
 PACKET_LENGTH = 128
 ENI_IP = "1.1.0.1"
 NETWORK_IP1 = "1.128.0.1"
@@ -89,7 +89,7 @@ class TestUdpOutbound:
         # send n packets and stop
         f1.duration.fixed_packets.packets = TOTALPACKETS
         # send n packets per second
-        f1.rate.pps = PPS
+        f1.rate.bw = BW
         f1.metrics.enable = True
 
         outer_eth1, ip1, udp1, vxlan1, inner_eth1, inner_ip1, inner_udp1= (
@@ -127,7 +127,7 @@ class TestUdpOutbound:
         # send n packets and stop
         f2.duration.fixed_packets.packets = TOTALPACKETS
         # send n packets per second
-        f2.rate.pps = PPS
+        f2.rate.bw = BW
         f2.metrics.enable = True
 
         outer_eth, ip, udp, vxlan, inner_eth, inner_ip , inner_udp= (

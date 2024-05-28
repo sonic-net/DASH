@@ -120,7 +120,7 @@ int main(int argc, char **argv)
     attr.value.u32 = 10000;
     attrs.push_back(attr);
 
-    attr.id = SAI_ENI_ATTR_PPS;
+    attr.id = SAI_ENI_ATTR_BW;
     attr.value.u32 = 100000;
     attrs.push_back(attr);
 
