@@ -54,15 +54,14 @@ control outbound_routing_stage(inout headers_t hdr,
 
         routing_group.apply();
         if (meta.eni_data.routing_group_admin_state) {
-        routing.apply();
+            if (!routing.apply().hit) {
+                UPDATE_COUNTER(outbound_routing_entry_miss_drop, meta.eni_id);
+            }
         } else {
             drop(meta);
         }
-
-        if (!routing.apply().hit) {
-            UPDATE_COUNTER(outbound_routing_entry_miss_drop, meta.eni_id);
-        }
     }
+
 }
 
 #endif /* _DASH_STAGE_OUTBOUND_ROUTING_P4_ */
