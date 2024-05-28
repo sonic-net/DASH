@@ -3,8 +3,6 @@
 
 #include "../dash_routing_types.p4"
 
-DEFINE_PACKET_COUNTER(outbound_routing_entry_miss_drop, MAX_ENI, attr_type="stats", action_names="set_eni_attrs", order=3)
-
 control outbound_routing_stage(inout headers_t hdr,
                                inout metadata_t meta)
 {
@@ -36,7 +34,7 @@ control outbound_routing_stage(inout headers_t hdr,
         }
 
         if (!routing.apply().hit) {
-            UPDATE_COUNTER(outbound_routing_entry_miss_drop, meta.eni_id);
+            UPDATE_ENI_COUNTER(outbound_routing_entry_miss_drop);
         }
     }
 }
