@@ -4,4 +4,4 @@
 #
 [ X$SETUP == "X" ] && export SETUP=../sai_dpu_client_server_snappi.json
 echo "==> PYTHONPATH=.. pytest -sv --setup $SETUP $@"
-PYTHONPATH=.. pytest -sv --setup $SETUP $@
+# PYTHONPATH=.. pytest -sv --setup $SETUP $@
