@@ -311,7 +311,7 @@ class DashP4Table(DashP4Object):
         if self.is_object != "false":
             return
 
-        sai_struct_members = [attr.to_sai(self.name) for attr in self.keys if attr.skipattr != "true"]
+        sai_struct_members = [attr.to_sai_struct_entry(self.name) for attr in self.keys if attr.skipattr != "true"]
 
         sai_struct = SaiStruct(
             name=f"sai_{self.name.lower()}_entry_t",
@@ -323,13 +323,13 @@ class DashP4Table(DashP4Object):
 
     def create_sai_stats(self, sai_api: SaiApi) -> None:
         sai_api.stats = [
-            sai_stat.to_sai(self.name)
+            sai_stat.to_sai_attribute(self.name)
             for sai_stat in self.sai_stats
         ]
 
     def create_sai_attributes(self, sai_api: SaiApi) -> None:
         sai_api.attributes.extend(
-            [attr.to_sai(self.name) for attr in self.sai_attributes if attr.skipattr != "true"]
+            [attr.to_sai_attribute(self.name) for attr in self.sai_attributes if attr.skipattr != "true"]
         )
 
         # If the table has an counter attached, we need to create a counter attribute for it.

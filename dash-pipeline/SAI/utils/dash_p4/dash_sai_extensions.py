@@ -119,10 +119,37 @@ class DashP4SAIExtensions(DashP4Object):
     #
     def to_sai(self) -> SaiSpec:
         sai_spec = SaiSpec()
+        self.create_sai_api_types(sai_spec)
+        self.create_sai_object_types(sai_spec)
+        self.create_sai_object_entries(sai_spec)
         self.create_sai_enums(sai_spec)
         self.create_sai_port_counters(sai_spec.port_extenstion)
         sai_spec.api_groups = [api_group.to_sai() for api_group in self.table_groups]
         return sai_spec
+    
+    def create_sai_api_types(self, sai_spec: SaiSpec):
+        for table_group in self.table_groups:
+            sai_spec.api_types.append(f"SAI_API_{table_group.app_name.upper()}")
+
+    def create_sai_object_types(self, sai_spec: SaiSpec):
+        for table_group in self.table_groups:
+            for table in table_group.tables:
+                sai_spec.object_types.append(f"SAI_OBJECT_TYPE_{table.name.upper()}")
+    
+    def create_sai_object_entries(self, sai_spec: SaiSpec):
+        for table_group in self.table_groups:
+            for table in table_group.tables:
+                if table.is_object != "false":
+                    continue
+
+                object_entry = SaiStructEntry(
+                    name=table.name,
+                    description=f"Object entry for DASH API {table.name}",
+                    type=f"sai_{table.name}_t",
+                    valid_only=f"object_type == SAI_OBJECT_TYPE_{table.name.upper()},"
+                )
+
+                sai_spec.object_entries.append(object_entry)
     
     def create_sai_enums(self, sai_spec: SaiSpec):
         for enum in self.enums:
@@ -135,7 +162,7 @@ class DashP4SAIExtensions(DashP4Object):
             if len(counter.param_actions) > 0:
                 continue
 
-            sai_counter = counter.to_sai("port")
+            sai_counter = counter.to_sai_attribute("port")
 
             if counter.attr_type != "stats":
                 api_ext.attributes.append(sai_counter)

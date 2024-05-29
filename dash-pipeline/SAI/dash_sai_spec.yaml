@@ -1,19 +1,101 @@
 !!python/object:utils.sai_spec.sai_spec.SaiSpec
-api_types: []
-object_types: []
+api_types:
+- SAI_API_DASH_ACL
+- SAI_API_DASH_DIRECTION_LOOKUP
+- SAI_API_DASH_ENI
+- SAI_API_DASH_HA
+- SAI_API_DASH_INBOUND_ROUTING
+- SAI_API_DASH_METER
+- SAI_API_DASH_OUTBOUND_CA_TO_PA
+- SAI_API_DASH_VNET
+- SAI_API_DASH_OUTBOUND_ROUTING
+- SAI_API_DASH_PA_VALIDATION
+- SAI_API_ROUTE
+- SAI_API_DASH_VIP
+object_types:
+- SAI_OBJECT_TYPE_DASH_ACL_GROUP
+- SAI_OBJECT_TYPE_DASH_ACL_RULE
+- SAI_OBJECT_TYPE_DIRECTION_LOOKUP_ENTRY
+- SAI_OBJECT_TYPE_ENI_ETHER_ADDRESS_MAP_ENTRY
+- SAI_OBJECT_TYPE_ENI
+- SAI_OBJECT_TYPE_HA_SET
+- SAI_OBJECT_TYPE_HA_SCOPE
+- SAI_OBJECT_TYPE_INBOUND_ROUTING_ENTRY
+- SAI_OBJECT_TYPE_METER_BUCKET
+- SAI_OBJECT_TYPE_METER_POLICY
+- SAI_OBJECT_TYPE_METER_RULE
+- SAI_OBJECT_TYPE_OUTBOUND_CA_TO_PA_ENTRY
+- SAI_OBJECT_TYPE_VNET
+- SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY
+- SAI_OBJECT_TYPE_PA_VALIDATION_ENTRY
+- SAI_OBJECT_TYPE_ROUTE_ENTRY
+- SAI_OBJECT_TYPE_VIP_ENTRY
+object_entries:
+- !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+  name: direction_lookup_entry
+  description: Object entry for DASH API direction_lookup_entry
+  type: sai_direction_lookup_entry_t
+  objects: null
+  valid_only: object_type == SAI_OBJECT_TYPE_DIRECTION_LOOKUP_ENTRY,
+- !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+  name: eni_ether_address_map_entry
+  description: Object entry for DASH API eni_ether_address_map_entry
+  type: sai_eni_ether_address_map_entry_t
+  objects: null
+  valid_only: object_type == SAI_OBJECT_TYPE_ENI_ETHER_ADDRESS_MAP_ENTRY,
+- !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+  name: inbound_routing_entry
+  description: Object entry for DASH API inbound_routing_entry
+  type: sai_inbound_routing_entry_t
+  objects: null
+  valid_only: object_type == SAI_OBJECT_TYPE_INBOUND_ROUTING_ENTRY,
+- !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+  name: outbound_ca_to_pa_entry
+  description: Object entry for DASH API outbound_ca_to_pa_entry
+  type: sai_outbound_ca_to_pa_entry_t
+  objects: null
+  valid_only: object_type == SAI_OBJECT_TYPE_OUTBOUND_CA_TO_PA_ENTRY,
+- !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+  name: outbound_routing_entry
+  description: Object entry for DASH API outbound_routing_entry
+  type: sai_outbound_routing_entry_t
+  objects: null
+  valid_only: object_type == SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY,
+- !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+  name: pa_validation_entry
+  description: Object entry for DASH API pa_validation_entry
+  type: sai_pa_validation_entry_t
+  objects: null
+  valid_only: object_type == SAI_OBJECT_TYPE_PA_VALIDATION_ENTRY,
+- !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+  name: route_entry
+  description: Object entry for DASH API route_entry
+  type: sai_route_entry_t
+  objects: null
+  valid_only: object_type == SAI_OBJECT_TYPE_ROUTE_ENTRY,
+- !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+  name: vip_entry
+  description: Object entry for DASH API vip_entry
+  type: sai_vip_entry_t
+  objects: null
+  valid_only: object_type == SAI_OBJECT_TYPE_VIP_ENTRY,
 enums:
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
-  name: sai_dash_tunnel_dscp_mode_t
+  name: sai_dash_encapsulation_t
   description: ''
   members:
   - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: PRESERVE_MODEL
+    name: INVALID
     description: ''
     value: '0'
   - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: PIPE_MODEL
+    name: VXLAN
     description: ''
     value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: NVGRE
+    description: ''
+    value: '2'
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
   name: sai_dash_ha_role_t
   description: ''
@@ -39,21 +121,17 @@ enums:
     description: ''
     value: '4'
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
-  name: sai_dash_encapsulation_t
+  name: sai_dash_tunnel_dscp_mode_t
   description: ''
   members:
   - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: INVALID
+    name: PRESERVE_MODEL
     description: ''
     value: '0'
   - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: VXLAN
+    name: PIPE_MODEL
     description: ''
     value: '1'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: NVGRE
-    description: ''
-    value: '2'
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
   name: sai_dash_direction_t
   description: ''
@@ -74,36 +152,6 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
   attributes: []
   stats:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_PORT_STAT_ENI_MISS_DROP_PACKETS
-    description: DASH PORT ENI_MISS_DROP_PACKETS stat count
-    type: sai_uint64_t
-    attr_value_field: u64
-    default: null
-    isresourcetype: false
-    flags: READ_ONLY
-    object_name: null
-    allow_null: false
-  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_PORT_STAT_LB_FAST_PATH_ENI_MISS_DROP_BYTES
-    description: DASH PORT LB_FAST_PATH_ENI_MISS_DROP_BYTES stat count
-    type: sai_uint64_t
-    attr_value_field: u64
-    default: null
-    isresourcetype: false
-    flags: READ_ONLY
-    object_name: null
-    allow_null: false
-  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_PORT_STAT_LB_FAST_PATH_ENI_MISS_DROP_PACKETS
-    description: DASH PORT LB_FAST_PATH_ENI_MISS_DROP_PACKETS stat count
-    type: sai_uint64_t
-    attr_value_field: u64
-    default: null
-    isresourcetype: false
-    flags: READ_ONLY
-    object_name: null
-    allow_null: false
-  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_PORT_STAT_VIP_MISS_DROP_PACKETS
     description: DASH PORT VIP_MISS_DROP_PACKETS stat count
     type: sai_uint64_t
@@ -113,9 +161,10 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     flags: READ_ONLY
     object_name: null
     allow_null: false
+    valid_only: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_PORT_STAT_LB_FAST_PATH_ICMP_IN_BYTES
-    description: DASH PORT LB_FAST_PATH_ICMP_IN_BYTES stat count
+    name: SAI_PORT_STAT_ENI_MISS_DROP_PACKETS
+    description: DASH PORT ENI_MISS_DROP_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
     default: null
@@ -123,9 +172,10 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     flags: READ_ONLY
     object_name: null
     allow_null: false
+    valid_only: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_PORT_STAT_LB_FAST_PATH_ICMP_IN_PACKETS
-    description: DASH PORT LB_FAST_PATH_ICMP_IN_PACKETS stat count
+    name: SAI_PORT_STAT_PORT_LB_FAST_PATH_ICMP_IN_BYTES
+    description: DASH PORT PORT_LB_FAST_PATH_ICMP_IN_BYTES stat count
     type: sai_uint64_t
     attr_value_field: u64
     default: null
@@ -133,6 +183,40 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     flags: READ_ONLY
     object_name: null
     allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_PORT_STAT_PORT_LB_FAST_PATH_ICMP_IN_PACKETS
+    description: DASH PORT PORT_LB_FAST_PATH_ICMP_IN_PACKETS stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_PORT_STAT_PORT_LB_FAST_PATH_ENI_MISS_DROP_BYTES
+    description: DASH PORT PORT_LB_FAST_PATH_ENI_MISS_DROP_BYTES stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_PORT_STAT_PORT_LB_FAST_PATH_ENI_MISS_DROP_PACKETS
+    description: DASH PORT PORT_LB_FAST_PATH_ENI_MISS_DROP_PACKETS stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
 api_groups:
 - !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
   name: dash_acl
@@ -155,6 +239,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     stats: []
   - !!python/object:utils.sai_spec.sai_api.SaiApi
     name: dash_acl_rule
@@ -193,6 +278,7 @@ api_groups:
       flags: MANDATORY_ON_CREATE | CREATE_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_DASH_ACL_RULE_ATTR_COUNTER_ID
       description: Attach a counter. When it is empty, then packet hits won't be counted.
@@ -203,6 +289,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_COUNTER
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_DASH_ACL_RULE_ATTR_PRIORITY
       description: Rule priority in table
@@ -213,6 +300,7 @@ api_groups:
       flags: MANDATORY_ON_CREATE | CREATE_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_DASH_ACL_RULE_ATTR_IP_ADDR_FAMILY
       description: IP address family for resource accounting
@@ -223,6 +311,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     stats: []
 - !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
   name: dash_direction_lookup
@@ -246,16 +335,12 @@ api_groups:
       name: sai_direction_lookup_entry_entry_t
       description: Entry for direction_lookup_entry
       members:
-      - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
         name: VNI
         description: Exact matched key VNI
         type: sai_uint32_t
-        attr_value_field: u32
-        default: '0'
-        isresourcetype: false
-        flags: CREATE_AND_SET
-        object_name: null
-        allow_null: false
+        objects: null
+        valid_only: null
     attributes:
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_DIRECTION_LOOKUP_ENTRY_ATTR_ACTION
@@ -267,6 +352,7 @@ api_groups:
       flags: MANDATORY_ON_CREATE | CREATE_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     stats: []
 - !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
   name: dash_eni
@@ -290,16 +376,12 @@ api_groups:
       name: sai_eni_ether_address_map_entry_entry_t
       description: Entry for eni_ether_address_map_entry
       members:
-      - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
         name: address
         description: Exact matched key address
         type: sai_mac_t
-        attr_value_field: mac
-        default: vendor
-        isresourcetype: false
-        flags: CREATE_AND_SET
-        object_name: null
-        allow_null: false
+        objects: null
+        valid_only: null
     attributes:
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ACTION
@@ -311,6 +393,7 @@ api_groups:
       flags: MANDATORY_ON_CREATE | CREATE_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ENI_ID
       description: Action parameter ENI_ID
@@ -321,6 +404,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_ENI
       allow_null: true
+      valid_only: null
     stats: []
   - !!python/object:utils.sai_spec.sai_api.SaiApi
     name: eni
@@ -339,6 +423,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_PPS
       description: Action parameter PPS
@@ -349,6 +434,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_FLOWS
       description: Action parameter FLOWS
@@ -359,6 +445,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_ADMIN_STATE
       description: Action parameter ADMIN_STATE
@@ -369,6 +456,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_HA_SCOPE_ID
       description: Action parameter HA_SCOPE_ID
@@ -379,6 +467,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_HA_SCOPE
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_VM_UNDERLAY_DIP
       description: Action parameter VM_UNDERLAY_DIP
@@ -389,6 +478,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_VM_VNI
       description: Action parameter VM_VNI
@@ -399,6 +489,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_VNET_ID
       description: Action parameter VNET_ID
@@ -409,6 +500,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_VNET
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_PL_SIP
       description: Action parameter PL_SIP
@@ -419,6 +511,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_PL_SIP_MASK
       description: Action parameter PL_SIP_MASK
@@ -429,6 +522,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_PL_UNDERLAY_SIP
       description: Action parameter PL_UNDERLAY_SIP
@@ -439,6 +533,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_V4_METER_POLICY_ID
       description: Action parameter V4_METER_POLICY_ID
@@ -449,6 +544,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_METER_POLICY
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_V6_METER_POLICY_ID
       description: Action parameter V6_METER_POLICY_ID
@@ -459,6 +555,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_METER_POLICY
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_DASH_TUNNEL_DSCP_MODE
       description: Action parameter DASH_TUNNEL_DSCP_MODE
@@ -469,6 +566,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_DSCP
       description: Action parameter DSCP
@@ -479,6 +577,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE == SAI_DASH_TUNNEL_DSCP_MODE_PIPE_MODEL
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID
       description: Action parameter INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID
@@ -489,6 +588,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_INBOUND_V4_STAGE2_DASH_ACL_GROUP_ID
       description: Action parameter INBOUND_V4_STAGE2_DASH_ACL_GROUP_ID
@@ -499,6 +599,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_INBOUND_V4_STAGE3_DASH_ACL_GROUP_ID
       description: Action parameter INBOUND_V4_STAGE3_DASH_ACL_GROUP_ID
@@ -509,6 +610,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_INBOUND_V4_STAGE4_DASH_ACL_GROUP_ID
       description: Action parameter INBOUND_V4_STAGE4_DASH_ACL_GROUP_ID
@@ -519,6 +621,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_INBOUND_V4_STAGE5_DASH_ACL_GROUP_ID
       description: Action parameter INBOUND_V4_STAGE5_DASH_ACL_GROUP_ID
@@ -529,6 +632,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_INBOUND_V6_STAGE1_DASH_ACL_GROUP_ID
       description: Action parameter INBOUND_V6_STAGE1_DASH_ACL_GROUP_ID
@@ -539,6 +643,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_INBOUND_V6_STAGE2_DASH_ACL_GROUP_ID
       description: Action parameter INBOUND_V6_STAGE2_DASH_ACL_GROUP_ID
@@ -549,6 +654,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_INBOUND_V6_STAGE3_DASH_ACL_GROUP_ID
       description: Action parameter INBOUND_V6_STAGE3_DASH_ACL_GROUP_ID
@@ -559,6 +665,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_INBOUND_V6_STAGE4_DASH_ACL_GROUP_ID
       description: Action parameter INBOUND_V6_STAGE4_DASH_ACL_GROUP_ID
@@ -569,6 +676,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_INBOUND_V6_STAGE5_DASH_ACL_GROUP_ID
       description: Action parameter INBOUND_V6_STAGE5_DASH_ACL_GROUP_ID
@@ -579,6 +687,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_OUTBOUND_V4_STAGE1_DASH_ACL_GROUP_ID
       description: Action parameter OUTBOUND_V4_STAGE1_DASH_ACL_GROUP_ID
@@ -589,6 +698,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_OUTBOUND_V4_STAGE2_DASH_ACL_GROUP_ID
       description: Action parameter OUTBOUND_V4_STAGE2_DASH_ACL_GROUP_ID
@@ -599,6 +709,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_OUTBOUND_V4_STAGE3_DASH_ACL_GROUP_ID
       description: Action parameter OUTBOUND_V4_STAGE3_DASH_ACL_GROUP_ID
@@ -609,6 +720,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_OUTBOUND_V4_STAGE4_DASH_ACL_GROUP_ID
       description: Action parameter OUTBOUND_V4_STAGE4_DASH_ACL_GROUP_ID
@@ -619,6 +731,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_OUTBOUND_V4_STAGE5_DASH_ACL_GROUP_ID
       description: Action parameter OUTBOUND_V4_STAGE5_DASH_ACL_GROUP_ID
@@ -629,6 +742,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_OUTBOUND_V6_STAGE1_DASH_ACL_GROUP_ID
       description: Action parameter OUTBOUND_V6_STAGE1_DASH_ACL_GROUP_ID
@@ -639,6 +753,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_OUTBOUND_V6_STAGE2_DASH_ACL_GROUP_ID
       description: Action parameter OUTBOUND_V6_STAGE2_DASH_ACL_GROUP_ID
@@ -649,6 +764,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_OUTBOUND_V6_STAGE3_DASH_ACL_GROUP_ID
       description: Action parameter OUTBOUND_V6_STAGE3_DASH_ACL_GROUP_ID
@@ -659,6 +775,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_OUTBOUND_V6_STAGE4_DASH_ACL_GROUP_ID
       description: Action parameter OUTBOUND_V6_STAGE4_DASH_ACL_GROUP_ID
@@ -669,6 +786,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_OUTBOUND_V6_STAGE5_DASH_ACL_GROUP_ID
       description: Action parameter OUTBOUND_V6_STAGE5_DASH_ACL_GROUP_ID
@@ -679,6 +797,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION
       description: Action parameter DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION
@@ -689,6 +808,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     stats:
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_RX_BYTES
@@ -700,6 +820,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_RX_PACKETS
       description: DASH ENI RX_PACKETS stat count
@@ -710,6 +831,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_TX_BYTES
       description: DASH ENI TX_BYTES stat count
@@ -720,6 +842,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_TX_PACKETS
       description: DASH ENI TX_PACKETS stat count
@@ -730,6 +853,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_OUTBOUND_RX_BYTES
       description: DASH ENI OUTBOUND_RX_BYTES stat count
@@ -740,6 +864,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_OUTBOUND_RX_PACKETS
       description: DASH ENI OUTBOUND_RX_PACKETS stat count
@@ -750,6 +875,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_OUTBOUND_TX_BYTES
       description: DASH ENI OUTBOUND_TX_BYTES stat count
@@ -760,6 +886,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_OUTBOUND_TX_PACKETS
       description: DASH ENI OUTBOUND_TX_PACKETS stat count
@@ -770,6 +897,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INBOUND_RX_BYTES
       description: DASH ENI INBOUND_RX_BYTES stat count
@@ -780,6 +908,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INBOUND_RX_PACKETS
       description: DASH ENI INBOUND_RX_PACKETS stat count
@@ -790,6 +919,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INBOUND_TX_BYTES
       description: DASH ENI INBOUND_TX_BYTES stat count
@@ -800,6 +930,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INBOUND_TX_PACKETS
       description: DASH ENI INBOUND_TX_PACKETS stat count
@@ -810,6 +941,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_LB_FAST_PATH_ICMP_IN_BYTES
       description: DASH ENI LB_FAST_PATH_ICMP_IN_BYTES stat count
@@ -820,6 +952,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_LB_FAST_PATH_ICMP_IN_PACKETS
       description: DASH ENI LB_FAST_PATH_ICMP_IN_PACKETS stat count
@@ -830,6 +963,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_FLOW_CREATED
       description: DASH ENI FLOW_CREATED stat count
@@ -840,6 +974,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_FLOW_CREATE_FAILED
       description: DASH ENI FLOW_CREATE_FAILED stat count
@@ -850,6 +985,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_FLOW_UPDATED
       description: DASH ENI FLOW_UPDATED stat count
@@ -860,6 +996,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_FLOW_UPDATE_FAILED
       description: DASH ENI FLOW_UPDATE_FAILED stat count
@@ -870,6 +1007,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_FLOW_DELETED
       description: DASH ENI FLOW_DELETED stat count
@@ -880,6 +1018,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_FLOW_DELETE_FAILED
       description: DASH ENI FLOW_DELETE_FAILED stat count
@@ -890,6 +1029,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_FLOW_AGED
       description: DASH ENI FLOW_AGED stat count
@@ -900,6 +1040,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INLINE_SYNC_PACKET_RX_BYTES
       description: DASH ENI INLINE_SYNC_PACKET_RX_BYTES stat count
@@ -910,6 +1051,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INLINE_SYNC_PACKET_RX_PACKETS
       description: DASH ENI INLINE_SYNC_PACKET_RX_PACKETS stat count
@@ -920,6 +1062,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INLINE_SYNC_PACKET_TX_BYTES
       description: DASH ENI INLINE_SYNC_PACKET_TX_BYTES stat count
@@ -930,6 +1073,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INLINE_SYNC_PACKET_TX_PACKETS
       description: DASH ENI INLINE_SYNC_PACKET_TX_PACKETS stat count
@@ -940,6 +1084,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_TIMED_SYNC_PACKET_RX_BYTES
       description: DASH ENI TIMED_SYNC_PACKET_RX_BYTES stat count
@@ -950,6 +1095,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_TIMED_SYNC_PACKET_RX_PACKETS
       description: DASH ENI TIMED_SYNC_PACKET_RX_PACKETS stat count
@@ -960,6 +1106,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_TIMED_SYNC_PACKET_TX_BYTES
       description: DASH ENI TIMED_SYNC_PACKET_TX_BYTES stat count
@@ -970,6 +1117,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_TIMED_SYNC_PACKET_TX_PACKETS
       description: DASH ENI TIMED_SYNC_PACKET_TX_PACKETS stat count
@@ -980,6 +1128,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INLINE_FLOW_CREATE_REQ_SENT
       description: DASH ENI INLINE_FLOW_CREATE_REQ_SENT stat count
@@ -990,6 +1139,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INLINE_FLOW_CREATE_REQ_RECV
       description: DASH ENI INLINE_FLOW_CREATE_REQ_RECV stat count
@@ -1000,6 +1150,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INLINE_FLOW_CREATE_REQ_FAILED
       description: DASH ENI INLINE_FLOW_CREATE_REQ_FAILED stat count
@@ -1010,6 +1161,18 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      name: SAI_ENI_STAT_INLINE_FLOW_CREATE_REQ_IGNORED
+      description: DASH ENI INLINE_FLOW_CREATE_REQ_IGNORED stat count
+      type: sai_uint64_t
+      attr_value_field: u64
+      default: null
+      isresourcetype: false
+      flags: READ_ONLY
+      object_name: null
+      allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INLINE_FLOW_CREATE_ACK_RECV
       description: DASH ENI INLINE_FLOW_CREATE_ACK_RECV stat count
@@ -1020,9 +1183,10 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-      name: SAI_ENI_STAT_INLINE_FLOW_CREATE_ACK_FAILED_RECV
-      description: DASH ENI INLINE_FLOW_CREATE_ACK_FAILED_RECV stat count
+      name: SAI_ENI_STAT_INLINE_FLOW_CREATE_ACK_FAILED
+      description: DASH ENI INLINE_FLOW_CREATE_ACK_FAILED stat count
       type: sai_uint64_t
       attr_value_field: u64
       default: null
@@ -1030,9 +1194,10 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-      name: SAI_ENI_STAT_INLINE_FLOW_CREATE_ACK_IGNORED_RECV
-      description: DASH ENI INLINE_FLOW_CREATE_ACK_IGNORED_RECV stat count
+      name: SAI_ENI_STAT_INLINE_FLOW_CREATE_ACK_IGNORED
+      description: DASH ENI INLINE_FLOW_CREATE_ACK_IGNORED stat count
       type: sai_uint64_t
       attr_value_field: u64
       default: null
@@ -1040,6 +1205,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_TIMED_FLOW_CREATE_REQ_SENT
       description: DASH ENI TIMED_FLOW_CREATE_REQ_SENT stat count
@@ -1050,6 +1216,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_TIMED_FLOW_CREATE_REQ_RECV
       description: DASH ENI TIMED_FLOW_CREATE_REQ_RECV stat count
@@ -1060,6 +1227,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_TIMED_FLOW_CREATE_REQ_FAILED
       description: DASH ENI TIMED_FLOW_CREATE_REQ_FAILED stat count
@@ -1070,6 +1238,18 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      name: SAI_ENI_STAT_TIMED_FLOW_CREATE_REQ_IGNORED
+      description: DASH ENI TIMED_FLOW_CREATE_REQ_IGNORED stat count
+      type: sai_uint64_t
+      attr_value_field: u64
+      default: null
+      isresourcetype: false
+      flags: READ_ONLY
+      object_name: null
+      allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_TIMED_FLOW_CREATE_ACK_RECV
       description: DASH ENI TIMED_FLOW_CREATE_ACK_RECV stat count
@@ -1080,9 +1260,10 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-      name: SAI_ENI_STAT_TIMED_FLOW_CREATE_ACK_FAILED_RECV
-      description: DASH ENI TIMED_FLOW_CREATE_ACK_FAILED_RECV stat count
+      name: SAI_ENI_STAT_TIMED_FLOW_CREATE_ACK_FAILED
+      description: DASH ENI TIMED_FLOW_CREATE_ACK_FAILED stat count
       type: sai_uint64_t
       attr_value_field: u64
       default: null
@@ -1090,9 +1271,10 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-      name: SAI_ENI_STAT_TIMED_FLOW_CREATE_ACK_IGNORED_RECV
-      description: DASH ENI TIMED_FLOW_CREATE_ACK_IGNORED_RECV stat count
+      name: SAI_ENI_STAT_TIMED_FLOW_CREATE_ACK_IGNORED
+      description: DASH ENI TIMED_FLOW_CREATE_ACK_IGNORED stat count
       type: sai_uint64_t
       attr_value_field: u64
       default: null
@@ -1100,6 +1282,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_REQ_SENT
       description: DASH ENI INLINE_FLOW_UPDATE_REQ_SENT stat count
@@ -1110,6 +1293,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_REQ_RECV
       description: DASH ENI INLINE_FLOW_UPDATE_REQ_RECV stat count
@@ -1120,6 +1304,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_REQ_FAILED
       description: DASH ENI INLINE_FLOW_UPDATE_REQ_FAILED stat count
@@ -1130,6 +1315,18 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_REQ_IGNORED
+      description: DASH ENI INLINE_FLOW_UPDATE_REQ_IGNORED stat count
+      type: sai_uint64_t
+      attr_value_field: u64
+      default: null
+      isresourcetype: false
+      flags: READ_ONLY
+      object_name: null
+      allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_ACK_RECV
       description: DASH ENI INLINE_FLOW_UPDATE_ACK_RECV stat count
@@ -1140,9 +1337,10 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-      name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_ACK_FAILED_RECV
-      description: DASH ENI INLINE_FLOW_UPDATE_ACK_FAILED_RECV stat count
+      name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_ACK_FAILED
+      description: DASH ENI INLINE_FLOW_UPDATE_ACK_FAILED stat count
       type: sai_uint64_t
       attr_value_field: u64
       default: null
@@ -1150,9 +1348,10 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-      name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_ACK_IGNORED_RECV
-      description: DASH ENI INLINE_FLOW_UPDATE_ACK_IGNORED_RECV stat count
+      name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_ACK_IGNORED
+      description: DASH ENI INLINE_FLOW_UPDATE_ACK_IGNORED stat count
       type: sai_uint64_t
       attr_value_field: u64
       default: null
@@ -1160,6 +1359,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_REQ_SENT
       description: DASH ENI TIMED_FLOW_UPDATE_REQ_SENT stat count
@@ -1170,6 +1370,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_REQ_RECV
       description: DASH ENI TIMED_FLOW_UPDATE_REQ_RECV stat count
@@ -1180,6 +1381,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_REQ_FAILED
       description: DASH ENI TIMED_FLOW_UPDATE_REQ_FAILED stat count
@@ -1190,6 +1392,18 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_REQ_IGNORED
+      description: DASH ENI TIMED_FLOW_UPDATE_REQ_IGNORED stat count
+      type: sai_uint64_t
+      attr_value_field: u64
+      default: null
+      isresourcetype: false
+      flags: READ_ONLY
+      object_name: null
+      allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_ACK_RECV
       description: DASH ENI TIMED_FLOW_UPDATE_ACK_RECV stat count
@@ -1200,9 +1414,10 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-      name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_ACK_FAILED_RECV
-      description: DASH ENI TIMED_FLOW_UPDATE_ACK_FAILED_RECV stat count
+      name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_ACK_FAILED
+      description: DASH ENI TIMED_FLOW_UPDATE_ACK_FAILED stat count
       type: sai_uint64_t
       attr_value_field: u64
       default: null
@@ -1210,9 +1425,10 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-      name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_ACK_IGNORED_RECV
-      description: DASH ENI TIMED_FLOW_UPDATE_ACK_IGNORED_RECV stat count
+      name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_ACK_IGNORED
+      description: DASH ENI TIMED_FLOW_UPDATE_ACK_IGNORED stat count
       type: sai_uint64_t
       attr_value_field: u64
       default: null
@@ -1220,6 +1436,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INLINE_FLOW_DELETE_REQ_SENT
       description: DASH ENI INLINE_FLOW_DELETE_REQ_SENT stat count
@@ -1230,6 +1447,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INLINE_FLOW_DELETE_REQ_RECV
       description: DASH ENI INLINE_FLOW_DELETE_REQ_RECV stat count
@@ -1240,6 +1458,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INLINE_FLOW_DELETE_REQ_FAILED
       description: DASH ENI INLINE_FLOW_DELETE_REQ_FAILED stat count
@@ -1250,6 +1469,18 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      name: SAI_ENI_STAT_INLINE_FLOW_DELETE_REQ_IGNORED
+      description: DASH ENI INLINE_FLOW_DELETE_REQ_IGNORED stat count
+      type: sai_uint64_t
+      attr_value_field: u64
+      default: null
+      isresourcetype: false
+      flags: READ_ONLY
+      object_name: null
+      allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INLINE_FLOW_DELETE_ACK_RECV
       description: DASH ENI INLINE_FLOW_DELETE_ACK_RECV stat count
@@ -1260,9 +1491,10 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-      name: SAI_ENI_STAT_INLINE_FLOW_DELETE_ACK_FAILED_RECV
-      description: DASH ENI INLINE_FLOW_DELETE_ACK_FAILED_RECV stat count
+      name: SAI_ENI_STAT_INLINE_FLOW_DELETE_ACK_FAILED
+      description: DASH ENI INLINE_FLOW_DELETE_ACK_FAILED stat count
       type: sai_uint64_t
       attr_value_field: u64
       default: null
@@ -1270,9 +1502,10 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-      name: SAI_ENI_STAT_INLINE_FLOW_DELETE_ACK_IGNORED_RECV
-      description: DASH ENI INLINE_FLOW_DELETE_ACK_IGNORED_RECV stat count
+      name: SAI_ENI_STAT_INLINE_FLOW_DELETE_ACK_IGNORED
+      description: DASH ENI INLINE_FLOW_DELETE_ACK_IGNORED stat count
       type: sai_uint64_t
       attr_value_field: u64
       default: null
@@ -1280,6 +1513,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_TIMED_FLOW_DELETE_REQ_SENT
       description: DASH ENI TIMED_FLOW_DELETE_REQ_SENT stat count
@@ -1290,6 +1524,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_TIMED_FLOW_DELETE_REQ_RECV
       description: DASH ENI TIMED_FLOW_DELETE_REQ_RECV stat count
@@ -1300,6 +1535,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_TIMED_FLOW_DELETE_REQ_FAILED
       description: DASH ENI TIMED_FLOW_DELETE_REQ_FAILED stat count
@@ -1310,6 +1546,18 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      name: SAI_ENI_STAT_TIMED_FLOW_DELETE_REQ_IGNORED
+      description: DASH ENI TIMED_FLOW_DELETE_REQ_IGNORED stat count
+      type: sai_uint64_t
+      attr_value_field: u64
+      default: null
+      isresourcetype: false
+      flags: READ_ONLY
+      object_name: null
+      allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_TIMED_FLOW_DELETE_ACK_RECV
       description: DASH ENI TIMED_FLOW_DELETE_ACK_RECV stat count
@@ -1320,9 +1568,10 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-      name: SAI_ENI_STAT_TIMED_FLOW_DELETE_ACK_FAILED_RECV
-      description: DASH ENI TIMED_FLOW_DELETE_ACK_FAILED_RECV stat count
+      name: SAI_ENI_STAT_TIMED_FLOW_DELETE_ACK_FAILED
+      description: DASH ENI TIMED_FLOW_DELETE_ACK_FAILED stat count
       type: sai_uint64_t
       attr_value_field: u64
       default: null
@@ -1330,9 +1579,10 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-      name: SAI_ENI_STAT_TIMED_FLOW_DELETE_ACK_IGNORED_RECV
-      description: DASH ENI TIMED_FLOW_DELETE_ACK_IGNORED_RECV stat count
+      name: SAI_ENI_STAT_TIMED_FLOW_DELETE_ACK_IGNORED
+      description: DASH ENI TIMED_FLOW_DELETE_ACK_IGNORED stat count
       type: sai_uint64_t
       attr_value_field: u64
       default: null
@@ -1340,6 +1590,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_OUTBOUND_ROUTING_ENTRY_MISS_DROP_PACKETS
       description: DASH ENI OUTBOUND_ROUTING_ENTRY_MISS_DROP_PACKETS stat count
@@ -1350,6 +1601,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_OUTBOUND_CA_PA_ENTRY_MISS_DROP_PACKETS
       description: DASH ENI OUTBOUND_CA_PA_ENTRY_MISS_DROP_PACKETS stat count
@@ -1360,6 +1612,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_INBOUND_ROUTING_ENTRY_MISS_DROP_PACKETS
       description: DASH ENI INBOUND_ROUTING_ENTRY_MISS_DROP_PACKETS stat count
@@ -1370,6 +1623,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
 - !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
   name: dash_ha
   description: ''
@@ -1391,6 +1645,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_PEER_IP
       description: Action parameter PEER_IP
@@ -1401,6 +1656,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_CP_DATA_CHANNEL_PORT
       description: Action parameter CP_DATA_CHANNEL_PORT
@@ -1411,6 +1667,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_DP_CHANNEL_DST_PORT
       description: Action parameter DP_CHANNEL_DST_PORT
@@ -1421,6 +1678,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_DP_CHANNEL_MIN_SRC_PORT
       description: Action parameter DP_CHANNEL_MIN_SRC_PORT
@@ -1431,6 +1689,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_DP_CHANNEL_MAX_SRC_PORT
       description: Action parameter DP_CHANNEL_MAX_SRC_PORT
@@ -1441,6 +1700,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_DP_CHANNEL_PROBE_INTERVAL_MS
       description: Action parameter DP_CHANNEL_PROBE_INTERVAL_MS
@@ -1451,6 +1711,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_DP_CHANNEL_PROBE_FAIL_THRESHOLD
       description: Action parameter DP_CHANNEL_PROBE_FAIL_THRESHOLD
@@ -1461,6 +1722,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_DP_CHANNEL_IS_ALIVE
       description: Action parameter DP_CHANNEL_IS_ALIVE
@@ -1471,6 +1733,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     stats:
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_DP_PROBE_REQ_RX_BYTES
@@ -1482,6 +1745,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_DP_PROBE_REQ_RX_PACKETS
       description: DASH HA_SET DP_PROBE_REQ_RX_PACKETS stat count
@@ -1492,6 +1756,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_DP_PROBE_REQ_TX_BYTES
       description: DASH HA_SET DP_PROBE_REQ_TX_BYTES stat count
@@ -1502,6 +1767,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_DP_PROBE_REQ_TX_PACKETS
       description: DASH HA_SET DP_PROBE_REQ_TX_PACKETS stat count
@@ -1512,6 +1778,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_DP_PROBE_ACK_RX_BYTES
       description: DASH HA_SET DP_PROBE_ACK_RX_BYTES stat count
@@ -1522,6 +1789,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_DP_PROBE_ACK_RX_PACKETS
       description: DASH HA_SET DP_PROBE_ACK_RX_PACKETS stat count
@@ -1532,6 +1800,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_DP_PROBE_ACK_TX_BYTES
       description: DASH HA_SET DP_PROBE_ACK_TX_BYTES stat count
@@ -1542,6 +1811,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_DP_PROBE_ACK_TX_PACKETS
       description: DASH HA_SET DP_PROBE_ACK_TX_PACKETS stat count
@@ -1552,6 +1822,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_DP_PROBE_FAILED
       description: DASH HA_SET DP_PROBE_FAILED stat count
@@ -1562,6 +1833,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_ATTEMPTED
       description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_ATTEMPTED stat count
@@ -1572,6 +1844,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_RECEIVED
       description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_RECEIVED stat count
@@ -1582,6 +1855,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_SUCCEEDED
       description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_SUCCEEDED stat count
@@ -1592,6 +1866,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_FAILED
       description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_FAILED stat count
@@ -1602,6 +1877,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_REJECTED
       description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_REJECTED stat count
@@ -1612,6 +1888,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_TIMEOUT_COUNT
       description: DASH HA_SET CP_DATA_CHANNEL_TIMEOUT_COUNT stat count
@@ -1622,6 +1899,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_RECEIVED
       description: DASH HA_SET BULK_SYNC_MESSAGE_RECEIVED stat count
@@ -1632,6 +1910,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_SENT
       description: DASH HA_SET BULK_SYNC_MESSAGE_SENT stat count
@@ -1642,6 +1921,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_SEND_FAILED
       description: DASH HA_SET BULK_SYNC_MESSAGE_SEND_FAILED stat count
@@ -1652,6 +1932,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_BULK_SYNC_FLOW_RECEIVED
       description: DASH HA_SET BULK_SYNC_FLOW_RECEIVED stat count
@@ -1662,6 +1943,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SET_STAT_BULK_SYNC_FLOW_SENT
       description: DASH HA_SET BULK_SYNC_FLOW_SENT stat count
@@ -1672,6 +1954,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
   - !!python/object:utils.sai_spec.sai_api.SaiApi
     name: ha_scope
     description: ''
@@ -1689,6 +1972,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SCOPE_DASH_HA_ROLE
       description: Action parameter DASH_HA_ROLE
@@ -1699,6 +1983,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SCOPE_FLOW_VERSION
       description: Action parameter FLOW_VERSION
@@ -1709,6 +1994,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SCOPE_FLOW_RECONCILE_REQUESTED
       description: Action parameter FLOW_RECONCILE_REQUESTED
@@ -1719,6 +2005,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_HA_SCOPE_FLOW_RECONCILE_NEEDED
       description: Action parameter FLOW_RECONCILE_NEEDED
@@ -1729,6 +2016,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     stats: []
 - !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
   name: dash_inbound_routing
@@ -1764,36 +2052,24 @@ api_groups:
       name: sai_inbound_routing_entry_entry_t
       description: Entry for inbound_routing_entry
       members:
-      - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
         name: eni_id
         description: Exact matched key eni_id
         type: sai_object_id_t
-        attr_value_field: u16
-        default: SAI_NULL_OBJECT_ID
-        isresourcetype: false
-        flags: CREATE_AND_SET
-        object_name: SAI_OBJECT_TYPE_ENI
-        allow_null: true
-      - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+        objects: SAI_OBJECT_TYPE_ENI
+        valid_only: null
+      - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
         name: VNI
         description: Exact matched key VNI
         type: sai_uint32_t
-        attr_value_field: u32
-        default: '0'
-        isresourcetype: false
-        flags: CREATE_AND_SET
-        object_name: null
-        allow_null: false
-      - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+        objects: null
+        valid_only: null
+      - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
         name: sip
         description: Ternary matched key sip
         type: sai_ip_address_t
-        attr_value_field: ipaddr
-        default: 0.0.0.0
-        isresourcetype: false
-        flags: CREATE_AND_SET
-        object_name: null
-        allow_null: false
+        objects: null
+        valid_only: null
     attributes:
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION
@@ -1805,6 +2081,7 @@ api_groups:
       flags: MANDATORY_ON_CREATE | CREATE_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_INBOUND_ROUTING_ENTRY_METER_CLASS_OR
       description: Action parameter METER_CLASS_OR
@@ -1815,6 +2092,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_INBOUND_ROUTING_ENTRY_METER_CLASS_AND
       description: Action parameter METER_CLASS_AND
@@ -1825,6 +2103,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_INBOUND_ROUTING_ENTRY_SRC_VNET_ID
       description: Action parameter SRC_VNET_ID
@@ -1835,6 +2114,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_VNET
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_INBOUND_ROUTING_ENTRY_ATTR_IP_ADDR_FAMILY
       description: IP address family for resource accounting
@@ -1845,6 +2125,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     stats: []
 - !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
   name: dash_meter
@@ -1868,6 +2149,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_METER_BUCKET_STAT_INBOUND_BYTES
       description: DASH METER_BUCKET INBOUND_BYTES stat count
@@ -1878,6 +2160,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
   - !!python/object:utils.sai_spec.sai_api.SaiApi
     name: meter_policy
     description: ''
@@ -1895,6 +2178,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     stats: []
   - !!python/object:utils.sai_spec.sai_api.SaiApi
     name: meter_rule
@@ -1913,6 +2197,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_METER_RULE_ATTR_PRIORITY
       description: Rule priority in table
@@ -1923,6 +2208,7 @@ api_groups:
       flags: MANDATORY_ON_CREATE | CREATE_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_METER_RULE_ATTR_IP_ADDR_FAMILY
       description: IP address family for resource accounting
@@ -1933,6 +2219,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     stats: []
 - !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
   name: dash_outbound_ca_to_pa
@@ -1960,26 +2247,18 @@ api_groups:
       name: sai_outbound_ca_to_pa_entry_entry_t
       description: Entry for outbound_ca_to_pa_entry
       members:
-      - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
         name: dst_vnet_id
         description: Exact matched key dst_vnet_id
         type: sai_object_id_t
-        attr_value_field: u16
-        default: SAI_NULL_OBJECT_ID
-        isresourcetype: false
-        flags: CREATE_AND_SET
-        object_name: SAI_OBJECT_TYPE_VNET
-        allow_null: true
-      - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+        objects: SAI_OBJECT_TYPE_VNET
+        valid_only: null
+      - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
         name: dip
         description: Exact matched key dip
         type: sai_ip_address_t
-        attr_value_field: ipaddr
-        default: 0.0.0.0
-        isresourcetype: false
-        flags: CREATE_AND_SET
-        object_name: null
-        allow_null: false
+        objects: null
+        valid_only: null
     attributes:
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION
@@ -1991,6 +2270,7 @@ api_groups:
       flags: MANDATORY_ON_CREATE | CREATE_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_CA_TO_PA_ENTRY_UNDERLAY_DIP
       description: Action parameter UNDERLAY_DIP
@@ -2001,6 +2281,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_CA_TO_PA_ENTRY_OVERLAY_DMAC
       description: Action parameter OVERLAY_DMAC
@@ -2011,6 +2292,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_CA_TO_PA_ENTRY_USE_DST_VNET_VNI
       description: Action parameter USE_DST_VNET_VNI
@@ -2021,6 +2303,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_CA_TO_PA_ENTRY_METER_CLASS_OR
       description: Action parameter METER_CLASS_OR
@@ -2031,6 +2314,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_CA_TO_PA_ENTRY_OVERLAY_SIP
       description: Action parameter OVERLAY_SIP
@@ -2041,6 +2325,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_CA_TO_PA_ENTRY_OVERLAY_DIP
       description: Action parameter OVERLAY_DIP
@@ -2051,6 +2336,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_CA_TO_PA_ENTRY_DASH_ENCAPSULATION
       description: Action parameter DASH_ENCAPSULATION
@@ -2061,6 +2347,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_CA_TO_PA_ENTRY_TUNNEL_KEY
       description: Action parameter TUNNEL_KEY
@@ -2071,6 +2358,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_COUNTER_ID
       description: Attach a counter. When it is empty, then packet hits won't be counted.
@@ -2081,6 +2369,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_COUNTER
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_IP_ADDR_FAMILY
       description: IP address family for resource accounting
@@ -2091,6 +2380,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     stats: []
 - !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
   name: dash_vnet
@@ -2113,6 +2403,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     stats: []
 - !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
   name: dash_outbound_routing
@@ -2152,26 +2443,18 @@ api_groups:
       name: sai_outbound_routing_entry_entry_t
       description: Entry for outbound_routing_entry
       members:
-      - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
         name: eni_id
         description: Exact matched key eni_id
         type: sai_object_id_t
-        attr_value_field: u16
-        default: SAI_NULL_OBJECT_ID
-        isresourcetype: false
-        flags: CREATE_AND_SET
-        object_name: SAI_OBJECT_TYPE_ENI
-        allow_null: true
-      - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+        objects: SAI_OBJECT_TYPE_ENI
+        valid_only: null
+      - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
         name: destination
         description: Lpm matched key destination
         type: sai_ip_prefix_t
-        attr_value_field: ipPrefix
-        default: '0'
-        isresourcetype: false
-        flags: CREATE_AND_SET
-        object_name: null
-        allow_null: false
+        objects: null
+        valid_only: null
     attributes:
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION
@@ -2183,6 +2466,7 @@ api_groups:
       flags: MANDATORY_ON_CREATE | CREATE_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_ROUTING_ENTRY_DST_VNET_ID
       description: Action parameter DST_VNET_ID
@@ -2193,6 +2477,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_VNET
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_ROUTING_ENTRY_METER_CLASS_OR
       description: Action parameter METER_CLASS_OR
@@ -2203,6 +2488,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_ROUTING_ENTRY_METER_CLASS_AND
       description: Action parameter METER_CLASS_AND
@@ -2213,6 +2499,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_IP
       description: Action parameter OVERLAY_IP
@@ -2223,6 +2510,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_DIP
       description: Action parameter OVERLAY_DIP
@@ -2233,6 +2521,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_DIP_MASK
       description: Action parameter OVERLAY_DIP_MASK
@@ -2243,6 +2532,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_SIP
       description: Action parameter OVERLAY_SIP
@@ -2253,6 +2543,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_SIP_MASK
       description: Action parameter OVERLAY_SIP_MASK
@@ -2263,6 +2554,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_ROUTING_ENTRY_UNDERLAY_DIP
       description: Action parameter UNDERLAY_DIP
@@ -2273,6 +2565,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_ROUTING_ENTRY_UNDERLAY_SIP
       description: Action parameter UNDERLAY_SIP
@@ -2283,6 +2576,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_ROUTING_ENTRY_DASH_ENCAPSULATION
       description: Action parameter DASH_ENCAPSULATION
@@ -2293,6 +2587,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_ROUTING_ENTRY_TUNNEL_KEY
       description: Action parameter TUNNEL_KEY
@@ -2303,6 +2598,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_COUNTER_ID
       description: Attach a counter. When it is empty, then packet hits won't be counted.
@@ -2313,6 +2609,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: SAI_OBJECT_TYPE_COUNTER
       allow_null: true
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_IP_ADDR_FAMILY
       description: IP address family for resource accounting
@@ -2323,6 +2620,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     stats: []
 - !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
   name: dash_pa_validation
@@ -2346,26 +2644,18 @@ api_groups:
       name: sai_pa_validation_entry_entry_t
       description: Entry for pa_validation_entry
       members:
-      - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
         name: vnet_id
         description: Exact matched key vnet_id
         type: sai_object_id_t
-        attr_value_field: u16
-        default: SAI_NULL_OBJECT_ID
-        isresourcetype: false
-        flags: CREATE_AND_SET
-        object_name: SAI_OBJECT_TYPE_VNET
-        allow_null: true
-      - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+        objects: SAI_OBJECT_TYPE_VNET
+        valid_only: null
+      - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
         name: sip
         description: Exact matched key sip
         type: sai_ip_address_t
-        attr_value_field: ipaddr
-        default: 0.0.0.0
-        isresourcetype: false
-        flags: CREATE_AND_SET
-        object_name: null
-        allow_null: false
+        objects: null
+        valid_only: null
     attributes:
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_PA_VALIDATION_ENTRY_ATTR_ACTION
@@ -2377,6 +2667,7 @@ api_groups:
       flags: MANDATORY_ON_CREATE | CREATE_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_PA_VALIDATION_ENTRY_ATTR_IP_ADDR_FAMILY
       description: IP address family for resource accounting
@@ -2387,6 +2678,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     stats: []
 - !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
   name: route
@@ -2410,16 +2702,12 @@ api_groups:
       name: sai_route_entry_entry_t
       description: Entry for route_entry
       members:
-      - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
         name: destination
         description: Lpm matched key destination
         type: sai_ip_prefix_t
-        attr_value_field: ipPrefix
-        default: '0'
-        isresourcetype: false
-        flags: CREATE_AND_SET
-        object_name: null
-        allow_null: false
+        objects: null
+        valid_only: null
     attributes:
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ROUTE_ENTRY_ATTR_ACTION
@@ -2431,6 +2719,7 @@ api_groups:
       flags: MANDATORY_ON_CREATE | CREATE_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ROUTE_ENTRY_PACKET_ACTION
       description: Action parameter PACKET_ACTION
@@ -2441,6 +2730,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ROUTE_ENTRY_NEXT_HOP_ID
       description: Action parameter NEXT_HOP_ID
@@ -2451,6 +2741,7 @@ api_groups:
       flags: CREATE_AND_SET
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ROUTE_ENTRY_ATTR_IP_ADDR_FAMILY
       description: IP address family for resource accounting
@@ -2461,6 +2752,7 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     stats: []
 - !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
   name: dash_vip
@@ -2484,16 +2776,12 @@ api_groups:
       name: sai_vip_entry_entry_t
       description: Entry for vip_entry
       members:
-      - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
         name: VIP
         description: Exact matched key VIP
         type: sai_ip_address_t
-        attr_value_field: ipaddr
-        default: 0.0.0.0
-        isresourcetype: false
-        flags: CREATE_AND_SET
-        object_name: null
-        allow_null: false
+        objects: null
+        valid_only: null
     attributes:
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_VIP_ENTRY_ATTR_ACTION
@@ -2505,6 +2793,7 @@ api_groups:
       flags: MANDATORY_ON_CREATE | CREATE_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_VIP_ENTRY_ATTR_IP_ADDR_FAMILY
       description: IP address family for resource accounting
@@ -2515,4 +2804,5 @@ api_groups:
       flags: READ_ONLY
       object_name: null
       allow_null: false
+      valid_only: null
     stats: []

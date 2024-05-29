@@ -18,6 +18,7 @@ class SaiAttribute(SaiCommon):
         flags: str = "CREATE_AND_SET",
         object_name: Optional[str] = None,
         allow_null: bool = False,
+        valid_only: Optional[str] = None,
     ):
         super().__init__(name, description)
         self.type = type
@@ -27,3 +28,4 @@ class SaiAttribute(SaiCommon):
         self.flags = flags
         self.object_name = object_name
         self.allow_null = allow_null
+        self.valid_only = valid_only
