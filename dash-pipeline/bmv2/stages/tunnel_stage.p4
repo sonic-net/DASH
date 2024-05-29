@@ -32,15 +32,24 @@ control tunnel_stage(
     }
 
     apply {
-        if (tunnel.apply().hit) {
-            do_tunnel_encap(hdr, meta,
-                        meta.overlay_data.dmac,
-                        meta.tunnel_data.underlay_dmac,
-                        meta.tunnel_data.underlay_smac,
-                        meta.tunnel_data.underlay_dip,
-                        meta.tunnel_data.underlay_sip,
-                        meta.tunnel_data.dash_encapsulation,
-                        meta.tunnel_data.vni);
+        tunnel.apply();
+    }
+}
+
+control tunnel_stage_encap(
+    inout headers_t hdr,
+    inout metadata_t meta)
+{
+    apply {
+        if (meta.dash_tunnel_id != 0) {
+                do_tunnel_encap(hdr, meta,
+                            meta.overlay_data.dmac,
+                            meta.tunnel_data.underlay_dmac,
+                            meta.tunnel_data.underlay_smac,
+                            meta.tunnel_data.underlay_dip,
+                            meta.tunnel_data.underlay_sip,
+                            meta.tunnel_data.dash_encapsulation,
+                            meta.tunnel_data.vni);
         }
     }
 }

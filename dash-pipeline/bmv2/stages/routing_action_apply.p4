@@ -16,8 +16,6 @@ control routing_action_apply(
         // because it requires the transforms on the inner packet to be finished in order to
         // get the correct inner packet size and other informations.
         do_action_static_encap.apply(hdr, meta);
-
-        tunnel_stage.apply(hdr, meta);
     }
 }
 
