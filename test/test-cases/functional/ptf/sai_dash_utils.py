@@ -173,6 +173,8 @@ class VnetAPI(VnetObjects):
             "outbound_v6_stage5_dash_acl_group_id": 0,
             "disable_fast_path_icmp_flow_redirection": 0,
             "routing_group_id": 0,
+            "full_flow_resimulation_requested": False,
+            "max_resimulated_flow_per_second": 0
         }
         default_kwargs.update(kwargs)
 
@@ -311,7 +313,7 @@ class VnetAPI(VnetObjects):
         sai_thrift_remove_pa_validation_entry(self.client, pa_validation_entry)
 
     def outbound_routing_vnet_direct_create(self, routing_group_id, lpm, dst_vnet_id,
-                                            overlay_ip, counter_id=None):
+                                            overlay_ip, counter_id=None, dash_tunnel_id=0):
         """
         Create outband vnet direct routing entry
         """
@@ -323,13 +325,13 @@ class VnetAPI(VnetObjects):
                                                  outbound_routing_entry, dst_vnet_id=dst_vnet_id,
                                                  action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT,
                                                  overlay_ip=sai_ipaddress(overlay_ip), counter_id=counter_id,
-                                                 meter_class_or=0, meter_class_and=-1)
+                                                 meter_class_or=0, meter_class_and=-1, dash_tunnel_id=dash_tunnel_id, routing_actions_disabled_in_flow_resimulation = 0)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_routing_vnet_direct_remove, outbound_routing_entry)
 
         return outbound_routing_entry
 
-    def outbound_routing_direct_create(self, routing_group_id, lpm, counter_id=None):
+    def outbound_routing_direct_create(self, routing_group_id, lpm, counter_id=None, dash_tunnel_id=0):
         """
         Create outband vnet direct routing entry
         """
@@ -339,13 +341,13 @@ class VnetAPI(VnetObjects):
             destination=sai_ipprefix(lpm))
         sai_thrift_create_outbound_routing_entry(self.client, outbound_routing_entry, counter_id=counter_id,
                                                  action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_DIRECT,
-                                                 meter_class_or=0, meter_class_and=-1)
+                                                 meter_class_or=0, meter_class_and=-1, dash_tunnel_id=dash_tunnel_id, routing_actions_disabled_in_flow_resimulation = 0)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_routing_vnet_direct_remove, outbound_routing_entry)
 
         return outbound_routing_entry
 
-    def outbound_routing_vnet_create(self, routing_group_id, lpm, dst_vnet_id, counter_id=None):
+    def outbound_routing_vnet_create(self, routing_group_id, lpm, dst_vnet_id, counter_id=None, dash_tunnel_id=0):
         """
         Create outbound vnet routing entry
         """
@@ -357,7 +359,8 @@ class VnetAPI(VnetObjects):
                                                  outbound_routing_entry, dst_vnet_id=dst_vnet_id,
                                                  counter_id=counter_id,
                                                  action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET,
-                                                 meter_class_or=0, meter_class_and=-1)
+                                                 meter_class_or=0, meter_class_and=-1,
+                                                 dash_tunnel_id=dash_tunnel_id, routing_actions_disabled_in_flow_resimulation = 0)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_routing_vnet_direct_remove, outbound_routing_entry)
 
@@ -365,7 +368,7 @@ class VnetAPI(VnetObjects):
         sai_thrift_remove_outbound_routing_entry(self.client, entry)
 
     def outbound_ca_to_pa_create(self, dst_vnet_id, dip, underlay_dip,
-                                 use_dst_vnet_vni=True, overlay_dmac=None):
+                                 use_dst_vnet_vni=True, overlay_dmac=None, dash_tunnel_id=0):
         """
         Create outband CA PA mapping
         """
@@ -378,7 +381,10 @@ class VnetAPI(VnetObjects):
                                                   underlay_dip=sai_ipaddress(underlay_dip),
                                                   use_dst_vnet_vni=use_dst_vnet_vni,
                                                   overlay_dmac=overlay_dmac,
-                                                  meter_class_or=0)
+                                                  meter_class_or=0,
+                                                  dash_tunnel_id=dash_tunnel_id,
+                                                  flow_resimulation_requested = False,
+                                                  routing_actions_disabled_in_flow_resimulation = 0)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_ca_to_pa_remove, ca_to_pa_entry)
 

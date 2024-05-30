@@ -110,15 +110,18 @@ control dash_ingress(
                          ACL_GROUPS_PARAM(outbound_v4),
                          ACL_GROUPS_PARAM(outbound_v6),
                          bit<1> disable_fast_path_icmp_flow_redirection,
-                         @SaiVal[type="sai_object_id_t"] bit<16> routing_group_id) {
-        meta.eni_data.cps              = cps;
-        meta.eni_data.pps              = pps;
-        meta.eni_data.flows            = flows;
-        meta.eni_data.admin_state      = admin_state;
-        meta.eni_data.pl_sip           = pl_sip;
-        meta.eni_data.pl_sip_mask      = pl_sip_mask;
-        meta.eni_data.pl_underlay_sip  = pl_underlay_sip;
-        meta.encap_data.underlay_dip   = vm_underlay_dip;
+                         bit<1> full_flow_resimulation_requested,
+                         bit<64> max_resimulated_flow_per_second,
+                         @SaiVal[type="sai_object_id_t"] bit<16> routing_group_id)
+    {
+        meta.eni_data.cps             = cps;
+        meta.eni_data.pps             = pps;
+        meta.eni_data.flows           = flows;
+        meta.eni_data.admin_state     = admin_state;
+        meta.eni_data.pl_sip          = pl_sip;
+        meta.eni_data.pl_sip_mask     = pl_sip_mask;
+        meta.eni_data.pl_underlay_sip = pl_underlay_sip;
+        meta.encap_data.underlay_dip  = vm_underlay_dip;
         meta.eni_data.routing_group_id = routing_group_id;
         if (dash_tunnel_dscp_mode == dash_tunnel_dscp_mode_t.PIPE_MODEL) {
             meta.eni_data.dscp = dscp;
@@ -352,7 +355,11 @@ control dash_ingress(
             inbound.apply(hdr, meta);
         }
 
+        tunnel_stage.apply(hdr, meta);
+
         routing_action_apply.apply(hdr, meta);
+
+        tunnel_stage_encap.apply(hdr, meta);
 
         /* Underlay routing */
         meta.dst_ip_addr = (bit<128>)hdr.u0_ipv4.dst_addr;

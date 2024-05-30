@@ -63,13 +63,19 @@ class TestSaiVnetOutbound:
                               'SAI_ENI_ATTR_PL_SIP', '2001:0db8:85a3:0000:0000:8a2e:0370:7334', 'SAI_ENI_ATTR_PL_SIP_MASK',
                               '2001:0db8:85a3:0000:0000:0000:0000:0000', 'SAI_ENI_ATTR_PL_UNDERLAY_SIP', '10.0.0.18',
                               "SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE", "SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL", "SAI_ENI_ATTR_DSCP", "0",
-                              "SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION", "False", "SAI_ENI_ATTR_HA_SCOPE_ID", "0"])
+                              "SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION", "False", "SAI_ENI_ATTR_HA_SCOPE_ID", "0",
+                              "SAI_ENI_ATTR_FULL_FLOW_RESIMULATION_REQUESTED", "False", "SAI_ENI_ATTR_MAX_RESIMULATED_FLOW_PER_SECOND", "0" ])
 
         ret = add_extra_attrs('SAI_OBJECT_TYPE_OUTBOUND_CA_TO_PA_ENTRY', ret, [ 'SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS_OR', '0',
-                                                                                'SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION', 'SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING' ])
+                                                                                'SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION', 'SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING',
+                                                                                'SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_DASH_TUNNEL_ID', 'SAI_NULL_OBJECT_ID',
+                                                                                "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_FLOW_RESIMULATION_REQUESTED", "False",
+                                                                                "SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION", "0" ])
 
         ret = add_extra_attrs('SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY', ret, [ 'SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR', '0',
-                                                                               'SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND', '-1' ])
+                                                                               'SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND', '-1',
+                                                                               'SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_TUNNEL_ID', 'SAI_NULL_OBJECT_ID',
+                                                                               "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION", "0" ])
         return ret
 
     def make_remove_commands(self):

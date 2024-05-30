@@ -111,6 +111,8 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
                                          outbound_v6_stage4_dash_acl_group_id = 0,
                                          outbound_v6_stage5_dash_acl_group_id = 0,
                                          disable_fast_path_icmp_flow_redirection = 0,
+                                         full_flow_resimulation_requested=False,
+                                         max_resimulated_flow_per_second=0,
                                          routing_group_id=self.routing_group)
 
         self.eam = sai_thrift_eni_ether_address_map_entry_t(switch_id=self.switch_id, address = self.eni_mac)
@@ -135,7 +137,8 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         status = sai_thrift_create_outbound_routing_entry(self.client, self.ore,
                                                           action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET,
                                                           dst_vnet_id=self.vnet,
-                                                          meter_class_or=0, meter_class_and=-1)
+                                                          meter_class_or=0, meter_class_and=-1,
+                                                          dash_tunnel_id=0, routing_actions_disabled_in_flow_resimulation = 0)
         assert(status == SAI_STATUS_SUCCESS)
 
         underlay_dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
@@ -144,7 +147,8 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         status = sai_thrift_create_outbound_ca_to_pa_entry(self.client, self.ocpe, action=SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING,
                                                            underlay_dip = underlay_dip,
                                                            overlay_dmac=self.dst_ca_mac, use_dst_vnet_vni = True,
-                                                           meter_class_or=0)
+                                                           meter_class_or=0, flow_resimulation_requested = False, dash_tunnel_id=0,
+                                                           routing_actions_disabled_in_flow_resimulation = 0)
         assert(status == SAI_STATUS_SUCCESS)
 
         print(f"\n{self.__class__.__name__} configureVnet OK")

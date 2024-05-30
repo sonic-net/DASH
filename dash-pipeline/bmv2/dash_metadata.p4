@@ -7,7 +7,6 @@
 #define MAX_HA_SET 1
 
 enum bit<32> dash_routing_actions_t {
-    NONE = 0,
     STATIC_ENCAP = (1 << 0),
     NAT = (1 << 1),
     NAT46 = (1 << 2),
@@ -190,8 +189,12 @@ struct metadata_t {
     
     // Action data
     bool dropped;
+    // encap_data is for underlay
     encap_data_t encap_data;
+    // tunnel_data is used by dash_tunnel_id
+    encap_data_t tunnel_data;
     overlay_rewrite_data_t overlay_data;
+    bit<16> dash_tunnel_id;
     bit<32> meter_class;
 }
 

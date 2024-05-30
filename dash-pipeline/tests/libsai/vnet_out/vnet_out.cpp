@@ -215,6 +215,14 @@ int main(int argc, char **argv)
     attr.value.oid = SAI_NULL_OBJECT_ID;
     attrs.push_back(attr);
 
+    attr.id = SAI_ENI_ATTR_FULL_FLOW_RESIMULATION_REQUESTED;
+    attr.value.booldata = false;
+    attrs.push_back(attr);
+
+    attr.id = SAI_ENI_ATTR_MAX_RESIMULATED_FLOW_PER_SECOND;
+    attr.value.u64 = 0;
+    attrs.push_back(attr);
+
     status = dash_eni_api->create_eni(&eni_id, switch_id, attrs.size(), attrs.data());
 
     if (status != SAI_STATUS_SUCCESS)
