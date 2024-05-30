@@ -107,7 +107,11 @@ class TestSaiVnetOutboundRoutingEntry:
                     "SAI_ENI_ATTR_DSCP",
                     "0",
                     "SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION",
-                    "False"
+                    "False",
+                    "SAI_ENI_ATTR_FULL_FLOW_RESIMULATION_REQUESTED",
+                    "False",
+                    "SAI_ENI_ATTR_MAX_RESIMULATED_FLOW_PER_SECOND",
+                    "0"
                 ]
             },
         ]
@@ -129,7 +133,8 @@ class TestSaiVnetOutboundRoutingEntry:
                     "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION", "SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET",
                     "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID", "$vnet",
                     "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR", "0",
-                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND", "-1"
+                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND", "-1",
+                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION", "0"
                 ]
             },
         ]
@@ -168,7 +173,8 @@ class TestSaiVnetOutboundRoutingEntry:
                     "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION", "SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET",
                     "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID", "$vnet",
                     "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR", "0",
-                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND", "-1"
+                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND", "-1",
+                    "SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION", "0"
                 ]
             },
         ]

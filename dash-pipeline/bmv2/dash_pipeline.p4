@@ -109,7 +109,10 @@ control dash_ingress(
                          ACL_GROUPS_PARAM(inbound_v6),
                          ACL_GROUPS_PARAM(outbound_v4),
                          ACL_GROUPS_PARAM(outbound_v6),
-                         bit<1> disable_fast_path_icmp_flow_redirection) {
+                         bit<1> disable_fast_path_icmp_flow_redirection,
+                         bit<1> full_flow_resimulation_requested,
+                         bit<64> max_resimulated_flow_per_second)
+    {
         meta.eni_data.cps             = cps;
         meta.eni_data.pps             = pps;
         meta.eni_data.flows           = flows;

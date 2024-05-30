@@ -8,6 +8,7 @@ try:
     import re
     import jinja2
     import typing
+    import base64
     import jsonpath_ng.ext as jsonpath_ext
     import jsonpath_ng as jsonpath
     from utils.dash_p4 import DashP4SAIExtensions

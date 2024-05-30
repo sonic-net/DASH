@@ -27,7 +27,8 @@ action route_vnet(
     inout metadata_t meta,
     @SaiVal[type="sai_object_id_t"] bit<16> dst_vnet_id,
     bit<32> meter_class_or,
-    @SaiVal[default_value="4294967295"] bit<32> meter_class_and)
+    @SaiVal[default_value="4294967295"] bit<32> meter_class_and,
+    dash_routing_actions_t routing_actions_disabled_in_flow_resimulation)
 {
     meta.target_stage = dash_pipeline_stage_t.OUTBOUND_MAPPING;
     meta.dst_vnet_id = dst_vnet_id;
@@ -45,7 +46,8 @@ action route_vnet_direct(
     @SaiVal[type="sai_ip_address_t"]
     IPv4ORv6Address overlay_ip,
     bit<32> meter_class_or,
-    @SaiVal[default_value="4294967295"] bit<32> meter_class_and)
+    @SaiVal[default_value="4294967295"] bit<32> meter_class_and,
+    dash_routing_actions_t routing_actions_disabled_in_flow_resimulation)
 {
     meta.target_stage = dash_pipeline_stage_t.OUTBOUND_MAPPING;
     meta.dst_vnet_id = dst_vnet_id;
@@ -61,7 +63,8 @@ action route_direct(
     inout headers_t hdr,
     inout metadata_t meta,
     bit<32> meter_class_or,
-    @SaiVal[default_value="4294967295"] bit<32> meter_class_and)
+    @SaiVal[default_value="4294967295"] bit<32> meter_class_and,
+    dash_routing_actions_t routing_actions_disabled_in_flow_resimulation)
 {
     meta.target_stage = dash_pipeline_stage_t.OUTBOUND_PRE_ROUTING_ACTION_APPLY;
     set_meter_attrs(meta, meter_class_or, meter_class_and);
@@ -89,7 +92,8 @@ action route_service_tunnel(
     dash_encapsulation_t dash_encapsulation,
     bit<24> tunnel_key,
     bit<32> meter_class_or,
-    @SaiVal[default_value="4294967295"] bit<32> meter_class_and)
+    @SaiVal[default_value="4294967295"] bit<32> meter_class_and,
+    dash_routing_actions_t routing_actions_disabled_in_flow_resimulation)
 {
     /* Assume the overlay addresses provided are always IPv6 and the original are IPv4 */
     /* assert(overlay_dip_is_v6 == 1 && overlay_sip_is_v6 == 1);
@@ -128,7 +132,9 @@ action set_tunnel_mapping(
     @SaiVal[type="sai_ip_address_t"] IPv4Address underlay_dip,
     EthernetAddress overlay_dmac,
     bit<1> use_dst_vnet_vni,
-    bit<32> meter_class_or)
+    bit<32> meter_class_or,
+    bit<1> flow_resimulation_requested,
+    dash_routing_actions_t routing_actions_disabled_in_flow_resimulation)
 {
     meta.target_stage = dash_pipeline_stage_t.OUTBOUND_PRE_ROUTING_ACTION_APPLY;
 
@@ -152,7 +158,9 @@ action set_private_link_mapping(
     IPv6Address overlay_dip,
     @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t dash_encapsulation,
     bit<24> tunnel_key,
-    bit<32> meter_class_or)
+    bit<32> meter_class_or,
+    bit<1> flow_resimulation_requested,
+    dash_routing_actions_t routing_actions_disabled_in_flow_resimulation)
 {
     meta.target_stage = dash_pipeline_stage_t.OUTBOUND_PRE_ROUTING_ACTION_APPLY;
     

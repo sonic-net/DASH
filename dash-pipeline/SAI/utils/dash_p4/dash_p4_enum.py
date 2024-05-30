@@ -14,6 +14,7 @@ class DashP4Enum(DashP4Object):
         super().__init__()
         self.bitwidth: int = 0
         self.members: List[DashP4EnumMember] = []
+        self.explicit_value: bool = False
 
     def parse_p4rt(self, p4rt_enum: Dict[str, Any]) -> None:
         """
@@ -38,6 +39,18 @@ class DashP4Enum(DashP4Object):
             DashP4EnumMember.from_p4rt(enum_member)
             for enum_member in p4rt_enum[MEMBERS_TAG]
         ]
+
+        # Check if all enum values are starting from 0 and contiguous.
+        expected_value = 0
+        for member in self.members:
+            if member.enum_value != expected_value:
+                self.explicit_value = True
+                break
+            expected_value += 1
+
+        print(
+            f"Enum parsed: {self.name}, Bitwidth = {self.bitwidth}, MemberCount = {len(self.members)}, ExplicitValue = {self.explicit_value}"
+        )
 
         # Register enum type info.
         SAITypeSolver.register_sai_type(
