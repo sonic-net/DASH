@@ -353,7 +353,11 @@ control dash_ingress(
             inbound.apply(hdr, meta);
         }
 
+        tunnel_stage.apply(hdr, meta);
+
         routing_action_apply.apply(hdr, meta);
+
+        tunnel_stage_encap.apply(hdr, meta);
 
         /* Underlay routing */
         meta.dst_ip_addr = (bit<128>)hdr.u0_ipv4.dst_addr;
