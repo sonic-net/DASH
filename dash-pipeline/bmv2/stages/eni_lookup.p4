@@ -5,8 +5,6 @@ control eni_lookup_stage(
     inout headers_t hdr,
     inout metadata_t meta)
 {
-    DEFINE_COUNTER(port_lb_fast_path_eni_miss_counter, 1, name="lb_fast_path_eni_miss", attr_type="stats")
-
     action set_eni(@SaiVal[type="sai_object_id_t"] bit<16> eni_id) {
         meta.eni_id = eni_id;
     }
@@ -35,8 +33,10 @@ control eni_lookup_stage(
                                           hdr.customer_ethernet.dst_addr;
                                           
         if (!eni_ether_address_map.apply().hit) {
+            UPDATE_COUNTER(eni_miss_drop, 0);
+
             if (meta.is_fast_path_icmp_flow_redirection_packet) {
-                UPDATE_COUNTER(port_lb_fast_path_eni_miss_counter, 0);
+                UPDATE_COUNTER(port_lb_fast_path_eni_miss_drop, 0);
             }
         }
     }

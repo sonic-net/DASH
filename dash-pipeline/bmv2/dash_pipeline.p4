@@ -3,6 +3,7 @@
 
 #include "dash_headers.p4"
 #include "dash_metadata.p4"
+#include "dash_counters.p4"
 #include "dash_parser.p4"
 #include "dash_tunnel.p4"
 #include "dash_outbound.p4"
@@ -43,8 +44,6 @@ control dash_ingress(
     action accept() {
     }
 
-    DEFINE_COUNTER(port_lb_fast_path_icmp_in_counter, 1, name="lb_fast_path_icmp_in", attr_type="stats")
-    
     @SaiTable[name = "vip", api = "dash_vip"]
     table vip {
         key = {
@@ -91,14 +90,6 @@ control dash_ingress(
    meta.stage4_dash_acl_group_id = ## prefix ##_stage4_dash_acl_group_id; \
    meta.stage5_dash_acl_group_id = ## prefix ##_stage5_dash_acl_group_id;
 
-    DEFINE_COUNTER(eni_rx_counter, MAX_ENI, name="rx", attr_type="stats", action_names="set_eni_attrs", order=0)
-    DEFINE_COUNTER(eni_tx_counter, MAX_ENI, name="tx", attr_type="stats", action_names="set_eni_attrs", order=0)
-    DEFINE_COUNTER(eni_outbound_rx_counter, MAX_ENI, name="outbound_rx", attr_type="stats", action_names="set_eni_attrs", order=0)
-    DEFINE_COUNTER(eni_outbound_tx_counter, MAX_ENI, name="outbound_tx", attr_type="stats", action_names="set_eni_attrs", order=0)
-    DEFINE_COUNTER(eni_inbound_rx_counter, MAX_ENI, name="inbound_rx", attr_type="stats", action_names="set_eni_attrs", order=0)
-    DEFINE_COUNTER(eni_inbound_tx_counter, MAX_ENI, name="inbound_tx", attr_type="stats", action_names="set_eni_attrs", order=0)
-    DEFINE_COUNTER(eni_lb_fast_path_icmp_in_counter, MAX_ENI, name="lb_fast_path_icmp_in", attr_type="stats", action_names="set_eni_attrs", order=0)
-
     action set_eni_attrs(bit<32> cps,
                          bit<32> pps,
                          bit<32> flows,
@@ -118,7 +109,10 @@ control dash_ingress(
                          ACL_GROUPS_PARAM(inbound_v6),
                          ACL_GROUPS_PARAM(outbound_v4),
                          ACL_GROUPS_PARAM(outbound_v6),
-                         bit<1> disable_fast_path_icmp_flow_redirection) {
+                         bit<1> disable_fast_path_icmp_flow_redirection,
+                         bit<1> full_flow_resimulation_requested,
+                         bit<64> max_resimulated_flow_per_second)
+    {
         meta.eni_data.cps             = cps;
         meta.eni_data.pps             = pps;
         meta.eni_data.flows           = flows;
@@ -268,7 +262,7 @@ control dash_ingress(
 #endif // TARGET_DPDK_PNA
 
         if (meta.is_fast_path_icmp_flow_redirection_packet) {
-            UPDATE_COUNTER(port_lb_fast_path_icmp_in_counter, 0);
+            UPDATE_COUNTER(port_lb_fast_path_icmp_in, 0);
         }
 
         if (vip.apply().hit) {
@@ -276,7 +270,8 @@ control dash_ingress(
                present in the VIP table */
             meta.encap_data.underlay_sip = hdr.u0_ipv4.dst_addr;
         } else {
-            // TODO: Count the packet drops due to VIP miss
+            UPDATE_COUNTER(vip_miss_drop, 0);
+
             if (meta.is_fast_path_icmp_flow_redirection_packet) {
             }
         }
@@ -296,6 +291,9 @@ control dash_ingress(
             switch (inbound_routing.apply().action_run) {
                 tunnel_decap_pa_validate: {
                     pa_validation.apply();
+                }
+                deny: {
+                    UPDATE_ENI_COUNTER(inbound_routing_entry_miss_drop);
                 }
             }
         }
@@ -327,14 +325,18 @@ control dash_ingress(
             meta.dst_l4_port = hdr.customer_udp.dst_port;
         }
 
-        eni.apply();
+        if (!eni.apply().hit) {
+            UPDATE_COUNTER(eni_miss_drop, 0);
+            deny();
+        }
+
         if (meta.eni_data.admin_state == 0) {
             deny();
         }
         
-        UPDATE_COUNTER(eni_rx_counter, meta.eni_id);
+        UPDATE_ENI_COUNTER(eni_rx);
         if (meta.is_fast_path_icmp_flow_redirection_packet) {
-            UPDATE_COUNTER(eni_lb_fast_path_icmp_in_counter, meta.eni_id);
+            UPDATE_ENI_COUNTER(eni_lb_fast_path_icmp_in);
         }
 
         ha_stage.apply(hdr, meta);
@@ -342,12 +344,12 @@ control dash_ingress(
         acl_group.apply();
 
         if (meta.direction == dash_direction_t.OUTBOUND) {
-            UPDATE_COUNTER(eni_outbound_rx_counter, meta.eni_id);
+            UPDATE_ENI_COUNTER(eni_outbound_rx);
 
             meta.target_stage = dash_pipeline_stage_t.OUTBOUND_ROUTING;
             outbound.apply(hdr, meta);
         } else if (meta.direction == dash_direction_t.INBOUND) {
-            UPDATE_COUNTER(eni_inbound_rx_counter, meta.eni_id);
+            UPDATE_ENI_COUNTER(eni_inbound_rx);
             inbound.apply(hdr, meta);
         }
 
@@ -380,12 +382,12 @@ control dash_ingress(
         if (meta.dropped) {
             drop_action();
         } else {
-            UPDATE_COUNTER(eni_tx_counter, meta.eni_id);
+            UPDATE_ENI_COUNTER(eni_tx);
 
             if (meta.direction == dash_direction_t.OUTBOUND) {
-                UPDATE_COUNTER(eni_outbound_tx_counter, meta.eni_id);
+                UPDATE_ENI_COUNTER(eni_outbound_tx);
             } else if (meta.direction == dash_direction_t.INBOUND) {
-                UPDATE_COUNTER(eni_inbound_tx_counter, meta.eni_id);
+                UPDATE_ENI_COUNTER(eni_inbound_tx);
             }
         }
     }

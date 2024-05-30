@@ -43,6 +43,12 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    // check if dtel create will work
+
+    sai_dtel_api_t *dtel_api;
+    status = sai_api_query((sai_api_t)SAI_API_DTEL, (void**)&dtel_api);
+    QUERY_STATUS_CHECK(status, SAI_API_DTEL);
+
     sai_dash_direction_lookup_api_t *dash_direction_lookup_api;
     status = sai_api_query((sai_api_t)SAI_API_DASH_DIRECTION_LOOKUP, (void**)&dash_direction_lookup_api);
     QUERY_STATUS_CHECK(status, SAI_API_DASH_DIRECTION_LOOKUP);
@@ -203,6 +209,14 @@ int main(int argc, char **argv)
 
     attr.id = SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION;
     attr.value.booldata = false;
+    attrs.push_back(attr);
+
+    attr.id = SAI_ENI_ATTR_FULL_FLOW_RESIMULATION_REQUESTED;
+    attr.value.booldata = false;
+    attrs.push_back(attr);
+
+    attr.id = SAI_ENI_ATTR_MAX_RESIMULATED_FLOW_PER_SECOND;
+    attr.value.u64 = 0;
     attrs.push_back(attr);
 
     status = dash_eni_api->create_eni(&eni_id, switch_id, attrs.size(), attrs.data());

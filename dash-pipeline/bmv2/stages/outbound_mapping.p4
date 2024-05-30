@@ -51,6 +51,9 @@ control outbound_mapping_stage(inout headers_t hdr,
             set_tunnel_mapping: {
                 vnet.apply();
             }
+            drop: {
+                UPDATE_ENI_COUNTER(outbound_ca_pa_entry_miss_drop);
+            }
         }
     }
 }
