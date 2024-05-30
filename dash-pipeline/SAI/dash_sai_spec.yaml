@@ -97,6 +97,58 @@ enums:
     description: ''
     value: '2'
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_direction_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: INVALID
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: OUTBOUND
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: INBOUND
+    description: ''
+    value: '2'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_tunnel_dscp_mode_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: PRESERVE_MODEL
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: PIPE_MODEL
+    description: ''
+    value: '1'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_routing_actions_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: STATIC_ENCAP
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: NAT
+    description: ''
+    value: '2'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: NAT46
+    description: ''
+    value: '4'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: NAT64
+    description: ''
+    value: '8'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: NAT_PORT
+    description: ''
+    value: '16'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
   name: sai_dash_ha_role_t
   description: ''
   members:
@@ -120,34 +172,6 @@ enums:
     name: SWITCHING_TO_ACTIVE
     description: ''
     value: '4'
-- !!python/object:utils.sai_spec.sai_enum.SaiEnum
-  name: sai_dash_tunnel_dscp_mode_t
-  description: ''
-  members:
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: PRESERVE_MODEL
-    description: ''
-    value: '0'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: PIPE_MODEL
-    description: ''
-    value: '1'
-- !!python/object:utils.sai_spec.sai_enum.SaiEnum
-  name: sai_dash_direction_t
-  description: ''
-  members:
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: INVALID
-    description: ''
-    value: '0'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: OUTBOUND
-    description: ''
-    value: '1'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: INBOUND
-    description: ''
-    value: '2'
 port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtension
   attributes: []
   stats:
@@ -809,6 +833,28 @@ api_groups:
       object_name: null
       allow_null: false
       valid_only: null
+    - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      name: SAI_ENI_FULL_FLOW_RESIMULATION_REQUESTED
+      description: Action parameter FULL_FLOW_RESIMULATION_REQUESTED
+      type: bool
+      attr_value_field: booldata
+      default: 'false'
+      isresourcetype: false
+      flags: CREATE_AND_SET
+      object_name: null
+      allow_null: false
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      name: SAI_ENI_MAX_RESIMULATED_FLOW_PER_SECOND
+      description: Action parameter MAX_RESIMULATED_FLOW_PER_SECOND
+      type: sai_uint64_t
+      attr_value_field: u64
+      default: '0'
+      isresourcetype: false
+      flags: CREATE_AND_SET
+      object_name: null
+      allow_null: false
+      valid_only: null
     stats:
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_RX_BYTES
@@ -1000,6 +1046,28 @@ api_groups:
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_ENI_STAT_FLOW_UPDATE_FAILED
       description: DASH ENI FLOW_UPDATE_FAILED stat count
+      type: sai_uint64_t
+      attr_value_field: u64
+      default: null
+      isresourcetype: false
+      flags: READ_ONLY
+      object_name: null
+      allow_null: false
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      name: SAI_ENI_STAT_FLOW_UPDATED_BY_RESIMULATION
+      description: DASH ENI FLOW_UPDATED_BY_RESIMULATION stat count
+      type: sai_uint64_t
+      attr_value_field: u64
+      default: null
+      isresourcetype: false
+      flags: READ_ONLY
+      object_name: null
+      allow_null: false
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      name: SAI_ENI_STAT_FLOW_UPDATE_BY_RESIMULATION_FAILED
+      description: DASH ENI FLOW_UPDATE_BY_RESIMULATION_FAILED stat count
       type: sai_uint64_t
       attr_value_field: u64
       default: null
@@ -2316,6 +2384,28 @@ api_groups:
       allow_null: false
       valid_only: null
     - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      name: SAI_OUTBOUND_CA_TO_PA_ENTRY_FLOW_RESIMULATION_REQUESTED
+      description: Action parameter FLOW_RESIMULATION_REQUESTED
+      type: bool
+      attr_value_field: booldata
+      default: 'false'
+      isresourcetype: false
+      flags: CREATE_AND_SET
+      object_name: null
+      allow_null: false
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION
+      description: Action parameter ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION
+      type: sai_uint32_t
+      attr_value_field: u32
+      default: '0'
+      isresourcetype: false
+      flags: CREATE_AND_SET
+      object_name: null
+      allow_null: false
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
       name: SAI_OUTBOUND_CA_TO_PA_ENTRY_OVERLAY_SIP
       description: Action parameter OVERLAY_SIP
       type: sai_ip_address_t
@@ -2495,6 +2585,17 @@ api_groups:
       type: sai_uint32_t
       attr_value_field: u32
       default: '4294967295'
+      isresourcetype: false
+      flags: CREATE_AND_SET
+      object_name: null
+      allow_null: false
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+      name: SAI_OUTBOUND_ROUTING_ENTRY_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION
+      description: Action parameter ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION
+      type: sai_uint32_t
+      attr_value_field: u32
+      default: '0'
       isresourcetype: false
       flags: CREATE_AND_SET
       object_name: null

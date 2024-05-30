@@ -17,6 +17,7 @@ class DashP4Table(DashP4Object):
     def __init__(self):
         super().__init__()
         self.ignored: bool = False
+        self.ignored_in_header: bool = False
         self.api_name: str = ""
         self.ipaddr_family_attr: str = "false"
         self.keys: List[DashP4TableKey] = []

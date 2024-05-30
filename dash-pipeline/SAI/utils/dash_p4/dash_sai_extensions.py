@@ -134,11 +134,17 @@ class DashP4SAIExtensions(DashP4Object):
     def create_sai_object_types(self, sai_spec: SaiSpec):
         for table_group in self.table_groups:
             for table in table_group.tables:
+                if table.ignored_in_header:
+                    continue
+
                 sai_spec.object_types.append(f"SAI_OBJECT_TYPE_{table.name.upper()}")
     
     def create_sai_object_entries(self, sai_spec: SaiSpec):
         for table_group in self.table_groups:
             for table in table_group.tables:
+                if table.ignored_in_header:
+                    continue
+
                 if table.is_object != "false":
                     continue
 
