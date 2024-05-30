@@ -255,7 +255,6 @@ class SaiThriftDashAclTest(VnetAPI):
         self.create_entry(sai_thrift_create_outbound_ca_to_pa_entry, sai_thrift_remove_outbound_ca_to_pa_entry,
                           self.ocpe, action=SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING,
                           underlay_dip=underlay_dip, overlay_dmac=self.dst_ca_mac, use_dst_vnet_vni=True,
-                          meter_class_or=0, dash_tunnel_id=0)
                           meter_class_or=0, dash_tunnel_id=0,
                           flow_resimulation_requested = False, routing_actions_disabled_in_flow_resimulation = 0)
 
