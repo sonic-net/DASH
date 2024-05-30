@@ -1,10 +1,10 @@
 from .common import *
-from .sai_api_attribute import *
+from .dash_p4_table_attribute import *
 from .sai_type_solver import *
 
 
-@sai_parser_from_p4rt
-class SAIAPITableActionParam(SAIAPIAttribute):
+@dash_p4rt_parser
+class DashP4TableActionParam(DashP4TableAttribute):
     def __init__(self):
         super().__init__()
         self.bitwidth: int = 0
@@ -24,8 +24,7 @@ class SAIAPITableActionParam(SAIAPIAttribute):
         self.bitwidth = int(p4rt_table_action_param[BITWIDTH_TAG])
         # print("Parsing table action param: " + self.name)
 
-        if STRUCTURED_ANNOTATIONS_TAG in p4rt_table_action_param:
-            self._parse_sai_table_attribute_annotation(p4rt_table_action_param)
+        self._parse_sai_table_attribute_annotation(p4rt_table_action_param)
 
         # If type is specified, use it. Otherwise, try to find the proper type using default heuristics.
         if self.type != None:

@@ -1,13 +1,13 @@
 import copy
 from typing import Iterator
 from .common import *
-from .sai_api_attribute import *
+from .dash_p4_table_attribute import *
 from .sai_type_solver import *
 from utils.p4ir import P4VarRefGraph
 
 
-@sai_parser_from_p4rt
-class SAIAPICounter(SAIAPIAttribute):
+@dash_p4rt_parser
+class DashP4Counter(DashP4TableAttribute):
     """
     This class represents a single counter in SAI and provides parser from the P4Runtime counter object
     """
@@ -113,7 +113,7 @@ class SAIAPICounter(SAIAPIAttribute):
                     else:
                         raise ValueError("Unknown attr annotation " + kv["key"])
 
-    def generate_counter_sai_attributes(self) -> "Iterator[SAIAPICounter]":
+    def generate_counter_sai_attributes(self) -> "Iterator[DashP4Counter]":
         # If the SAI attribute type is counter id, we generate as standard SAI counter ID attributes, hence return as it is.
         if self.attr_type == "counter_id":
             yield self

@@ -1,22 +1,22 @@
 from typing import List
 from .common import *
-from .sai_api_table_action_param import *
-from .sai_api_counter import *
-from .sai_enum import *
+from .dash_p4_table_action_param import *
+from .dash_p4_counter import *
+from .dash_p4_enum import *
 
 
-@sai_parser_from_p4rt
-class SAIAPITableAction(SAIObject):
+@dash_p4rt_parser
+class DashP4TableAction(DashP4Object):
     def __init__(self):
         super().__init__()
-        self.params: List[SAIAPITableActionParam] = []
-        self.counters: List[SAIAPICounter] = []
+        self.params: List[DashP4TableActionParam] = []
+        self.counters: List[DashP4Counter] = []
 
     def parse_p4rt(
         self,
         p4rt_table_action: Dict[str, Any],
-        sai_enums: List[SAIEnum],
-        counters_by_action_name: Dict[str, List[SAIAPICounter]],
+        sai_enums: List[DashP4Enum],
+        counters_by_action_name: Dict[str, List[DashP4Counter]],
     ) -> None:
         """
         This method parses the P4Runtime table action object and populates the SAI API table action object.
@@ -45,16 +45,16 @@ class SAIAPITableAction(SAIObject):
         )
 
     def parse_action_params(
-        self, p4rt_table_action: Dict[str, Any], sai_enums: List[SAIEnum]
+        self, p4rt_table_action: Dict[str, Any], sai_enums: List[DashP4Enum]
     ) -> None:
         if PARAMS_TAG not in p4rt_table_action:
             return
 
         # Parse all params.
         for p in p4rt_table_action[PARAMS_TAG]:
-            param = SAIAPITableActionParam.from_p4rt(p)
+            param = DashP4TableActionParam.from_p4rt(p)
             self.params.append(param)
 
-        self.params = SAIAPIAttribute.link_ip_is_v6_vars(self.params)
+        self.params = DashP4TableAttribute.link_ip_is_v6_vars(self.params)
 
         return

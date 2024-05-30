@@ -3,7 +3,7 @@ from .common import *
 from .sai_type_solver import SAITypeInfo
 
 
-class SAIAPIAttribute(SAIObject):
+class DashP4TableAttribute(DashP4Object):
     def __init__(self):
         super().__init__()
 
@@ -38,6 +38,9 @@ class SAIAPIAttribute(SAIObject):
 
         Whenever a new attribute is introduced, please update the doc here to get it captured: dash-pipeline/bmv2/README.md.
         """
+        if not (STRUCTURED_ANNOTATIONS_TAG in p4rt_anno_list):
+            return
+
         for anno in p4rt_anno_list[STRUCTURED_ANNOTATIONS_TAG]:
             if anno[NAME_TAG] == SAI_VAL_TAG:
                 for kv in anno[KV_PAIR_LIST_TAG][KV_PAIRS_TAG]:
@@ -66,8 +69,8 @@ class SAIAPIAttribute(SAIObject):
 
     @staticmethod
     def link_ip_is_v6_vars(
-        vars: List["SAIAPIAttribute"],
-    ) -> List["SAIAPIAttribute"]:
+        vars: List["DashP4TableAttribute"],
+    ) -> List["DashP4TableAttribute"]:
         # Link *_is_v6 var to its corresponding var.
         ip_is_v6_key_ids = {
             v.name.replace("_is_v6", ""): v.id for v in vars if "_is_v6" in v.name

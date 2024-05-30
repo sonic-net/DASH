@@ -1,11 +1,11 @@
 from typing import List
 from .common import *
 from .sai_type_solver import SAITypeSolver
-from .sai_enum_member import SAIEnumMember
+from .dash_p4_enum_member import DashP4EnumMember
 
 
-@sai_parser_from_p4rt
-class SAIEnum(SAIObject):
+@dash_p4rt_parser
+class DashP4Enum(DashP4Object):
     """
     This class represents a single SAI enum and provides parser from the P4Runtime enum object
     """
@@ -13,7 +13,7 @@ class SAIEnum(SAIObject):
     def __init__(self):
         super().__init__()
         self.bitwidth: int = 0
-        self.members: List[SAIEnumMember] = []
+        self.members: List[DashP4EnumMember] = []
 
     def parse_p4rt(self, p4rt_enum: Dict[str, Any]) -> None:
         """
@@ -35,7 +35,7 @@ class SAIEnum(SAIObject):
         self.name = self.name[:-2]
         self.bitwidth = int(p4rt_enum["underlyingType"][BITWIDTH_TAG])
         self.members = [
-            SAIEnumMember.from_p4rt(enum_member)
+            DashP4EnumMember.from_p4rt(enum_member)
             for enum_member in p4rt_enum[MEMBERS_TAG]
         ]
 
