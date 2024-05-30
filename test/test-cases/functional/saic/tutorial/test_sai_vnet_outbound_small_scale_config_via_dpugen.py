@@ -90,7 +90,6 @@ class TestSaiVnetOutbound:
 
     @pytest.mark.ptf
     @pytest.mark.snappi
-    @pytest.mark.skip(reason="Skipping this test until dpugen fixes ORE eni_id->routing_group_id")
     def test_create_vnet_scale_config_generated(self, dpu):
         """Generate and apply configuration"""
         results = [*dpu.process_commands( (self.make_create_commands()) )]
@@ -100,7 +99,6 @@ class TestSaiVnetOutbound:
 
     @pytest.mark.ptf
     @pytest.mark.snappi
-    @pytest.mark.skip(reason="Skipping this test until dpugen fixes ORE eni_id->routing_group_id")
     def test_remove_vnet_scale_config_generated(self, dpu):
         """
         Generate and remove configuration
