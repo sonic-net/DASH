@@ -20,6 +20,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   stats: []
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: dash_acl_rule
@@ -59,6 +60,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_DASH_ACL_RULE_ATTR_COUNTER_ID
     description: Attach a counter. When it is empty, then packet hits won't be counted.
@@ -70,6 +72,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_COUNTER
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_DASH_ACL_RULE_ATTR_PRIORITY
     description: Rule priority in table
@@ -81,6 +84,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_DASH_ACL_RULE_ATTR_IP_ADDR_FAMILY
     description: IP address family for resource accounting
@@ -92,4 +96,5 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   stats: []

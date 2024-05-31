@@ -62,6 +62,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_INBOUND_ROUTING_ENTRY_METER_CLASS_OR
     description: Action parameter METER_CLASS_OR
@@ -73,6 +74,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_INBOUND_ROUTING_ENTRY_METER_CLASS_AND
     description: Action parameter METER_CLASS_AND
@@ -84,6 +86,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_INBOUND_ROUTING_ENTRY_SRC_VNET_ID
     description: Action parameter SRC_VNET_ID
@@ -95,6 +98,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_VNET
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_INBOUND_ROUTING_ENTRY_ATTR_IP_ADDR_FAMILY
     description: IP address family for resource accounting
@@ -106,4 +110,5 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   stats: []

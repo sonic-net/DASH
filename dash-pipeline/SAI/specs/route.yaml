@@ -38,6 +38,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ROUTE_ENTRY_PACKET_ACTION
     description: Action parameter PACKET_ACTION
@@ -49,6 +50,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ROUTE_ENTRY_NEXT_HOP_ID
     description: Action parameter NEXT_HOP_ID
@@ -60,6 +62,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ROUTE_ENTRY_ATTR_IP_ADDR_FAMILY
     description: IP address family for resource accounting
@@ -71,4 +74,5 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   stats: []

@@ -20,6 +20,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_PEER_IP
     description: Action parameter PEER_IP
@@ -31,6 +32,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_CP_DATA_CHANNEL_PORT
     description: Action parameter CP_DATA_CHANNEL_PORT
@@ -42,6 +44,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_DP_CHANNEL_DST_PORT
     description: Action parameter DP_CHANNEL_DST_PORT
@@ -53,6 +56,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_DP_CHANNEL_MIN_SRC_PORT
     description: Action parameter DP_CHANNEL_MIN_SRC_PORT
@@ -64,6 +68,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_DP_CHANNEL_MAX_SRC_PORT
     description: Action parameter DP_CHANNEL_MAX_SRC_PORT
@@ -75,6 +80,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_DP_CHANNEL_PROBE_INTERVAL_MS
     description: Action parameter DP_CHANNEL_PROBE_INTERVAL_MS
@@ -86,6 +92,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_DP_CHANNEL_PROBE_FAIL_THRESHOLD
     description: Action parameter DP_CHANNEL_PROBE_FAIL_THRESHOLD
@@ -97,6 +104,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_DP_CHANNEL_IS_ALIVE
     description: Action parameter DP_CHANNEL_IS_ALIVE
@@ -108,6 +116,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   stats:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_REQ_RX_BYTES
@@ -120,6 +129,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_REQ_RX_PACKETS
     description: DASH HA_SET DP_PROBE_REQ_RX_PACKETS stat count
@@ -131,6 +141,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_REQ_TX_BYTES
     description: DASH HA_SET DP_PROBE_REQ_TX_BYTES stat count
@@ -142,6 +153,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_REQ_TX_PACKETS
     description: DASH HA_SET DP_PROBE_REQ_TX_PACKETS stat count
@@ -153,6 +165,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_ACK_RX_BYTES
     description: DASH HA_SET DP_PROBE_ACK_RX_BYTES stat count
@@ -164,6 +177,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_ACK_RX_PACKETS
     description: DASH HA_SET DP_PROBE_ACK_RX_PACKETS stat count
@@ -175,6 +189,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_ACK_TX_BYTES
     description: DASH HA_SET DP_PROBE_ACK_TX_BYTES stat count
@@ -186,6 +201,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_ACK_TX_PACKETS
     description: DASH HA_SET DP_PROBE_ACK_TX_PACKETS stat count
@@ -197,6 +213,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_FAILED
     description: DASH HA_SET DP_PROBE_FAILED stat count
@@ -208,6 +225,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_ATTEMPTED
     description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_ATTEMPTED stat count
@@ -219,6 +237,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_RECEIVED
     description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_RECEIVED stat count
@@ -230,6 +249,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_SUCCEEDED
     description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_SUCCEEDED stat count
@@ -241,6 +261,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_FAILED
     description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_FAILED stat count
@@ -252,6 +273,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_REJECTED
     description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_REJECTED stat count
@@ -263,6 +285,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_TIMEOUT_COUNT
     description: DASH HA_SET CP_DATA_CHANNEL_TIMEOUT_COUNT stat count
@@ -274,6 +297,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_RECEIVED
     description: DASH HA_SET BULK_SYNC_MESSAGE_RECEIVED stat count
@@ -285,6 +309,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_SENT
     description: DASH HA_SET BULK_SYNC_MESSAGE_SENT stat count
@@ -296,6 +321,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_SEND_FAILED
     description: DASH HA_SET BULK_SYNC_MESSAGE_SEND_FAILED stat count
@@ -307,6 +333,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_BULK_SYNC_FLOW_RECEIVED
     description: DASH HA_SET BULK_SYNC_FLOW_RECEIVED stat count
@@ -318,6 +345,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_BULK_SYNC_FLOW_SENT
     description: DASH HA_SET BULK_SYNC_FLOW_SENT stat count
@@ -329,6 +357,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: ha_scope
   description: ''
@@ -347,6 +376,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SCOPE_DASH_HA_ROLE
     description: Action parameter DASH_HA_ROLE
@@ -358,6 +388,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SCOPE_FLOW_VERSION
     description: Action parameter FLOW_VERSION
@@ -369,6 +400,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SCOPE_FLOW_RECONCILE_REQUESTED
     description: Action parameter FLOW_RECONCILE_REQUESTED
@@ -380,6 +412,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SCOPE_FLOW_RECONCILE_NEEDED
     description: Action parameter FLOW_RECONCILE_NEEDED
@@ -391,4 +424,5 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   stats: []

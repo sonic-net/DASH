@@ -60,6 +60,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_DST_VNET_ID
     description: Action parameter DST_VNET_ID
@@ -71,6 +72,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_VNET
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_METER_CLASS_OR
     description: Action parameter METER_CLASS_OR
@@ -82,6 +84,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_METER_CLASS_AND
     description: Action parameter METER_CLASS_AND
@@ -93,6 +96,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION
     description: Action parameter ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION
@@ -104,6 +108,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_IP
     description: Action parameter OVERLAY_IP
@@ -115,6 +120,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_DIP
     description: Action parameter OVERLAY_DIP
@@ -126,6 +132,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_DIP_MASK
     description: Action parameter OVERLAY_DIP_MASK
@@ -137,6 +144,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_SIP
     description: Action parameter OVERLAY_SIP
@@ -148,6 +156,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_SIP_MASK
     description: Action parameter OVERLAY_SIP_MASK
@@ -159,6 +168,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_UNDERLAY_DIP
     description: Action parameter UNDERLAY_DIP
@@ -170,6 +180,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_UNDERLAY_SIP
     description: Action parameter UNDERLAY_SIP
@@ -181,6 +192,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_DASH_ENCAPSULATION
     description: Action parameter DASH_ENCAPSULATION
@@ -192,6 +204,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_TUNNEL_KEY
     description: Action parameter TUNNEL_KEY
@@ -203,6 +216,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_COUNTER_ID
     description: Attach a counter. When it is empty, then packet hits won't be counted.
@@ -214,6 +228,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_COUNTER
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_IP_ADDR_FAMILY
     description: IP address family for resource accounting
@@ -225,4 +240,5 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   stats: []

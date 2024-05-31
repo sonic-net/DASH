@@ -38,6 +38,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ENI_ID
     description: Action parameter ENI_ID
@@ -49,6 +50,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_ENI
     allow_null: true
     valid_only: null
+    deprecated: null
   stats: []
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: eni
@@ -68,6 +70,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_PPS
     description: Action parameter PPS
@@ -79,6 +82,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_FLOWS
     description: Action parameter FLOWS
@@ -90,6 +94,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_ADMIN_STATE
     description: Action parameter ADMIN_STATE
@@ -101,6 +106,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_HA_SCOPE_ID
     description: Action parameter HA_SCOPE_ID
@@ -112,6 +118,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_HA_SCOPE
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_VM_UNDERLAY_DIP
     description: Action parameter VM_UNDERLAY_DIP
@@ -123,6 +130,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_VM_VNI
     description: Action parameter VM_VNI
@@ -134,6 +142,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_VNET_ID
     description: Action parameter VNET_ID
@@ -145,6 +154,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_VNET
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_PL_SIP
     description: Action parameter PL_SIP
@@ -156,6 +166,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_PL_SIP_MASK
     description: Action parameter PL_SIP_MASK
@@ -167,6 +178,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_PL_UNDERLAY_SIP
     description: Action parameter PL_UNDERLAY_SIP
@@ -178,6 +190,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_V4_METER_POLICY_ID
     description: Action parameter V4_METER_POLICY_ID
@@ -189,6 +202,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_METER_POLICY
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_V6_METER_POLICY_ID
     description: Action parameter V6_METER_POLICY_ID
@@ -200,6 +214,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_METER_POLICY
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_DASH_TUNNEL_DSCP_MODE
     description: Action parameter DASH_TUNNEL_DSCP_MODE
@@ -211,6 +226,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_DSCP
     description: Action parameter DSCP
@@ -222,6 +238,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE == SAI_DASH_TUNNEL_DSCP_MODE_PIPE_MODEL
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID
     description: Action parameter INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID
@@ -233,6 +250,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_INBOUND_V4_STAGE2_DASH_ACL_GROUP_ID
     description: Action parameter INBOUND_V4_STAGE2_DASH_ACL_GROUP_ID
@@ -244,6 +262,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_INBOUND_V4_STAGE3_DASH_ACL_GROUP_ID
     description: Action parameter INBOUND_V4_STAGE3_DASH_ACL_GROUP_ID
@@ -255,6 +274,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_INBOUND_V4_STAGE4_DASH_ACL_GROUP_ID
     description: Action parameter INBOUND_V4_STAGE4_DASH_ACL_GROUP_ID
@@ -266,6 +286,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_INBOUND_V4_STAGE5_DASH_ACL_GROUP_ID
     description: Action parameter INBOUND_V4_STAGE5_DASH_ACL_GROUP_ID
@@ -277,6 +298,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_INBOUND_V6_STAGE1_DASH_ACL_GROUP_ID
     description: Action parameter INBOUND_V6_STAGE1_DASH_ACL_GROUP_ID
@@ -288,6 +310,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_INBOUND_V6_STAGE2_DASH_ACL_GROUP_ID
     description: Action parameter INBOUND_V6_STAGE2_DASH_ACL_GROUP_ID
@@ -299,6 +322,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_INBOUND_V6_STAGE3_DASH_ACL_GROUP_ID
     description: Action parameter INBOUND_V6_STAGE3_DASH_ACL_GROUP_ID
@@ -310,6 +334,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_INBOUND_V6_STAGE4_DASH_ACL_GROUP_ID
     description: Action parameter INBOUND_V6_STAGE4_DASH_ACL_GROUP_ID
@@ -321,6 +346,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_INBOUND_V6_STAGE5_DASH_ACL_GROUP_ID
     description: Action parameter INBOUND_V6_STAGE5_DASH_ACL_GROUP_ID
@@ -332,6 +358,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_OUTBOUND_V4_STAGE1_DASH_ACL_GROUP_ID
     description: Action parameter OUTBOUND_V4_STAGE1_DASH_ACL_GROUP_ID
@@ -343,6 +370,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_OUTBOUND_V4_STAGE2_DASH_ACL_GROUP_ID
     description: Action parameter OUTBOUND_V4_STAGE2_DASH_ACL_GROUP_ID
@@ -354,6 +382,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_OUTBOUND_V4_STAGE3_DASH_ACL_GROUP_ID
     description: Action parameter OUTBOUND_V4_STAGE3_DASH_ACL_GROUP_ID
@@ -365,6 +394,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_OUTBOUND_V4_STAGE4_DASH_ACL_GROUP_ID
     description: Action parameter OUTBOUND_V4_STAGE4_DASH_ACL_GROUP_ID
@@ -376,6 +406,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_OUTBOUND_V4_STAGE5_DASH_ACL_GROUP_ID
     description: Action parameter OUTBOUND_V4_STAGE5_DASH_ACL_GROUP_ID
@@ -387,6 +418,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_OUTBOUND_V6_STAGE1_DASH_ACL_GROUP_ID
     description: Action parameter OUTBOUND_V6_STAGE1_DASH_ACL_GROUP_ID
@@ -398,6 +430,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_OUTBOUND_V6_STAGE2_DASH_ACL_GROUP_ID
     description: Action parameter OUTBOUND_V6_STAGE2_DASH_ACL_GROUP_ID
@@ -409,6 +442,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_OUTBOUND_V6_STAGE3_DASH_ACL_GROUP_ID
     description: Action parameter OUTBOUND_V6_STAGE3_DASH_ACL_GROUP_ID
@@ -420,6 +454,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_OUTBOUND_V6_STAGE4_DASH_ACL_GROUP_ID
     description: Action parameter OUTBOUND_V6_STAGE4_DASH_ACL_GROUP_ID
@@ -431,6 +466,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_OUTBOUND_V6_STAGE5_DASH_ACL_GROUP_ID
     description: Action parameter OUTBOUND_V6_STAGE5_DASH_ACL_GROUP_ID
@@ -442,6 +478,7 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION
     description: Action parameter DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION
@@ -453,6 +490,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_FULL_FLOW_RESIMULATION_REQUESTED
     description: Action parameter FULL_FLOW_RESIMULATION_REQUESTED
@@ -464,6 +502,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_MAX_RESIMULATED_FLOW_PER_SECOND
     description: Action parameter MAX_RESIMULATED_FLOW_PER_SECOND
@@ -475,6 +514,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   stats:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_RX_BYTES
@@ -487,6 +527,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_RX_PACKETS
     description: DASH ENI RX_PACKETS stat count
@@ -498,6 +539,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TX_BYTES
     description: DASH ENI TX_BYTES stat count
@@ -509,6 +551,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TX_PACKETS
     description: DASH ENI TX_PACKETS stat count
@@ -520,6 +563,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_OUTBOUND_RX_BYTES
     description: DASH ENI OUTBOUND_RX_BYTES stat count
@@ -531,6 +575,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_OUTBOUND_RX_PACKETS
     description: DASH ENI OUTBOUND_RX_PACKETS stat count
@@ -542,6 +587,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_OUTBOUND_TX_BYTES
     description: DASH ENI OUTBOUND_TX_BYTES stat count
@@ -553,6 +599,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_OUTBOUND_TX_PACKETS
     description: DASH ENI OUTBOUND_TX_PACKETS stat count
@@ -564,6 +611,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INBOUND_RX_BYTES
     description: DASH ENI INBOUND_RX_BYTES stat count
@@ -575,6 +623,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INBOUND_RX_PACKETS
     description: DASH ENI INBOUND_RX_PACKETS stat count
@@ -586,6 +635,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INBOUND_TX_BYTES
     description: DASH ENI INBOUND_TX_BYTES stat count
@@ -597,6 +647,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INBOUND_TX_PACKETS
     description: DASH ENI INBOUND_TX_PACKETS stat count
@@ -608,6 +659,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_LB_FAST_PATH_ICMP_IN_BYTES
     description: DASH ENI LB_FAST_PATH_ICMP_IN_BYTES stat count
@@ -619,6 +671,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_LB_FAST_PATH_ICMP_IN_PACKETS
     description: DASH ENI LB_FAST_PATH_ICMP_IN_PACKETS stat count
@@ -630,6 +683,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_FLOW_CREATED
     description: DASH ENI FLOW_CREATED stat count
@@ -641,6 +695,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_FLOW_CREATE_FAILED
     description: DASH ENI FLOW_CREATE_FAILED stat count
@@ -652,6 +707,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_FLOW_UPDATED
     description: DASH ENI FLOW_UPDATED stat count
@@ -663,6 +719,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_FLOW_UPDATE_FAILED
     description: DASH ENI FLOW_UPDATE_FAILED stat count
@@ -674,6 +731,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_FLOW_UPDATED_BY_RESIMULATION
     description: DASH ENI FLOW_UPDATED_BY_RESIMULATION stat count
@@ -685,6 +743,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_FLOW_UPDATE_BY_RESIMULATION_FAILED
     description: DASH ENI FLOW_UPDATE_BY_RESIMULATION_FAILED stat count
@@ -696,6 +755,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_FLOW_DELETED
     description: DASH ENI FLOW_DELETED stat count
@@ -707,6 +767,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_FLOW_DELETE_FAILED
     description: DASH ENI FLOW_DELETE_FAILED stat count
@@ -718,6 +779,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_FLOW_AGED
     description: DASH ENI FLOW_AGED stat count
@@ -729,6 +791,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_SYNC_PACKET_RX_BYTES
     description: DASH ENI INLINE_SYNC_PACKET_RX_BYTES stat count
@@ -740,6 +803,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_SYNC_PACKET_RX_PACKETS
     description: DASH ENI INLINE_SYNC_PACKET_RX_PACKETS stat count
@@ -751,6 +815,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_SYNC_PACKET_TX_BYTES
     description: DASH ENI INLINE_SYNC_PACKET_TX_BYTES stat count
@@ -762,6 +827,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_SYNC_PACKET_TX_PACKETS
     description: DASH ENI INLINE_SYNC_PACKET_TX_PACKETS stat count
@@ -773,6 +839,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_SYNC_PACKET_RX_BYTES
     description: DASH ENI TIMED_SYNC_PACKET_RX_BYTES stat count
@@ -784,6 +851,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_SYNC_PACKET_RX_PACKETS
     description: DASH ENI TIMED_SYNC_PACKET_RX_PACKETS stat count
@@ -795,6 +863,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_SYNC_PACKET_TX_BYTES
     description: DASH ENI TIMED_SYNC_PACKET_TX_BYTES stat count
@@ -806,6 +875,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_SYNC_PACKET_TX_PACKETS
     description: DASH ENI TIMED_SYNC_PACKET_TX_PACKETS stat count
@@ -817,6 +887,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_CREATE_REQ_SENT
     description: DASH ENI INLINE_FLOW_CREATE_REQ_SENT stat count
@@ -828,6 +899,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_CREATE_REQ_RECV
     description: DASH ENI INLINE_FLOW_CREATE_REQ_RECV stat count
@@ -839,6 +911,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_CREATE_REQ_FAILED
     description: DASH ENI INLINE_FLOW_CREATE_REQ_FAILED stat count
@@ -850,6 +923,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_CREATE_REQ_IGNORED
     description: DASH ENI INLINE_FLOW_CREATE_REQ_IGNORED stat count
@@ -861,6 +935,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_CREATE_ACK_RECV
     description: DASH ENI INLINE_FLOW_CREATE_ACK_RECV stat count
@@ -872,6 +947,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_CREATE_ACK_FAILED
     description: DASH ENI INLINE_FLOW_CREATE_ACK_FAILED stat count
@@ -883,6 +959,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_CREATE_ACK_IGNORED
     description: DASH ENI INLINE_FLOW_CREATE_ACK_IGNORED stat count
@@ -894,6 +971,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_CREATE_REQ_SENT
     description: DASH ENI TIMED_FLOW_CREATE_REQ_SENT stat count
@@ -905,6 +983,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_CREATE_REQ_RECV
     description: DASH ENI TIMED_FLOW_CREATE_REQ_RECV stat count
@@ -916,6 +995,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_CREATE_REQ_FAILED
     description: DASH ENI TIMED_FLOW_CREATE_REQ_FAILED stat count
@@ -927,6 +1007,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_CREATE_REQ_IGNORED
     description: DASH ENI TIMED_FLOW_CREATE_REQ_IGNORED stat count
@@ -938,6 +1019,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_CREATE_ACK_RECV
     description: DASH ENI TIMED_FLOW_CREATE_ACK_RECV stat count
@@ -949,6 +1031,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_CREATE_ACK_FAILED
     description: DASH ENI TIMED_FLOW_CREATE_ACK_FAILED stat count
@@ -960,6 +1043,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_CREATE_ACK_IGNORED
     description: DASH ENI TIMED_FLOW_CREATE_ACK_IGNORED stat count
@@ -971,6 +1055,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_REQ_SENT
     description: DASH ENI INLINE_FLOW_UPDATE_REQ_SENT stat count
@@ -982,6 +1067,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_REQ_RECV
     description: DASH ENI INLINE_FLOW_UPDATE_REQ_RECV stat count
@@ -993,6 +1079,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_REQ_FAILED
     description: DASH ENI INLINE_FLOW_UPDATE_REQ_FAILED stat count
@@ -1004,6 +1091,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_REQ_IGNORED
     description: DASH ENI INLINE_FLOW_UPDATE_REQ_IGNORED stat count
@@ -1015,6 +1103,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_ACK_RECV
     description: DASH ENI INLINE_FLOW_UPDATE_ACK_RECV stat count
@@ -1026,6 +1115,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_ACK_FAILED
     description: DASH ENI INLINE_FLOW_UPDATE_ACK_FAILED stat count
@@ -1037,6 +1127,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_ACK_IGNORED
     description: DASH ENI INLINE_FLOW_UPDATE_ACK_IGNORED stat count
@@ -1048,6 +1139,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_REQ_SENT
     description: DASH ENI TIMED_FLOW_UPDATE_REQ_SENT stat count
@@ -1059,6 +1151,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_REQ_RECV
     description: DASH ENI TIMED_FLOW_UPDATE_REQ_RECV stat count
@@ -1070,6 +1163,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_REQ_FAILED
     description: DASH ENI TIMED_FLOW_UPDATE_REQ_FAILED stat count
@@ -1081,6 +1175,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_REQ_IGNORED
     description: DASH ENI TIMED_FLOW_UPDATE_REQ_IGNORED stat count
@@ -1092,6 +1187,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_ACK_RECV
     description: DASH ENI TIMED_FLOW_UPDATE_ACK_RECV stat count
@@ -1103,6 +1199,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_ACK_FAILED
     description: DASH ENI TIMED_FLOW_UPDATE_ACK_FAILED stat count
@@ -1114,6 +1211,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_ACK_IGNORED
     description: DASH ENI TIMED_FLOW_UPDATE_ACK_IGNORED stat count
@@ -1125,6 +1223,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_DELETE_REQ_SENT
     description: DASH ENI INLINE_FLOW_DELETE_REQ_SENT stat count
@@ -1136,6 +1235,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_DELETE_REQ_RECV
     description: DASH ENI INLINE_FLOW_DELETE_REQ_RECV stat count
@@ -1147,6 +1247,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_DELETE_REQ_FAILED
     description: DASH ENI INLINE_FLOW_DELETE_REQ_FAILED stat count
@@ -1158,6 +1259,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_DELETE_REQ_IGNORED
     description: DASH ENI INLINE_FLOW_DELETE_REQ_IGNORED stat count
@@ -1169,6 +1271,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_DELETE_ACK_RECV
     description: DASH ENI INLINE_FLOW_DELETE_ACK_RECV stat count
@@ -1180,6 +1283,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_DELETE_ACK_FAILED
     description: DASH ENI INLINE_FLOW_DELETE_ACK_FAILED stat count
@@ -1191,6 +1295,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_DELETE_ACK_IGNORED
     description: DASH ENI INLINE_FLOW_DELETE_ACK_IGNORED stat count
@@ -1202,6 +1307,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_DELETE_REQ_SENT
     description: DASH ENI TIMED_FLOW_DELETE_REQ_SENT stat count
@@ -1213,6 +1319,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_DELETE_REQ_RECV
     description: DASH ENI TIMED_FLOW_DELETE_REQ_RECV stat count
@@ -1224,6 +1331,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_DELETE_REQ_FAILED
     description: DASH ENI TIMED_FLOW_DELETE_REQ_FAILED stat count
@@ -1235,6 +1343,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_DELETE_REQ_IGNORED
     description: DASH ENI TIMED_FLOW_DELETE_REQ_IGNORED stat count
@@ -1246,6 +1355,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_DELETE_ACK_RECV
     description: DASH ENI TIMED_FLOW_DELETE_ACK_RECV stat count
@@ -1257,6 +1367,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_DELETE_ACK_FAILED
     description: DASH ENI TIMED_FLOW_DELETE_ACK_FAILED stat count
@@ -1268,6 +1379,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_DELETE_ACK_IGNORED
     description: DASH ENI TIMED_FLOW_DELETE_ACK_IGNORED stat count
@@ -1279,6 +1391,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_OUTBOUND_ROUTING_ENTRY_MISS_DROP_PACKETS
     description: DASH ENI OUTBOUND_ROUTING_ENTRY_MISS_DROP_PACKETS stat count
@@ -1290,6 +1403,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_OUTBOUND_CA_PA_ENTRY_MISS_DROP_PACKETS
     description: DASH ENI OUTBOUND_CA_PA_ENTRY_MISS_DROP_PACKETS stat count
@@ -1301,6 +1415,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INBOUND_ROUTING_ENTRY_MISS_DROP_PACKETS
     description: DASH ENI INBOUND_ROUTING_ENTRY_MISS_DROP_PACKETS stat count
@@ -1312,3 +1427,4 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null

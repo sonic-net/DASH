@@ -21,6 +21,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_METER_BUCKET_STAT_INBOUND_BYTES
     description: DASH METER_BUCKET INBOUND_BYTES stat count
@@ -32,6 +33,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: meter_policy
   description: ''
@@ -50,6 +52,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   stats: []
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: meter_rule
@@ -69,6 +72,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_METER_RULE_ATTR_PRIORITY
     description: Rule priority in table
@@ -80,6 +84,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_METER_RULE_ATTR_IP_ADDR_FAMILY
     description: IP address family for resource accounting
@@ -91,4 +96,5 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   stats: []

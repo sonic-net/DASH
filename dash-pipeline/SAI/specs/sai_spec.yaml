@@ -186,6 +186,7 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_PORT_STAT_ENI_MISS_DROP_PACKETS
     description: DASH PORT ENI_MISS_DROP_PACKETS stat count
@@ -197,6 +198,7 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_PORT_STAT_PORT_LB_FAST_PATH_ICMP_IN_BYTES
     description: DASH PORT PORT_LB_FAST_PATH_ICMP_IN_BYTES stat count
@@ -208,6 +210,7 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_PORT_STAT_PORT_LB_FAST_PATH_ICMP_IN_PACKETS
     description: DASH PORT PORT_LB_FAST_PATH_ICMP_IN_PACKETS stat count
@@ -219,6 +222,7 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_PORT_STAT_PORT_LB_FAST_PATH_ENI_MISS_DROP_BYTES
     description: DASH PORT PORT_LB_FAST_PATH_ENI_MISS_DROP_BYTES stat count
@@ -230,6 +234,7 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_PORT_STAT_PORT_LB_FAST_PATH_ENI_MISS_DROP_PACKETS
     description: DASH PORT PORT_LB_FAST_PATH_ENI_MISS_DROP_PACKETS stat count
@@ -241,6 +246,7 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     object_name: null
     allow_null: false
     valid_only: null
+    deprecated: null
 api_groups:
 - !inc '/SAI/specs/dash_acl.yaml'
 - !inc '/SAI/specs/dash_direction_lookup.yaml'
