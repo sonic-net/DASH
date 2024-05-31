@@ -4,7 +4,7 @@ all: copysrc
 		/bmv2/dash_pipeline.bmv2/dash_pipeline_p4rt.json \
 		--ir /bmv2/dash_pipeline.bmv2/dash_pipeline_ir.json \
 		--ignore-tables=appliance,eni_meter,slb_decap \
-		--output-sai-spec=/SAI/dash_sai_spec.yaml \
+		--sai-spec-dir=/SAI/spec \
 		dash
 
 copysrc:

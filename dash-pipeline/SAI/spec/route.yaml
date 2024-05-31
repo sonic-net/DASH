@@ -1,0 +1,74 @@
+!!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
+name: route
+description: ''
+sai_apis:
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: route_entry
+  description: ''
+  is_object: false
+  enums:
+  - !!python/object:utils.sai_spec.sai_enum.SaiEnum
+    name: sai_route_entry_action_t
+    description: Attribute data for SAI_ROUTE_ENTRY_ATTR_ACTION
+    members:
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_ROUTE_ENTRY_ACTION_PKT_ACT
+      description: ''
+      value: '0'
+  structs:
+  - !!python/object:utils.sai_spec.sai_struct.SaiStruct
+    name: sai_route_entry_entry_t
+    description: Entry for route_entry
+    members:
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: destination
+      description: Lpm matched key destination
+      type: sai_ip_prefix_t
+      objects: null
+      valid_only: null
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_ROUTE_ENTRY_ATTR_ACTION
+    description: Action
+    type: sai_route_entry_action_t
+    attr_value_field: null
+    default: SAI_ROUTE_ENTRY_ACTION_PKT_ACT
+    isresourcetype: false
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_ROUTE_ENTRY_PACKET_ACTION
+    description: Action parameter PACKET_ACTION
+    type: sai_uint16_t
+    attr_value_field: u16
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_ROUTE_ENTRY_NEXT_HOP_ID
+    description: Action parameter NEXT_HOP_ID
+    type: sai_uint16_t
+    attr_value_field: u16
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_ROUTE_ENTRY_ATTR_IP_ADDR_FAMILY
+    description: IP address family for resource accounting
+    type: sai_ip_addr_family_t
+    attr_value_field: null
+    default: null
+    isresourcetype: true
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  stats: []

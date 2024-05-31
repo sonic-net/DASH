@@ -1,0 +1,228 @@
+!!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
+name: dash_outbound_routing
+description: ''
+sai_apis:
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: outbound_routing_entry
+  description: ''
+  is_object: false
+  enums:
+  - !!python/object:utils.sai_spec.sai_enum.SaiEnum
+    name: sai_outbound_routing_entry_action_t
+    description: Attribute data for SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION
+    members:
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET
+      description: ''
+      value: '0'
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT
+      description: ''
+      value: '0'
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_DIRECT
+      description: ''
+      value: '0'
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_SERVICE_TUNNEL
+      description: ''
+      value: '0'
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_DROP
+      description: ''
+      value: '0'
+  structs:
+  - !!python/object:utils.sai_spec.sai_struct.SaiStruct
+    name: sai_outbound_routing_entry_entry_t
+    description: Entry for outbound_routing_entry
+    members:
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: eni_id
+      description: Exact matched key eni_id
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_ENI
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: destination
+      description: Lpm matched key destination
+      type: sai_ip_prefix_t
+      objects: null
+      valid_only: null
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION
+    description: Action
+    type: sai_outbound_routing_entry_action_t
+    attr_value_field: null
+    default: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET
+    isresourcetype: false
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_ROUTING_ENTRY_DST_VNET_ID
+    description: Action parameter DST_VNET_ID
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_VNET
+    allow_null: true
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_ROUTING_ENTRY_METER_CLASS_OR
+    description: Action parameter METER_CLASS_OR
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_ROUTING_ENTRY_METER_CLASS_AND
+    description: Action parameter METER_CLASS_AND
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '4294967295'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION
+    description: Action parameter ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_IP
+    description: Action parameter OVERLAY_IP
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_DIP
+    description: Action parameter OVERLAY_DIP
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_DIP_MASK
+    description: Action parameter OVERLAY_DIP_MASK
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_SIP
+    description: Action parameter OVERLAY_SIP
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_SIP_MASK
+    description: Action parameter OVERLAY_SIP_MASK
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_ROUTING_ENTRY_UNDERLAY_DIP
+    description: Action parameter UNDERLAY_DIP
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_ROUTING_ENTRY_UNDERLAY_SIP
+    description: Action parameter UNDERLAY_SIP
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_ROUTING_ENTRY_DASH_ENCAPSULATION
+    description: Action parameter DASH_ENCAPSULATION
+    type: sai_dash_encapsulation_t
+    attr_value_field: s32
+    default: SAI_DASH_ENCAPSULATION_VXLAN
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_ROUTING_ENTRY_TUNNEL_KEY
+    description: Action parameter TUNNEL_KEY
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_COUNTER_ID
+    description: Attach a counter. When it is empty, then packet hits won't be counted.
+    type: sai_object_id_t
+    attr_value_field: null
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_COUNTER
+    allow_null: true
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_IP_ADDR_FAMILY
+    description: IP address family for resource accounting
+    type: sai_ip_addr_family_t
+    attr_value_field: null
+    default: null
+    isresourcetype: true
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  stats: []

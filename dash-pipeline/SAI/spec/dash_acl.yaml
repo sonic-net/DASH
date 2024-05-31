@@ -1,0 +1,95 @@
+!!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
+name: dash_acl
+description: ''
+sai_apis:
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: dash_acl_group
+  description: ''
+  is_object: true
+  enums: []
+  structs: []
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_ACL_GROUP_IP_ADDR_FAMILY
+    description: Action parameter IP_ADDR_FAMILY
+    type: sai_ip_addr_family_t
+    attr_value_field: u32
+    default: SAI_IP_ADDR_FAMILY_IPV4
+    isresourcetype: true
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  stats: []
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: dash_acl_rule
+  description: ''
+  is_object: true
+  enums:
+  - !!python/object:utils.sai_spec.sai_enum.SaiEnum
+    name: sai_dash_acl_rule_action_t
+    description: Attribute data for SAI_DASH_ACL_RULE_ATTR_ACTION
+    members:
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_DASH_ACL_RULE_ACTION_PERMIT
+      description: ''
+      value: '0'
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
+      description: ''
+      value: '0'
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_DASH_ACL_RULE_ACTION_DENY
+      description: ''
+      value: '0'
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
+      description: ''
+      value: '0'
+  structs: []
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_ACL_RULE_ATTR_ACTION
+    description: Action
+    type: sai_dash_acl_rule_action_t
+    attr_value_field: null
+    default: SAI_DASH_ACL_RULE_ACTION_PERMIT
+    isresourcetype: false
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_ACL_RULE_ATTR_COUNTER_ID
+    description: Attach a counter. When it is empty, then packet hits won't be counted.
+    type: sai_object_id_t
+    attr_value_field: null
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_COUNTER
+    allow_null: true
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_ACL_RULE_ATTR_PRIORITY
+    description: Rule priority in table
+    type: sai_uint32_t
+    attr_value_field: null
+    default: null
+    isresourcetype: false
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_ACL_RULE_ATTR_IP_ADDR_FAMILY
+    description: IP address family for resource accounting
+    type: sai_ip_addr_family_t
+    attr_value_field: null
+    default: null
+    isresourcetype: true
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  stats: []

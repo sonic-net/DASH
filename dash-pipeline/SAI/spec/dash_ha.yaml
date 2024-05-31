@@ -1,0 +1,394 @@
+!!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
+name: dash_ha
+description: ''
+sai_apis:
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: ha_set
+  description: ''
+  is_object: true
+  enums: []
+  structs: []
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_LOCAL_IP
+    description: Action parameter LOCAL_IP
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_PEER_IP
+    description: Action parameter PEER_IP
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_CP_DATA_CHANNEL_PORT
+    description: Action parameter CP_DATA_CHANNEL_PORT
+    type: sai_uint16_t
+    attr_value_field: u16
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_DP_CHANNEL_DST_PORT
+    description: Action parameter DP_CHANNEL_DST_PORT
+    type: sai_uint16_t
+    attr_value_field: u16
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_DP_CHANNEL_MIN_SRC_PORT
+    description: Action parameter DP_CHANNEL_MIN_SRC_PORT
+    type: sai_uint16_t
+    attr_value_field: u16
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_DP_CHANNEL_MAX_SRC_PORT
+    description: Action parameter DP_CHANNEL_MAX_SRC_PORT
+    type: sai_uint16_t
+    attr_value_field: u16
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_DP_CHANNEL_PROBE_INTERVAL_MS
+    description: Action parameter DP_CHANNEL_PROBE_INTERVAL_MS
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_DP_CHANNEL_PROBE_FAIL_THRESHOLD
+    description: Action parameter DP_CHANNEL_PROBE_FAIL_THRESHOLD
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_DP_CHANNEL_IS_ALIVE
+    description: Action parameter DP_CHANNEL_IS_ALIVE
+    type: bool
+    attr_value_field: booldata
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  stats:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_DP_PROBE_REQ_RX_BYTES
+    description: DASH HA_SET DP_PROBE_REQ_RX_BYTES stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_DP_PROBE_REQ_RX_PACKETS
+    description: DASH HA_SET DP_PROBE_REQ_RX_PACKETS stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_DP_PROBE_REQ_TX_BYTES
+    description: DASH HA_SET DP_PROBE_REQ_TX_BYTES stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_DP_PROBE_REQ_TX_PACKETS
+    description: DASH HA_SET DP_PROBE_REQ_TX_PACKETS stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_DP_PROBE_ACK_RX_BYTES
+    description: DASH HA_SET DP_PROBE_ACK_RX_BYTES stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_DP_PROBE_ACK_RX_PACKETS
+    description: DASH HA_SET DP_PROBE_ACK_RX_PACKETS stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_DP_PROBE_ACK_TX_BYTES
+    description: DASH HA_SET DP_PROBE_ACK_TX_BYTES stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_DP_PROBE_ACK_TX_PACKETS
+    description: DASH HA_SET DP_PROBE_ACK_TX_PACKETS stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_DP_PROBE_FAILED
+    description: DASH HA_SET DP_PROBE_FAILED stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_ATTEMPTED
+    description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_ATTEMPTED stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_RECEIVED
+    description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_RECEIVED stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_SUCCEEDED
+    description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_SUCCEEDED stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_FAILED
+    description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_FAILED stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_REJECTED
+    description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_REJECTED stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_TIMEOUT_COUNT
+    description: DASH HA_SET CP_DATA_CHANNEL_TIMEOUT_COUNT stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_RECEIVED
+    description: DASH HA_SET BULK_SYNC_MESSAGE_RECEIVED stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_SENT
+    description: DASH HA_SET BULK_SYNC_MESSAGE_SENT stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_SEND_FAILED
+    description: DASH HA_SET BULK_SYNC_MESSAGE_SEND_FAILED stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_BULK_SYNC_FLOW_RECEIVED
+    description: DASH HA_SET BULK_SYNC_FLOW_RECEIVED stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_STAT_BULK_SYNC_FLOW_SENT
+    description: DASH HA_SET BULK_SYNC_FLOW_SENT stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: ha_scope
+  description: ''
+  is_object: true
+  enums: []
+  structs: []
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SCOPE_HA_SET_ID
+    description: Action parameter HA_SET_ID
+    type: sai_uint16_t
+    attr_value_field: u16
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SCOPE_DASH_HA_ROLE
+    description: Action parameter DASH_HA_ROLE
+    type: sai_dash_ha_role_t
+    attr_value_field: s32
+    default: SAI_DASH_HA_ROLE_DEAD
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SCOPE_FLOW_VERSION
+    description: Action parameter FLOW_VERSION
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SCOPE_FLOW_RECONCILE_REQUESTED
+    description: Action parameter FLOW_RECONCILE_REQUESTED
+    type: bool
+    attr_value_field: booldata
+    default: 'false'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SCOPE_FLOW_RECONCILE_NEEDED
+    description: Action parameter FLOW_RECONCILE_NEEDED
+    type: bool
+    attr_value_field: booldata
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+  stats: []
