@@ -12,6 +12,7 @@ class DashP4TableKey(DashP4TableAttribute):
     def __init__(self):
         super().__init__()
         self.ip_is_v6_field_id: int = 0
+        self.is_entry_key: bool = True
 
     def parse_p4rt(self, p4rt_table_key: Dict[str, Any]) -> None:
         """
@@ -56,3 +57,15 @@ class DashP4TableKey(DashP4TableAttribute):
         self.set_sai_type(sai_type_info)
 
         return
+
+    #
+    # Functions for generating SAI specs.
+    #
+    def _get_sai_name(self, table_name: str) -> str:
+        if self.is_entry_key:
+            return self.name
+
+        return f"SAI_{table_name.upper()}_{self.name.upper()}"
+    
+    def _get_sai_description(self, table_name: str):
+        return f"{self.match_type.capitalize()} matched key {self.name}"

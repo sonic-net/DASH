@@ -1,5 +1,6 @@
 import base64
 from .common import *
+from ..sai_spec import SaiEnumMember
 
 
 @dash_p4rt_parser
@@ -22,3 +23,6 @@ class DashP4EnumMember(DashP4Object):
         """
         decoded_bytes = base64.b64decode(str(p4rt_member["value"]))
         self.enum_value = int.from_bytes(decoded_bytes, byteorder="big")
+
+    def to_sai(self) -> SaiEnumMember:
+        return SaiEnumMember(self.name, "", str(self.enum_value))

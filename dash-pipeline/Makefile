@@ -176,7 +176,12 @@ sai: sai-headers sai-meta libsai
 
 sai-headers: p4 docker-saithrift-bldr-image-exists | SAI/SAI
 	@echo "Generate SAI library headers and implementation..."
+
+	# Once the specs are checked in, we can use this to revert any local changes before generating the new specs.
+	# git checkout SAI/specs/*
+
 	mkdir -p SAI/lib
+
 	$(DOCKER_RUN) \
 		$(DOCKER_FLAGS) \
 		--name build_sai-$(USER) \

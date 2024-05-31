@@ -5,6 +5,7 @@ from .dash_p4_counter import *
 from .dash_p4_table_action_param import *
 from .dash_p4_table_key import *
 from .dash_p4_table_action import *
+from ..sai_spec import SaiApi, SaiStruct, SaiEnum, SaiEnumMember, SaiAttribute
 
 
 @dash_p4rt_parser
@@ -16,6 +17,7 @@ class DashP4Table(DashP4Object):
     def __init__(self):
         super().__init__()
         self.ignored: bool = False
+        self.ignored_in_header: bool = False
         self.api_name: str = ""
         self.ipaddr_family_attr: str = "false"
         self.keys: List[DashP4TableKey] = []
@@ -125,6 +127,10 @@ class DashP4Table(DashP4Object):
     def __parse_table_keys(self, p4rt_table: Dict[str, Any]) -> None:
         for p4rt_table_key in p4rt_table[MATCH_FIELDS_TAG]:
             table_key = DashP4TableKey.from_p4rt(p4rt_table_key)
+
+            if self.is_object != "false":
+                table_key.is_entry_key = False
+
             self.keys.append(table_key)
 
         self.keys = DashP4TableAttribute.link_ip_is_v6_vars(self.keys)
@@ -207,7 +213,7 @@ class DashP4Table(DashP4Object):
         self.__update_table_param_object_name_reference(all_table_names)
         self.__build_sai_attributes_after_parsing()
 
-    def __update_table_param_object_name_reference(self, all_table_names) -> None:
+    def __update_table_param_object_name_reference(self, all_table_names: List[str]) -> None:
         # Update object name reference for action params
         for param in self.action_params:
             if param.type == "sai_object_id_t":
@@ -252,3 +258,118 @@ class DashP4Table(DashP4Object):
         self.sai_stats = []
         for order in sorted(sai_stats_by_order.keys()):
             self.sai_stats.extend(sai_stats_by_order[order])
+
+    #
+    # Functions for generating SAI specs:
+    #
+    def to_sai(self) -> SaiApi:
+        sai_api = SaiApi(self.name, "", self.is_object != "false")
+
+        self.create_sai_action_enum(sai_api)
+        self.create_sai_structs(sai_api)
+        self.create_sai_attributes(sai_api)
+        self.create_sai_stats(sai_api)
+
+        return sai_api
+
+    def create_sai_action_enum(self, sai_api: SaiApi) -> None:
+        # If the table represents an SAI object, it should not have an action enum.
+        # If the table has only 1 action, we don't need to create the action enum.
+        if len(self.actions) <= 1 and self.is_object != "false":
+            return
+
+        action_enum_member_value = 0
+        action_enum_members: List[SaiEnumMember] = []
+        for action in self.actions:
+            action_enum_members.append(
+                SaiEnumMember(
+                    name=f"SAI_{self.name.upper()}_ACTION_{action.name.upper()}",
+                    description="",
+                    value=str(action_enum_member_value),
+                )
+            )
+
+        action_enum_type_name = f"sai_{self.name.lower()}_action_t"
+
+        action_enum = SaiEnum(
+            name=action_enum_type_name,
+            description=f"Attribute data for SAI_{ self.name.upper() }_ATTR_ACTION",
+            members=action_enum_members,
+        )
+        sai_api.enums.append(action_enum)
+
+        sai_attr_action = SaiAttribute(
+            name=f"SAI_{self.name.upper()}_ATTR_ACTION",
+            description="Action",
+            type=action_enum_type_name,
+            flags="MANDATORY_ON_CREATE | CREATE_ONLY",
+            default=action_enum_members[0].name,
+        )
+        sai_api.attributes.append(sai_attr_action)
+
+    def create_sai_structs(self, sai_api: SaiApi) -> None:
+        # The entry struct is only needed for non-object tables.
+        if self.is_object != "false":
+            return
+
+        sai_struct_members = [attr.to_sai_struct_entry(self.name) for attr in self.keys if attr.skipattr != "true"]
+
+        sai_struct = SaiStruct(
+            name=f"sai_{self.name.lower()}_entry_t",
+            description=f"Entry for {self.name.lower()}",
+            members=sai_struct_members,
+        )
+
+        sai_api.structs.append(sai_struct)
+
+    def create_sai_stats(self, sai_api: SaiApi) -> None:
+        sai_api.stats = [
+            sai_stat.to_sai_attribute(self.name)
+            for sai_stat in self.sai_stats
+        ]
+
+    def create_sai_attributes(self, sai_api: SaiApi) -> None:
+        sai_api.attributes.extend(
+            [attr.to_sai_attribute(self.name) for attr in self.sai_attributes if attr.skipattr != "true"]
+        )
+
+        # If the table has an counter attached, we need to create a counter attribute for it.
+        # The counter attribute only counts that packets that hits any entry, but not the packet that misses all entries.
+        if self.with_counters == "true":
+            counter_attr = SaiAttribute(
+                name=f"SAI_{self.name.upper()}_ATTR_COUNTER_ID",
+                description="Attach a counter. When it is empty, then packet hits won't be counted.",
+                type="sai_object_id_t",
+                default="SAI_NULL_OBJECT_ID",
+                object_name="SAI_OBJECT_TYPE_COUNTER",
+                allow_null=True,
+            )
+
+            sai_api.attributes.append(counter_attr)
+
+        if self.is_object == "true":
+            # If any match key in this table supports priority, we need to add a priority attribute.
+            if any([key.match_type != "exact" for key in self.keys]) and all(
+                [key.match_type != "lpm" for key in self.keys]
+            ):
+                priority_attr = SaiAttribute(
+                    name=f"SAI_{self.name.upper()}_ATTR_PRIORITY",
+                    description="Rule priority in table",
+                    type="sai_uint32_t",
+                    flags="MANDATORY_ON_CREATE | CREATE_ONLY",
+                )
+
+                sai_api.attributes.append(priority_attr)
+
+        # If any match key contains an IP address, we need to add an IP address family attribute
+        # for IPv4 and IPv6 support.
+        if self.ipaddr_family_attr == "true":
+            ip_addr_family_attr = SaiAttribute(
+                name=f"SAI_{self.name.upper()}_ATTR_IP_ADDR_FAMILY",
+                description="IP address family for resource accounting",
+                type="sai_ip_addr_family_t",
+                flags="READ_ONLY",
+                isresourcetype=True,
+            )
+
+            sai_api.attributes.append(ip_addr_family_attr)

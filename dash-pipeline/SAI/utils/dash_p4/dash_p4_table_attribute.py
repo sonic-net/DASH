@@ -1,6 +1,7 @@
 from typing import List, Optional
 from .common import *
 from .sai_type_solver import SAITypeInfo
+from ..sai_spec import SaiAttribute, SaiStructEntry
 
 
 class DashP4TableAttribute(DashP4Object):
@@ -17,6 +18,7 @@ class DashP4TableAttribute(DashP4Object):
         self.object_name: Optional[str] = None
         self.skipattr: Optional[str] = None
         self.match_type: str = ""
+        self.validonly: Optional[str] = None
 
     def _parse_sai_table_attribute_annotation(
         self, p4rt_anno_list: Dict[str, Any]
@@ -88,3 +90,47 @@ class DashP4TableAttribute(DashP4Object):
         self.field = sai_type_info.sai_attribute_value_field
         if self.default == None:
             self.default = sai_type_info.default
+
+    #
+    # Functions for generating SAI specs.
+    #
+    def to_sai_struct_entry(self, table_name: str) -> SaiStructEntry:
+        name = self._get_sai_name(table_name)
+        description = self._get_sai_description(table_name)
+        object_name = f"SAI_OBJECT_TYPE_{self.object_name.upper()}" if self.object_name else None
+
+        return SaiStructEntry(
+            name = name,
+            description = description,
+            type = self.type,
+            objects = object_name,
+            valid_only = self.validonly,
+        )
+
+    def to_sai_attribute(self, table_name: str) -> SaiAttribute:
+        name = self._get_sai_name(table_name)
+        description = self._get_sai_description(table_name)
+
+        default_value = None if self.isreadonly == "true" else self.default
+        object_name = f"SAI_OBJECT_TYPE_{self.object_name.upper()}" if self.object_name else None
+        sai_flags = "READ_ONLY" if self.isreadonly == "true" else "CREATE_AND_SET"
+        allow_null = True if self.type == "sai_object_id_t" else False
+
+        return SaiAttribute(
+            name = name,
+            description = description,
+            type = self.type,
+            attr_value_field = self.field,
+            default = default_value,
+            isresourcetype = self.isresourcetype == "true",
+            flags = sai_flags,
+            object_name = object_name,
+            allow_null = allow_null,
+            valid_only = self.validonly,
+        )
+
+    def _get_sai_name(self, table_name: str) -> str:
+        return f"SAI_{table_name.upper()}_{self.name.upper()}"
+    
+    def _get_sai_description(self, table_name: str):
+        return f"Action parameter {self.name.upper()}"

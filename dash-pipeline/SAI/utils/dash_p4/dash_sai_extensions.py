@@ -7,6 +7,7 @@ from .dash_p4_counter import DashP4Counter
 from .dash_p4_table import DashP4Table
 from .dash_p4_table_action import DashP4TableAction
 from ..p4ir import P4VarRefGraph
+from ..sai_spec import *
 
 
 @dash_p4rt_parser
@@ -112,3 +113,64 @@ class DashP4SAIExtensions(DashP4Object):
         all_table_names = [table.name for api in self.table_groups for table in api.tables]
         for table_group in self.table_groups:
             table_group.post_parsing_process(all_table_names)
+
+    #
+    # Functions for generating SAI specs:
+    #
+    def to_sai(self) -> SaiSpec:
+        sai_spec = SaiSpec()
+        self.create_sai_api_types(sai_spec)
+        self.create_sai_object_types(sai_spec)
+        self.create_sai_object_entries(sai_spec)
+        self.create_sai_enums(sai_spec)
+        self.create_sai_port_counters(sai_spec.port_extenstion)
+        sai_spec.api_groups = [api_group.to_sai() for api_group in self.table_groups]
+        return sai_spec
+    
+    def create_sai_api_types(self, sai_spec: SaiSpec):
+        for table_group in self.table_groups:
+            sai_spec.api_types.append(f"SAI_API_{table_group.app_name.upper()}")
+
+    def create_sai_object_types(self, sai_spec: SaiSpec):
+        for table_group in self.table_groups:
+            for table in table_group.tables:
+                if table.ignored_in_header:
+                    continue
+
+                sai_spec.object_types.append(f"SAI_OBJECT_TYPE_{table.name.upper()}")
+    
+    def create_sai_object_entries(self, sai_spec: SaiSpec):
+        for table_group in self.table_groups:
+            for table in table_group.tables:
+                if table.ignored_in_header:
+                    continue
+
+                if table.is_object != "false":
+                    continue
+
+                object_entry = SaiStructEntry(
+                    name=table.name,
+                    description=f"Object entry for DASH API {table.name}",
+                    type=f"sai_{table.name}_t",
+                    valid_only=f"object_type == SAI_OBJECT_TYPE_{table.name.upper()},"
+                )
+
+                sai_spec.object_entries.append(object_entry)
+    
+    def create_sai_enums(self, sai_spec: SaiSpec):
+        for enum in self.enums:
+            sai_spec.enums.append(enum.to_sai())
+
+    def create_sai_port_counters(self, api_ext: SaiApiExtension) -> None:
+        for counter in self.counters:
+            # If the counter is associated to any table actions, the counter will be generated as part of that table.
+            # Otherwise, the counters will be generated as part of the port level counter or stats.
+            if len(counter.param_actions) > 0:
+                continue
+
+            sai_counter = counter.to_sai_attribute("port")
+
+            if counter.attr_type != "stats":
+                api_ext.attributes.append(sai_counter)
+            else:
+                api_ext.stats.append(sai_counter)
