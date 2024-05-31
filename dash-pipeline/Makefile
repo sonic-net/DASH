@@ -177,7 +177,7 @@ sai: sai-headers sai-meta libsai
 sai-headers: p4 docker-saithrift-bldr-image-exists | SAI/SAI
 	@echo "Generate SAI library headers and implementation..."
 
-	git checkout SAI/spec/*
+	git checkout SAI/specs/*
 
 	mkdir -p SAI/lib
 
