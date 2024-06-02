@@ -68,7 +68,8 @@ if __name__ == "__main__":
     print("Outputting new SAI spec to " + sai_spec_dir)
     yaml_inc_ctor.autoload = False
     new_sai_spec = dash_sai_exts.to_sai()
-    new_sai_spec.serialize(sai_spec_dir)
+    sai_spec.merge(new_sai_spec)
+    sai_spec.serialize(sai_spec_dir)
 
     # Generate and update all SAI files
     SAIGenerator(dash_sai_exts).generate()
