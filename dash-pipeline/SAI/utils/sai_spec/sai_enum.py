@@ -13,6 +13,10 @@ class SaiEnum(SaiCommon):
         super().__init__(name, description)
         self.members: List[SaiEnumMember] = members
 
+    def finalize(self):
+        super().finalize()
+        _ = [member.finalize() for member in self.members]
+
     def merge(self, other: "SaiCommon"):
         super().merge(other)
         sai_spec_utils.merge_sai_common_lists(self.members, other.members)

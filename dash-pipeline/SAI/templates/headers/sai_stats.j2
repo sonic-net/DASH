@@ -1,0 +1,14 @@
+{% if api.stats | length > 0 %}
+/**
+ * @brief Counter IDs for {{ api.description | upper }}
+ */
+typedef enum _sai_{{ api.name }}_stat_t
+{
+    {% for stat in api.stats %}
+    /** {{ stat.description }} */
+    {{ stat.name }},
+
+    {% endfor %}
+} sai_{{ api.name }}_stat_t;
+
+{% endif %}

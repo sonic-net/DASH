@@ -1,5 +1,5 @@
-{% if table.is_object == 'true' %}
- * @param[in] {{ table.name }}_id Entry id
+{% if api.is_object == True %}
+ * @param[in] {{ api.name }}_id Entry id
 {% else %}
- * @param[in] {{ table.name }} Entry
+ * @param[in] {{ api.name }} Entry
 {% endif %}

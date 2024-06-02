@@ -263,7 +263,7 @@ class DashP4Table(DashP4Object):
     # Functions for generating SAI specs:
     #
     def to_sai(self) -> SaiApi:
-        sai_api = SaiApi(self.name, "", self.is_object != "false")
+        sai_api = SaiApi(self.name, self.name.replace('_', ' '), self.is_object != "false")
         sai_api.p4_meta.tables.append(SaiApiP4MetaTable(self.id))
 
         self.create_sai_action_enum(sai_api)
@@ -311,7 +311,7 @@ class DashP4Table(DashP4Object):
 
         action_enum = SaiEnum(
             name=action_enum_type_name,
-            description=f"Attribute data for SAI_{ self.name.upper() }_ATTR_ACTION",
+            description=f"Attribute data for #SAI_{ self.name.upper() }_ATTR_ACTION",
             members=action_enum_members,
         )
         sai_api.enums.append(action_enum)
@@ -331,10 +331,19 @@ class DashP4Table(DashP4Object):
         if self.is_object != "false":
             return
 
-        sai_struct_members = [attr.to_sai_struct_entry(self.name) for attr in self.keys if attr.skipattr != "true"]
+        sai_struct_members = [
+            SaiStructEntry(
+                name="switch_id",
+                type=f"sai_object_id_t",
+                description="Switch ID",
+                objects="SAI_OBJECT_TYPE_SWITCH",
+            )
+        ]
+        sai_struct_members.extend([attr.to_sai_struct_entry(self.name) for attr in self.keys if attr.skipattr != "true"])
 
+        print("Creating struct for table: " + self.name)
         sai_struct = SaiStruct(
-            name=f"sai_{self.name.lower()}_entry_t",
+            name=f"sai_{self.name.lower()}_t",
             description=f"Entry for {self.name.lower()}",
             members=sai_struct_members,
         )

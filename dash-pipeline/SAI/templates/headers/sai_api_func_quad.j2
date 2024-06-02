@@ -1,0 +1,60 @@
+
+/**
+ * @brief Create {{ api.description }}
+ *
+{% if api.is_object %}
+ * @param[out] {{ api.name }}_id Entry id
+ * @param[in] switch_id Switch id
+{% else %}
+ * @param[in] {{ api.name }} Entry
+{% endif %}
+ * @param[in] attr_count Number of attributes
+ * @param[in] attr_list Array of attributes
+ *
+ * @return #SAI_STATUS_SUCCESS on success Failure status code on error
+ */
+typedef sai_status_t (*sai_create_{{ api.name }}_fn)(
+{% if api.is_object %}
+        _Out_ sai_object_id_t *{{ api.name }}_id,
+        _In_ sai_object_id_t switch_id,
+{% else %}
+        _In_ const sai_{{ api.name }}_t *{{ api.name }},
+{% endif %}
+        _In_ uint32_t attr_count,
+        _In_ const sai_attribute_t *attr_list);
+
+/**
+ * @brief Remove {{ api.description }}
+ *
+{% include 'templates/headers/sai_api_comment_object_id.j2' %}
+ *
+ * @return #SAI_STATUS_SUCCESS on success Failure status code on error
+ */
+typedef sai_status_t (*sai_remove_{{ api.name }}_fn)(
+        {% include 'templates/headers/sai_api_param_object_id.j2' %});
+
+/**
+ * @brief Set attribute for {{ api.description }}
+ *
+{% include 'templates/headers/sai_api_comment_object_id.j2' %}
+ * @param[in] attr Attribute
+ *
+ * @return #SAI_STATUS_SUCCESS on success Failure status code on error
+ */
+typedef sai_status_t (*sai_set_{{ api.name }}_attribute_fn)(
+        {% include 'templates/headers/sai_api_param_object_id.j2' %},
+        _In_ const sai_attribute_t *attr);
+
+/**
+ * @brief Get attribute for {{ api.description }}
+ *
+{% include 'templates/headers/sai_api_comment_object_id.j2' %}
+ * @param[in] attr_count Number of attributes
+ * @param[inout] attr_list Array of attributes
+ *
+ * @return #SAI_STATUS_SUCCESS on success Failure status code on error
+ */
+typedef sai_status_t (*sai_get_{{ api.name }}_attribute_fn)(
+        {% include 'templates/headers/sai_api_param_object_id.j2' %},
+        _In_ uint32_t attr_count,
+        _Inout_ sai_attribute_t *attr_list);

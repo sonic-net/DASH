@@ -1,5 +1,0 @@
-{% if table.sai_stats | length > 0 %}
-    sai_get_{{ table.name }}_stats_fn        {{ " " * space_offset }}get_{{ table.name }}_stats;
-    sai_get_{{ table.name }}_stats_ext_fn    {{ " " * space_offset }}get_{{ table.name }}_stats_ext;
-    sai_clear_{{ table.name }}_stats_fn      {{ " " * space_offset }}clear_{{ table.name }}_stats;
-{% endif %}

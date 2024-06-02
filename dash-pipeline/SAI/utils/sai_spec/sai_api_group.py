@@ -13,6 +13,10 @@ class SaiApiGroup(SaiCommon):
         super().__init__(name, description)
         self.sai_apis: List[SaiApi] = []
 
+    def finalize(self):
+        super().finalize()
+        _ = [sai_api.finalize() for sai_api in self.sai_apis]
+
     def merge(self, other: "SaiCommon"):
         super().merge(other)
         sai_spec_utils.merge_sai_common_lists(self.sai_apis, other.sai_apis)

@@ -1,6 +1,28 @@
-from typing import Any, List, Callable
-from .sai_common import SaiCommon
+from typing import Any, List, Callable, Set
 
+sai_acronyms: Set[str] = set()
+
+def load_sai_acronyms() -> None:
+    with open("SAI/meta/acronyms.txt", "r") as f:
+        for line in f:
+            sai_acronyms.add(line.split('-')[0].strip().lower())
+    
+    sai_acronyms.add("dash")    # DASH
+    sai_acronyms.add("vm")      # VM
+    sai_acronyms.add("pl")      # Private Link
+    sai_acronyms.add("ha")      # High Availability
+    sai_acronyms.add("ca")      # CA
+    sai_acronyms.add("pa")      # PA
+
+def normalize_sai_comment(s: str) -> str:
+    """
+    Normalize SAI comment string by removing acronyms and extra spaces.
+    """
+    if len(sai_acronyms) == 0:
+        load_sai_acronyms()
+    
+    words = [word if word.lower() not in sai_acronyms else word.upper() for word in s.split()]
+    return " ".join(words)
 
 def merge_sai_value_lists(
     target: List[Any],
@@ -38,8 +60,8 @@ def merge_sai_value_lists(
 
 
 def merge_sai_common_lists(
-    target: List[SaiCommon],
-    source: List[SaiCommon],
+    target: List[Any],
+    source: List[Any],
 ) -> None:
     merge_sai_value_lists(
         target,

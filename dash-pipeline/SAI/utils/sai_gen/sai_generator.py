@@ -52,9 +52,6 @@ class SAIGenerator:
         sai_header_file_name = (
             "saiexperimental" + sai_api.app_name.replace("_", "") + ".h"
         )
-        SAITemplateRenderer("templates/saiapi.h.j2").render_to_file(
-            "SAI/experimental/" + sai_header_file_name, sai_api=sai_api
-        )
         self.generated_header_file_names.append(sai_header_file_name)
 
         # Gather SAI API extension name and object types

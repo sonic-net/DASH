@@ -22,6 +22,12 @@ class SaiSpec:
         self.port_extenstion: SaiApiExtension = SaiApiExtension()
         self.api_groups: List[SaiApiGroup] = []
 
+    def finalize(self):
+        _ = [object_entry.finalize() for object_entry in self.object_entries]
+        _ = [enum.finalize() for enum in self.enums]
+        _ = [api_group.finalize() for api_group in self.api_groups]
+        self.port_extenstion.finalize()
+
     def serialize(self, spec_dir: str):
         yaml_inc_files = []
         for api_group in self.api_groups:

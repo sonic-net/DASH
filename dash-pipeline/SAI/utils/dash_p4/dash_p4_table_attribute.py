@@ -130,7 +130,7 @@ class DashP4TableAttribute(DashP4Object):
         )
 
     def get_sai_name(self, table_name: str) -> str:
-        return f"SAI_{table_name.upper()}_{self.name.upper()}"
+        return f"SAI_{table_name.upper()}_ATTR_{self.name.upper()}"
     
     def get_sai_description(self, table_name: str):
-        return f"Action parameter {self.name.upper()}"
+        return f"Action parameter {self.name.replace('_', ' ')}"

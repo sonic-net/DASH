@@ -1,3 +1,5 @@
+from . import sai_spec_utils
+
 class SaiCommon:
     """
     Base class for all SAI objects.
@@ -6,6 +8,12 @@ class SaiCommon:
     def __init__(self, name: str, description: str):
         self.name: str = name
         self.description: str = description
+
+    def finalize(self):
+        """
+        Finalize the object after all the attributes are set.
+        """
+        self.description = sai_spec_utils.normalize_sai_comment(self.description)
 
     def merge(self, other: "SaiCommon"):
         """

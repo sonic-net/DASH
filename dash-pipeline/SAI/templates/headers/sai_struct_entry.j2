@@ -1,0 +1,13 @@
+    /**
+     * @brief {{ member.description }}
+{% if member.objects != None or member.valid_only != None %}
+     *
+{% endif %}
+{% if member.objects != None %}
+     * @objects {{ member.objects }}
+{% endif %}
+{% if member.valid_only != None %}
+     * @validonly {{ member.valid_only }}
+{% endif %}
+     */
+    {{ member.type }} {{ member.name }};

@@ -63,7 +63,7 @@ class DashP4TableKey(DashP4TableAttribute):
     #
     def get_sai_name(self, table_name: str) -> str:
         if self.is_entry_key:
-            return self.name
+            return self.name.lower()
 
         return f"SAI_{table_name.upper()}_{self.name.upper()}"
     
