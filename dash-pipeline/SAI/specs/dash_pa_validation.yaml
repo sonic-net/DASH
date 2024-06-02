@@ -17,22 +17,6 @@ sai_apis:
       value: '0'
   structs:
   - !!python/object:utils.sai_spec.sai_struct.SaiStruct
-    name: sai_pa_validation_entry_entry_t
-    description: Entry for pa_validation_entry
-    members:
-    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
-      name: vnet_id
-      description: Exact matched key vnet_id
-      type: sai_object_id_t
-      objects: SAI_OBJECT_TYPE_VNET
-      valid_only: null
-    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
-      name: sip
-      description: Exact matched key sip
-      type: sai_ip_address_t
-      objects: null
-      valid_only: null
-  - !!python/object:utils.sai_spec.sai_struct.SaiStruct
     name: sai_pa_validation_entry_t
     description: Entry for pa_validation_entry
     members:
