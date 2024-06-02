@@ -93,7 +93,8 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
+    valid_only: SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP
+      or SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE
     is_vlan: false
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
@@ -106,7 +107,8 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
+    valid_only: SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP
+      or SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE
     is_vlan: false
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
@@ -119,7 +121,7 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_VNET
     allow_null: true
-    valid_only: null
+    valid_only: SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE
     is_vlan: false
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute

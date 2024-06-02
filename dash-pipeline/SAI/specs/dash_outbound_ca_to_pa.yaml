@@ -67,7 +67,8 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING
+      or SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
     is_vlan: false
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
@@ -80,7 +81,7 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING
     is_vlan: false
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
@@ -93,7 +94,7 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING
     is_vlan: false
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
@@ -106,7 +107,8 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING
+      or SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
     is_vlan: false
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
@@ -119,7 +121,8 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING
+      or SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
     is_vlan: false
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
@@ -132,7 +135,8 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING
+      or SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
     is_vlan: false
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
@@ -145,7 +149,7 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
     is_vlan: false
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
@@ -172,7 +176,7 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
     is_vlan: false
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
@@ -199,7 +203,7 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
     is_vlan: false
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
@@ -212,7 +216,7 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
     is_vlan: false
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
@@ -251,7 +255,8 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_TUNNEL
     allow_null: true
-    valid_only: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING
+      or SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
     is_vlan: false
     deprecated: false
   stats: []

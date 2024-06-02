@@ -18,6 +18,9 @@
 {% if attr.default != None %}
      * @default {{ attr.default }}
 {% endif %}
+{% if attr.valid_only != None %}
+     * @validonly {{ attr.valid_only }}
+{% endif %}
 {% if attr.isresourcetype %}
      * @isresourcetype true
 {% endif %}

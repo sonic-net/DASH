@@ -122,7 +122,7 @@ class DashP4TableAttribute(DashP4Object):
 
         return entries
 
-    def to_sai_attribute(self, table_name: str, create_only: bool = False) -> List[SaiAttribute]:
+    def to_sai_attribute(self, table_name: str, create_only: bool = False, add_action_valid_only_check: bool = False) -> List[SaiAttribute]:
         name = self.get_sai_name(table_name)
         description = self.get_sai_description(table_name)
 
@@ -141,6 +141,16 @@ class DashP4TableAttribute(DashP4Object):
             sai_flags = "CREATE_AND_SET"
             default_value = self.default
 
+        valid_only_checks = []
+        if add_action_valid_only_check:
+            for param_action in self.param_actions:
+                valid_only_checks.append(f"SAI_{table_name.upper()}_ATTR_ACTION == SAI_{table_name.upper()}_ACTION_{param_action.upper()}")
+        
+        if self.validonly:
+            valid_only_checks.append(self.validonly)
+        
+        valid_only = " or ".join(valid_only_checks) if len(valid_only_checks) > 0 else None
+        
         attributes = [
             SaiAttribute(
                 name = name,
@@ -152,7 +162,7 @@ class DashP4TableAttribute(DashP4Object):
                 flags = sai_flags,
                 object_name = object_name,
                 allow_null = allow_null,
-                valid_only = self.validonly,
+                valid_only = valid_only,
                 is_vlan = is_vlan,
             )
         ]
@@ -168,7 +178,7 @@ class DashP4TableAttribute(DashP4Object):
                 flags = sai_flags,
                 object_name = object_name,
                 allow_null = allow_null,
-                valid_only = self.validonly,
+                valid_only = valid_only,
             ))
 
         return attributes

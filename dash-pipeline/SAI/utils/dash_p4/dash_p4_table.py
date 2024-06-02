@@ -379,7 +379,7 @@ class DashP4Table(DashP4Object):
         # Add all the action parameters into the attributes.
         for attr in self.sai_attributes:
             if attr.skipattr != "true":
-                sai_api.attributes.extend(attr.to_sai_attribute(self.name))
+                sai_api.attributes.extend(attr.to_sai_attribute(self.name, add_action_valid_only_check=len(self.actions) > 1))
 
         # If the table has an counter attached, we need to create a counter attribute for it.
         # The counter attribute only counts that packets that hits any entry, but not the packet that misses all entries.
