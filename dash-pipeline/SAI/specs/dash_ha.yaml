@@ -14,7 +14,7 @@ sai_apis:
     description: Action parameter local IP
     type: sai_ip_address_t
     attr_value_field: ipaddr
-    default: null
+    default: 0.0.0.0
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -27,7 +27,7 @@ sai_apis:
     description: Action parameter peer IP
     type: sai_ip_address_t
     attr_value_field: ipaddr
-    default: null
+    default: 0.0.0.0
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -40,7 +40,7 @@ sai_apis:
     description: Action parameter cp data channel port
     type: sai_uint16_t
     attr_value_field: u16
-    default: null
+    default: '0'
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -53,7 +53,7 @@ sai_apis:
     description: Action parameter dp channel dst port
     type: sai_uint16_t
     attr_value_field: u16
-    default: null
+    default: '0'
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -66,7 +66,7 @@ sai_apis:
     description: Action parameter dp channel min src port
     type: sai_uint16_t
     attr_value_field: u16
-    default: null
+    default: '0'
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -79,7 +79,7 @@ sai_apis:
     description: Action parameter dp channel max src port
     type: sai_uint16_t
     attr_value_field: u16
-    default: null
+    default: '0'
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -92,7 +92,7 @@ sai_apis:
     description: Action parameter dp channel probe interval ms
     type: sai_uint32_t
     attr_value_field: u32
-    default: null
+    default: '0'
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -105,7 +105,7 @@ sai_apis:
     description: Action parameter dp channel probe fail threshold
     type: sai_uint32_t
     attr_value_field: u32
-    default: null
+    default: '0'
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -408,7 +408,7 @@ sai_apis:
     description: Action parameter HA set id
     type: sai_uint16_t
     attr_value_field: u16
-    default: null
+    default: '0'
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -421,7 +421,7 @@ sai_apis:
     description: Action parameter DASH HA role
     type: sai_dash_ha_role_t
     attr_value_field: s32
-    default: null
+    default: SAI_DASH_HA_ROLE_DEAD
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -447,7 +447,7 @@ sai_apis:
     description: Action parameter flow reconcile requested
     type: bool
     attr_value_field: booldata
-    default: null
+    default: 'false'
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null

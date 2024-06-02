@@ -51,7 +51,7 @@ sai_apis:
     description: Action parameter packet action
     type: sai_uint16_t
     attr_value_field: u16
-    default: null
+    default: '0'
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -64,7 +64,7 @@ sai_apis:
     description: Action parameter next hop id
     type: sai_uint16_t
     attr_value_field: u16
-    default: null
+    default: '0'
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null

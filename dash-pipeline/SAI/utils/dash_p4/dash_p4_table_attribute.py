@@ -135,9 +135,10 @@ class DashP4TableAttribute(DashP4Object):
         elif create_only:
             sai_flags = "MANDATORY_ON_CREATE | CREATE_ONLY"
             default_value = None
+            allow_null = False
         else:
             sai_flags = "CREATE_AND_SET"
-            default_value = None
+            default_value = self.default
 
         attributes = [
             SaiAttribute(

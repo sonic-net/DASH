@@ -14,7 +14,7 @@ sai_apis:
     description: Action parameter IP addr family
     type: sai_ip_addr_family_t
     attr_value_field: u32
-    default: null
+    default: SAI_IP_ADDR_FAMILY_IPV4
     isresourcetype: true
     flags: CREATE_AND_SET
     object_name: null
@@ -79,9 +79,9 @@ sai_apis:
     attr_value_field: u16
     default: null
     isresourcetype: true
-    flags: CREATE_AND_SET
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
-    allow_null: true
+    allow_null: false
     valid_only: null
     is_vlan: false
     deprecated: false
@@ -92,7 +92,7 @@ sai_apis:
     attr_value_field: ipprefixlist
     default: null
     isresourcetype: false
-    flags: CREATE_AND_SET
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
     object_name: null
     allow_null: false
     valid_only: null
@@ -105,7 +105,7 @@ sai_apis:
     attr_value_field: ipprefixlist
     default: null
     isresourcetype: false
-    flags: CREATE_AND_SET
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
     object_name: null
     allow_null: false
     valid_only: null
@@ -118,7 +118,7 @@ sai_apis:
     attr_value_field: u8list
     default: null
     isresourcetype: false
-    flags: CREATE_AND_SET
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
     object_name: null
     allow_null: false
     valid_only: null
@@ -131,7 +131,7 @@ sai_apis:
     attr_value_field: u16rangelist
     default: null
     isresourcetype: false
-    flags: CREATE_AND_SET
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
     object_name: null
     allow_null: false
     valid_only: null
@@ -144,7 +144,7 @@ sai_apis:
     attr_value_field: u16rangelist
     default: null
     isresourcetype: false
-    flags: CREATE_AND_SET
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
     object_name: null
     allow_null: false
     valid_only: null

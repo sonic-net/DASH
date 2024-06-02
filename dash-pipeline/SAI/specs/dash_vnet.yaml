@@ -14,7 +14,7 @@ sai_apis:
     description: Action parameter VNI
     type: sai_uint32_t
     attr_value_field: u32
-    default: null
+    default: '0'
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null

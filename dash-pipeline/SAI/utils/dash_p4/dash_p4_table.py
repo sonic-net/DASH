@@ -374,7 +374,7 @@ class DashP4Table(DashP4Object):
         # If the table is an object with more one key (table entry id), we need to add all the keys into the attributes.
         if self.is_object == "true" and len(self.keys) > 1:
             for key in self.keys:
-                sai_api.attributes.extend(key.to_sai_attribute(self.name))
+                sai_api.attributes.extend(key.to_sai_attribute(self.name, create_only=True))
 
         # Add all the action parameters into the attributes.
         for attr in self.sai_attributes:
