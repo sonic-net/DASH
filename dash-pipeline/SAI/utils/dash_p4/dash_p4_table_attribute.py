@@ -128,6 +128,7 @@ class DashP4TableAttribute(DashP4Object):
 
         object_name = f"SAI_OBJECT_TYPE_{self.object_name.upper()}" if self.object_name else None
         allow_null = True if self.type == "sai_object_id_t" else False
+        is_vlan = True if self.type == "sai_uint16_t" else False
 
         if self.isreadonly == "true":
             sai_flags = "READ_ONLY"
@@ -152,6 +153,7 @@ class DashP4TableAttribute(DashP4Object):
                 object_name = object_name,
                 allow_null = allow_null,
                 valid_only = self.validonly,
+                is_vlan = is_vlan,
             )
         ]
 

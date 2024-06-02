@@ -10,6 +10,9 @@ class SaiHeaderGenerator:
         print("\nGenerating all SAI header files ...")
 
         for api_group in self.sai_spec.api_groups:
+            if api_group.api_type == "underlay":
+                continue
+            
             self._generate_sai_api_group(api_group)
     
     def _generate_sai_api_group(self, api_group: SaiApiGroup) -> None:

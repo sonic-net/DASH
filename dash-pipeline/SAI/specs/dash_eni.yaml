@@ -1,6 +1,7 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: dash_eni
 description: DASH ENI
+api_type: overlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: eni_ether_address_map_entry

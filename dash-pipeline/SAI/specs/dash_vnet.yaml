@@ -1,6 +1,7 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: dash_vnet
 description: DASH VNET
+api_type: overlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: vnet

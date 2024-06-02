@@ -1,6 +1,7 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: route
 description: route
+api_type: underlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: route_entry
@@ -57,7 +58,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    is_vlan: false
+    is_vlan: true
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ROUTE_ENTRY_ATTR_NEXT_HOP_ID
@@ -70,7 +71,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    is_vlan: false
+    is_vlan: true
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ROUTE_ENTRY_ATTR_IP_ADDR_FAMILY

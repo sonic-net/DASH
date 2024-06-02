@@ -1,6 +1,7 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: dash_pa_validation
 description: DASH PA validation
+api_type: overlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: pa_validation_entry

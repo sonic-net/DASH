@@ -11,6 +11,7 @@ class SaiApiGroup(SaiCommon):
 
     def __init__(self, name: str, description: str):
         super().__init__(name, description)
+        self.api_type: str = ""
         self.sai_apis: List[SaiApi] = []
 
     def finalize(self):
@@ -19,6 +20,7 @@ class SaiApiGroup(SaiCommon):
 
     def merge(self, other: "SaiCommon"):
         super().merge(other)
+        self.api_type = other.api_type
         sai_spec_utils.merge_sai_common_lists(self.sai_apis, other.sai_apis)
 
     def deprecate(self) -> bool:

@@ -1,6 +1,7 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: dash_ha
 description: DASH HA
+api_type: overlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: ha_set
@@ -46,7 +47,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    is_vlan: false
+    is_vlan: true
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_ATTR_DP_CHANNEL_DST_PORT
@@ -59,7 +60,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    is_vlan: false
+    is_vlan: true
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_ATTR_DP_CHANNEL_MIN_SRC_PORT
@@ -72,7 +73,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    is_vlan: false
+    is_vlan: true
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_ATTR_DP_CHANNEL_MAX_SRC_PORT
@@ -85,7 +86,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    is_vlan: false
+    is_vlan: true
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_ATTR_DP_CHANNEL_PROBE_INTERVAL_MS
@@ -414,7 +415,7 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    is_vlan: false
+    is_vlan: true
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SCOPE_ATTR_DASH_HA_ROLE
