@@ -18,7 +18,7 @@ sai_apis:
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
       description: ''
-      value: '0'
+      value: '1'
   structs:
   - !!python/object:utils.sai_spec.sai_struct.SaiStruct
     name: sai_outbound_ca_to_pa_entry_entry_t
@@ -230,3 +230,32 @@ sai_apis:
     valid_only: null
     deprecated: null
   stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 43335456
+      actions:
+        SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING
+          id: 25614729
+          attr_param_id:
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_UNDERLAY_DIP: 1
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_OVERLAY_DMAC: 2
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_USE_DST_VNET_VNI: 3
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_METER_CLASS_OR: 4
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_DASH_TUNNEL_ID: 5
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_FLOW_RESIMULATION_REQUESTED: 6
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: 7
+        SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+          id: 31441909
+          attr_param_id:
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_UNDERLAY_DIP: 1
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_OVERLAY_SIP: 2
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_OVERLAY_DIP: 3
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_DASH_ENCAPSULATION: 4
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_TUNNEL_KEY: 5
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_METER_CLASS_OR: 6
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_DASH_TUNNEL_ID: 7
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_FLOW_RESIMULATION_REQUESTED: 8
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: 9

@@ -22,6 +22,15 @@ sai_apis:
     valid_only: null
     deprecated: null
   stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 50200087
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 25655048
+          attr_param_id: {}
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: dash_acl_rule
   description: ''
@@ -38,15 +47,15 @@ sai_apis:
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
       description: ''
-      value: '0'
+      value: '1'
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_DASH_ACL_RULE_ACTION_DENY
       description: ''
-      value: '0'
+      value: '2'
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
       description: ''
-      value: '0'
+      value: '3'
   structs: []
   attributes:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
@@ -98,3 +107,119 @@ sai_apis:
     valid_only: null
     deprecated: null
   stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 41950136
+      actions:
+        SAI_DASH_ACL_RULE_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT
+          id: 32161567
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
+          id: 20706700
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY
+          id: 28146588
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
+          id: 31424218
+          attr_param_id: {}
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 43016664
+      actions:
+        SAI_DASH_ACL_RULE_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT
+          id: 32161567
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
+          id: 20706700
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY
+          id: 28146588
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
+          id: 31424218
+          attr_param_id: {}
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 49695908
+      actions:
+        SAI_DASH_ACL_RULE_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT
+          id: 32161567
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
+          id: 20706700
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY
+          id: 28146588
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
+          id: 31424218
+          attr_param_id: {}
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 49209582
+      actions:
+        SAI_DASH_ACL_RULE_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT
+          id: 18858683
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
+          id: 24263137
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY
+          id: 29962337
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
+          id: 26077229
+          attr_param_id: {}
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 36478314
+      actions:
+        SAI_DASH_ACL_RULE_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT
+          id: 18858683
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
+          id: 24263137
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY
+          id: 29962337
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
+          id: 26077229
+          attr_param_id: {}
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 39012793
+      actions:
+        SAI_DASH_ACL_RULE_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT
+          id: 18858683
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
+          id: 24263137
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY
+          id: 29962337
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
+          id: 26077229
+          attr_param_id: {}
