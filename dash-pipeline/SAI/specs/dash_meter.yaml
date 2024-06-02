@@ -109,6 +109,31 @@ sai_apis:
   structs: []
   attributes:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_METER_RULE_ATTR_METER_POLICY_ID
+    description: Exact matched key meter_policy_id
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: null
+    isresourcetype: true
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: SAI_OBJECT_TYPE_METER_POLICY
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_METER_RULE_ATTR_DIP
+    description: Ternary matched key dip
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: null
+    isresourcetype: false
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_METER_RULE_ATTR_METER_CLASS
     description: Action parameter meter class
     type: sai_uint32_t
@@ -146,31 +171,6 @@ sai_apis:
     allow_null: false
     valid_only: null
     deprecated: false
-    is_vlan: false
-  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_METER_RULE_ATTR_METER_POLICY_ID
-    description: Exact matched key meter_policy_id
-    type: sai_object_id_t
-    attr_value_field: u16
-    default: null
-    isresourcetype: true
-    flags: MANDATORY_ON_CREATE | CREATE_ONLY
-    object_name: SAI_OBJECT_TYPE_METER_POLICY
-    allow_null: false
-    valid_only: null
-    is_vlan: false
-    deprecated: false
-  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_METER_RULE_ATTR_DIP
-    description: Ternary matched key dip
-    type: sai_ip_address_t
-    attr_value_field: ipaddr
-    default: null
-    isresourcetype: false
-    flags: MANDATORY_ON_CREATE | CREATE_ONLY
-    object_name: null
-    allow_null: false
-    valid_only: null
     is_vlan: false
     deprecated: false
   stats: []
