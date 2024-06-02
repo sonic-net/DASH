@@ -133,6 +133,20 @@ sai_apis:
     allow_null: false
     valid_only: null
     is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_METER_RULE_ATTR_DIP_MASK
+    description: Ternary matched key dip mask
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: null
+    isresourcetype: false
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_METER_RULE_ATTR_METER_CLASS
     description: Action parameter meter class
@@ -172,7 +186,6 @@ sai_apis:
     valid_only: null
     deprecated: false
     is_vlan: false
-    deprecated: false
   stats: []
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:

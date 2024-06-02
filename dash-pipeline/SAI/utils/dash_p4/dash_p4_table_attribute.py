@@ -155,6 +155,20 @@ class DashP4TableAttribute(DashP4Object):
             )
         ]
 
+        if self.match_type == "ternary":
+            attributes.append(SaiAttribute(
+                name = f"{name}_MASK",
+                description = f"{description} mask",
+                type = self.type,
+                attr_value_field = self.field,
+                default = None,
+                isresourcetype = self.isresourcetype == "true",
+                flags = sai_flags,
+                object_name = object_name,
+                allow_null = allow_null,
+                valid_only = self.validonly,
+            ))
+
         return attributes
 
     def get_sai_name(self, table_name: str) -> str:
