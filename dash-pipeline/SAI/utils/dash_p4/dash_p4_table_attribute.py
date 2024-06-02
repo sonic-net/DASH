@@ -95,7 +95,7 @@ class DashP4TableAttribute(DashP4Object):
     # Functions for generating SAI specs.
     #
     def to_sai_struct_entry(self, table_name: str) -> List[SaiStructEntry]:
-        name = self.get_sai_name(table_name)
+        name = self.name.lower()
         description = self.get_sai_description(table_name)
         object_name = f"SAI_OBJECT_TYPE_{self.object_name.upper()}" if self.object_name else None
 
@@ -122,14 +122,22 @@ class DashP4TableAttribute(DashP4Object):
 
         return entries
 
-    def to_sai_attribute(self, table_name: str) -> List[SaiAttribute]:
+    def to_sai_attribute(self, table_name: str, create_only: bool = False) -> List[SaiAttribute]:
         name = self.get_sai_name(table_name)
         description = self.get_sai_description(table_name)
 
-        default_value = None if self.isreadonly == "true" else self.default
         object_name = f"SAI_OBJECT_TYPE_{self.object_name.upper()}" if self.object_name else None
-        sai_flags = "READ_ONLY" if self.isreadonly == "true" else "CREATE_AND_SET"
         allow_null = True if self.type == "sai_object_id_t" else False
+
+        if self.isreadonly == "true":
+            sai_flags = "READ_ONLY"
+            default_value = self.default
+        elif create_only:
+            sai_flags = "MANDATORY_ON_CREATE | CREATE_ONLY"
+            default_value = None
+        else:
+            sai_flags = "CREATE_AND_SET"
+            default_value = None
 
         attributes = [
             SaiAttribute(

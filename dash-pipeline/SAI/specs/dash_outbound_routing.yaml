@@ -79,7 +79,7 @@ sai_apis:
     description: Action parameter dst VNET id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_VNET
@@ -92,7 +92,7 @@ sai_apis:
     description: Action parameter meter class or
     type: sai_uint32_t
     attr_value_field: u32
-    default: '0'
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -105,7 +105,7 @@ sai_apis:
     description: Action parameter meter class and
     type: sai_uint32_t
     attr_value_field: u32
-    default: '4294967295'
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -118,7 +118,7 @@ sai_apis:
     description: Action parameter routing actions disabled in flow resimulation
     type: sai_uint32_t
     attr_value_field: u32
-    default: '0'
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -131,7 +131,7 @@ sai_apis:
     description: Action parameter overlay IP
     type: sai_ip_address_t
     attr_value_field: ipaddr
-    default: 0.0.0.0
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -144,7 +144,7 @@ sai_apis:
     description: Action parameter overlay dip
     type: sai_ip_address_t
     attr_value_field: ipaddr
-    default: 0.0.0.0
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -157,7 +157,7 @@ sai_apis:
     description: Action parameter overlay dip mask
     type: sai_ip_address_t
     attr_value_field: ipaddr
-    default: 0.0.0.0
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -170,7 +170,7 @@ sai_apis:
     description: Action parameter overlay sip
     type: sai_ip_address_t
     attr_value_field: ipaddr
-    default: 0.0.0.0
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -183,7 +183,7 @@ sai_apis:
     description: Action parameter overlay sip mask
     type: sai_ip_address_t
     attr_value_field: ipaddr
-    default: 0.0.0.0
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -196,7 +196,7 @@ sai_apis:
     description: Action parameter underlay dip
     type: sai_ip_address_t
     attr_value_field: ipaddr
-    default: 0.0.0.0
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -209,7 +209,7 @@ sai_apis:
     description: Action parameter underlay sip
     type: sai_ip_address_t
     attr_value_field: ipaddr
-    default: 0.0.0.0
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -222,7 +222,7 @@ sai_apis:
     description: Action parameter DASH encapsulation
     type: sai_dash_encapsulation_t
     attr_value_field: s32
-    default: SAI_DASH_ENCAPSULATION_VXLAN
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -235,7 +235,7 @@ sai_apis:
     description: Action parameter tunnel key
     type: sai_uint32_t
     attr_value_field: u32
-    default: '0'
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -274,7 +274,7 @@ sai_apis:
     description: Action parameter DASH tunnel id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_TUNNEL

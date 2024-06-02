@@ -51,7 +51,7 @@ sai_apis:
     description: Action parameter ENI id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_ENI
@@ -82,7 +82,7 @@ sai_apis:
     description: Action parameter cps
     type: sai_uint32_t
     attr_value_field: u32
-    default: '0'
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -95,7 +95,7 @@ sai_apis:
     description: Action parameter pps
     type: sai_uint32_t
     attr_value_field: u32
-    default: '0'
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -108,7 +108,7 @@ sai_apis:
     description: Action parameter flows
     type: sai_uint32_t
     attr_value_field: u32
-    default: '0'
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -121,7 +121,7 @@ sai_apis:
     description: Action parameter admin state
     type: bool
     attr_value_field: booldata
-    default: 'false'
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -134,7 +134,7 @@ sai_apis:
     description: Action parameter HA scope id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_HA_SCOPE
@@ -147,7 +147,7 @@ sai_apis:
     description: Action parameter VM underlay dip
     type: sai_ip_address_t
     attr_value_field: ipaddr
-    default: 0.0.0.0
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -160,7 +160,7 @@ sai_apis:
     description: Action parameter VM VNI
     type: sai_uint32_t
     attr_value_field: u32
-    default: '0'
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -173,7 +173,7 @@ sai_apis:
     description: Action parameter VNET id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_VNET
@@ -186,7 +186,7 @@ sai_apis:
     description: Action parameter PL sip
     type: sai_ip_address_t
     attr_value_field: ipaddr
-    default: 0.0.0.0
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -199,7 +199,7 @@ sai_apis:
     description: Action parameter PL sip mask
     type: sai_ip_address_t
     attr_value_field: ipaddr
-    default: 0.0.0.0
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -212,7 +212,7 @@ sai_apis:
     description: Action parameter PL underlay sip
     type: sai_ip_address_t
     attr_value_field: ipaddr
-    default: 0.0.0.0
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -225,7 +225,7 @@ sai_apis:
     description: Action parameter v4 meter policy id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_METER_POLICY
@@ -238,7 +238,7 @@ sai_apis:
     description: Action parameter v6 meter policy id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_METER_POLICY
@@ -251,7 +251,7 @@ sai_apis:
     description: Action parameter DASH tunnel DSCP mode
     type: sai_dash_tunnel_dscp_mode_t
     attr_value_field: s32
-    default: SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -264,7 +264,7 @@ sai_apis:
     description: Action parameter DSCP
     type: sai_uint8_t
     attr_value_field: u8
-    default: '0'
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -277,7 +277,7 @@ sai_apis:
     description: Action parameter inbound v4 stage1 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -290,7 +290,7 @@ sai_apis:
     description: Action parameter inbound v4 stage2 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -303,7 +303,7 @@ sai_apis:
     description: Action parameter inbound v4 stage3 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -316,7 +316,7 @@ sai_apis:
     description: Action parameter inbound v4 stage4 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -329,7 +329,7 @@ sai_apis:
     description: Action parameter inbound v4 stage5 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -342,7 +342,7 @@ sai_apis:
     description: Action parameter inbound v6 stage1 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -355,7 +355,7 @@ sai_apis:
     description: Action parameter inbound v6 stage2 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -368,7 +368,7 @@ sai_apis:
     description: Action parameter inbound v6 stage3 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -381,7 +381,7 @@ sai_apis:
     description: Action parameter inbound v6 stage4 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -394,7 +394,7 @@ sai_apis:
     description: Action parameter inbound v6 stage5 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -407,7 +407,7 @@ sai_apis:
     description: Action parameter outbound v4 stage1 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -420,7 +420,7 @@ sai_apis:
     description: Action parameter outbound v4 stage2 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -433,7 +433,7 @@ sai_apis:
     description: Action parameter outbound v4 stage3 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -446,7 +446,7 @@ sai_apis:
     description: Action parameter outbound v4 stage4 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -459,7 +459,7 @@ sai_apis:
     description: Action parameter outbound v4 stage5 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -472,7 +472,7 @@ sai_apis:
     description: Action parameter outbound v6 stage1 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -485,7 +485,7 @@ sai_apis:
     description: Action parameter outbound v6 stage2 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -498,7 +498,7 @@ sai_apis:
     description: Action parameter outbound v6 stage3 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -511,7 +511,7 @@ sai_apis:
     description: Action parameter outbound v6 stage4 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -524,7 +524,7 @@ sai_apis:
     description: Action parameter outbound v6 stage5 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
-    default: SAI_NULL_OBJECT_ID
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
@@ -537,7 +537,7 @@ sai_apis:
     description: Action parameter disable fast path ICMP flow redirection
     type: bool
     attr_value_field: booldata
-    default: 'false'
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -550,7 +550,7 @@ sai_apis:
     description: Action parameter full flow resimulation requested
     type: bool
     attr_value_field: booldata
-    default: 'false'
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -563,7 +563,7 @@ sai_apis:
     description: Action parameter max resimulated flow per second
     type: sai_uint64_t
     attr_value_field: u64
-    default: '0'
+    default: null
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -590,7 +590,7 @@ sai_apis:
     description: DASH ENI RX_BYTES stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -603,7 +603,7 @@ sai_apis:
     description: DASH ENI RX_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -616,7 +616,7 @@ sai_apis:
     description: DASH ENI TX_BYTES stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -629,7 +629,7 @@ sai_apis:
     description: DASH ENI TX_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -642,7 +642,7 @@ sai_apis:
     description: DASH ENI OUTBOUND_RX_BYTES stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -655,7 +655,7 @@ sai_apis:
     description: DASH ENI OUTBOUND_RX_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -668,7 +668,7 @@ sai_apis:
     description: DASH ENI OUTBOUND_TX_BYTES stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -681,7 +681,7 @@ sai_apis:
     description: DASH ENI OUTBOUND_TX_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -694,7 +694,7 @@ sai_apis:
     description: DASH ENI INBOUND_RX_BYTES stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -707,7 +707,7 @@ sai_apis:
     description: DASH ENI INBOUND_RX_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -720,7 +720,7 @@ sai_apis:
     description: DASH ENI INBOUND_TX_BYTES stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -733,7 +733,7 @@ sai_apis:
     description: DASH ENI INBOUND_TX_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -746,7 +746,7 @@ sai_apis:
     description: DASH ENI LB_FAST_PATH_ICMP_IN_BYTES stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -759,7 +759,7 @@ sai_apis:
     description: DASH ENI LB_FAST_PATH_ICMP_IN_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -772,7 +772,7 @@ sai_apis:
     description: DASH ENI FLOW_CREATED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -785,7 +785,7 @@ sai_apis:
     description: DASH ENI FLOW_CREATE_FAILED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -798,7 +798,7 @@ sai_apis:
     description: DASH ENI FLOW_UPDATED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -811,7 +811,7 @@ sai_apis:
     description: DASH ENI FLOW_UPDATE_FAILED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -824,7 +824,7 @@ sai_apis:
     description: DASH ENI FLOW_UPDATED_BY_RESIMULATION stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -837,7 +837,7 @@ sai_apis:
     description: DASH ENI FLOW_UPDATE_BY_RESIMULATION_FAILED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -850,7 +850,7 @@ sai_apis:
     description: DASH ENI FLOW_DELETED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -863,7 +863,7 @@ sai_apis:
     description: DASH ENI FLOW_DELETE_FAILED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -876,7 +876,7 @@ sai_apis:
     description: DASH ENI FLOW_AGED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -889,7 +889,7 @@ sai_apis:
     description: DASH ENI INLINE_SYNC_PACKET_RX_BYTES stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -902,7 +902,7 @@ sai_apis:
     description: DASH ENI INLINE_SYNC_PACKET_RX_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -915,7 +915,7 @@ sai_apis:
     description: DASH ENI INLINE_SYNC_PACKET_TX_BYTES stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -928,7 +928,7 @@ sai_apis:
     description: DASH ENI INLINE_SYNC_PACKET_TX_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -941,7 +941,7 @@ sai_apis:
     description: DASH ENI TIMED_SYNC_PACKET_RX_BYTES stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -954,7 +954,7 @@ sai_apis:
     description: DASH ENI TIMED_SYNC_PACKET_RX_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -967,7 +967,7 @@ sai_apis:
     description: DASH ENI TIMED_SYNC_PACKET_TX_BYTES stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -980,7 +980,7 @@ sai_apis:
     description: DASH ENI TIMED_SYNC_PACKET_TX_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -993,7 +993,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_CREATE_REQ_SENT stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1006,7 +1006,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_CREATE_REQ_RECV stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1019,7 +1019,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_CREATE_REQ_FAILED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1032,7 +1032,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_CREATE_REQ_IGNORED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1045,7 +1045,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_CREATE_ACK_RECV stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1058,7 +1058,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_CREATE_ACK_FAILED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1071,7 +1071,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_CREATE_ACK_IGNORED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1084,7 +1084,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_CREATE_REQ_SENT stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1097,7 +1097,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_CREATE_REQ_RECV stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1110,7 +1110,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_CREATE_REQ_FAILED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1123,7 +1123,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_CREATE_REQ_IGNORED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1136,7 +1136,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_CREATE_ACK_RECV stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1149,7 +1149,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_CREATE_ACK_FAILED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1162,7 +1162,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_CREATE_ACK_IGNORED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1175,7 +1175,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_UPDATE_REQ_SENT stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1188,7 +1188,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_UPDATE_REQ_RECV stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1201,7 +1201,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_UPDATE_REQ_FAILED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1214,7 +1214,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_UPDATE_REQ_IGNORED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1227,7 +1227,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_UPDATE_ACK_RECV stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1240,7 +1240,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_UPDATE_ACK_FAILED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1253,7 +1253,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_UPDATE_ACK_IGNORED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1266,7 +1266,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_UPDATE_REQ_SENT stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1279,7 +1279,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_UPDATE_REQ_RECV stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1292,7 +1292,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_UPDATE_REQ_FAILED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1305,7 +1305,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_UPDATE_REQ_IGNORED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1318,7 +1318,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_UPDATE_ACK_RECV stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1331,7 +1331,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_UPDATE_ACK_FAILED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1344,7 +1344,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_UPDATE_ACK_IGNORED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1357,7 +1357,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_DELETE_REQ_SENT stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1370,7 +1370,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_DELETE_REQ_RECV stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1383,7 +1383,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_DELETE_REQ_FAILED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1396,7 +1396,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_DELETE_REQ_IGNORED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1409,7 +1409,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_DELETE_ACK_RECV stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1422,7 +1422,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_DELETE_ACK_FAILED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1435,7 +1435,7 @@ sai_apis:
     description: DASH ENI INLINE_FLOW_DELETE_ACK_IGNORED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1448,7 +1448,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_DELETE_REQ_SENT stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1461,7 +1461,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_DELETE_REQ_RECV stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1474,7 +1474,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_DELETE_REQ_FAILED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1487,7 +1487,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_DELETE_REQ_IGNORED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1500,7 +1500,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_DELETE_ACK_RECV stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1513,7 +1513,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_DELETE_ACK_FAILED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1526,7 +1526,7 @@ sai_apis:
     description: DASH ENI TIMED_FLOW_DELETE_ACK_IGNORED stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1539,7 +1539,7 @@ sai_apis:
     description: DASH ENI OUTBOUND_ROUTING_ENTRY_MISS_DROP_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1552,7 +1552,7 @@ sai_apis:
     description: DASH ENI OUTBOUND_CA_PA_ENTRY_MISS_DROP_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -1565,7 +1565,7 @@ sai_apis:
     description: DASH ENI INBOUND_ROUTING_ENTRY_MISS_DROP_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: null
+    default: '0'
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
