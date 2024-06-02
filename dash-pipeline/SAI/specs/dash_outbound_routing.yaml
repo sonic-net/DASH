@@ -68,7 +68,7 @@ sai_apis:
     attr_value_field: null
     default: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET
     isresourcetype: false
-    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    flags: CREATE_AND_SET
     object_name: null
     allow_null: false
     valid_only: null
