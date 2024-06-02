@@ -244,6 +244,32 @@ sai_apis:
     is_vlan: false
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_COUNTER_ID
+    description: Attach a counter. When it is empty, then packet hits won't be counted.
+    type: sai_object_id_t
+    attr_value_field: null
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_COUNTER
+    allow_null: true
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_IP_ADDR_FAMILY
+    description: IP address family for resource accounting
+    type: sai_ip_addr_family_t
+    attr_value_field: null
+    default: null
+    isresourcetype: true
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_TUNNEL_ID
     description: Action parameter DASH tunnel id
     type: sai_object_id_t
