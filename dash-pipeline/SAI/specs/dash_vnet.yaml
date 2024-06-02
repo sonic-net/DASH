@@ -1,16 +1,16 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: dash_vnet
-description: ''
+description: DASH VNET
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: vnet
-  description: ''
+  description: VNET
   is_object: true
   enums: []
   structs: []
   attributes:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_VNET_VNI
+    name: SAI_VNET_ATTR_VNI
     description: Action parameter VNI
     type: sai_uint32_t
     attr_value_field: u32
@@ -20,7 +20,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   stats: []
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:

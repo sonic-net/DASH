@@ -1,15 +1,15 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: dash_direction_lookup
-description: ''
+description: DASH direction lookup
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: direction_lookup_entry
-  description: ''
+  description: direction lookup entry
   is_object: false
   enums:
   - !!python/object:utils.sai_spec.sai_enum.SaiEnum
     name: sai_direction_lookup_entry_action_t
-    description: Attribute data for SAI_DIRECTION_LOOKUP_ENTRY_ATTR_ACTION
+    description: 'Attribute data for #SAI_DIRECTION_LOOKUP_ENTRY_ATTR_ACTION'
     members:
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION
@@ -17,11 +17,17 @@ sai_apis:
       value: '0'
   structs:
   - !!python/object:utils.sai_spec.sai_struct.SaiStruct
-    name: sai_direction_lookup_entry_entry_t
+    name: sai_direction_lookup_entry_t
     description: Entry for direction_lookup_entry
     members:
     - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
-      name: VNI
+      name: switch_id
+      description: Switch ID
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_SWITCH
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: vni
       description: Exact matched key VNI
       type: sai_uint32_t
       objects: null
@@ -38,7 +44,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   stats: []
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:

@@ -1,17 +1,17 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: dash_acl
-description: ''
+description: DASH ACL
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: dash_acl_group
-  description: ''
+  description: DASH ACL group
   is_object: true
   enums: []
   structs: []
   attributes:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_DASH_ACL_GROUP_IP_ADDR_FAMILY
-    description: Action parameter IP_ADDR_FAMILY
+    name: SAI_DASH_ACL_GROUP_ATTR_IP_ADDR_FAMILY
+    description: Action parameter IP addr family
     type: sai_ip_addr_family_t
     attr_value_field: u32
     default: SAI_IP_ADDR_FAMILY_IPV4
@@ -20,7 +20,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   stats: []
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
@@ -33,12 +34,12 @@ sai_apis:
           attr_param_id: {}
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: dash_acl_rule
-  description: ''
+  description: DASH ACL rule
   is_object: true
   enums:
   - !!python/object:utils.sai_spec.sai_enum.SaiEnum
     name: sai_dash_acl_rule_action_t
-    description: Attribute data for SAI_DASH_ACL_RULE_ATTR_ACTION
+    description: 'Attribute data for #SAI_DASH_ACL_RULE_ATTR_ACTION'
     members:
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_DASH_ACL_RULE_ACTION_PERMIT
@@ -69,7 +70,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_DASH_ACL_RULE_ATTR_COUNTER_ID
     description: Attach a counter. When it is empty, then packet hits won't be counted.
@@ -81,7 +83,8 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_COUNTER
     allow_null: true
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_DASH_ACL_RULE_ATTR_PRIORITY
     description: Rule priority in table
@@ -93,7 +96,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_DASH_ACL_RULE_ATTR_IP_ADDR_FAMILY
     description: IP address family for resource accounting
@@ -105,7 +109,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   stats: []
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:

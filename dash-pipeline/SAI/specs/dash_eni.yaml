@@ -1,15 +1,15 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: dash_eni
-description: ''
+description: DASH ENI
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: eni_ether_address_map_entry
-  description: ''
+  description: ENI ether address map entry
   is_object: false
   enums:
   - !!python/object:utils.sai_spec.sai_enum.SaiEnum
     name: sai_eni_ether_address_map_entry_action_t
-    description: Attribute data for SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ACTION
+    description: 'Attribute data for #SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ACTION'
     members:
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ACTION_SET_ENI
@@ -17,9 +17,15 @@ sai_apis:
       value: '0'
   structs:
   - !!python/object:utils.sai_spec.sai_struct.SaiStruct
-    name: sai_eni_ether_address_map_entry_entry_t
+    name: sai_eni_ether_address_map_entry_t
     description: Entry for eni_ether_address_map_entry
     members:
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: switch_id
+      description: Switch ID
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_SWITCH
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
       name: address
       description: Exact matched key address
@@ -38,10 +44,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ENI_ID
-    description: Action parameter ENI_ID
+    name: SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID
+    description: Action parameter ENI id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -50,7 +57,8 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_ENI
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   stats: []
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
@@ -61,17 +69,17 @@ sai_apis:
           name: SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ACTION_SET_ENI
           id: 24618133
           attr_param_id:
-            SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ENI_ID: 1
+            SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID: 1
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: eni
-  description: ''
+  description: ENI
   is_object: true
   enums: []
   structs: []
   attributes:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_CPS
-    description: Action parameter CPS
+    name: SAI_ENI_ATTR_CPS
+    description: Action parameter cps
     type: sai_uint32_t
     attr_value_field: u32
     default: '0'
@@ -80,10 +88,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_PPS
-    description: Action parameter PPS
+    name: SAI_ENI_ATTR_PPS
+    description: Action parameter pps
     type: sai_uint32_t
     attr_value_field: u32
     default: '0'
@@ -92,10 +101,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_FLOWS
-    description: Action parameter FLOWS
+    name: SAI_ENI_ATTR_FLOWS
+    description: Action parameter flows
     type: sai_uint32_t
     attr_value_field: u32
     default: '0'
@@ -104,10 +114,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_ADMIN_STATE
-    description: Action parameter ADMIN_STATE
+    name: SAI_ENI_ATTR_ADMIN_STATE
+    description: Action parameter admin state
     type: bool
     attr_value_field: booldata
     default: 'false'
@@ -116,10 +127,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_HA_SCOPE_ID
-    description: Action parameter HA_SCOPE_ID
+    name: SAI_ENI_ATTR_HA_SCOPE_ID
+    description: Action parameter HA scope id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -128,10 +140,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_HA_SCOPE
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_VM_UNDERLAY_DIP
-    description: Action parameter VM_UNDERLAY_DIP
+    name: SAI_ENI_ATTR_VM_UNDERLAY_DIP
+    description: Action parameter VM underlay dip
     type: sai_ip_address_t
     attr_value_field: ipaddr
     default: 0.0.0.0
@@ -140,10 +153,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_VM_VNI
-    description: Action parameter VM_VNI
+    name: SAI_ENI_ATTR_VM_VNI
+    description: Action parameter VM VNI
     type: sai_uint32_t
     attr_value_field: u32
     default: '0'
@@ -152,10 +166,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_VNET_ID
-    description: Action parameter VNET_ID
+    name: SAI_ENI_ATTR_VNET_ID
+    description: Action parameter VNET id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -164,10 +179,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_VNET
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_PL_SIP
-    description: Action parameter PL_SIP
+    name: SAI_ENI_ATTR_PL_SIP
+    description: Action parameter PL sip
     type: sai_ip_address_t
     attr_value_field: ipaddr
     default: 0.0.0.0
@@ -176,10 +192,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_PL_SIP_MASK
-    description: Action parameter PL_SIP_MASK
+    name: SAI_ENI_ATTR_PL_SIP_MASK
+    description: Action parameter PL sip mask
     type: sai_ip_address_t
     attr_value_field: ipaddr
     default: 0.0.0.0
@@ -188,10 +205,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_PL_UNDERLAY_SIP
-    description: Action parameter PL_UNDERLAY_SIP
+    name: SAI_ENI_ATTR_PL_UNDERLAY_SIP
+    description: Action parameter PL underlay sip
     type: sai_ip_address_t
     attr_value_field: ipaddr
     default: 0.0.0.0
@@ -200,10 +218,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_V4_METER_POLICY_ID
-    description: Action parameter V4_METER_POLICY_ID
+    name: SAI_ENI_ATTR_V4_METER_POLICY_ID
+    description: Action parameter v4 meter policy id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -212,10 +231,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_METER_POLICY
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_V6_METER_POLICY_ID
-    description: Action parameter V6_METER_POLICY_ID
+    name: SAI_ENI_ATTR_V6_METER_POLICY_ID
+    description: Action parameter v6 meter policy id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -224,10 +244,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_METER_POLICY
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_DASH_TUNNEL_DSCP_MODE
-    description: Action parameter DASH_TUNNEL_DSCP_MODE
+    name: SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE
+    description: Action parameter DASH tunnel DSCP mode
     type: sai_dash_tunnel_dscp_mode_t
     attr_value_field: s32
     default: SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL
@@ -236,9 +257,10 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_DSCP
+    name: SAI_ENI_ATTR_DSCP
     description: Action parameter DSCP
     type: sai_uint8_t
     attr_value_field: u8
@@ -248,10 +270,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE == SAI_DASH_TUNNEL_DSCP_MODE_PIPE_MODEL
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID
-    description: Action parameter INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID
+    description: Action parameter inbound v4 stage1 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -260,10 +283,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_INBOUND_V4_STAGE2_DASH_ACL_GROUP_ID
-    description: Action parameter INBOUND_V4_STAGE2_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_INBOUND_V4_STAGE2_DASH_ACL_GROUP_ID
+    description: Action parameter inbound v4 stage2 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -272,10 +296,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_INBOUND_V4_STAGE3_DASH_ACL_GROUP_ID
-    description: Action parameter INBOUND_V4_STAGE3_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_INBOUND_V4_STAGE3_DASH_ACL_GROUP_ID
+    description: Action parameter inbound v4 stage3 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -284,10 +309,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_INBOUND_V4_STAGE4_DASH_ACL_GROUP_ID
-    description: Action parameter INBOUND_V4_STAGE4_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_INBOUND_V4_STAGE4_DASH_ACL_GROUP_ID
+    description: Action parameter inbound v4 stage4 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -296,10 +322,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_INBOUND_V4_STAGE5_DASH_ACL_GROUP_ID
-    description: Action parameter INBOUND_V4_STAGE5_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_INBOUND_V4_STAGE5_DASH_ACL_GROUP_ID
+    description: Action parameter inbound v4 stage5 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -308,10 +335,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_INBOUND_V6_STAGE1_DASH_ACL_GROUP_ID
-    description: Action parameter INBOUND_V6_STAGE1_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_INBOUND_V6_STAGE1_DASH_ACL_GROUP_ID
+    description: Action parameter inbound v6 stage1 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -320,10 +348,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_INBOUND_V6_STAGE2_DASH_ACL_GROUP_ID
-    description: Action parameter INBOUND_V6_STAGE2_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_INBOUND_V6_STAGE2_DASH_ACL_GROUP_ID
+    description: Action parameter inbound v6 stage2 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -332,10 +361,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_INBOUND_V6_STAGE3_DASH_ACL_GROUP_ID
-    description: Action parameter INBOUND_V6_STAGE3_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_INBOUND_V6_STAGE3_DASH_ACL_GROUP_ID
+    description: Action parameter inbound v6 stage3 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -344,10 +374,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_INBOUND_V6_STAGE4_DASH_ACL_GROUP_ID
-    description: Action parameter INBOUND_V6_STAGE4_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_INBOUND_V6_STAGE4_DASH_ACL_GROUP_ID
+    description: Action parameter inbound v6 stage4 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -356,10 +387,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_INBOUND_V6_STAGE5_DASH_ACL_GROUP_ID
-    description: Action parameter INBOUND_V6_STAGE5_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_INBOUND_V6_STAGE5_DASH_ACL_GROUP_ID
+    description: Action parameter inbound v6 stage5 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -368,10 +400,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_OUTBOUND_V4_STAGE1_DASH_ACL_GROUP_ID
-    description: Action parameter OUTBOUND_V4_STAGE1_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_OUTBOUND_V4_STAGE1_DASH_ACL_GROUP_ID
+    description: Action parameter outbound v4 stage1 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -380,10 +413,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_OUTBOUND_V4_STAGE2_DASH_ACL_GROUP_ID
-    description: Action parameter OUTBOUND_V4_STAGE2_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_OUTBOUND_V4_STAGE2_DASH_ACL_GROUP_ID
+    description: Action parameter outbound v4 stage2 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -392,10 +426,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_OUTBOUND_V4_STAGE3_DASH_ACL_GROUP_ID
-    description: Action parameter OUTBOUND_V4_STAGE3_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_OUTBOUND_V4_STAGE3_DASH_ACL_GROUP_ID
+    description: Action parameter outbound v4 stage3 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -404,10 +439,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_OUTBOUND_V4_STAGE4_DASH_ACL_GROUP_ID
-    description: Action parameter OUTBOUND_V4_STAGE4_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_OUTBOUND_V4_STAGE4_DASH_ACL_GROUP_ID
+    description: Action parameter outbound v4 stage4 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -416,10 +452,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_OUTBOUND_V4_STAGE5_DASH_ACL_GROUP_ID
-    description: Action parameter OUTBOUND_V4_STAGE5_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_OUTBOUND_V4_STAGE5_DASH_ACL_GROUP_ID
+    description: Action parameter outbound v4 stage5 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -428,10 +465,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_OUTBOUND_V6_STAGE1_DASH_ACL_GROUP_ID
-    description: Action parameter OUTBOUND_V6_STAGE1_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_OUTBOUND_V6_STAGE1_DASH_ACL_GROUP_ID
+    description: Action parameter outbound v6 stage1 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -440,10 +478,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_OUTBOUND_V6_STAGE2_DASH_ACL_GROUP_ID
-    description: Action parameter OUTBOUND_V6_STAGE2_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_OUTBOUND_V6_STAGE2_DASH_ACL_GROUP_ID
+    description: Action parameter outbound v6 stage2 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -452,10 +491,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_OUTBOUND_V6_STAGE3_DASH_ACL_GROUP_ID
-    description: Action parameter OUTBOUND_V6_STAGE3_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_OUTBOUND_V6_STAGE3_DASH_ACL_GROUP_ID
+    description: Action parameter outbound v6 stage3 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -464,10 +504,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_OUTBOUND_V6_STAGE4_DASH_ACL_GROUP_ID
-    description: Action parameter OUTBOUND_V6_STAGE4_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_OUTBOUND_V6_STAGE4_DASH_ACL_GROUP_ID
+    description: Action parameter outbound v6 stage4 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -476,10 +517,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_OUTBOUND_V6_STAGE5_DASH_ACL_GROUP_ID
-    description: Action parameter OUTBOUND_V6_STAGE5_DASH_ACL_GROUP_ID
+    name: SAI_ENI_ATTR_OUTBOUND_V6_STAGE5_DASH_ACL_GROUP_ID
+    description: Action parameter outbound v6 stage5 DASH ACL group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -488,10 +530,11 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION
-    description: Action parameter DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION
+    name: SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION
+    description: Action parameter disable fast path ICMP flow redirection
     type: bool
     attr_value_field: booldata
     default: 'false'
@@ -500,10 +543,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_FULL_FLOW_RESIMULATION_REQUESTED
-    description: Action parameter FULL_FLOW_RESIMULATION_REQUESTED
+    name: SAI_ENI_ATTR_FULL_FLOW_RESIMULATION_REQUESTED
+    description: Action parameter full flow resimulation requested
     type: bool
     attr_value_field: booldata
     default: 'false'
@@ -512,10 +556,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_MAX_RESIMULATED_FLOW_PER_SECOND
-    description: Action parameter MAX_RESIMULATED_FLOW_PER_SECOND
+    name: SAI_ENI_ATTR_MAX_RESIMULATED_FLOW_PER_SECOND
+    description: Action parameter max resimulated flow per second
     type: sai_uint64_t
     attr_value_field: u64
     default: '0'
@@ -537,6 +582,8 @@ sai_apis:
     allow_null: true
     valid_only: null
     deprecated: null
+    is_vlan: false
+    deprecated: false
   stats:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_RX_BYTES
@@ -549,7 +596,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_RX_PACKETS
     description: DASH ENI RX_PACKETS stat count
@@ -561,7 +609,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TX_BYTES
     description: DASH ENI TX_BYTES stat count
@@ -573,7 +622,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TX_PACKETS
     description: DASH ENI TX_PACKETS stat count
@@ -585,7 +635,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_OUTBOUND_RX_BYTES
     description: DASH ENI OUTBOUND_RX_BYTES stat count
@@ -597,7 +648,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_OUTBOUND_RX_PACKETS
     description: DASH ENI OUTBOUND_RX_PACKETS stat count
@@ -609,7 +661,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_OUTBOUND_TX_BYTES
     description: DASH ENI OUTBOUND_TX_BYTES stat count
@@ -621,7 +674,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_OUTBOUND_TX_PACKETS
     description: DASH ENI OUTBOUND_TX_PACKETS stat count
@@ -633,7 +687,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INBOUND_RX_BYTES
     description: DASH ENI INBOUND_RX_BYTES stat count
@@ -645,7 +700,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INBOUND_RX_PACKETS
     description: DASH ENI INBOUND_RX_PACKETS stat count
@@ -657,7 +713,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INBOUND_TX_BYTES
     description: DASH ENI INBOUND_TX_BYTES stat count
@@ -669,7 +726,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INBOUND_TX_PACKETS
     description: DASH ENI INBOUND_TX_PACKETS stat count
@@ -681,7 +739,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_LB_FAST_PATH_ICMP_IN_BYTES
     description: DASH ENI LB_FAST_PATH_ICMP_IN_BYTES stat count
@@ -693,7 +752,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_LB_FAST_PATH_ICMP_IN_PACKETS
     description: DASH ENI LB_FAST_PATH_ICMP_IN_PACKETS stat count
@@ -705,7 +765,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_FLOW_CREATED
     description: DASH ENI FLOW_CREATED stat count
@@ -717,7 +778,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_FLOW_CREATE_FAILED
     description: DASH ENI FLOW_CREATE_FAILED stat count
@@ -729,7 +791,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_FLOW_UPDATED
     description: DASH ENI FLOW_UPDATED stat count
@@ -741,7 +804,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_FLOW_UPDATE_FAILED
     description: DASH ENI FLOW_UPDATE_FAILED stat count
@@ -753,7 +817,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_FLOW_UPDATED_BY_RESIMULATION
     description: DASH ENI FLOW_UPDATED_BY_RESIMULATION stat count
@@ -765,7 +830,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_FLOW_UPDATE_BY_RESIMULATION_FAILED
     description: DASH ENI FLOW_UPDATE_BY_RESIMULATION_FAILED stat count
@@ -777,7 +843,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_FLOW_DELETED
     description: DASH ENI FLOW_DELETED stat count
@@ -789,7 +856,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_FLOW_DELETE_FAILED
     description: DASH ENI FLOW_DELETE_FAILED stat count
@@ -801,7 +869,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_FLOW_AGED
     description: DASH ENI FLOW_AGED stat count
@@ -813,7 +882,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_SYNC_PACKET_RX_BYTES
     description: DASH ENI INLINE_SYNC_PACKET_RX_BYTES stat count
@@ -825,7 +895,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_SYNC_PACKET_RX_PACKETS
     description: DASH ENI INLINE_SYNC_PACKET_RX_PACKETS stat count
@@ -837,7 +908,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_SYNC_PACKET_TX_BYTES
     description: DASH ENI INLINE_SYNC_PACKET_TX_BYTES stat count
@@ -849,7 +921,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_SYNC_PACKET_TX_PACKETS
     description: DASH ENI INLINE_SYNC_PACKET_TX_PACKETS stat count
@@ -861,7 +934,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_SYNC_PACKET_RX_BYTES
     description: DASH ENI TIMED_SYNC_PACKET_RX_BYTES stat count
@@ -873,7 +947,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_SYNC_PACKET_RX_PACKETS
     description: DASH ENI TIMED_SYNC_PACKET_RX_PACKETS stat count
@@ -885,7 +960,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_SYNC_PACKET_TX_BYTES
     description: DASH ENI TIMED_SYNC_PACKET_TX_BYTES stat count
@@ -897,7 +973,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_SYNC_PACKET_TX_PACKETS
     description: DASH ENI TIMED_SYNC_PACKET_TX_PACKETS stat count
@@ -909,7 +986,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_CREATE_REQ_SENT
     description: DASH ENI INLINE_FLOW_CREATE_REQ_SENT stat count
@@ -921,7 +999,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_CREATE_REQ_RECV
     description: DASH ENI INLINE_FLOW_CREATE_REQ_RECV stat count
@@ -933,7 +1012,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_CREATE_REQ_FAILED
     description: DASH ENI INLINE_FLOW_CREATE_REQ_FAILED stat count
@@ -945,7 +1025,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_CREATE_REQ_IGNORED
     description: DASH ENI INLINE_FLOW_CREATE_REQ_IGNORED stat count
@@ -957,7 +1038,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_CREATE_ACK_RECV
     description: DASH ENI INLINE_FLOW_CREATE_ACK_RECV stat count
@@ -969,7 +1051,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_CREATE_ACK_FAILED
     description: DASH ENI INLINE_FLOW_CREATE_ACK_FAILED stat count
@@ -981,7 +1064,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_CREATE_ACK_IGNORED
     description: DASH ENI INLINE_FLOW_CREATE_ACK_IGNORED stat count
@@ -993,7 +1077,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_CREATE_REQ_SENT
     description: DASH ENI TIMED_FLOW_CREATE_REQ_SENT stat count
@@ -1005,7 +1090,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_CREATE_REQ_RECV
     description: DASH ENI TIMED_FLOW_CREATE_REQ_RECV stat count
@@ -1017,7 +1103,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_CREATE_REQ_FAILED
     description: DASH ENI TIMED_FLOW_CREATE_REQ_FAILED stat count
@@ -1029,7 +1116,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_CREATE_REQ_IGNORED
     description: DASH ENI TIMED_FLOW_CREATE_REQ_IGNORED stat count
@@ -1041,7 +1129,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_CREATE_ACK_RECV
     description: DASH ENI TIMED_FLOW_CREATE_ACK_RECV stat count
@@ -1053,7 +1142,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_CREATE_ACK_FAILED
     description: DASH ENI TIMED_FLOW_CREATE_ACK_FAILED stat count
@@ -1065,7 +1155,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_CREATE_ACK_IGNORED
     description: DASH ENI TIMED_FLOW_CREATE_ACK_IGNORED stat count
@@ -1077,7 +1168,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_REQ_SENT
     description: DASH ENI INLINE_FLOW_UPDATE_REQ_SENT stat count
@@ -1089,7 +1181,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_REQ_RECV
     description: DASH ENI INLINE_FLOW_UPDATE_REQ_RECV stat count
@@ -1101,7 +1194,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_REQ_FAILED
     description: DASH ENI INLINE_FLOW_UPDATE_REQ_FAILED stat count
@@ -1113,7 +1207,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_REQ_IGNORED
     description: DASH ENI INLINE_FLOW_UPDATE_REQ_IGNORED stat count
@@ -1125,7 +1220,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_ACK_RECV
     description: DASH ENI INLINE_FLOW_UPDATE_ACK_RECV stat count
@@ -1137,7 +1233,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_ACK_FAILED
     description: DASH ENI INLINE_FLOW_UPDATE_ACK_FAILED stat count
@@ -1149,7 +1246,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_UPDATE_ACK_IGNORED
     description: DASH ENI INLINE_FLOW_UPDATE_ACK_IGNORED stat count
@@ -1161,7 +1259,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_REQ_SENT
     description: DASH ENI TIMED_FLOW_UPDATE_REQ_SENT stat count
@@ -1173,7 +1272,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_REQ_RECV
     description: DASH ENI TIMED_FLOW_UPDATE_REQ_RECV stat count
@@ -1185,7 +1285,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_REQ_FAILED
     description: DASH ENI TIMED_FLOW_UPDATE_REQ_FAILED stat count
@@ -1197,7 +1298,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_REQ_IGNORED
     description: DASH ENI TIMED_FLOW_UPDATE_REQ_IGNORED stat count
@@ -1209,7 +1311,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_ACK_RECV
     description: DASH ENI TIMED_FLOW_UPDATE_ACK_RECV stat count
@@ -1221,7 +1324,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_ACK_FAILED
     description: DASH ENI TIMED_FLOW_UPDATE_ACK_FAILED stat count
@@ -1233,7 +1337,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_UPDATE_ACK_IGNORED
     description: DASH ENI TIMED_FLOW_UPDATE_ACK_IGNORED stat count
@@ -1245,7 +1350,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_DELETE_REQ_SENT
     description: DASH ENI INLINE_FLOW_DELETE_REQ_SENT stat count
@@ -1257,7 +1363,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_DELETE_REQ_RECV
     description: DASH ENI INLINE_FLOW_DELETE_REQ_RECV stat count
@@ -1269,7 +1376,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_DELETE_REQ_FAILED
     description: DASH ENI INLINE_FLOW_DELETE_REQ_FAILED stat count
@@ -1281,7 +1389,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_DELETE_REQ_IGNORED
     description: DASH ENI INLINE_FLOW_DELETE_REQ_IGNORED stat count
@@ -1293,7 +1402,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_DELETE_ACK_RECV
     description: DASH ENI INLINE_FLOW_DELETE_ACK_RECV stat count
@@ -1305,7 +1415,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_DELETE_ACK_FAILED
     description: DASH ENI INLINE_FLOW_DELETE_ACK_FAILED stat count
@@ -1317,7 +1428,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INLINE_FLOW_DELETE_ACK_IGNORED
     description: DASH ENI INLINE_FLOW_DELETE_ACK_IGNORED stat count
@@ -1329,7 +1441,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_DELETE_REQ_SENT
     description: DASH ENI TIMED_FLOW_DELETE_REQ_SENT stat count
@@ -1341,7 +1454,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_DELETE_REQ_RECV
     description: DASH ENI TIMED_FLOW_DELETE_REQ_RECV stat count
@@ -1353,7 +1467,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_DELETE_REQ_FAILED
     description: DASH ENI TIMED_FLOW_DELETE_REQ_FAILED stat count
@@ -1365,7 +1480,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_DELETE_REQ_IGNORED
     description: DASH ENI TIMED_FLOW_DELETE_REQ_IGNORED stat count
@@ -1377,7 +1493,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_DELETE_ACK_RECV
     description: DASH ENI TIMED_FLOW_DELETE_ACK_RECV stat count
@@ -1389,7 +1506,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_DELETE_ACK_FAILED
     description: DASH ENI TIMED_FLOW_DELETE_ACK_FAILED stat count
@@ -1401,7 +1519,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_TIMED_FLOW_DELETE_ACK_IGNORED
     description: DASH ENI TIMED_FLOW_DELETE_ACK_IGNORED stat count
@@ -1413,7 +1532,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_OUTBOUND_ROUTING_ENTRY_MISS_DROP_PACKETS
     description: DASH ENI OUTBOUND_ROUTING_ENTRY_MISS_DROP_PACKETS stat count
@@ -1425,7 +1545,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_OUTBOUND_CA_PA_ENTRY_MISS_DROP_PACKETS
     description: DASH ENI OUTBOUND_CA_PA_ENTRY_MISS_DROP_PACKETS stat count
@@ -1437,7 +1558,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_INBOUND_ROUTING_ENTRY_MISS_DROP_PACKETS
     description: DASH ENI INBOUND_ROUTING_ENTRY_MISS_DROP_PACKETS stat count
@@ -1474,6 +1596,8 @@ sai_apis:
     allow_null: false
     valid_only: null
     deprecated: null
+    deprecated: false
+    is_vlan: false
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
