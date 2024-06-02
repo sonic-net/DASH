@@ -72,7 +72,7 @@ sai_apis:
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC
-    description: Action parameter overlay dmac
+    description: Action parameter overlay destination MAC
     type: sai_mac_t
     attr_value_field: mac
     default: vendor
@@ -111,7 +111,7 @@ sai_apis:
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_FLOW_RESIMULATION_REQUESTED
-    description: Action parameter flow resimulation requested
+    description: Action parameter flow re-simulation requested
     type: bool
     attr_value_field: booldata
     default: 'false'
@@ -124,7 +124,7 @@ sai_apis:
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION
-    description: Action parameter routing actions disabled in flow resimulation
+    description: Action parameter routing actions disabled in flow re-simulation
     type: sai_uint32_t
     attr_value_field: u32
     default: '0'

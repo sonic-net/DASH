@@ -1,11 +1,11 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: dash_vip
-description: DASH vip
+description: DASH VIP
 api_type: overlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: vip_entry
-  description: vip entry
+  description: VIP entry
   is_object: false
   enums:
   - !!python/object:utils.sai_spec.sai_enum.SaiEnum

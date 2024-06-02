@@ -184,7 +184,7 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     description: DASH PORT VIP_MISS_DROP_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: '0'
+    default: null
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -197,7 +197,7 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     description: DASH PORT ENI_MISS_DROP_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: '0'
+    default: null
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -210,7 +210,7 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     description: DASH PORT PORT_LB_FAST_PATH_ICMP_IN_BYTES stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: '0'
+    default: null
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -223,7 +223,7 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     description: DASH PORT PORT_LB_FAST_PATH_ICMP_IN_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: '0'
+    default: null
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -236,7 +236,7 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     description: DASH PORT PORT_LB_FAST_PATH_ENI_MISS_DROP_BYTES stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: '0'
+    default: null
     isresourcetype: false
     flags: READ_ONLY
     object_name: null
@@ -249,7 +249,7 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     description: DASH PORT PORT_LB_FAST_PATH_ENI_MISS_DROP_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
-    default: '0'
+    default: null
     isresourcetype: false
     flags: READ_ONLY
     object_name: null

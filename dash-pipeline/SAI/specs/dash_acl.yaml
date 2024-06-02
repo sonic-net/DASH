@@ -12,7 +12,7 @@ sai_apis:
   attributes:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_DASH_ACL_GROUP_ATTR_IP_ADDR_FAMILY
-    description: Action parameter IP addr family
+    description: Action parameter IP address family
     type: sai_ip_addr_family_t
     attr_value_field: u32
     default: SAI_IP_ADDR_FAMILY_IPV4

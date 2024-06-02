@@ -132,7 +132,7 @@ class DashP4TableAttribute(DashP4Object):
 
         if self.isreadonly == "true":
             sai_flags = "READ_ONLY"
-            default_value = self.default
+            default_value = None
         elif create_only:
             sai_flags = "MANDATORY_ON_CREATE | CREATE_ONLY"
             default_value = None

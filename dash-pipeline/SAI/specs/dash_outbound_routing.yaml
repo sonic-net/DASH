@@ -116,7 +116,7 @@ sai_apis:
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION
-    description: Action parameter routing actions disabled in flow resimulation
+    description: Action parameter routing actions disabled in flow re-simulation
     type: sai_uint32_t
     attr_value_field: u32
     default: '0'
