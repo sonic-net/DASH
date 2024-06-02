@@ -1,5 +1,3 @@
-{% if api.stats | length > 0 %}
-
 /**
  * @brief Get {{ api.name | upper }} statistics counters. Deprecated for backward compatibility.
  *
@@ -47,4 +45,3 @@ typedef sai_status_t (*sai_clear_{{ api.name }}_stats_fn)(
         {% include 'templates/headers/sai_api_param_object_id.j2' %},
         _In_ uint32_t number_of_counters,
         _In_ const sai_stat_id_t *counter_ids);
-{% endif %}

@@ -38,23 +38,37 @@
 {% for enum in api.enums %}
 
 {% include 'templates/headers/sai_enum.j2' %}
+
 {% endfor %}
 {% endfor %}
 {% for api in api_group.sai_apis %}
 {% for struct in api.structs %}
 
 {% include 'templates/headers/sai_struct.j2' %}
+
 {% endfor %}
 
 {% include 'templates/headers/sai_attributes.j2' %}
 
+{% if api.stats | length > 0 %}
+
 {% include 'templates/headers/sai_stats.j2' %}
+
+{% endif %}
 {% endfor %}
 {% for api in api_group.sai_apis %}
 {% include 'templates/headers/sai_api_func_quad.j2' %}
+
+{% if api.stats | length > 0 %}
+
 {% include 'templates/headers/sai_api_func_stats.j2' %}
+
+{% endif %}
+{% if api.is_object != True %}
+
 {% include 'templates/headers/sai_api_func_bulk.j2' %}
 
+{% endif %}
 {% endfor %}
 
 typedef struct _sai_{{ api_group.name }}_api_t

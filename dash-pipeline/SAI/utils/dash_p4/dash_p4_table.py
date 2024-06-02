@@ -320,7 +320,7 @@ class DashP4Table(DashP4Object):
             name=f"SAI_{self.name.upper()}_ATTR_ACTION",
             description="Action",
             type=action_enum_type_name,
-            flags="MANDATORY_ON_CREATE | CREATE_ONLY",
+            flags="CREATE_AND_SET",
             default=action_enum_members[0].name,
         )
         sai_api.attributes.append(sai_attr_action)

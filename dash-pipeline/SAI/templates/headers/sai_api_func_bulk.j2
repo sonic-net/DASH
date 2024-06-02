@@ -1,5 +1,3 @@
-{% if api.is_object != True %}
-
 /**
  * @brief Bulk create {{ api.description }}
  *
@@ -44,4 +42,3 @@ typedef sai_status_t (*sai_bulk_remove_{{ api.name }}_fn)(
         _In_ const sai_{{ api.name }}_t *{{ api.name }},
         _In_ sai_bulk_op_error_mode_t mode,
         _Out_ sai_status_t *object_statuses);
-{% endif %}
