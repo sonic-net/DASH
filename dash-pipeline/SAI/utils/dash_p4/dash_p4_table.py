@@ -339,7 +339,22 @@ class DashP4Table(DashP4Object):
                 objects="SAI_OBJECT_TYPE_SWITCH",
             )
         ]
-        sai_struct_members.extend([attr.to_sai_struct_entry(self.name) for attr in self.keys if attr.skipattr != "true"])
+
+        for attr in self.keys:
+            if attr.skipattr != "true":
+                sai_struct_members.extend(attr.to_sai_struct_entry(self.name))
+
+        # If any match key in this table supports priority, we need to add a priority attribute.
+        if any([key.match_type != "exact" for key in self.keys]) and all(
+            [key.match_type != "lpm" for key in self.keys]
+        ):
+            priority_entry = SaiStructEntry(
+                name="priority",
+                description="Rule priority in table",
+                type="sai_uint32_t",
+            )
+
+            sai_struct_members.append(priority_entry)
 
         print("Creating struct for table: " + self.name)
         sai_struct = SaiStruct(
@@ -351,15 +366,20 @@ class DashP4Table(DashP4Object):
         sai_api.structs.append(sai_struct)
 
     def create_sai_stats(self, sai_api: SaiApi) -> None:
-        sai_api.stats = [
-            sai_stat.to_sai_attribute(self.name)
-            for sai_stat in self.sai_stats
-        ]
+        sai_api.stats = []
+        for sai_stat in self.sai_stats:
+            sai_api.stats.extend(sai_stat.to_sai_attribute(self.name))
 
     def create_sai_attributes(self, sai_api: SaiApi) -> None:
+        # If the table is an object with more one key (table entry id), we need to add all the keys into the attributes.
+        if self.is_object == "true" and len(self.keys) > 1:
+            for key in self.keys:
+                sai_api.attributes.extend(key.to_sai_attribute(self.name))
+
+        # Add all the action parameters into the attributes.
         for attr in self.sai_attributes:
             if attr.skipattr != "true":
-                sai_api.attributes.append(attr.to_sai_attribute(self.name))
+                sai_api.attributes.extend(attr.to_sai_attribute(self.name))
 
         # If the table has an counter attached, we need to create a counter attribute for it.
         # The counter attribute only counts that packets that hits any entry, but not the packet that misses all entries.

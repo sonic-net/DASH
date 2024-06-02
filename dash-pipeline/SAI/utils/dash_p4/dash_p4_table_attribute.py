@@ -94,20 +94,35 @@ class DashP4TableAttribute(DashP4Object):
     #
     # Functions for generating SAI specs.
     #
-    def to_sai_struct_entry(self, table_name: str) -> SaiStructEntry:
+    def to_sai_struct_entry(self, table_name: str) -> List[SaiStructEntry]:
         name = self.get_sai_name(table_name)
         description = self.get_sai_description(table_name)
         object_name = f"SAI_OBJECT_TYPE_{self.object_name.upper()}" if self.object_name else None
 
-        return SaiStructEntry(
-            name = name,
-            description = description,
-            type = self.type,
-            objects = object_name,
-            valid_only = self.validonly,
-        )
+        entries = [
+            SaiStructEntry(
+                name = name,
+                description = description,
+                type = self.type,
+                objects = object_name,
+                valid_only = self.validonly,
+            )
+        ]
 
-    def to_sai_attribute(self, table_name: str) -> SaiAttribute:
+        if self.match_type == "ternary":
+            entries.append(
+                SaiStructEntry(
+                    name = f"{name}_mask",
+                    description = f"{description} mask",
+                    type = self.type,
+                    objects = object_name,
+                    valid_only = self.validonly,
+                )
+            )
+
+        return entries
+
+    def to_sai_attribute(self, table_name: str) -> List[SaiAttribute]:
         name = self.get_sai_name(table_name)
         description = self.get_sai_description(table_name)
 
@@ -116,18 +131,22 @@ class DashP4TableAttribute(DashP4Object):
         sai_flags = "READ_ONLY" if self.isreadonly == "true" else "CREATE_AND_SET"
         allow_null = True if self.type == "sai_object_id_t" else False
 
-        return SaiAttribute(
-            name = name,
-            description = description,
-            type = self.type,
-            attr_value_field = self.field,
-            default = default_value,
-            isresourcetype = self.isresourcetype == "true",
-            flags = sai_flags,
-            object_name = object_name,
-            allow_null = allow_null,
-            valid_only = self.validonly,
-        )
+        attributes = [
+            SaiAttribute(
+                name = name,
+                description = description,
+                type = self.type,
+                attr_value_field = self.field,
+                default = default_value,
+                isresourcetype = self.isresourcetype == "true",
+                flags = sai_flags,
+                object_name = object_name,
+                allow_null = allow_null,
+                valid_only = self.validonly,
+            )
+        ]
+
+        return attributes
 
     def get_sai_name(self, table_name: str) -> str:
         return f"SAI_{table_name.upper()}_ATTR_{self.name.upper()}"

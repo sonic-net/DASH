@@ -73,6 +73,84 @@ sai_apis:
     deprecated: false
     is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_ACL_RULE_DASH_ACL_GROUP_ID
+    description: Exact matched key dash_acl_group_id
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: true
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
+    allow_null: true
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_ACL_RULE_DIP
+    description: List matched key dip
+    type: sai_ip_prefix_list_t
+    attr_value_field: ipprefixlist
+    default: empty
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_ACL_RULE_SIP
+    description: List matched key sip
+    type: sai_ip_prefix_list_t
+    attr_value_field: ipprefixlist
+    default: empty
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_ACL_RULE_PROTOCOL
+    description: List matched key protocol
+    type: sai_u8_list_t
+    attr_value_field: u8list
+    default: empty
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_ACL_RULE_SRC_PORT
+    description: Range_list matched key src_port
+    type: sai_u16_range_list_t
+    attr_value_field: u16rangelist
+    default: empty
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_ACL_RULE_DST_PORT
+    description: Range_list matched key dst_port
+    type: sai_u16_range_list_t
+    attr_value_field: u16rangelist
+    default: empty
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_DASH_ACL_RULE_ATTR_COUNTER_ID
     description: Attach a counter. When it is empty, then packet hits won't be counted.
     type: sai_object_id_t

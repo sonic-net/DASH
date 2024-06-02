@@ -56,6 +56,18 @@ sai_apis:
       type: sai_ip_address_t
       objects: null
       valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: sip_mask
+      description: Ternary matched key sip mask
+      type: sai_ip_address_t
+      objects: null
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: priority
+      description: Rule priority in table
+      type: sai_uint32_t
+      objects: null
+      valid_only: null
   attributes:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION
