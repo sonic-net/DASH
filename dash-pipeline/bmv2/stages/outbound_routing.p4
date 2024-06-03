@@ -50,13 +50,18 @@ control outbound_routing_stage(inout headers_t hdr,
             return;
         }
 
-        routing_group.apply();
-        if (meta.eni_data.routing_group_data.routing_group_admin_state) {
-            if (!routing.apply().hit) {
-                UPDATE_ENI_COUNTER(outbound_routing_entry_miss_drop);
-            }
-        } else {
+        if (!routing_group.apply().hit) {
             drop(meta);
+            return;
+        }
+
+        if (!meta.eni_data.routing_group_data.routing_group_admin_state) {
+            drop(meta);
+            return;
+        }
+            
+        if (!routing.apply().hit) {
+                UPDATE_ENI_COUNTER(outbound_routing_entry_miss_drop);
         }
     }
 
