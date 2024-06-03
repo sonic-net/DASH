@@ -8,13 +8,13 @@ control outbound_routing_stage(inout headers_t hdr,
 {
 
     action set_routing_group_attr(bit<1> admin_state) {
-        meta.eni_data.routing_group_admin_state = (bool)admin_state;
+        meta.eni_data.routing_group_data.routing_group_admin_state = (bool)admin_state;
     }
 
     @SaiTable[name = "routing_group", api = "dash_routing_group", isobject="true"]
     table routing_group {
         key = {
-            meta.eni_data.routing_group_id : exact @SaiVal[type="sai_object_id_t"];
+            meta.eni_data.routing_group_data.routing_group_id : exact @SaiVal[type="sai_object_id_t"];
         }
 
         actions = {
@@ -51,7 +51,7 @@ control outbound_routing_stage(inout headers_t hdr,
         }
 
         routing_group.apply();
-        if (meta.eni_data.routing_group_admin_state) {
+        if (meta.eni_data.routing_group_data.routing_group_admin_state) {
             if (!routing.apply().hit) {
                 UPDATE_ENI_COUNTER(outbound_routing_entry_miss_drop);
             }
