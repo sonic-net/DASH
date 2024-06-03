@@ -238,6 +238,27 @@ namespace dash
 
         int leadingNonZeroBits(const sai_ip6_t& ipv6);
 
+        inline int getPrefixLength(const sai_ip_prefix_t &value)
+        {
+            switch(value.addr_family)
+            {
+                case SAI_IP_ADDR_FAMILY_IPV4:
+                    // LPM entry match field prefix length calculation needs to be fixed to accomodate 128 bit size.
+                    // So the 96 is added to the prefix length.
+                    return leadingNonZeroBits(htonl(value.mask.ip4)) + 96;
+                case SAI_IP_ADDR_FAMILY_IPV6:
+                    return leadingNonZeroBits(value.mask.ip6);
+                default:
+                    assert(0 && "unrecognzed value.ipaddr.addr_family");
+            }
+            return 0;
+        }
+
+        inline int getPrefixLength(const sai_attribute_value_t &value)
+        {
+            return getPrefixLength(value.ipprefix);
+        }
+
         template<typename T>
             void ipPrefixSetVal(const sai_attribute_value_t &value, T &t, int bits = -1)
             {
@@ -256,12 +277,7 @@ namespace dash
                             correctIpPrefix(&val, &value.mask.ip4, 4);
 
                             t->set_value(&val, 4);
-
-                            val = htonl(value.mask.ip4);
-
-                            // LPM entry match field prefix length calculation needs to be fixed to accomodate 128 bit size.
-                            // So the 96 is added to the prefix length.
-                            t->set_prefix_len(leadingNonZeroBits(val) + 96);
+                            t->set_prefix_len(getPrefixLength(value));
                         }
                         break;
 
@@ -274,7 +290,7 @@ namespace dash
                             correctIpPrefix(ip, value.mask.ip6, 16);
 
                             t->set_value(ip, 16);
-                            t->set_prefix_len(leadingNonZeroBits(value.mask.ip6));
+                            t->set_prefix_len(getPrefixLength(value));
                         }
                         break;
 
