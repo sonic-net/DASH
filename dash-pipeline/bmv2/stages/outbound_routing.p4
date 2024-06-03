@@ -28,7 +28,7 @@ control outbound_routing_stage(inout headers_t hdr,
     @SaiTable[name = "outbound_routing", api = "dash_outbound_routing"]
     table routing {
         key = {
-            meta.eni_data.routing_group_id : exact @SaiVal[type="sai_object_id_t"];
+            meta.eni_data.routing_group_data.routing_group_id : exact @SaiVal[type="sai_object_id_t"];
             meta.is_overlay_ip_v6 : exact @SaiVal[name = "destination_is_v6"];
             meta.dst_ip_addr : lpm @SaiVal[name = "destination"];
         }
