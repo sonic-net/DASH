@@ -27,7 +27,6 @@ extern "C"
 #include <limits>
 #include <fstream>
 #include <memory>
-#include <type_traits>
 
 namespace dash
 {
@@ -240,13 +239,13 @@ namespace dash
         int leadingNonZeroBits(const sai_ip6_t& ipv6);
 
         template<typename T>
-            sai_status_t ipPrefixSetVal(const sai_attribute_value_t &value, T &t, int bits = -1)
+            void ipPrefixSetVal(const sai_attribute_value_t &value, T &t, int bits = -1)
             {
-                return ipPrefixSetVal(value.ipprefix, t);
+                ipPrefixSetVal(value.ipprefix, t);
             }
 
         template<typename T>
-            sai_status_t ipPrefixSetVal(const sai_ip_prefix_t &value, T &t, int bits = -1)
+            void ipPrefixSetVal(const sai_ip_prefix_t &value, T &t, int bits = -1)
             {
                 switch(value.addr_family)
                 {
@@ -269,10 +268,6 @@ namespace dash
                     case SAI_IP_ADDR_FAMILY_IPV6:
                         {
                             uint8_t ip[16];
-                            if (std::is_same<T, p4::v1::FieldMatch_LPM>::value) {
-                                // BMv2 cannot support IPv6 LPM with prefix
-                                return SAI_STATUS_NOT_SUPPORTED;
-                            }
 
                             std::copy(const_cast<uint8_t*>(&value.addr.ip6[0]), const_cast<uint8_t*>(&value.addr.ip6[0]) + 16, ip);
 
@@ -286,8 +281,6 @@ namespace dash
                     default:
                         assert(0 && "unrecognzed value.ipaddr.addr_family");
                 }
-
-                return SAI_STATUS_SUCCESS;
             }
 
         template<typename T>
