@@ -51,11 +51,13 @@ control outbound_routing_stage(inout headers_t hdr,
         }
 
         if (!routing_group.apply().hit) {
+            UPDATE_ENI_COUNTER(outbound_routing_group_miss_drop);
             drop(meta);
             return;
         }
 
         if (!meta.eni_data.routing_group_data.routing_group_admin_state) {
+            UPDATE_ENI_COUNTER(outbound_routing_group_admin_drop);
             drop(meta);
             return;
         }
