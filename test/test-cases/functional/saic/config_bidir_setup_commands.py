@@ -87,6 +87,14 @@ dpu_config = [
     ]
   },
   {
+    "name": "rg",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_ROUTING_GROUP",
+    "attributes": [
+      "SAI_ROUTING_GROUP_ATTR_ADMIN_STATE", "True"
+    ]
+  },
+  {
     "name": "eni_#1",
     "op": "create",
     "type": "SAI_OBJECT_TYPE_ENI",
@@ -99,6 +107,7 @@ dpu_config = [
       "SAI_ENI_ATTR_VM_UNDERLAY_DIP", ENI_VTEP_IP,
       "SAI_ENI_ATTR_VM_VNI", "9",
       "SAI_ENI_ATTR_VNET_ID", "$vnet",
+      "SAI_ENI_ATTR_ROUTING_GROUP_ID", "$rg",
       "SAI_ENI_ATTR_PL_SIP", "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
       "SAI_ENI_ATTR_PL_SIP_MASK", "2001:0db8:85a3:0000:0000:0000:0000:0000",
       "SAI_ENI_ATTR_PL_UNDERLAY_SIP", "10.0.0.18",
@@ -144,6 +153,7 @@ dpu_config = [
       "SAI_ENI_ATTR_VM_UNDERLAY_DIP", NETWORK_VTEP_IP,
       "SAI_ENI_ATTR_VM_VNI", "9",
       "SAI_ENI_ATTR_VNET_ID", "$vnet",
+      "SAI_ENI_ATTR_ROUTING_GROUP_ID", "$rg",
       "SAI_ENI_ATTR_PL_SIP", "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
       "SAI_ENI_ATTR_PL_SIP_MASK", "2001:0db8:85a3:0000:0000:0000:0000:0000",
       "SAI_ENI_ATTR_PL_UNDERLAY_SIP", "10.0.0.18",
@@ -189,6 +199,7 @@ dpu_config = [
       "SAI_ENI_ATTR_VM_UNDERLAY_DIP", NETWORK_VTEP_IP,
       "SAI_ENI_ATTR_VM_VNI", "9",
       "SAI_ENI_ATTR_VNET_ID", "$vnet",
+      "SAI_ENI_ATTR_ROUTING_GROUP_ID", "$rg",
       "SAI_ENI_ATTR_PL_SIP", "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
       "SAI_ENI_ATTR_PL_SIP_MASK", "2001:0db8:85a3:0000:0000:0000:0000:0000",
       "SAI_ENI_ATTR_PL_UNDERLAY_SIP", "10.0.0.18",
@@ -267,7 +278,7 @@ dpu_config = [
     "type": "SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
-      "eni_id": "$eni_#1",
+      "routing_group_id": "$rg",
       "destination": "1.0.0.0/8"
     },
     "attributes": [
@@ -285,7 +296,7 @@ dpu_config = [
     "type": "SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
-      "eni_id": "$eni_#2",
+      "routing_group_id": "$rg",
       "destination": "1.0.0.0/8"
     },
     "attributes": [
@@ -303,7 +314,7 @@ dpu_config = [
     "type": "SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
-      "eni_id": "$eni_#3",
+      "routing_group_id": "$rg",
       "destination": "1.0.0.0/8"
     },
     "attributes": [
