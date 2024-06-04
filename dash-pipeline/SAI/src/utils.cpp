@@ -67,3 +67,25 @@ int dash::utils::leadingNonZeroBits(const sai_ip6_t& ipv6)
 
     return 0;
 }
+
+
+int dash::utils::getPrefixLength(const sai_ip_prefix_t &value)
+{
+    switch(value.addr_family)
+    {
+        case SAI_IP_ADDR_FAMILY_IPV4:
+            // LPM entry match field prefix length calculation needs to be fixed to accomodate 128 bit size.
+            // So the 96 is added to the prefix length.
+            return leadingNonZeroBits(htonl(value.mask.ip4)) + 96;
+        case SAI_IP_ADDR_FAMILY_IPV6:
+            return leadingNonZeroBits(value.mask.ip6);
+        default:
+            assert(0 && "unrecognzed value.ipaddr.addr_family");
+    }
+    return 0;
+}
+
+int dash::utils::getPrefixLength(const sai_attribute_value_t &value)
+{
+    return getPrefixLength(value.ipprefix);
+}
