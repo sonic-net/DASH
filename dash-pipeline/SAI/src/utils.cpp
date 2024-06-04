@@ -59,7 +59,7 @@ int dash::utils::leadingNonZeroBits(const sai_ip6_t& ipv6)
 
         if (firstSetBit > 0)
         {
-            return 129-trailingZeros-firstSetBit;
+            return 129-trailingZeros-(33-firstSetBit);
         }
 
         trailingZeros += 32;
