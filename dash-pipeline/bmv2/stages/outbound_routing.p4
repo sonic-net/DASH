@@ -23,6 +23,7 @@ control outbound_routing_stage(inout headers_t hdr,
             route_service_tunnel(hdr, meta);
             drop(meta);
         }
+        size = 4194304;
         const default_action = drop(meta);
 
         ATTACH_TABLE_COUNTER(routing_counter)

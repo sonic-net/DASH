@@ -40,7 +40,7 @@ All tests must be run from within a `dash-saichallenger-client` container. You c
 Fetch and build bmv2 and collaterals. You may skip if you've already done this.
 ```
 git clone https://github.com/sonic-net/DASH.git
-cd dash-pipeline
+cd ./DASH/dash-pipeline
 make clean && make all
 ```
 Launch the switch (console #1):
