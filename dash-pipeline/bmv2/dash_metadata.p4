@@ -61,6 +61,11 @@ enum bit<16> dash_tunnel_dscp_mode_t {
     PIPE_MODEL = 1
 }
 
+struct routing_group_data_t {
+    bit<16> routing_group_id;
+    bool routing_group_admin_state;
+}
+
 struct eni_data_t {
     bit<32> cps;
     bit<32> pps;
@@ -71,6 +76,7 @@ struct eni_data_t {
     IPv4Address pl_underlay_sip;
     bit<6> dscp;
     dash_tunnel_dscp_mode_t dscp_mode;
+    routing_group_data_t routing_group_data;
 }
 
 struct meter_context_t {

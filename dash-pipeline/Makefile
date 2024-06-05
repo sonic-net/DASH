@@ -748,18 +748,20 @@ kill-saichallenger-client:
 run-saichallenger-tests: run-saichallenger-functional-tests run-saichallenger-scale-tests
 
 run-saichallenger-functional-tests: deploy-ixiac
-	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
-	-w /sai-challenger/dash_tests/functional \
-	$(DOCKER_FLAGS) \
-	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
-	./run-tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
+        # Disabled due to https://github.com/sonic-net/DASH/issues/581
+	# $(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
+	# -w /sai-challenger/dash_tests/functional \
+	# $(DOCKER_FLAGS) \
+	# $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
+	# ./run-tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
 
 run-saichallenger-scale-tests: deploy-ixiac
-	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
-	-w /sai-challenger/dash_tests/scale \
-	$(DOCKER_FLAGS) \
-	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
-	./run-tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
+        # Disabled due to https://github.com/sonic-net/DASH/issues/581
+	# $(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
+	# -w /sai-challenger/dash_tests/scale \
+	# $(DOCKER_FLAGS) \
+	# $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
+	# ./run-tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
 
 run-saichallenger-tutorials: deploy-ixiac
 	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \

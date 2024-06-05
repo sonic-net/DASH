@@ -6,12 +6,29 @@
 control outbound_routing_stage(inout headers_t hdr,
                                inout metadata_t meta)
 {
+
+    action set_routing_group_attr(bit<1> admin_state) {
+        meta.eni_data.routing_group_data.routing_group_admin_state = (bool)admin_state;
+    }
+
+    @SaiTable[name = "routing_group", api = "dash_routing_group", isobject="true"]
+    table routing_group {
+        key = {
+            meta.eni_data.routing_group_data.routing_group_id : exact @SaiVal[type="sai_object_id_t"];
+        }
+
+        actions = {
+            set_routing_group_attr;
+            @defaultonly drop(meta);
+        }
+    }
+
     DEFINE_TABLE_COUNTER(routing_counter)
 
     @SaiTable[name = "outbound_routing", api = "dash_outbound_routing"]
     table routing {
         key = {
-            meta.eni_id : exact @SaiVal[type="sai_object_id_t"];
+            meta.eni_data.routing_group_data.routing_group_id : exact @SaiVal[type="sai_object_id_t"];
             meta.is_overlay_ip_v6 : exact @SaiVal[name = "destination_is_v6"];
             meta.dst_ip_addr : lpm @SaiVal[name = "destination"];
         }
@@ -34,10 +51,23 @@ control outbound_routing_stage(inout headers_t hdr,
             return;
         }
 
+        if (!routing_group.apply().hit) {
+            UPDATE_ENI_COUNTER(outbound_routing_group_miss_drop);
+            drop(meta);
+            return;
+        }
+
+        if (!meta.eni_data.routing_group_data.routing_group_admin_state) {
+            UPDATE_ENI_COUNTER(outbound_routing_group_admin_down_drop);
+            drop(meta);
+            return;
+        }
+            
         if (!routing.apply().hit) {
-            UPDATE_ENI_COUNTER(outbound_routing_entry_miss_drop);
+                UPDATE_ENI_COUNTER(outbound_routing_entry_miss_drop);
         }
     }
+
 }
 
 #endif /* _DASH_STAGE_OUTBOUND_ROUTING_P4_ */
