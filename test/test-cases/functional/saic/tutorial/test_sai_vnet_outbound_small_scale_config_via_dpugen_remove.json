@@ -32,6 +32,10 @@
     "op": "remove"
   },
   {
+    "name": "rg",
+    "op": "remove"
+  },
+  {
     "name": "vnet_#6001",
     "op": "remove"
   },

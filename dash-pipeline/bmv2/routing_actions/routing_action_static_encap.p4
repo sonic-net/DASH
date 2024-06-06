@@ -35,44 +35,24 @@ control do_action_static_encap(
         }
         
         if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {
-            if (meta.tunnel_pointer == 0) {
-                push_vxlan_tunnel_u0(hdr,
-                            meta.overlay_data.dmac,
-                            meta.encap_data.underlay_dmac,
-                            meta.encap_data.underlay_smac,
-                            meta.encap_data.underlay_dip,
-                            meta.encap_data.underlay_sip,
-                            meta.encap_data.vni);
-            } else if (meta.tunnel_pointer == 1) {
-                push_vxlan_tunnel_u1(hdr,
-                            meta.overlay_data.dmac,
-                            meta.encap_data.underlay_dmac,
-                            meta.encap_data.underlay_smac,
-                            meta.encap_data.underlay_dip,
-                            meta.encap_data.underlay_sip,
-                            meta.encap_data.vni);
-            }
+            push_vxlan_tunnel_u0(hdr,
+                        meta.overlay_data.dmac,
+                        meta.encap_data.underlay_dmac,
+                        meta.encap_data.underlay_smac,
+                        meta.encap_data.underlay_dip,
+                        meta.encap_data.underlay_sip,
+                        meta.encap_data.vni);
         }
         else if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
-            if (meta.tunnel_pointer == 0) {
-                push_vxlan_tunnel_u0(hdr,
-                            meta.overlay_data.dmac,
-                            meta.encap_data.underlay_dmac,
-                            meta.encap_data.underlay_smac,
-                            meta.encap_data.underlay_dip,
-                            meta.encap_data.underlay_sip,
-                            meta.encap_data.vni);
-            } else if (meta.tunnel_pointer == 1) {
-                push_vxlan_tunnel_u1(hdr,
-                            meta.overlay_data.dmac,
-                            meta.encap_data.underlay_dmac,
-                            meta.encap_data.underlay_smac,
-                            meta.encap_data.underlay_dip,
-                            meta.encap_data.underlay_sip,
-                            meta.encap_data.vni);
-            }
+            push_vxlan_tunnel_u0(hdr,
+                        meta.overlay_data.dmac,
+                        meta.encap_data.underlay_dmac,
+                        meta.encap_data.underlay_smac,
+                        meta.encap_data.underlay_dip,
+                        meta.encap_data.underlay_sip,
+                        meta.encap_data.vni);
         }
-    
+
         meta.tunnel_pointer = meta.tunnel_pointer + 1;
     }
 }

@@ -91,6 +91,15 @@ dpu_config = [
     ]
   },
   {
+    "name": "rg",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_ROUTING_GROUP",
+    "attributes": [
+      "SAI_ROUTING_GROUP_ATTR_ADMIN_STATE",
+      "True"
+    ]
+  },
+  {
     "name": "eni_#1",
     "op": "create",
     "type": "SAI_OBJECT_TYPE_ENI",
@@ -111,6 +120,8 @@ dpu_config = [
       "9",
       "SAI_ENI_ATTR_VNET_ID",
       "$vnet_#1",
+      "SAI_ENI_ATTR_ROUTING_GROUP_ID",
+      "$rg",
       "SAI_ENI_ATTR_PL_SIP",
       "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
       "SAI_ENI_ATTR_PL_SIP_MASK",
@@ -166,7 +177,11 @@ dpu_config = [
       "SAI_ENI_ATTR_DSCP",
       "0",
       "SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION",
-      "False"
+      "False",
+      "SAI_ENI_ATTR_FULL_FLOW_RESIMULATION_REQUESTED",
+      "False",
+      "SAI_ENI_ATTR_MAX_RESIMULATED_FLOW_PER_SECOND",
+      "0"
     ]
   },
     {
@@ -190,6 +205,8 @@ dpu_config = [
       "9",
       "SAI_ENI_ATTR_VNET_ID",
       "$vnet_#1",
+      "SAI_ENI_ATTR_ROUTING_GROUP_ID",
+      "$rg",
       "SAI_ENI_ATTR_PL_SIP",
       "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
       "SAI_ENI_ATTR_PL_SIP_MASK",
@@ -245,7 +262,11 @@ dpu_config = [
       "SAI_ENI_ATTR_DSCP",
       "0",
       "SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION",
-      "False"
+      "False",
+      "SAI_ENI_ATTR_FULL_FLOW_RESIMULATION_REQUESTED",
+      "False",
+      "SAI_ENI_ATTR_MAX_RESIMULATED_FLOW_PER_SECOND",
+      "0"
     ]
   },
 

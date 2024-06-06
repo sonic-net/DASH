@@ -1,0 +1,60 @@
+!!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
+name: dash_pa_validation
+description: ''
+sai_apis:
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: pa_validation_entry
+  description: ''
+  is_object: false
+  enums:
+  - !!python/object:utils.sai_spec.sai_enum.SaiEnum
+    name: sai_pa_validation_entry_action_t
+    description: Attribute data for SAI_PA_VALIDATION_ENTRY_ATTR_ACTION
+    members:
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_PA_VALIDATION_ENTRY_ACTION_PERMIT
+      description: ''
+      value: '0'
+  structs:
+  - !!python/object:utils.sai_spec.sai_struct.SaiStruct
+    name: sai_pa_validation_entry_entry_t
+    description: Entry for pa_validation_entry
+    members:
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: vnet_id
+      description: Exact matched key vnet_id
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_VNET
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: sip
+      description: Exact matched key sip
+      type: sai_ip_address_t
+      objects: null
+      valid_only: null
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_PA_VALIDATION_ENTRY_ATTR_ACTION
+    description: Action
+    type: sai_pa_validation_entry_action_t
+    attr_value_field: null
+    default: SAI_PA_VALIDATION_ENTRY_ACTION_PERMIT
+    isresourcetype: false
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    deprecated: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_PA_VALIDATION_ENTRY_ATTR_IP_ADDR_FAMILY
+    description: IP address family for resource accounting
+    type: sai_ip_addr_family_t
+    attr_value_field: null
+    default: null
+    isresourcetype: true
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    deprecated: null
+  stats: []

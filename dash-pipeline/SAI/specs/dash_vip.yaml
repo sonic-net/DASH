@@ -1,0 +1,54 @@
+!!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
+name: dash_vip
+description: ''
+sai_apis:
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: vip_entry
+  description: ''
+  is_object: false
+  enums:
+  - !!python/object:utils.sai_spec.sai_enum.SaiEnum
+    name: sai_vip_entry_action_t
+    description: Attribute data for SAI_VIP_ENTRY_ATTR_ACTION
+    members:
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_VIP_ENTRY_ACTION_ACCEPT
+      description: ''
+      value: '0'
+  structs:
+  - !!python/object:utils.sai_spec.sai_struct.SaiStruct
+    name: sai_vip_entry_entry_t
+    description: Entry for vip_entry
+    members:
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: VIP
+      description: Exact matched key VIP
+      type: sai_ip_address_t
+      objects: null
+      valid_only: null
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_VIP_ENTRY_ATTR_ACTION
+    description: Action
+    type: sai_vip_entry_action_t
+    attr_value_field: null
+    default: SAI_VIP_ENTRY_ACTION_ACCEPT
+    isresourcetype: false
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    deprecated: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_VIP_ENTRY_ATTR_IP_ADDR_FAMILY
+    description: IP address family for resource accounting
+    type: sai_ip_addr_family_t
+    attr_value_field: null
+    default: null
+    isresourcetype: true
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    deprecated: null
+  stats: []

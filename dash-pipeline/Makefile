@@ -176,7 +176,12 @@ sai: sai-headers sai-meta libsai
 
 sai-headers: p4 docker-saithrift-bldr-image-exists | SAI/SAI
 	@echo "Generate SAI library headers and implementation..."
+
+	# Once the specs are checked in, we can use this to revert any local changes before generating the new specs.
+	# git checkout SAI/specs/*
+
 	mkdir -p SAI/lib
+
 	$(DOCKER_RUN) \
 		$(DOCKER_FLAGS) \
 		--name build_sai-$(USER) \
@@ -743,18 +748,20 @@ kill-saichallenger-client:
 run-saichallenger-tests: run-saichallenger-functional-tests run-saichallenger-scale-tests
 
 run-saichallenger-functional-tests: deploy-ixiac
-	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
-	-w /sai-challenger/dash_tests/functional \
-	$(DOCKER_FLAGS) \
-	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
-	./run-tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
+        # Disabled due to https://github.com/sonic-net/DASH/issues/581
+	# $(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
+	# -w /sai-challenger/dash_tests/functional \
+	# $(DOCKER_FLAGS) \
+	# $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
+	# ./run-tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
 
 run-saichallenger-scale-tests: deploy-ixiac
-	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
-	-w /sai-challenger/dash_tests/scale \
-	$(DOCKER_FLAGS) \
-	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
-	./run-tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
+        # Disabled due to https://github.com/sonic-net/DASH/issues/581
+	# $(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
+	# -w /sai-challenger/dash_tests/scale \
+	# $(DOCKER_FLAGS) \
+	# $(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
+	# ./run-tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) $(SAI_CHALLENGER_TEST)
 
 run-saichallenger-tutorials: deploy-ixiac
 	$(DOCKER_RUN_SAI_CHALLENGER_CLIENT) \
