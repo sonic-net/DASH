@@ -1,6 +1,10 @@
 #include "objectidmanager.h"
 #include "logger.h"
 
+extern "C" {
+#include "saimetadata.h"
+}
+
 #define SAI_OBJECT_ID_BITS_SIZE (8 * sizeof(sai_object_id_t))
 
 static_assert(SAI_OBJECT_ID_BITS_SIZE == 64, "sai_object_id_t must have 64 bits");
@@ -65,7 +69,7 @@ static_assert((SAI_OBJECT_TYPE_EXTENSIONS_RANGE_END - SAI_OBJECT_TYPE_EXTENSIONS
     ( (((uint64_t)oid) >> ( DASH_SWITCH_INDEX_BITS_SIZE + DASH_OBJECT_INDEX_BITS_SIZE ) ) & ( DASH_OBJECT_TYPE_MASK ) )
 
  #define DASH_GET_OBJECT_TYPE_EXTENSIONS_FLAG(oid) \
-     ( (((uint64_t)oid) >> ( DASH_OBJECT_TYPE_BITS_SIZE + DASH_SWITCH_INDEX_BITS_SIZE + DASH_OBJECT_INDEX_BITS_SIZE) & ( DASH_OBJECT_TYPE_EXTENSIONS_FLAG_MAX ) )
+     ( (((uint64_t)oid) >> ( DASH_OBJECT_TYPE_BITS_SIZE + DASH_SWITCH_INDEX_BITS_SIZE + DASH_OBJECT_INDEX_BITS_SIZE) ) & ( DASH_OBJECT_TYPE_EXTENSIONS_FLAG_MAX ) )
 
 #define DASH_TEST_OID (0x0123456789abcdef)
 
