@@ -19,7 +19,7 @@ match_kind {
 #define RANGE_LIST_MATCH range_list
 #else
 #ifdef TARGET_BMV2_V1MODEL
-#define LIST_MATCH optional
+#define LIST_MATCH ternary
 #define RANGE_LIST_MATCH optional
 #endif // TARGET_BMV2_V1MODEL
 #ifdef TARGET_DPDK_PNA
