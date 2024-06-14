@@ -185,9 +185,7 @@ must be applied depending on the rule.
 All inbound rules are matched based on the priority order (with lower priority
 value rule matched first). Matching is based on multiple fields (or must match
 if field is populated). The supported fields are: 
-
-- Most Outer Source IP Prefix 
-- Most Outer Destination IP Prefix 
+ 
 - VXLAN/GRE key 
 
 Once the rule is matched, the correct set of **decap, transposition** steps must
