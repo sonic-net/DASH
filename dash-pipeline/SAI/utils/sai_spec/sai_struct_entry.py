@@ -19,3 +19,7 @@ class SaiStructEntry(SaiCommon):
         self.type = type
         self.objects = objects
         self.valid_only = valid_only
+
+    def merge(self, other: "SaiCommon"):
+        super().merge(other)
+        self.__dict__.update(other.__dict__)

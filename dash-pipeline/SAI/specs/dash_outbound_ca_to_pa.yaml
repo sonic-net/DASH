@@ -217,4 +217,16 @@ sai_apis:
     allow_null: false
     valid_only: null
     deprecated: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_DASH_TUNNEL_ID
+    description: Action parameter DASH_TUNNEL_ID
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_DASH_TUNNEL
+    allow_null: true
+    valid_only: null
+    deprecated: null
   stats: []

@@ -31,3 +31,11 @@ class SaiAttribute(SaiCommon):
         self.allow_null = allow_null
         self.valid_only = valid_only
         self.deprecated = deprecated
+
+    def merge(self, other: "SaiCommon"):
+        super().merge(other)
+        self.__dict__.update(other.__dict__)
+
+    def deprecate(self) -> bool:
+        self.deprecated = True
+        return False

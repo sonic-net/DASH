@@ -1,7 +1,7 @@
 from typing import List
 from .sai_common import SaiCommon
 from .sai_struct_entry import SaiStructEntry
-
+from . import sai_spec_utils
 
 class SaiStruct(SaiCommon):
     """
@@ -11,3 +11,7 @@ class SaiStruct(SaiCommon):
     def __init__(self, name: str, description: str, members: List[SaiStructEntry] = []):
         super().__init__(name, description)
         self.members: List[SaiStructEntry] = members
+
+    def merge(self, other: "SaiCommon"):
+        super().merge(other)
+        sai_spec_utils.merge_sai_common_lists(self.members, other.members)

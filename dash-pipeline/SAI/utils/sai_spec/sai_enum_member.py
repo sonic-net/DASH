@@ -10,3 +10,7 @@ class SaiEnumMember(SaiCommon):
     def __init__(self, name: str, description: str, value: str):
         super().__init__(name, description)
         self.value: str = value
+
+    def merge(self, other: "SaiCommon"):
+        super().merge(other)
+        self.value = other.value

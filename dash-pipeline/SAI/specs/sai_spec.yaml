@@ -12,6 +12,7 @@ api_types:
 - SAI_API_DASH_PA_VALIDATION
 - SAI_API_ROUTE
 - SAI_API_DASH_VIP
+- SAI_API_DASH_TUNNEL
 object_types:
 - SAI_OBJECT_TYPE_DASH_ACL_GROUP
 - SAI_OBJECT_TYPE_DASH_ACL_RULE
@@ -30,6 +31,7 @@ object_types:
 - SAI_OBJECT_TYPE_PA_VALIDATION_ENTRY
 - SAI_OBJECT_TYPE_ROUTE_ENTRY
 - SAI_OBJECT_TYPE_VIP_ENTRY
+- SAI_OBJECT_TYPE_DASH_TUNNEL
 object_entries:
 - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
   name: direction_lookup_entry
@@ -97,42 +99,6 @@ enums:
     description: ''
     value: '2'
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
-  name: sai_dash_tunnel_dscp_mode_t
-  description: ''
-  members:
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: PRESERVE_MODEL
-    description: ''
-    value: '0'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: PIPE_MODEL
-    description: ''
-    value: '1'
-- !!python/object:utils.sai_spec.sai_enum.SaiEnum
-  name: sai_dash_ha_role_t
-  description: ''
-  members:
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: DEAD
-    description: ''
-    value: '0'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: ACTIVE
-    description: ''
-    value: '1'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: STANDBY
-    description: ''
-    value: '2'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: STANDALONE
-    description: ''
-    value: '3'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: SWITCHING_TO_ACTIVE
-    description: ''
-    value: '4'
-- !!python/object:utils.sai_spec.sai_enum.SaiEnum
   name: sai_dash_encapsulation_t
   description: ''
   members:
@@ -172,6 +138,42 @@ enums:
     name: NAT_PORT
     description: ''
     value: '16'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_tunnel_dscp_mode_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: PRESERVE_MODEL
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: PIPE_MODEL
+    description: ''
+    value: '1'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_ha_role_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: DEAD
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: ACTIVE
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: STANDBY
+    description: ''
+    value: '2'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: STANDALONE
+    description: ''
+    value: '3'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SWITCHING_TO_ACTIVE
+    description: ''
+    value: '4'
 port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtension
   attributes: []
   stats:
@@ -260,3 +262,4 @@ api_groups:
 - !inc '/SAI/specs/dash_pa_validation.yaml'
 - !inc '/SAI/specs/route.yaml'
 - !inc '/SAI/specs/dash_vip.yaml'
+- !inc '/SAI/specs/dash_tunnel.yaml'
