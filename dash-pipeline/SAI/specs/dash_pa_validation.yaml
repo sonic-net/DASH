@@ -58,3 +58,12 @@ sai_apis:
     valid_only: null
     deprecated: null
   stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 35526612
+      actions:
+        SAI_PA_VALIDATION_ENTRY_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_PA_VALIDATION_ENTRY_ACTION_PERMIT
+          id: 32591400
+          attr_param_id: {}

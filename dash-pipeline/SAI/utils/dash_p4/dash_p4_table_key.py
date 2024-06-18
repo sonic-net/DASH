@@ -61,11 +61,11 @@ class DashP4TableKey(DashP4TableAttribute):
     #
     # Functions for generating SAI specs.
     #
-    def _get_sai_name(self, table_name: str) -> str:
+    def get_sai_name(self, table_name: str) -> str:
         if self.is_entry_key:
             return self.name
 
         return f"SAI_{table_name.upper()}_{self.name.upper()}"
     
-    def _get_sai_description(self, table_name: str):
+    def get_sai_description(self, table_name: str):
         return f"{self.match_type.capitalize()} matched key {self.name}"
