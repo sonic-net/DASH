@@ -153,18 +153,6 @@ sai_apis:
     is_vlan: false
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_OVERLAY_SIP_MASK
-    description: Action parameter OVERLAY_SIP_MASK
-    type: sai_ip_address_t
-    attr_value_field: ipaddr
-    default: 0.0.0.0
-    isresourcetype: false
-    flags: CREATE_AND_SET
-    object_name: null
-    allow_null: false
-    valid_only: null
-    deprecated: true
-  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP
     description: Action parameter overlay dip
     type: sai_ip_address_t
@@ -177,18 +165,6 @@ sai_apis:
     valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
     is_vlan: false
     deprecated: false
-  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_OVERLAY_DIP_MASK
-    description: Action parameter OVERLAY_DIP_MASK
-    type: sai_ip_address_t
-    attr_value_field: ipaddr
-    default: 0.0.0.0
-    isresourcetype: false
-    flags: CREATE_AND_SET
-    object_name: null
-    allow_null: false
-    valid_only: null
-    deprecated: true
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_DASH_ENCAPSULATION
     description: Action parameter DASH encapsulation
