@@ -127,6 +127,19 @@ sai_apis:
     valid_only: null
     is_vlan: false
     deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_ATTR_SWITCHOVER_NETWORK_CONVERGENCE_TIME_MS
+    description: Action parameter switchover network convergence time ms
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
   stats:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_REQ_RX_BYTES
@@ -461,6 +474,71 @@ sai_apis:
     description: Action parameter flow reconcile needed
     type: bool
     attr_value_field: booldata
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SCOPE_ATTR_VIP_V4
+    description: Action parameter VIP v4
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SCOPE_ATTR_VIP_V6
+    description: Action parameter VIP v6
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SCOPE_ATTR_ADMIN_STATE
+    description: Action parameter admin state
+    type: bool
+    attr_value_field: booldata
+    default: 'false'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SCOPE_ATTR_ACTIVATE_ROLE
+    description: Action parameter activate role
+    type: bool
+    attr_value_field: booldata
+    default: 'false'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SCOPE_ATTR_DASH_HA_STATE
+    description: Action parameter DASH HA state
+    type: sai_dash_ha_state_t
+    attr_value_field: s32
     default: null
     isresourcetype: false
     flags: READ_ONLY
