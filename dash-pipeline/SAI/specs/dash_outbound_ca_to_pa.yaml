@@ -163,10 +163,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: true
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_OVERLAY_DIP
-    description: Action parameter OVERLAY_DIP
     name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP
     description: Action parameter overlay dip
     type: sai_ip_address_t
@@ -190,10 +188,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: true
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_DASH_ENCAPSULATION
-    description: Action parameter DASH_ENCAPSULATION
     name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_DASH_ENCAPSULATION
     description: Action parameter DASH encapsulation
     type: sai_dash_encapsulation_t
@@ -259,6 +255,32 @@ sai_apis:
       or SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
     is_vlan: false
     deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP_MASK
+    description: Action parameter overlay sip mask
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP_MASK
+    description: Action parameter overlay dip mask
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+    is_vlan: false
+    deprecated: false
   stats: []
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
@@ -280,14 +302,14 @@ sai_apis:
           name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
           id: 31441909
           attr_param_id:
-            SAI_OUTBOUND_CA_TO_PA_ENTRY_UNDERLAY_DIP: 1
-            SAI_OUTBOUND_CA_TO_PA_ENTRY_OVERLAY_SIP: 2
-            SAI_OUTBOUND_CA_TO_PA_ENTRY_OVERLAY_SIP_MASK: 3
-            SAI_OUTBOUND_CA_TO_PA_ENTRY_OVERLAY_DIP: 4
-            SAI_OUTBOUND_CA_TO_PA_ENTRY_OVERLAY_DIP_MASK: 5
-            SAI_OUTBOUND_CA_TO_PA_ENTRY_DASH_ENCAPSULATION: 6
-            SAI_OUTBOUND_CA_TO_PA_ENTRY_TUNNEL_KEY: 7
-            SAI_OUTBOUND_CA_TO_PA_ENTRY_METER_CLASS_OR: 8
-            SAI_OUTBOUND_CA_TO_PA_ENTRY_DASH_TUNNEL_ID: 9
-            SAI_OUTBOUND_CA_TO_PA_ENTRY_FLOW_RESIMULATION_REQUESTED: 10
-            SAI_OUTBOUND_CA_TO_PA_ENTRY_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: 11
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP: 1
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP: 2
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP_MASK: 3
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP: 4
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP_MASK: 5
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_DASH_ENCAPSULATION: 6
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_TUNNEL_KEY: 7
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS_OR: 8
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_DASH_TUNNEL_ID: 9
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_FLOW_RESIMULATION_REQUESTED: 10
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: 11

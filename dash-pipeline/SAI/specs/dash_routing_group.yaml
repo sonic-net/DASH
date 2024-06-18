@@ -1,17 +1,18 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: dash_routing_group
-description: ''
+description: DASH routing group
+api_type: overlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: routing_group
-  description: ''
+  description: routing group
   is_object: true
   enums: []
   structs: []
   attributes:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ROUTING_GROUP_ADMIN_STATE
-    description: Action parameter ADMIN_STATE
+    name: SAI_ROUTING_GROUP_ATTR_ADMIN_STATE
+    description: Action parameter admin state
     type: bool
     attr_value_field: booldata
     default: 'false'
@@ -20,7 +21,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   stats: []
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
