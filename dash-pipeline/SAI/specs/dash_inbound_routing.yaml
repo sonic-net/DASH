@@ -18,15 +18,15 @@ sai_apis:
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE
       description: ''
-      value: '0'
+      value: '1'
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP
       description: ''
-      value: '0'
+      value: '2'
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE
       description: ''
-      value: '0'
+      value: '3'
   structs:
   - !!python/object:utils.sai_spec.sai_struct.SaiStruct
     name: sai_inbound_routing_entry_entry_t
@@ -112,3 +112,29 @@ sai_apis:
     valid_only: null
     deprecated: null
   stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 38920290
+      actions:
+        SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP
+          id: 22253429
+          attr_param_id:
+            SAI_INBOUND_ROUTING_ENTRY_METER_CLASS_OR: 1
+            SAI_INBOUND_ROUTING_ENTRY_METER_CLASS_AND: 2
+        SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE
+          id: 27987616
+          attr_param_id:
+            SAI_INBOUND_ROUTING_ENTRY_SRC_VNET_ID: 1
+            SAI_INBOUND_ROUTING_ENTRY_METER_CLASS_OR: 2
+            SAI_INBOUND_ROUTING_ENTRY_METER_CLASS_AND: 3
+        SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP
+          id: 32581635
+          attr_param_id: {}
+        SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE
+          id: 22711915
+          attr_param_id: {}

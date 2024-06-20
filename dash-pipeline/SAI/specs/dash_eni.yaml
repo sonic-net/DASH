@@ -52,6 +52,16 @@ sai_apis:
     valid_only: null
     deprecated: null
   stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 36648123
+      actions:
+        SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ACTION_SET_ENI: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ACTION_SET_ENI
+          id: 24618133
+          attr_param_id:
+            SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ENI_ID: 1
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: eni
   description: ''
@@ -513,6 +523,18 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
+    valid_only: null
+    deprecated: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_ENI_ROUTING_GROUP_ID
+    description: Action parameter ROUTING_GROUP_ID
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_ROUTING_GROUP
+    allow_null: true
     valid_only: null
     deprecated: null
   stats:
@@ -1428,3 +1450,36 @@ sai_apis:
     allow_null: false
     valid_only: null
     deprecated: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_ENI_STAT_OUTBOUND_ROUTING_GROUP_MISS_DROP_PACKETS
+    description: DASH ENI OUTBOUND_ROUTING_GROUP_MISS_DROP_PACKETS stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    deprecated: null
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_ENI_STAT_OUTBOUND_ROUTING_GROUP_ADMIN_DOWN_DROP_PACKETS
+    description: DASH ENI OUTBOUND_ROUTING_GROUP_ADMIN_DOWN_DROP_PACKETS stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    deprecated: null
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 45859274
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 27167550
+          attr_param_id: {}

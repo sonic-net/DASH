@@ -358,6 +358,15 @@ sai_apis:
     allow_null: false
     valid_only: null
     deprecated: null
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 45319666
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 21324178
+          attr_param_id: {}
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: ha_scope
   description: ''
@@ -426,3 +435,12 @@ sai_apis:
     valid_only: null
     deprecated: null
   stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 49681752
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 25507507
+          attr_param_id: {}

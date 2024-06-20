@@ -5,7 +5,7 @@ from .dash_p4_counter import *
 from .dash_p4_table_action_param import *
 from .dash_p4_table_key import *
 from .dash_p4_table_action import *
-from ..sai_spec import SaiApi, SaiStruct, SaiEnum, SaiEnumMember, SaiAttribute
+from ..sai_spec import SaiApi, SaiStruct, SaiEnum, SaiEnumMember, SaiAttribute, SaiApiP4MetaAction, SaiApiP4MetaTable
 
 
 @dash_p4rt_parser
@@ -264,6 +264,7 @@ class DashP4Table(DashP4Object):
     #
     def to_sai(self) -> SaiApi:
         sai_api = SaiApi(self.name, "", self.is_object != "false")
+        sai_api.p4_meta.tables.append(SaiApiP4MetaTable(self.id))
 
         self.create_sai_action_enum(sai_api)
         self.create_sai_structs(sai_api)
@@ -276,18 +277,35 @@ class DashP4Table(DashP4Object):
         # If the table represents an SAI object, it should not have an action enum.
         # If the table has only 1 action, we don't need to create the action enum.
         if len(self.actions) <= 1 and self.is_object != "false":
+            # We still need to create the p4 meta action here for generating default action code in libsai.
+            if len(self.actions) == 1:
+                sai_api.p4_meta.tables[0].actions["default"] = SaiApiP4MetaAction("default", self.actions[0].id)
             return
 
         action_enum_member_value = 0
         action_enum_members: List[SaiEnumMember] = []
         for action in self.actions:
+            action_enum_member_name = f"SAI_{self.name.upper()}_ACTION_{action.name.upper()}"
+
             action_enum_members.append(
                 SaiEnumMember(
-                    name=f"SAI_{self.name.upper()}_ACTION_{action.name.upper()}",
+                    name=action_enum_member_name,
                     description="",
                     value=str(action_enum_member_value),
                 )
             )
+
+            p4_meta_action = SaiApiP4MetaAction(
+                name=action_enum_member_name,
+                id=action.id,
+            )
+
+            for action_param in action.params:
+                p4_meta_action.attr_param_id[action_param.get_sai_name(self.name)] = action_param.id
+
+            sai_api.p4_meta.tables[0].actions[action_enum_member_name] = p4_meta_action
+
+            action_enum_member_value += 1
 
         action_enum_type_name = f"sai_{self.name.lower()}_action_t"
 
@@ -306,6 +324,7 @@ class DashP4Table(DashP4Object):
             default=action_enum_members[0].name,
         )
         sai_api.attributes.append(sai_attr_action)
+
 
     def create_sai_structs(self, sai_api: SaiApi) -> None:
         # The entry struct is only needed for non-object tables.
@@ -329,9 +348,9 @@ class DashP4Table(DashP4Object):
         ]
 
     def create_sai_attributes(self, sai_api: SaiApi) -> None:
-        sai_api.attributes.extend(
-            [attr.to_sai_attribute(self.name) for attr in self.sai_attributes if attr.skipattr != "true"]
-        )
+        for attr in self.sai_attributes:
+            if attr.skipattr != "true":
+                sai_api.attributes.append(attr.to_sai_attribute(self.name))
 
         # If the table has an counter attached, we need to create a counter attribute for it.
         # The counter attribute only counts that packets that hits any entry, but not the packet that misses all entries.

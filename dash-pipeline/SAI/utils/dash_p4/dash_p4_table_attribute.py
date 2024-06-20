@@ -95,8 +95,8 @@ class DashP4TableAttribute(DashP4Object):
     # Functions for generating SAI specs.
     #
     def to_sai_struct_entry(self, table_name: str) -> SaiStructEntry:
-        name = self._get_sai_name(table_name)
-        description = self._get_sai_description(table_name)
+        name = self.get_sai_name(table_name)
+        description = self.get_sai_description(table_name)
         object_name = f"SAI_OBJECT_TYPE_{self.object_name.upper()}" if self.object_name else None
 
         return SaiStructEntry(
@@ -108,8 +108,8 @@ class DashP4TableAttribute(DashP4Object):
         )
 
     def to_sai_attribute(self, table_name: str) -> SaiAttribute:
-        name = self._get_sai_name(table_name)
-        description = self._get_sai_description(table_name)
+        name = self.get_sai_name(table_name)
+        description = self.get_sai_description(table_name)
 
         default_value = None if self.isreadonly == "true" else self.default
         object_name = f"SAI_OBJECT_TYPE_{self.object_name.upper()}" if self.object_name else None
@@ -129,8 +129,8 @@ class DashP4TableAttribute(DashP4Object):
             valid_only = self.validonly,
         )
 
-    def _get_sai_name(self, table_name: str) -> str:
+    def get_sai_name(self, table_name: str) -> str:
         return f"SAI_{table_name.upper()}_{self.name.upper()}"
     
-    def _get_sai_description(self, table_name: str):
+    def get_sai_description(self, table_name: str):
         return f"Action parameter {self.name.upper()}"
