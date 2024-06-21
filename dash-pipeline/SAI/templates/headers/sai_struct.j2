@@ -1,0 +1,11 @@
+/**
+ * @brief {{ struct.description }}
+ */
+typedef struct _{{ struct.name }}
+{
+{% for member in struct.members %}
+{% include 'templates/headers/sai_struct_entry.j2' %}
+
+
+{% endfor %}
+} {{ struct.name }};

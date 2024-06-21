@@ -1,15 +1,16 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: dash_outbound_routing
-description: ''
+description: DASH outbound routing
+api_type: overlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: outbound_routing_entry
-  description: ''
+  description: outbound routing entry
   is_object: false
   enums:
   - !!python/object:utils.sai_spec.sai_enum.SaiEnum
     name: sai_outbound_routing_entry_action_t
-    description: Attribute data for SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION
+    description: 'Attribute data for #SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION'
     members:
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET
@@ -33,9 +34,15 @@ sai_apis:
       value: '4'
   structs:
   - !!python/object:utils.sai_spec.sai_struct.SaiStruct
-    name: sai_outbound_routing_entry_entry_t
+    name: sai_outbound_routing_entry_t
     description: Entry for outbound_routing_entry
     members:
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: switch_id
+      description: Switch ID
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_SWITCH
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
       name: eni_id
       description: Exact matched key eni_id
@@ -44,7 +51,7 @@ sai_apis:
       valid_only: null
     - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
       name: destination
-      description: Lpm matched key destination
+      description: LPM matched key destination
       type: sai_ip_prefix_t
       objects: null
       valid_only: null
@@ -62,14 +69,15 @@ sai_apis:
     attr_value_field: null
     default: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET
     isresourcetype: false
-    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    flags: CREATE_AND_SET
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_ROUTING_ENTRY_DST_VNET_ID
-    description: Action parameter DST_VNET_ID
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID
+    description: Action parameter dst VNET id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -77,11 +85,13 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_VNET
     allow_null: true
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET
+      or SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_ROUTING_ENTRY_METER_CLASS_OR
-    description: Action parameter METER_CLASS_OR
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR
+    description: Action parameter meter class or
     type: sai_uint32_t
     attr_value_field: u32
     default: '0'
@@ -89,11 +99,15 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET
+      or SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT
+      or SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_DIRECT
+      or SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_SERVICE_TUNNEL
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_ROUTING_ENTRY_METER_CLASS_AND
-    description: Action parameter METER_CLASS_AND
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND
+    description: Action parameter meter class and
     type: sai_uint32_t
     attr_value_field: u32
     default: '4294967295'
@@ -101,11 +115,15 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET
+      or SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT
+      or SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_DIRECT
+      or SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_SERVICE_TUNNEL
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_ROUTING_ENTRY_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION
-    description: Action parameter ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION
+    description: Action parameter routing actions disabled in flow re-simulation
     type: sai_uint32_t
     attr_value_field: u32
     default: '0'
@@ -113,11 +131,15 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET
+      or SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT
+      or SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_DIRECT
+      or SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_SERVICE_TUNNEL
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_IP
-    description: Action parameter OVERLAY_IP
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_IP
+    description: Action parameter overlay IP
     type: sai_ip_address_t
     attr_value_field: ipaddr
     default: 0.0.0.0
@@ -125,11 +147,12 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_DIP
-    description: Action parameter OVERLAY_DIP
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_DIP
+    description: Action parameter overlay dip
     type: sai_ip_address_t
     attr_value_field: ipaddr
     default: 0.0.0.0
@@ -137,11 +160,12 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_SERVICE_TUNNEL
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_DIP_MASK
-    description: Action parameter OVERLAY_DIP_MASK
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_DIP_MASK
+    description: Action parameter overlay dip mask
     type: sai_ip_address_t
     attr_value_field: ipaddr
     default: 0.0.0.0
@@ -149,11 +173,12 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_SERVICE_TUNNEL
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_SIP
-    description: Action parameter OVERLAY_SIP
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_SIP
+    description: Action parameter overlay sip
     type: sai_ip_address_t
     attr_value_field: ipaddr
     default: 0.0.0.0
@@ -161,11 +186,12 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_SERVICE_TUNNEL
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_SIP_MASK
-    description: Action parameter OVERLAY_SIP_MASK
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_SIP_MASK
+    description: Action parameter overlay sip mask
     type: sai_ip_address_t
     attr_value_field: ipaddr
     default: 0.0.0.0
@@ -173,11 +199,12 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_SERVICE_TUNNEL
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_ROUTING_ENTRY_UNDERLAY_DIP
-    description: Action parameter UNDERLAY_DIP
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_UNDERLAY_DIP
+    description: Action parameter underlay dip
     type: sai_ip_address_t
     attr_value_field: ipaddr
     default: 0.0.0.0
@@ -185,11 +212,12 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_SERVICE_TUNNEL
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_ROUTING_ENTRY_UNDERLAY_SIP
-    description: Action parameter UNDERLAY_SIP
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_UNDERLAY_SIP
+    description: Action parameter underlay sip
     type: sai_ip_address_t
     attr_value_field: ipaddr
     default: 0.0.0.0
@@ -197,11 +225,12 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_SERVICE_TUNNEL
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_ROUTING_ENTRY_DASH_ENCAPSULATION
-    description: Action parameter DASH_ENCAPSULATION
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_ENCAPSULATION
+    description: Action parameter DASH encapsulation
     type: sai_dash_encapsulation_t
     attr_value_field: s32
     default: SAI_DASH_ENCAPSULATION_VXLAN
@@ -209,11 +238,12 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_SERVICE_TUNNEL
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_ROUTING_ENTRY_TUNNEL_KEY
-    description: Action parameter TUNNEL_KEY
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_TUNNEL_KEY
+    description: Action parameter tunnel key
     type: sai_uint32_t
     attr_value_field: u32
     default: '0'
@@ -221,8 +251,9 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_SERVICE_TUNNEL
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_COUNTER_ID
     description: Attach a counter. When it is empty, then packet hits won't be counted.
@@ -234,7 +265,8 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_COUNTER
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_IP_ADDR_FAMILY
     description: IP address family for resource accounting
@@ -246,10 +278,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_ROUTING_ENTRY_DASH_TUNNEL_ID
-    description: Action parameter DASH_TUNNEL_ID
+    name: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_TUNNEL_ID
+    description: Action parameter DASH tunnel id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -257,8 +290,12 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_DASH_TUNNEL
     allow_null: true
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET
+      or SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT
+      or SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_DIRECT
+      or SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_SERVICE_TUNNEL
+    is_vlan: false
+    deprecated: false
   stats: []
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
@@ -269,45 +306,45 @@ sai_apis:
           name: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET
           id: 21392322
           attr_param_id:
-            SAI_OUTBOUND_ROUTING_ENTRY_DST_VNET_ID: 1
-            SAI_OUTBOUND_ROUTING_ENTRY_DASH_TUNNEL_ID: 2
-            SAI_OUTBOUND_ROUTING_ENTRY_METER_CLASS_OR: 3
-            SAI_OUTBOUND_ROUTING_ENTRY_METER_CLASS_AND: 4
-            SAI_OUTBOUND_ROUTING_ENTRY_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: 5
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID: 1
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_TUNNEL_ID: 2
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR: 3
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND: 4
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: 5
         SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT
           id: 24813914
           attr_param_id:
-            SAI_OUTBOUND_ROUTING_ENTRY_DST_VNET_ID: 1
-            SAI_OUTBOUND_ROUTING_ENTRY_DASH_TUNNEL_ID: 2
-            SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_IP: 4
-            SAI_OUTBOUND_ROUTING_ENTRY_METER_CLASS_OR: 5
-            SAI_OUTBOUND_ROUTING_ENTRY_METER_CLASS_AND: 6
-            SAI_OUTBOUND_ROUTING_ENTRY_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: 7
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID: 1
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_TUNNEL_ID: 2
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_IP: 4
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR: 5
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND: 6
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: 7
         SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_DIRECT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_DIRECT
           id: 31102279
           attr_param_id:
-            SAI_OUTBOUND_ROUTING_ENTRY_DASH_TUNNEL_ID: 1
-            SAI_OUTBOUND_ROUTING_ENTRY_METER_CLASS_OR: 2
-            SAI_OUTBOUND_ROUTING_ENTRY_METER_CLASS_AND: 3
-            SAI_OUTBOUND_ROUTING_ENTRY_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: 4
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_TUNNEL_ID: 1
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR: 2
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND: 3
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: 4
         SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_SERVICE_TUNNEL: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_SERVICE_TUNNEL
           id: 26982790
           attr_param_id:
-            SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_DIP: 2
-            SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_DIP_MASK: 4
-            SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_SIP: 6
-            SAI_OUTBOUND_ROUTING_ENTRY_OVERLAY_SIP_MASK: 8
-            SAI_OUTBOUND_ROUTING_ENTRY_UNDERLAY_DIP: 10
-            SAI_OUTBOUND_ROUTING_ENTRY_UNDERLAY_SIP: 12
-            SAI_OUTBOUND_ROUTING_ENTRY_DASH_ENCAPSULATION: 13
-            SAI_OUTBOUND_ROUTING_ENTRY_TUNNEL_KEY: 14
-            SAI_OUTBOUND_ROUTING_ENTRY_DASH_TUNNEL_ID: 15
-            SAI_OUTBOUND_ROUTING_ENTRY_METER_CLASS_OR: 16
-            SAI_OUTBOUND_ROUTING_ENTRY_METER_CLASS_AND: 17
-            SAI_OUTBOUND_ROUTING_ENTRY_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: 18
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_DIP: 2
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_DIP_MASK: 4
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_SIP: 6
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_SIP_MASK: 8
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_UNDERLAY_DIP: 10
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_UNDERLAY_SIP: 12
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_ENCAPSULATION: 13
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_TUNNEL_KEY: 14
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_TUNNEL_ID: 15
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR: 16
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND: 17
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: 18
         SAI_OUTBOUND_ROUTING_ENTRY_ACTION_DROP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_DROP
           id: 18759588

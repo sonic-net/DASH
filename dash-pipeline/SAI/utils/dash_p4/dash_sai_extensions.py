@@ -170,9 +170,9 @@ class DashP4SAIExtensions(DashP4Object):
             if len(counter.param_actions) > 0:
                 continue
 
-            sai_counter = counter.to_sai_attribute("port")
+            sai_counters = counter.to_sai_attribute("port")
 
             if counter.attr_type != "stats":
-                api_ext.attributes.append(sai_counter)
+                api_ext.attributes.extend(sai_counters)
             else:
-                api_ext.stats.append(sai_counter)
+                api_ext.stats.extend(sai_counters)

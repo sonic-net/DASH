@@ -1,6 +1,45 @@
-from typing import Any, List, Callable
-from .sai_common import SaiCommon
+from typing import Any, Dict, List, Callable
 
+word_fixers: Dict[str, str] = {}
+
+def load_word_fixers() -> None:
+    global word_fixers
+
+    word_fixers = {
+        "dash": "DASH",
+        "vm": "",
+        "pl": "PL",
+        "ha": "HA",
+        "ca": "CA",
+        "pa": "PA",
+        "vip": "VIP",
+        "cp": "control plane",
+        "dp": "data plane",
+        "pps": "PPS",
+        "cps": "CPS",
+        "addr": "address",
+        "dmac": "destination MAC",
+        "resimulated": "re-simulated",
+        "resimulation": "re-simulation",
+    }
+
+    # Load all SAI acronyms
+    with open("SAI/meta/acronyms.txt", "r") as f:
+        for line in f:
+            word = line.split('-')[0].strip().lower()
+            word_fixers[word] = word.upper()
+    
+    # More command word fixers
+
+def normalize_sai_comment(s: str) -> str:
+    """
+    Normalize SAI comment string by removing acronyms and extra spaces.
+    """
+    if len(word_fixers) == 0:
+        load_word_fixers()
+    
+    words = [word if word.lower() not in word_fixers else word_fixers[word.lower()] for word in s.split()]
+    return " ".join(words)
 
 def merge_sai_value_lists(
     target: List[Any],
@@ -38,8 +77,8 @@ def merge_sai_value_lists(
 
 
 def merge_sai_common_lists(
-    target: List[SaiCommon],
-    source: List[SaiCommon],
+    target: List[Any],
+    source: List[Any],
 ) -> None:
     merge_sai_value_lists(
         target,

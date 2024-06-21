@@ -42,6 +42,8 @@ class DashP4TableGroup(DashP4Object):
                 sai_api_map[table.name] = sai_api
                 sai_api_list.append(sai_api)
 
-        sai_api_group = SaiApiGroup(self.app_name, "")
+        sai_api_group = SaiApiGroup(self.app_name, self.app_name.replace("_", " "))
+        sai_api_group.api_type = "overlay" if self.api_type == None else self.api_type
         sai_api_group.sai_apis = sai_api_list
+
         return sai_api_group

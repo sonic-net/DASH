@@ -263,7 +263,7 @@ class DashP4Table(DashP4Object):
     # Functions for generating SAI specs:
     #
     def to_sai(self) -> SaiApi:
-        sai_api = SaiApi(self.name, "", self.is_object != "false")
+        sai_api = SaiApi(self.name, self.name.replace('_', ' '), self.is_object != "false")
         sai_api.p4_meta.tables.append(SaiApiP4MetaTable(self.id))
 
         self.create_sai_action_enum(sai_api)
@@ -311,7 +311,7 @@ class DashP4Table(DashP4Object):
 
         action_enum = SaiEnum(
             name=action_enum_type_name,
-            description=f"Attribute data for SAI_{ self.name.upper() }_ATTR_ACTION",
+            description=f"Attribute data for #SAI_{ self.name.upper() }_ATTR_ACTION",
             members=action_enum_members,
         )
         sai_api.enums.append(action_enum)
@@ -320,7 +320,7 @@ class DashP4Table(DashP4Object):
             name=f"SAI_{self.name.upper()}_ATTR_ACTION",
             description="Action",
             type=action_enum_type_name,
-            flags="MANDATORY_ON_CREATE | CREATE_ONLY",
+            flags="CREATE_AND_SET",
             default=action_enum_members[0].name,
         )
         sai_api.attributes.append(sai_attr_action)
@@ -331,10 +331,34 @@ class DashP4Table(DashP4Object):
         if self.is_object != "false":
             return
 
-        sai_struct_members = [attr.to_sai_struct_entry(self.name) for attr in self.keys if attr.skipattr != "true"]
+        sai_struct_members = [
+            SaiStructEntry(
+                name="switch_id",
+                type=f"sai_object_id_t",
+                description="Switch ID",
+                objects="SAI_OBJECT_TYPE_SWITCH",
+            )
+        ]
 
+        for attr in self.keys:
+            if attr.skipattr != "true":
+                sai_struct_members.extend(attr.to_sai_struct_entry(self.name))
+
+        # If any match key in this table supports priority, we need to add a priority attribute.
+        if any([key.match_type != "exact" for key in self.keys]) and all(
+            [key.match_type != "lpm" for key in self.keys]
+        ):
+            priority_entry = SaiStructEntry(
+                name="priority",
+                description="Rule priority in table",
+                type="sai_uint32_t",
+            )
+
+            sai_struct_members.append(priority_entry)
+
+        print("Creating struct for table: " + self.name)
         sai_struct = SaiStruct(
-            name=f"sai_{self.name.lower()}_entry_t",
+            name=f"sai_{self.name.lower()}_t",
             description=f"Entry for {self.name.lower()}",
             members=sai_struct_members,
         )
@@ -342,15 +366,20 @@ class DashP4Table(DashP4Object):
         sai_api.structs.append(sai_struct)
 
     def create_sai_stats(self, sai_api: SaiApi) -> None:
-        sai_api.stats = [
-            sai_stat.to_sai_attribute(self.name)
-            for sai_stat in self.sai_stats
-        ]
+        sai_api.stats = []
+        for sai_stat in self.sai_stats:
+            sai_api.stats.extend(sai_stat.to_sai_attribute(self.name))
 
     def create_sai_attributes(self, sai_api: SaiApi) -> None:
+        # If the table is an object with more one key (table entry id), we need to add all the keys into the attributes.
+        if self.is_object == "true" and len(self.keys) > 1:
+            for key in self.keys:
+                sai_api.attributes.extend(key.to_sai_attribute(self.name, create_only=True))
+
+        # Add all the action parameters into the attributes.
         for attr in self.sai_attributes:
             if attr.skipattr != "true":
-                sai_api.attributes.append(attr.to_sai_attribute(self.name))
+                sai_api.attributes.extend(attr.to_sai_attribute(self.name, add_action_valid_only_check=len(self.actions) > 1))
 
         # If the table has an counter attached, we need to create a counter attribute for it.
         # The counter attribute only counts that packets that hits any entry, but not the packet that misses all entries.

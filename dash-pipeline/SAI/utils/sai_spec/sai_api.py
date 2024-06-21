@@ -20,6 +20,13 @@ class SaiApi(SaiCommon):
         self.attributes: List[SaiAttribute] = []
         self.stats: List[SaiAttribute] = []
         self.p4_meta: SaiApiP4Meta = SaiApiP4Meta()
+    
+    def finalize(self):
+        super().finalize()
+        _ = [enum.finalize() for enum in self.enums]
+        _ = [struct.finalize() for struct in self.structs]
+        _ = [attribute.finalize() for attribute in self.attributes]
+        _ = [stat.finalize() for stat in self.stats]
 
     def merge(self, other: "SaiCommon"):
         super().merge(other)

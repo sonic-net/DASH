@@ -1,5 +1,5 @@
-{% if table.is_object == 'true' %}
-        _In_ sai_object_id_t {{ table.name }}_id,
-{% else %}
-        _In_ const sai_{{ table.name }}_t *{{ table.name }},
-{% endif %}
+{% if api.is_object %}
+        _In_ sai_object_id_t {{ api.name }}_id
+{%- else %}
+        _In_ const sai_{{ api.name }}_t *{{ api.name }}
+{%- endif %}

@@ -85,18 +85,6 @@ object_entries:
   valid_only: object_type == SAI_OBJECT_TYPE_VIP_ENTRY,
 enums:
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
-  name: sai_dash_tunnel_dscp_mode_t
-  description: ''
-  members:
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: PRESERVE_MODEL
-    description: ''
-    value: '0'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: PIPE_MODEL
-    description: ''
-    value: '1'
-- !!python/object:utils.sai_spec.sai_enum.SaiEnum
   name: sai_dash_direction_t
   description: ''
   members:
@@ -113,29 +101,17 @@ enums:
     description: ''
     value: '2'
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
-  name: sai_dash_routing_actions_t
+  name: sai_dash_tunnel_dscp_mode_t
   description: ''
   members:
   - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: STATIC_ENCAP
+    name: PRESERVE_MODEL
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: PIPE_MODEL
     description: ''
     value: '1'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: NAT
-    description: ''
-    value: '2'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: NAT46
-    description: ''
-    value: '4'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: NAT64
-    description: ''
-    value: '8'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: NAT_PORT
-    description: ''
-    value: '16'
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
   name: sai_dash_ha_role_t
   description: ''
@@ -176,6 +152,30 @@ enums:
     name: NVGRE
     description: ''
     value: '2'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_routing_actions_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: STATIC_ENCAP
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: NAT
+    description: ''
+    value: '2'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: NAT46
+    description: ''
+    value: '4'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: NAT64
+    description: ''
+    value: '8'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: NAT_PORT
+    description: ''
+    value: '16'
 port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtension
   attributes: []
   stats:
@@ -190,7 +190,8 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_PORT_STAT_ENI_MISS_DROP_PACKETS
     description: DASH PORT ENI_MISS_DROP_PACKETS stat count
@@ -202,7 +203,8 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_PORT_STAT_PORT_LB_FAST_PATH_ICMP_IN_BYTES
     description: DASH PORT PORT_LB_FAST_PATH_ICMP_IN_BYTES stat count
@@ -214,7 +216,8 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_PORT_STAT_PORT_LB_FAST_PATH_ICMP_IN_PACKETS
     description: DASH PORT PORT_LB_FAST_PATH_ICMP_IN_PACKETS stat count
@@ -226,7 +229,8 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_PORT_STAT_PORT_LB_FAST_PATH_ENI_MISS_DROP_BYTES
     description: DASH PORT PORT_LB_FAST_PATH_ENI_MISS_DROP_BYTES stat count
@@ -238,7 +242,8 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_PORT_STAT_PORT_LB_FAST_PATH_ENI_MISS_DROP_PACKETS
     description: DASH PORT PORT_LB_FAST_PATH_ENI_MISS_DROP_PACKETS stat count
@@ -250,7 +255,8 @@ port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtensio
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
 api_groups:
 - !inc '/SAI/specs/dash_acl.yaml'
 - !inc '/SAI/specs/dash_direction_lookup.yaml'

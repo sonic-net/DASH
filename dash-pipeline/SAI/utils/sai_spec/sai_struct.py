@@ -11,6 +11,10 @@ class SaiStruct(SaiCommon):
     def __init__(self, name: str, description: str, members: List[SaiStructEntry] = []):
         super().__init__(name, description)
         self.members: List[SaiStructEntry] = members
+    
+    def finalize(self):
+        super().finalize()
+        _ = [member.finalize() for member in self.members]
 
     def merge(self, other: "SaiCommon"):
         super().merge(other)

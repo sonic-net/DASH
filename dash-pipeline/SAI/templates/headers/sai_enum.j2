@@ -1,0 +1,10 @@
+/**
+ * @brief {{ enum.description }}
+ */
+typedef enum _{{ enum.name }}
+{
+{% for enum_member in enum.members %}
+    {{ enum_member.name }},
+
+{% endfor %}
+} {{ enum.name }};
