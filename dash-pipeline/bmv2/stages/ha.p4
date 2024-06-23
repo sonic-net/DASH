@@ -40,19 +40,19 @@ control ha_stage(inout headers_t hdr,
     DEFINE_HIT_COUNTER(dp_probe_failed, MAX_HA_SET, name="dp_probe_failed", attr_type="stats", action_names="set_ha_set_attr")
 
     // Control plane data channel related counters
-    DEFINE_HIT_COUNTER(cp_data_channel_connect_attempted, MAX_HA_SET, name="cp_data_channel_connect_attempted", attr_type="stats", action_names="set_ha_set_attr", order=1)
-    DEFINE_HIT_COUNTER(cp_data_channel_connect_received, MAX_HA_SET, name="cp_data_channel_connect_received", attr_type="stats", action_names="set_ha_set_attr", order=1)
-    DEFINE_HIT_COUNTER(cp_data_channel_connect_succeeded, MAX_HA_SET, name="cp_data_channel_connect_succeeded", attr_type="stats", action_names="set_ha_set_attr", order=1)
-    DEFINE_HIT_COUNTER(cp_data_channel_connect_failed, MAX_HA_SET, name="cp_data_channel_connect_failed", attr_type="stats", action_names="set_ha_set_attr", order=1)
-    DEFINE_HIT_COUNTER(cp_data_channel_connect_rejected, MAX_HA_SET, name="cp_data_channel_connect_rejected", attr_type="stats", action_names="set_ha_set_attr", order=1)
-    DEFINE_HIT_COUNTER(cp_data_channel_timeout_count, MAX_HA_SET, name="cp_data_channel_timeout_count", attr_type="stats", action_names="set_ha_set_attr", order=1)
+    DEFINE_HIT_COUNTER(cp_data_channel_connect_attempted, MAX_HA_SET, name="cp_data_channel_connect_attempted", attr_type="stats", action_names="set_ha_set_attr")
+    DEFINE_HIT_COUNTER(cp_data_channel_connect_received, MAX_HA_SET, name="cp_data_channel_connect_received", attr_type="stats", action_names="set_ha_set_attr")
+    DEFINE_HIT_COUNTER(cp_data_channel_connect_succeeded, MAX_HA_SET, name="cp_data_channel_connect_succeeded", attr_type="stats", action_names="set_ha_set_attr")
+    DEFINE_HIT_COUNTER(cp_data_channel_connect_failed, MAX_HA_SET, name="cp_data_channel_connect_failed", attr_type="stats", action_names="set_ha_set_attr")
+    DEFINE_HIT_COUNTER(cp_data_channel_connect_rejected, MAX_HA_SET, name="cp_data_channel_connect_rejected", attr_type="stats", action_names="set_ha_set_attr")
+    DEFINE_HIT_COUNTER(cp_data_channel_timeout_count, MAX_HA_SET, name="cp_data_channel_timeout_count", attr_type="stats", action_names="set_ha_set_attr")
 
     // Bulk sync related counters
-    DEFINE_HIT_COUNTER(bulk_sync_message_received, MAX_HA_SET, name="bulk_sync_message_received", attr_type="stats", action_names="set_ha_set_attr", order=1)
-    DEFINE_HIT_COUNTER(bulk_sync_message_sent, MAX_HA_SET, name="bulk_sync_message_sent", attr_type="stats", action_names="set_ha_set_attr", order=1)
-    DEFINE_HIT_COUNTER(bulk_sync_message_send_failed, MAX_HA_SET, name="bulk_sync_message_send_failed", attr_type="stats", action_names="set_ha_set_attr", order=1)
-    DEFINE_HIT_COUNTER(bulk_sync_flow_received, MAX_HA_SET, name="bulk_sync_flow_received", attr_type="stats", action_names="set_ha_set_attr", order=1)
-    DEFINE_HIT_COUNTER(bulk_sync_flow_sent, MAX_HA_SET, name="bulk_sync_flow_sent", attr_type="stats", action_names="set_ha_set_attr", order=1)
+    DEFINE_HIT_COUNTER(bulk_sync_message_received, MAX_HA_SET, name="bulk_sync_message_received", attr_type="stats", action_names="set_ha_set_attr")
+    DEFINE_HIT_COUNTER(bulk_sync_message_sent, MAX_HA_SET, name="bulk_sync_message_sent", attr_type="stats", action_names="set_ha_set_attr")
+    DEFINE_HIT_COUNTER(bulk_sync_message_send_failed, MAX_HA_SET, name="bulk_sync_message_send_failed", attr_type="stats", action_names="set_ha_set_attr")
+    DEFINE_HIT_COUNTER(bulk_sync_flow_received, MAX_HA_SET, name="bulk_sync_flow_received", attr_type="stats", action_names="set_ha_set_attr")
+    DEFINE_HIT_COUNTER(bulk_sync_flow_sent, MAX_HA_SET, name="bulk_sync_flow_sent", attr_type="stats", action_names="set_ha_set_attr")
 
     action set_ha_set_attr(
         bit<1> local_ip_is_v6,
