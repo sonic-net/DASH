@@ -20,7 +20,7 @@ control tunnel_stage(
                             overlay_dmac = hdr.u0_ethernet.dst_addr);
     }
 
-    @SaiTable[name = "dash_tunnel", api = "dash_tunnel", order = 0, isobject="true"]
+    @SaiTable[name = "dash_tunnel", api = "dash_tunnel", isobject="true"]
     table tunnel {
         key = {
             meta.dash_tunnel_id : exact @SaiVal[type="sai_object_id_t"];

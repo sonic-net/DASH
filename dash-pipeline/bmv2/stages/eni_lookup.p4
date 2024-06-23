@@ -13,7 +13,7 @@ control eni_lookup_stage(
         meta.dropped = true;
     }
     
-    @SaiTable[name = "eni_ether_address_map", api = "dash_eni", order=0]
+    @SaiTable[name = "eni_ether_address_map", api = "dash_eni"]
     table eni_ether_address_map {
         key = {
             meta.eni_addr : exact @SaiVal[name = "address", type = "sai_mac_t"];

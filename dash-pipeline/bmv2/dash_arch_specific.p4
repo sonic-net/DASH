@@ -29,7 +29,7 @@
         counter(count, CounterType.bytes) name;
 
     #define DEFINE_HIT_COUNTER(name, count, ...) \
-        @SaiCounter[__VA_ARGS__, no_suffix="true"] \
+        @SaiCounter[no_suffix="true", __VA_ARGS__] \
         counter(count, CounterType.packets) name;
 
     #define UPDATE_COUNTER(name, index) \

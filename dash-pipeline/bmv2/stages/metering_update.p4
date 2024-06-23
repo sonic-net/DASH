@@ -17,7 +17,7 @@ control metering_update_stage(
         }
     }
 
-    @SaiTable[name = "meter_policy", api = "dash_meter", order = 1, isobject="true"]
+    @SaiTable[name = "meter_policy", api = "dash_meter", isobject="true"]
     table meter_policy {
         key = {
             meta.meter_context.meter_policy_id : exact;
@@ -31,7 +31,7 @@ control metering_update_stage(
         meta.meter_class = meter_class;
     }
 
-    @SaiTable[name = "meter_rule", api = "dash_meter", order = 2, isobject="true"]
+    @SaiTable[name = "meter_rule", api = "dash_meter", isobject="true"]
     table meter_rule {
         key = {
             meta.meter_context.meter_policy_id: exact @SaiVal[type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
@@ -51,7 +51,7 @@ control metering_update_stage(
     DEFINE_BYTE_COUNTER(meter_bucket_inbound, MAX_METER_BUCKETS, name="inbound", action_names="meter_bucket_action", attr_type="stats")
     action meter_bucket_action() {}
 
-    @SaiTable[name = "meter_bucket", api = "dash_meter", order = 0, isobject="true"]
+    @SaiTable[name = "meter_bucket", api = "dash_meter", isobject="true"]
     table meter_bucket {
         key = {
             meta.eni_id: exact @SaiVal[type="sai_object_id_t"];

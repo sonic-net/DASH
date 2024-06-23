@@ -157,7 +157,7 @@ control dash_ingress(
         meta.fast_path_icmp_flow_redirection_disabled = disable_fast_path_icmp_flow_redirection;
     }
 
-    @SaiTable[name = "eni", api = "dash_eni", order=1, isobject="true"]
+    @SaiTable[name = "eni", api = "dash_eni", isobject="true"]
     table eni {
         key = {
             meta.eni_id : exact @SaiVal[type="sai_object_id_t"];
@@ -237,7 +237,7 @@ control dash_ingress(
         }
     }
 
-    @SaiTable[name = "dash_acl_group", api = "dash_acl", order = 0, isobject="true"]
+    @SaiTable[name = "dash_acl_group", api = "dash_acl", isobject="true"]
     table acl_group {
         key = {
             meta.stage1_dash_acl_group_id : exact @SaiVal[name = "dash_acl_group_id"];
