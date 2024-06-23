@@ -30,7 +30,6 @@ Available tags are:
 - `default_value`: Override the default value for this key or action parameter.
 - `isresourcetype`: When set to "true", we generate a corresponding SAI tag in SAI APIs: `@isresourcetype true`.
 - `objects`: Space separated list of SAI object type this value accepts. When set, we force this value to be a SAI object id, and generate a corresponding SAI tag in SAI APIs: `@objects <list>`.
-- `order`: Specify the order of the generated attributes in the SAI API header file. This will be particularly useful, when a table has multiple actions, and we add parameters to one of them. The new attributes might be generated in the middle of existing attributes, which breaks ABI compatibility with older version of SAI APIs.
 - `isreadonly`: When set to "true", we generate force this value to be read-only in SAI API using: `@flags READ_ONLY`, otherwise, we generate `@flags CREATE_AND_SET`.
 - `skipattr`: When set to "true", we skip this attribute in SAI API generation.
 
@@ -46,7 +45,6 @@ Available tags are:
   - `counter_attr`: The counters will be generated as attributes for directly fetching the counter value on the target SAI object.
   - `counter_id`: The counters will be generated as counter ids on the target SAI objects.
   - `stats`: The counters will be generated as SAI stats attributes. If any SAI objects has any stats attributes, SAI get stats API will be generated.
-- `order`: Specify the order of the generated attributes in the SAI API header file. This will be particularly useful, when a table has multiple actions, and we add parameters to one of them. The new attributes might be generated in the middle of existing attributes, which breaks ABI compatibility with older version of SAI APIs. When `attr_type` is set, it will be compared with the order of other attributes from match keys and action parameters in the same object too.
 
 #### `@SaiTable`: Tables
 
@@ -57,7 +55,6 @@ Available tags are:
 - `name`: Specify the preferred table name in SAI API generation, e.g. `dash_acl_rule`.
 - `api`: Specify which SAI API should be used in generation, e.g. `dash_acl`.
 - `api_type`: The type of the API. DASH contains certain tables for handling underlay actions, such as route table. We should not generate header files for these tables but only the lib files without experimental prefix. To enable this behavior, please set the API type to `underlay`.
-- `order`: Specify the order of the generated API in the SAI API header file. When multiple tables generates API entries in the same API set, e.g., acl group and acl rules. This explicit attribute helps us keep the order of the generated APIs to keep ABI compatibility.
 - `stage`: Specify which stage this table represents for the matching stage type, e.g. `acl.stage1`.
 - `isobject`: When set to "true", a top level objects in SAI that attached to switch will be generated. Otherwise, a new type of entry will be generated, if nothing else helps us to determine this table is an object table.
 - `ignored`: When set to "true", we skip this table in SAI API generation.
