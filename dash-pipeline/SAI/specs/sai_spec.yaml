@@ -32,6 +32,7 @@ object_types:
 - SAI_OBJECT_TYPE_ROUTE_ENTRY
 - SAI_OBJECT_TYPE_VIP_ENTRY
 - SAI_OBJECT_TYPE_DASH_TUNNEL
+- SAI_OBJECT_TYPE_OUTBOUND_ROUTING_GROUP
 object_entries:
 - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
   name: direction_lookup_entry

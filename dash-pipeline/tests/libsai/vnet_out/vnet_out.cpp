@@ -211,7 +211,7 @@ int main(int argc, char **argv)
     attr.value.booldata = false;
     attrs.push_back(attr);
 
-    attr.id = SAI_ENI_ATTR_ROUTING_GROUP_ID;
+    attr.id = SAI_ENI_ATTR_OUTBOUND_ROUTING_GROUP_ID;
     attr.value.oid = SAI_NULL_OBJECT_ID;
     attrs.push_back(attr);
 

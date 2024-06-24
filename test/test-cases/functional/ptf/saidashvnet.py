@@ -52,16 +52,16 @@ class UnderlayRouteTest(VnetApiEndpoints, VnetTrafficMixin):
         src_vnet = self.vnet_create(vni=self.tx_host.client.vni)
         dst_vnet = self.vnet_create(vni=self.rx_host.client.vni)
 
-        routing_group_id = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
 
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
                                  vnet_id=src_vnet,
-                                 routing_group_id=routing_group_id)
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id, self.tx_host.client.mac)  # ENI MAC
 
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="192.168.1.0/24",
                                           dst_vnet_id=dst_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet,
                                       dip=self.rx_host.client.ip,
@@ -1476,16 +1476,16 @@ class Vnet2VnetOutboundRouteVnetDirectSinglePortTest(VnetApiEndpoints, VnetTraff
         src_vnet = self.vnet_create(vni=self.tx_host.client.vni)
         dst_vnet = self.vnet_create(vni=self.rx_host.client.vni)
 
-        routing_group_id = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
 
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
                                  vnet_id=src_vnet,
-                                 routing_group_id=routing_group_id)
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id, self.tx_host.client.mac)  # ENI MAC
         # outbound routing
-        self.outbound_routing_vnet_direct_create(routing_group_id, "192.168.1.0/24", dst_vnet,
+        self.outbound_routing_vnet_direct_create(outbound_routing_group_id, "192.168.1.0/24", dst_vnet,
                                                  overlay_ip="192.168.1.10")
         self.outbound_ca_to_pa_create(dst_vnet,  # DST vnet id
                                       "192.168.1.10",  # DST IP addr
@@ -1548,16 +1548,16 @@ class Vnet2VnetOutboundRouteVnetDirectSinglePortOverlayIpv6Test(Vnet2VnetOutboun
         src_vnet = self.vnet_create(vni=self.tx_host.client.vni)
         dst_vnet = self.vnet_create(vni=self.rx_host.client.vni)
 
-        routing_group_id = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
 
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
                                  vnet_id=src_vnet,
-                                 routing_group_id=routing_group_id)
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id, self.tx_host.client.mac)  # ENI MAC
         # outbound routing
-        self.outbound_routing_vnet_direct_create(routing_group_id, "bbbb::0/64", dst_vnet,
+        self.outbound_routing_vnet_direct_create(outbound_routing_group_id, "bbbb::0/64", dst_vnet,
                                                  overlay_ip="bbbb::bc")
         self.outbound_ca_to_pa_create(dst_vnet,  # DST vnet id
                                       "bbbb::bc",  # DST IP addr
@@ -1648,16 +1648,16 @@ class Vnet2VnetOutboundRouteVnetSinglePortTest(VnetApiEndpoints, VnetTrafficMixi
         src_vnet = self.vnet_create(vni=self.tx_host.client.vni)
         dst_vnet = self.vnet_create(vni=self.rx_host.client.vni)
 
-        routing_group_id = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
 
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
                                  vnet_id=src_vnet,
-                                 routing_group_id=routing_group_id)
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id, self.tx_host.client.mac)  # ENI MAC
 
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="192.168.1.0/24",
                                           dst_vnet_id=dst_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet,
                                       dip=self.rx_host.client.ip,
@@ -1726,16 +1726,16 @@ class Vnet2VnetOutboundRouteVnetSinglePortOverlayIpv6Test(Vnet2VnetOutboundRoute
         src_vnet = self.vnet_create(vni=self.tx_host.client.vni)
         dst_vnet = self.vnet_create(vni=self.rx_host.client.vni)
 
-        routing_group_id = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
 
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
                                  vnet_id=src_vnet,
-                                 routing_group_id=routing_group_id)
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id, self.tx_host.client.mac)  # ENI MAC
 
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id, lpm="bbbb::0/64",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="bbbb::0/64",
                                           dst_vnet_id=dst_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet,
                                       dip=self.rx_host.client.ip,
@@ -1836,16 +1836,16 @@ class Vnet2VnetOutboundEniSetUpDownSinglePortTest(VnetApiEndpoints, VnetTrafficM
         src_vnet = self.vnet_create(vni=self.tx_host.client.vni)
         dst_vnet = self.vnet_create(vni=self.rx_host.client.vni)
 
-        routing_group_id = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
 
         self.eni_id = self.eni_create(admin_state=True,
                                       vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                       vm_vni=self.tx_host.client.vni,
                                       vnet_id=src_vnet,
-                                      routing_group_id=routing_group_id)
+                                      outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(self.eni_id, self.tx_host.client.mac)  # ENI MAC
 
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="192.168.1.0/24",
                                           dst_vnet_id=dst_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet,
                                       dip=self.rx_host.client.ip,
@@ -2123,16 +2123,16 @@ class Vnet2VnetSingleOutboundRouteMultipleCa2PaSinglePortTest(VnetApiEndpoints, 
         src_vnet = self.vnet_create(vni=self.tx_host.client.vni)
         dst_vnet = self.vnet_create(vni=self.rx_host_0.client.vni)
 
-        routing_group_id = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
 
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
                                  vnet_id=src_vnet,
-                                 routing_group_id=routing_group_id)
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id, self.tx_host.client.mac)  # ENI MAC
 
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="192.168.1.0/24",
                                           dst_vnet_id=dst_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet,
                                       dip=self.rx_host_0.client.ip,
@@ -2265,16 +2265,16 @@ class Vnet2VnetSingleOutboundRouteMultipleCa2PaSinglePortIpv6Test(Vnet2VnetSingl
         src_vnet = self.vnet_create(vni=self.tx_host.client.vni)
         dst_vnet = self.vnet_create(vni=self.rx_host_0.client.vni)
 
-        routing_group_id = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
 
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
                                  vnet_id=src_vnet,
-                                 routing_group_id=routing_group_id)
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id, self.tx_host.client.mac)  # ENI MAC
 
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id, lpm="bbbb::0/64",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="bbbb::0/64",
                                           dst_vnet_id=dst_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet,
                                       dip=self.rx_host_0.client.ip,
@@ -2400,18 +2400,18 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortTest(VnetApiEndpoints, VnetTr
         dst_vnet_0 = self.vnet_create(vni=self.rx_host_0.client.vni)
         dst_vnet_1 = self.vnet_create(vni=self.rx_host_1.client.vni)
 
-        routing_group_id = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
 
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
                                  vnet_id=src_vnet,
-                                 routing_group_id=routing_group_id)
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id=eni_id, mac=self.tx_host.client.mac)
 
         # Outbound routing and CA to PA entries creation
         #  for use_dst_vnet_vni=True
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="192.168.1.0/24",
                                           dst_vnet_id=dst_vnet_0)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_0,
                                       dip=self.rx_host_0.client.ip,
@@ -2420,7 +2420,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortTest(VnetApiEndpoints, VnetTr
                                       use_dst_vnet_vni=True)
 
         # for use_dst_vnet_vni=False
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id, lpm="192.168.2.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="192.168.2.0/24",
                                           dst_vnet_id=dst_vnet_1)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_1,
                                       dip=self.rx_host_1.client.ip,
@@ -2487,18 +2487,18 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortOverlayIpv6Test(Vnet2VnetOutb
         dst_vnet_0 = self.vnet_create(vni=self.rx_host_0.client.vni)
         dst_vnet_1 = self.vnet_create(vni=self.rx_host_1.client.vni)
 
-        routing_group_id = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
 
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
                                  vnet_id=src_vnet,
-                                 routing_group_id=routing_group_id)
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id=eni_id, mac=self.tx_host.client.mac)
 
         # Outbound routing and CA to PA entries creation
         #  for use_dst_vnet_vni=True
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id, lpm="bbbb::0/64",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="bbbb::0/64",
                                           dst_vnet_id=dst_vnet_0)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_0,
                                       dip=self.rx_host_0.client.ip,
@@ -2507,7 +2507,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortOverlayIpv6Test(Vnet2VnetOutb
                                       use_dst_vnet_vni=True)
 
         # for use_dst_vnet_vni=False
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id, lpm="cccc::0/64",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="cccc::0/64",
                                           dst_vnet_id=dst_vnet_1)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_1,
                                       dip=self.rx_host_1.client.ip,
@@ -2598,18 +2598,18 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortTest(Vnet2VnetOutboundD
         dst_vnet_0 = self.vnet_create(vni=self.rx_host_0.client.vni)
         dst_vnet_1 = self.vnet_create(vni=self.rx_host_1.client.vni)
 
-        routing_group_id = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
 
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
                                  vnet_id=src_vnet,
-                                 routing_group_id=routing_group_id)
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id=eni_id, mac=self.tx_host.client.mac)
 
         # Outbound routing and CA to PA entries creation
         #  for use_dst_vnet_vni=True
-        self.outbound_routing_vnet_direct_create(routing_group_id=routing_group_id, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_direct_create(outbound_routing_group_id=outbound_routing_group_id, lpm="192.168.1.0/24",
                                                  dst_vnet_id=dst_vnet_0,
                                                  overlay_ip="192.168.1.111")
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_0,
@@ -2619,7 +2619,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortTest(Vnet2VnetOutboundD
                                       use_dst_vnet_vni=True)
 
         # for use_dst_vnet_vni=False
-        self.outbound_routing_vnet_direct_create(routing_group_id=routing_group_id, lpm="192.168.2.0/24",
+        self.outbound_routing_vnet_direct_create(outbound_routing_group_id=outbound_routing_group_id, lpm="192.168.2.0/24",
                                                  dst_vnet_id=dst_vnet_1,
                                                  overlay_ip="192.168.2.222")
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_1,
@@ -2670,18 +2670,18 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortOverlayIpv6Test(Vnet2Vn
         dst_vnet_0 = self.vnet_create(vni=self.rx_host_0.client.vni)
         dst_vnet_1 = self.vnet_create(vni=self.rx_host_1.client.vni)
 
-        routing_group_id = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
 
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
                                  vnet_id=src_vnet,
-                                 routing_group_id=routing_group_id)
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id=eni_id, mac=self.tx_host.client.mac)
 
         # Outbound routing and CA to PA entries creation
         #  for use_dst_vnet_vni=True
-        self.outbound_routing_vnet_direct_create(routing_group_id=routing_group_id, lpm="bbbb::0/64",
+        self.outbound_routing_vnet_direct_create(outbound_routing_group_id=outbound_routing_group_id, lpm="bbbb::0/64",
                                                  dst_vnet_id=dst_vnet_0,
                                                  overlay_ip="bbbb::bc")
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_0,
@@ -2691,7 +2691,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortOverlayIpv6Test(Vnet2Vn
                                       use_dst_vnet_vni=True)
 
         # for use_dst_vnet_vni=False
-        self.outbound_routing_vnet_direct_create(routing_group_id=routing_group_id, lpm="cccc::0/64",
+        self.outbound_routing_vnet_direct_create(outbound_routing_group_id=outbound_routing_group_id, lpm="cccc::0/64",
                                                  dst_vnet_id=dst_vnet_1,
                                                  overlay_ip="cccc::bc")
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_1,
@@ -2803,21 +2803,21 @@ class Vnet2VnetInboundOutboundMultipleConfigsSinglePortTest(VnetApiEndpoints, Vn
         host_2_vnet = self.vnet_create(vni=self.host_2.client.vni)
         host_3_vnet = self.vnet_create(vni=self.host_3.client.vni)
 
-        routing_group_id_0 = self.routing_group_create(admin_state=True)
-        routing_group_id_3 = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id_0 = self.outbound_routing_group_create(disabled=False)
+        outbound_routing_group_id_3 = self.outbound_routing_group_create(disabled=False)
 
         eni_id_0 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.host_0.ip),
                                    vm_vni=self.host_0.client.vni,
                                    vnet_id=host_0_vnet,
-                                   routing_group_id=routing_group_id_0)
+                                   outbound_routing_group_id=outbound_routing_group_id_0)
         self.eni_mac_map_create(eni_id_0, self.host_0.client.mac)
 
         eni_id_3 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.host_3.ip),
                                    vm_vni=self.host_3.client.vni,
                                    vnet_id=host_3_vnet,
-                                   routing_group_id=routing_group_id_3)
+                                   outbound_routing_group_id=outbound_routing_group_id_3)
         self.eni_mac_map_create(eni_id_3, self.host_3.client.mac)
 
         # ENI 0 inbound/outbound routing
@@ -2828,7 +2828,7 @@ class Vnet2VnetInboundOutboundMultipleConfigsSinglePortTest(VnetApiEndpoints, Vn
         self.pa_validation_create(sip=self.host_2.ip,
                                   vnet_id=host_2_vnet)
 
-        self.outbound_routing_vnet_create(routing_group_id_0, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id_0, lpm="192.168.1.0/24",
                                           dst_vnet_id=host_2_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=host_2_vnet,
                                       dip=self.host_2.client.ip,
@@ -2843,7 +2843,7 @@ class Vnet2VnetInboundOutboundMultipleConfigsSinglePortTest(VnetApiEndpoints, Vn
         self.pa_validation_create(sip=self.host_1.ip,
                                   vnet_id=host_1_vnet)
 
-        self.outbound_routing_vnet_create(routing_group_id_3, lpm="192.168.2.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id_3, lpm="192.168.2.0/24",
                                           dst_vnet_id=host_1_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=host_1_vnet,
                                       dip=self.host_1.client.ip,
@@ -2946,21 +2946,21 @@ class Vnet2VnetInboundOutboundMultipleConfigsSinglePortOverlayIpv6Test(Vnet2Vnet
         host_2_vnet = self.vnet_create(vni=self.host_2.client.vni)
         host_3_vnet = self.vnet_create(vni=self.host_3.client.vni)
 
-        routing_group_id_0 = self.routing_group_create(admin_state=True)
-        routing_group_id_3 = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id_0 = self.outbound_routing_group_create(disabled=False)
+        outbound_routing_group_id_3 = self.outbound_routing_group_create(disabled=False)
 
         eni_id_0 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.host_0.ip),
                                    vm_vni=self.host_0.client.vni,
                                    vnet_id=host_0_vnet,
-                                   routing_group_id=routing_group_id_0)
+                                   outbound_routing_group_id=outbound_routing_group_id_0)
         self.eni_mac_map_create(eni_id_0, self.host_0.client.mac)
 
         eni_id_3 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.host_3.ip),
                                    vm_vni=self.host_3.client.vni,
                                    vnet_id=host_3_vnet,
-                                   routing_group_id=routing_group_id_3)
+                                   outbound_routing_group_id=outbound_routing_group_id_3)
         self.eni_mac_map_create(eni_id_3, self.host_3.client.mac)
 
         # ENI 0 inbound/outbound routing
@@ -2971,7 +2971,7 @@ class Vnet2VnetInboundOutboundMultipleConfigsSinglePortOverlayIpv6Test(Vnet2Vnet
         self.pa_validation_create(sip=self.host_2.ip,
                                   vnet_id=host_2_vnet)
 
-        self.outbound_routing_vnet_create(routing_group_id_0, lpm="bbbb::0/64",
+        self.outbound_routing_vnet_create(outbound_routing_group_id_0, lpm="bbbb::0/64",
                                           dst_vnet_id=host_2_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=host_2_vnet,
                                       dip=self.host_2.client.ip,
@@ -2986,7 +2986,7 @@ class Vnet2VnetInboundOutboundMultipleConfigsSinglePortOverlayIpv6Test(Vnet2Vnet
         self.pa_validation_create(sip=self.host_1.ip,
                                   vnet_id=host_1_vnet)
 
-        self.outbound_routing_vnet_create(routing_group_id_3, lpm="cccc::0/64",
+        self.outbound_routing_vnet_create(outbound_routing_group_id_3, lpm="cccc::0/64",
                                           dst_vnet_id=host_1_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=host_1_vnet,
                                       dip=self.host_1.client.ip,
@@ -3128,35 +3128,35 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortTest(VnetApiEndpoints, V
         dst_vnet_1 = self.vnet_create(vni=self.rx_host_1.client.vni)
         dst_vnet_2 = self.vnet_create(vni=self.rx_host_2.client.vni)
 
-        routing_group_id_0 = self.routing_group_create(admin_state=True)
-        routing_group_id_1 = self.routing_group_create(admin_state=True)
-        routing_group_id_2 = self.routing_group_create(admin_state=True)
-        routing_group_id_3 = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id_0 = self.outbound_routing_group_create(disabled=False)
+        outbound_routing_group_id_1 = self.outbound_routing_group_create(disabled=False)
+        outbound_routing_group_id_2 = self.outbound_routing_group_create(disabled=False)
+        outbound_routing_group_id_3 = self.outbound_routing_group_create(disabled=False)
 
         eni_id_0 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.tx_host_0.ip),
                                    vm_vni=self.tx_host_0.client.vni,
                                    vnet_id=src_vnet_0,
-                                   routing_group_id=routing_group_id_0)
+                                   outbound_routing_group_id=outbound_routing_group_id_0)
         self.eni_mac_map_create(eni_id=eni_id_0, mac=self.tx_host_0.client.mac)
 
         eni_id_1 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.tx_host_1.ip),
                                    vm_vni=self.tx_host_1.client.vni,
                                    vnet_id=src_vnet_1,
-                                   routing_group_id=routing_group_id_1)
+                                   outbound_routing_group_id=outbound_routing_group_id_1)
         self.eni_mac_map_create(eni_id=eni_id_1, mac=self.tx_host_1.client.mac)
 
         eni_id_2 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.tx_host_2.ip),
                                    vm_vni=self.tx_host_2.client.vni,
                                    vnet_id=src_vnet_2,
-                                   routing_group_id=routing_group_id_2)
+                                   outbound_routing_group_id=outbound_routing_group_id_2)
         self.eni_mac_map_create(eni_id=eni_id_2, mac=self.tx_host_2.client.mac)
 
         # Outbound routing and CA to PA entries creation
         #  for use_dst_vnet_vni=True
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id_0, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id_0, lpm="192.168.1.0/24",
                                           dst_vnet_id=dst_vnet_0)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_0,
                                       dip=self.rx_host_0.client.ip,
@@ -3165,7 +3165,7 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortTest(VnetApiEndpoints, V
                                       use_dst_vnet_vni=True)
 
         # for use_dst_vnet_vni=False
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id_1, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id_1, lpm="192.168.1.0/24",
                                           dst_vnet_id=dst_vnet_1)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_1,
                                       dip=self.rx_host_1.client.ip,
@@ -3173,7 +3173,7 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortTest(VnetApiEndpoints, V
                                       overlay_dmac=self.rx_host_1.client.mac,
                                       use_dst_vnet_vni=False)
 
-        self.outbound_routing_vnet_direct_create(routing_group_id=routing_group_id_2, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_direct_create(outbound_routing_group_id=outbound_routing_group_id_2, lpm="192.168.1.0/24",
                                                  dst_vnet_id=dst_vnet_2,
                                                  overlay_ip="192.168.1.111")
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_2,
@@ -3302,34 +3302,34 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortOverlayIpv6Test(Vnet2Vne
         dst_vnet_1 = self.vnet_create(vni=self.rx_host_1.client.vni)
         dst_vnet_2 = self.vnet_create(vni=self.rx_host_2.client.vni)
 
-        routing_group_id_0 = self.routing_group_create(admin_state=True)
-        routing_group_id_1 = self.routing_group_create(admin_state=True)
-        routing_group_id_2 = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id_0 = self.outbound_routing_group_create(disabled=False)
+        outbound_routing_group_id_1 = self.outbound_routing_group_create(disabled=False)
+        outbound_routing_group_id_2 = self.outbound_routing_group_create(disabled=False)
 
         eni_id_0 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.tx_host_0.ip),
                                    vm_vni=self.tx_host_0.client.vni,
                                    vnet_id=src_vnet_0,
-                                   routing_group_id=routing_group_id_0)
+                                   outbound_routing_group_id=outbound_routing_group_id_0)
         self.eni_mac_map_create(eni_id=eni_id_0, mac=self.tx_host_0.client.mac)
 
         eni_id_1 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.tx_host_1.ip),
                                    vm_vni=self.tx_host_1.client.vni,
                                    vnet_id=src_vnet_1,
-                                   routing_group_id=routing_group_id_1)
+                                   outbound_routing_group_id=outbound_routing_group_id_1)
         self.eni_mac_map_create(eni_id=eni_id_1, mac=self.tx_host_1.client.mac)
 
         eni_id_2 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.tx_host_2.ip),
                                    vm_vni=self.tx_host_2.client.vni,
                                    vnet_id=src_vnet_2,
-                                   routing_group_id=routing_group_id_2)
+                                   outbound_routing_group_id=outbound_routing_group_id_2)
         self.eni_mac_map_create(eni_id=eni_id_2, mac=self.tx_host_2.client.mac)
 
         # Outbound routing and CA to PA entries creation
         # for use_dst_vnet_vni=True
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id_0, lpm="bbbb::0/64",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id_0, lpm="bbbb::0/64",
                                           dst_vnet_id=dst_vnet_0)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_0,
                                       dip=self.rx_host_0.client.ip,
@@ -3338,7 +3338,7 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortOverlayIpv6Test(Vnet2Vne
                                       use_dst_vnet_vni=True)
 
         # for use_dst_vnet_vni=False
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id_1, lpm="bbbb::0/64",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id_1, lpm="bbbb::0/64",
                                           dst_vnet_id=dst_vnet_1)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_1,
                                       dip=self.rx_host_1.client.ip,
@@ -3346,7 +3346,7 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortOverlayIpv6Test(Vnet2Vne
                                       overlay_dmac=self.rx_host_1.client.mac,
                                       use_dst_vnet_vni=False)
 
-        self.outbound_routing_vnet_direct_create(routing_group_id=routing_group_id_2, lpm="bbbb::0/64",
+        self.outbound_routing_vnet_direct_create(outbound_routing_group_id=outbound_routing_group_id_2, lpm="bbbb::0/64",
                                                  dst_vnet_id=dst_vnet_2,
                                                  overlay_ip="bbbb::bc")
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_2,
@@ -3471,18 +3471,18 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortTest(VnetApiEndpoints,
         dst_vnet_1 = self.vnet_create(vni=self.rx_host_1.client.vni)
         dst_vnet_2 = self.vnet_create(vni=self.rx_host_2.client.vni)
 
-        routing_group_id = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
 
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
                                  vnet_id=src_vnet,
-                                 routing_group_id=routing_group_id)
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id=eni_id, mac=self.tx_host.client.mac)
 
         # Outbound routing and CA to PA entries creation
         #  for use_dst_vnet_vni=True
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id, lpm=rx_host_0_client_ip_prefix,
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm=rx_host_0_client_ip_prefix,
                                           dst_vnet_id=dst_vnet_0)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_0,
                                       dip=self.rx_host_0.client.ip,
@@ -3491,7 +3491,7 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortTest(VnetApiEndpoints,
                                       use_dst_vnet_vni=True)
 
         # for use_dst_vnet_vni=False
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id, lpm=rx_host_1_client_ip_prefix,
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm=rx_host_1_client_ip_prefix,
                                           dst_vnet_id=dst_vnet_1)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_1,
                                       dip=self.rx_host_1.client.ip,
@@ -3499,7 +3499,7 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortTest(VnetApiEndpoints,
                                       overlay_dmac=self.rx_host_1.client.mac,
                                       use_dst_vnet_vni=True)
 
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id, lpm=rx_host_2_client_ip_prefix,
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm=rx_host_2_client_ip_prefix,
                                           dst_vnet_id=dst_vnet_2)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_2,
                                       dip=self.rx_host_2.client.ip,
@@ -3620,18 +3620,18 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortOverlayIpv6Test(Vnet2V
         dst_vnet_1 = self.vnet_create(vni=self.rx_host_1.client.vni)
         dst_vnet_2 = self.vnet_create(vni=self.rx_host_2.client.vni)
 
-        routing_group_id = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
 
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
                                  vnet_id=src_vnet,
-                                 routing_group_id=routing_group_id)
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id=eni_id, mac=self.tx_host.client.mac)
 
         # Outbound routing and CA to PA entries creation
         #  for use_dst_vnet_vni=True
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id, lpm=rx_host_0_client_ip_prefix,
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm=rx_host_0_client_ip_prefix,
                                           dst_vnet_id=dst_vnet_0)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_0,
                                       dip=self.rx_host_0.client.ip,
@@ -3640,7 +3640,7 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortOverlayIpv6Test(Vnet2V
                                       use_dst_vnet_vni=True)
 
         # for use_dst_vnet_vni=False
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id, lpm=rx_host_1_client_ip_prefix,
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm=rx_host_1_client_ip_prefix,
                                           dst_vnet_id=dst_vnet_1)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_1,
                                       dip=self.rx_host_1.client.ip,
@@ -3648,7 +3648,7 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortOverlayIpv6Test(Vnet2V
                                       overlay_dmac=self.rx_host_1.client.mac,
                                       use_dst_vnet_vni=True)
 
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id, lpm=rx_host_2_client_ip_prefix,
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm=rx_host_2_client_ip_prefix,
                                           dst_vnet_id=dst_vnet_2)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_2,
                                       dip=self.rx_host_2.client.ip,
@@ -3729,16 +3729,16 @@ class Vnet2VnetOutboundSameCaPaIpPrefixesSinglePortTest(VnetApiEndpoints, VnetTr
         src_vnet = self.vnet_create(vni=self.tx_host.client.vni)
         dst_vnet = self.vnet_create(vni=self.rx_host.client.vni)
 
-        routing_group_id = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
 
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
                                  vnet_id=src_vnet,
-                                 routing_group_id=routing_group_id)
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id, self.tx_host.client.mac)  # ENI MAC
 
-        self.outbound_routing_vnet_create(routing_group_id=routing_group_id, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="192.168.1.0/24",
                                           dst_vnet_id=dst_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet,
                                       dip=self.rx_host.client.ip,
