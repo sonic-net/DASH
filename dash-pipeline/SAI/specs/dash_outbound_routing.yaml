@@ -44,22 +44,10 @@ sai_apis:
       objects: SAI_OBJECT_TYPE_SWITCH
       valid_only: null
     - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
-      name: eni_id
-      description: Exact matched key eni_id
-      type: sai_object_id_t
-      objects: SAI_OBJECT_TYPE_ENI
-      valid_only: null
-    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
       name: destination
       description: LPM matched key destination
       type: sai_ip_prefix_t
       objects: null
-      valid_only: null
-    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
-      name: routing_group_id
-      description: Exact matched key routing_group_id
-      type: sai_object_id_t
-      objects: SAI_OBJECT_TYPE_ROUTING_GROUP
       valid_only: null
   attributes:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
