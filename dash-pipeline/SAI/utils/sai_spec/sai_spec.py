@@ -64,11 +64,14 @@ class SaiSpec:
         )
         sai_spec_utils.merge_sai_common_lists(self.object_entries, other.object_entries)
 
-        # The global enums are generated from the P4 enum types, so we can respect whatever in the
-        # new spec and simply replace them, because:
-        # - It doesn't matter if the order of enum itself changes.
-        # - We cannot move the enum members as we want, as their order changes their values.
-        self.enums = other.enums
+        # Althoug the order of enum value doesn't matter, but we still merge it in the same way
+        # other SAI values, because:
+        # - P4 compiler is not maintaining the order of enum values, so the definitions in SAI
+        #   spec can move around and make code review harder.
+        # - Removing enum can break existing code.
+        sai_spec_utils.merge_sai_value_lists(
+            self.enums, other.enums, lambda x: x.name
+        )
 
         self.port_extenstion.merge(other.port_extenstion)
         sai_spec_utils.merge_sai_common_lists(self.api_groups, other.api_groups)
