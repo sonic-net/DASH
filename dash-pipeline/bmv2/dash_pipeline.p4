@@ -237,7 +237,7 @@ control dash_ingress(
         }
     }
 
-    @SaiTable[name = "dash_acl_group", api = "dash_acl", order = 0, isobject="true"]
+    @SaiTable[name = "dash_acl_group", api = "dash_acl", isobject="true"]
     table acl_group {
         key = {
             meta.stage1_dash_acl_group_id : exact @SaiVal[name = "dash_acl_group_id"];
