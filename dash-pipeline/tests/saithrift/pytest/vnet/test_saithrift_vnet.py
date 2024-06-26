@@ -78,7 +78,7 @@ def test_sai_thrift_create_eni(saithrift_client):
                                     disable_fast_path_icmp_flow_redirection = 0,
                                     full_flow_resimulation_requested = False,
                                     max_resimulated_flow_per_second = 0,
-                                    routing_group_id = 0)
+                                    outbound_routing_group_id = 0)
         assert (eni != SAI_NULL_OBJECT_ID);
 
         eam = sai_thrift_eni_ether_address_map_entry_t(switch_id=switch_id, address = eth_addr)

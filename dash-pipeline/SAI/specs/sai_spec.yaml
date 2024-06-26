@@ -13,7 +13,6 @@ api_types:
 - SAI_API_ROUTE
 - SAI_API_DASH_VIP
 - SAI_API_DASH_TUNNEL
-- SAI_API_DASH_ROUTING_GROUP
 object_types:
 - SAI_OBJECT_TYPE_DASH_ACL_GROUP
 - SAI_OBJECT_TYPE_DASH_ACL_RULE
@@ -33,7 +32,7 @@ object_types:
 - SAI_OBJECT_TYPE_ROUTE_ENTRY
 - SAI_OBJECT_TYPE_VIP_ENTRY
 - SAI_OBJECT_TYPE_DASH_TUNNEL
-- SAI_OBJECT_TYPE_ROUTING_GROUP
+- SAI_OBJECT_TYPE_OUTBOUND_ROUTING_GROUP
 object_entries:
 - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
   name: direction_lookup_entry
@@ -271,4 +270,3 @@ api_groups:
 - !inc '/SAI/specs/route.yaml'
 - !inc '/SAI/specs/dash_vip.yaml'
 - !inc '/SAI/specs/dash_tunnel.yaml'
-- !inc '/SAI/specs/dash_routing_group.yaml'

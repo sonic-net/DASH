@@ -34,9 +34,9 @@ class TestSaiVnetOutboundRoutingEntry:
             {
                 "name": "routing_group",
                 "op": "create",
-                "type": "SAI_OBJECT_TYPE_ROUTING_GROUP",
+                "type": "SAI_OBJECT_TYPE_OUTBOUND_ROUTING_GROUP",
                 "attributes": [
-                    "SAI_ROUTING_GROUP_ATTR_ADMIN_STATE",
+                    "SAI_OUTBOUND_ROUTING_GROUP_ATTR_DISABLED",
                     "True"
                 ]
             },
@@ -68,7 +68,7 @@ class TestSaiVnetOutboundRoutingEntry:
                     "9",
                     "SAI_ENI_ATTR_VNET_ID",
                     "$vnet",
-                    "SAI_ENI_ATTR_ROUTING_GROUP_ID",
+                    "SAI_ENI_ATTR_OUTBOUND_ROUTING_GROUP_ID",
                     "$routing_group",
                     "SAI_ENI_ATTR_PL_SIP",
                     "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
@@ -259,7 +259,7 @@ class TestSaiVnetOutboundRoutingEntry:
             {
                 "name": "routing_group",
                 "op": "remove",
-                "type": "SAI_OBJECT_TYPE_ROUTING_GROUP"
+                "type": "SAI_OBJECT_TYPE_OUTBOUND_ROUTING_GROUP"
             },
         ]
 

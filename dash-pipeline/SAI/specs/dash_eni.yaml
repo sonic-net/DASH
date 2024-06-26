@@ -573,14 +573,14 @@ sai_apis:
     deprecated: false
     is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_ATTR_ROUTING_GROUP_ID
-    description: Action parameter routing group id
+    name: SAI_ENI_ATTR_OUTBOUND_ROUTING_GROUP_ID
+    description: Action parameter outbound routing group id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
     isresourcetype: false
     flags: CREATE_AND_SET
-    object_name: SAI_OBJECT_TYPE_ROUTING_GROUP
+    object_name: SAI_OBJECT_TYPE_OUTBOUND_ROUTING_GROUP
     allow_null: true
     valid_only: null
     is_vlan: false
@@ -1585,11 +1585,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: false
     is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ENI_STAT_OUTBOUND_ROUTING_GROUP_ADMIN_DOWN_DROP_PACKETS
-    description: DASH ENI OUTBOUND_ROUTING_GROUP_ADMIN_DOWN_DROP_PACKETS stat count
+    name: SAI_ENI_STAT_OUTBOUND_ROUTING_GROUP_DISABLED_DROP_PACKETS
+    description: DASH ENI OUTBOUND_ROUTING_GROUP_DISABLED_DROP_PACKETS stat count
     type: sai_uint64_t
     attr_value_field: u64
     default: null
@@ -1598,8 +1598,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: false
     is_vlan: false
+    deprecated: false
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
