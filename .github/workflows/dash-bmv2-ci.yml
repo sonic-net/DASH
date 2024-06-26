@@ -62,6 +62,8 @@ jobs:
       run:  make docker-bmv2-bldr
     - name: Generate SAI API
       run:  DOCKER_FLAGS=$docker_fg_flags make sai
+    - name: Check if SAI spec is updated
+      run:  DOCKER_FLAGS=$docker_fg_flags make check-sai-spec
     - name: Build libsai c++ tests
       run:  DOCKER_FLAGS=$docker_fg_flags make test
     - name: Prepare network
