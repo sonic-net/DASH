@@ -94,43 +94,97 @@ class DashP4TableAttribute(DashP4Object):
     #
     # Functions for generating SAI specs.
     #
-    def to_sai_struct_entry(self, table_name: str) -> SaiStructEntry:
-        name = self._get_sai_name(table_name)
-        description = self._get_sai_description(table_name)
+    def to_sai_struct_entry(self, table_name: str) -> List[SaiStructEntry]:
+        name = self.name.lower()
+        description = self.get_sai_description(table_name)
         object_name = f"SAI_OBJECT_TYPE_{self.object_name.upper()}" if self.object_name else None
 
-        return SaiStructEntry(
-            name = name,
-            description = description,
-            type = self.type,
-            objects = object_name,
-            valid_only = self.validonly,
-        )
+        entries = [
+            SaiStructEntry(
+                name = name,
+                description = description,
+                type = self.type,
+                objects = object_name,
+                valid_only = self.validonly,
+            )
+        ]
 
-    def to_sai_attribute(self, table_name: str) -> SaiAttribute:
-        name = self._get_sai_name(table_name)
-        description = self._get_sai_description(table_name)
+        if self.match_type == "ternary":
+            entries.append(
+                SaiStructEntry(
+                    name = f"{name}_mask",
+                    description = f"{description} mask",
+                    type = self.type,
+                    objects = object_name,
+                    valid_only = self.validonly,
+                )
+            )
 
-        default_value = None if self.isreadonly == "true" else self.default
+        return entries
+
+    def to_sai_attribute(self, table_name: str, create_only: bool = False, add_action_valid_only_check: bool = False) -> List[SaiAttribute]:
+        name = self.get_sai_name(table_name)
+        description = self.get_sai_description(table_name)
+
         object_name = f"SAI_OBJECT_TYPE_{self.object_name.upper()}" if self.object_name else None
-        sai_flags = "READ_ONLY" if self.isreadonly == "true" else "CREATE_AND_SET"
         allow_null = True if self.type == "sai_object_id_t" else False
+        is_vlan = True if self.type == "sai_uint16_t" else False
 
-        return SaiAttribute(
-            name = name,
-            description = description,
-            type = self.type,
-            attr_value_field = self.field,
-            default = default_value,
-            isresourcetype = self.isresourcetype == "true",
-            flags = sai_flags,
-            object_name = object_name,
-            allow_null = allow_null,
-            valid_only = self.validonly,
-        )
+        if self.isreadonly == "true":
+            sai_flags = "READ_ONLY"
+            default_value = None
+        elif create_only:
+            sai_flags = "MANDATORY_ON_CREATE | CREATE_ONLY"
+            default_value = None
+            allow_null = False
+        else:
+            sai_flags = "CREATE_AND_SET"
+            default_value = self.default
 
-    def _get_sai_name(self, table_name: str) -> str:
-        return f"SAI_{table_name.upper()}_{self.name.upper()}"
+        valid_only_checks = []
+        if add_action_valid_only_check:
+            for param_action in self.param_actions:
+                valid_only_checks.append(f"SAI_{table_name.upper()}_ATTR_ACTION == SAI_{table_name.upper()}_ACTION_{param_action.upper()}")
+        
+        if self.validonly:
+            valid_only_checks.append(self.validonly)
+        
+        valid_only = " or ".join(valid_only_checks) if len(valid_only_checks) > 0 else None
+        
+        attributes = [
+            SaiAttribute(
+                name = name,
+                description = description,
+                type = self.type,
+                attr_value_field = self.field,
+                default = default_value,
+                isresourcetype = self.isresourcetype == "true",
+                flags = sai_flags,
+                object_name = object_name,
+                allow_null = allow_null,
+                valid_only = valid_only,
+                is_vlan = is_vlan,
+            )
+        ]
+
+        if self.match_type == "ternary":
+            attributes.append(SaiAttribute(
+                name = f"{name}_MASK",
+                description = f"{description} mask",
+                type = self.type,
+                attr_value_field = self.field,
+                default = None,
+                isresourcetype = self.isresourcetype == "true",
+                flags = sai_flags,
+                object_name = object_name,
+                allow_null = allow_null,
+                valid_only = valid_only,
+            ))
+
+        return attributes
+
+    def get_sai_name(self, table_name: str) -> str:
+        return f"SAI_{table_name.upper()}_ATTR_{self.name.upper()}"
     
-    def _get_sai_description(self, table_name: str):
-        return f"Action parameter {self.name.upper()}"
+    def get_sai_description(self, table_name: str):
+        return f"Action parameter {self.name.replace('_', ' ')}"

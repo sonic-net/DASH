@@ -22,48 +22,48 @@ DEFINE_COUNTER(port_lb_fast_path_eni_miss_drop, 1, attr_type="stats")
 // ENI level counters:
 //
 #define DEFINE_ENI_COUNTER(name, ...) \
-    DEFINE_COUNTER(name, MAX_ENI, attr_type="stats", action_names="set_eni_attrs", __VA_ARGS__)
+    DEFINE_COUNTER(name, MAX_ENI, __VA_ARGS__ attr_type="stats", action_names="set_eni_attrs")
 
 #define DEFINE_ENI_PACKET_COUNTER(name, ...) \
-    DEFINE_PACKET_COUNTER(name, MAX_ENI, attr_type="stats", action_names="set_eni_attrs", __VA_ARGS__)
+    DEFINE_PACKET_COUNTER(name, MAX_ENI, __VA_ARGS__ attr_type="stats", action_names="set_eni_attrs")
 
 #define DEFINE_ENI_BYTE_COUNTER(name, count, ...) \
-    DEFINE_BYTE_COUNTER(name, MAX_ENI, attr_type="stats", action_names="set_eni_attrs", __VA_ARGS__)
+    DEFINE_BYTE_COUNTER(name, MAX_ENI, __VA_ARGS__ attr_type="stats", action_names="set_eni_attrs")
 
 #define DEFINE_ENI_HIT_COUNTER(name, ...) \
-    DEFINE_HIT_COUNTER(name, MAX_ENI, attr_type="stats", action_names="set_eni_attrs", __VA_ARGS__)
+    DEFINE_HIT_COUNTER(name, MAX_ENI, __VA_ARGS__ attr_type="stats", action_names="set_eni_attrs")
 
 #define UPDATE_ENI_COUNTER(name) \
     UPDATE_COUNTER(name, meta.eni_id)
 
-DEFINE_ENI_COUNTER(eni_rx, order=0, name="rx")
-DEFINE_ENI_COUNTER(eni_tx, order=0, name="tx")
-DEFINE_ENI_COUNTER(eni_outbound_rx, order=0, name="outbound_rx")
-DEFINE_ENI_COUNTER(eni_outbound_tx, order=0, name="outbound_tx")
-DEFINE_ENI_COUNTER(eni_inbound_rx, order=0, name="inbound_rx")
-DEFINE_ENI_COUNTER(eni_inbound_tx, order=0, name="inbound_tx")
-DEFINE_ENI_COUNTER(eni_lb_fast_path_icmp_in, order=0, name="lb_fast_path_icmp_in")
+DEFINE_ENI_COUNTER(eni_rx, name="rx",)
+DEFINE_ENI_COUNTER(eni_tx, name="tx",)
+DEFINE_ENI_COUNTER(eni_outbound_rx, name="outbound_rx",)
+DEFINE_ENI_COUNTER(eni_outbound_tx, name="outbound_tx",)
+DEFINE_ENI_COUNTER(eni_inbound_rx, name="inbound_rx",)
+DEFINE_ENI_COUNTER(eni_inbound_tx, name="inbound_tx",)
+DEFINE_ENI_COUNTER(eni_lb_fast_path_icmp_in, name="lb_fast_path_icmp_in",)
 
 //
 // ENI-level flow operation counters:
 //
-DEFINE_ENI_HIT_COUNTER(flow_created, order=1)
-DEFINE_ENI_HIT_COUNTER(flow_create_failed, order=1)
-DEFINE_ENI_HIT_COUNTER(flow_updated, order=1)
-DEFINE_ENI_HIT_COUNTER(flow_update_failed, order=1)
-DEFINE_ENI_HIT_COUNTER(flow_updated_by_resimulation, order=1)
-DEFINE_ENI_HIT_COUNTER(flow_update_by_resimulation_failed, order=1)
-DEFINE_ENI_HIT_COUNTER(flow_deleted, order=1)
-DEFINE_ENI_HIT_COUNTER(flow_delete_failed, order=1)
-DEFINE_ENI_HIT_COUNTER(flow_aged, order=1)
+DEFINE_ENI_HIT_COUNTER(flow_created)
+DEFINE_ENI_HIT_COUNTER(flow_create_failed)
+DEFINE_ENI_HIT_COUNTER(flow_updated)
+DEFINE_ENI_HIT_COUNTER(flow_update_failed)
+DEFINE_ENI_HIT_COUNTER(flow_updated_by_resimulation)
+DEFINE_ENI_HIT_COUNTER(flow_update_by_resimulation_failed)
+DEFINE_ENI_HIT_COUNTER(flow_deleted)
+DEFINE_ENI_HIT_COUNTER(flow_delete_failed)
+DEFINE_ENI_HIT_COUNTER(flow_aged)
 
 //
 // ENI-level data plane flow sync packet counters:
 //
-DEFINE_ENI_COUNTER(inline_sync_packet_rx, order=2)
-DEFINE_ENI_COUNTER(inline_sync_packet_tx, order=2)
-DEFINE_ENI_COUNTER(timed_sync_packet_rx, order=2)
-DEFINE_ENI_COUNTER(timed_sync_packet_tx, order=2)
+DEFINE_ENI_COUNTER(inline_sync_packet_rx)
+DEFINE_ENI_COUNTER(inline_sync_packet_tx)
+DEFINE_ENI_COUNTER(timed_sync_packet_rx)
+DEFINE_ENI_COUNTER(timed_sync_packet_tx)
 
 //
 // ENI-level data plane flow sync request counters:
@@ -74,21 +74,21 @@ DEFINE_ENI_COUNTER(timed_sync_packet_tx, order=2)
 //   - Request result: succeeded, failed (unexpected) and ignored (expected and ok to ignore, e.g., more packets arrives before flow sync is acked).
 //
 #define DEFINE_ENI_FLOW_SYNC_COUNTERS(counter_name) \
-    DEFINE_ENI_HIT_COUNTER(inline_ ## counter_name ## _req_sent, order=2) \
-    DEFINE_ENI_HIT_COUNTER(inline_ ## counter_name ## _req_recv, order=2) \
-    DEFINE_ENI_HIT_COUNTER(inline_ ## counter_name ## _req_failed, order=2) \
-    DEFINE_ENI_HIT_COUNTER(inline_ ## counter_name ## _req_ignored, order=2) \
-    DEFINE_ENI_HIT_COUNTER(inline_ ## counter_name ## _ack_recv, order=2) \
-    DEFINE_ENI_HIT_COUNTER(inline_ ## counter_name ## _ack_failed, order=2) \
-    DEFINE_ENI_HIT_COUNTER(inline_ ## counter_name ## _ack_ignored, order=2) \
+    DEFINE_ENI_HIT_COUNTER(inline_ ## counter_name ## _req_sent) \
+    DEFINE_ENI_HIT_COUNTER(inline_ ## counter_name ## _req_recv) \
+    DEFINE_ENI_HIT_COUNTER(inline_ ## counter_name ## _req_failed) \
+    DEFINE_ENI_HIT_COUNTER(inline_ ## counter_name ## _req_ignored) \
+    DEFINE_ENI_HIT_COUNTER(inline_ ## counter_name ## _ack_recv) \
+    DEFINE_ENI_HIT_COUNTER(inline_ ## counter_name ## _ack_failed) \
+    DEFINE_ENI_HIT_COUNTER(inline_ ## counter_name ## _ack_ignored) \
     \
-    DEFINE_ENI_HIT_COUNTER(timed_ ## counter_name ## _req_sent, order=2) \
-    DEFINE_ENI_HIT_COUNTER(timed_ ## counter_name ## _req_recv, order=2) \
-    DEFINE_ENI_HIT_COUNTER(timed_ ## counter_name ## _req_failed, order=2) \
-    DEFINE_ENI_HIT_COUNTER(timed_ ## counter_name ## _req_ignored, order=2) \
-    DEFINE_ENI_HIT_COUNTER(timed_ ## counter_name ## _ack_recv, order=2) \
-    DEFINE_ENI_HIT_COUNTER(timed_ ## counter_name ## _ack_failed, order=2) \
-    DEFINE_ENI_HIT_COUNTER(timed_ ## counter_name ## _ack_ignored, order=2)
+    DEFINE_ENI_HIT_COUNTER(timed_ ## counter_name ## _req_sent) \
+    DEFINE_ENI_HIT_COUNTER(timed_ ## counter_name ## _req_recv) \
+    DEFINE_ENI_HIT_COUNTER(timed_ ## counter_name ## _req_failed) \
+    DEFINE_ENI_HIT_COUNTER(timed_ ## counter_name ## _req_ignored) \
+    DEFINE_ENI_HIT_COUNTER(timed_ ## counter_name ## _ack_recv) \
+    DEFINE_ENI_HIT_COUNTER(timed_ ## counter_name ## _ack_failed) \
+    DEFINE_ENI_HIT_COUNTER(timed_ ## counter_name ## _ack_ignored)
 
 DEFINE_ENI_FLOW_SYNC_COUNTERS(flow_create)
 DEFINE_ENI_FLOW_SYNC_COUNTERS(flow_update)
@@ -97,10 +97,10 @@ DEFINE_ENI_FLOW_SYNC_COUNTERS(flow_delete)
 //
 // ENI-level drop counters:
 //
-DEFINE_ENI_PACKET_COUNTER(outbound_routing_entry_miss_drop, order=3)
-DEFINE_ENI_PACKET_COUNTER(outbound_ca_pa_entry_miss_drop, order=3)
-DEFINE_ENI_PACKET_COUNTER(inbound_routing_entry_miss_drop, order=3)
-DEFINE_ENI_PACKET_COUNTER(outbound_routing_group_miss_drop, order=3)
-DEFINE_ENI_PACKET_COUNTER(outbound_routing_group_admin_down_drop, order=3)
+DEFINE_ENI_PACKET_COUNTER(outbound_routing_entry_miss_drop)
+DEFINE_ENI_PACKET_COUNTER(outbound_ca_pa_entry_miss_drop)
+DEFINE_ENI_PACKET_COUNTER(inbound_routing_entry_miss_drop)
+DEFINE_ENI_PACKET_COUNTER(outbound_routing_group_miss_drop)
+DEFINE_ENI_PACKET_COUNTER(outbound_routing_group_disabled_drop)
 
 #endif // __DASH_COUNTERS__

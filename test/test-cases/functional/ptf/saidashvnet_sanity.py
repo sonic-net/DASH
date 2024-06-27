@@ -54,8 +54,8 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         self.vnet = sai_thrift_create_vnet(self.client, vni=self.vnet_vni)
         assert (self.vnet != SAI_NULL_OBJECT_ID)
 
-        self.routing_group = sai_thrift_create_routing_group(self.client, admin_state=True)
-        assert (self.routing_group != SAI_NULL_OBJECT_ID)
+        self.outbound_routing_group = sai_thrift_create_outbound_routing_group(self.client, disabled=False)
+        assert (self.outbound_routing_group != SAI_NULL_OBJECT_ID)
 
         vm_underlay_dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
                                                   addr=sai_thrift_ip_addr_t(ip4=self.src_vm_pa_ip))
@@ -113,7 +113,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
                                          disable_fast_path_icmp_flow_redirection = 0,
                                          full_flow_resimulation_requested=False,
                                          max_resimulated_flow_per_second=0,
-                                         routing_group_id=self.routing_group)
+                                         outbound_routing_group_id=self.outbound_routing_group)
 
         self.eam = sai_thrift_eni_ether_address_map_entry_t(switch_id=self.switch_id, address = self.eni_mac)
         status = sai_thrift_create_eni_ether_address_map_entry(self.client,
@@ -133,7 +133,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         ca_prefix = sai_thrift_ip_prefix_t(addr_family=self.sai_ip_addr_family,
                                             addr=sai_thrift_ip_addr_t(**{self.ip_addr_family_attr: self.ca_prefix_addr}),
                                             mask=sai_thrift_ip_addr_t(**{self.ip_addr_family_attr: self.ca_prefix_mask}))
-        self.ore = sai_thrift_outbound_routing_entry_t(switch_id=self.switch_id, routing_group_id=self.routing_group, destination=ca_prefix)
+        self.ore = sai_thrift_outbound_routing_entry_t(switch_id=self.switch_id, outbound_routing_group_id=self.outbound_routing_group, destination=ca_prefix)
         status = sai_thrift_create_outbound_routing_entry(self.client, self.ore,
                                                           action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET,
                                                           dst_vnet_id=self.vnet,

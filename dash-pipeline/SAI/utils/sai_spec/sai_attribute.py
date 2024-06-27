@@ -19,7 +19,8 @@ class SaiAttribute(SaiCommon):
         object_name: Optional[str] = None,
         allow_null: bool = False,
         valid_only: Optional[str] = None,
-        deprecated: Optional[bool] = None,
+        is_vlan: bool = False,
+        deprecated: bool = False,
     ):
         super().__init__(name, description)
         self.type = type
@@ -30,4 +31,13 @@ class SaiAttribute(SaiCommon):
         self.object_name = object_name
         self.allow_null = allow_null
         self.valid_only = valid_only
+        self.is_vlan = is_vlan
         self.deprecated = deprecated
+
+    def merge(self, other: "SaiCommon"):
+        super().merge(other)
+        self.__dict__.update(other.__dict__)
+
+    def deprecate(self) -> bool:
+        self.deprecated = True
+        return False

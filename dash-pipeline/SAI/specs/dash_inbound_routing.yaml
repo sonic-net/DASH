@@ -1,15 +1,16 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: dash_inbound_routing
-description: ''
+description: DASH inbound routing
+api_type: overlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: inbound_routing_entry
-  description: ''
+  description: inbound routing entry
   is_object: false
   enums:
   - !!python/object:utils.sai_spec.sai_enum.SaiEnum
     name: sai_inbound_routing_entry_action_t
-    description: Attribute data for SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION
+    description: 'Attribute data for #SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION'
     members:
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP
@@ -18,20 +19,26 @@ sai_apis:
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE
       description: ''
-      value: '0'
+      value: '1'
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP
       description: ''
-      value: '0'
+      value: '2'
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE
       description: ''
-      value: '0'
+      value: '3'
   structs:
   - !!python/object:utils.sai_spec.sai_struct.SaiStruct
-    name: sai_inbound_routing_entry_entry_t
+    name: sai_inbound_routing_entry_t
     description: Entry for inbound_routing_entry
     members:
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: switch_id
+      description: Switch ID
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_SWITCH
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
       name: eni_id
       description: Exact matched key eni_id
@@ -39,7 +46,7 @@ sai_apis:
       objects: SAI_OBJECT_TYPE_ENI
       valid_only: null
     - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
-      name: VNI
+      name: vni
       description: Exact matched key VNI
       type: sai_uint32_t
       objects: null
@@ -50,6 +57,18 @@ sai_apis:
       type: sai_ip_address_t
       objects: null
       valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: sip_mask
+      description: Ternary matched key sip mask
+      type: sai_ip_address_t
+      objects: null
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: priority
+      description: Rule priority in table
+      type: sai_uint32_t
+      objects: null
+      valid_only: null
   attributes:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION
@@ -58,14 +77,15 @@ sai_apis:
     attr_value_field: null
     default: SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP
     isresourcetype: false
-    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    flags: CREATE_AND_SET
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_INBOUND_ROUTING_ENTRY_METER_CLASS_OR
-    description: Action parameter METER_CLASS_OR
+    name: SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR
+    description: Action parameter meter class or
     type: sai_uint32_t
     attr_value_field: u32
     default: '0'
@@ -73,11 +93,13 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP
+      or SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_INBOUND_ROUTING_ENTRY_METER_CLASS_AND
-    description: Action parameter METER_CLASS_AND
+    name: SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND
+    description: Action parameter meter class and
     type: sai_uint32_t
     attr_value_field: u32
     default: '4294967295'
@@ -85,11 +107,13 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP
+      or SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_INBOUND_ROUTING_ENTRY_SRC_VNET_ID
-    description: Action parameter SRC_VNET_ID
+    name: SAI_INBOUND_ROUTING_ENTRY_ATTR_SRC_VNET_ID
+    description: Action parameter src VNET id
     type: sai_object_id_t
     attr_value_field: u16
     default: SAI_NULL_OBJECT_ID
@@ -97,8 +121,9 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: SAI_OBJECT_TYPE_VNET
     allow_null: true
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION == SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_INBOUND_ROUTING_ENTRY_ATTR_IP_ADDR_FAMILY
     description: IP address family for resource accounting
@@ -110,5 +135,32 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 38920290
+      actions:
+        SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP
+          id: 22253429
+          attr_param_id:
+            SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR: 1
+            SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND: 2
+        SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE
+          id: 27987616
+          attr_param_id:
+            SAI_INBOUND_ROUTING_ENTRY_ATTR_SRC_VNET_ID: 1
+            SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR: 2
+            SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND: 3
+        SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP
+          id: 32581635
+          attr_param_id: {}
+        SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE
+          id: 22711915
+          attr_param_id: {}

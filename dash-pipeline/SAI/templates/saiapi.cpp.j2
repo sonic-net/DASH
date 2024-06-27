@@ -87,6 +87,14 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 auto mf_exact = mf->mutable_exact();
                 {{key.field}}SetVal(attr_list[i].value, mf_exact, {{key.bitwidth}});
                 {% elif key.match_type == 'lpm' %}
+                {% if key.field == 'ipPrefix' %}
+                if (getPrefixLength(attr_list[i].value) == 0)
+                {
+                    // https://github.com/p4lang/PI/blob/24e0a3c08c964e36d235973556b90e0ae922b894/proto/frontend/src/device_mgr.cpp#L2242-L2246
+                    DASH_LOG_WARN("Invalid reprsentation of 'don't care' LPM match, omit match field instead of using a prefix length of 0");
+                    return SAI_STATUS_SUCCESS;
+                }
+                {% endif %}
                 auto mf_lpm = mf->mutable_lpm();
                 {{key.field}}SetVal(attr_list[i].value, mf_lpm, {{key.bitwidth}});
                 {% elif key.match_type == 'list' %}
@@ -401,6 +409,14 @@ static sai_status_t dash_sai_create_{{ table.name }}(
           {{key.field}}SetVal(static_cast<uint{{key.bitwidth}}_t>(tableEntry->{{ key.name | lower }}), mf_exact, {{key.bitwidth}});
         {% endif %}
         {% elif key.match_type == 'lpm' %}
+        {% if key.field == 'ipPrefix' %}
+        if (getPrefixLength(tableEntry->{{ key.name | lower }}) == 0)
+        {
+            // https://github.com/p4lang/PI/blob/24e0a3c08c964e36d235973556b90e0ae922b894/proto/frontend/src/device_mgr.cpp#L2242-L2246
+            DASH_LOG_WARN("Invalid reprsentation of 'don't care' LPM match, omit match field instead of using a prefix length of 0");
+            return SAI_STATUS_SUCCESS;
+        }
+        {% endif %}
         auto mf_lpm = mf->mutable_lpm();
         {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_lpm, {{key.bitwidth}});
         {% elif key.match_type == 'ternary' %}
@@ -582,6 +598,14 @@ static sai_status_t dash_sai_remove_{{ table.name }}(
         {% endif %}  
         //{{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
         {% elif key.match_type == 'lpm' %}
+        {% if key.field == 'ipPrefix' %}
+        if (getPrefixLength(tableEntry->{{ key.name | lower }}) == 0)
+        {
+            // https://github.com/p4lang/PI/blob/24e0a3c08c964e36d235973556b90e0ae922b894/proto/frontend/src/device_mgr.cpp#L2242-L2246
+            DASH_LOG_WARN("Invalid reprsentation of 'don't care' LPM match, omit match field instead of using a prefix length of 0");
+            return SAI_STATUS_SUCCESS;
+        }
+        {% endif %}
         auto mf_lpm = mf->mutable_lpm();
         {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_lpm, {{key.bitwidth}});
         {% elif key.match_type == 'ternary' %}

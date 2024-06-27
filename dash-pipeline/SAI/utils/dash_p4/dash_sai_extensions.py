@@ -119,12 +119,14 @@ class DashP4SAIExtensions(DashP4Object):
     #
     def to_sai(self) -> SaiSpec:
         sai_spec = SaiSpec()
+        sai_spec.api_groups = [api_group.to_sai() for api_group in self.table_groups]
+
         self.create_sai_api_types(sai_spec)
         self.create_sai_object_types(sai_spec)
         self.create_sai_object_entries(sai_spec)
         self.create_sai_enums(sai_spec)
         self.create_sai_port_counters(sai_spec.port_extenstion)
-        sai_spec.api_groups = [api_group.to_sai() for api_group in self.table_groups]
+
         return sai_spec
     
     def create_sai_api_types(self, sai_spec: SaiSpec):
@@ -168,9 +170,9 @@ class DashP4SAIExtensions(DashP4Object):
             if len(counter.param_actions) > 0:
                 continue
 
-            sai_counter = counter.to_sai_attribute("port")
+            sai_counters = counter.to_sai_attribute("port")
 
             if counter.attr_type != "stats":
-                api_ext.attributes.append(sai_counter)
+                api_ext.attributes.extend(sai_counters)
             else:
-                api_ext.stats.append(sai_counter)
+                api_ext.stats.extend(sai_counters)

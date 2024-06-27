@@ -1,0 +1,103 @@
+/**
+ * Copyright (c) 2014 Microsoft Open Technologies, Inc.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License"); you may
+ *    not use this file except in compliance with the License. You may obtain
+ *    a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR
+ *    CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
+ *    LIMITATION ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS
+ *    FOR A PARTICULAR PURPOSE, MERCHANTABILITY OR NON-INFRINGEMENT.
+ *
+ *    See the Apache Version 2.0 License for specific language governing
+ *    permissions and limitations under the License.
+ *
+ *    Microsoft would like to thank the following companies for their review and
+ *    assistance with these files: Intel Corporation, Mellanox Technologies Ltd,
+ *    Dell Products, L.P., Facebook, Inc., Marvell International Ltd.
+ *
+ * @file    saiexperimental{{ api_group.name | replace('_', '') }}.h
+ *
+ * @brief   This module defines SAI extensions for {{ api_group.description }}
+ *
+ * @warning This module is a SAI experimental module
+ */
+
+#if !defined (__SAIEXPERIMENTAL{{ api_group.name | replace('_', '') | upper }}_H_)
+#define __SAIEXPERIMENTAL{{ api_group.name | replace('_', '') | upper}}_H_
+
+#include <saitypesextensions.h>
+
+/**
+ * @defgroup SAIEXPERIMENTAL{{ api_group.name | replace('_', '') | upper }} SAI - Experimental: {{ api_group.description }} specific API definitions
+ *
+ * @{
+ */
+{% for api in api_group.sai_apis %}
+{% for enum in api.enums %}
+
+{% include 'templates/headers/sai_enum.j2' %}
+
+{% endfor %}
+{% endfor %}
+{% for api in api_group.sai_apis %}
+{% for struct in api.structs %}
+
+{% include 'templates/headers/sai_struct.j2' %}
+
+{% endfor %}
+
+{% include 'templates/headers/sai_attributes.j2' %}
+
+{% if api.stats | length > 0 %}
+
+{% include 'templates/headers/sai_stats.j2' %}
+
+{% endif %}
+{% endfor %}
+{% for api in api_group.sai_apis %}
+{% include 'templates/headers/sai_api_func_quad.j2' %}
+
+{% if api.stats | length > 0 %}
+
+{% include 'templates/headers/sai_api_func_stats.j2' %}
+
+{% endif %}
+{% if api.is_object != True %}
+
+{% include 'templates/headers/sai_api_func_bulk.j2' %}
+
+{% endif %}
+{% endfor %}
+
+typedef struct _sai_{{ api_group.name }}_api_t
+{
+{% set api_name_max = api_group.sai_apis|map(attribute="name")|map("length") | max %}
+{% for api in api_group.sai_apis %}
+{% set space_offset = api_name_max - api.name | length %}
+    sai_create_{{ api.name }}_fn           {{ " " * space_offset }}create_{{ api.name }};
+    sai_remove_{{ api.name }}_fn           {{ " " * space_offset }}remove_{{ api.name }};
+    sai_set_{{ api.name }}_attribute_fn    {{ " " * space_offset }}set_{{ api.name }}_attribute;
+    sai_get_{{ api.name }}_attribute_fn    {{ " " * space_offset }}get_{{ api.name }}_attribute;
+{% if api.stats | length > 0 %}
+    sai_get_{{ api.name }}_stats_fn        {{ " " * space_offset }}get_{{ api.name }}_stats;
+    sai_get_{{ api.name }}_stats_ext_fn    {{ " " * space_offset }}get_{{ api.name }}_stats_ext;
+    sai_clear_{{ api.name }}_stats_fn      {{ " " * space_offset }}clear_{{ api.name }}_stats;
+{% endif %}
+{% if api.is_object %}
+    sai_bulk_object_create_fn{{ " " * api_name_max }}create_{{ api.name }}s;
+    sai_bulk_object_remove_fn{{ " " * api_name_max }}remove_{{ api.name }}s;
+{% else %}
+    sai_bulk_create_{{ api.name }}_fn      {{ " " * space_offset }}create_{{ api.name | replace("entry", "entries") }};
+    sai_bulk_remove_{{ api.name }}_fn      {{ " " * space_offset }}remove_{{ api.name | replace("entry", "entries") }};
+{% endif %}
+
+{% endfor %}
+} sai_{{ api_group.name }}_api_t;
+
+/**
+ * @}
+ */
+#endif /** __SAIEXPERIMENTAL{{ api_group.name | replace('_', '') | upper}}_H_ */
+

@@ -1,5 +1,7 @@
 #include "utils.h"
 
+#include <algorithm>
+
 const sai_attribute_t* dash::utils::getMaskAttr(sai_attr_id_t id, uint32_t attr_count, const sai_attribute_t *attr_list)
 {
     DASH_LOG_ENTER();
@@ -59,11 +61,36 @@ int dash::utils::leadingNonZeroBits(const sai_ip6_t& ipv6)
 
         if (firstSetBit > 0)
         {
-            return 129-trailingZeros-firstSetBit;
+            return 129-trailingZeros-(33-firstSetBit);
         }
 
         trailingZeros += 32;
     }
 
     return 0;
+}
+
+
+int dash::utils::getPrefixLength(const sai_ip_prefix_t &value)
+{
+    switch(value.addr_family)
+    {
+        case SAI_IP_ADDR_FAMILY_IPV4:
+            // LPM entry match field prefix length calculation needs to be fixed to accomodate 128 bit size.
+            // So the 96 is added to the prefix length.
+            return leadingNonZeroBits(htonl(value.mask.ip4)) + 96;
+        case SAI_IP_ADDR_FAMILY_IPV6:
+            sai_ip6_t mask;
+            memcpy(mask, value.mask.ip6, sizeof(mask));
+            std::reverse(std::begin(mask), std::end(mask));
+            return leadingNonZeroBits(mask);
+        default:
+            assert(0 && "unrecognzed value.ipaddr.addr_family");
+    }
+    return 0;
+}
+
+int dash::utils::getPrefixLength(const sai_attribute_value_t &value)
+{
+    return getPrefixLength(value.ipprefix);
 }

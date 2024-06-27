@@ -1,0 +1,61 @@
+!!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
+name: dash_tunnel
+description: DASH tunnel
+api_type: overlay
+sai_apis:
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: dash_tunnel
+  description: DASH tunnel
+  is_object: true
+  enums: []
+  structs: []
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_TUNNEL_ATTR_DIP
+    description: Action parameter dip
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_TUNNEL_ATTR_DASH_ENCAPSULATION
+    description: Action parameter DASH encapsulation
+    type: sai_dash_encapsulation_t
+    attr_value_field: s32
+    default: SAI_DASH_ENCAPSULATION_VXLAN
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_TUNNEL_ATTR_TUNNEL_KEY
+    description: Action parameter tunnel key
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 44400659
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 27891720
+          attr_param_id: {}
