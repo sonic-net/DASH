@@ -393,7 +393,6 @@ typedef sai_status_t (*sai_bulk_remove_{{ table.name }}_fn)(
         _In_ sai_bulk_op_error_mode_t mode,
         _Out_ sai_status_t *object_statuses);
 
-{% include 'templates/headers/sai_bulk_get_api.j2' %}
 {% endif %}
 {% endfor %}
 typedef struct _sai_{{ sai_api.app_name }}_api_t
@@ -412,7 +411,6 @@ typedef struct _sai_{{ sai_api.app_name }}_api_t
 {% else %}
     sai_bulk_create_{{ table.name }}_fn      {{ " " * space_offset }}create_{{ table.name | replace("entry", "entries") }};
     sai_bulk_remove_{{ table.name }}_fn      {{ " " * space_offset }}remove_{{ table.name | replace("entry", "entries") }};
-{% include 'templates/headers/sai_bulk_get_api_list.j2' %}
 {% endif %}
 
 {% endfor %}

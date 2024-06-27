@@ -21,6 +21,7 @@ except ImportError as ie:
     print("Import failed for " + ie.name)
     exit(1)
 
+
 if __name__ == "__main__":
     # CLI
     parser = argparse.ArgumentParser(description="P4 SAI API generator")

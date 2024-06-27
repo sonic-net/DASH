@@ -33,7 +33,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
     //
     action set_flow_entry_attr(
         /* Flow basic metadata */
-        @SaiVal[is_filter_key="true"] bit<32> version,
+        bit<32> version,
         @SaiVal[type="sai_dash_direction_t"] dash_direction_t dash_direction,
         @SaiVal[type="sai_dash_flow_action_t"] dash_flow_action_t dash_flow_action,
         bit<32> meter_class,

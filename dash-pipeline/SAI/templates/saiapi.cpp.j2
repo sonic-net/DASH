@@ -739,22 +739,6 @@ static sai_status_t dash_sai_clear_{{ table.name }}_stats(
     return SAI_STATUS_FAILURE;
 }
 {% endif %}
-{% if table.enable_bulk_get_api %}
-
-static sai_status_t dash_sai_get_{{ table.name | replace("entry", "entries") }}_attribute(
-        _In_ uint32_t object_count,
-        _In_ const sai_{{ table.name }}_t *{{ table.name }}, 
-        _In_ const uint32_t *attr_count,
-        _Inout_ sai_attribute_t **attr_list,
-        _In_ sai_bulk_op_error_mode_t mode,
-        _Out_ sai_status_t *object_statuses)
-{
-    DASH_LOG_ENTER();
-    assert(0 && "sai_get_{{ table.name | replace("entry", "entries") }}_attribute NYI");
-    return SAI_STATUS_FAILURE;
-}
-
-{% endif %}
 {% if table.name == 'route_entry' %}
 
 static sai_status_t dash_sai_set_{{ table.name | replace("entry", "entries") }}_attribute(
@@ -807,9 +791,6 @@ sai_{{ app_name }}_api_t dash_sai_{{ app_name }}_api_impl = {
 {% else %}
     .create_{{ table.name | replace("entry", "entries") }} = dash_sai_create_{{ table.name | replace("entry", "entries") }},
     .remove_{{ table.name | replace("entry", "entries") }} = dash_sai_remove_{{ table.name | replace("entry", "entries") }},
-{% endif %}
-{% if table.enable_bulk_get_api %}
-    .get_{{ table.name | replace("entry", "entries") }}_attribute = dash_sai_get_{{ table.name | replace("entry", "entries") }}_attribute,
 {% endif %}
 {% if table.name == 'route_entry' %}
     .set_{{ table.name | replace("entry", "entries") }}_attribute = dash_sai_set_{{ table.name | replace("entry", "entries") }}_attribute,
