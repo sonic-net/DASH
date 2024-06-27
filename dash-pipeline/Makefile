@@ -1,20 +1,27 @@
 SHELL = /bin/bash
 
+HAVE_VPP ?=
+ifeq ($(HAVE_VPP),y)
+VPP_LINK = veth4
+VPP_LINK_PEER = veth5
+SWITCH_PORT_VPP = --interface 2@$(VPP_LINK)
+endif
+
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
 
 # "All" type targets for convenience
-all:p4 sai saithrift-server docker-saithrift-client docker-saichallenger-client test
+all:p4 sai saithrift-server docker-saithrift-client docker-saichallenger-client vpp test
 
 run-all-tests:run-libsai-test run-saithrift-client-tests run-saichallenger-tests
 run-saithrift-client-tests: run-saithrift-ptftests run-saithrift-pytests
 run-saithrift-client-dev-tests: run-saithrift-dev-ptftests run-saithrift-dev-pytests
 
 .PHONY:clean
-clean: kill-all p4-clean sai-clean test-clean network-clean saithrift-server-clean
+clean: kill-all p4-clean sai-clean test-clean network-clean saithrift-server-clean vpp-clean
 	rm -rf $(P4_OUTDIR)
 
-kill-all: kill-saithrift-server kill-switch undeploy-ixiac kill-saichallenger-client
+kill-all: kill-saithrift-server kill-switch undeploy-ixiac kill-saichallenger-client kill-vpp
 
 PWD := $(realpath $(mkfile_dir))
 DASH_USER ?=dashuser
@@ -63,6 +70,10 @@ include dockerfiles/DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG.env
 
 # SAIChallenger Client image built locally with saithrift client libs + PTF & Pytest frameworks
 DOCKER_SAI_CHALLENGER_CLIENT_IMG ?= local/dash-saichallenger-client:latest
+
+# Run/compile vpp
+# include file defines DOCKER_VPP_IMG
+include dockerfiles/DOCKER_VPP_IMG.env
 
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
@@ -252,6 +263,50 @@ run-saithrift-bldr-bash:
 	    /bin/bash
 
 ######################################
+# VPP date-plane app TARGETS
+######################################
+DOCKER_RUN_VPP = docker run\
+	$(DOCKER_FLAGS) \
+	-v $(PWD)/bmv2:/bmv2 \
+	-v $(PWD)/tests:/tests \
+	-v $(PWD)/../:/dash \
+	--network=host \
+	-u $(HOST_USER):$(HOST_GROUP) \
+	--rm \
+
+.PHONY:vpp vpp-clean
+vpp-clean:
+	$(DOCKER_RUN_VPP) \
+	--name dash-vpp-$(USER) \
+	-w /dash/dash-pipeline/vpp-plugin $(DOCKER_VPP_IMG) \
+	make clean
+
+vpp:
+	@echo "Compile vpp for date-plane app ..."
+	$(DOCKER_RUN_VPP) \
+	--name dash-vpp-$(USER) \
+	-w /dash/dash-pipeline/vpp-plugin $(DOCKER_VPP_IMG) \
+	make
+
+run-vpp-bash:
+	$(DOCKER_RUN_VPP) \
+	--privileged \
+	--name dash-vpp-$(USER) \
+	-w /dash/dash-pipeline/vpp-plugin $(DOCKER_VPP_IMG) \
+	/bin/bash
+
+run-vpp: $(VPP_LINK)
+	$(DOCKER_RUN_VPP) \
+	--privileged \
+	-u root \
+	--name dash-vpp-$(USER) \
+	-w /dash/dash-pipeline/vpp-plugin $(DOCKER_VPP_IMG) \
+	env HOST_INTERFACE=$(VPP_LINK_PEER) ./vpp.sh startup.conf
+
+kill-vpp:
+	-docker kill dash-vpp-$(USER)
+
+######################################
 # P4 Behavioral-model (switch) TARGETS
 ######################################
 
@@ -267,6 +322,7 @@ run-switch: network
 		simple_switch_grpc \
 		--interface 0@veth0 \
 		--interface 1@veth2 \
+		$(SWITCH_PORT_VPP) \
 		--log-console \
 		--no-p4
 
@@ -622,10 +678,39 @@ docker-publish-dash-grpc:
 	[ -n $(DOCKER_GRPC_IMG_CTAG) ] && docker push $(DOCKER_GRPC_IMG_NAME):$(DOCKER_GRPC_IMG_CTAG)
 
 ###############################
+
+DOCKER_VPP_IMG_TAG = $(shell cat dockerfiles/Dockerfile.vpp | $(SHA1SUM))
+DOCKER_VPP_IMG = $(DOCKER_VPP_IMG_NAME):$(DOCKER_VPP_IMG_TAG)
+
+docker-dash-vpp:
+	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_VPP_IMG); } || \
+	docker build \
+	    -f dockerfiles/Dockerfile.vpp \
+	    -t $(DOCKER_VPP_IMG) \
+	    --build-arg user=$(DASH_USER) \
+	    --build-arg group=$(DASH_GROUP) \
+	    --build-arg uid=$(DASH_UID) \
+	    --build-arg guid=$(DASH_GUID) \
+	    --build-arg hostname=$(DASH_HOST) \
+	    --build-arg available_processors=$(shell nproc) \
+		dockerfiles
+	[ -n $(DOCKER_VPP_IMG_CTAG) ] && \
+		docker tag $(DOCKER_VPP_IMG) $(DOCKER_VPP_IMG_NAME):$(DOCKER_VPP_IMG_CTAG)
+
+docker-pull-dash-vpp:
+	docker pull $(DOCKER_VPP_IMG)
+
+docker-publish-dash-vpp:
+	@echo "Publish $(DOCKER_VPP_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_VPP_IMG)
+	[ -n $(DOCKER_VPP_IMG_CTAG) ] && \
+		docker push $(DOCKER_VPP_IMG_NAME):$(DOCKER_VPP_IMG_CTAG)
+
+###############################
 # BMV2-PKTGEN NETWORKING TARGETS
 ###############################
 
-network:veth0 veth2 disable-ipv6
+network:veth0 veth2 $(VPP_LINK) disable-ipv6
 
 veth0: /sys/class/net/veth0
 /sys/class/net/veth0:
@@ -644,13 +729,27 @@ veth2: /sys/class/net/veth2
 	sudo ip link set veth2 mtu 9500
 	sudo ip link set veth3 mtu 9500
 
+ifeq ($(HAVE_VPP),y)
+$(VPP_LINK): /sys/class/net/$(VPP_LINK)
+/sys/class/net/$(VPP_LINK):
+	sudo ip link add name $(VPP_LINK) type veth peer name $(VPP_LINK_PEER)
+	sudo ip link set dev $(VPP_LINK) up
+	sudo ip link set dev $(VPP_LINK_PEER) up
+	sudo ip link set $(VPP_LINK) mtu 9500
+	sudo ip link set $(VPP_LINK_PEER) mtu 9500
+endif
+
 disable-ipv6:
-	./disable_veth_ipv6.sh
+	VPP_LINK=$(VPP_LINK) VPP_LINK_PEER=$(VPP_LINK_PEER) ./disable_veth_ipv6.sh
 
 # Delete veth's, test existence to avoid needless use of sudo
 network-clean:
 	@-([ -e /sys/class/net/veth0 ] && sudo ip link delete dev veth0 && echo "Deleted veth0/1") || echo "No veth0, not deleting"
 	@-([ -e /sys/class/net/veth2 ] && sudo ip link delete dev veth2 && echo "Deleted veth2/3") || echo "No veth2, not deleting"
+ifeq ($(HAVE_VPP),y)
+	@-([ -e /sys/class/net/$(VPP_LINK) ] && sudo ip link delete dev $(VPP_LINK) \
+		&& echo "Deleted $(VPP_LINK)") || echo "No $(VPP_LINK), not deleting"
+endif
 
 ###############################
 # IXIA-C TARGETS
