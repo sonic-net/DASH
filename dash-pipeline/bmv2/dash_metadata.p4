@@ -14,26 +14,6 @@ enum bit<32> dash_routing_actions_t {
     NAT_PORT = (1 << 4)
 };
 
-enum bit<16> dash_direction_t {
-    INVALID = 0,
-    OUTBOUND = 1,
-    INBOUND = 2
-};
-
-enum bit<8> dash_packet_source_t {
-    EXTERNAL = 0,           // Packets from external sources.
-    DPAPP = 1,              // Packets from data plane app.
-    PEER = 2                // Packets from the paired DPU.
-};
-
-enum bit<8> dash_packet_type_t {
-    REGULAR = 0,            // Regular packets from external sources.
-    FLOW_SYNC_REQ = 1,      // Flow sync request packet.
-    FLOW_SYNC_ACK = 2,      // Flow sync ack packet.
-    DP_PROBE_REQ = 3,       // Data plane probe packet.
-    DP_PROBE_ACK = 4        // Data plane probe ack packet.
-};
-
 // Pipeline stages:
 enum bit<16> dash_pipeline_stage_t {
     INVALID = 0,
@@ -51,74 +31,6 @@ enum bit<16> dash_pipeline_stage_t {
     ROUTING_ACTION_APPLY = 300
 };
 
-enum bit<16> dash_flow_enabled_key_t {
-    ENI_ADDR = (1 << 0),
-    VNI = (1 << 1),
-    PROTOCOL = (1 << 2),
-    SRC_IP = (1 << 3),
-    DST_IP = (1 << 4),
-    SRC_PORT = (1 << 5),
-    DST_PORT = (1 << 6)
-}
-
-struct flow_table_data_t {
-    bit<16> id;
-    bit<32> max_flow_count;
-    dash_flow_enabled_key_t flow_enabled_key;
-    bit<32> flow_ttl_in_milliseconds;
-}
-
-enum bit<32> dash_flow_action_t {
-    NONE = 0
-}
-
-struct flow_key_t {
-    EthernetAddress eni_mac;
-    bit<8> ip_proto;
-    bit<16> vnet_id;
-    IPv4ORv6Address src_ip;
-    IPv4ORv6Address dst_ip;
-    bit<16> src_port;
-    bit<16> dst_port;
-    bool is_ipv6;
-}
-
-struct flow_data_t {
-    bit<32> version;
-    dash_direction_t dash_direction;
-    dash_flow_action_t actions;
-}
-
-enum bit<16> dash_flow_entry_bulk_get_session_mode_t {
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_GRPC = 0,
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_VENDOR = 1,
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_EVENT = 2,
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_EVENT_WITHOUT_FLOW_STATE = 3
-}
-
-enum bit<16> dash_flow_entry_bulk_get_session_filter_key_t
-{
-    INVAILD = 0,
-    FLOW_TABLE_ID = 1,
-    ENI_ADDR = 2,
-    IP_PROTOCOL = 3,
-    SRC_IP_ADDR = 4,
-    DST_IP_ADDR = 5,
-    SRC_L4_PORT = 6,
-    DST_L4_PORT = 7,
-    KEY_VERSION = 8
-}
-
-enum bit<8> dash_flow_entry_bulk_get_session_op_key_t
-{
-    FILTER_OP_INVALID = 0,
-    FILTER_OP_EQUAL_TO = 1,
-    FILTER_OP_GREATER_THAN = 2,
-    FILTER_OP_GREATER_THAN_OR_EQUAL_TO = 3,
-    FILTER_OP_LESS_THAN = 4,
-    FILTER_OP_LESS_THAN_OR_EQUAL_TO = 5
-}
-
 enum bit<8> dash_eni_mac_override_type_t {
     NONE = 0,
     SRC_MAC = 1,
@@ -133,14 +45,6 @@ enum bit<8> dash_eni_mac_type_t {
 struct conntrack_data_t {
     bool allow_in;
     bool allow_out;
-    flow_table_data_t flow_table;
-    EthernetAddress eni_mac;
-    flow_data_t flow_data;
-    flow_key_t flow_key;
-    flow_key_t reverse_flow_key;
-    bit<1> is_unidirectional_flow;
-    bit<16> bulk_get_session_id;
-    bit<16> bulk_get_session_filter_id;
 }
 
 enum bit<16> dash_tunnel_dscp_mode_t {
@@ -171,24 +75,6 @@ struct meter_context_t {
     bit<32> meter_class_and;
     bit<16> meter_policy_id;
     IPv4ORv6Address meter_policy_lookup_ip;
-}
-
-struct encap_data_t {
-    bit<24> vni;
-    IPv4Address underlay_sip;
-    IPv4Address underlay_dip;
-    dash_encapsulation_t dash_encapsulation;
-    EthernetAddress underlay_smac;
-    EthernetAddress underlay_dmac;
-}
-
-struct overlay_rewrite_data_t {
-    bool is_ipv6;
-    EthernetAddress dmac;
-    IPv4ORv6Address sip;
-    IPv4ORv6Address dip;
-    IPv6Address sip_mask;
-    IPv6Address dip_mask;
 }
 
 // HA roles
@@ -229,20 +115,13 @@ enum bit<8> dash_ha_state_t {
     SWITCHING_TO_STANDALONE = 12
 };
 
-// Flow sync state
-enum bit<8> dash_ha_flow_sync_state_t {
+// Flow state
+enum bit<8> dash_flow_state_t {
     FLOW_MISS = 0,                  // Flow not created yet
     FLOW_CREATED = 1,               // Flow is created but not synched or waiting for ack
     FLOW_SYNCED = 2,                // Flow has been synched to its peer
     FLOW_PENDING_DELETE = 3,        // Flow is pending deletion, waiting for ack
     FLOW_PENDING_RESIMULATION = 4   // Flow is marked as pending resimulation
-};
-
-// HA flow sync operations
-enum bit<8> dash_ha_flow_sync_op_t {
-    FLOW_CREATE = 0, // New flow creation.
-    FLOW_UPDATE = 1, // Flow resimulation or any other reason causing existing flow to be updated.
-    FLOW_DELETE = 2  // Flow deletion.
 };
 
 struct ha_data_t {
@@ -261,7 +140,7 @@ struct ha_data_t {
     bit<16> dp_channel_src_port_max;
 
     // HA packet/flow state
-    dash_ha_flow_sync_state_t flow_sync_state;
+    dash_flow_state_t flow_sync_state;
 }
 
 struct metadata_t {
@@ -303,13 +182,18 @@ struct metadata_t {
 
     // Flow data
     conntrack_data_t conntrack_data;
+#ifdef DPAPP_CONNTRACK
+    flow_table_data_t flow_table;
+    dash_flow_state_t flow_state;
+    bit<16> bulk_get_session_id;
+    bit<16> bulk_get_session_filter_id;
+#endif // DPAPP_CONNTRACK
 
     // Stage transition control
     dash_pipeline_stage_t target_stage;
 
     // Actions
     bit<32> routing_actions;
-    bit<32> flow_actions;
 
     // Action data
     bool dropped;

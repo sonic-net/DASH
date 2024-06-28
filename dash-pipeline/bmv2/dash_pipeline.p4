@@ -8,8 +8,11 @@
 #include "dash_tunnel.p4"
 #include "dash_outbound.p4"
 #include "dash_inbound.p4"
-#include "dash_conntrack.p4"
+#ifdef DPAPP_CONNTRACK
 #include "stages/conntrack_lookup.p4"
+#else
+#include "dash_conntrack.p4"
+#endif
 #include "stages/direction_lookup.p4"
 #include "stages/eni_lookup.p4"
 #include "stages/ha.p4"
@@ -250,6 +253,9 @@ control dash_ingress(
     }
 
     apply {
+        meta.encap_data.setValid();
+        meta.tunnel_data.setValid();
+        meta.overlay_data.setValid();
 
 #ifdef TARGET_DPDK_PNA
 #ifdef DPDK_PNA_SEND_TO_PORT_FIX_MERGED
@@ -264,6 +270,11 @@ control dash_ingress(
         send_to_port(istd.input_port);
 #endif  // DPDK_PNA_SEND_TO_PORT_FIX_MERGED
 #endif // TARGET_DPDK_PNA
+
+#ifdef DPAPP_CONNTRACK
+        // If packet is from DPAPP, just do conntrack_lookup
+        if (hdr.packet_meta.packet_source != dash_packet_source_t.DPAPP) {
+#endif // DPAPP_CONNTRACK
 
         if (meta.is_fast_path_icmp_flow_redirection_packet) {
             UPDATE_COUNTER(port_lb_fast_path_icmp_in, 0);
@@ -337,15 +348,23 @@ control dash_ingress(
         if (meta.eni_data.admin_state == 0) {
             deny();
         }
-
-        conntrack_lookup_stage.apply(hdr, meta);
-
+        
         UPDATE_ENI_COUNTER(eni_rx);
         if (meta.is_fast_path_icmp_flow_redirection_packet) {
             UPDATE_ENI_COUNTER(eni_lb_fast_path_icmp_in);
         }
 
+
+#ifdef DPAPP_CONNTRACK
+        } // from dpapp
+        conntrack_lookup_stage.apply(hdr, meta);
+#endif // DPAPP_CONNTRACK
+
         ha_stage.apply(hdr, meta);
+
+#ifdef DPAPP_CONNTRACK
+        if (meta.flow_state == dash_flow_state_t.FLOW_MISS) {
+#endif // DPAPP_CONNTRACK
 
         acl_group.apply();
 
@@ -360,6 +379,15 @@ control dash_ingress(
         }
 
         tunnel_stage.apply(hdr, meta);
+
+#ifdef DPAPP_CONNTRACK
+        if (!meta.dropped) {
+            conntrack_set_flow_data.apply(hdr, meta);
+            standard_metadata.egress_spec = 2; // vpp port
+            return;
+        }
+        }
+#endif // DPAPP_CONNTRACK
 
         routing_action_apply.apply(hdr, meta);
 
@@ -396,6 +424,19 @@ control dash_ingress(
                 UPDATE_ENI_COUNTER(eni_inbound_tx);
             }
         }
+
+#ifdef DPAPP_CONNTRACK
+        // Drop dash header in fast path
+        if (meta.flow_state == dash_flow_state_t.FLOW_CREATED) {
+            hdr.dp_ethernet.setInvalid();
+            hdr.packet_meta.setInvalid();
+            hdr.flow_key.setInvalid();
+            hdr.flow_data.setInvalid();
+            hdr.flow_overlay_data.setInvalid();
+            hdr.flow_encap_data.setInvalid();
+            hdr.flow_tunnel_data.setInvalid();
+        }
+#endif // DPAPP_CONNTRACK
     }
 }
 

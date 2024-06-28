@@ -24,6 +24,7 @@ def load_word_fixers() -> None:
         "pb": "protocol buffer",
         "proto": "protocol",
         "smac": "source MAC",
+        "dest": "destination",
         "dpu": "DPU"
     }
 
