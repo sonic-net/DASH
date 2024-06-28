@@ -29,13 +29,34 @@ parser dash_parser(
     )
 {
     state start {
+#ifdef DPAPP_CONNTRACK
+        // By default, packet is REGULAR from EXTERNAL
+        hd.packet_meta.setValid();
+        hd.packet_meta.packet_source = dash_packet_source_t.EXTERNAL;
+        hd.packet_meta.packet_type = dash_packet_type_t.REGULAR;
+        hd.packet_meta.packet_subtype = dash_packet_subtype_t.NONE;
+        hd.packet_meta.length = PACKET_META_HDR_SIZE;
+#endif // DPAPP_CONNTRACK
+
         packet.extract(hd.u0_ethernet);
         transition select(hd.u0_ethernet.ether_type) {
             IPV4_ETHTYPE:  parse_u0_ipv4;
             IPV6_ETHTYPE:  parse_u0_ipv6;
+#ifdef DPAPP_CONNTRACK
+            DASH_ETHTYPE:  parse_dash;
+#endif // DPAPP_CONNTRACK
             default: accept;
         }
     }
+
+#ifdef DPAPP_CONNTRACK
+    state parse_dash {
+        packet.extract(hd.packet_meta);
+        // TODO extract flow_key, etc by checking packet type/subtype
+        packet.extract(hd.flow_key);
+        transition parse_customer_ethernet;
+    }
+#endif // DPAPP_CONNTRACK
 
     state parse_u0_ipv4 {
         packet.extract(hd.u0_ipv4);
@@ -138,7 +159,17 @@ control dash_deparser(
     )
 {
     apply {
-	packet.emit(hdr.u0_ethernet);
+#ifdef DPAPP_CONNTRACK
+        packet.emit(hdr.dp_ethernet);
+        packet.emit(hdr.packet_meta);
+        packet.emit(hdr.flow_key);
+        packet.emit(hdr.flow_data);
+        packet.emit(hdr.flow_overlay_data);
+        packet.emit(hdr.flow_encap_data);
+        packet.emit(hdr.flow_tunnel_data);
+#endif // DPAPP_CONNTRACK
+
+        packet.emit(hdr.u0_ethernet);
         packet.emit(hdr.u0_ipv4);
         packet.emit(hdr.u0_ipv4options);
         packet.emit(hdr.u0_ipv6);

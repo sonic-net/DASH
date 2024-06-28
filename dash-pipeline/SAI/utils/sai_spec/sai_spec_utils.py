@@ -23,7 +23,8 @@ def load_word_fixers() -> None:
         "resimulation": "re-simulation",
         "pb": "protocol buffer",
         "proto": "protocol",
-        "smac": "source MAC"
+        "smac": "source MAC",
+        "dest": "destination",
     }
 
     # Load all SAI acronyms
