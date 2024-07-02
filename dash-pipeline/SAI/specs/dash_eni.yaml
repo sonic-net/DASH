@@ -585,6 +585,19 @@ sai_apis:
     valid_only: null
     is_vlan: false
     deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_ENI_ATTR_IS_HA_FLOW_OWNER
+    description: Action parameter is HA flow owner
+    type: bool
+    attr_value_field: booldata
+    default: 'false'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
   stats:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_RX_BYTES

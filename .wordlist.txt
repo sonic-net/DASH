@@ -377,6 +377,7 @@ Novus
 NPL
 NPU
 NPUS
+NPUs
 NSG
 NSGs
 num
@@ -733,3 +734,5 @@ Ivantsiv
 Zhixiong
 Niu
 validonly
+BFD
+hamgrd

@@ -114,6 +114,35 @@ enum bit<8> dash_ha_role_t {
     SWITCHING_TO_ACTIVE = 4
 };
 
+// HA states
+enum bit<8> dash_ha_state_t {
+    DEAD = 0,
+    // trying to connect to HA pair
+    CONNECTING = 1,
+    // bulk sync in progress
+    CONNECTED = 2,
+    // connection successful, bulk sync in progress
+    INITIALIZING_TO_ACTIVE      = 3,
+    // connection successful, bulk sync in progress
+    INITIALIZING_TO_STANDBY     = 4,
+    // ready to be in STANDALONE state, waiting for activation of admin role
+    PENDING_STANDALONE_ACTIVATION  = 5,
+    // ready to be in ACTIVE state, waiting for activation of admin role
+    PENDING_ACTIVE_ACTIVATION      = 6,
+    // ready to be in STANDBY state, waiting for activation of admin role
+    PENDING_STANDBY_ACTIVATION     = 7,
+    // activation done, fowarding traffic
+    STANDALONE = 8,
+    // activation done, fowarding traffic and syncing flows with HA pair
+    ACTIVE = 9,
+    // activation done, ready to fowarding traffic if pair fails
+    STANDBY = 10,
+    // going down for planned shutdown
+    DESTROYING = 11,
+    // gracefully transitioning from paired state to stand-alone
+    SWITCHING_TO_STANDALONE = 12
+};
+
 // Flow sync state
 enum bit<8> dash_ha_flow_sync_state_t {
     FLOW_MISS = 0,                  // Flow not created yet
@@ -190,7 +219,7 @@ struct metadata_t {
 
     // Actions
     bit<32> routing_actions;
-    
+
     // Action data
     bool dropped;
     // encap_data is for underlay
