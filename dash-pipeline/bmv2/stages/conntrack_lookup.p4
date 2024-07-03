@@ -113,8 +113,9 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
     @SaiTable[name = "flow", api = "dash_flow", order = 1, enable_bulk_get_api = "true", enable_bulk_get_server = "true"]
     table flow_entry {
         key = {
-            meta.conntrack_data.flow_table.id: exact @SaiVal[name = "flow_table_id", type="sai_object_id_t"];
+            // meta.conntrack_data.flow_table.id: exact @SaiVal[name = "flow_table_id", type="sai_object_id_t"];
             meta.conntrack_data.flow_key.eni_mac : exact;
+            // Disable VNI due to key length limitation
             meta.conntrack_data.flow_key.vnet_id : exact;
             meta.conntrack_data.flow_key.ip_proto : exact;
             meta.conntrack_data.flow_key.src_ip : exact;
@@ -187,9 +188,11 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
             meta.conntrack_data.flow_key.eni_mac = meta.eni_addr;
         }
 
-        if (meta.conntrack_data.flow_table.flow_enabled_key & dash_flow_enabled_key_t.VNI != 0) {
-            meta.conntrack_data.flow_key.vnet_id = meta.vnet_id;
-        } 
+        /* Disable VNI due to key length limitation */
+        // if (meta.conntrack_data.flow_table.flow_enabled_key & dash_flow_enabled_key_t.VNI != 0) {
+        //     meta.conntrack_data.flow_key.vnet_id = meta.vnet_id;
+        // } 
+        
         if (meta.conntrack_data.flow_table.flow_enabled_key & dash_flow_enabled_key_t.PROTOCOL != 0) {
             meta.conntrack_data.flow_key.ip_proto = meta.ip_protocol;
         }
