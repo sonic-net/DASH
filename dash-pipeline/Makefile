@@ -268,6 +268,9 @@ run-saithrift-bldr-bash:
 DOCKER_RUN_VPP = docker run\
 	$(DOCKER_FLAGS) \
 	-v $(PWD)/bmv2:/bmv2 \
+	-v $(PWD)/$(P4_OUTDIR)/dash_pipeline.json:/etc/dash/dash_pipeline.json \
+	-v $(PWD)/$(P4_OUTDIR)/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
+	-v $(PWD)/SAI:/SAI \
 	-v $(PWD)/tests:/tests \
 	-v $(PWD)/../:/dash \
 	--network=host \
