@@ -1,5 +1,6 @@
 # This Dockerfile builds an image used to compile vpp for dash date-plane app.
-FROM amd64/ubuntu:20.04
+FROM sonicdash.azurecr.io/dash-grpc:1.43.2 as grpc
+FROM p4lang/behavioral-model@sha256:ce45720e28a96a50f275c1b511cd84c2558b62f2cf7a7e506765183bc3fb2e32
 LABEL maintainer="SONIC-DASH Community"
 LABEL description="DASH date-plane app using vpp"
 
@@ -7,6 +8,7 @@ LABEL description="DASH date-plane app using vpp"
 ARG available_processors
 ARG MAKEFLAGS=-j$available_processors
 
+ARG sswitch_grpc=yes
 ARG CC=gcc
 ARG CXX=g++
 # Set TZ to avoid interactive installer
@@ -20,7 +22,9 @@ RUN apt-get update && \
             build-essential \
             autoconf \
             libtool \
+            libtool-bin \
             pkg-config \
+            patchelf \
             sudo \
             iproute2 net-tools iputils-ping \
             make
@@ -38,6 +42,29 @@ WORKDIR /var
 RUN (git clone https://gerrit.fd.io/r/vpp && \
      cd vpp && UNATTENDED=y make install-dep)
 
+
+WORKDIR /usr/local/lib/
+
+# Copy libabsl .a files from p4pi, make shared lib for our use and delete .a's
+COPY --from=grpc /usr/local/lib/lib*grpc*.so* \
+        /usr/local/lib/libabsl*.so* \
+        /usr/local/lib/libgpr*.so* \
+        /usr/local/lib/libupb*.so* \
+        /usr/local/lib/libre2*.so* \
+        /usr/local/lib/libaddress_sorting*.so* \
+        /usr/local/lib/libssl*.so* \
+        /usr/local/lib/libcrypto*.so* \
+        ./
+
+# Specify dash sai libs dependency on vpp
+RUN patchelf --set-rpath /SAI/lib /usr/bin/vpp
+RUN patchelf --add-needed libsai.so \
+             --add-needed libprotobuf.so \
+             --add-needed libpiprotobuf.so \
+             --add-needed libpiprotogrpc.so \
+             --add-needed libgrpc++.so.1.43 \
+             /usr/bin/vpp
+RUN ldconfig
 
 WORKDIR /
 
