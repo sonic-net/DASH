@@ -113,7 +113,8 @@ control dash_ingress(
                          bit<1> disable_fast_path_icmp_flow_redirection,
                          bit<1> full_flow_resimulation_requested,
                          bit<64> max_resimulated_flow_per_second,
-                         @SaiVal[type="sai_object_id_t"] bit<16> outbound_routing_group_id)
+                         @SaiVal[type="sai_object_id_t"] bit<16> outbound_routing_group_id,
+                         bit<1> is_ha_flow_owner)
     {
         meta.eni_data.cps                                                   = cps;
         meta.eni_data.pps                                                   = pps;
@@ -338,7 +339,7 @@ control dash_ingress(
         }
 
         conntrack_lookup_stage.apply(hdr, meta);
-        
+
         UPDATE_ENI_COUNTER(eni_rx);
         if (meta.is_fast_path_icmp_flow_redirection_packet) {
             UPDATE_ENI_COUNTER(eni_lb_fast_path_icmp_in);
@@ -375,7 +376,7 @@ control dash_ingress(
     #endif // TARGET_BMV2_V1MODEL
     #ifdef TARGET_DPDK_PNA
             , istd
-    #endif // TARGET_DPDK_PNA        
+    #endif // TARGET_DPDK_PNA
         );
 
         if (meta.eni_data.dscp_mode == dash_tunnel_dscp_mode_t.PIPE_MODEL) {

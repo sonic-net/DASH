@@ -106,7 +106,7 @@ enum bit<16> dash_flow_entry_bulk_get_session_filter_key_t
     DST_IP_ADDR = 5,
     SRC_L4_PORT = 6,
     DST_L4_PORT = 7,
-    KEY_VERSION = 8 
+    KEY_VERSION = 8
 }
 
 enum bit<8> dash_flow_entry_bulk_get_session_op_key_t
@@ -123,7 +123,7 @@ struct conntrack_data_t {
     bool allow_in;
     bool allow_out;
     flow_table_data_t flow_table;
-    EthernetAddress eni_mac; 
+    EthernetAddress eni_mac;
     flow_data_t flow_data;
     flow_key_t flow_key;
     flow_key_t reverse_flow_key;
@@ -169,7 +169,7 @@ struct encap_data_t {
     dash_encapsulation_t dash_encapsulation;
     EthernetAddress underlay_smac;
     EthernetAddress underlay_dmac;
-}    
+}
 
 struct overlay_rewrite_data_t {
     bool is_ipv6;
@@ -187,6 +187,35 @@ enum bit<8> dash_ha_role_t {
     STANDBY = 2,
     STANDALONE = 3,
     SWITCHING_TO_ACTIVE = 4
+};
+
+// HA states
+enum bit<8> dash_ha_state_t {
+    DEAD = 0,
+    // trying to connect to HA pair
+    CONNECTING = 1,
+    // bulk sync in progress
+    CONNECTED = 2,
+    // connection successful, bulk sync in progress
+    INITIALIZING_TO_ACTIVE      = 3,
+    // connection successful, bulk sync in progress
+    INITIALIZING_TO_STANDBY     = 4,
+    // ready to be in STANDALONE state, waiting for activation of admin role
+    PENDING_STANDALONE_ACTIVATION  = 5,
+    // ready to be in ACTIVE state, waiting for activation of admin role
+    PENDING_ACTIVE_ACTIVATION      = 6,
+    // ready to be in STANDBY state, waiting for activation of admin role
+    PENDING_STANDBY_ACTIVATION     = 7,
+    // activation done, fowarding traffic
+    STANDALONE = 8,
+    // activation done, fowarding traffic and syncing flows with HA pair
+    ACTIVE = 9,
+    // activation done, ready to fowarding traffic if pair fails
+    STANDBY = 10,
+    // going down for planned shutdown
+    DESTROYING = 11,
+    // gracefully transitioning from paired state to stand-alone
+    SWITCHING_TO_STANDALONE = 12
 };
 
 // Flow sync state

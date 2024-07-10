@@ -108,7 +108,7 @@ HA set is defined as a SAI object and contains the following SAI attributes:
 | SAI_HA_SET_ATTR_DP_CHANNEL_PROBE_INTERVAL_MS | `sai_uint32_t` | The interval of the data plane channel probe. |
 | SAI_HA_SET_ATTR_DP_CHANNEL_PROBE_FAIL_THRESHOLD | `sai_uint32_t` | The threshold of the data plane channel probe fail. |
 | SAI_HA_SET_ATTR_DP_CHANNEL_IS_ALIVE | `bool` | (Read-only) Is data plane channel alive. |
-| SAI_HA_SET_ATTR_SWITCHOVER_NETWORK_CONVERGENCE_TIME_MS | sai_uint32_t | Time for which DPU driven HA state machine needs to wait for the network to switchover traffic during planned shutdown of the other DPU in the HA pair. |
+| SAI_HA_SET_ATTR_DPU_DRIVEN_HA_SWITCHOVER_WAIT_TIME_MS | sai_uint32_t | Time to wait for the network to switchover traffic in DPU driven HA mode. |
 
 ### 4.2. HA Scope
 
@@ -121,10 +121,10 @@ HA scope is also defined as a SAI object and contains the following SAI attribut
 | SAI_HA_SCOPE_ATTR_FLOW_VERSION | `sai_uint32_t` | The flow version for new flows. |
 | SAI_HA_SCOPE_ATTR_FLOW_RECONCILE_REQUESTED | `bool` | When set to true, flow reconcile will be initiated. |
 | SAI_HA_SCOPE_ATTR_FLOW_RECONCILE_NEEDED | `bool` | (Read-only) If true, flow reconcile is needed. |
-| SAI_HA_SCOPE_ATTR_VIP_V4 | `sai_ip_address_t` | Dedicated IPv4 VIP for DPU HA scope. |
-| SAI_HA_SCOPE_ATTR_VIP_V6 | `sai_ip_address_t` | Dedicated IPv6 VIP for DPU HA scope. |
-| SAI_HA_SCOPE_ATTR_ADMIN_STATE | `bool` | Start or stop the DPU driven HA state machine. |
-| SAI_HA_SCOPE_ATTR_HA_STATE | `sai_dash_ha_state_t` | Read-only state in case of DPU driven state machine. |
+| SAI_HA_SCOPE_ATTR_VIP_V4 | `sai_ip_address_t` | IPv4 VIP of the HA scope (Used in DPU driven HA mode only). |
+| SAI_HA_SCOPE_ATTR_VIP_V6 | `sai_ip_address_t` | IPv6 VIP of the HA scope (Used in DPU driven HA mode only). |
+| SAI_HA_SCOPE_ATTR_ADMIN_STATE | `bool` | Administrative control of HA scope (In case of DPU driven HA mode, this is used to start or stop HA state machine). |
+| SAI_HA_SCOPE_ATTR_HA_STATE | `sai_dash_ha_state_t` | (Read-only) Operational HA state. |
 | SAI_HA_SCOPE_ATTR_ACTIVATE_ROLE | `bool` | Trigger DPU driven HA state machine to transition to steady state and prepare to start receiving traffic destined to VIP. |
 
 The HA role is defined as below:
@@ -292,10 +292,13 @@ Similar to HA set, whenever any HA scope state is changed, it will be reported b
 typedef enum _sai_ha_scope_event_t
 {
     /** HA scope state changed */
-    SAI_HA_SCOPE_STATE_CHANGED,
+    SAI_HA_SCOPE_EVENT_STATE_CHANGED,
 
     /** Flow reconcile is needed */
-    SAI_HA_SCOPE_FLOW_RECONCILE_NEEDED,
+    SAI_HA_SCOPE_EVENT_FLOW_RECONCILE_NEEDED,
+
+    /** DPU driven HA split brain detected */
+    SAI_HA_SCOPE_EVENT_SPLIT_BRAIN_DETECTED,
 
 } sai_ha_scope_event_t;
 
@@ -316,7 +319,7 @@ typedef struct _sai_ha_scope_event_data_t
     /** Flow version */
     sai_uint32_t flow_version;
 
-    /** HA role */
+    /** HA state */
     sai_dash_ha_state_t ha_state;
 
 } sai_ha_scope_event_data_t;
