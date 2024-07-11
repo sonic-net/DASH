@@ -95,7 +95,6 @@ control dash_ingress(
                          bit<32> pps,
                          bit<32> flows,
                          bit<1> admin_state,
-                         @SaiVal[type="sai_object_id_t"] bit<16> flow_table_id,
                          @SaiVal[type="sai_object_id_t"] bit<16> ha_scope_id,
                          @SaiVal[type="sai_ip_address_t"] IPv4Address vm_underlay_dip,
                          @SaiVal[type="sai_uint32_t"] bit<24> vm_vni,
@@ -155,7 +154,6 @@ control dash_ingress(
             meta.meter_context.meter_policy_id = v4_meter_policy_id;
         }
 
-        meta.conntrack_data.flow_table.id = flow_table_id;
         meta.ha.ha_scope_id = ha_scope_id;
         meta.fast_path_icmp_flow_redirection_disabled = disable_fast_path_icmp_flow_redirection;
     }
