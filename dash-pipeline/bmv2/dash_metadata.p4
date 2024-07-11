@@ -81,6 +81,7 @@ struct flow_key_t {
     IPv4ORv6Address dst_ip;
     bit<16> src_port;
     bit<16> dst_port;
+    bool is_ipv6;
 }
 
 struct flow_data_t {
@@ -162,14 +163,7 @@ struct encap_data_t {
     dash_encapsulation_t dash_encapsulation;
     EthernetAddress underlay_smac;
     EthernetAddress underlay_dmac;
-    
-    bit<24> underlay1_vni;
-    IPv4Address underlay1_sip;
-    IPv4Address underlay1_dip;
-    dash_encapsulation_t underlay1_dash_encapsulation;
-    EthernetAddress underlay1_smac;
-    EthernetAddress underlay1_dmac;
-}
+}    
 
 struct overlay_rewrite_data_t {
     bool is_ipv6;
@@ -267,7 +261,8 @@ struct metadata_t {
 
     // Actions
     bit<32> routing_actions;
-    
+    bit<32> flow_actions;
+
     // Action data
     bool dropped;
     // encap_data is for underlay

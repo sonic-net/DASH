@@ -94,12 +94,13 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         meta.encap_data.underlay_sip = underlay0_sip;
         meta.encap_data.underlay_dip = underlay0_dip;
         meta.encap_data.dash_encapsulation = underlay0_dash_encapsulation;
-        meta.encap_data.underlay1_vni = underlay1_vnet_id;
-        meta.encap_data.underlay1_sip = underlay1_sip;
-        meta.encap_data.underlay1_dip = underlay1_dip;
-        meta.encap_data.underlay1_dash_encapsulation = underlay1_dash_encapsulation;
-        meta.encap_data.underlay1_smac = underlay1_smac;
-        meta.encap_data.underlay1_dmac = underlay1_dmac;
+
+        meta.tunnel_data.vni = underlay1_vnet_id;
+        meta.tunnel_data.underlay_sip = underlay1_sip;
+        meta.tunnel_data.underlay_dip = underlay1_dip;
+        meta.tunnel_data.dash_encapsulation = underlay1_dash_encapsulation;
+        meta.tunnel_data.underlay_smac = underlay1_smac;
+        meta.tunnel_data.underlay_dmac = underlay1_dmac;
 
 
         /* Set overlay rewrite metadata */
@@ -120,6 +121,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
             meta.conntrack_data.flow_key.dst_ip : exact;
             meta.conntrack_data.flow_key.src_port : exact;
             meta.conntrack_data.flow_key.dst_port : exact;
+            meta.conntrack_data.flow_key.is_ipv6 : exact @SaiVal[name = "src_ip_is_v6"];
         }
 
         actions = {
