@@ -90,6 +90,15 @@ struct flow_data_t {
     dash_flow_action_t actions;
 }
 
+enum bit<16> dash_flow_entry_bulk_get_session_mode_t
+
+{
+  SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_GRPC = 0,
+  SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_VENDOR = 1,
+  SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_EVENT = 2,
+  SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_EVENT_WITHOUT_FLOW_STATE = 3
+}
+
 enum bit<16> dash_flow_entry_bulk_get_session_filter_key_t
 {
     INVAILD = 0,

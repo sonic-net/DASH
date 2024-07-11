@@ -131,22 +131,29 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
     
     //
     // Flow bulk get session filter:
+    // For API generation only and has no effect on the dataplane
     //
     action set_flow_entry_bulk_get_session_filter_attr(
         @SaiVal[type="sai_dash_flow_entry_bulk_get_session_filter_key_t"] dash_flow_entry_bulk_get_session_filter_key_t dash_flow_entry_bulk_get_session_filter_key, 
         @SaiVal[type="sai_dash_flow_entry_bulk_get_session_op_key_t"] dash_flow_entry_bulk_get_session_op_key_t  dash_flow_entry_bulk_get_session_op_key,
         bit<64> int_value,
-        IPv4ORv6Address ip_value)
+        IPv4ORv6Address ip_value,
+        bit<48> mac_value)
     {
     }
 
     //
     // Flow bulk get session:
+    // For API generation only and has no effect on the dataplane
     //
     action set_flow_entry_bulk_get_session_attr(
+        /* Mode and limitation */
+        @SaiVal[type="sai_dash_flow_entry_bulk_get_session_mode_t"] dash_flow_entry_bulk_get_session_mode_t dash_flow_entry_bulk_get_session_mode, 
+        bit<32> bulk_get_entry_limitation,
+        
         /* GRPC Session server IP and port */
-        IPv4ORv6Address bulk_get_session_ip,
-        bit<16> bulk_get_session_port,
+        IPv4ORv6Address bulk_get_session_server_ip,
+        bit<16> bulk_get_session_server_port,
 
         /* Session filters */ 
         @SaiVal[type="sai_object_id_t"] bit<16> first_flow_entry_bulk_get_session_filter_id,

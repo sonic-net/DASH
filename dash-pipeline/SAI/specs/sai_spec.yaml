@@ -298,6 +298,26 @@ enums:
     name: KEY_VERSION
     description: ''
     value: '8'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_flow_entry_bulk_get_session_mode_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_GRPC
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_VENDOR
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_EVENT
+    description: ''
+    value: '2'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_EVENT_WITHOUT_FLOW_STATE
+    description: ''
+    value: '3'
 port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtension
   attributes: []
   stats:
