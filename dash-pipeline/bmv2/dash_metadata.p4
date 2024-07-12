@@ -52,14 +52,13 @@ enum bit<16> dash_pipeline_stage_t {
 };
 
 enum bit<16> dash_flow_enabled_key_t {
-    NONE = (1 << 0),
-    ENI_ADDR = (1 << 1),
-    VNI = (1 << 2),
-    PROTOCOL = (1 << 3),
-    SRC_IP = (1 << 4),
-    DST_IP = (1 << 5),
-    SRC_PORT = (1 << 6),
-    DST_PORT = (1 << 7)
+    ENI_ADDR = (1 << 0),
+    VNI = (1 << 1),
+    PROTOCOL = (1 << 2),
+    SRC_IP = (1 << 3),
+    DST_IP = (1 << 4),
+    SRC_PORT = (1 << 5),
+    DST_PORT = (1 << 6)
 }
 
 struct flow_table_data_t {
@@ -90,13 +89,11 @@ struct flow_data_t {
     dash_flow_action_t actions;
 }
 
-enum bit<16> dash_flow_entry_bulk_get_session_mode_t
-
-{
-  SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_GRPC = 0,
-  SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_VENDOR = 1,
-  SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_EVENT = 2,
-  SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_EVENT_WITHOUT_FLOW_STATE = 3
+enum bit<16> dash_flow_entry_bulk_get_session_mode_t {
+    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_GRPC = 0,
+    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_VENDOR = 1,
+    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_EVENT = 2,
+    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_EVENT_WITHOUT_FLOW_STATE = 3
 }
 
 enum bit<16> dash_flow_entry_bulk_get_session_filter_key_t
