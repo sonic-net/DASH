@@ -40,6 +40,7 @@ enum bit<16> dash_pipeline_stage_t {
 
     // Inbound stages
     INBOUND_STAGE_START = 100,
+    INBOUND_ROUTING = 100, // OUTBOUND_STAGE_START
 
     // Outbound stages
     OUTBOUND_STAGE_START = 200,
@@ -164,6 +165,7 @@ struct eni_data_t {
     bit<6> dscp;
     dash_tunnel_dscp_mode_t dscp_mode;
     outbound_routing_group_data_t outbound_routing_group_data;
+    IPv4Address vip;
 }
 
 struct meter_context_t {
@@ -273,6 +275,7 @@ struct metadata_t {
     dash_direction_t direction;
     dash_eni_mac_type_t eni_mac_type;
     dash_eni_mac_override_type_t eni_mac_override_type;
+    encap_data_t rx_encap;
     EthernetAddress eni_addr;
     bit<16> vnet_id;
     bit<16> dst_vnet_id;

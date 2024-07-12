@@ -33,7 +33,7 @@ control direction_lookup_stage(
     @SaiTable[name = "direction_lookup", api = "dash_direction_lookup"]
     table direction_lookup {
         key = {
-            hdr.u0_vxlan.vni : exact @SaiVal[name = "VNI"];
+            meta.rx_encap.vni : exact @SaiVal[name = "VNI"];
         }
 
         actions = {

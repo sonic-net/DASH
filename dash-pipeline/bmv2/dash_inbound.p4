@@ -6,6 +6,7 @@
 #include "dash_acl.p4"
 #include "routing_actions/routing_actions.p4"
 #include "dash_conntrack.p4"
+#include "stages/inbound_routing.p4"
 
 control inbound(inout headers_t hdr,
                 inout metadata_t meta)
@@ -28,11 +29,13 @@ control inbound(inout headers_t hdr,
         }
 
 #ifdef STATEFUL_P4
-            ConntrackOut.apply(1);
+        ConntrackOut.apply(1);
 #endif /* STATEFUL_P4 */
 #ifdef PNA_CONNTRACK
         ConntrackOut.apply(hdr, meta);
 #endif //PNA_CONNTRACK
+
+        inbound_routing_stage.apply(hdr, meta);
 
         do_tunnel_encap(hdr,
                      meta,
