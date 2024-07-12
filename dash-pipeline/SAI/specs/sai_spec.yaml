@@ -191,73 +191,33 @@ enums:
   description: ''
   members:
   - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: NONE
-    description: ''
-    value: '1'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
     name: ENI_ADDR
     description: ''
-    value: '2'
+    value: '1'
   - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
     name: VNI
     description: ''
-    value: '4'
+    value: '2'
   - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
     name: PROTOCOL
     description: ''
-    value: '8'
+    value: '4'
   - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
     name: SRC_IP
     description: ''
-    value: '16'
+    value: '8'
   - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
     name: DST_IP
     description: ''
-    value: '32'
+    value: '16'
   - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
     name: SRC_PORT
     description: ''
-    value: '64'
+    value: '32'
   - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
     name: DST_PORT
     description: ''
-    value: '128'
-- !!python/object:utils.sai_spec.sai_enum.SaiEnum
-  name: sai_dash_flow_entry_bulk_get_session_op_key_t
-  description: ''
-  members:
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: FILTER_OP_INVALID
-    description: ''
-    value: '0'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: FILTER_OP_EQUAL_TO
-    description: ''
-    value: '1'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: FILTER_OP_GREATER_THAN
-    description: ''
-    value: '2'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: FILTER_OP_GREATER_THAN_OR_EQUAL_TO
-    description: ''
-    value: '3'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: FILTER_OP_LESS_THAN
-    description: ''
-    value: '4'
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: FILTER_OP_LESS_THAN_OR_EQUAL_TO
-    description: ''
-    value: '5'
-- !!python/object:utils.sai_spec.sai_enum.SaiEnum
-  name: sai_dash_flow_action_t
-  description: ''
-  members:
-  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: NONE
-    description: ''
-    value: '0'
+    value: '64'
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
   name: sai_dash_flow_entry_bulk_get_session_filter_key_t
   description: ''
@@ -299,6 +259,34 @@ enums:
     description: ''
     value: '8'
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_flow_entry_bulk_get_session_op_key_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: FILTER_OP_INVALID
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: FILTER_OP_EQUAL_TO
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: FILTER_OP_GREATER_THAN
+    description: ''
+    value: '2'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: FILTER_OP_GREATER_THAN_OR_EQUAL_TO
+    description: ''
+    value: '3'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: FILTER_OP_LESS_THAN
+    description: ''
+    value: '4'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: FILTER_OP_LESS_THAN_OR_EQUAL_TO
+    description: ''
+    value: '5'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
   name: sai_dash_flow_entry_bulk_get_session_mode_t
   description: ''
   members:
@@ -318,6 +306,14 @@ enums:
     name: SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_EVENT_WITHOUT_FLOW_STATE
     description: ''
     value: '3'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_flow_action_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: NONE
+    description: ''
+    value: '0'
 port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtension
   attributes: []
   stats:
