@@ -70,7 +70,8 @@ class SaiSpec:
         #   spec can move around and make code review harder.
         # - Removing enum can break existing code.
         sai_spec_utils.merge_sai_value_lists(
-            self.enums, other.enums, lambda x: x.name
+            self.enums, other.enums, lambda x: x.name,
+            on_conflict = lambda x, y: x.__dict__.update(y.__dict__),
         )
 
         self.port_extenstion.merge(other.port_extenstion)
