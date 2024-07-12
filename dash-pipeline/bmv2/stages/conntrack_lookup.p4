@@ -195,10 +195,9 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
             meta.conntrack_data.flow_key.eni_mac = meta.eni_addr;
         }
 
-        /* Disable VNI due to key length limitation */
-        // if (meta.conntrack_data.flow_table.flow_enabled_key & dash_flow_enabled_key_t.VNI != 0) {
-        //     meta.conntrack_data.flow_key.vnet_id = meta.vnet_id;
-        // } 
+        if (meta.conntrack_data.flow_table.flow_enabled_key & dash_flow_enabled_key_t.VNI != 0) {
+             meta.conntrack_data.flow_key.vnet_id = meta.vnet_id;
+        } 
         
         if (meta.conntrack_data.flow_table.flow_enabled_key & dash_flow_enabled_key_t.PROTOCOL != 0) {
             meta.conntrack_data.flow_key.ip_proto = meta.ip_protocol;
