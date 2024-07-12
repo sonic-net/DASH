@@ -64,9 +64,9 @@ sai_apis:
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
-      id: 45245089
+      id: 43450617
       actions:
         SAI_VIP_ENTRY_ACTION_ACCEPT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_VIP_ENTRY_ACTION_ACCEPT
-          id: 26041632
+          id: 22888270
           attr_param_id: {}
