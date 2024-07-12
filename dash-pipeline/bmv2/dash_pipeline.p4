@@ -9,6 +9,7 @@
 #include "dash_outbound.p4"
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"
+#include "stages/conntrack_lookup.p4"
 #include "stages/direction_lookup.p4"
 #include "stages/eni_lookup.p4"
 #include "stages/ha.p4"
@@ -335,6 +336,8 @@ control dash_ingress(
         if (meta.eni_data.admin_state == 0) {
             deny();
         }
+
+        conntrack_lookup_stage.apply(hdr, meta);
         
         UPDATE_ENI_COUNTER(eni_rx);
         if (meta.is_fast_path_icmp_flow_redirection_packet) {

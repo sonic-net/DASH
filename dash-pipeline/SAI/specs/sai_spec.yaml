@@ -13,6 +13,7 @@ api_types:
 - SAI_API_ROUTE
 - SAI_API_DASH_VIP
 - SAI_API_DASH_TUNNEL
+- SAI_API_DASH_FLOW
 object_types:
 - SAI_OBJECT_TYPE_DASH_ACL_GROUP
 - SAI_OBJECT_TYPE_DASH_ACL_RULE
@@ -33,6 +34,10 @@ object_types:
 - SAI_OBJECT_TYPE_VIP_ENTRY
 - SAI_OBJECT_TYPE_DASH_TUNNEL
 - SAI_OBJECT_TYPE_OUTBOUND_ROUTING_GROUP
+- SAI_OBJECT_TYPE_FLOW_TABLE
+- SAI_OBJECT_TYPE_FLOW_ENTRY
+- SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER
+- SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION
 object_entries:
 - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
   name: direction_lookup_entry
@@ -82,6 +87,12 @@ object_entries:
   type: sai_vip_entry_t
   objects: null
   valid_only: object_type == SAI_OBJECT_TYPE_VIP_ENTRY,
+- !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+  name: flow_entry
+  description: Object entry for DASH API flow_entry
+  type: sai_flow_entry_t
+  objects: null
+  valid_only: object_type == SAI_OBJECT_TYPE_FLOW_ENTRY,
 enums:
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
   name: sai_dash_direction_t
@@ -175,6 +186,134 @@ enums:
     name: NAT_PORT
     description: ''
     value: '16'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_flow_enabled_key_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: ENI_ADDR
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: VNI
+    description: ''
+    value: '2'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: PROTOCOL
+    description: ''
+    value: '4'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SRC_IP
+    description: ''
+    value: '8'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: DST_IP
+    description: ''
+    value: '16'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SRC_PORT
+    description: ''
+    value: '32'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: DST_PORT
+    description: ''
+    value: '64'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_flow_entry_bulk_get_session_filter_key_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: INVAILD
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: FLOW_TABLE_ID
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: ENI_ADDR
+    description: ''
+    value: '2'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: IP_PROTOCOL
+    description: ''
+    value: '3'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SRC_IP_ADDR
+    description: ''
+    value: '4'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: DST_IP_ADDR
+    description: ''
+    value: '5'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SRC_L4_PORT
+    description: ''
+    value: '6'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: DST_L4_PORT
+    description: ''
+    value: '7'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: KEY_VERSION
+    description: ''
+    value: '8'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_flow_entry_bulk_get_session_op_key_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: FILTER_OP_INVALID
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: FILTER_OP_EQUAL_TO
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: FILTER_OP_GREATER_THAN
+    description: ''
+    value: '2'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: FILTER_OP_GREATER_THAN_OR_EQUAL_TO
+    description: ''
+    value: '3'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: FILTER_OP_LESS_THAN
+    description: ''
+    value: '4'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: FILTER_OP_LESS_THAN_OR_EQUAL_TO
+    description: ''
+    value: '5'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_flow_entry_bulk_get_session_mode_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_GRPC
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_VENDOR
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_EVENT
+    description: ''
+    value: '2'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_EVENT_WITHOUT_FLOW_STATE
+    description: ''
+    value: '3'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_flow_action_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: NONE
+    description: ''
+    value: '0'
 port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtension
   attributes: []
   stats:
@@ -270,3 +409,4 @@ api_groups:
 - !inc '/SAI/specs/route.yaml'
 - !inc '/SAI/specs/dash_vip.yaml'
 - !inc '/SAI/specs/dash_tunnel.yaml'
+- !inc '/SAI/specs/dash_flow.yaml'
