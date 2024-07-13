@@ -31,7 +31,6 @@
 | Term | Definition |
 | ---- | ---------- |
 | ER | ExpressRoute |
-| ERGW | ExpressRoute Gateway |
 | MSEE | Microsoft Enterprise Edge |
 | PL | Private Link: <https://azure.microsoft.com/en-us/products/private-link> |
 | PE | Private Endpoint |
@@ -39,7 +38,7 @@
 
 ## 2. Background
 
-Azure Private Link provides private connectivity from a virtual network to Azure platform as a service, by providing an 1-to-1 VNET mapping to the service. In addition, it is also used by ExpressRoute for providing the similar functionality for on-prem network.
+Azure Private Link provides private connectivity from a virtual network to Azure platform as a service, by providing an 1-to-1 VNET mapping to the service. In addition, it is also used by ExpressRoute for providing the similar functionality for On-Prem network.
 
 This doc is used to capture the additional requirements for ExpressRoute, such as MSEE failover scenarios.
 
@@ -201,11 +200,11 @@ When multiple destination IPs are required as ECMP group, the tunnel table and t
 
 ##### 5.2.3.1. Reverse tunnel updates
 
-When MSEE failover, the tunnel configuration will be updated. Since the tunnel is route based, we can leverage the existing [flow resimulation APIs](../dataplane/dash-flow-resimulation.md) to update the nexthops.
+When MSEE failover, the tunnel configuration will be updated. Since the tunnel is route based, we can leverage the existing [flow resimulation APIs](../dataplane/dash-flow-resimulation.md) to update the nexthop list.
 
 Whenever the reverse tunnel id is set, we consider the reverse tunnel routing action bit is set in the pipeline, this allows us to control the flow resimulation behavior using the same mechanism.
 
-1. Step 1: Update the DIPs in the reverse tunnel object, which will cover all the new flows.
+1. Step 1: Update the DIP list in the reverse tunnel object, which will cover all the new flows.
 2. Step 2: Request a full flow resimulation, which will cover the existing flows.
 
 ##### 5.2.3.2. Maintaining per connection consistency (PCC)
