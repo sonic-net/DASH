@@ -352,6 +352,7 @@ MaxUdpFlow
 md
 microsoft
 misorder
+MSEE
 MSFT
 msft
 MSRC
@@ -418,6 +419,7 @@ oversubscription
 param
 params
 PAs
+PCC
 PCI
 PCIe
 Pensando
@@ -499,6 +501,7 @@ roadmap
 routable
 RPC
 RPCs
+RPF
 RST
 RSTPackets
 RSTs

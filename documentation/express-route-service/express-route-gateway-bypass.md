@@ -4,7 +4,7 @@
 | --- | ---- | ------ | ------------------ |
 | 0.1 | 07/09/2024 | Riff Jiang | Initial version |
 
-1. [1. Teminalogy](#1-teminalogy)
+1. [1. Terminology](#1-terminology)
 2. [2. Background](#2-background)
 3. [3. SDN transformation](#3-sdn-transformation)
    1. [3.1. Private Link](#31-private-link)
@@ -26,7 +26,7 @@
          2. [5.2.3.2. Maintaining per connection consistency (PCC)](#5232-maintaining-per-connection-consistency-pcc)
 6. [6. References](#6-references)
 
-## 1. Teminalogy
+## 1. Terminology
 
 | Term | Definition |
 | ---- | ---------- |
@@ -34,7 +34,7 @@
 | ERGW | ExpressRoute Gateway |
 | MSEE | Microsoft Enterprise Edge |
 | PL | Private Link: <https://azure.microsoft.com/en-us/products/private-link> |
-| PE | Private Endoint |
+| PE | Private Endpoint |
 | PLS | Private Link Service: <https://learn.microsoft.com/en-us/azure/private-link/private-link-service-overview> |
 
 ## 2. Background
