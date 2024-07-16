@@ -1,5 +1,5 @@
-#ifndef _DASH_STAGE_OUTBOUND_REVERSE_reverse_routing_P4_
-#define _DASH_STAGE_OUTBOUND_REVERSE_reverse_routing_P4_
+#ifndef _DASH_STAGE_OUTBOUND_REVERSE_ROUTING_P4_
+#define _DASH_STAGE_OUTBOUND_REVERSE_ROUTING_P4_
 
 control outbound_reverse_routing_stage(
     inout headers_t hdr,
@@ -68,4 +68,4 @@ control outbound_reverse_routing_stage(
     }
 }
 
-#endif /* _DASH_STAGE_OUTBOUND_REVERSE_reverse_routing_P4_ */
+#endif /* _DASH_STAGE_OUTBOUND_REVERSE_ROUTING_P4_ */
