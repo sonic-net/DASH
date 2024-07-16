@@ -304,6 +304,7 @@ struct metadata_t {
 
     // Actions
     bit<32> routing_actions;
+    bit<32> routing_actions_disabled_in_flow_resimulation;
     bit<32> flow_actions;
 
     // Action data

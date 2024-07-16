@@ -31,6 +31,7 @@ control outbound_reverse_routing_stage(
         dash_routing_actions_t routing_actions_disabled_in_flow_resimulation
     ) {
         push_action_reverse_tunnel(hdr, meta, dash_reverse_tunnel_id);
+        meta.routing_actions_disabled_in_flow_resimulation = meta.routing_actions_disabled_in_flow_resimulation | routing_actions_disabled_in_flow_resimulation;
     }
 
     DEFINE_TABLE_COUNTER(reverse_routing_counter)
