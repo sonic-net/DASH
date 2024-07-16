@@ -25,11 +25,9 @@ control direction_lookup_stage(
         set_eni_mac_type(dash_eni_mac_type_t.SRC_MAC, dash_eni_mac_override_type);
     }
 
-    action set_inbound_direction(
-        @SaiVal[type="sai_dash_eni_mac_override_type_t"] dash_eni_mac_override_type_t dash_eni_mac_override_type 
-    ) {
+    action set_inbound_direction() {
         meta.direction = dash_direction_t.INBOUND;
-        set_eni_mac_type(dash_eni_mac_type_t.DST_MAC, dash_eni_mac_override_type);
+        set_eni_mac_type(dash_eni_mac_type_t.DST_MAC, dash_eni_mac_override_type_t.NONE);
     }
 
     @SaiTable[name = "direction_lookup", api = "dash_direction_lookup"]
@@ -40,8 +38,10 @@ control direction_lookup_stage(
 
         actions = {
             set_outbound_direction;
-            set_inbound_direction;
+            @defaultonly set_inbound_direction;
         }
+
+        const default_action = set_inbound_direction;
     }
 
     apply {

@@ -16,10 +16,6 @@ sai_apis:
       name: SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION
       description: ''
       value: '0'
-    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-      name: SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_INBOUND_DIRECTION
-      description: ''
-      value: '1'
   structs:
   - !!python/object:utils.sai_spec.sai_struct.SaiStruct
     name: sai_direction_lookup_entry_t
@@ -61,8 +57,7 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: SAI_DIRECTION_LOOKUP_ENTRY_ATTR_ACTION == SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION
-      or SAI_DIRECTION_LOOKUP_ENTRY_ATTR_ACTION == SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_INBOUND_DIRECTION
+    valid_only: null
     is_vlan: false
     deprecated: false
   stats: []
@@ -74,10 +69,5 @@ sai_apis:
         SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION
           id: 17408972
-          attr_param_id:
-            SAI_DIRECTION_LOOKUP_ENTRY_ATTR_DASH_ENI_MAC_OVERRIDE_TYPE: 1
-        SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_INBOUND_DIRECTION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
-          name: SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_INBOUND_DIRECTION
-          id: 21063902
           attr_param_id:
             SAI_DIRECTION_LOOKUP_ENTRY_ATTR_DASH_ENI_MAC_OVERRIDE_TYPE: 1
