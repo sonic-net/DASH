@@ -67,6 +67,8 @@ control do_action_reverse_tunnel(
     ) {
         meta.reverse_tunnel_data.underlay_dip = dip;
         meta.reverse_tunnel_data.underlay_sip = sip;
+
+        // TODO: Push flow action here. Waiting for flow API P4 implementation.
     }
 
     @SaiTable[name = "dash_reverse_tunnel_next_hop", api = "dash_reverse_tunnel", order = 2, isobject="true"]
