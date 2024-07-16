@@ -314,6 +314,62 @@ enums:
     name: NONE
     description: ''
     value: '0'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_ha_state_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: DEAD
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: CONNECTING
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: CONNECTED
+    description: ''
+    value: '2'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: INITIALIZING_TO_ACTIVE
+    description: ''
+    value: '3'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: INITIALIZING_TO_STANDBY
+    description: ''
+    value: '4'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: PENDING_STANDALONE_ACTIVATION
+    description: ''
+    value: '5'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: PENDING_ACTIVE_ACTIVATION
+    description: ''
+    value: '6'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: PENDING_STANDBY_ACTIVATION
+    description: ''
+    value: '7'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: STANDALONE
+    description: ''
+    value: '8'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: ACTIVE
+    description: ''
+    value: '9'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: STANDBY
+    description: ''
+    value: '10'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: DESTROYING
+    description: ''
+    value: '11'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SWITCHING_TO_STANDALONE
+    description: ''
+    value: '12'
 port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtension
   attributes: []
   stats:
