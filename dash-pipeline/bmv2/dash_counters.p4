@@ -102,5 +102,8 @@ DEFINE_ENI_PACKET_COUNTER(outbound_ca_pa_entry_miss_drop)
 DEFINE_ENI_PACKET_COUNTER(inbound_routing_entry_miss_drop)
 DEFINE_ENI_PACKET_COUNTER(outbound_routing_group_miss_drop)
 DEFINE_ENI_PACKET_COUNTER(outbound_routing_group_disabled_drop)
+DEFINE_ENI_PACKET_COUNTER(reverse_tunnel_miss_drop)
+DEFINE_ENI_PACKET_COUNTER(reverse_tunnel_member_miss_drop)
+DEFINE_ENI_PACKET_COUNTER(reverse_tunnel_next_hop_miss_drop)
 
 #endif // __DASH_COUNTERS__

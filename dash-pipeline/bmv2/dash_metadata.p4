@@ -11,7 +11,9 @@ enum bit<32> dash_routing_actions_t {
     NAT = (1 << 1),
     NAT46 = (1 << 2),
     NAT64 = (1 << 3),
-    NAT_PORT = (1 << 4)
+    NAT_PORT = (1 << 4),
+    TUNNEL = (1 << 5),
+    REVERSE_TUNNEL = (1 << 6)
 };
 
 enum bit<16> dash_direction_t {
@@ -155,6 +157,11 @@ struct eni_data_t {
     outbound_routing_group_data_t outbound_routing_group_data;
 }
 
+struct outbound_reverse_routing_data_t {
+    bit<16> routing_group_id;
+    bool disabled;
+};
+
 struct meter_context_t {
     bit<32> meter_class_or;
     bit<32> meter_class_and;
@@ -265,6 +272,7 @@ struct metadata_t {
     bit<16> dst_vnet_id;
     bit<16> eni_id;
     eni_data_t eni_data;
+    outbound_reverse_routing_data_t outbound_reverse_routing_data;
     bit<16> inbound_vm_id;
     bit<8> appliance_id;
     bit<1> is_overlay_ip_v6;
@@ -303,9 +311,13 @@ struct metadata_t {
     // encap_data is for underlay
     encap_data_t encap_data;
     // tunnel_data is used by dash_tunnel_id
-    encap_data_t tunnel_data;
-    overlay_rewrite_data_t overlay_data;
     bit<16> dash_tunnel_id;
+    encap_data_t tunnel_data;
+    bit<16> dash_reverse_tunnel_id;
+    bit<16> dash_reverse_tunnel_member_id;
+    bit<16> dash_reverse_tunnel_next_hop_id;
+    encap_data_t reverse_tunnel_data;
+    overlay_rewrite_data_t overlay_data;
     bit<32> meter_class;
 }
 
