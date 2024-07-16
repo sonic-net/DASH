@@ -27,7 +27,7 @@ control direction_lookup_stage(
 
     action set_inbound_direction() {
         meta.direction = dash_direction_t.INBOUND;
-        set_eni_mac_type(dash_eni_mac_type_t.DST_MAC, dash_eni_mac_override_type_t.NONE);
+        meta.eni_mac_type = dash_eni_mac_type_t.DST_MAC;
     }
 
     @SaiTable[name = "direction_lookup", api = "dash_direction_lookup"]
