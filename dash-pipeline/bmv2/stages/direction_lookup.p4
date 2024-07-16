@@ -5,12 +5,31 @@ control direction_lookup_stage(
     inout headers_t hdr,
     inout metadata_t meta)
 {
-    action set_outbound_direction() {
-        meta.direction = dash_direction_t.OUTBOUND;
+    action set_eni_mac_type(
+        dash_eni_mac_type_t eni_mac_type,
+        dash_eni_mac_override_type_t eni_mac_override_type
+    ) {
+        meta.eni_mac_type = eni_mac_type;
+
+        if (eni_mac_override_type == dash_eni_mac_override_type_t.SRC_MAC) {
+            meta.eni_mac_type = dash_eni_mac_type_t.SRC_MAC;
+        } else if (eni_mac_override_type == dash_eni_mac_override_type_t.DST_MAC) {
+            meta.eni_mac_type = dash_eni_mac_type_t.DST_MAC;
+        }
     }
 
-    action set_inbound_direction() {
+    action set_outbound_direction(
+        @SaiVal[type="sai_dash_eni_mac_override_type_t"] dash_eni_mac_override_type_t dash_eni_mac_override_type 
+    ) {
+        meta.direction = dash_direction_t.OUTBOUND;
+        set_eni_mac_type(dash_eni_mac_type_t.SRC_MAC, dash_eni_mac_override_type);
+    }
+
+    action set_inbound_direction(
+        @SaiVal[type="sai_dash_eni_mac_override_type_t"] dash_eni_mac_override_type_t dash_eni_mac_override_type 
+    ) {
         meta.direction = dash_direction_t.INBOUND;
+        set_eni_mac_type(dash_eni_mac_type_t.DST_MAC, dash_eni_mac_override_type);
     }
 
     @SaiTable[name = "direction_lookup", api = "dash_direction_lookup"]
@@ -21,10 +40,8 @@ control direction_lookup_stage(
 
         actions = {
             set_outbound_direction;
-            @defaultonly set_inbound_direction;
+            set_inbound_direction;
         }
-
-        const default_action = set_inbound_direction;
     }
 
     apply {

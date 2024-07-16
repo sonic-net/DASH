@@ -119,6 +119,17 @@ enum bit<8> dash_flow_entry_bulk_get_session_op_key_t
     FILTER_OP_LESS_THAN_OR_EQUAL_TO = 5
 }
 
+enum bit<8> dash_eni_mac_override_type_t {
+    NONE = 0,
+    SRC_MAC = 1,
+    DST_MAC = 2
+};
+
+enum bit<8> dash_eni_mac_type_t {
+    SRC_MAC = 0,
+    DST_MAC = 1
+};
+
 struct conntrack_data_t {
     bool allow_in;
     bool allow_out;
@@ -260,6 +271,8 @@ struct metadata_t {
 
     // Lookup context
     dash_direction_t direction;
+    dash_eni_mac_type_t eni_mac_type;
+    dash_eni_mac_override_type_t eni_mac_override_type;
     EthernetAddress eni_addr;
     bit<16> vnet_id;
     bit<16> dst_vnet_id;

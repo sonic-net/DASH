@@ -377,6 +377,22 @@ enums:
     name: SWITCHING_TO_STANDALONE
     description: ''
     value: '12'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_eni_mac_override_type_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: NONE
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SRC_MAC
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: DST_MAC
+    description: ''
+    value: '2'
 port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtension
   attributes: []
   stats:

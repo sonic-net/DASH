@@ -28,9 +28,11 @@ control eni_lookup_stage(
 
     apply {
         /* Put VM's MAC in the direction agnostic metadata field */
-        meta.eni_addr = meta.direction == dash_direction_t.OUTBOUND  ?
-                                          hdr.customer_ethernet.src_addr :
-                                          hdr.customer_ethernet.dst_addr;
+        if (meta.eni_mac_type == dash_eni_mac_type_t.SRC_MAC) { 
+            meta.eni_addr = hdr.customer_ethernet.src_addr;
+        } else {
+            meta.eni_addr = hdr.customer_ethernet.dst_addr;
+        }
                                           
         if (!eni_ether_address_map.apply().hit) {
             UPDATE_COUNTER(eni_miss_drop, 0);
