@@ -4,7 +4,37 @@
 #ifdef DPAPP_CONNTRACK
 #include "../dash_metadata.p4"
 
-control conntrack_set_flow_data(inout headers_t hdr, inout metadata_t meta)
+action conntrack_set_meta_from_dash_header(in headers_t hdr, out metadata_t meta)
+{
+    /* basic metadata */
+    meta.direction = hdr.flow_data.direction;
+    meta.dash_tunnel_id = hdr.flow_data.tunnel_id;
+    meta.routing_actions = hdr.flow_data.routing_actions;
+    meta.meter_class = hdr.flow_data.meter_class;
+
+    /* encapsulation metadata */
+    meta.encap_data = hdr.flow_encap_data;
+
+    /* tunnel metadata */
+    meta.tunnel_data = hdr.flow_tunnel_data;
+
+    /* overlay rewrite metadata */
+    meta.overlay_data = hdr.flow_overlay_data;
+}
+
+action conntrack_strip_dash_header(inout headers_t hdr)
+{
+    hdr.dp_ethernet.setInvalid();
+    hdr.packet_meta.setInvalid();
+    hdr.flow_key.setInvalid();
+    hdr.flow_data.setInvalid();
+    hdr.flow_overlay_data.setInvalid();
+    hdr.flow_encap_data.setInvalid();
+    hdr.flow_tunnel_data.setInvalid();
+}
+
+control conntrack_build_dash_header(inout headers_t hdr, in metadata_t meta,
+        dash_packet_subtype_t packet_subtype)
 {
     apply {
         bit<16> length = 0;
@@ -38,7 +68,7 @@ control conntrack_set_flow_data(inout headers_t hdr, inout metadata_t meta)
         hdr.packet_meta.setValid();
         hdr.packet_meta.packet_source = dash_packet_source_t.PIPELINE;
         hdr.packet_meta.packet_type = dash_packet_type_t.REGULAR;
-        hdr.packet_meta.packet_subtype = dash_packet_subtype_t.FLOW_CREATE;
+        hdr.packet_meta.packet_subtype = packet_subtype;
         hdr.packet_meta.length = length + PACKET_META_HDR_SIZE;
 
         hdr.dp_ethernet.setValid();
@@ -47,6 +77,63 @@ control conntrack_set_flow_data(inout headers_t hdr, inout metadata_t meta)
         hdr.dp_ethernet.ether_type = DASH_ETHTYPE;
     }
 }
+
+control conntrack_flow_miss_handle(inout headers_t hdr, inout metadata_t meta)
+{
+    apply {
+        if ((hdr.customer_tcp.isValid() && hdr.customer_tcp.flags == 0x2 /* SYN */)
+            || hdr.customer_udp.isValid()) {
+            conntrack_build_dash_header.apply(hdr, meta, dash_packet_subtype_t.FLOW_CREATE);
+            meta.to_dpapp = true; // trap to dpapp
+            return;
+        }
+        else if ((hdr.customer_tcp.flags & 0b000101 /* FIN/RST */) != 0
+                && hdr.packet_meta.packet_source == dash_packet_source_t.DPAPP) {
+            /* Flow should be just deleted by dpapp */
+            conntrack_set_meta_from_dash_header(hdr, meta);
+            return;
+        }
+
+        // should not reach here
+        meta.dropped = true; // drop it
+    }
+}
+
+control conntrack_flow_created_handle(inout headers_t hdr, inout metadata_t meta)
+{
+    apply {
+        if (hdr.customer_tcp.isValid()) {
+            if ((hdr.customer_tcp.flags & 0b000101 /* FIN/RST */) != 0) {
+                conntrack_build_dash_header.apply(hdr, meta, dash_packet_subtype_t.FLOW_DELETE);
+                meta.to_dpapp = true; // trap to dpapp
+                return;
+            }
+        }
+
+        // TODO update flow timestamp for aging
+    }
+}
+
+
+control conntrack_flow_handle(inout headers_t hdr, inout metadata_t meta)
+{
+    apply {
+        switch (meta.flow_state) {
+            dash_flow_state_t.FLOW_MISS: {
+                conntrack_flow_miss_handle.apply(hdr, meta);
+            }
+            dash_flow_state_t.FLOW_CREATED: {
+                conntrack_flow_created_handle.apply(hdr, meta);
+            }
+        }
+
+        // Drop dash header if not sending to dpapp
+        if (!meta.to_dpapp) {
+            conntrack_strip_dash_header(hdr);
+        }
+    }
+}
+
 
 control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
     //
