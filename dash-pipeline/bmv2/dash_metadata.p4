@@ -187,6 +187,7 @@ struct metadata_t {
     dash_flow_state_t flow_state;
     bit<16> bulk_get_session_id;
     bit<16> bulk_get_session_filter_id;
+    bool to_dpapp;
 #endif // DPAPP_CONNTRACK
 
     // Stage transition control

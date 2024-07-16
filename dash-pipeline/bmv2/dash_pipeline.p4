@@ -363,7 +363,8 @@ control dash_ingress(
         ha_stage.apply(hdr, meta);
 
 #ifdef DPAPP_CONNTRACK
-        if (meta.flow_state == dash_flow_state_t.FLOW_MISS) {
+        if (meta.flow_state == dash_flow_state_t.FLOW_MISS &&
+            hdr.packet_meta.packet_source == dash_packet_source_t.EXTERNAL) {
 #endif // DPAPP_CONNTRACK
 
         acl_group.apply();
@@ -380,12 +381,18 @@ control dash_ingress(
 
         tunnel_stage.apply(hdr, meta);
 
-#ifdef DPAPP_CONNTRACK
-        if (!meta.dropped) {
-            conntrack_set_flow_data.apply(hdr, meta);
-            standard_metadata.egress_spec = 2; // vpp port
+        if (meta.dropped) {
+            drop_action();
             return;
         }
+
+#ifdef DPAPP_CONNTRACK
+        }
+
+        conntrack_flow_handle.apply(hdr, meta);
+        if (meta.to_dpapp) {
+            standard_metadata.egress_spec = 2; // vpp port
+            return;
         }
 #endif // DPAPP_CONNTRACK
 
@@ -424,19 +431,6 @@ control dash_ingress(
                 UPDATE_ENI_COUNTER(eni_inbound_tx);
             }
         }
-
-#ifdef DPAPP_CONNTRACK
-        // Drop dash header in fast path
-        if (meta.flow_state == dash_flow_state_t.FLOW_CREATED) {
-            hdr.dp_ethernet.setInvalid();
-            hdr.packet_meta.setInvalid();
-            hdr.flow_key.setInvalid();
-            hdr.flow_data.setInvalid();
-            hdr.flow_overlay_data.setInvalid();
-            hdr.flow_encap_data.setInvalid();
-            hdr.flow_tunnel_data.setInvalid();
-        }
-#endif // DPAPP_CONNTRACK
     }
 }
 

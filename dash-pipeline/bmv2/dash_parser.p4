@@ -52,8 +52,28 @@ parser dash_parser(
 #ifdef DPAPP_CONNTRACK
     state parse_dash {
         packet.extract(hd.packet_meta);
-        // TODO extract flow_key, etc by checking packet type/subtype
-        packet.extract(hd.flow_key);
+        if (hd.packet_meta.packet_subtype != dash_packet_subtype_t.NONE) {
+            // Flow create/update/delete, extract flow_key
+            packet.extract(hd.flow_key);
+        }
+
+        if (hd.packet_meta.packet_subtype == dash_packet_subtype_t.FLOW_DELETE) {
+            // Flow delete, extract flow_data ...
+            packet.extract(hd.flow_data);
+
+            if (hd.flow_data.routing_actions != 0) {
+                packet.extract(hd.flow_overlay_data);
+            }
+
+            if (hd.flow_data.routing_actions & dash_routing_actions_t.STATIC_ENCAP != 0) {
+                packet.extract(hd.flow_encap_data);
+            }
+
+            if (hd.flow_data.tunnel_id != 0) {
+                packet.extract(hd.flow_tunnel_data);
+            }
+        }
+
         transition parse_customer_ethernet;
     }
 #endif // DPAPP_CONNTRACK
