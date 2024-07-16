@@ -46,7 +46,7 @@ control do_action_reverse_tunnel(
         meta.dash_reverse_tunnel_next_hop_id = dash_reverse_tunnel_next_hop_id;
     }
 
-    @SaiTable[name = "dash_reverse_tunnel", api = "dash_reverse_tunnel", order = 1, isobject="true"]
+    @SaiTable[name = "dash_reverse_tunnel_member", api = "dash_reverse_tunnel", order = 1, isobject="true"]
     table reverse_tunnel_member {
         key = {
             meta.dash_reverse_tunnel_id : exact @SaiVal[type="sai_object_id_t"];
@@ -69,7 +69,7 @@ control do_action_reverse_tunnel(
         meta.reverse_tunnel_data.underlay_sip = sip;
     }
 
-    @SaiTable[name = "dash_reverse_tunnel", api = "dash_reverse_tunnel", order = 2, isobject="true"]
+    @SaiTable[name = "dash_reverse_tunnel_next_hop", api = "dash_reverse_tunnel", order = 2, isobject="true"]
     table reverse_tunnel_next_hop {
         key = {
             meta.dash_reverse_tunnel_next_hop_id : exact @SaiVal[type="sai_object_id_t"];

@@ -12,7 +12,7 @@ control outbound_reverse_routing_stage(
         meta.outbound_reverse_routing_data.disabled = (bool)disabled;
     }
 
-    @SaiTable[name = "outbound_reverse_routing_group", api = "dash_outbound_reverse_routing", order = 1, isobject="true"]
+    @SaiTable[name = "outbound_reverse_routing_group", api = "dash_outbound_reverse_routing", order = 0, isobject="true"]
     table outbound_reverse_routing_group {
         key = {
             meta.outbound_reverse_routing_data.routing_group_id: exact @SaiVal[type="sai_object_id_t"];
@@ -35,7 +35,7 @@ control outbound_reverse_routing_stage(
 
     DEFINE_TABLE_COUNTER(reverse_routing_counter)
 
-    @SaiTable[name = "outbound_reverse_routing", api = "dash_outbound_reverse_routing"]
+    @SaiTable[name = "outbound_reverse_routing", api = "dash_outbound_reverse_routing", order = 1]
     table reverse_routing {
         key = {
             meta.outbound_reverse_routing_data.routing_group_id : exact @SaiVal[type="sai_object_id_t"];
