@@ -14,6 +14,8 @@ api_types:
 - SAI_API_DASH_VIP
 - SAI_API_DASH_TUNNEL
 - SAI_API_DASH_FLOW
+- SAI_API_DASH_OUTBOUND_REVERSE_ROUTING
+- SAI_API_DASH_REVERSE_TUNNEL
 object_types:
 - SAI_OBJECT_TYPE_DASH_ACL_GROUP
 - SAI_OBJECT_TYPE_DASH_ACL_RULE
@@ -38,6 +40,11 @@ object_types:
 - SAI_OBJECT_TYPE_FLOW_ENTRY
 - SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER
 - SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION
+- SAI_OBJECT_TYPE_OUTBOUND_REVERSE_ROUTING_GROUP
+- SAI_OBJECT_TYPE_OUTBOUND_REVERSE_ROUTING_ENTRY
+- SAI_OBJECT_TYPE_DASH_REVERSE_TUNNEL
+- SAI_OBJECT_TYPE_DASH_REVERSE_TUNNEL_MEMBER
+- SAI_OBJECT_TYPE_DASH_REVERSE_TUNNEL_NEXT_HOP
 object_entries:
 - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
   name: direction_lookup_entry
@@ -93,6 +100,12 @@ object_entries:
   type: sai_flow_entry_t
   objects: null
   valid_only: object_type == SAI_OBJECT_TYPE_FLOW_ENTRY,
+- !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+  name: outbound_reverse_routing_entry
+  description: Object entry for DASH API outbound_reverse_routing_entry
+  type: sai_outbound_reverse_routing_entry_t
+  objects: null
+  valid_only: object_type == SAI_OBJECT_TYPE_OUTBOUND_REVERSE_ROUTING_ENTRY,
 enums:
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
   name: sai_dash_direction_t
@@ -186,6 +199,14 @@ enums:
     name: NAT_PORT
     description: ''
     value: '16'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: TUNNEL
+    description: ''
+    value: '32'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: REVERSE_TUNNEL
+    description: ''
+    value: '64'
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
   name: sai_dash_flow_enabled_key_t
   description: ''
@@ -466,3 +487,5 @@ api_groups:
 - !inc '/SAI/specs/dash_vip.yaml'
 - !inc '/SAI/specs/dash_tunnel.yaml'
 - !inc '/SAI/specs/dash_flow.yaml'
+- !inc '/SAI/specs/dash_outbound_reverse_routing.yaml'
+- !inc '/SAI/specs/dash_reverse_tunnel.yaml'

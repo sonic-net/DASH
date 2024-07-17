@@ -91,8 +91,9 @@ control do_action_reverse_tunnel(
             UPDATE_ENI_COUNTER(reverse_tunnel_miss_drop);
             return;
         }
-
-        meta.dash_reverse_tunnel_member_id = 0; // TODO: ECMP group selection!
+        
+        // TODO: Select reverse tunnel member as ECMP
+        meta.dash_reverse_tunnel_member_id = 0;
 
         if (!reverse_tunnel_member.apply().hit) {
             UPDATE_ENI_COUNTER(reverse_tunnel_member_miss_drop);
