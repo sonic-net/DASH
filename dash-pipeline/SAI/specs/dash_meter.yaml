@@ -4,6 +4,92 @@ description: DASH meter
 api_type: overlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: meter_bucket_entry
+  description: meter bucket entry
+  is_object: false
+  enums:
+  - !!python/object:utils.sai_spec.sai_enum.SaiEnum
+    name: sai_meter_bucket_entry_action_t
+    description: 'Attribute data for #SAI_METER_BUCKET_ENTRY_ATTR_ACTION'
+    members:
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_METER_BUCKET_ENTRY_ACTION_UPDATE_METER_BUCKET
+      description: ''
+      value: '0'
+  structs:
+  - !!python/object:utils.sai_spec.sai_struct.SaiStruct
+    name: sai_meter_bucket_entry_t
+    description: Entry for meter_bucket_entry
+    members:
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: switch_id
+      description: Switch ID
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_SWITCH
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: eni_id
+      description: Exact matched key eni_id
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_ENI
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: meter_class
+      description: Exact matched key meter_class
+      type: sai_uint32_t
+      objects: null
+      valid_only: null
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_METER_BUCKET_ENTRY_ATTR_ACTION
+    description: Action
+    type: sai_meter_bucket_entry_action_t
+    attr_value_field: null
+    default: SAI_METER_BUCKET_ENTRY_ACTION_UPDATE_METER_BUCKET
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  stats:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_METER_BUCKET_ENTRY_STAT_OUTBOUND_BYTES
+    description: DASH METER_BUCKET_ENTRY OUTBOUND_BYTES stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_METER_BUCKET_ENTRY_STAT_INBOUND_BYTES
+    description: DASH METER_BUCKET_ENTRY INBOUND_BYTES stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 45482818
+      actions:
+        SAI_METER_BUCKET_ENTRY_ACTION_UPDATE_METER_BUCKET: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_METER_BUCKET_ENTRY_ACTION_UPDATE_METER_BUCKET
+          id: 23515737
+          attr_param_id: {}
+- !!python/object:utils.sai_spec.sai_api.SaiApi
   name: meter_policy
   description: meter policy
   is_object: true
@@ -127,90 +213,4 @@ sai_apis:
         default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: default
           id: 19652160
-          attr_param_id: {}
-- !!python/object:utils.sai_spec.sai_api.SaiApi
-  name: meter_bucket_entry
-  description: meter bucket entry
-  is_object: false
-  enums:
-  - !!python/object:utils.sai_spec.sai_enum.SaiEnum
-    name: sai_meter_bucket_entry_action_t
-    description: 'Attribute data for #SAI_METER_BUCKET_ENTRY_ATTR_ACTION'
-    members:
-    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-      name: SAI_METER_BUCKET_ENTRY_ACTION_UPDATE_METER_BUCKET
-      description: ''
-      value: '0'
-  structs:
-  - !!python/object:utils.sai_spec.sai_struct.SaiStruct
-    name: sai_meter_bucket_entry_t
-    description: Entry for meter_bucket_entry
-    members:
-    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
-      name: switch_id
-      description: Switch ID
-      type: sai_object_id_t
-      objects: SAI_OBJECT_TYPE_SWITCH
-      valid_only: null
-    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
-      name: eni_id
-      description: Exact matched key eni_id
-      type: sai_object_id_t
-      objects: SAI_OBJECT_TYPE_ENI
-      valid_only: null
-    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
-      name: meter_class
-      description: Exact matched key meter_class
-      type: sai_uint32_t
-      objects: null
-      valid_only: null
-  attributes:
-  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_METER_BUCKET_ENTRY_ATTR_ACTION
-    description: Action
-    type: sai_meter_bucket_entry_action_t
-    attr_value_field: null
-    default: SAI_METER_BUCKET_ENTRY_ACTION_UPDATE_METER_BUCKET
-    isresourcetype: false
-    flags: CREATE_AND_SET
-    object_name: null
-    allow_null: false
-    valid_only: null
-    is_vlan: false
-    deprecated: false
-  stats:
-  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_METER_BUCKET_ENTRY_STAT_OUTBOUND_BYTES
-    description: DASH METER_BUCKET_ENTRY OUTBOUND_BYTES stat count
-    type: sai_uint64_t
-    attr_value_field: u64
-    default: null
-    isresourcetype: false
-    flags: READ_ONLY
-    object_name: null
-    allow_null: false
-    valid_only: null
-    is_vlan: false
-    deprecated: false
-  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_METER_BUCKET_ENTRY_STAT_INBOUND_BYTES
-    description: DASH METER_BUCKET_ENTRY INBOUND_BYTES stat count
-    type: sai_uint64_t
-    attr_value_field: u64
-    default: null
-    isresourcetype: false
-    flags: READ_ONLY
-    object_name: null
-    allow_null: false
-    valid_only: null
-    is_vlan: false
-    deprecated: false
-  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
-    tables:
-    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
-      id: 45482818
-      actions:
-        SAI_METER_BUCKET_ENTRY_ACTION_UPDATE_METER_BUCKET: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
-          name: SAI_METER_BUCKET_ENTRY_ACTION_UPDATE_METER_BUCKET
-          id: 23515737
           attr_param_id: {}
