@@ -23,7 +23,8 @@ def load_word_fixers() -> None:
         "resimulation": "re-simulation",
         "pb": "protocol buffer",
         "proto": "protocol",
-        "smac": "source MAC"
+        "smac": "source MAC",
+        "dpu": "DPU"
     }
 
     # Load all SAI acronyms
@@ -31,7 +32,7 @@ def load_word_fixers() -> None:
         for line in f:
             word = line.split('-')[0].strip().lower()
             word_fixers[word] = word.upper()
-    
+
     # More command word fixers
 
 def normalize_sai_comment(s: str) -> str:
@@ -40,9 +41,11 @@ def normalize_sai_comment(s: str) -> str:
     """
     if len(word_fixers) == 0:
         load_word_fixers()
-    
+
     words = [word if word.lower() not in word_fixers else word_fixers[word.lower()] for word in s.split()]
-    return " ".join(words)
+    s = " ".join(words)
+    # temporary workaround until "DPU" is added to SAI meta acronyms
+    return s.replace("DPU driven HA ", "SAI vendor driven HA ")
 
 def merge_sai_value_lists(
     target: List[Any],
@@ -62,19 +65,19 @@ def merge_sai_value_lists(
       it will not be removed from the old list.
     """
     target_dict = {get_key(item): item for item in target}
-    
+
     source_keys = set()
     for source_item in source:
         source_key = get_key(source_item)
         source_keys.add(source_key)
-        
+
         if source_key in target_dict:
             target_item = target_dict[source_key]
             on_conflict(target_item, source_item)
         else:
             target.append(source_item)
             target_dict[source_key] = source_item
-    
+
     # Remove all items in target, if its key doesn't exist in source_keys and on_deprecate returns True.
     target[:] = [item for item in target if get_key(item) in source_keys or not on_deprecate(item)]
 

@@ -128,8 +128,8 @@ sai_apis:
     is_vlan: false
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_HA_SET_ATTR_SWITCHOVER_NETWORK_CONVERGENCE_TIME_MS
-    description: Action parameter switchover network convergence time ms
+    name: SAI_HA_SET_ATTR_DPU_DRIVEN_HA_SWITCHOVER_WAIT_TIME_MS
+    description: Action parameter SAI vendor driven HA switchover wait time ms
     type: sai_uint32_t
     attr_value_field: u32
     default: '0'
