@@ -25,6 +25,8 @@
       3. [5.2.3. MSEE failover handling using flow resimulation](#523-msee-failover-handling-using-flow-resimulation)
          1. [5.2.3.1. Reverse tunnel updates](#5231-reverse-tunnel-updates)
          2. [5.2.3.2. Maintaining per connection consistency (PCC)](#5232-maintaining-per-connection-consistency-pcc)
+         3. [5.2.3.3. Flow resimulation on return path](#5233-flow-resimulation-on-return-path)
+         4. [5.2.3.4. Flow resimulation on fast path](#5234-flow-resimulation-on-fast-path)
 6. [6. References](#6-references)
 
 ## 1. Terminology
@@ -231,6 +233,11 @@ For more information, please refer to the [flow resimulation scope control APIs]
 
 - For PL, it will be `SAI_DASH_ROUTING_ACTION_STATIC_ENCAP` and `SAI_DASH_ROUTING_ACTION_4TO6`.
 - For PL NSG, we need add 1 more tunnel: `SAI_DASH_ROUTING_ACTION_TUNNEL`.
+
+##### 5.2.3.3. Flow resimulation on return path
+
+
+##### 5.2.3.4. Flow resimulation on fast path
 
 ## 6. References
 
