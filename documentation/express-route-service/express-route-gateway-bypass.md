@@ -19,9 +19,9 @@
       1. [5.2.1. Background](#521-background)
       2. [5.2.2. MSEE device selection](#522-msee-device-selection)
          1. [5.2.2.1. Reverse routing stage](#5221-reverse-routing-stage)
-         2. [5.2.2.2. Reverse routing group](#5222-reverse-routing-group)
-         3. [5.2.2.3. Reverse routing group entry](#5223-reverse-routing-group-entry)
-         4. [5.2.2.4. Reverse tunnel table and entry](#5224-reverse-tunnel-table-and-entry)
+            1. [5.2.2.1.1. Reverse routing group](#52211-reverse-routing-group)
+            2. [5.2.2.1.2. Reverse routing group entry](#52212-reverse-routing-group-entry)
+         2. [5.2.2.2. Reverse tunnel table and entry](#5222-reverse-tunnel-table-and-entry)
       3. [5.2.3. MSEE failover handling using flow resimulation](#523-msee-failover-handling-using-flow-resimulation)
          1. [5.2.3.1. Reverse tunnel updates](#5231-reverse-tunnel-updates)
          2. [5.2.3.2. Maintaining per connection consistency (PCC)](#5232-maintaining-per-connection-consistency-pcc)
@@ -154,7 +154,7 @@ Unlike the regular routing stage, the reverse routing stage will not be specifie
 
 If no route entries are being hit in this stage, the packet should not be dropped but continue to later stages. This behavior is the same as having a default route with allow action.
 
-##### 5.2.2.2. Reverse routing group
+###### 5.2.2.1.1. Reverse routing group
 
 The reverse routing group is used for defining the reverse routing table. Once created, we can bind its object id to ENI to make it taking effect:
 
@@ -168,7 +168,7 @@ To specify which reverse group should be used on an ENI, we add the following at
 | --------------- | ---- | ----------- |
 | SAI_ENI_ATTR_OUTBOUND_REVERSE_ROUTING_GROUP_ID | sai_object_id_t | Reverse routing group object ID |
 
-##### 5.2.2.3. Reverse routing group entry
+###### 5.2.2.1.2. Reverse routing group entry
 
 The reverse routing table is essentially a LPM lookup table with each entry takes the IP prefix as key:
 
@@ -185,9 +185,9 @@ The attributes will only have action and reverse tunnel id, as it won't change a
 | SAI_OUTBOUND_REVERSE_ROUTE_ENTRY_ATTR_REVERSE_TUNNEL_ID | sai_object_id_t | SAI object ID of the reverse tunnel |
 | SAI_OUTBOUND_REVERSE_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION | sai_uint64_t | Routing actions that need to be disabled in flow resimulation. |
 
-##### 5.2.2.4. Reverse tunnel table and entry
+##### 5.2.2.2. Reverse tunnel table and entry
 
-Besides the routing table, we also need to split the tunnel table into tunnel and reverse tunnel table. It makes the API clean, also allows P4 to support it, because each P4 table can be only matched once in the pipeline:
+Besides the reverse routing stage, we also need to split the tunnel table into tunnel and reverse tunnel table. It makes the API clean, also allows P4 to support it, because each P4 table can be only matched once in the pipeline:
 
 The reverse tunnel table will have the following attributes that is common to all next hops:
 
