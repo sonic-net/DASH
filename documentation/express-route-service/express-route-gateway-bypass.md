@@ -152,7 +152,7 @@ To support this behavior, we add the reverse routing stage in DASH.
 
 Unlike the regular routing stage, the reverse routing stage will not be specified in the routing types and will be default to be executed before the action apply stage.
 
-If no entries are being hit in this stage, the packet should not be dropped but continue to later stages.
+If no route entries are being hit in this stage, the packet should not be dropped but continue to later stages. This behavior is the same as having a default route with allow action.
 
 ##### 5.2.2.2. Reverse routing group
 
