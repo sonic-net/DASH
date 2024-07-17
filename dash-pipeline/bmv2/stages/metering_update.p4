@@ -47,18 +47,18 @@ control metering_update_stage(
     
     // MAX_METER_BUCKET = MAX_ENI(64) * NUM_BUCKETS_PER_ENI(4096)
     #define MAX_METER_BUCKETS 262144
-    DEFINE_BYTE_COUNTER(meter_bucket_outbound, MAX_METER_BUCKETS, name="outbound", action_names="meter_bucket_action", attr_type="stats")
-    DEFINE_BYTE_COUNTER(meter_bucket_inbound, MAX_METER_BUCKETS, name="inbound", action_names="meter_bucket_action", attr_type="stats")
-    action meter_bucket_action() {}
+    DEFINE_BYTE_COUNTER(meter_bucket_outbound, MAX_METER_BUCKETS, name="outbound", action_names="update_meter_bucket", attr_type="stats")
+    DEFINE_BYTE_COUNTER(meter_bucket_inbound, MAX_METER_BUCKETS, name="inbound", action_names="update_meter_bucket", attr_type="stats")
+    action update_meter_bucket() {}
 
-    @SaiTable[name = "meter_bucket", api = "dash_meter", order = 0, isobject="true"]
+    @SaiTable[name = "meter_bucket", api = "dash_meter", order = 0]
     table meter_bucket {
         key = {
             meta.eni_id: exact @SaiVal[type="sai_object_id_t"];
             meta.meter_class: exact;
         }
         actions = {
-            meter_bucket_action;
+            update_meter_bucket;
             @defaultonly NoAction;
         }
         const default_action = NoAction();
