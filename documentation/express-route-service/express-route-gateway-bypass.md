@@ -26,7 +26,7 @@
          1. [5.2.3.1. Reverse tunnel updates](#5231-reverse-tunnel-updates)
          2. [5.2.3.2. Maintaining per connection consistency (PCC)](#5232-maintaining-per-connection-consistency-pcc)
          3. [5.2.3.3. Flow resimulation on return path](#5233-flow-resimulation-on-return-path)
-         4. [5.2.3.4. Flow resimulation on fast path](#5234-flow-resimulation-on-fast-path)
+         4. [5.2.3.4. Flow resimulation on flow redirected flows](#5234-flow-resimulation-on-flow-redirected-flows)
 6. [6. References](#6-references)
 
 ## 1. Terminology
@@ -236,8 +236,15 @@ For more information, please refer to the [flow resimulation scope control APIs]
 
 ##### 5.2.3.3. Flow resimulation on return path
 
+In flow resimulation, flow is usually updated when packets lands on the forwarding path, however this introduces extra downtime for the reverse tunnel update. The reason is that the return packet will still take the old tunnel in the flow, and being sent to the wrong destination, although the policy is updated and flow resimulation is triggered.
 
-##### 5.2.3.4. Flow resimulation on fast path
+To avoid this impact, it is required for the return packet to check the resimulation status and update the reverse tunnel in the flow if needed. This means when a packet coming from PLS to MSEE, if reverse tunnel is changed, the reverse routing stage should be evaluated and updating the flow accordingly.
+
+##### 5.2.3.4. Flow resimulation on flow redirected flows
+
+Another thing in flow resimulation is [load balancer fast path flow redirection](../load-bal-service/fast-path-icmp-flow-redirection.md) related. When a flow is redirected by fast path ICMP packet, this flow will be ignored in the flow resimulation. However, this behavior should only apply for the forwarding side of transformation, but not the reverse side.
+
+This means when a packet lands on DASH pipeline and it belongs to a flow that is redirected by fast path ICMP packet, the reverse routing stage should be evaluated and updating the flow accordingly.
 
 ## 6. References
 
