@@ -38,6 +38,7 @@ object_types:
 - SAI_OBJECT_TYPE_FLOW_ENTRY
 - SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER
 - SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION
+- SAI_OBJECT_TYPE_METER_BUCKET_ENTRY
 object_entries:
 - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
   name: direction_lookup_entry
@@ -93,6 +94,12 @@ object_entries:
   type: sai_flow_entry_t
   objects: null
   valid_only: object_type == SAI_OBJECT_TYPE_FLOW_ENTRY,
+- !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+  name: meter_bucket_entry
+  description: Object entry for DASH API meter_bucket_entry
+  type: sai_meter_bucket_entry_t
+  objects: null
+  valid_only: object_type == SAI_OBJECT_TYPE_METER_BUCKET_ENTRY,
 enums:
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
   name: sai_dash_direction_t
