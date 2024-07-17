@@ -21,6 +21,7 @@ class DashP4Table(DashP4Object):
         self.api_name: str = ""
         self.ipaddr_family_attr: str = "false"
         self.keys: List[DashP4TableKey] = []
+        self.object_id_key: Optional[DashP4TableKey] = None
         self.actions: List[DashP4TableAction] = []
         self.action_params: List[DashP4TableActionParam] = []
         self.counters: List[DashP4Counter] = []
@@ -372,8 +373,12 @@ class DashP4Table(DashP4Object):
 
     def create_sai_attributes(self, sai_api: SaiApi) -> None:
         # If the table is an object with more one key (table entry id), we need to add all the keys into the attributes.
-        if self.is_object == "true" and len(self.keys) > 1:
+        if self.is_object == "true":
             for key in self.keys:
+                if key.name.endswith("_id") and key.name[:-3].upper().endswith(self.name.upper()):
+                    print(f"Found object id key for table {self.name}: {key.name}")
+                    self.object_id_key = key
+                    continue
                 sai_api.attributes.extend(key.to_sai_attribute(self.name, create_only=True))
 
         # Add all the action parameters into the attributes.

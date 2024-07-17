@@ -59,14 +59,14 @@ static sai_status_t dash_sai_create_{{ table.name }}(
 
     matchActionEntry->set_table_id(tableId);
 
-    {% if table['keys'] | length== 1 %}
+    {% if table['object_id_key'] != None %}
     // SAI object table with single P4 key - object ID itself is the P4 table key
     // Generate a SAI object ID and fill it as the P4 table key
     auto mf = matchActionEntry->add_match();
     mf->set_field_id({{table['keys'][0].id}});
     auto mf_exact = mf->mutable_exact();
     //{{table['keys'][0].field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
-      {{table['keys'][0].field}}SetVal(static_cast<uint{{ table['keys'][0].bitwidth }}_t>(objId), mf_exact, {{ table['keys'][0].bitwidth }}); 
+    {{table['keys'][0].field}}SetVal(static_cast<uint{{ table['keys'][0].bitwidth }}_t>(objId), mf_exact, {{ table['keys'][0].bitwidth }}); 
     {% else %}
     // SAI object table with multiple P4 table keys
     // Copy P4 table keys from appropriate SAI attributes

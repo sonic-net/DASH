@@ -15,7 +15,7 @@ control outbound_reverse_routing_stage(
     @SaiTable[name = "outbound_reverse_routing_group", api = "dash_outbound_reverse_routing", order = 0, isobject="true"]
     table outbound_reverse_routing_group {
         key = {
-            meta.outbound_reverse_routing_data.routing_group_id: exact @SaiVal[type="sai_object_id_t"];
+            meta.outbound_reverse_routing_data.routing_group_id: exact @SaiVal[name="outbound_reverse_routing_group_id", type="sai_object_id_t"];
         }
 
         actions = {

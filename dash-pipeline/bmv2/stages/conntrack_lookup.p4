@@ -20,7 +20,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
     @SaiTable[name = "flow_table", api = "dash_flow", order = 0, isobject="true"]
     table flow_table {
         key = {
-            meta.conntrack_data.flow_table.id : exact;
+            meta.conntrack_data.flow_table.id : exact @SaiVal[name="flow_table_id"];
         }
 
         actions = {
@@ -169,7 +169,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
     @SaiTable[name = "flow_entry_bulk_get_session_filter", api = "dash_flow", order = 2, isobject="true"]
     table flow_entry_bulk_get_session_filter {
         key = {
-            meta.conntrack_data.bulk_get_session_filter_id: exact @SaiVal[name = "bulk_get_session_filter_id", type="sai_object_id_t"];
+            meta.conntrack_data.bulk_get_session_filter_id: exact @SaiVal[name = "flow_entry_bulk_get_session_filter_id", type="sai_object_id_t"];
         }
 
         actions = {
@@ -180,7 +180,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
    @SaiTable[name = "flow_entry_bulk_get_session", api = "dash_flow", order = 3, isobject="true"]
     table flow_entry_bulk_get_session {
         key = {
-            meta.conntrack_data.bulk_get_session_id: exact @SaiVal[name = "bulk_get_session_id", type="sai_object_id_t"];
+            meta.conntrack_data.bulk_get_session_id: exact @SaiVal[name = "flow_entry_bulk_get_session_id", type="sai_object_id_t"];
         }
 
         actions = {
