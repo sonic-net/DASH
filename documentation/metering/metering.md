@@ -162,7 +162,7 @@ When a packet arrives at an ENI, it will go through the steps below to find its 
 
 ### 5.1. Metering bucket creation
 
-Whenever the ENI is created, we will assume the all metering buckets are created together with the ENI and initialized to 0, without the need of any addtional SAI API calls, such as `create_meter_bucket`.
+Whenever the ENI is created, we will assume the all metering buckets are created together with the ENI and initialized to 0, without the need of any additional SAI API calls, such as `create_meter_bucket`.
 
 Each ENI will maintain the metering bucket from 1 to SAI_SWITCH_ATTR_DASH_CAPS_MAX_METER_BUCKET_COUNT_PER_ENI, inclusive.
 
