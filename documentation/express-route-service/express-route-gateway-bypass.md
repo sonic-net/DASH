@@ -18,8 +18,8 @@
    2. [5.2. MSEE selection and failover handling](#52-msee-selection-and-failover-handling)
       1. [5.2.1. Background](#521-background)
       2. [5.2.2. MSEE device selection](#522-msee-device-selection)
-         1. [5.2.2.1. Reverse routing table](#5221-reverse-routing-table)
-         2. [5.2.2.2. Reverse routing table entry](#5222-reverse-routing-table-entry)
+         1. [5.2.2.1. Reverse routing group](#5221-reverse-routing-group)
+         2. [5.2.2.2. Reverse routing group entry](#5222-reverse-routing-group-entry)
          3. [5.2.2.3. Reverse tunnel table and entry](#5223-reverse-tunnel-table-and-entry)
       3. [5.2.3. MSEE failover handling using flow resimulation](#523-msee-failover-handling-using-flow-resimulation)
          1. [5.2.3.1. Reverse tunnel updates](#5231-reverse-tunnel-updates)
@@ -145,22 +145,28 @@ Furthermore, when MSEE failover, we need to update the reverse tunnel on all exi
 
 To handle this, we are leveraging similar concepts as the RPF (Reverse Path Forwarding) in network devices, which checks the source IP during the forwarding path.
 
-##### 5.2.2.1. Reverse routing table
+##### 5.2.2.1. Reverse routing group
 
-To support it in reverse path, we add the reverse routing table in DASH that acts as RPF rules and is similar to outbound routing table that binds to an ENI.
+To support it in reverse path, we add the reverse routing group in DASH that acts as RPF rules and is similar to outbound routing group that binds to an ENI.
 
 | SAI attribute name | Type | Description |
 | --------------- | ---- | ----------- |
-| SAI_OUTBOUND_REVERSE_ROUTING_TABLE_ATTR_ENI_ID | sai_object_id_t | SAI object ID of the ENI |
+| SAI_OUTBOUND_REVERSE_ROUTING_GROUP_ATTR_DISABLED | bool | If true, this entries in this routing group will not take effect, but won't drop the packets. |
 
-##### 5.2.2.2. Reverse routing table entry
+To specify which reverse group should be used on an ENI, we add the following attribute on ENI:
+
+| SAI attribute name | Type | Description |
+| --------------- | ---- | ----------- |
+| SAI_ENI_ATTR_OUTBOUND_REVERSE_ROUTING_GROUP_ID | sai_object_id_t | Reverse routing group object ID |
+
+##### 5.2.2.2. Reverse routing group entry
 
 The reverse routing table is essentially a LPM lookup table with each entry takes the IP prefix as key:
 
 | SAI entry field | Type | Description |
 | --------------- | ---- | ----------- |
-| routing_table_id | sai_object_id_t | SAI object ID of the reverse routing table |
-| prefix | sai_ip_prefix_t | Source IP prefix |
+| outbound_reverse_routing_group_id | sai_object_id_t | SAI object ID of the reverse routing table |
+| source | sai_ip_prefix_t | Source IP prefix |
 
 The attributes will only have action and reverse tunnel id, as it won't change anything else:
 
@@ -174,27 +180,28 @@ The attributes will only have action and reverse tunnel id, as it won't change a
 
 Besides the routing table, we also need to split the tunnel table into tunnel and reverse tunnel table. It makes the API clean, also allows P4 to support it, because each P4 table can be only matched once in the pipeline:
 
+The reverse tunnel table will have the following attributes that is common to all next hops:
+
 | Attribute name | Type | Description |
 | --- | --- | --- |
-| SAI_DASH_REVERSE_TUNNEL_ENTRY_ATTR_DASH_ENCAPSULATION | sai_dash_encapsulation_t | Encapsulation type, such as VxLan, NvGRE. Optional. If not specified, the encap from tunnel will be used. |
-| SAI_DASH_REVERSE_TUNNEL_ENTRY_ATTR_VNI | sai_uint32_t | VNI used in the encap. Optional. If not specified, the VNI from tunnel will be used. |
-| SAI_DASH_REVERSE_TUNNEL_NEXT_HOP_ENTRY_ATTR_DIP | sai_ip_address_t | Destination IP of the next hop. |
+| SAI_DASH_REVERSE_TUNNEL_ATTR_DASH_ENCAPSULATION | sai_dash_encapsulation_t | Encapsulation type, such as VxLan, NvGRE. Optional. If not specified, the encap from tunnel will be used. |
+| SAI_DASH_REVERSE_TUNNEL_ATTR_TUNNEL_KEY | sai_uint32_t | Tunnel key used in the encap, e.g. VNI in VxLAN. |
 
-When multiple destination IPs are required as ECMP group, the tunnel table and tunnel member will be used to specify the tunnel with multiple next hop information:
+A reverse tunnel supports multiple destination IPs as an ECMP group, the reverse tunnel member and reverse tunnel next hop objects will be used to specify these information:
 
-- A new tunnel table needs to be added with the following attributes:
-
-  | Attribute name | Type | Description |
-  | --- | --- | --- |
-  | SAI_DASH_REVERSE_TUNNEL_ENTRY_ATTR_DASH_ENCAPSULATION | sai_dash_encapsulation_t | Encapsulation type, such as VxLan, NvGRE. |
-  | SAI_DASH_REVERSE_TUNNEL_ENTRY_ATTR_VNI | sai_uint32_t | VNI used in the encap. |
-
-- A new tunnel member table needs to be added to create the bindings between tunnel and next hop:
+- The reverse tunnel next hop object defines the tunnel information for each destination:
 
   | Attribute name | Type | Description |
   | --- | --- | --- |
-  | SAI_DASH_REVERSE_TUNNEL_MEMBER_ENTRY_ATTR_TUNNEL_ID | sai_object_id_t | Tunnel Id |
-  | SAI_DASH_REVERSE_TUNNEL_MEMBER_ENTRY_ATTR_TUNNEL_NEXT_HOP_ID | sai_object_id_t | Tunnel next hop id |
+  | SAI_DASH_REVERSE_TUNNEL_NEXT_HOP_ATTR_DIP | sai_ip_address_t | Destination IP used in tunnel. |
+  | SAI_DASH_REVERSE_TUNNEL_NEXT_HOP_ATTR_SIP | sai_ip_address_t | Source IP used in tunnel. |
+
+- The reverse tunnel member defines the bindings between tunnel and next hop:
+
+  | Attribute name | Type | Description |
+  | --- | --- | --- |
+  | SAI_DASH_REVERSE_TUNNEL_MEMBER_ATTR_TUNNEL_ID | sai_object_id_t | Tunnel Id |
+  | SAI_DASH_REVERSE_TUNNEL_MEMBER_ATTR_TUNNEL_NEXT_HOP_ID | sai_object_id_t | Tunnel next hop id |
 
 #### 5.2.3. MSEE failover handling using flow resimulation
 
