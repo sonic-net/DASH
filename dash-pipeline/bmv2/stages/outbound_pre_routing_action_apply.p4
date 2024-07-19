@@ -1,6 +1,8 @@
 #ifndef _DASH_STAGE_OUTBOUND_PRE_ROUTING_ACTION_APPLY_P4_
 #define _DASH_STAGE_OUTBOUND_PRE_ROUTING_ACTION_APPLY_P4_
 
+#include "outbound_reverse_routing.p4"
+
 control outbound_pre_routing_action_apply_stage(
     inout headers_t hdr,
     inout metadata_t meta)
@@ -10,6 +12,8 @@ control outbound_pre_routing_action_apply_stage(
         if (meta.target_stage != dash_pipeline_stage_t.OUTBOUND_PRE_ROUTING_ACTION_APPLY) {
             return;
         }
+
+        outbound_reverse_routing_stage.apply(hdr, meta);
 
         // Once it is done, move to routing action apply stage.
         meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;

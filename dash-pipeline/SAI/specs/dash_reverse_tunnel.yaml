@@ -1,0 +1,134 @@
+!!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
+name: dash_reverse_tunnel
+description: DASH reverse tunnel
+api_type: overlay
+sai_apis:
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: dash_reverse_tunnel
+  description: DASH reverse tunnel
+  is_object: true
+  enums: []
+  structs: []
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_REVERSE_TUNNEL_ATTR_DASH_ENCAPSULATION
+    description: Action parameter DASH encapsulation
+    type: sai_dash_encapsulation_t
+    attr_value_field: s32
+    default: SAI_DASH_ENCAPSULATION_VXLAN
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_REVERSE_TUNNEL_ATTR_TUNNEL_KEY
+    description: Action parameter tunnel key
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 49122034
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 17501974
+          attr_param_id: {}
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: dash_reverse_tunnel_member
+  description: DASH reverse tunnel member
+  is_object: true
+  enums: []
+  structs: []
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_REVERSE_TUNNEL_MEMBER_ATTR_DASH_REVERSE_TUNNEL_ID
+    description: Exact matched key dash_reverse_tunnel_id
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: null
+    isresourcetype: false
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: SAI_OBJECT_TYPE_DASH_REVERSE_TUNNEL
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_REVERSE_TUNNEL_MEMBER_ATTR_DASH_REVERSE_TUNNEL_NEXT_HOP_ID
+    description: Action parameter DASH reverse tunnel next hop id
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_DASH_REVERSE_TUNNEL_NEXT_HOP
+    allow_null: true
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 37338287
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 29566243
+          attr_param_id: {}
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: dash_reverse_tunnel_next_hop
+  description: DASH reverse tunnel next hop
+  is_object: true
+  enums: []
+  structs: []
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_REVERSE_TUNNEL_NEXT_HOP_ATTR_DIP
+    description: Action parameter dip
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_REVERSE_TUNNEL_NEXT_HOP_ATTR_SIP
+    description: Action parameter sip
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 37313152
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 25630550
+          attr_param_id: {}
