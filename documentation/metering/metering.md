@@ -23,6 +23,9 @@
       3. [3.3.3. Meter rule](#333-meter-rule)
    4. [3.4. Capability](#34-capability)
 4. [4. Metering bucket selection in DASH pipeline](#4-metering-bucket-selection-in-dash-pipeline)
+5. [5. Metering bucket stats fetch process](#5-metering-bucket-stats-fetch-process)
+   1. [5.1. Metering bucket creation](#51-metering-bucket-creation)
+   2. [5.2. Fetching metering bucket stats](#52-fetching-metering-bucket-stats)
 
 ## 1. Background
 
@@ -61,10 +64,12 @@ The following attributes will be involved in determining the final metering buck
 
 ### 3.1. Meter bucket
 
+The meter bucket is defined as an entry table with each entry defined as below:
+
 | Attribute | Type | Default Value | Description |
 | --- | --- | --- | --- |
-| SAI_METER_BUCKET_ATTR_ENI_ID | `sai_object_id_t` | SAI_NULL_OBJECT_ID | ENI ID of this metering class. |
-| SAI_METER_BUCKET_ATTR_METER_CLASS | `sai_uint32_t` | 0 | Meter class of this meter bucket. |
+| eni_id | `sai_object_id_t` | SAI_NULL_OBJECT_ID | ENI ID of this metering class. |
+| meter_class | `sai_uint32_t` | 0 | Meter class of this meter bucket. |
 
 To fetch the metering data from each meter bucket, we are going to leverage the SAI stats APIs, which provides get, get and clear and other frequently used semantics. It will also reduce the work in SONiC stack, as SONiC already have good support over the stats APIs.
 
@@ -152,3 +157,30 @@ When a packet arrives at an ENI, it will go through the steps below to find its 
    1. Meter policy v4 or v6 will be selected based on the IP family of the original overlay packet.
    2. The overlay destination (outbound pipeline) / source (inbound pipeline) IP will be used for ternary match against the meter rules in the meter policy to find the meter class.
 6. **Meter Update**: The final meter class will be used for update the counters in meter bucket. If final meter class is 0, no meter bucket will be updated.
+
+## 5. Metering bucket stats fetch process
+
+### 5.1. Metering bucket creation
+
+Whenever the ENI is created, we will assume the all metering buckets are created together with the ENI and initialized to 0, without the need of any additional SAI API calls, such as `create_meter_bucket`.
+
+Each ENI will maintain the metering bucket from 1 to SAI_SWITCH_ATTR_DASH_CAPS_MAX_METER_BUCKET_COUNT_PER_ENI, inclusive.
+
+### 5.2. Fetching metering bucket stats
+
+Every once a while, the counters of each metering bucket will be pulled. 
+
+To save the cost, it is preferred to use the buck get stats API defined in `saiobject.h` to get all stats back in one call, with all metering bucket entry specified:
+
+```c
+sai_status_t sai_bulk_object_get_stats(
+        _In_ sai_object_id_t switch_id,
+        _In_ sai_object_type_t object_type,
+        _In_ uint32_t object_count,
+        _In_ const sai_object_key_t *object_key,
+        _In_ uint32_t number_of_counters,
+        _In_ const sai_stat_id_t *counter_ids,
+        _In_ sai_stats_mode_t mode,
+        _Inout_ sai_status_t *object_statuses,
+        _Out_ uint64_t *counters);
+```
