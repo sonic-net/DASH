@@ -3,10 +3,10 @@
 
 #include "../dash_routing_types.p4"
 
-control outbound_routing_stage(inout headers_t hdr,
-                               inout metadata_t meta)
+control outbound_routing_stage(
+    inout headers_t hdr,
+    inout metadata_t meta)
 {
-
     action set_outbound_routing_group_attr(bit<1> disabled) {
         meta.eni_data.outbound_routing_group_data.disabled = (bool)disabled;
     }
@@ -64,7 +64,7 @@ control outbound_routing_stage(inout headers_t hdr,
         }
             
         if (!routing.apply().hit) {
-                UPDATE_ENI_COUNTER(outbound_routing_entry_miss_drop);
+            UPDATE_ENI_COUNTER(outbound_routing_entry_miss_drop);
         }
     }
 

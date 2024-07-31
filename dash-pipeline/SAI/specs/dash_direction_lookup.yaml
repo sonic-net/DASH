@@ -47,6 +47,19 @@ sai_apis:
     valid_only: null
     deprecated: false
     is_vlan: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DIRECTION_LOOKUP_ENTRY_ATTR_DASH_ENI_MAC_OVERRIDE_TYPE
+    description: Action parameter DASH ENI MAC override type
+    type: sai_dash_eni_mac_override_type_t
+    attr_value_field: s32
+    default: SAI_DASH_ENI_MAC_OVERRIDE_TYPE_NONE
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
   stats: []
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
@@ -56,4 +69,5 @@ sai_apis:
         SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION
           id: 17408972
-          attr_param_id: {}
+          attr_param_id:
+            SAI_DIRECTION_LOOKUP_ENTRY_ATTR_DASH_ENI_MAC_OVERRIDE_TYPE: 1
