@@ -1,17 +1,18 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: dash_acl
-description: ''
+description: DASH ACL
+api_type: overlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: dash_acl_group
-  description: ''
+  description: DASH ACL group
   is_object: true
   enums: []
   structs: []
   attributes:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_DASH_ACL_GROUP_IP_ADDR_FAMILY
-    description: Action parameter IP_ADDR_FAMILY
+    name: SAI_DASH_ACL_GROUP_ATTR_IP_ADDR_FAMILY
+    description: Action parameter IP address family
     type: sai_ip_addr_family_t
     attr_value_field: u32
     default: SAI_IP_ADDR_FAMILY_IPV4
@@ -20,16 +21,26 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 50200087
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 25655048
+          attr_param_id: {}
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: dash_acl_rule
-  description: ''
+  description: DASH ACL rule
   is_object: true
   enums:
   - !!python/object:utils.sai_spec.sai_enum.SaiEnum
     name: sai_dash_acl_rule_action_t
-    description: Attribute data for SAI_DASH_ACL_RULE_ATTR_ACTION
+    description: 'Attribute data for #SAI_DASH_ACL_RULE_ATTR_ACTION'
     members:
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_DASH_ACL_RULE_ACTION_PERMIT
@@ -38,15 +49,15 @@ sai_apis:
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
       description: ''
-      value: '0'
+      value: '1'
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_DASH_ACL_RULE_ACTION_DENY
       description: ''
-      value: '0'
+      value: '2'
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
       description: ''
-      value: '0'
+      value: '3'
   structs: []
   attributes:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
@@ -56,11 +67,90 @@ sai_apis:
     attr_value_field: null
     default: SAI_DASH_ACL_RULE_ACTION_PERMIT
     isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    deprecated: false
+    is_vlan: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_ACL_RULE_ATTR_DASH_ACL_GROUP_ID
+    description: Exact matched key dash_acl_group_id
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: null
+    isresourcetype: true
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: SAI_OBJECT_TYPE_DASH_ACL_GROUP
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_ACL_RULE_ATTR_DIP
+    description: List matched key dip
+    type: sai_ip_prefix_list_t
+    attr_value_field: ipprefixlist
+    default: null
+    isresourcetype: false
     flags: MANDATORY_ON_CREATE | CREATE_ONLY
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_ACL_RULE_ATTR_SIP
+    description: List matched key sip
+    type: sai_ip_prefix_list_t
+    attr_value_field: ipprefixlist
+    default: null
+    isresourcetype: false
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_ACL_RULE_ATTR_PROTOCOL
+    description: List matched key protocol
+    type: sai_u8_list_t
+    attr_value_field: u8list
+    default: null
+    isresourcetype: false
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_ACL_RULE_ATTR_SRC_PORT
+    description: Range_list matched key src_port
+    type: sai_u16_range_list_t
+    attr_value_field: u16rangelist
+    default: null
+    isresourcetype: false
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_ACL_RULE_ATTR_DST_PORT
+    description: Range_list matched key dst_port
+    type: sai_u16_range_list_t
+    attr_value_field: u16rangelist
+    default: null
+    isresourcetype: false
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_DASH_ACL_RULE_ATTR_COUNTER_ID
     description: Attach a counter. When it is empty, then packet hits won't be counted.
@@ -72,7 +162,8 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_COUNTER
     allow_null: true
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_DASH_ACL_RULE_ATTR_PRIORITY
     description: Rule priority in table
@@ -84,7 +175,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_DASH_ACL_RULE_ATTR_IP_ADDR_FAMILY
     description: IP address family for resource accounting
@@ -96,5 +188,122 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 41950136
+      actions:
+        SAI_DASH_ACL_RULE_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT
+          id: 32161567
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
+          id: 20706700
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY
+          id: 28146588
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
+          id: 31424218
+          attr_param_id: {}
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 43016664
+      actions:
+        SAI_DASH_ACL_RULE_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT
+          id: 32161567
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
+          id: 20706700
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY
+          id: 28146588
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
+          id: 31424218
+          attr_param_id: {}
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 49695908
+      actions:
+        SAI_DASH_ACL_RULE_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT
+          id: 32161567
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
+          id: 20706700
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY
+          id: 28146588
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
+          id: 31424218
+          attr_param_id: {}
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 49209582
+      actions:
+        SAI_DASH_ACL_RULE_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT
+          id: 18858683
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
+          id: 24263137
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY
+          id: 29962337
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
+          id: 26077229
+          attr_param_id: {}
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 36478314
+      actions:
+        SAI_DASH_ACL_RULE_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT
+          id: 18858683
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
+          id: 24263137
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY
+          id: 29962337
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
+          id: 26077229
+          attr_param_id: {}
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 39012793
+      actions:
+        SAI_DASH_ACL_RULE_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT
+          id: 18858683
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
+          id: 24263137
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY
+          id: 29962337
+          attr_param_id: {}
+        SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
+          id: 26077229
+          attr_param_id: {}

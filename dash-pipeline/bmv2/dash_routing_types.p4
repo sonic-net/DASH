@@ -168,7 +168,9 @@ action set_private_link_mapping(
     inout metadata_t meta, 
     @SaiVal[type="sai_ip_address_t"] IPv4Address underlay_dip,
     IPv6Address overlay_sip,
+    IPv6Address overlay_sip_mask,
     IPv6Address overlay_dip,
+    IPv6Address overlay_dip_mask,
     @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t dash_encapsulation,
     bit<24> tunnel_key,
     bit<32> meter_class_or,
@@ -197,8 +199,8 @@ action set_private_link_mapping(
     push_action_nat46(hdr = hdr,
                     meta = meta,
                     dip = overlay_dip,
-                    dip_mask = 0xffffffffffffffffffffffff,
-                    sip = (overlay_sip & ~meta.eni_data.pl_sip_mask) | meta.eni_data.pl_sip | (IPv6Address)hdr.u0_ipv4.src_addr,
+                    dip_mask = overlay_dip_mask,
+                    sip = ((( (IPv6Address)hdr.u0_ipv4.src_addr & ~overlay_sip_mask) | overlay_sip) & ~meta.eni_data.pl_sip_mask) | meta.eni_data.pl_sip,
                     sip_mask = 0xffffffffffffffffffffffff);
 #endif /* DISABLE_128BIT_ARITHMETIC */
 

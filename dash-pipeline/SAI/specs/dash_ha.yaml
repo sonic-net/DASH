@@ -1,17 +1,18 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: dash_ha
-description: ''
+description: DASH HA
+api_type: overlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: ha_set
-  description: ''
+  description: HA set
   is_object: true
   enums: []
   structs: []
   attributes:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_HA_SET_LOCAL_IP
-    description: Action parameter LOCAL_IP
+    name: SAI_HA_SET_ATTR_LOCAL_IP
+    description: Action parameter local IP
     type: sai_ip_address_t
     attr_value_field: ipaddr
     default: 0.0.0.0
@@ -20,10 +21,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_HA_SET_PEER_IP
-    description: Action parameter PEER_IP
+    name: SAI_HA_SET_ATTR_PEER_IP
+    description: Action parameter peer IP
     type: sai_ip_address_t
     attr_value_field: ipaddr
     default: 0.0.0.0
@@ -32,10 +34,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_HA_SET_CP_DATA_CHANNEL_PORT
-    description: Action parameter CP_DATA_CHANNEL_PORT
+    name: SAI_HA_SET_ATTR_CP_DATA_CHANNEL_PORT
+    description: Action parameter control plane data channel port
     type: sai_uint16_t
     attr_value_field: u16
     default: '0'
@@ -44,10 +47,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: true
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_HA_SET_DP_CHANNEL_DST_PORT
-    description: Action parameter DP_CHANNEL_DST_PORT
+    name: SAI_HA_SET_ATTR_DP_CHANNEL_DST_PORT
+    description: Action parameter data plane channel dst port
     type: sai_uint16_t
     attr_value_field: u16
     default: '0'
@@ -56,10 +60,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: true
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_HA_SET_DP_CHANNEL_MIN_SRC_PORT
-    description: Action parameter DP_CHANNEL_MIN_SRC_PORT
+    name: SAI_HA_SET_ATTR_DP_CHANNEL_MIN_SRC_PORT
+    description: Action parameter data plane channel min src port
     type: sai_uint16_t
     attr_value_field: u16
     default: '0'
@@ -68,10 +73,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: true
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_HA_SET_DP_CHANNEL_MAX_SRC_PORT
-    description: Action parameter DP_CHANNEL_MAX_SRC_PORT
+    name: SAI_HA_SET_ATTR_DP_CHANNEL_MAX_SRC_PORT
+    description: Action parameter data plane channel max src port
     type: sai_uint16_t
     attr_value_field: u16
     default: '0'
@@ -80,10 +86,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: true
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_HA_SET_DP_CHANNEL_PROBE_INTERVAL_MS
-    description: Action parameter DP_CHANNEL_PROBE_INTERVAL_MS
+    name: SAI_HA_SET_ATTR_DP_CHANNEL_PROBE_INTERVAL_MS
+    description: Action parameter data plane channel probe interval ms
     type: sai_uint32_t
     attr_value_field: u32
     default: '0'
@@ -92,10 +99,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_HA_SET_DP_CHANNEL_PROBE_FAIL_THRESHOLD
-    description: Action parameter DP_CHANNEL_PROBE_FAIL_THRESHOLD
+    name: SAI_HA_SET_ATTR_DP_CHANNEL_PROBE_FAIL_THRESHOLD
+    description: Action parameter data plane channel probe fail threshold
     type: sai_uint32_t
     attr_value_field: u32
     default: '0'
@@ -104,10 +112,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_HA_SET_DP_CHANNEL_IS_ALIVE
-    description: Action parameter DP_CHANNEL_IS_ALIVE
+    name: SAI_HA_SET_ATTR_DP_CHANNEL_IS_ALIVE
+    description: Action parameter data plane channel is alive
     type: bool
     attr_value_field: booldata
     default: null
@@ -116,7 +125,21 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_ATTR_DPU_DRIVEN_HA_SWITCHOVER_WAIT_TIME_MS
+    description: Action parameter SAI vendor driven HA switchover wait time ms
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
   stats:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_REQ_RX_BYTES
@@ -129,7 +152,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_REQ_RX_PACKETS
     description: DASH HA_SET DP_PROBE_REQ_RX_PACKETS stat count
@@ -141,7 +165,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_REQ_TX_BYTES
     description: DASH HA_SET DP_PROBE_REQ_TX_BYTES stat count
@@ -153,7 +178,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_REQ_TX_PACKETS
     description: DASH HA_SET DP_PROBE_REQ_TX_PACKETS stat count
@@ -165,7 +191,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_ACK_RX_BYTES
     description: DASH HA_SET DP_PROBE_ACK_RX_BYTES stat count
@@ -177,7 +204,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_ACK_RX_PACKETS
     description: DASH HA_SET DP_PROBE_ACK_RX_PACKETS stat count
@@ -189,7 +217,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_ACK_TX_BYTES
     description: DASH HA_SET DP_PROBE_ACK_TX_BYTES stat count
@@ -201,7 +230,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_ACK_TX_PACKETS
     description: DASH HA_SET DP_PROBE_ACK_TX_PACKETS stat count
@@ -213,7 +243,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_FAILED
     description: DASH HA_SET DP_PROBE_FAILED stat count
@@ -225,7 +256,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_ATTEMPTED
     description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_ATTEMPTED stat count
@@ -237,7 +269,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_RECEIVED
     description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_RECEIVED stat count
@@ -249,7 +282,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_SUCCEEDED
     description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_SUCCEEDED stat count
@@ -261,7 +295,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_FAILED
     description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_FAILED stat count
@@ -273,7 +308,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_CONNECT_REJECTED
     description: DASH HA_SET CP_DATA_CHANNEL_CONNECT_REJECTED stat count
@@ -285,7 +321,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_CP_DATA_CHANNEL_TIMEOUT_COUNT
     description: DASH HA_SET CP_DATA_CHANNEL_TIMEOUT_COUNT stat count
@@ -297,7 +334,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_RECEIVED
     description: DASH HA_SET BULK_SYNC_MESSAGE_RECEIVED stat count
@@ -309,7 +347,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_SENT
     description: DASH HA_SET BULK_SYNC_MESSAGE_SENT stat count
@@ -321,7 +360,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_BULK_SYNC_MESSAGE_SEND_FAILED
     description: DASH HA_SET BULK_SYNC_MESSAGE_SEND_FAILED stat count
@@ -333,7 +373,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_BULK_SYNC_FLOW_RECEIVED
     description: DASH HA_SET BULK_SYNC_FLOW_RECEIVED stat count
@@ -345,7 +386,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_BULK_SYNC_FLOW_SENT
     description: DASH HA_SET BULK_SYNC_FLOW_SENT stat count
@@ -357,17 +399,27 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 45319666
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 21324178
+          attr_param_id: {}
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: ha_scope
-  description: ''
+  description: HA scope
   is_object: true
   enums: []
   structs: []
   attributes:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_HA_SCOPE_HA_SET_ID
-    description: Action parameter HA_SET_ID
+    name: SAI_HA_SCOPE_ATTR_HA_SET_ID
+    description: Action parameter HA set id
     type: sai_uint16_t
     attr_value_field: u16
     default: '0'
@@ -376,10 +428,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: true
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_HA_SCOPE_DASH_HA_ROLE
-    description: Action parameter DASH_HA_ROLE
+    name: SAI_HA_SCOPE_ATTR_DASH_HA_ROLE
+    description: Action parameter DASH HA role
     type: sai_dash_ha_role_t
     attr_value_field: s32
     default: SAI_DASH_HA_ROLE_DEAD
@@ -388,10 +441,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_HA_SCOPE_FLOW_VERSION
-    description: Action parameter FLOW_VERSION
+    name: SAI_HA_SCOPE_ATTR_FLOW_VERSION
+    description: Action parameter flow version
     type: sai_uint32_t
     attr_value_field: u32
     default: null
@@ -400,10 +454,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_HA_SCOPE_FLOW_RECONCILE_REQUESTED
-    description: Action parameter FLOW_RECONCILE_REQUESTED
+    name: SAI_HA_SCOPE_ATTR_FLOW_RECONCILE_REQUESTED
+    description: Action parameter flow reconcile requested
     type: bool
     attr_value_field: booldata
     default: 'false'
@@ -412,10 +467,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_HA_SCOPE_FLOW_RECONCILE_NEEDED
-    description: Action parameter FLOW_RECONCILE_NEEDED
+    name: SAI_HA_SCOPE_ATTR_FLOW_RECONCILE_NEEDED
+    description: Action parameter flow reconcile needed
     type: bool
     attr_value_field: booldata
     default: null
@@ -424,5 +480,80 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SCOPE_ATTR_VIP_V4
+    description: Action parameter VIP v4
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SCOPE_ATTR_VIP_V6
+    description: Action parameter VIP v6
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SCOPE_ATTR_ADMIN_STATE
+    description: Action parameter admin state
+    type: bool
+    attr_value_field: booldata
+    default: 'false'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SCOPE_ATTR_ACTIVATE_ROLE
+    description: Action parameter activate role
+    type: bool
+    attr_value_field: booldata
+    default: 'false'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SCOPE_ATTR_DASH_HA_STATE
+    description: Action parameter DASH HA state
+    type: sai_dash_ha_state_t
+    attr_value_field: s32
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
   stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 49681752
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 25507507
+          attr_param_id: {}

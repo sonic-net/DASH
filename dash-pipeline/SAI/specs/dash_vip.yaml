@@ -1,15 +1,16 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: dash_vip
-description: ''
+description: DASH VIP
+api_type: overlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: vip_entry
-  description: ''
+  description: VIP entry
   is_object: false
   enums:
   - !!python/object:utils.sai_spec.sai_enum.SaiEnum
     name: sai_vip_entry_action_t
-    description: Attribute data for SAI_VIP_ENTRY_ATTR_ACTION
+    description: 'Attribute data for #SAI_VIP_ENTRY_ATTR_ACTION'
     members:
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_VIP_ENTRY_ACTION_ACCEPT
@@ -17,11 +18,17 @@ sai_apis:
       value: '0'
   structs:
   - !!python/object:utils.sai_spec.sai_struct.SaiStruct
-    name: sai_vip_entry_entry_t
+    name: sai_vip_entry_t
     description: Entry for vip_entry
     members:
     - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
-      name: VIP
+      name: switch_id
+      description: Switch ID
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_SWITCH
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: vip
       description: Exact matched key VIP
       type: sai_ip_address_t
       objects: null
@@ -34,11 +41,12 @@ sai_apis:
     attr_value_field: null
     default: SAI_VIP_ENTRY_ACTION_ACCEPT
     isresourcetype: false
-    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    flags: CREATE_AND_SET
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_VIP_ENTRY_ATTR_IP_ADDR_FAMILY
     description: IP address family for resource accounting
@@ -50,5 +58,15 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 45245089
+      actions:
+        SAI_VIP_ENTRY_ACTION_ACCEPT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_VIP_ENTRY_ACTION_ACCEPT
+          id: 26041632
+          attr_param_id: {}

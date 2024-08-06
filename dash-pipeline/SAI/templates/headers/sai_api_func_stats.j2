@@ -1,6 +1,5 @@
-{% if table.sai_stats | length > 0 %}
 /**
- * @brief Get {{ table.name | upper }} statistics counters. Deprecated for backward compatibility.
+ * @brief Get {{ api.name | upper }} statistics counters. Deprecated for backward compatibility.
  *
 {% include 'templates/headers/sai_api_comment_object_id.j2' %}
  * @param[in] number_of_counters Number of counters in the array
@@ -9,14 +8,14 @@
  *
  * @return #SAI_STATUS_SUCCESS on success, failure status code on error
  */
-typedef sai_status_t (*sai_get_{{ table.name }}_stats_fn)(
-{% include 'templates/headers/sai_api_param_object_id.j2' %}
+typedef sai_status_t (*sai_get_{{ api.name }}_stats_fn)(
+        {% include 'templates/headers/sai_api_param_object_id.j2' %},
         _In_ uint32_t number_of_counters,
         _In_ const sai_stat_id_t *counter_ids,
         _Out_ uint64_t *counters);
 
 /**
- * @brief Get {{ table.name | upper }} statistics counters extended.
+ * @brief Get {{ api.name | upper }} statistics counters extended.
  *
 {% include 'templates/headers/sai_api_comment_object_id.j2' %}
  * @param[in] number_of_counters Number of counters in the array
@@ -26,15 +25,15 @@ typedef sai_status_t (*sai_get_{{ table.name }}_stats_fn)(
  *
  * @return #SAI_STATUS_SUCCESS on success, failure status code on error
  */
-typedef sai_status_t (*sai_get_{{ table.name }}_stats_ext_fn)(
-{% include 'templates/headers/sai_api_param_object_id.j2' %}
+typedef sai_status_t (*sai_get_{{ api.name }}_stats_ext_fn)(
+        {% include 'templates/headers/sai_api_param_object_id.j2' %},
         _In_ uint32_t number_of_counters,
         _In_ const sai_stat_id_t *counter_ids,
         _In_ sai_stats_mode_t mode,
         _Out_ uint64_t *counters);
 
 /**
- * @brief Clear {{ table.name | upper }} statistics counters.
+ * @brief Clear {{ api.name | upper }} statistics counters.
  *
 {% include 'templates/headers/sai_api_comment_object_id.j2' %}
  * @param[in] number_of_counters Number of counters in the array
@@ -42,9 +41,7 @@ typedef sai_status_t (*sai_get_{{ table.name }}_stats_ext_fn)(
  *
  * @return #SAI_STATUS_SUCCESS on success, failure status code on error
  */
-typedef sai_status_t (*sai_clear_{{ table.name }}_stats_fn)(
-{% include 'templates/headers/sai_api_param_object_id.j2' %}
+typedef sai_status_t (*sai_clear_{{ api.name }}_stats_fn)(
+        {% include 'templates/headers/sai_api_param_object_id.j2' %},
         _In_ uint32_t number_of_counters,
         _In_ const sai_stat_id_t *counter_ids);
-
-{% endif %}

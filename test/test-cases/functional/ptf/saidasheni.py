@@ -192,10 +192,10 @@ class CreateDeleteEniTest(VnetAPI):
         Note: test should be run after createEniTest
         """
         self.overlay_ip = "192.168.2.22"
-        routing_group_id = self.routing_group_create(admin_state=True)
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
 
         self.outbound_routing_entry = self.outbound_routing_vnet_direct_create(
-            routing_group_id=routing_group_id,
+            outbound_routing_group_id=outbound_routing_group_id,
             lpm="192.168.2.0/24",
             dst_vnet_id=self.outbound_vnet,
             overlay_ip=self.overlay_ip)
@@ -1058,7 +1058,7 @@ class EniScaleTest(VnetAPI):
 
                 self.outbound_vni += 1
                 outbound_vnet = self.vnet_create(vni=self.outbound_vni)
-                routing_group_id = self.routing_group_create(admin_state=True)
+                outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
 
                 # create inbound_routing_entry
                 self.inbound_routing_decap_create(eni_id=eni,
@@ -1067,7 +1067,7 @@ class EniScaleTest(VnetAPI):
                                                   sip_mask="255.255.255.0")
 
                 # create outbound_routing_entry
-                self.outbound_routing_vnet_direct_create(routing_group_id=routing_group_id,
+                self.outbound_routing_vnet_direct_create(outbound_routing_group_id=outbound_routing_group_id,
                                                          lpm="192.168.1.0/24",
                                                          dst_vnet_id=outbound_vnet,
                                                          overlay_ip="192.168.1.10")

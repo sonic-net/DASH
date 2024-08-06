@@ -352,6 +352,7 @@ MaxUdpFlow
 md
 microsoft
 misorder
+MSEE
 MSFT
 msft
 MSRC
@@ -377,6 +378,7 @@ Novus
 NPL
 NPU
 NPUS
+NPUs
 NSG
 NSGs
 num
@@ -418,6 +420,7 @@ oversubscription
 param
 params
 PAs
+PCC
 PCI
 PCIe
 Pensando
@@ -499,6 +502,7 @@ roadmap
 routable
 RPC
 RPCs
+RPF
 RST
 RSTPackets
 RSTs
@@ -730,3 +734,11 @@ Gan
 Ze
 AppDBMemoryEstimation
 Ivantsiv
+Zhixiong
+Niu
+validonly
+pb
+proto
+smac
+BFD
+hamgrd

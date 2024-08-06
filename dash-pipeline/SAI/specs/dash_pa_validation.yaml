@@ -1,15 +1,16 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: dash_pa_validation
-description: ''
+description: DASH PA validation
+api_type: overlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: pa_validation_entry
-  description: ''
+  description: PA validation entry
   is_object: false
   enums:
   - !!python/object:utils.sai_spec.sai_enum.SaiEnum
     name: sai_pa_validation_entry_action_t
-    description: Attribute data for SAI_PA_VALIDATION_ENTRY_ATTR_ACTION
+    description: 'Attribute data for #SAI_PA_VALIDATION_ENTRY_ATTR_ACTION'
     members:
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_PA_VALIDATION_ENTRY_ACTION_PERMIT
@@ -17,9 +18,15 @@ sai_apis:
       value: '0'
   structs:
   - !!python/object:utils.sai_spec.sai_struct.SaiStruct
-    name: sai_pa_validation_entry_entry_t
+    name: sai_pa_validation_entry_t
     description: Entry for pa_validation_entry
     members:
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: switch_id
+      description: Switch ID
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_SWITCH
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
       name: vnet_id
       description: Exact matched key vnet_id
@@ -40,11 +47,12 @@ sai_apis:
     attr_value_field: null
     default: SAI_PA_VALIDATION_ENTRY_ACTION_PERMIT
     isresourcetype: false
-    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    flags: CREATE_AND_SET
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_PA_VALIDATION_ENTRY_ATTR_IP_ADDR_FAMILY
     description: IP address family for resource accounting
@@ -56,5 +64,15 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 35526612
+      actions:
+        SAI_PA_VALIDATION_ENTRY_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_PA_VALIDATION_ENTRY_ACTION_PERMIT
+          id: 32591400
+          attr_param_id: {}

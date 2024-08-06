@@ -16,7 +16,7 @@ try:
     from utils.dash_p4 import DashP4SAIExtensions
     from utils.p4ir import P4IRTree, P4VarRefGraph
     from utils.sai_spec import SaiSpec
-    from utils.sai_gen import SAIGenerator
+    from utils.sai_gen import SAIGenerator, SaiHeaderGenerator
 except ImportError as ie:
     print("Import failed for " + ie.name)
     exit(1)
@@ -68,7 +68,10 @@ if __name__ == "__main__":
     print("Outputting new SAI spec to " + sai_spec_dir)
     yaml_inc_ctor.autoload = False
     new_sai_spec = dash_sai_exts.to_sai()
-    new_sai_spec.serialize(sai_spec_dir)
+    new_sai_spec.finalize()
+    sai_spec.merge(new_sai_spec)
+    sai_spec.serialize(sai_spec_dir)
 
     # Generate and update all SAI files
     SAIGenerator(dash_sai_exts).generate()
+    SaiHeaderGenerator(sai_spec).generate()

@@ -1,15 +1,16 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: dash_outbound_ca_to_pa
-description: ''
+description: DASH outbound CA to PA
+api_type: overlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: outbound_ca_to_pa_entry
-  description: ''
+  description: outbound CA to PA entry
   is_object: false
   enums:
   - !!python/object:utils.sai_spec.sai_enum.SaiEnum
     name: sai_outbound_ca_to_pa_entry_action_t
-    description: Attribute data for SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION
+    description: 'Attribute data for #SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION'
     members:
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING
@@ -18,12 +19,18 @@ sai_apis:
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
       description: ''
-      value: '0'
+      value: '1'
   structs:
   - !!python/object:utils.sai_spec.sai_struct.SaiStruct
-    name: sai_outbound_ca_to_pa_entry_entry_t
+    name: sai_outbound_ca_to_pa_entry_t
     description: Entry for outbound_ca_to_pa_entry
     members:
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: switch_id
+      description: Switch ID
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_SWITCH
+      valid_only: null
     - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
       name: dst_vnet_id
       description: Exact matched key dst_vnet_id
@@ -44,14 +51,15 @@ sai_apis:
     attr_value_field: null
     default: SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING
     isresourcetype: false
-    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    flags: CREATE_AND_SET
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_UNDERLAY_DIP
-    description: Action parameter UNDERLAY_DIP
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP
+    description: Action parameter underlay dip
     type: sai_ip_address_t
     attr_value_field: ipaddr
     default: 0.0.0.0
@@ -59,11 +67,13 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING
+      or SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_OVERLAY_DMAC
-    description: Action parameter OVERLAY_DMAC
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC
+    description: Action parameter overlay destination MAC
     type: sai_mac_t
     attr_value_field: mac
     default: vendor
@@ -71,11 +81,12 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_USE_DST_VNET_VNI
-    description: Action parameter USE_DST_VNET_VNI
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_USE_DST_VNET_VNI
+    description: Action parameter use dst VNET VNI
     type: bool
     attr_value_field: booldata
     default: 'false'
@@ -83,11 +94,12 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_METER_CLASS_OR
-    description: Action parameter METER_CLASS_OR
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS_OR
+    description: Action parameter meter class or
     type: sai_uint32_t
     attr_value_field: u32
     default: '0'
@@ -95,11 +107,27 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING
+      or SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_FLOW_RESIMULATION_REQUESTED
-    description: Action parameter FLOW_RESIMULATION_REQUESTED
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_DASH_TUNNEL_ID
+    description: Action parameter DASH tunnel id
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_DASH_TUNNEL
+    allow_null: true
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING
+      or SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_FLOW_RESIMULATION_REQUESTED
+    description: Action parameter flow re-simulation requested
     type: bool
     attr_value_field: booldata
     default: 'false'
@@ -107,11 +135,13 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING
+      or SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION
-    description: Action parameter ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION
+    description: Action parameter routing actions disabled in flow re-simulation
     type: sai_uint32_t
     attr_value_field: u32
     default: '0'
@@ -119,11 +149,13 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING
+      or SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_OVERLAY_SIP
-    description: Action parameter OVERLAY_SIP
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP
+    description: Action parameter overlay sip
     type: sai_ip_address_t
     attr_value_field: ipaddr
     default: 0.0.0.0
@@ -131,11 +163,12 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_OVERLAY_DIP
-    description: Action parameter OVERLAY_DIP
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP_MASK
+    description: Action parameter overlay sip mask
     type: sai_ip_address_t
     attr_value_field: ipaddr
     default: 0.0.0.0
@@ -143,11 +176,38 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_DASH_ENCAPSULATION
-    description: Action parameter DASH_ENCAPSULATION
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP
+    description: Action parameter overlay dip
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP_MASK
+    description: Action parameter overlay dip mask
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_DASH_ENCAPSULATION
+    description: Action parameter DASH encapsulation
     type: sai_dash_encapsulation_t
     attr_value_field: s32
     default: SAI_DASH_ENCAPSULATION_INVALID
@@ -155,11 +215,12 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_TUNNEL_KEY
-    description: Action parameter TUNNEL_KEY
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_TUNNEL_KEY
+    description: Action parameter tunnel key
     type: sai_uint32_t
     attr_value_field: u32
     default: '0'
@@ -167,8 +228,9 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
-    valid_only: null
-    deprecated: null
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_COUNTER_ID
     description: Attach a counter. When it is empty, then packet hits won't be counted.
@@ -180,7 +242,8 @@ sai_apis:
     object_name: SAI_OBJECT_TYPE_COUNTER
     allow_null: true
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_IP_ADDR_FAMILY
     description: IP address family for resource accounting
@@ -192,5 +255,37 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 43335456
+      actions:
+        SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING
+          id: 25614729
+          attr_param_id:
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP: 1
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DMAC: 2
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_USE_DST_VNET_VNI: 3
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS_OR: 4
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_DASH_TUNNEL_ID: 5
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_FLOW_RESIMULATION_REQUESTED: 6
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: 7
+        SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+          id: 31441909
+          attr_param_id:
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_UNDERLAY_DIP: 1
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP: 2
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP_MASK: 3
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP: 4
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP_MASK: 5
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_DASH_ENCAPSULATION: 6
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_TUNNEL_KEY: 7
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS_OR: 8
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_DASH_TUNNEL_ID: 9
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_FLOW_RESIMULATION_REQUESTED: 10
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: 11

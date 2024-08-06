@@ -1,0 +1,33 @@
+    /**
+     * @brief {{ attr.description }}
+     *
+     * @type {{ attr.type }}
+     * @flags {{ attr.flags }}
+{% if attr.deprecated %}
+     * @deprecated true
+{% endif %}
+{% if attr.is_vlan %}
+     * @isvlan true
+{% endif %}
+{% if attr.object_name != None %}
+     * @objects {{ attr.object_name }}
+{% endif %}
+{% if attr.allow_null %}
+     * @allownull true
+{% endif %}
+{% if attr.default != None %}
+     * @default {{ attr.default }}
+{% endif %}
+{% if attr.valid_only != None %}
+     * @validonly {{ attr.valid_only }}
+{% endif %}
+{% if attr.isresourcetype %}
+     * @isresourcetype true
+{% endif %}
+     */
+{% if ns.firstattr %}
+    {{ attr.name }} = SAI_{{ api.name | upper }}_ATTR_START,
+{% set ns.firstattr = false %}
+{% else %}
+    {{ attr.name }},
+{% endif %}

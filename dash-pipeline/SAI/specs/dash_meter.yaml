@@ -1,18 +1,62 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: dash_meter
-description: ''
+description: DASH meter
+api_type: overlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
-  name: meter_bucket
-  description: ''
-  is_object: true
-  enums: []
-  structs: []
-  attributes: []
+  name: meter_bucket_entry
+  description: meter bucket entry
+  is_object: false
+  enums:
+  - !!python/object:utils.sai_spec.sai_enum.SaiEnum
+    name: sai_meter_bucket_entry_action_t
+    description: 'Attribute data for #SAI_METER_BUCKET_ENTRY_ATTR_ACTION'
+    members:
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_METER_BUCKET_ENTRY_ACTION_UPDATE_METER_BUCKET
+      description: ''
+      value: '0'
+  structs:
+  - !!python/object:utils.sai_spec.sai_struct.SaiStruct
+    name: sai_meter_bucket_entry_t
+    description: Entry for meter_bucket_entry
+    members:
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: switch_id
+      description: Switch ID
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_SWITCH
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: eni_id
+      description: Exact matched key eni_id
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_ENI
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: meter_class
+      description: Exact matched key meter_class
+      type: sai_uint32_t
+      objects: null
+      valid_only: null
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_METER_BUCKET_ENTRY_ATTR_ACTION
+    description: Action
+    type: sai_meter_bucket_entry_action_t
+    attr_value_field: null
+    default: SAI_METER_BUCKET_ENTRY_ACTION_UPDATE_METER_BUCKET
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
   stats:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_METER_BUCKET_STAT_OUTBOUND_BYTES
-    description: DASH METER_BUCKET OUTBOUND_BYTES stat count
+    name: SAI_METER_BUCKET_ENTRY_STAT_OUTBOUND_BYTES
+    description: DASH METER_BUCKET_ENTRY OUTBOUND_BYTES stat count
     type: sai_uint64_t
     attr_value_field: u64
     default: null
@@ -21,10 +65,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_METER_BUCKET_STAT_INBOUND_BYTES
-    description: DASH METER_BUCKET INBOUND_BYTES stat count
+    name: SAI_METER_BUCKET_ENTRY_STAT_INBOUND_BYTES
+    description: DASH METER_BUCKET_ENTRY INBOUND_BYTES stat count
     type: sai_uint64_t
     attr_value_field: u64
     default: null
@@ -33,17 +78,27 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 45482818
+      actions:
+        SAI_METER_BUCKET_ENTRY_ACTION_UPDATE_METER_BUCKET: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_METER_BUCKET_ENTRY_ACTION_UPDATE_METER_BUCKET
+          id: 23515737
+          attr_param_id: {}
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: meter_policy
-  description: ''
+  description: meter policy
   is_object: true
   enums: []
   structs: []
   attributes:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_METER_POLICY_IP_ADDR_FAMILY
-    description: Action parameter IP_ADDR_FAMILY
+    name: SAI_METER_POLICY_ATTR_IP_ADDR_FAMILY
+    description: Action parameter IP address family
     type: sai_ip_addr_family_t
     attr_value_field: u32
     default: SAI_IP_ADDR_FAMILY_IPV4
@@ -52,18 +107,67 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 40733610
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 20564717
+          attr_param_id: {}
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: meter_rule
-  description: ''
+  description: meter rule
   is_object: true
   enums: []
   structs: []
   attributes:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_METER_RULE_METER_CLASS
-    description: Action parameter METER_CLASS
+    name: SAI_METER_RULE_ATTR_METER_POLICY_ID
+    description: Exact matched key meter_policy_id
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: null
+    isresourcetype: true
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: SAI_OBJECT_TYPE_METER_POLICY
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_METER_RULE_ATTR_DIP
+    description: Ternary matched key dip
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: null
+    isresourcetype: false
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_METER_RULE_ATTR_DIP_MASK
+    description: Ternary matched key dip mask
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: null
+    isresourcetype: false
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_METER_RULE_ATTR_METER_CLASS
+    description: Action parameter meter class
     type: sai_uint32_t
     attr_value_field: u32
     default: '0'
@@ -72,7 +176,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_METER_RULE_ATTR_PRIORITY
     description: Rule priority in table
@@ -84,7 +189,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_METER_RULE_ATTR_IP_ADDR_FAMILY
     description: IP address family for resource accounting
@@ -96,5 +202,15 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 44484556
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 19652160
+          attr_param_id: {}

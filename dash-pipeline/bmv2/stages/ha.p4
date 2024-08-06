@@ -12,7 +12,12 @@ control ha_stage(inout headers_t hdr,
         @SaiVal[type="sai_dash_ha_role_t"] dash_ha_role_t dash_ha_role,
         @SaiVal[isreadonly="true"] bit<32> flow_version,
         bit<1> flow_reconcile_requested,
-        @SaiVal[isreadonly="true"] bit<1> flow_reconcile_needed
+        @SaiVal[isreadonly="true"] bit<1> flow_reconcile_needed,
+        @SaiVal[type="sai_ip_address_t"] IPv4Address vip_v4,
+        IPv6Address vip_v6,
+        bit<1> admin_state,
+        bit<1> activate_role,
+        @SaiVal[isreadonly="true", type="sai_dash_ha_state_t"] dash_ha_state_t dash_ha_state
     ) {
         meta.ha.ha_set_id = ha_set_id;
         meta.ha.ha_role = dash_ha_role;
@@ -40,19 +45,19 @@ control ha_stage(inout headers_t hdr,
     DEFINE_HIT_COUNTER(dp_probe_failed, MAX_HA_SET, name="dp_probe_failed", attr_type="stats", action_names="set_ha_set_attr")
 
     // Control plane data channel related counters
-    DEFINE_HIT_COUNTER(cp_data_channel_connect_attempted, MAX_HA_SET, name="cp_data_channel_connect_attempted", attr_type="stats", action_names="set_ha_set_attr", order=1)
-    DEFINE_HIT_COUNTER(cp_data_channel_connect_received, MAX_HA_SET, name="cp_data_channel_connect_received", attr_type="stats", action_names="set_ha_set_attr", order=1)
-    DEFINE_HIT_COUNTER(cp_data_channel_connect_succeeded, MAX_HA_SET, name="cp_data_channel_connect_succeeded", attr_type="stats", action_names="set_ha_set_attr", order=1)
-    DEFINE_HIT_COUNTER(cp_data_channel_connect_failed, MAX_HA_SET, name="cp_data_channel_connect_failed", attr_type="stats", action_names="set_ha_set_attr", order=1)
-    DEFINE_HIT_COUNTER(cp_data_channel_connect_rejected, MAX_HA_SET, name="cp_data_channel_connect_rejected", attr_type="stats", action_names="set_ha_set_attr", order=1)
-    DEFINE_HIT_COUNTER(cp_data_channel_timeout_count, MAX_HA_SET, name="cp_data_channel_timeout_count", attr_type="stats", action_names="set_ha_set_attr", order=1)
+    DEFINE_HIT_COUNTER(cp_data_channel_connect_attempted, MAX_HA_SET, name="cp_data_channel_connect_attempted", attr_type="stats", action_names="set_ha_set_attr")
+    DEFINE_HIT_COUNTER(cp_data_channel_connect_received, MAX_HA_SET, name="cp_data_channel_connect_received", attr_type="stats", action_names="set_ha_set_attr")
+    DEFINE_HIT_COUNTER(cp_data_channel_connect_succeeded, MAX_HA_SET, name="cp_data_channel_connect_succeeded", attr_type="stats", action_names="set_ha_set_attr")
+    DEFINE_HIT_COUNTER(cp_data_channel_connect_failed, MAX_HA_SET, name="cp_data_channel_connect_failed", attr_type="stats", action_names="set_ha_set_attr")
+    DEFINE_HIT_COUNTER(cp_data_channel_connect_rejected, MAX_HA_SET, name="cp_data_channel_connect_rejected", attr_type="stats", action_names="set_ha_set_attr")
+    DEFINE_HIT_COUNTER(cp_data_channel_timeout_count, MAX_HA_SET, name="cp_data_channel_timeout_count", attr_type="stats", action_names="set_ha_set_attr")
 
     // Bulk sync related counters
-    DEFINE_HIT_COUNTER(bulk_sync_message_received, MAX_HA_SET, name="bulk_sync_message_received", attr_type="stats", action_names="set_ha_set_attr", order=1)
-    DEFINE_HIT_COUNTER(bulk_sync_message_sent, MAX_HA_SET, name="bulk_sync_message_sent", attr_type="stats", action_names="set_ha_set_attr", order=1)
-    DEFINE_HIT_COUNTER(bulk_sync_message_send_failed, MAX_HA_SET, name="bulk_sync_message_send_failed", attr_type="stats", action_names="set_ha_set_attr", order=1)
-    DEFINE_HIT_COUNTER(bulk_sync_flow_received, MAX_HA_SET, name="bulk_sync_flow_received", attr_type="stats", action_names="set_ha_set_attr", order=1)
-    DEFINE_HIT_COUNTER(bulk_sync_flow_sent, MAX_HA_SET, name="bulk_sync_flow_sent", attr_type="stats", action_names="set_ha_set_attr", order=1)
+    DEFINE_HIT_COUNTER(bulk_sync_message_received, MAX_HA_SET, name="bulk_sync_message_received", attr_type="stats", action_names="set_ha_set_attr")
+    DEFINE_HIT_COUNTER(bulk_sync_message_sent, MAX_HA_SET, name="bulk_sync_message_sent", attr_type="stats", action_names="set_ha_set_attr")
+    DEFINE_HIT_COUNTER(bulk_sync_message_send_failed, MAX_HA_SET, name="bulk_sync_message_send_failed", attr_type="stats", action_names="set_ha_set_attr")
+    DEFINE_HIT_COUNTER(bulk_sync_flow_received, MAX_HA_SET, name="bulk_sync_flow_received", attr_type="stats", action_names="set_ha_set_attr")
+    DEFINE_HIT_COUNTER(bulk_sync_flow_sent, MAX_HA_SET, name="bulk_sync_flow_sent", attr_type="stats", action_names="set_ha_set_attr")
 
     action set_ha_set_attr(
         bit<1> local_ip_is_v6,
@@ -65,11 +70,12 @@ control ha_stage(inout headers_t hdr,
         bit<16> dp_channel_max_src_port,
         bit<32> dp_channel_probe_interval_ms,
         bit<32> dp_channel_probe_fail_threshold,
-        @SaiVal[isreadonly="true"] bit<1> dp_channel_is_alive
+        @SaiVal[isreadonly="true"] bit<1> dp_channel_is_alive,
+        bit<32> dpu_driven_ha_switchover_wait_time_ms
     ) {
         meta.ha.peer_ip_is_v6 = peer_ip_is_v6;
         meta.ha.peer_ip = peer_ip;
-        
+
         meta.ha.dp_channel_dst_port = dp_channel_dst_port;
         meta.ha.dp_channel_src_port_min = dp_channel_min_src_port;
         meta.ha.dp_channel_src_port_max = dp_channel_max_src_port;
@@ -97,7 +103,7 @@ control ha_stage(inout headers_t hdr,
             return;
         }
         ha_set.apply();
-    
+
         // TODO: HA state machine handling.
     }
 }

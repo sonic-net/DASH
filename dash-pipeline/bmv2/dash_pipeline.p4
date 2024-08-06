@@ -9,6 +9,7 @@
 #include "dash_outbound.p4"
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"
+#include "stages/conntrack_lookup.p4"
 #include "stages/direction_lookup.p4"
 #include "stages/eni_lookup.p4"
 #include "stages/ha.p4"
@@ -112,17 +113,18 @@ control dash_ingress(
                          bit<1> disable_fast_path_icmp_flow_redirection,
                          bit<1> full_flow_resimulation_requested,
                          bit<64> max_resimulated_flow_per_second,
-                         @SaiVal[type="sai_object_id_t"] bit<16> routing_group_id)
+                         @SaiVal[type="sai_object_id_t"] bit<16> outbound_routing_group_id,
+                         bit<1> is_ha_flow_owner)
     {
-        meta.eni_data.cps                                 = cps;
-        meta.eni_data.pps                                 = pps;
-        meta.eni_data.flows                               = flows;
-        meta.eni_data.admin_state                         = admin_state;
-        meta.eni_data.pl_sip                              = pl_sip;
-        meta.eni_data.pl_sip_mask                         = pl_sip_mask;
-        meta.eni_data.pl_underlay_sip                     = pl_underlay_sip;
-        meta.encap_data.underlay_dip                      = vm_underlay_dip;
-        meta.eni_data.routing_group_data.routing_group_id = routing_group_id;
+        meta.eni_data.cps                                                   = cps;
+        meta.eni_data.pps                                                   = pps;
+        meta.eni_data.flows                                                 = flows;
+        meta.eni_data.admin_state                                           = admin_state;
+        meta.eni_data.pl_sip                                                = pl_sip;
+        meta.eni_data.pl_sip_mask                                           = pl_sip_mask;
+        meta.eni_data.pl_underlay_sip                                       = pl_underlay_sip;
+        meta.encap_data.underlay_dip                                        = vm_underlay_dip;
+        meta.eni_data.outbound_routing_group_data.outbound_routing_group_id = outbound_routing_group_id;
         if (dash_tunnel_dscp_mode == dash_tunnel_dscp_mode_t.PIPE_MODEL) {
             meta.eni_data.dscp = dscp;
         }
@@ -237,7 +239,7 @@ control dash_ingress(
         }
     }
 
-    @SaiTable[name = "dash_acl_group", api = "dash_acl", order = 0, isobject="true"]
+    @SaiTable[name = "dash_acl_group", api = "dash_acl", isobject="true"]
     table acl_group {
         key = {
             meta.stage1_dash_acl_group_id : exact @SaiVal[name = "dash_acl_group_id"];
@@ -335,7 +337,9 @@ control dash_ingress(
         if (meta.eni_data.admin_state == 0) {
             deny();
         }
-        
+
+        conntrack_lookup_stage.apply(hdr, meta);
+
         UPDATE_ENI_COUNTER(eni_rx);
         if (meta.is_fast_path_icmp_flow_redirection_packet) {
             UPDATE_ENI_COUNTER(eni_lb_fast_path_icmp_in);
@@ -372,7 +376,7 @@ control dash_ingress(
     #endif // TARGET_BMV2_V1MODEL
     #ifdef TARGET_DPDK_PNA
             , istd
-    #endif // TARGET_DPDK_PNA        
+    #endif // TARGET_DPDK_PNA
         );
 
         if (meta.eni_data.dscp_mode == dash_tunnel_dscp_mode_t.PIPE_MODEL) {

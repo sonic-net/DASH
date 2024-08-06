@@ -63,17 +63,17 @@
   {
     "name": "routing_group_#1",
     "op": "create",
-    "type": "SAI_OBJECT_TYPE_ROUTING_GROUP",
+    "type": "SAI_OBJECT_TYPE_OUTBOUND_ROUTING_GROUP",
     "attributes": [
-      "SAI_ROUTING_GROUP_ATTR_ADMIN_STATE", "True"
+      "SAI_OUTBOUND_ROUTING_GROUP_ATTR_DISABLED", "False"
     ]
   },
   {
     "name": "routing_group_#2",
     "op": "create",
-    "type": "SAI_OBJECT_TYPE_ROUTING_GROUP",
+    "type": "SAI_OBJECT_TYPE_OUTBOUND_ROUTING_GROUP",
     "attributes": [
-      "SAI_ROUTING_GROUP_ATTR_ADMIN_STATE", "True"
+      "SAI_OUTBOUND_ROUTING_GROUP_ATTR_DISABLED", "False"
     ]
   },
   {
@@ -116,7 +116,7 @@
       "SAI_ENI_ATTR_V6_METER_POLICY_ID", "0",
       "SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE", "SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL",
       "SAI_ENI_ATTR_DSCP", "0",
-      "SAI_ENI_ATTR_ROUTING_GROUP_ID", "$routing_group_#1",
+      "SAI_ENI_ATTR_OUTBOUND_ROUTING_GROUP_ID", "$routing_group_#1",
       "SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION", "False",
       "SAI_ENI_ATTR_FULL_FLOW_RESIMULATION_REQUESTED", "False",
       "SAI_ENI_ATTR_MAX_RESIMULATED_FLOW_PER_SECOND", "0"
@@ -162,7 +162,7 @@
       "SAI_ENI_ATTR_V6_METER_POLICY_ID", "0",
       "SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE", "SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL",
       "SAI_ENI_ATTR_DSCP", "0",
-      "SAI_ENI_ATTR_ROUTING_GROUP_ID", "$routing_group_#2",
+      "SAI_ENI_ATTR_OUTBOUND_ROUTING_GROUP_ID", "$routing_group_#2",
       "SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION", "False",
       "SAI_ENI_ATTR_FULL_FLOW_RESIMULATION_REQUESTED", "False",
       "SAI_ENI_ATTR_MAX_RESIMULATED_FLOW_PER_SECOND", "0"
@@ -201,7 +201,7 @@
     "type": "SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
-      "routing_group_id": "$routing_group_#1",
+      "outbound_routing_group_id": "$routing_group_#1",
       "destination": "1.0.0.0/8"
     },
     "attributes": [
@@ -219,7 +219,7 @@
     "type": "SAI_OBJECT_TYPE_OUTBOUND_ROUTING_ENTRY",
     "key": {
       "switch_id": "$SWITCH_ID",
-      "routing_group_id": "$routing_group_#2",
+      "outbound_routing_group_id": "$routing_group_#2",
       "destination": "1.0.0.0/8"
     },
     "attributes": [

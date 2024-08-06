@@ -1,15 +1,16 @@
 !!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
 name: route
-description: ''
+description: route
+api_type: underlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: route_entry
-  description: ''
+  description: route entry
   is_object: false
   enums:
   - !!python/object:utils.sai_spec.sai_enum.SaiEnum
     name: sai_route_entry_action_t
-    description: Attribute data for SAI_ROUTE_ENTRY_ATTR_ACTION
+    description: 'Attribute data for #SAI_ROUTE_ENTRY_ATTR_ACTION'
     members:
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
       name: SAI_ROUTE_ENTRY_ACTION_PKT_ACT
@@ -17,12 +18,18 @@ sai_apis:
       value: '0'
   structs:
   - !!python/object:utils.sai_spec.sai_struct.SaiStruct
-    name: sai_route_entry_entry_t
+    name: sai_route_entry_t
     description: Entry for route_entry
     members:
     - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: switch_id
+      description: Switch ID
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_SWITCH
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
       name: destination
-      description: Lpm matched key destination
+      description: LPM matched key destination
       type: sai_ip_prefix_t
       objects: null
       valid_only: null
@@ -34,14 +41,15 @@ sai_apis:
     attr_value_field: null
     default: SAI_ROUTE_ENTRY_ACTION_PKT_ACT
     isresourcetype: false
-    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    flags: CREATE_AND_SET
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ROUTE_ENTRY_PACKET_ACTION
-    description: Action parameter PACKET_ACTION
+    name: SAI_ROUTE_ENTRY_ATTR_PACKET_ACTION
+    description: Action parameter packet action
     type: sai_uint16_t
     attr_value_field: u16
     default: '0'
@@ -50,10 +58,11 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: true
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_ROUTE_ENTRY_NEXT_HOP_ID
-    description: Action parameter NEXT_HOP_ID
+    name: SAI_ROUTE_ENTRY_ATTR_NEXT_HOP_ID
+    description: Action parameter next hop id
     type: sai_uint16_t
     attr_value_field: u16
     default: '0'
@@ -62,7 +71,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    is_vlan: true
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ROUTE_ENTRY_ATTR_IP_ADDR_FAMILY
     description: IP address family for resource accounting
@@ -74,5 +84,17 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: null
+    deprecated: false
+    is_vlan: false
   stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 49279256
+      actions:
+        SAI_ROUTE_ENTRY_ACTION_PKT_ACT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_ROUTE_ENTRY_ACTION_PKT_ACT
+          id: 32404057
+          attr_param_id:
+            SAI_ROUTE_ENTRY_ATTR_PACKET_ACTION: 1
+            SAI_ROUTE_ENTRY_ATTR_NEXT_HOP_ID: 2

@@ -177,8 +177,9 @@ sai: sai-headers sai-meta libsai
 sai-headers: p4 docker-saithrift-bldr-image-exists | SAI/SAI
 	@echo "Generate SAI library headers and implementation..."
 
-	# Once the specs are checked in, we can use this to revert any local changes before generating the new specs.
-	# git checkout SAI/specs/*
+	# Revert any local changes before generating the new specs.
+	git clean -xf SAI/specs
+	git checkout SAI/specs/*
 
 	mkdir -p SAI/lib
 
@@ -236,6 +237,14 @@ sai-clean: SAI/SAI libsai-clean saithrift-server-clean
 	rm -rf SAI/SAI/inc SAI/SAI/experimental SAI/SAI/meta
 	cd SAI/SAI && git checkout -- inc experimental meta
 
+.PHONY:check-sai-spec
+check-sai-spec:
+	if git status | grep -q "SAI/specs"; then \
+		echo 'SAI specs have changed, please run "make sai-headers" locally and commit the changes for review.'; \
+		echo ""; echo "SAI spec diff found as below:"; \
+		git diff SAI/specs; \
+		exit 1; \
+	fi
 
 # Run to recreate same environment as building saithrift client & server
 run-saithrift-bldr-bash:
