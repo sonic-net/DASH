@@ -10,14 +10,16 @@ ADD SAI/SAI/test/ptf /SAI/test/ptf
 # Install PTF test framework & test-cases from SAI repo
 ADD SAI/SAI/ptf /SAI/ptf/
 
-# Install dependencies for dpugen==0.0.5
+# Install dependencies for dpugen==0.2.3
 RUN apt-get update && \
     apt-get install -y python3-lxml
 
 # Install the python libraries
-RUN python3 -m pip install -r /tests/requirements.txt && \
-    pip3 install scapy \
-                 dpugen==0.0.5 \
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install setuptools_rust
+RUN python3 -m pip install -r /tests/requirements.txt
+RUN python3 -m pip install scapy \
+                 dpugen==0.2.3 \
                  pysubnettree \
                  macaddress \
                  munch
