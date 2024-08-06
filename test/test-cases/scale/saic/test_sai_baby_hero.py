@@ -58,11 +58,16 @@ baby_hero_params = {                    # CONFIG VALUE             # DEFAULT VAL
 
 class TestSaiBabyHero:
 
+    # def create_baby_hero_config_from_file(self):
+    #     current_file_dir = Path(__file__).parent
+    #     with (current_file_dir / 'config_baby_hero.json').open(mode='r') as config_file:
+    #         baby_hero_commands = json.load(config_file)
+    #     return baby_hero_commands
+
     def create_baby_hero_config(self):
-        current_file_dir = Path(__file__).parent
-        with (current_file_dir / 'config_baby_hero.json').open(mode='r') as config_file:
-            baby_hero_commands = json.load(config_file)
-        return baby_hero_commands
+        conf = dpugen.sai.SaiConfig()
+        conf.mergeParams(baby_hero_params)
+        return dpugen.sai.SaiConfig()
 
     @pytest.mark.snappi
     def test_create_vnet_config(self, dpu):
