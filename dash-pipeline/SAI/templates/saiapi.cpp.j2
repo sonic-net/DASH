@@ -1,47 +1,61 @@
-#include <mutex>
-#include <unordered_map>
-#include <atomic>
-#include <limits>
-#include <stdint.h>
-#include <PI/pi.h>
-#include <grpcpp/grpcpp.h>
-#include "p4/v1/p4runtime.grpc.pb.h"
 #include "utils.h"
-#include "saiexperimental{{ app_name | replace('_', '') }}.h"
-#include "saitypes.h"
-#include <fstream>
-#include <google/protobuf/text_format.h>
-#include <google/rpc/code.pb.h>
+#include "saiimpl.h"
 
-#if __APPLE__
-#include <net/ethernet.h>
-#else
-#include <netinet/ether.h>
-#include <netinet/in.h>
-#endif
+extern "C" {
+#include "saimetadata.h"
+}
 
-#define LOG(x) std::cerr<<x
+using namespace dash::utils;
 
-using namespace std;
-
+{% set registered_group = [] %}
 {% for table in tables %}
+{% if table.name in registered_group %}{% continue %}{% endif %}
+{% do registered_group.append( table.name ) %}
 
 {% if table.is_object == 'true' %}
-sai_status_t sai_create_{{ table.name }}(
+static sai_status_t dash_sai_create_{{ table.name }}(
         _Out_ sai_object_id_t *{{ table.name }}_id,
         _In_ sai_object_id_t switch_id,
         _In_ uint32_t attr_count,
-        _In_ const sai_attribute_t *attr_list) { 
-    p4::v1::TableEntry * matchActionEntry = new p4::v1::TableEntry();
-    pi_p4_id_t tableId = {{table.id}};
-        // There shall be one and only one action_type
-    auto entry = matchActionEntry->mutable_action();
-    auto action = entry->mutable_action();
-    auto expectedParams = 0;
-    auto matchedParams = 0;
+        _In_ const sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
+
+    auto attrs = dash::DashSai::populateDefaultAttributes((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_count, attr_list);
+    attr_count = (uint32_t)attrs.size();
+    attr_list = attrs.data();
+
+    std::shared_ptr<p4::v1::TableEntry> matchActionEntry;
+    pi_p4_id_t tableId = 0;
+    // There shall be one and only one action_type
+    p4::v1::TableAction* entry = nullptr;
+    p4::v1::Action* action = nullptr;
+    //auto expectedParams = 0;
+    //auto matchedParams = 0;
     sai_object_id_t objId = 0;
     // Search the action
-    pi_p4_id_t actionId;
+    pi_p4_id_t actionId = 0;
+
+    {% for group_item in tables%}
+    {% if group_item.name != table.name  %}{% continue %}{% endif %}
+    {% set table = group_item %}
+    {% if table.stage != None %}
+    // For stage {{ table.stage }}
+    {% endif %}
+    matchActionEntry = std::make_shared<p4::v1::TableEntry>();
+    tableId = {{table.id}};
+    entry = matchActionEntry->mutable_action();
+    action = entry->mutable_action();
+    //expectedParams = 0;
+    //matchedParams = 0;
+    objId = dashSai->getNextObjectId((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }});
+
+    if (objId == SAI_NULL_OBJECT_ID)
+    {
+        DASH_LOG_ERROR("getNextObjectId failed for SAI_OBJECT_TYPE_{{ table.name | upper }}");
+        // TODO clean resources
+        return SAI_STATUS_FAILURE;
+    }
 
     matchActionEntry->set_table_id(tableId);
 
@@ -50,44 +64,74 @@ sai_status_t sai_create_{{ table.name }}(
     // Generate a SAI object ID and fill it as the P4 table key
     auto mf = matchActionEntry->add_match();
     mf->set_field_id({{table['keys'][0].id}});
-    objId = NextObjIndex();
     auto mf_exact = mf->mutable_exact();
-    {{table['keys'][0].sai_key_field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
+    //{{table['keys'][0].field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
+      {{table['keys'][0].field}}SetVal(static_cast<uint{{ table['keys'][0].bitwidth }}_t>(objId), mf_exact, {{ table['keys'][0].bitwidth }}); 
     {% else %}
     // SAI object table with multiple P4 table keys
     // Copy P4 table keys from appropriate SAI attributes
-    for (uint32_t i = 0; i < attr_count; i++) {
-        switch(attr_list[i].id) {
+    for (uint32_t i = 0; i < attr_count; i++)
+    {
+        auto *md = sai_metadata_get_attr_metadata((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_list[i].id);
+
+        const char* attrName = md ? md->attridname : "unknown";
+
+        switch(attr_list[i].id)
+        {
             {% for key in table['keys'] %}
-            case SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }}: {
+            case SAI_{{ table.name | upper }}_ATTR_{{ key.name | upper }}:
+            {
                 auto mf = matchActionEntry->add_match();
                 mf->set_field_id({{key.id}});
                 {% if key.match_type == 'exact' %}
                 auto mf_exact = mf->mutable_exact();
-                {{key.sai_key_field}}SetVal(attr_list[i].value, mf_exact, {{key.bitwidth}});
+                {{key.field}}SetVal(attr_list[i].value, mf_exact, {{key.bitwidth}});
                 {% elif key.match_type == 'lpm' %}
+                {% if key.field == 'ipPrefix' %}
+                if (getPrefixLength(attr_list[i].value) == 0)
+                {
+                    // https://github.com/p4lang/PI/blob/24e0a3c08c964e36d235973556b90e0ae922b894/proto/frontend/src/device_mgr.cpp#L2242-L2246
+                    DASH_LOG_WARN("Invalid reprsentation of 'don't care' LPM match, omit match field instead of using a prefix length of 0");
+                    return SAI_STATUS_SUCCESS;
+                }
+                {% endif %}
                 auto mf_lpm = mf->mutable_lpm();
-                {{key.sai_lpm_field}}SetVal(attr_list[i].value, mf_lpm, {{key.bitwidth}});
+                {{key.field}}SetVal(attr_list[i].value, mf_lpm, {{key.bitwidth}});
                 {% elif key.match_type == 'list' %}
-                assert(0 && "mutable_list is not supported");
-                goto ErrRet;
-                // auto mf1_list = mf1->mutable_xxx();
-                //{{key.sai_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+                // BMv2 doesn't support "list" match type, and we are using "optional" match in v1model as our implementation.
+                // Hence, here we only take the first item from the list and program it as optional match.
+                assert(attr_list[i].value.{{key.field}}.count == 1 && "BMv2 only supports one item in list match type");
+                auto mf_optional = mf->mutable_optional();
+                sai_attribute_value_t attr_val;
+                    {% if key.field == 'ipprefixlist' %}
+                attr_val.ipaddr.addr_family = attr_list[i].value.ipprefixlist.list[0].addr_family;
+                attr_val.ipaddr.addr = attr_list[i].value.ipprefixlist.list[0].addr;
+                ipaddrSetVal(attr_val, mf_optional, {{key.bitwidth}});
+                    {% else %}
+                attr_val.{{ key.field | replace('list', '') }} = attr_list[i].value.{{key.field}}.list[0];
+                {{ key.field | replace('list', '') }}SetVal(attr_val, mf_optional, {{key.bitwidth}});
+                    {% endif %}
                 {% elif key.match_type == 'range_list' %}
-                goto ErrRet;
-                assert(0 && "range_list is not supported");
-                // TODO: if it is ternary, need to set the mask
-                // auto mf1_list = mf1->mutable_xxx();
-                //{{key.sai_range_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+                // BMv2 doesn't support "range_list" match type, and we are using "optional" match in v1model as our implementation.
+                // Hence, here we only take the first item from the list and program it as optional match.
+                assert(attr_list[i].value.{{key.field}}.count == 1 && "BMv2 only supports one item in list match type");
+                auto mf_optional = mf->mutable_optional();
+                {{ key.field | replace('rangelist', '') }}SetVal(attr_list[i].value.{{key.field}}.list[0].min, mf_optional, {{key.bitwidth}});
                 {% elif key.match_type == 'optional' %}
                 auto mf_optional = mf->mutable_optional();
-                {{key.sai_key_field}}SetVal(attr_list[i].value, mf_optional, {{key.bitwidth}});
+                {{key.field}}SetVal(attr_list[i].value, mf_optional, {{key.bitwidth}});
+                {% elif key.match_type == 'ternary' %}
+                auto mf_ternary = mf->mutable_ternary();
+                {{key.field}}SetVal(attr_list[i].value, mf_ternary, {{key.bitwidth}});
+                auto mask = getMaskAttr(SAI_{{ table.name | upper }}_ATTR_{{ key.name | upper }}_MASK, attr_count, attr_list);
+                assert(mask && "SAI_{{ table.name | upper }}_ATTR_{{ key.name | upper }}_MASK isn't provided");
+                {{key.field}}SetMask(mask->value, mf_ternary, {{key.bitwidth}});
                 {% endif %}
-                {% if 'v4_or_v6_id' in key %}
+                {% if key.ip_is_v6_field_id != 0 %}
                 {
-                    // set v4_or_v6 field
+                    // set ip_is_v6_field_id field
                     auto mf = matchActionEntry->add_match();
-                    mf->set_field_id({{key.v4_or_v6_id}});
+                    mf->set_field_id({{key.ip_is_v6_field_id}});
                     auto mf_exact = mf->mutable_exact();
                     booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
                 }
@@ -98,114 +142,255 @@ sai_status_t sai_create_{{ table.name }}(
             {% if table['keys'] | selectattr('match_type', 'ne', 'exact') | list | length > 0 %}
             {% if table['keys'] | selectattr('match_type', 'eq', 'lpm') | list | length == 0 %}
             // Table has non lpm ternary keys - add priority field
-            case SAI_{{ table.name | upper }}_ATTR_PRIORITY: {
+            case SAI_{{ table.name | upper }}_ATTR_PRIORITY:
+            {
                 matchActionEntry->set_priority(attr_list[i].value.u32);
                 break;
             }
             {% endif %}
             {% endif %}
+            default:
+                DASH_LOG_ERROR("attribute [%d] %d %s not supported yet", i, attr_list[i].id, attrName);
+                break;
         }
     }
     {% endif %}
-
 
     // If there is only one action, simply set it.
     // Else, search in the attrs.
     {% if table.actions|length == 1 %}
     {% for action in table.actions %}
     actionId = {{action.id}}; // SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}
-    expectedParams = {{ action.params|length }};
+    //expectedParams = {{ action.params|length }};
     {% endfor %}
     {% else %}
-    // Search the action 
-    for (uint32_t i = 0; i < attr_count; i++) {
-        switch(attr_list[i].value.s32) {
-            {% for action in table.actions %}
-            case SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}: {
-                actionId = {{action.id}}; 
-                expectedParams = {{ action.params|length }};
-                break;
+    // Search the action
+    for (uint32_t i = 0; i < attr_count; i++)
+    {
+        if (SAI_{{ table.name | upper }}_ATTR_ACTION == attr_list[i].id)
+        {
+            switch(attr_list[i].value.s32)
+            {
+                {% for action in table.actions %}
+                case SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}:
+                {
+                    actionId = {{action.id}};
+                    //expectedParams = {{ action.params|length }};
+                    break;
+                }
+                {% endfor %}
+                default:
+                    DASH_LOG_ERROR("attribute value [%d] %d not supported yet", i, attr_list[i].value.s32);
+                    break;
             }
-            {% endfor %}
+            // only one action
+            break;
         }
-        // only one action
-        break;
     }
     {% endif %}
+
     action->set_action_id(actionId);
 
-    for (uint32_t i = 0; i < attr_count; i++) {
-        switch(attr_list[i].id) {
-            {% for param in table.actionParams %}
-            case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}: {
+    for (uint32_t i = 0; i < attr_count; i++)
+    {
+        auto *md = sai_metadata_get_attr_metadata((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_list[i].id);
+
+        const char* attrName = md ? md->attridname : "unknown";
+
+        switch(attr_list[i].id)
+        {
+            {% for param in table.action_params %}
+            {% if param.skipattr == 'true' %}
+            {% else %}
+            case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}:
+            {
                 auto param = action->add_params();
                 param->set_param_id({{param.id}});
                 {{param.field}}SetVal(attr_list[i].value, param, {{param.bitwidth}});
-                matchedParams++;
-                {% if 'v4_or_v6_id' in param %}
+                //matchedParams++;
+                {% if param.ip_is_v6_field_id != 0 %}
                 {
-                    // set v4_or_v6 field
-                    auto param = action->add_params();
-                    param->set_param_id({{param.v4_or_v6_id}});
-                    booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param, 1);
-                    matchedParams++;
+                    // set ip_is_v6_field_id field
+                    auto param2 = action->add_params();
+                    param2->set_param_id({{param.ip_is_v6_field_id}});
+                    booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param2, 1);
+                    //matchedParams++;
                 }
                 {% endif %}
                 break;
             }
+            {% endif %}
             {% endfor %}
+            default:
+                DASH_LOG_ERROR("attribute [%d] %d %s not supported yet", i, attr_list[i].id, attrName);
+                break;
         }
     }
-    
-    assert((matchedParams == expectedParams)); 
 
-    if (matchedParams != expectedParams) {
+    //assert((matchedParams == expectedParams));
+
+    //if (matchedParams != expectedParams) {
+    //    goto ErrRet;
+    //}
+    if (false == dashSai->insertInTable(matchActionEntry, objId)) {
         goto ErrRet;
     }
-    if (true == InsertInTable(matchActionEntry, &objId)) {
-        *{{ table.name }}_id = objId;
-        return 0;
-    }
+
+    {% endfor %}
+
+    *{{ table.name }}_id = objId;
+    return SAI_STATUS_SUCCESS;
 ErrRet:
-    delete matchActionEntry;
-    return -1;
+    dashSai->removeFromTable(*{{ table.name }}_id);
+    return SAI_STATUS_FAILURE;
 }
 
-sai_status_t sai_remove_{{ table.name }}(_In_ sai_object_id_t {{ table.name }}_id) {
-    if (RemoveFromTable({{ table.name }}_id)) {
-        return 0;
+static sai_status_t dash_sai_create_{{ table.name }}s(
+        _In_ sai_object_id_t switch_id,
+        _In_ uint32_t object_count,
+        _In_ const uint32_t *attr_count,
+        _In_ const sai_attribute_t **attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_object_id_t *object_id,
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+
+    sai_status_t agg_status = SAI_STATUS_SUCCESS;
+
+    for (uint32_t i = 0; i < object_count; i++)
+    {
+        object_statuses[i] = dash_sai_create_{{ table.name }}(&object_id[i], switch_id, attr_count[i], attr_list[i]);
+
+        if (object_statuses[i] != SAI_STATUS_SUCCESS)
+        {
+            agg_status = SAI_STATUS_FAILURE;
+        }
+
+        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR)
+        {
+            return agg_status;
+        }
     }
-    return -1;
+
+    return agg_status;
 }
 
-sai_status_t sai_set_{{ table.name }}_attribute (
+static sai_status_t dash_sai_remove_{{ table.name }}(
+        _In_ sai_object_id_t {{ table.name }}_id)
+{
+    DASH_LOG_ENTER();
+
+    if (dashSai->removeFromTable({{ table.name }}_id))
+    {
+        return SAI_STATUS_SUCCESS;
+    }
+
+    return SAI_STATUS_FAILURE;
+}
+
+static sai_status_t dash_sai_remove_{{ table.name }}s(
+        _In_ uint32_t object_count,
+        _In_ const sai_object_id_t *object_id,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+
+    sai_status_t agg_status = SAI_STATUS_SUCCESS;
+
+    for (uint32_t i = 0; i < object_count; i++)
+    {
+        object_statuses[i] = dash_sai_remove_{{ table.name }}(object_id[i]);
+
+        if (object_statuses[i] != SAI_STATUS_SUCCESS)
+        {
+            agg_status = SAI_STATUS_FAILURE;
+        }
+
+        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR)
+        {
+            return agg_status;
+        }
+    }
+
+    return agg_status;
+}
+
+static sai_status_t dash_sai_set_{{ table.name }}_attribute (
         _In_ sai_object_id_t {{ table.name }}_id,
-        _In_ const sai_attribute_t *attr) {
+        _In_ const sai_attribute_t *attr)
+{
+    DASH_LOG_ENTER();
     assert(0 && "sai_set_{{ table.name }}_attribute NYI");
-    return -1;
+    return SAI_STATUS_FAILURE;
 }
 
-sai_status_t sai_get_{{ table.name }}_attribute(
+static sai_status_t dash_sai_get_{{ table.name }}_attribute(
         _In_ sai_object_id_t {{ table.name }}_id,
         _In_ uint32_t attr_count,
-        _Inout_ sai_attribute_t *attr_list) {
+        _Inout_ sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
     assert(0 && "sai_get_{{ table.name }}_attribute NYI");
-    return -1;
+    return SAI_STATUS_FAILURE;
 }
+
+{% if table.sai_stats | length > 0 %}
+static sai_status_t dash_sai_get_{{ table.name }}_stats(
+        _In_ sai_object_id_t {{ table.name }}_id,
+        _In_ uint32_t number_of_counters,
+        _In_ const sai_stat_id_t *counter_ids,
+        _Out_ uint64_t *counters)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_get_{{ table.name }}_stats NYI");
+    return SAI_STATUS_FAILURE;
+}
+
+static sai_status_t dash_sai_get_{{ table.name }}_stats_ext(
+        _In_ sai_object_id_t {{ table.name }}_id,
+        _In_ uint32_t number_of_counters,
+        _In_ const sai_stat_id_t *counter_ids,
+        _In_ sai_stats_mode_t mode,
+        _Out_ uint64_t *counters)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_get_{{ table.name }}_stats_ext NYI");
+    return SAI_STATUS_FAILURE;
+}
+
+static sai_status_t dash_sai_clear_{{ table.name }}_stats(
+        _In_ sai_object_id_t {{ table.name }}_id,
+        _In_ uint32_t number_of_counters,
+        _In_ const sai_stat_id_t *counter_ids)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_clear_{{ table.name }}_stats NYI");
+    return SAI_STATUS_FAILURE;
+}
+{% endif %}
 {% else %}
-sai_status_t sai_create_{{ table.name }}(
+static sai_status_t dash_sai_create_{{ table.name }}(
         _In_ const sai_{{ table.name }}_t *{{ table.name }},
         _In_ uint32_t attr_count,
-        _In_ const sai_attribute_t *attr_list) { 
-    p4::v1::TableEntry * matchActionEntry = new p4::v1::TableEntry();
+        _In_ const sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
+
+    auto attrs = dash::DashSai::populateDefaultAttributes((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_count, attr_list);
+    attr_count = (uint32_t)attrs.size();
+    attr_list = attrs.data();
+
+    std::shared_ptr<p4::v1::TableEntry> matchActionEntry = std::make_shared<p4::v1::TableEntry>();
     pi_p4_id_t tableId = {{table.id}};
     matchActionEntry->set_table_id(tableId);
     auto tableEntry = {{ table.name }};
     // There shall be one and only one action_type
     auto entry = matchActionEntry->mutable_action();
     auto action = entry->mutable_action();
-    auto expectedParams = 0;
-    auto matchedParams = 0;
+    //auto expectedParams = 0;
+    //auto matchedParams = 0;
     pi_p4_id_t actionId;
     grpc::StatusCode retCode;
 
@@ -215,30 +400,59 @@ sai_status_t sai_create_{{ table.name }}(
         mf->set_field_id({{key.id}});
         {% if key.match_type == 'exact' %}
         auto mf_exact = mf->mutable_exact();
-        {{key.sai_key_field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
+        //{{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
+        {% set keyfield = key.field %}
+        {% set bitwidth = key.bitwidth %}
+        {% if keyfield in ['ipaddr','mac'] or bitwidth in [24] %} 
+          {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
+        {% else %} 
+          {{key.field}}SetVal(static_cast<uint{{key.bitwidth}}_t>(tableEntry->{{ key.name | lower }}), mf_exact, {{key.bitwidth}});
+        {% endif %}
         {% elif key.match_type == 'lpm' %}
+        {% if key.field == 'ipPrefix' %}
+        if (getPrefixLength(tableEntry->{{ key.name | lower }}) == 0)
+        {
+            // https://github.com/p4lang/PI/blob/24e0a3c08c964e36d235973556b90e0ae922b894/proto/frontend/src/device_mgr.cpp#L2242-L2246
+            DASH_LOG_WARN("Invalid reprsentation of 'don't care' LPM match, omit match field instead of using a prefix length of 0");
+            return SAI_STATUS_SUCCESS;
+        }
+        {% endif %}
         auto mf_lpm = mf->mutable_lpm();
-        {{key.sai_lpm_field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_lpm, {{key.bitwidth}});
+        {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_lpm, {{key.bitwidth}});
+        {% elif key.match_type == 'ternary' %}
+        auto mf_ternary = mf->mutable_ternary();
+        {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_ternary, {{key.bitwidth}});
+        {{key.field}}SetMask(tableEntry->{{ key.name | lower }}_mask, mf_ternary, {{key.bitwidth}});
+        matchActionEntry->set_priority(tableEntry->priority);
         {% elif key.match_type == 'list' %}
-        assert(0 && "mutable_list is not supported");
-        goto ErrRet;
-        // auto mf1_list = mf1->mutable_xxx();
-        //{{key.sai_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
-        {% elif key.match_type == 'range_list' %}
-        assert(0 && "range_list is not supported");
-        goto ErrRet;
-        // TODO: if it is ternary, need to set the mask
-        // auto mf1_list = mf1->mutable_xxx();
-        //{{key.sai_range_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+        // BMv2 doesn't support "list" match type, and we are using "optional" match in v1model as our implementation.
+        // Hence, here we only take the first item from the list and program it as optional match.
+        assert(attr_list[i].value.{{key.field}}.count == 1 && "BMv2 only supports one item in list match type");
+        auto mf_optional = mf->mutable_optional();
+        sai_attribute_value_t attr_val;
+            {% if key.field == 'ipprefixlist' %}
+        attr_val.ipaddr.addr_family = attr_list[i].value.ipprefixlist.list[0].addr_family;
+        attr_val.ipaddr.addr = attr_list[i].value.ipprefixlist.list[0].addr;
+        ipaddrSetVal(attr_val, mf_optional, {{key.bitwidth}});
+            {% else %}
+        attr_val.{{ key.field | replace('list', '') }} = attr_list[i].value.{{key.field}}.list[0];
+        {{ key.field | replace('list', '') }}SetVal(attr_val, mf_optional, {{key.bitwidth}});
+            {% endif %}
+        {% elif key.field == 'range_list' %}
+        // BMv2 doesn't support "range_list" match type, and we are using "optional" match in v1model as our implementation.
+        // Hence, here we only take the first item from the list and program the range start as optional match.
+        assert(attr_list[i].value.{{key.field}}.count == 1 && "BMv2 only supports one item in list match type");
+        auto mf_optional = mf->mutable_optional();
+        {{ key.field | replace('rangelist', '') }}SetVal(attr_list[i].value.{{key.field}}.list[0].min, mf_optional, {{key.bitwidth}});
         {% endif %}
     }
-    {% if 'v4_or_v6_id' in key %}
+    {% if key.ip_is_v6_field_id != 0 %}
     {
-        // set v4_or_v6 field
+        // set ip_is_v6_field_id field
         auto mf = matchActionEntry->add_match();
-        mf->set_field_id({{key.v4_or_v6_id}});
+        mf->set_field_id({{key.ip_is_v6_field_id}});
         auto mf_exact = mf->mutable_exact();
-        booldataSetVal((tableEntry->{{ key.sai_key_name | lower }}.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
+        booldataSetVal((tableEntry->{{ key.name | lower }}.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
     }
     {% endif %}
     {% endfor %}
@@ -247,71 +461,126 @@ sai_status_t sai_create_{{ table.name }}(
     {% if table.actions|length == 1 %}
     {% for action in table.actions %}
     actionId = {{action.id}}; // SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}
-    expectedParams = {{ action.params|length }};
+    //expectedParams = {{ action.params|length }};
     {% endfor %}
     {% else %}
-    // Search the action 
-    for (uint32_t i = 0; i < attr_count; i++) {
-        switch(attr_list[i].value.s32) {
-            {% for action in table.actions %}
-            case SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}: {
-                actionId = {{action.id}}; 
-                expectedParams = {{ action.params|length }};
-                break;
+    // Search the action
+    for (uint32_t i = 0; i < attr_count; i++)
+    {
+        if (SAI_{{ table.name | upper }}_ATTR_ACTION == attr_list[i].id)
+        {
+            switch(attr_list[i].value.s32)
+            {
+                {% for action in table.actions %}
+                case SAI_{{ table.name | upper }}_ACTION_{{ action.name | upper }}:
+                {
+                    actionId = {{action.id}};
+                    //expectedParams = {{ action.params|length }};
+                    break;
+                }
+                {% endfor %}
+                default:
+                    DASH_LOG_ERROR("attribute value [%d] %d not supported yet", i, attr_list[i].value.s32);
+                    break;
             }
-            {% endfor %}
+            // only one action
+            break;
         }
-        // only one action
-        break;
     }
     {% endif %}
     action->set_action_id(actionId);
 
-    for (uint32_t i = 0; i < attr_count; i++) {
-        switch(attr_list[i].id) {
-            {% for param in table.actionParams %}
-            case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}: {
+    for (uint32_t i = 0; i < attr_count; i++)
+    {
+        auto *md = sai_metadata_get_attr_metadata((sai_object_type_t)SAI_OBJECT_TYPE_{{ table.name | upper }}, attr_list[i].id);
+
+        const char* attrName = md ? md->attridname : "unknown";
+
+        switch(attr_list[i].id)
+        {
+            {% for param in table.action_params %}
+            {% if param.skipattr == 'true' %}
+            {% else %}
+            case SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }}:
+            {
                 auto param = action->add_params();
                 param->set_param_id({{param.id}});
                 {{param.field}}SetVal(attr_list[i].value, param, {{param.bitwidth}});
-                matchedParams++;
-                {% if 'v4_or_v6_id' in param %}
+                //matchedParams++;
+                {% if param.ip_is_v6_field_id != 0 %}
                 {
-                    // set v4_or_v6 field
-                    auto param = action->add_params();
-                    param->set_param_id({{param.v4_or_v6_id}});
-                    booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param, 1);
-                    matchedParams++;
+                    // set ip_is_v6_field_id field
+                    auto param2 = action->add_params();
+                    param2->set_param_id({{param.ip_is_v6_field_id}});
+                    booldataSetVal((attr_list[i].value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, param2, 1);
+                    //matchedParams++;
                 }
                 {% endif %}
                 break;
             }
+            {% endif %}
             {% endfor %}
+            default:
+                DASH_LOG_ERROR("attribute [%d] %d %s not supported yet", i, attr_list[i].id, attrName);
+                break;
         }
     }
-    
-    assert((matchedParams == expectedParams)); 
 
-    if (matchedParams != expectedParams) {
-        goto ErrRet;
-    }
+    //assert((matchedParams == expectedParams));
+
+    //if (matchedParams != expectedParams) {
+    //    goto ErrRet;
+    //}
     // TODO: ternaly needs to set priority
-    retCode = MutateTableEntry(matchActionEntry, p4::v1::Update_Type_INSERT);
-    if (grpc::StatusCode::OK == retCode) {
-        delete matchActionEntry;
-        return 0;
+    retCode = dashSai->mutateTableEntry(matchActionEntry, p4::v1::Update_Type_INSERT);
+
+    if (grpc::StatusCode::OK == retCode)
+    {
+        return SAI_STATUS_SUCCESS;
     }
 ErrRet:
-    delete matchActionEntry;
-    return -1;
+    return SAI_STATUS_FAILURE;
 }
 
-sai_status_t sai_remove_{{ table.name }}(
-        _In_ const sai_{{ table.name }}_t *{{ table.name }}) { 
-    p4::v1::TableEntry * matchActionEntry = new p4::v1::TableEntry();
+static sai_status_t dash_sai_create_{{ table.name | replace("entry", "entries") }}(
+        _In_ uint32_t object_count,
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+        _In_ const uint32_t *attr_count,
+        _In_ const sai_attribute_t **attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+
+    sai_status_t agg_status = SAI_STATUS_SUCCESS;
+
+    for (uint32_t i = 0; i < object_count; i++)
+    {
+        object_statuses[i] = dash_sai_create_{{ table.name }}(&{{ table.name }}[i], attr_count[i], attr_list[i]);
+
+        if (object_statuses[i] != SAI_STATUS_SUCCESS)
+        {
+            agg_status = SAI_STATUS_FAILURE;
+        }
+
+        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR)
+        {
+            return agg_status;
+        }
+    }
+
+    return agg_status;
+}
+
+static sai_status_t dash_sai_remove_{{ table.name }}(
+        _In_ const sai_{{ table.name }}_t *{{ table.name }})
+{
+    DASH_LOG_ENTER();
+
+    std::shared_ptr<p4::v1::TableEntry> matchActionEntry = std::make_shared<p4::v1::TableEntry>();
     pi_p4_id_t tableId = {{table.id}};
     matchActionEntry->set_table_id(tableId);
-    auto tableEntry =  {{ table.name }};
+    auto tableEntry = {{ table.name }};
     grpc::StatusCode retCode;
 
     {% for key in table['keys'] %}
@@ -320,68 +589,212 @@ sai_status_t sai_remove_{{ table.name }}(
         mf->set_field_id({{key.id}});
         {% if key.match_type == 'exact' %}
         auto mf_exact = mf->mutable_exact();
-        {{key.sai_key_field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_exact, {{key.bitwidth}});
+        {% set keyfield = key.field %}
+        {% set bitwidth = key.bitwidth %}
+        {% if keyfield in ['ipaddr','mac'] or bitwidth in [24] %}
+           {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
+        {% else %}
+          {{key.field}}SetVal(static_cast<uint{{key.bitwidth}}_t>(tableEntry->{{ key.name | lower }}), mf_exact, {{key.bitwidth}});
+        {% endif %}  
+        //{{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
         {% elif key.match_type == 'lpm' %}
+        {% if key.field == 'ipPrefix' %}
+        if (getPrefixLength(tableEntry->{{ key.name | lower }}) == 0)
+        {
+            // https://github.com/p4lang/PI/blob/24e0a3c08c964e36d235973556b90e0ae922b894/proto/frontend/src/device_mgr.cpp#L2242-L2246
+            DASH_LOG_WARN("Invalid reprsentation of 'don't care' LPM match, omit match field instead of using a prefix length of 0");
+            return SAI_STATUS_SUCCESS;
+        }
+        {% endif %}
         auto mf_lpm = mf->mutable_lpm();
-        {{key.sai_lpm_field}}SetVal(tableEntry->{{ key.sai_key_name | lower }}, mf_lpm, {{key.bitwidth}});
+        {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_lpm, {{key.bitwidth}});
+        {% elif key.match_type == 'ternary' %}
+        auto mf_ternary = mf->mutable_ternary();
+        {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_ternary, {{key.bitwidth}});
+        {{key.field}}SetMask(tableEntry->{{ key.name | lower }}_mask, mf_ternary, {{key.bitwidth}});
+        matchActionEntry->set_priority(tableEntry->priority);
         {% elif key.match_type == 'list' %}
-        assert(0 && "mutable_list is not supported");
-        goto ErrRet;
-        // auto mf1_list = mf1->mutable_xxx();
-        //{{key.sai_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+        // BMv2 doesn't support "list" match type, and we are using "optional" match in v1model as our implementation.
+        // Hence, here we only take the first item from the list and program it as optional match.
+        assert(attr_list[i].value.{{key.field}}.count == 1 && "BMv2 only supports one item in list match type");
+        auto mf_optional = mf->mutable_optional();
+        sai_attribute_value_t attr_val;
+            {% if key.field == 'ipprefixlist' %}
+        attr_val.ipaddr.addr_family = attr_list[i].value.ipprefixlist.list[0].addr_family;
+        attr_val.ipaddr.addr = attr_list[i].value.ipprefixlist.list[0].addr;
+        ipaddrSetVal(attr_val, mf_optional, {{key.bitwidth}});
+            {% else %}
+        attr_val.{{ key.field | replace('list', '') }} = attr_list[i].value.{{key.field}}.list[0];
+        {{ key.field | replace('list', '') }}SetVal(attr_val, mf_optional, {{key.bitwidth}});
+            {% endif %}
         {% elif key.match_type == 'range_list' %}
-        assert(0 && "range_list is not supported");
-        goto ErrRet;
-        // auto mf1_list = mf1->mutable_xxx();
-        //{{key.sai_range_list_field}}SetVal(attr_list[i].value, mf1_list, {{key.bitwidth}});
+        // BMv2 doesn't support "range_list" match type, and we are using "optional" match in v1model as our implementation.
+        // Hence, here we only take the first item from the list and program it as optional match.
+        assert(attr_list[i].value.{{key.field}}.count == 1 && "BMv2 only supports one item in list match type");
+        auto mf_optional = mf->mutable_optional();
+        {{ key.field | replace('rangelist', '') }}SetVal(attr_list[i].value.{{key.field}}.list[0].min, mf_optional, {{key.bitwidth}});
         {% endif %}
     }
-    {% if 'v4_or_v6_id' in key %}
+    {% if key.ip_is_v6_field_id != 0 %}
     {
-        // set v4_or_v6 field
+        // set ip_is_v6_field_id field
         auto mf = matchActionEntry->add_match();
-        mf->set_field_id({{key.v4_or_v6_id}});
+        mf->set_field_id({{key.ip_is_v6_field_id}});
         auto mf_exact = mf->mutable_exact();
-        booldataSetVal((tableEntry->{{ key.sai_key_name | lower }}.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
+        booldataSetVal((tableEntry->{{ key.name | lower }}.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
     }
     {% endif %}
     {% endfor %}
 
-    retCode = MutateTableEntry(matchActionEntry, p4::v1::Update_Type_DELETE);
-    if (grpc::StatusCode::OK == retCode) {
-        delete matchActionEntry;
-        return 0;
+    retCode = dashSai->mutateTableEntry(matchActionEntry, p4::v1::Update_Type_DELETE);
+
+    if (grpc::StatusCode::OK == retCode)
+    {
+        return SAI_STATUS_SUCCESS;
     }
 
 ErrRet:
 
-    delete matchActionEntry;
-    return -1;
+    return SAI_STATUS_FAILURE;
 }
 
-sai_status_t sai_set_{{ table.name }}_attribute(
+static sai_status_t dash_sai_remove_{{ table.name | replace("entry", "entries") }}(
+        _In_ uint32_t object_count,
         _In_ const sai_{{ table.name }}_t *{{ table.name }},
-        _In_ const sai_attribute_t *attr) {
-            assert(0 && "sai_set_{{ table.name }}_attribute NYI");
-            return -1;
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+
+    sai_status_t agg_status = SAI_STATUS_SUCCESS;
+
+    for (uint32_t i = 0; i < object_count; i++)
+    {
+        object_statuses[i] = dash_sai_remove_{{ table.name }}(&{{ table.name }}[i]);
+
+        if (object_statuses[i] != SAI_STATUS_SUCCESS)
+        {
+            agg_status = SAI_STATUS_FAILURE;
+        }
+
+        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR)
+        {
+            return agg_status;
+        }
+    }
+
+    return agg_status;
 }
 
-sai_status_t sai_get_{{ table.name }}_attribute(
+static sai_status_t dash_sai_set_{{ table.name }}_attribute(
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+        _In_ const sai_attribute_t *attr)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_set_{{ table.name }}_attribute NYI");
+    return SAI_STATUS_FAILURE;
+}
+
+static sai_status_t dash_sai_get_{{ table.name }}_attribute(
         _In_ const sai_{{ table.name }}_t *{{ table.name }},
         _In_ uint32_t attr_count,
-        _Inout_ sai_attribute_t *attr_list) {
-            assert(0 && "sai_get_{{ table.name }}_attribute NYI");
-            return -1;
+        _Inout_ sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_get_{{ table.name }}_attribute NYI");
+    return SAI_STATUS_FAILURE;
 }
+
+{% if table.sai_stats | length > 0 %}
+static sai_status_t dash_sai_get_{{ table.name }}_stats(
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+        _In_ uint32_t number_of_counters,
+        _In_ const sai_stat_id_t *counter_ids,
+        _Out_ uint64_t *counters)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_get_{{ table.name }}_stats NYI");
+    return SAI_STATUS_FAILURE;
+}
+
+static sai_status_t dash_sai_get_{{ table.name }}_stats_ext(
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+        _In_ uint32_t number_of_counters,
+        _In_ const sai_stat_id_t *counter_ids,
+        _In_ sai_stats_mode_t mode,
+        _Out_ uint64_t *counters)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_get_{{ table.name }}_stats_ext NYI");
+    return SAI_STATUS_FAILURE;
+}
+
+static sai_status_t dash_sai_clear_{{ table.name }}_stats(
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+        _In_ uint32_t number_of_counters,
+        _In_ const sai_stat_id_t *counter_ids)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_clear_{{ table.name }}_stats NYI");
+    return SAI_STATUS_FAILURE;
+}
+{% endif %}
+{% if table.name == 'route_entry' %}
+
+static sai_status_t dash_sai_set_{{ table.name | replace("entry", "entries") }}_attribute(
+        _In_ uint32_t object_count,
+        _In_ const sai_route_entry_t *route_entry,
+        _In_ const sai_attribute_t *attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_set_{{ table.name | replace("entry", "entries") }}_attribute NYI");
+    return SAI_STATUS_FAILURE;
+}
+
+static sai_status_t dash_sai_get_{{ table.name | replace("entry", "entries") }}_attribute(
+        _In_ uint32_t object_count,
+        _In_ const sai_route_entry_t *route_entry,
+        _In_ const uint32_t *attr_count,
+        _Inout_ sai_attribute_t **attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_get_{{ table.name | replace("entry", "entries") }}_attribute NYI");
+    return SAI_STATUS_FAILURE;
+}
+
+{% endif %}
 {% endif %}
 {% endfor %}
 
 /* TODO [cs] Generate .h file for _impl to use within sai_api_query() */
-sai_{{ app_name }}_api_t sai_{{app_name }}_api_impl = {
+sai_{{ app_name }}_api_t dash_sai_{{ app_name }}_api_impl = {
+{% set registered_group = [] %}
 {% for table in tables %}
-    .create_{{ table.name }} =  sai_create_{{ table.name }},
-    .remove_{{ table.name }} = sai_remove_{{ table.name }},
-    .set_{{ table.name }}_attribute = sai_set_{{ table.name }}_attribute,
-    .get_{{ table.name }}_attribute = sai_get_{{ table.name }}_attribute,
+{% if table.name in registered_group %}{% continue %}{% endif %}
+{% do registered_group.append( table.name ) %}
+    .create_{{ table.name }} = dash_sai_create_{{ table.name }},
+    .remove_{{ table.name }} = dash_sai_remove_{{ table.name }},
+    .set_{{ table.name }}_attribute = dash_sai_set_{{ table.name }}_attribute,
+    .get_{{ table.name }}_attribute = dash_sai_get_{{ table.name }}_attribute,
+{% if table.sai_stats | length > 0 %}
+    .get_{{ table.name }}_stats = dash_sai_get_{{ table.name }}_stats,
+    .get_{{ table.name }}_stats_ext = dash_sai_get_{{ table.name }}_stats_ext,
+    .clear_{{ table.name }}_stats = dash_sai_clear_{{ table.name }}_stats,
+{% endif %}
+{% if table.is_object == 'true' %}
+    .create_{{ table.name }}s = dash_sai_create_{{ table.name }}s,
+    .remove_{{ table.name }}s = dash_sai_remove_{{ table.name }}s,
+{% else %}
+    .create_{{ table.name | replace("entry", "entries") }} = dash_sai_create_{{ table.name | replace("entry", "entries") }},
+    .remove_{{ table.name | replace("entry", "entries") }} = dash_sai_remove_{{ table.name | replace("entry", "entries") }},
+{% endif %}
+{% if table.name == 'route_entry' %}
+    .set_{{ table.name | replace("entry", "entries") }}_attribute = dash_sai_set_{{ table.name | replace("entry", "entries") }}_attribute,
+    .get_{{ table.name | replace("entry", "entries") }}_attribute = dash_sai_get_{{ table.name | replace("entry", "entries") }}_attribute,
+{% endif %}
 {% endfor %}
 };

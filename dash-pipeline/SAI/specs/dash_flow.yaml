@@ -1,0 +1,786 @@
+!!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
+name: dash_flow
+description: DASH flow
+api_type: overlay
+sai_apis:
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: flow_table
+  description: flow table
+  is_object: true
+  enums: []
+  structs: []
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_TABLE_ATTR_MAX_FLOW_COUNT
+    description: Action parameter max flow count
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_TABLE_ATTR_DASH_FLOW_ENABLED_KEY
+    description: Action parameter DASH flow enabled key
+    type: sai_dash_flow_enabled_key_t
+    attr_value_field: s32
+    default: SAI_DASH_FLOW_ENABLED_KEY_ENI_ADDR
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_TABLE_ATTR_FLOW_TTL_IN_MILLISECONDS
+    description: Action parameter flow TTL in milliseconds
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 38557285
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 33071001
+          attr_param_id: {}
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: flow_entry
+  description: flow entry
+  is_object: false
+  enums:
+  - !!python/object:utils.sai_spec.sai_enum.SaiEnum
+    name: sai_flow_entry_action_t
+    description: 'Attribute data for #SAI_FLOW_ENTRY_ATTR_ACTION'
+    members:
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_FLOW_ENTRY_ACTION_SET_FLOW_ENTRY_ATTR
+      description: ''
+      value: '0'
+  structs:
+  - !!python/object:utils.sai_spec.sai_struct.SaiStruct
+    name: sai_flow_entry_t
+    description: Entry for flow_entry
+    members:
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: switch_id
+      description: Switch ID
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_SWITCH
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: eni_mac
+      description: Exact matched key eni_mac
+      type: sai_mac_t
+      objects: null
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: vnet_id
+      description: Exact matched key vnet_id
+      type: sai_uint16_t
+      objects: null
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: ip_proto
+      description: Exact matched key ip_proto
+      type: sai_uint8_t
+      objects: null
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: src_ip
+      description: Exact matched key src_ip
+      type: sai_ip_address_t
+      objects: null
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: dst_ip
+      description: Exact matched key dst_ip
+      type: sai_ip_address_t
+      objects: null
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: src_port
+      description: Exact matched key src_port
+      type: sai_uint16_t
+      objects: null
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: dst_port
+      description: Exact matched key dst_port
+      type: sai_uint16_t
+      objects: null
+      valid_only: null
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_ACTION
+    description: Action
+    type: sai_flow_entry_action_t
+    attr_value_field: null
+    default: SAI_FLOW_ENTRY_ACTION_SET_FLOW_ENTRY_ATTR
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_VERSION
+    description: Action parameter version
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_DASH_DIRECTION
+    description: Action parameter DASH direction
+    type: sai_dash_direction_t
+    attr_value_field: s32
+    default: SAI_DASH_DIRECTION_INVALID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION
+    description: Action parameter DASH flow action
+    type: sai_dash_flow_action_t
+    attr_value_field: s32
+    default: SAI_DASH_FLOW_ACTION_NONE
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_METER_CLASS
+    description: Action parameter meter class
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_IS_UNIDIRECTIONAL_FLOW
+    description: Action parameter is unidirectional flow
+    type: bool
+    attr_value_field: booldata
+    default: 'false'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_ENI_MAC
+    description: Action parameter reverse flow ENI MAC
+    type: sai_mac_t
+    attr_value_field: mac
+    default: vendor
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_VNET_ID
+    description: Action parameter reverse flow VNET id
+    type: sai_uint16_t
+    attr_value_field: u16
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: true
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_IP_PROTO
+    description: Action parameter reverse flow IP protocol
+    type: sai_uint8_t
+    attr_value_field: u8
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_SRC_IP
+    description: Action parameter reverse flow src IP
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_DST_IP
+    description: Action parameter reverse flow dst IP
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_SRC_PORT
+    description: Action parameter reverse flow src port
+    type: sai_uint16_t
+    attr_value_field: u16
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: true
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_DST_PORT
+    description: Action parameter reverse flow dst port
+    type: sai_uint16_t
+    attr_value_field: u16
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: true
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_UNDERLAY0_VNET_ID
+    description: Action parameter underlay0 VNET id
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_UNDERLAY0_SIP
+    description: Action parameter underlay0 sip
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DIP
+    description: Action parameter underlay0 dip
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DASH_ENCAPSULATION
+    description: Action parameter underlay0 DASH encapsulation
+    type: sai_dash_encapsulation_t
+    attr_value_field: s32
+    default: SAI_DASH_ENCAPSULATION_INVALID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_UNDERLAY1_VNET_ID
+    description: Action parameter underlay1 VNET id
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_UNDERLAY1_SIP
+    description: Action parameter underlay1 sip
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DIP
+    description: Action parameter underlay1 dip
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_UNDERLAY1_SMAC
+    description: Action parameter underlay1 source MAC
+    type: sai_mac_t
+    attr_value_field: mac
+    default: vendor
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DMAC
+    description: Action parameter underlay1 destination MAC
+    type: sai_mac_t
+    attr_value_field: mac
+    default: vendor
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DASH_ENCAPSULATION
+    description: Action parameter underlay1 DASH encapsulation
+    type: sai_dash_encapsulation_t
+    attr_value_field: s32
+    default: SAI_DASH_ENCAPSULATION_INVALID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_DST_MAC
+    description: Action parameter dst MAC
+    type: sai_mac_t
+    attr_value_field: mac
+    default: vendor
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_SIP
+    description: Action parameter sip
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_DIP
+    description: Action parameter dip
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_SIP_MASK
+    description: Action parameter sip mask
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_DIP_MASK
+    description: Action parameter dip mask
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_VENDOR_METADATA
+    description: Action parameter vendor metadata
+    type: sai_u8_list_t
+    attr_value_field: u8list
+    default: empty
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_FLOW_DATA_PB
+    description: Action parameter flow data protocol buffer
+    type: sai_u8_list_t
+    attr_value_field: u8list
+    default: empty
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_ATTR_IP_ADDR_FAMILY
+    description: IP address family for resource accounting
+    type: sai_ip_addr_family_t
+    attr_value_field: null
+    default: null
+    isresourcetype: true
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 49035675
+      actions:
+        SAI_FLOW_ENTRY_ACTION_SET_FLOW_ENTRY_ATTR: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_FLOW_ENTRY_ACTION_SET_FLOW_ENTRY_ATTR
+          id: 26241621
+          attr_param_id:
+            SAI_FLOW_ENTRY_ATTR_VERSION: 1
+            SAI_FLOW_ENTRY_ATTR_DASH_DIRECTION: 2
+            SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION: 3
+            SAI_FLOW_ENTRY_ATTR_METER_CLASS: 4
+            SAI_FLOW_ENTRY_ATTR_IS_UNIDIRECTIONAL_FLOW: 5
+            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_ENI_MAC: 6
+            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_VNET_ID: 7
+            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_IP_PROTO: 8
+            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_SRC_IP: 9
+            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_DST_IP: 10
+            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_SRC_PORT: 11
+            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_DST_PORT: 12
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY0_VNET_ID: 13
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY0_SIP: 14
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DIP: 15
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DASH_ENCAPSULATION: 16
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY1_VNET_ID: 17
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY1_SIP: 18
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DIP: 19
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY1_SMAC: 20
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DMAC: 21
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DASH_ENCAPSULATION: 22
+            SAI_FLOW_ENTRY_ATTR_DST_MAC: 23
+            SAI_FLOW_ENTRY_ATTR_SIP: 24
+            SAI_FLOW_ENTRY_ATTR_DIP: 25
+            SAI_FLOW_ENTRY_ATTR_SIP_MASK: 26
+            SAI_FLOW_ENTRY_ATTR_DIP_MASK: 27
+            SAI_FLOW_ENTRY_ATTR_VENDOR_METADATA: 28
+            SAI_FLOW_ENTRY_ATTR_FLOW_DATA_PB: 29
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: flow_entry_bulk_get_session_filter
+  description: flow entry bulk get session filter
+  is_object: true
+  enums: []
+  structs: []
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY
+    description: Action parameter DASH flow entry bulk get session filter key
+    type: sai_dash_flow_entry_bulk_get_session_filter_key_t
+    attr_value_field: s32
+    default: SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_INVAILD
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_OP_KEY
+    description: Action parameter DASH flow entry bulk get session op key
+    type: sai_dash_flow_entry_bulk_get_session_op_key_t
+    attr_value_field: s32
+    default: SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_OP_KEY_FILTER_OP_INVALID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_INT_VALUE
+    description: Action parameter int value
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_IP_VALUE
+    description: Action parameter IP value
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_MAC_VALUE
+    description: Action parameter MAC value
+    type: sai_mac_t
+    attr_value_field: mac
+    default: vendor
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 38861669
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 19436677
+          attr_param_id: {}
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: flow_entry_bulk_get_session
+  description: flow entry bulk get session
+  is_object: true
+  enums: []
+  structs: []
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE
+    description: Action parameter DASH flow entry bulk get session mode
+    type: sai_dash_flow_entry_bulk_get_session_mode_t
+    attr_value_field: s32
+    default: SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_GRPC
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_ENTRY_LIMITATION
+    description: Action parameter bulk get entry limitation
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_SERVER_IP
+    description: Action parameter bulk get session server IP
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_SERVER_PORT
+    description: Action parameter bulk get session server port
+    type: sai_uint16_t
+    attr_value_field: u16
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: true
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FIRST_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID
+    description: Action parameter first flow entry bulk get session filter id
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER
+    allow_null: true
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_SECOND_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID
+    description: Action parameter second flow entry bulk get session filter id
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER
+    allow_null: true
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_THIRD_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID
+    description: Action parameter third flow entry bulk get session filter id
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER
+    allow_null: true
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FOURTH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID
+    description: Action parameter fourth flow entry bulk get session filter id
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER
+    allow_null: true
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FIFTH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID
+    description: Action parameter fifth flow entry bulk get session filter id
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER
+    allow_null: true
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 38230977
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 24218189
+          attr_param_id: {}

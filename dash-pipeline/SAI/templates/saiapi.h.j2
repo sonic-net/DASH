@@ -19,22 +19,24 @@
  *
  * @file    saiexperimental{{ sai_api.app_name | replace('_', '') }}.h
  *
- * @brief   This module defines SAI P4 extension  interface
+ * @brief   This module defines SAI extensions for {{ sai_api.app_name | replace('_', ' ') | upper }}
+ *
+ * @warning This module is a SAI experimental module
  */
 
 #if !defined (__SAIEXPERIMENTAL{{ sai_api.app_name | replace('_', '') | upper }}_H_)
 #define __SAIEXPERIMENTAL{{ sai_api.app_name | replace('_', '') | upper}}_H_
 
-#include <saitypes.h>
+#include <saitypesextensions.h>
 
 /**
- * @defgroup SAIEXPERIMENTAL{{ sai_api.app_name | upper}} SAI - Extension specific API definitions
+ * @defgroup SAIEXPERIMENTAL{{ sai_api.app_name | upper}} SAI - Experimental: {{ sai_api.app_name | replace('_', ' ') | upper }} specific API definitions
  *
  * @{
  */
 
 {% for table in sai_api.tables %}
-{% if table.actions | length > 1 or ((table.actions | length == 1) and (((table.is_object == 'false') or (table['keys'] | length <= 1)) and ((table['actionParams'] | length == 0))))  %}
+{% if table.actions | length > 1 or table.is_object == 'false' %}
 /**
  * @brief Attribute data for #SAI_{{ table.name | upper }}_ATTR_ACTION
  */
@@ -64,29 +66,19 @@ typedef struct _sai_{{ table.name }}_t
 
 {% for key in table['keys'] %}
     /**
-     * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.sai_key_name }}
-{% if key.sai_key_type == 'sai_object_id_t' %}
+     * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.name }}
+{% if key.type == 'sai_object_id_t' %}
      *
-     * @objects SAI_OBJECT_TYPE_{{ key.objectName | upper }}
+     * @objects SAI_OBJECT_TYPE_{{ key.object_name | upper }}
 {% endif %}
      */
-{% if key.match_type == 'lpm' %}
-    {{ key.sai_lpm_type }} {{ key.sai_key_name | lower }};
-{% elif key.match_type == 'list' %}
-    {{ key.sai_list_type }} {{ key.sai_key_name | lower }};
-{% elif key.match_type == 'range_list' %}
-    {{ key.sai_range_list_type }} {{ key.sai_key_name | lower }};
-{% elif key.match_type == 'optional' %}
-    {{ key.sai_key_type }} {{ key.sai_key_name | lower }};
-{% else %}
-    {{ key.sai_key_type }} {{ key.sai_key_name | lower }};
-{% endif %}
+    {{ key.type }} {{ key.name | lower }};
 
 {% if key.match_type == 'ternary' %}
     /**
-     * @brief Ternary key {{ key.sai_key_name }} mask
+     * @brief Ternary key {{ key.name }} mask
      */
-    {{ key.sai_key_type }} {{ key.sai_key_name | lower }}_mask;
+    {{ key.type }} {{ key.name | lower }}_mask;
 
 {% endif %}
 {% endfor %}
@@ -113,7 +105,7 @@ typedef enum _sai_{{ table.name }}_attr_t
     SAI_{{ table.name | upper }}_ATTR_START,
 
 {% set ns = namespace(firstattr=false) %}
-{% if table.actions | length > 1 or ((table.actions | length == 1) and (((table.is_object == 'false') or (table['keys'] | length <= 1)) and ((table['actionParams'] | length == 0))))  %}
+{% if table.actions | length > 1 or table.is_object == 'false' %}
     /**
      * @brief Action
      *
@@ -128,74 +120,86 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% if table.is_object == 'true' %}
 {% if table['keys'] | length > 1 %}
 {% for key in table['keys'] %}
+{% if key.isattribute != 'false' %}
     /**
-     * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.sai_key_name }}
+     * @brief {{ key.match_type | capitalize | replace('Lpm', 'LPM') }} matched key {{ key.name }}
      *
-{% if key.match_type == 'lpm' %}
-     * @type {{ key.sai_lpm_type }}
-{% elif key.match_type == 'list' %}
-     * @type {{ key.sai_list_type }}
-{% elif key.match_type == 'range_list' %}
-     * @type {{ key.sai_range_list_type }}
-{% else %}
-     * @type {{ key.sai_key_type }}
-{% endif %}
+     * @type {{ key.type }}
      * @flags MANDATORY_ON_CREATE | CREATE_ONLY
-{% if key.sai_key_type == 'sai_uint16_t' %}
+{% if key.type == 'sai_uint16_t' %}
      * @isvlan false
 {% endif %}
-{% if key.sai_key_type == 'sai_object_id_t' %}
-     * @objects SAI_OBJECT_TYPE_{{ key.sai_key_name | replace('_id', '') | upper }}
+{% if key.type == 'sai_object_id_t' %}
+     * @objects SAI_OBJECT_TYPE_{{ key.name | replace('_id', '') | upper }}
+{% endif %}
+{% if key.isresourcetype == 'true' %}
+     * @isresourcetype true
 {% endif %}
      */
 {% if not ns.firstattr %}
-    SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }} = SAI_{{ table.name | upper }}_ATTR_START,
+    SAI_{{ table.name | upper }}_ATTR_{{ key.name | upper }} = SAI_{{ table.name | upper }}_ATTR_START,
 {% set ns.firstattr = true %}
 {% else %}
-    SAI_{{ table.name | upper }}_ATTR_{{ key.sai_key_name | upper }},
+    SAI_{{ table.name | upper }}_ATTR_{{ key.name | upper }},
 {% endif %}
 
+{% if key.match_type == 'ternary' %}
+    /**
+     * @brief Ternary matched mask {{ key.name }}
+     *
+     * @type {{ key.type }}
+     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
+     */
+    SAI_{{ table.name | upper }}_ATTR_{{ key.name | upper }}_MASK,
+
+{% endif %}
+{% endif %}
 {% endfor %}
 {% endif %}
 {% endif %}
-{% for param in table.actionParams %}
+{% for sai_attr in table.sai_attributes %}
+{% if sai_attr.skipattr == 'true' %}
+{% else %}
     /**
-     * @brief Action {% for action in param.paramActions %}{{ action }}{{ ", " if not loop.last else "" }}{% endfor %} parameter {{ param.name | upper }}
+     * @brief Action {% for action in sai_attr.param_actions %}{{ action }}{{ ", " if not loop.last else "" }}{% endfor %} parameter {{ sai_attr.name | upper }}
      *
-     * @type {{ param.type }}
+     * @type {{ sai_attr.type }}
+{% if sai_attr.isreadonly == 'true' %}
+     * @flags READ_ONLY
+{% else %}
      * @flags CREATE_AND_SET
-{% if param.type == 'sai_uint16_t' %}
+{% endif %}
+{% if sai_attr.type == 'sai_uint16_t' %}
      * @isvlan false
 {% endif %}
-{% if param.type == 'sai_ip_address_t' %}
-     * @default 0.0.0.0
-{% elif param.type == 'sai_ip_addr_family_t' %}
-     * @default SAI_IP_ADDR_FAMILY_IPV4
-{% elif param.type == 'sai_mac_t' %}
-     * @default 0:0:0:0:0:0
-{% elif param.type == 'bool' %}
-     * @default false
-{% elif param.type == 'sai_object_id_t' %}
-     * @objects SAI_OBJECT_TYPE_{{ param.objectName | upper }}
+{% if sai_attr.type == 'sai_object_id_t' %}
+     * @objects SAI_OBJECT_TYPE_{{ sai_attr.object_name | upper }}
      * @allownull true
-     * @default SAI_NULL_OBJECT_ID
-{% else %}
-     * @default 0
+{% endif %}
+{% if sai_attr.isreadonly != 'true' %}
+     * @default {{ sai_attr.default }}
 {% endif %}
 {% if table.actions | length > 1 %}
-{% if param.paramActions | length > 0 %}
-     * @validonly {% for action in param.paramActions %}SAI_{{ table.name | upper }}_ATTR_ACTION == SAI_{{ table.name | upper }}_ACTION_{{ action | upper }}{{ " or " if not loop.last else "" }}{% endfor %}
+{% if sai_attr.param_actions | length > 0 %}
+     * @validonly {% for action in sai_attr.param_actions %}SAI_{{ table.name | upper }}_ATTR_ACTION == SAI_{{ table.name | upper }}_ACTION_{{ action | upper }}{{ " or " if not loop.last else "" }}{% endfor %}
 
 {% endif %}
+{% endif %}
+{% if sai_attr.validonly != None %}
+     * @validonly {{ sai_attr.validonly }}
+{% endif %}
+{% if sai_attr.isresourcetype == 'true' %}
+     * @isresourcetype true
 {% endif %}
      */
 {% if not ns.firstattr %}
-    SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }} = SAI_{{ table.name | upper }}_ATTR_START,
+    SAI_{{ table.name | upper }}_ATTR_{{ sai_attr.name | upper }} = SAI_{{ table.name | upper }}_ATTR_START,
 {% set ns.firstattr = true %}
 {% else %}
-    SAI_{{ table.name | upper }}_ATTR_{{ param.name | upper }},
+    SAI_{{ table.name | upper }}_ATTR_{{ sai_attr.name | upper }},
 {% endif %}
 
+{% endif %}
 {% endfor %}
 {% if table.with_counters == 'true' %}
     /**
@@ -209,7 +213,12 @@ typedef enum _sai_{{ table.name }}_attr_t
      * @allownull true
      * @default SAI_NULL_OBJECT_ID
      */
+{% if not ns.firstattr %}
+    SAI_{{ table.name | upper }}_ATTR_COUNTER_ID = SAI_{{ table.name | upper }}_ATTR_START,
+{% set ns.firstattr = true %}
+{% else %}
     SAI_{{ table.name | upper }}_ATTR_COUNTER_ID,
+{% endif %}
 
 {% endif %}
 {% if table.is_object == 'true' %}
@@ -226,6 +235,17 @@ typedef enum _sai_{{ table.name }}_attr_t
 {% endif %}
 {% endif %}
 {% endif %}
+{% if table.ipaddr_family_attr == 'true' %}
+    /**
+     * @brief IP address family for resource accounting
+     *
+     * @type sai_ip_addr_family_t
+     * @flags READ_ONLY
+     * @isresourcetype true
+     */
+    SAI_{{ table.name | upper }}_ATTR_IP_ADDR_FAMILY,
+
+{% endif %}
     /**
      * @brief End of attributes
      */
@@ -239,6 +259,7 @@ typedef enum _sai_{{ table.name }}_attr_t
 
 } sai_{{ table.name }}_attr_t;
 
+{% include 'templates/headers/sai_stats_enum.j2' %}
 {% endfor %}
 {% for table in sai_api.tables %}
 /**
@@ -325,6 +346,7 @@ typedef sai_status_t (*sai_get_{{ table.name }}_attribute_fn)(
         _In_ uint32_t attr_count,
         _Inout_ sai_attribute_t *attr_list);
 
+{% include 'templates/headers/sai_stats_api.j2' %}
 {% if table.is_object == 'false' %}
 /**
  * @brief Bulk create {{ sai_api.app_name }}_{{ table.name }}
@@ -382,6 +404,7 @@ typedef struct _sai_{{ sai_api.app_name }}_api_t
     sai_remove_{{ table.name }}_fn           {{ " " * space_offset }}remove_{{ table.name }};
     sai_set_{{ table.name }}_attribute_fn    {{ " " * space_offset }}set_{{ table.name }}_attribute;
     sai_get_{{ table.name }}_attribute_fn    {{ " " * space_offset }}get_{{ table.name }}_attribute;
+{% include 'templates/headers/sai_stats_api_list.j2' %}
 {% if table.is_object == 'true' %}
     sai_bulk_object_create_fn{{ " " * table_name_max }}create_{{ table.name }}s;
     sai_bulk_object_remove_fn{{ " " * table_name_max }}remove_{{ table.name }}s;

@@ -30,12 +30,13 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
   - [Install docker](#install-docker)
   - [Install Python 3](#install-python-3)
   - [Install pip3](#install-pip3)
-  - [Install docker-compose](#install-docker-compose)
+  - [Install docker compose](#install-docker-compose)
 
 # Known Issues
 * P4 code doesn't loop packets back to same port.
 * P4 code mark-to-drop not set when meta.drop is set.
 * Permission and ownership issues in Docker images, permanent fix is needed.
+* Link to article describing gaps in BMv2 and P4-DPDK; targets that they are missing in order to be a good DASH P4 reference model: [Draft Gap Analysis](https://github.com/jafingerhut/p4-guide/tree/master/dash)
 # TODOs
 ## Loose Ends
 Small items to complete given the existing features and state, e.g. excluding major roadmap items.
@@ -61,7 +62,7 @@ See [Installing Prerequisites](#installing-prerequisites) for details.
 * 2 CPU cores minimum, 7GB RAM, 14Gb HD; same as [free Azure 2-core GitHub runner instances](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources), we'll try to live within these limits
 * git - tested with version 2.25.1
 * docker
-* [docker-compose](#install-docker-compose) (**1.29.2 or later**)
+* [docker compose](#install-docker-compose) (**v2 required**)
 
 ## Clone this repo
 ```
@@ -135,27 +136,27 @@ Need for basically everything to build/test dash-pipeline.
 See:
 * https://docs.docker.com/desktop/linux/install/
 
-## Install docker-compose
->**NOTE** Use docker-compose 1.29.2 or later! The `.yml` file format changed. Using an older version might result in an error such as: <br/> `ERROR: Invalid interpolation format for "controller" option in service "services": "ixiacom/ixia-c-controller:${CONTROLLER_VERSION:-latest}"`
+## Install docker compose
+>**NOTE** Use docker compose version 2 or later!
 
 It is assumed you already have Docker on your system.
-The `docker-compose` command is used to orchestrate the ixia-c containers. You need to install it to run the ixia-c test scripts (`ixia-c` itself doesn't require docker-compose; it's merely convenient for instantiating it using a declarative `.yml` file).
+The `docker compose` command is used to orchestrate the ixia-c containers. You need to install it to run the ixia-c test scripts (`ixia-c` itself doesn't require `docker compose`; it's merely convenient for instantiating it using a declarative `.yml` file).
 
 See also:
-* https://www.cyberithub.com/how-to-install-docker-compose-on-ubuntu-20-04-lts-step-by-step/
+* https://docs.docker.com/compose/install/linux/
   
 
-Installation of `docker-compose` has to be done just once. You can use another technique based on your platform and preferences. The following will download and install a linux executable under `/usr/local/bin`. You should have a PATH to this directory. **You can edit the commands below to locate it somewhere else as desired; just change the path as needed.**
+Installation of `docker compose` has to be done just once. You can use another technique based on your platform and preferences. The following will download and install the `compose` CLI plugin for Docker.
 
 
 ```
-sudo mkdir -p /usr/local/bin
-sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
+DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+mkdir -p $DOCKER_CONFIG/cli-plugins
+curl -SL https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose
 ```
 
 To test installation, execute the following. The output on the second line is an example, yours may differ.
 ```
-docker-compose --version
-docker-compose version 1.29.2, build 5becea4c
+docker compose version
+Docker Compose version 2.24.5
 ```

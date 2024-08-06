@@ -1,5 +1,5 @@
-[![DASH-bmv2-CI](https://github.com/Azure/DASH/workflows/DASH-BMV2-CI/badge.svg?branch=main)](https://github.com/Azure/DASH/actions/workflows/dash-bmv2-ci.yml)
-[![Spellcheck](https://github.com/Azure/DASH/actions/workflows/dash-md-spellcheck.yml/badge.svg)](https://github.com/Azure/DASH/actions/workflows/dash-md-spellcheck.yml) 
+[![DASH-bmv2-CI](https://github.com/sonic-net/DASH/workflows/DASH-BMV2-CI/badge.svg?branch=main)](https://github.com/sonic-net/DASH/actions/workflows/dash-bmv2-ci.yml)
+[![Spellcheck](https://github.com/sonic-net/DASH/actions/workflows/dash-md-spellcheck.yml/badge.svg)](https://github.com/sonic-net/DASH/actions/workflows/dash-md-spellcheck.yml) 
 
 # SONiC-DASH - Disaggregated API for SONiC Hosts - DRAFT/Work in Progress
 
@@ -18,9 +18,9 @@ Visit the [Documentation table of contents](documentation/README.md) for access 
 
 For a quick technical deep-dive, please begin with:
 
-1. Peruse the [DASH high level design](documentation/general/design/dash-high-level-design.md) for an overview of DASH architecture. 
-1. The [SDN Packet Transforms](documentation/general/design/sdn-features-packet-transforms.md) document, this facilitates understanding of the program goal and the 7 networking scenarios that Azure has defined.  
-1. [Program Scale Testing Requirements - Draft](documentation/general/requirements/program-scale-testing-requirements-draft.md) for an example of a test to stress DPU/NIC hardware.
+1. Peruse the [DASH high level design](documentation/general/dash-high-level-design.md) for an overview of DASH architecture. 
+1. The [SDN Packet Transforms](documentation/general/sdn-features-packet-transforms.md) document, this facilitates understanding of the program goal and the 7 networking scenarios that Azure has defined.  
+1. [Program Scale Testing Requirements - Draft](documentation/general/program-scale-testing-requirements-draft.md) for an example of a test to stress DPU/NIC hardware.
 
 The API and Object Model for VNET<->VNET is in draft; the remaining services will be posted over as we move forward.
 
@@ -33,11 +33,7 @@ This project welcomes contributions and suggestions.  We are happy to have the C
 See [GitHub Basic Process](doc-github-rules.md).
 
 Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
-
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repositories using our CLA.
+the rights to use your contribution. All contributors must sign an [Individual Contributor License Agreement (ICLA)](https://docs.linuxfoundation.org/lfx/easycla/v2-current/contributors/individual-contributor) before contributions can be accepted.  This process is managed by the [Linux Foundation - EasyCLA](https://easycla.lfx.linuxfoundation.org/) and automated via a GitHub bot. If the contributor has not yet signed a CLA, the bot will create a comment on the pull request containing a link to electronically sign the CLA.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or

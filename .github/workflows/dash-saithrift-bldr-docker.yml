@@ -1,0 +1,48 @@
+name: DASH-docker-saithrift-bldr-image
+
+on:
+  push:
+    branches: [ "**" ]
+    paths:
+      - '.github/workflows/dash-saithrift-bldr-docker.yml'
+      - 'dash-pipeline/Makefile'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-bldr'
+      - 'dash-pipeline/dockerfiles/DOCKER_SAITHRIFT_BLDR_IMG.env'
+      - 'dash-pipeline/.dockerignore'
+      - 'dash-pipeline/dockerfiles/.dockerignore'
+  pull_request:
+    branches: [ "**" ]
+    paths:
+      - '.github/workflows/dash-saithrift-bldr-docker.yml'
+      - 'dash-pipeline/Makefile'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-bldr'
+      - 'dash-pipeline/dockerfiles/DOCKER_SAITHRIFT_BLDR_IMG.env'
+      - 'dash-pipeline/.dockerignore'
+      - 'dash-pipeline/dockerfiles/.dockerignore'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build dash-saithrift-bldr-image
+    runs-on: ubuntu-20.04
+    env:
+      docker_fg_flags: -u root --privileged
+      docker_bg_flags: -d -u root --privileged
+    defaults:
+      run:
+        working-directory: ./dash-pipeline
+    steps:
+    - uses: actions/checkout@v3
+    - name: Pull/Build docker-saithrift-bldr image
+      run:  make docker-saithrift-bldr
+
+    # Can only publish from within DASH repo (need credentials from secrets)
+    - uses: azure/docker-login@v1
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'sonic-net/DASH' }}
+      with:
+        login-server: sonicdash.azurecr.io
+        username: ${{ secrets.DASH_ACR_USERNAME }}
+        password: ${{ secrets.DASH_ACR_PASSWORD }}
+    - name: Publish dash-saithrift-bldr docker image
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'sonic-net/DASH' }}
+      run: make docker-publish-saithrift-bldr

@@ -7,17 +7,17 @@ on:
       - '.github/workflows/dash-saithrift-client-bldr-docker.yml'
       - '.github/workflows/dash-saithrift-client-bldr-docker.yml'
       - 'dash-pipeline/Makefile'
-      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-bldr'
       - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client-bldr'
+      - 'dash-pipeline/dockerfiles/DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
-    branches: [ "main" ]
+    branches: [ "**" ]
     paths:
       - '.github/workflows/dash-saithrift-client-bldr-docker.yml'
       - 'dash-pipeline/Makefile'
-      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-bldr'
       - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client-bldr'
+      - 'dash-pipeline/dockerfiles/DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   workflow_dispatch:
@@ -35,7 +35,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Pull docker p4c image
-      run:  make docker-pull-dash-p4c
+      run:  make docker-dash-p4c
     - name: Build P4 software switch (bmv2) and P4Info
       run:  DOCKER_FLAGS=$docker_fg_flags make p4
     - name: Install SAI submodule
@@ -46,5 +46,15 @@ jobs:
       run:  DOCKER_FLAGS=$docker_fg_flags make sai
     - name: Generate SAI-Thrift client and server code and libs
       run:  DOCKER_FLAGS=$docker_fg_flags make saithrift-server
-    - name: Build saithrift client docker image 
+    - name: Build saithrift client builder docker image 
       run:  DOCKER_FLAGS=$docker_fg_flags make docker-saithrift-client-bldr
+
+    - uses: azure/docker-login@v1
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'sonic-net/DASH' }}
+      with:
+        login-server: sonicdash.azurecr.io
+        username: ${{ secrets.DASH_ACR_USERNAME }}
+        password: ${{ secrets.DASH_ACR_PASSWORD }}
+    - name: Publish dash-saithrift-client-bldr docker image
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'sonic-net/DASH' }}
+      run: make docker-publish-saithrift-client-bldr

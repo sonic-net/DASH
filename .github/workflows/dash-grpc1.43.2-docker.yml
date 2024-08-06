@@ -1,19 +1,22 @@
 name: DASH-docker-grpc1.43.2-build-image
 
-
 on:
   push:
     branches: [ "**" ]
     paths:
       - '.github/workflows/dash-grpc1.43.2-docker.yml'
+      - 'dash-pipeline/Makefile'
       - 'dash-pipeline/dockerfiles/Dockerfile.grpc1.43.2'
+      - 'dash-pipeline/dockerfiles/DOCKER_GRPC_IMG.env'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
-    branches: [ "main" ]
+    branches: [ "**" ]
     paths:
       - '.github/workflows/dash-grpc1.43.2-docker.yml'
+      - 'dash-pipeline/Makefile'
       - 'dash-pipeline/dockerfiles/Dockerfile.grpc1.43.2'
+      - 'dash-pipeline/dockerfiles/DOCKER_GRPC_IMG.env'
       - 'dash-pipeline/.dockerignore'
       - 'dash-pipeline/dockerfiles/.dockerignore'
   workflow_dispatch:
@@ -29,5 +32,13 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build dash-grpc1.43.2 docker image
       run: make docker-dash-grpc
-    - name: Publish dash-bmv2 docker image
+
+    - uses: azure/docker-login@v1
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'sonic-net/DASH' }}
+      with:
+        login-server: sonicdash.azurecr.io
+        username: ${{ secrets.DASH_ACR_USERNAME }}
+        password: ${{ secrets.DASH_ACR_PASSWORD }}
+    - name: Publish dash-grpc1.43.2 image
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'sonic-net/DASH' }}
       run: make docker-publish-dash-grpc

@@ -1,0 +1,175 @@
+{
+
+    "enis": [
+        {
+            "ENI:1": {
+                "eni-id": 1,
+                "mac": "00:1B:6E:00:00:01",
+                "vpcs": [
+                    1
+                ],
+                "acls-v4-in": [
+                    {
+                        "acl-group-id": "1",
+                        "stage": 1
+                    }
+                ],
+                "acls-v4-out": [
+                    {
+                        "acl-group-id": "1",
+                        "stage": 1
+                    }
+                ],
+                "route-table-v4": "1"
+            }
+        }
+    ],
+
+    "acl-groups": [
+        {
+            "ACL-GROUP:1": {
+                "acl-group-id": "1",
+                "ip_version": "IPv4",
+                "rules": [
+                    {
+                        "priority": 100,
+                        "action": "allow",
+                        "terminating": "true",
+                        "protocols": [ 
+                            1,
+                            6,
+                            17
+                        ],
+                        "src_addrs": [
+                            "1.1.0.1/32",
+                            "1.128.0.1/32"
+                        ],
+                        "src_ports": [],
+                        "dst_addrs":  [
+                            "1.1.0.1/32",
+                            "1.128.0.1/32"
+                        ],
+                        "dst_ports": []
+                    }
+                ]
+            }
+        }
+    ],
+    "vpc": [
+        {
+            "VPC:1": {
+                "vpc-id": "1",
+                "vni-key": 1,
+                "encap": "vxlan",
+                "address_spaces": [
+                    "1.1.0.0/9"
+                ]
+            },
+            "VPC:101": {
+                "vpc-id": "101",
+                "vni-key": 101,
+                "encap": "vxlan",
+                "address_spaces": [
+                    "1.128.0.0/9"
+                ]
+            }
+        }
+    ],
+
+    "vpc-mappings-routing-types": [
+        "vpc",
+        "privatelink",
+        "privatelinknsg"
+    ],
+
+    "vpc-mappings": [
+        {
+            "VPC:1": {
+                "vpc-id": "1",
+                "mappings" : [
+                    {
+                        "routing-type": "vpc-direct",
+                        "overlay-ip-address": "1.1.0.1/32", 
+                        "underlay-ip-address": "221.0.1.1/32", 
+                        "mac": "00:1B:6E:00:00:01" 
+                    }
+                ]
+            },
+            "VPC:101": {
+                "vpc-id": "101",
+                "mappings" : [
+                    {
+                        "routing-type": "vpc-direct",
+                        "overlay-ip-address": "1.128.0.1/32", 
+                        "underlay-ip-address": "221.0.2.1/32", 
+                        "mac": "00:1B:6E:80:00:01" 
+                    }
+                ]
+            }
+        }
+    ],
+
+    "routing-appliances": [
+        {
+            "VTEP:1": { 
+                "appliance-id": "1",
+                "routing-appliance-id": 1,
+                "routing-appliance-addresses": [ "221.0.1.1" ],
+                "encap-type": "vxlan",
+                "vni-key": 1
+            },
+            "VTEP:101": { 
+                "appliance-id": "101",
+                "routing-appliance-id": 101,
+                "routing-appliance-addresses": [ "221.0.2.1" ],
+                "encap-type": "vxlan",
+                "vni-key": 101
+            }
+        }
+    ],
+
+    "route-tables": [
+        {
+            "ROUTE-TABLE:1": {
+                "routetable-id": "1",
+                "ip-version": "IPv4",
+                "routes": [
+                    {
+                        "ip-prefixes": [ "1.1.0.0/9" ],
+                        "action" : {
+                            "routing-type": "vpc",
+                            "vpc-id": "1"
+                        }
+                    },
+                    {
+                        "ip-prefixes": [ "1.128.0.0/9" ],
+                        "action" : {
+                            "routing-type": "vpc",
+                            "vpc-id": "101"
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+
+    "prefix-tags": [
+        {
+            "VPC:1": {
+                "prefix-tag-id": "1",
+                "prefix-tag-number": 1,
+                "ip-prefixes-ipv4": [
+                    "1.1.0.0/9"
+                ]
+            },
+            "VPC:101": {
+                "prefix-tag-id": "101",
+                "prefix-tag-number": 101, 
+                "ip-prefixes-ipv4": [
+                    "1.128.0.0/9"
+                ]
+            }
+        }
+    ]
+
+}

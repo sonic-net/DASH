@@ -1,11 +1,17 @@
-[ [ << Back to DASH top-level Documents](../README.md#contents) ]
-
 # DASH Data plane Documents
+
 This folder contains DASH data plane design and requirements documents.
 
-# Contents
+## Design
 
-| Folder                                                 | Description                                  |
-| ------------------------------------------------------ | -------------------------------------------- |
-| [design](design/README.md)                             | DASH Data plane design & architecture documents |
-| [requirements](requirements/README.md)                 | DASH Data plane requirements documents         |
+| Document                                               | Description                                |
+| ------------------------------------------------------ | ------------------------------------------ |
+|[dash-update-timing.md](dash-update-timing.md)          |Routing, ACL, Mapping Updates (WIP)         |
+|[dash-config-schema-json.md](dash-config-schema-json.md)   |Configuration schema example                |
+
+
+
+## Requirements
+
+| Document                                               | Description                                |
+| ------------------------------------------------------ | ------------------------------------------ |

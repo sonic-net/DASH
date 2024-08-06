@@ -1,0 +1,57 @@
+name: DASH-docker-saichallenger-client-bldr-img
+
+on:
+  push:
+    branches: [ "**" ]
+    paths:
+      - '.github/workflows/dash-saichallenger-client-bldr-docker.yml'
+      - 'dash-pipeline/Makefile'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saichallenger-client-bldr'
+      - 'dash-pipeline/dockerfiles/DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG.env'
+      - 'dash-pipeline/.dockerignore'
+      - 'dash-pipeline/dockerfiles/.dockerignore'
+  pull_request:
+    branches: [ "**" ]
+    paths:
+      - '.github/workflows/dash-saichallenger-client-bldr-docker.yml'
+      - 'dash-pipeline/Makefile'
+      - 'dash-pipeline/dockerfiles/Dockerfile.saichallenger-client-bldr'
+      - 'dash-pipeline/dockerfiles/DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG.env'
+      - 'dash-pipeline/.dockerignore'
+      - 'dash-pipeline/dockerfiles/.dockerignore'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build dash-saichallenger-client-bldr-image
+    runs-on: ubuntu-20.04
+    env:
+      docker_fg_flags: -u root --privileged
+      docker_bg_flags: -d -u root --privileged
+    defaults:
+      run:
+        working-directory: ./dash-pipeline
+    steps:
+    - uses: actions/checkout@v3
+    - name: Pull docker p4c image
+      run:  make docker-pull-dash-p4c
+    - name: Build P4 software switch (bmv2) and P4Info
+      run:  DOCKER_FLAGS=$docker_fg_flags make p4
+    - name: Install SAI submodule
+      run:  git submodule update --init
+    - name: Generate SAI API
+      run:  DOCKER_FLAGS=$docker_fg_flags make sai
+    - name: Generate SAI-Thrift client and server code and libs
+      run:  DOCKER_FLAGS=$docker_fg_flags make saithrift-server
+    - name: Build SAI-Challenger client builder base docker image
+      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saichallenger-client-bldr
+      
+    - uses: azure/docker-login@v1
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'sonic-net/DASH' }}
+      with:
+        login-server: sonicdash.azurecr.io
+        username: ${{ secrets.DASH_ACR_USERNAME }}
+        password: ${{ secrets.DASH_ACR_PASSWORD }}
+    - name: Publish SAI-Challenger client builder base docker image
+      run:  make docker-publish-saichallenger-client-bldr
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'sonic-net/DASH' }}

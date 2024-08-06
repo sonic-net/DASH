@@ -1,0 +1,30 @@
+{
+  "dpu": [
+    {
+      "alias": "dash",
+      "asic": "generic",
+      "target": "bmv2",
+      "sku": null,
+      "client": {
+        "type": "thrift",
+        "config": {
+          "ip": "127.0.0.1",
+          "port": "9092"
+        }
+      }
+    }
+  ],
+
+  "dataplane": [
+    {
+      "alias": "ptf",
+      "type": "ptf",
+      "mode": "eth",
+      "port_groups": [
+        {"alias": 0, "name": "veth1"},
+        {"alias": 1, "name": "veth2"}
+      ]
+    }
+  ]
+
+}

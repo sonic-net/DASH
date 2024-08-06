@@ -12,130 +12,145 @@ error {
 #define UDP_PORT_VXLAN 4789
 #define UDP_PROTO 17
 #define TCP_PROTO 6
+#define NVGRE_PROTO 0x2f
 #define IPV4_ETHTYPE 0x0800
 #define IPV6_ETHTYPE 0x86dd
 
-parser dash_parser(packet_in packet,
-                out headers_t hd,
-                inout metadata_t meta,
-                inout standard_metadata_t standard_meta)
+parser dash_parser(
+    packet_in packet
+    , out headers_t hd
+    , inout metadata_t meta
+#ifdef TARGET_BMV2_V1MODEL
+    , inout standard_metadata_t standard_meta
+#endif // TARGET_BMV2_V1MODEL
+#ifdef TARGET_DPDK_PNA
+    , in pna_main_parser_input_metadata_t istd
+#endif // TARGET_DPDK_PNA
+    )
 {
     state start {
-        packet.extract(hd.ethernet);
-        transition select(hd.ethernet.ether_type) {
-            IPV4_ETHTYPE:  parse_ipv4;
-            IPV6_ETHTYPE:  parse_ipv6;
+        packet.extract(hd.u0_ethernet);
+        transition select(hd.u0_ethernet.ether_type) {
+            IPV4_ETHTYPE:  parse_u0_ipv4;
+            IPV6_ETHTYPE:  parse_u0_ipv6;
             default: accept;
         }
     }
 
-    state parse_ipv4 {
-        packet.extract(hd.ipv4);
-        verify(hd.ipv4.version == 4w4, error.IPv4IncorrectVersion);
-        verify(hd.ipv4.ihl >= 5, error.InvalidIPv4Header);
-        transition select (hd.ipv4.ihl) {
-                5: dispatch_on_protocol;
-                default: parse_ipv4options;
+    state parse_u0_ipv4 {
+        packet.extract(hd.u0_ipv4);
+        verify(hd.u0_ipv4.version == 4w4, error.IPv4IncorrectVersion);
+        verify(hd.u0_ipv4.ihl >= 5, error.InvalidIPv4Header);
+        transition select (hd.u0_ipv4.ihl) {
+                5: dispatch_on_u0_protocol;
+                default: parse_u0_ipv4options;
         }
     }
 
-    state parse_ipv4options {
-        packet.extract(hd.ipv4options,
-                    (bit<32>)(((bit<16>)hd.ipv4.ihl - 5) * 32));
-        transition dispatch_on_protocol;
+    state parse_u0_ipv4options {
+        packet.extract(hd.u0_ipv4options,
+                    (bit<32>)(((bit<16>)hd.u0_ipv4.ihl - 5) * 32));
+        transition dispatch_on_u0_protocol;
     }
 
-    state dispatch_on_protocol {
-        transition select(hd.ipv4.protocol) {
-            UDP_PROTO: parse_udp;
-            TCP_PROTO: parse_tcp;
+    state dispatch_on_u0_protocol {
+        transition select(hd.u0_ipv4.protocol) {
+            UDP_PROTO: parse_u0_udp;
+            TCP_PROTO: parse_u0_tcp;
             default: accept;
         }
     }
 
-    state parse_ipv6 {
-        packet.extract(hd.ipv6);
-        transition select(hd.ipv6.next_header) {
-            UDP_PROTO: parse_udp;
-            TCP_PROTO: parse_tcp;
+    state parse_u0_ipv6 {
+        packet.extract(hd.u0_ipv6);
+        transition select(hd.u0_ipv6.next_header) {
+            UDP_PROTO: parse_u0_udp;
+            TCP_PROTO: parse_u0_tcp;
             default: accept;
         }
     }
 
-    state parse_udp {
-        packet.extract(hd.udp);
-        transition select(hd.udp.dst_port) {
-            UDP_PORT_VXLAN: parse_vxlan;
+    state parse_u0_udp {
+        packet.extract(hd.u0_udp);
+        transition select(hd.u0_udp.dst_port) {
+            UDP_PORT_VXLAN: parse_u0_vxlan;
             default: accept;
          }
     }
 
-    state parse_tcp {
-        packet.extract(hd.tcp);
+    state parse_u0_tcp {
+        packet.extract(hd.u0_tcp);
         transition accept;
     }
 
-    state parse_vxlan {
-        packet.extract(hd.vxlan);
-        transition parse_inner_ethernet;
+    state parse_u0_vxlan {
+        packet.extract(hd.u0_vxlan);
+        transition parse_customer_ethernet;
     }
 
-    state parse_inner_ethernet {
-        packet.extract(hd.inner_ethernet);
-        transition select(hd.ethernet.ether_type) {
-            IPV4_ETHTYPE: parse_inner_ipv4;
-            IPV6_ETHTYPE: parse_inner_ipv6;
+    state parse_customer_ethernet {
+        packet.extract(hd.customer_ethernet);
+        transition select(hd.customer_ethernet.ether_type) {
+            IPV4_ETHTYPE: parse_customer_ipv4;
+            IPV6_ETHTYPE: parse_customer_ipv6;
             default: accept;
         }
     }
 
-    state parse_inner_ipv4 {
-        packet.extract(hd.inner_ipv4);
-        verify(hd.inner_ipv4.version == 4w4, error.IPv4IncorrectVersion);
-        verify(hd.inner_ipv4.ihl == 4w5, error.IPv4OptionsNotSupported);
-        transition select(hd.inner_ipv4.protocol) {
-            UDP_PROTO: parse_inner_udp;
-            TCP_PROTO: parse_inner_tcp;
+    state parse_customer_ipv4 {
+        packet.extract(hd.customer_ipv4);
+        verify(hd.customer_ipv4.version == 4w4, error.IPv4IncorrectVersion);
+        verify(hd.customer_ipv4.ihl == 4w5, error.IPv4OptionsNotSupported);
+        transition select(hd.customer_ipv4.protocol) {
+            UDP_PROTO: parse_customer_udp;
+            TCP_PROTO: parse_customer_tcp;
             default: accept;
         }
     }
 
-    state parse_inner_ipv6 {
-        packet.extract(hd.inner_ipv6);
-        transition select(hd.inner_ipv6.next_header) {
-            UDP_PROTO: parse_inner_udp;
-            TCP_PROTO: parse_inner_tcp;
+    state parse_customer_ipv6 {
+        packet.extract(hd.customer_ipv6);
+        transition select(hd.customer_ipv6.next_header) {
+            UDP_PROTO: parse_customer_udp;
+            TCP_PROTO: parse_customer_tcp;
             default: accept;
         }
     }
 
-    state parse_inner_tcp {
-        packet.extract(hd.inner_tcp);
+    state parse_customer_tcp {
+        packet.extract(hd.customer_tcp);
         transition accept;
     }
 
-    state parse_inner_udp {
-        packet.extract(hd.inner_udp);
+    state parse_customer_udp {
+        packet.extract(hd.customer_udp);
         transition accept;
     }
 }
 
-control dash_deparser(packet_out packet,
-                   in headers_t hdr)
+control dash_deparser(
+      packet_out packet
+    , in headers_t hdr
+#ifdef TARGET_DPDK_PNA
+    , in metadata_t meta
+    , in pna_main_output_metadata_t ostd
+#endif // TARGET_DPDK_PNA
+    )
 {
     apply {
-	packet.emit(hdr.ethernet);
-        packet.emit(hdr.ipv4);
-        packet.emit(hdr.ipv4options);
-        packet.emit(hdr.ipv6);
-        packet.emit(hdr.udp);
-        packet.emit(hdr.tcp);
-        packet.emit(hdr.vxlan);
-        packet.emit(hdr.inner_ethernet);
-        packet.emit(hdr.inner_ipv4);
-        packet.emit(hdr.inner_ipv6);
-        packet.emit(hdr.inner_tcp);
-        packet.emit(hdr.inner_udp);
+	packet.emit(hdr.u0_ethernet);
+        packet.emit(hdr.u0_ipv4);
+        packet.emit(hdr.u0_ipv4options);
+        packet.emit(hdr.u0_ipv6);
+        packet.emit(hdr.u0_udp);
+        packet.emit(hdr.u0_tcp);
+        packet.emit(hdr.u0_vxlan);
+        packet.emit(hdr.u0_nvgre);
+        packet.emit(hdr.customer_ethernet);
+        packet.emit(hdr.customer_ipv4);
+        packet.emit(hdr.customer_ipv6);
+        packet.emit(hdr.customer_tcp);
+        packet.emit(hdr.customer_udp);
     }
 }
 

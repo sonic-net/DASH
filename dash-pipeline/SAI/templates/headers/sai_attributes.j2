@@ -1,0 +1,27 @@
+/**
+ * @brief Attribute ID for {{ api.description }}
+ */
+typedef enum _sai_{{ api.name }}_attr_t
+{
+    /**
+     * @brief Start of attributes
+     */
+    SAI_{{ api.name | upper }}_ATTR_START,
+{% set ns = namespace(firstattr=true) %}
+{% for attr in api.attributes %}
+
+{% include 'templates/headers/sai_attribute.j2' %}
+{% endfor %}
+
+    /**
+     * @brief End of attributes
+     */
+    SAI_{{ api.name | upper }}_ATTR_END,
+
+    /** Custom range base value */
+    SAI_{{ api.name | upper }}_ATTR_CUSTOM_RANGE_START = 0x10000000,
+
+    /** End of custom range base */
+    SAI_{{ api.name | upper }}_ATTR_CUSTOM_RANGE_END,
+
+} sai_{{ api.name }}_attr_t;

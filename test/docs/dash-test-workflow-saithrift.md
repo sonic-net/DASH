@@ -45,7 +45,7 @@ The previous figure highlights the following important test work-flow concepts:
 
 The GitHub repositories can be found at these locations:
 
-- [dash/test](https://github.com/Azure/DASH/tree/main/test)
+- [dash/test](https://github.com/sonic-net/DASH/tree/main/test)
 - [opencompute/SAI](https://github.com/opencomputeproject/SAI)
 
 The descriptions below are listed in rough order of dependency, culminating in the test script itself.

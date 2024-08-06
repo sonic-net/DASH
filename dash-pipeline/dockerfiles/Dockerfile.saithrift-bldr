@@ -1,12 +1,14 @@
 
-FROM chrissommers/dash-grpc:1.43.2 as grpc
-FROM chrissommers/dash-bmv2-bldr:220630 as bmv2
-# amd64/ubuntu:20.04 on 2022-07-03
-FROM amd64/ubuntu@sha256:b2339eee806d44d6a8adc0a790f824fb71f03366dd754d400316ae5a7e3ece3e as builder
+ARG ubuntu_image_sha
+
+FROM sonicdash.azurecr.io/dash-grpc:1.43.2 as grpc
+FROM sonicdash.azurecr.io/dash-bmv2-bldr:220819 as bmv2
+
+FROM amd64/ubuntu@sha256:$ubuntu_image_sha as builder
+
 LABEL maintainer="SONiC-DASH Community "
 LABEL description="This Docker image contains the toolchain to build \
 the saithrift client & server + sai-P4Runtime adaptor layer, for DASH."
-
 
 # Configure make to run as many parallel jobs as cores available
 ARG available_processors
@@ -17,15 +19,15 @@ ENV TZ=America/Los_Angeles
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 ENV GIT_SSL_NO_VERIFY=true
 
-ENV SAI_PTF_DEPS    sudo git python wget doxygen graphviz aspell-en \
+ENV SAI_PTF_DEPS    sudo git python3 wget doxygen graphviz aspell-en \
                     libgetopt-long-descriptive-perl libconst-fast-perl \
                     libtemplate-perl libnamespace-autoclean-perl libmoose-perl libmoosex-aliases-perl
 
 ENV DASH_SAIGEN_DEPS python3 python3-pip
 
-RUN apt-get update -qq && \
+RUN apt-get update -q && \
     apt-get install -y --no-install-recommends $SAI_PTF_DEPS $DASH_SAIGEN_DEPS && \
-    pip3 install ctypesgen jinja2
+    pip3 install ctypesgen jinja2 jsonpath-ng pyyaml pyyaml-include
 
 ENV SAI_THRIFT_DEPS automake bison flex g++ git libboost-all-dev libevent-dev libssl-dev libtool make pkg-config
 
@@ -42,7 +44,7 @@ RUN wget http://archive.apache.org/dist/thrift/0.11.0/thrift-0.11.0.tar.gz && \
     make && \
     make install && \
     cd lib/py && \
-    python setup.py sdist && \
+    python3 setup.py sdist && \
     sudo cp dist/* /usr/lib && \
     cd / && \
     rm -rf thrift-0.11.0 thrift-0.11.0.tar.gz
@@ -77,13 +79,14 @@ WORKDIR /
 
 ARG user
 ARG uid
+ARG group
 ARG guid
 ARG hostname
 
 ENV BUILD_HOSTNAME $hostname
 ENV USER $user
 
-RUN groupadd -f -r -g $guid g$user
+RUN groupadd -f -r -g $guid $group
 
 RUN useradd $user -l -u $uid -g $guid -d /var/$user -m -s /bin/bash
 

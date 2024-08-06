@@ -1,0 +1,210 @@
+[
+  {
+    "name": "vip_entry#01",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vip": "192.168.0.1"
+    },
+    "attributes": [
+      "SAI_VIP_ENTRY_ATTR_ACTION",
+      "SAI_VIP_ENTRY_ACTION_ACCEPT"
+    ]
+  },
+  {
+    "name": "vip_entry#02",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vip": "192.168.0.2"
+    },
+    "attributes": [
+      "SAI_VIP_ENTRY_ATTR_ACTION",
+      "SAI_VIP_ENTRY_ACTION_ACCEPT"
+    ]
+  },
+  {
+    "name": "vip_entry#03",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vip": "192.168.0.3"
+    },
+    "attributes": [
+      "SAI_VIP_ENTRY_ATTR_ACTION",
+      "SAI_VIP_ENTRY_ACTION_ACCEPT"
+    ]
+  },
+  {
+    "name": "vip_entry#04",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vip": "192.168.0.4"
+    },
+    "attributes": [
+      "SAI_VIP_ENTRY_ATTR_ACTION",
+      "SAI_VIP_ENTRY_ACTION_ACCEPT"
+    ]
+  },
+  {
+    "name": "vip_entry#05",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vip": "192.168.0.5"
+    },
+    "attributes": [
+      "SAI_VIP_ENTRY_ATTR_ACTION",
+      "SAI_VIP_ENTRY_ACTION_ACCEPT"
+    ]
+  },
+  {
+    "name": "vip_entry#06",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vip": "192.168.0.6"
+    },
+    "attributes": [
+      "SAI_VIP_ENTRY_ATTR_ACTION",
+      "SAI_VIP_ENTRY_ACTION_ACCEPT"
+    ]
+  },
+  {
+    "name": "vip_entry#07",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vip": "192.168.0.7"
+    },
+    "attributes": [
+      "SAI_VIP_ENTRY_ATTR_ACTION",
+      "SAI_VIP_ENTRY_ACTION_ACCEPT"
+    ]
+  },
+  {
+    "name": "vip_entry#08",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vip": "192.168.0.8"
+    },
+    "attributes": [
+      "SAI_VIP_ENTRY_ATTR_ACTION",
+      "SAI_VIP_ENTRY_ACTION_ACCEPT"
+    ]
+  },
+  {
+    "name": "vip_entry#09",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vip": "192.168.0.9"
+    },
+    "attributes": [
+      "SAI_VIP_ENTRY_ATTR_ACTION",
+      "SAI_VIP_ENTRY_ACTION_ACCEPT"
+    ]
+  },
+  {
+    "name": "vip_entry#10",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vip": "192.168.0.10"
+    },
+    "attributes": [
+      "SAI_VIP_ENTRY_ATTR_ACTION",
+      "SAI_VIP_ENTRY_ACTION_ACCEPT"
+    ]
+  },
+  {
+    "name": "vip_entry#11",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vip": "192.168.0.11"
+    },
+    "attributes": [
+      "SAI_VIP_ENTRY_ATTR_ACTION",
+      "SAI_VIP_ENTRY_ACTION_ACCEPT"
+    ]
+  },
+  {
+    "name": "vip_entry#12",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vip": "192.168.0.12"
+    },
+    "attributes": [
+      "SAI_VIP_ENTRY_ATTR_ACTION",
+      "SAI_VIP_ENTRY_ACTION_ACCEPT"
+    ]
+  },
+  {
+    "name": "vip_entry#13",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vip": "192.168.0.13"
+    },
+    "attributes": [
+      "SAI_VIP_ENTRY_ATTR_ACTION",
+      "SAI_VIP_ENTRY_ACTION_ACCEPT"
+    ]
+  },
+  {
+    "name": "vip_entry#14",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vip": "192.168.0.14"
+    },
+    "attributes": [
+      "SAI_VIP_ENTRY_ATTR_ACTION",
+      "SAI_VIP_ENTRY_ACTION_ACCEPT"
+    ]
+  },
+  {
+    "name": "vip_entry#15",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vip": "192.168.0.15"
+    },
+    "attributes": [
+      "SAI_VIP_ENTRY_ATTR_ACTION",
+      "SAI_VIP_ENTRY_ACTION_ACCEPT"
+    ]
+  },
+  {
+    "name": "vip_entry#16",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_VIP_ENTRY",
+    "key": {
+      "switch_id": "$SWITCH_ID",
+      "vip": "192.168.0.16"
+    },
+    "attributes": [
+      "SAI_VIP_ENTRY_ATTR_ACTION",
+      "SAI_VIP_ENTRY_ACTION_ACCEPT"
+    ]
+  }
+]

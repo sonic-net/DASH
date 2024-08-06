@@ -1,10 +1,14 @@
-[ [ << Back to DASH top-level Documents](../README.md#contents) ]
+# DASH Express Route Gateway Service Documents
 
 This folder contains DASH Express Route Gateway Service design and requirements documents.
 
-# Contents
+## Design
 
-| Folder                                                 | Description                                  |
-| ------------------------------------------------------ | -------------------------------------------- |
-| [design](design/README.md)                             | DASH Express Route Gateway Service design & architecture documents |
-| [requirements](requirements/README.md)                 | DASH Express Route Gateway Service requirements documents         |
+| Document                                               | Description                                |
+| ------------------------------------------------------ | ------------------------------------------ |
+
+
+## Requirements
+
+| Document                                               | Description                                |
+| ------------------------------------------------------ | ------------------------------------------ |

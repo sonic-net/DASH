@@ -11,14 +11,15 @@ on:
       - 'test/**.sh'
       - 'test/**.yml'
       - 'dash-pipeline/**'
-      - '!dash-pipeline/docker files/Dockerfile.*'
+      - '!dash-pipeline/dockerfiles/Dockerfile.*'
+      - 'dash-pipeline/dockerfiles/*.env'
       - '!dash-pipeline/.dockerignore'
       - '!dash-pipeline/**.md'
       - '!dash-pipeline/**.svg'
       - '!dash-pipeline/**.png'
       - '!dash-pipeline/**.txt'
   pull_request:
-    branches: [ "main" ]
+    branches: [ "**" ]
     paths:
       - '.gitmodules'
       - '.github/workflows/dash-bmv2-ci.yml'
@@ -27,7 +28,8 @@ on:
       - 'test/**.sh'
       - 'test/**.yml'
       - 'dash-pipeline/**'
-      - '!dash-pipeline/docker files/Dockerfile.*'
+      - '!dash-pipeline/dockerfiles/Dockerfile.*'
+      - 'dash-pipeline/dockerfiles/*.env'
       - '!dash-pipeline/.dockerignore'
       - '!dash-pipeline/**.md'
       - '!dash-pipeline/**.svg'
@@ -40,25 +42,28 @@ jobs:
     name: Build and Test DASH Pipeline
     runs-on: ubuntu-20.04
     env:
-      docker_fg_flags: -u root --privileged
-      docker_bg_flags: -d -u root --privileged
+      docker_fg_flags: --privileged
+      docker_fg_root_flags: --privileged -u root
+      docker_bg_flags: -d --privileged
     defaults:
       run:
         working-directory: ./dash-pipeline
     steps:
     - uses: actions/checkout@v3
     - name: Pull docker p4c image
-      run:  make docker-pull-dash-p4c
+      run:  make docker-dash-p4c
     - name: Build P4 software switch (bmv2) and P4Info
       run:  DOCKER_FLAGS=$docker_fg_flags make p4
     - name: Install SAI submodule
       run:  git submodule update --init
-    - name: Pull docker saithrift-bldr image
-      run:  make docker-pull-saithrift-bldr
+    - name: Pull/Build docker saithrift-bldr image
+      run:  make docker-saithrift-bldr
+    - name: Pull/Build docker bmv2-bldr image
+      run:  make docker-bmv2-bldr
     - name: Generate SAI API
       run:  DOCKER_FLAGS=$docker_fg_flags make sai
-    - name: Pull docker bmv2-bldr image
-      run:  make docker-pull-bmv2-bldr
+    - name: Check if SAI spec is updated
+      run:  DOCKER_FLAGS=$docker_fg_flags make check-sai-spec
     - name: Build libsai c++ tests
       run:  DOCKER_FLAGS=$docker_fg_flags make test
     - name: Prepare network
@@ -76,9 +81,21 @@ jobs:
     - name: Run saithrift server
       run:  DOCKER_FLAGS=$docker_bg_flags make run-saithrift-server
     - name: Run PTF Tests
-      run:  DOCKER_FLAGS=$docker_fg_flags make run-saithrift-ptftests
+      run:  DOCKER_FLAGS=$docker_fg_root_flags make run-saithrift-ptftests
     - name: Deploy ixia-c Traffic Generator
       run:  DOCKER_FLAGS=$docker_fg_flags make deploy-ixiac
     - name: Run Pytests
-      run:  DOCKER_FLAGS=$docker_fg_flags make run-saithrift-pytests
-      
+      run:  DOCKER_FLAGS=$docker_fg_root_flags make run-saithrift-pytests
+    - name: Pull/Build SAI-Challenger client builder docker image
+      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saichallenger-client-bldr
+    - name: Build SAI-Challenger client docker image
+      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saichallenger-client
+    - name: Run SAI-Challenger Tests
+      run:  DOCKER_FLAGS=$docker_fg_root_flags make run-saichallenger-tests
+    - name: Build libsai debian packages
+      run:  DOCKER_FLAGS=$docker_fg_root_flags make libsai-debs
+    - uses: actions/upload-artifact@v3
+      with:
+        name: libsai-debian-packages
+        path: /home/runner/work/DASH/DASH/dash-pipeline/SAI/debian/*deb
+        if-no-files-found: error

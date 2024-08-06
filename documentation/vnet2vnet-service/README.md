@@ -1,12 +1,15 @@
-[ [ << Back to DASH top-level Documents](../README.md#contents) ]
-
 # DASH VNET-to-VNET Service Documents
 
 This folder contains DASH VNET-to-VNET Service design and requirements documents.
 
-# Contents
+## Design
 
-| Folder                                                 | Description                                  |
-| ------------------------------------------------------ | -------------------------------------------- |
-| [design](design/README.md)                             | DASH VNET-to-VNET Service design & architecture documents |
-| [requirements](requirements/README.md)                 | DASH VNET-to-VNET Service requirements documents         |
+| Document                                               | Description                                |
+| ------------------------------------------------------ | ------------------------------------------ |
+|[VNET to VNET scenario](vnet-to-vnet-service.md)|Implement and test core DASH mechanisms in VM to VM communication in VNET|
+
+
+## Requirements
+
+| Document                                               | Description                                |
+| ------------------------------------------------------ | ------------------------------------------ |

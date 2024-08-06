@@ -15,10 +15,10 @@
   - [Third-Party CI Pipeline Automation (Git Actions)](#third-party-ci-pipeline-automation-git-actions)
 # Importing the DASH project into another project
 
-The [Azure/DASH project](https://github.com/Azure/DASH) can be used as a resource within other projects, such as third-party, commercial or open-source DASH implementations. For example, a commercial DPU vendor can incorporate the DASH project into a private Git repository and utilize many of the components, providing consistency with the community implementation and definition, reusing test-cases, and avoiding duplication of efforts.
+The [sonic-net/DASH project](https://github.com/sonic-net/DASH) can be used as a resource within other projects, such as third-party, commercial or open-source DASH implementations. For example, a commercial DPU vendor can incorporate the DASH project into a private Git repository and utilize many of the components, providing consistency with the community implementation and definition, reusing test-cases, and avoiding duplication of efforts.
 
 # Quick-Start
-This will show you how to import the [Azure/DASH project](https://github.com/Azure/DASH) project into your own Git project.
+This will show you how to import the [sonic-net/DASH project](https://github.com/sonic-net/DASH) project into your own Git project.
 
 A minimal sample project created using this recipe can be found here: https://github.com/chrispsommers/dashsubmodule
 
@@ -31,7 +31,7 @@ A minimal sample project created using this recipe can be found here: https://gi
      ```
 4. Import the DASH repository as a submodule using the following command. Modify the final parameter to match the relative directory in your project where you want the submodule to be cloned into:
     ```
-    git submodule add -b main --name DASH [git@github.com:Azure/DASH.git](https://github.com/Azure/DASH.git) DASH
+    git submodule add -b main --name DASH [git@github.com:sonic-net/DASH.git](https://github.com/sonic-net/DASH.git) DASH
     ```
 5. Commit the changes now or later, see [DASH as a Git Submodule](#dash-as-a-git-submodule)
 6. To verify the dash submodule was imported correctly and crucial steps function properly, execute the following. (If you rename the file to `Makefile` you can omit the `-f` option.)
@@ -55,7 +55,7 @@ A minimal sample project created using this recipe can be found here: https://gi
 A third-party project can import the DASH project as a Git Submodule. See [about-git-submodules](README-dash-workflows.md#about-git-submodules) for background. In this example, DASH is imported at the top-level of the project using the following command. (See the documentation for `git submodule add` for other options.)
 
 ```
-git submodule add -b main --name DASH [git@github.com:Azure/DASH.git](https://github.com/Azure/DASH.git) DASH
+git submodule add -b main --name DASH [git@github.com:sonic-net/DASH.git](https://github.com/sonic-net/DASH.git) DASH
 ```
 
 The effects of this command are:
@@ -64,7 +64,7 @@ The effects of this command are:
   ```
   [submodule "DASH"]
 	path = DASH
-	url = git@github.com:Azure/DASH.git
+	url = git@github.com:sonic-net/DASH.git
 	branch = main
   ```
 - Store the imported repository git index/database under the parent project's `.git/modules` directory
@@ -100,7 +100,7 @@ The resulting Git structure is as follows. DASH is imported as a submodule. Furt
 ## Recap: DASH bmv2 workflow
 The figure below shows the traditional bmv2-based workflow and is described in [README-dash-workflows](README-dash-workflows.md).
 
-![dash-p4-bmv2-thrift-workflow](https://github.com/Azure/DASH/raw/main/dash-pipeline/images/dash-p4-bmv2-thrift-workflow.svg
+![dash-p4-bmv2-thrift-workflow](https://github.com/sonic-net/DASH/raw/main/dash-pipeline/images/dash-p4-bmv2-thrift-workflow.svg
 )
 ## Custom DASH Workflow
 The reference project contains a `Makefile.3rdpty` to serve as a starting point. It has make targets which are just wrappers to invoke predefined Makefile targets in the DASH repository (e.g. using `make -C...`). It also has placeholder make targets where third-party customization is required. You can modify it arbitrarily. The intent was to reuse as much as possible from DASH.
@@ -138,7 +138,7 @@ The community DASH bmv2 test workflow includes SW traffic-generators connected t
 
 If test ports other than `veth0/1` and `veth2/3` are used, some modifications of setup scripts may be required:
 * PTF tests using scapy for SW traffic generation can be parameterized to specify logical-to-physical port mappings.
-* Pytests using ixia-c SW traffic generator are set up using docker-compose topology files under [DASH/test/third-party/traffic_gen/deployment](https://github.com/Azure/DASH/tree/main/test/third-party/traffic_gen/deployment)
+* Pytests using ixia-c SW traffic generator are set up using `docker compose` topology files under [DASH/test/third-party/traffic_gen/deployment](https://github.com/sonic-net/DASH/tree/main/test/third-party/traffic_gen/deployment)
 
 ## Custom Tests
 You can use the tests under DASH by calling the appropriate DASH make targets from the parent project. You can also have private tests in your own project repository which you invoke from your Makefiles. We recommend if you write new tests which are generally applicable that you consider upstreaming to the Community repository.
