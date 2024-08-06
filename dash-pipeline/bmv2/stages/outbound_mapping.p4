@@ -22,7 +22,7 @@ control outbound_mapping_stage(inout headers_t hdr,
             set_private_link_mapping(hdr, meta);
             @defaultonly drop(meta);
         }
-        size = 8388608;
+        size = 8 * 1024 * 1024;
         const default_action = drop(meta);
 
         ATTACH_TABLE_COUNTER(ca_to_pa_counter)
