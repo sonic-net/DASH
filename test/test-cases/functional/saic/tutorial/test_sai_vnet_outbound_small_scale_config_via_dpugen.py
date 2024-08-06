@@ -29,8 +29,8 @@ from pathlib import Path
 from pprint import pprint
 import pytest
 import dpugen
-from saigen.confbase import *
-from saigen.confutils import *
+from dpugen.confbase import *
+from dpugen.confutils import *
 
 current_file_dir = Path(__file__).parent
 
