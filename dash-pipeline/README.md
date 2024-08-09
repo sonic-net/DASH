@@ -33,6 +33,7 @@ This is a P4 model of the DASH overlay pipeline which uses the [bmv2](https://gi
   - [Install docker compose](#install-docker-compose)
 
 # Known Issues
+* The issue with P4 behavioral model is that it is hardware agnostic. P4-16 has very basic constructs and the consortium left it the hardware vendors to define all else as extern. For example: simple things like checksums are now extern. Running a P4 program written for a specific hardware will not compile for BMv2 unless all externs used in the P4 program as implemented for BMv2. PNA (Portable NIC Architecture) is an attempt at standardizing the externs to enable code to work across vendors. 
 * P4 code doesn't loop packets back to same port.
 * P4 code mark-to-drop not set when meta.drop is set.
 * Permission and ownership issues in Docker images, permanent fix is needed.
