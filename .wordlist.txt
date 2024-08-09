@@ -76,6 +76,8 @@ centos
 Cfg
 cfg
 checkboxes
+checksum
+checksums
 chris
 chrispsommers
 ci
@@ -220,6 +222,8 @@ EPYC
 ethernet
 executables
 ExpressRoute
+extern
+externs
 failover
 failovers
 fakesai
