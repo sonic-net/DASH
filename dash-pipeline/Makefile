@@ -1,7 +1,7 @@
 SHELL = /bin/bash
 
-HAVE_VPP ?=
-ifeq ($(HAVE_VPP),y)
+HAVE_DPAPP ?=
+ifeq ($(HAVE_DPAPP),y)
 VPP_LINK = veth4
 VPP_LINK_PEER = veth5
 SWITCH_PORT_VPP = --interface 2@$(VPP_LINK)
@@ -732,7 +732,7 @@ veth2: /sys/class/net/veth2
 	sudo ip link set veth2 mtu 9500
 	sudo ip link set veth3 mtu 9500
 
-ifeq ($(HAVE_VPP),y)
+ifeq ($(HAVE_DPAPP),y)
 $(VPP_LINK): /sys/class/net/$(VPP_LINK)
 /sys/class/net/$(VPP_LINK):
 	sudo ip link add name $(VPP_LINK) type veth peer name $(VPP_LINK_PEER)
@@ -749,7 +749,7 @@ disable-ipv6:
 network-clean:
 	@-([ -e /sys/class/net/veth0 ] && sudo ip link delete dev veth0 && echo "Deleted veth0/1") || echo "No veth0, not deleting"
 	@-([ -e /sys/class/net/veth2 ] && sudo ip link delete dev veth2 && echo "Deleted veth2/3") || echo "No veth2, not deleting"
-ifeq ($(HAVE_VPP),y)
+ifeq ($(HAVE_DPAPP),y)
 	@-([ -e /sys/class/net/$(VPP_LINK) ] && sudo ip link delete dev $(VPP_LINK) \
 		&& echo "Deleted $(VPP_LINK)") || echo "No $(VPP_LINK), not deleting"
 endif
