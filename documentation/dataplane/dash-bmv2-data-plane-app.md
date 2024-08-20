@@ -54,7 +54,11 @@ In flow lookup stage, if packet hits one flow, it will refresh flow timestamp. D
 
 ### 3.2. HA
 - Inline flow replication<br>
-In HA context, Active data-plane app creates flow, replicates the flow in metadata, glues it with original packet, and sends the packet to Standby data-plane app via DPU data-plane channel. Standby data-plane app recreates the flow, and acknowledges Active data-plane app to finish flow creation. The same logics apply for flow deletion, flow age-out.
+In HA context, Active data-plane app creates flow, replicates the flow in
+metadata, glues it with original packet, and sends the packet to Standby
+data-plane app via DPU data-plane channel. Standby data-plane app recreates
+the flow, and acknowledges Active data-plane app to finish flow creation. The
+same logic can apply for flow deletion, flow age-out.
 - Flow bulk sync<br>
 Flow bulk sync replicates batch flows from one DPU to another to make flow table consistency on Active and Standby DPUs. When HA agents starts a bulk sync via DASH SAI, Active data-plane app will walk flow table based on sync method (perfect/range), generate batch flows and send them to Standby data-plane app with gRPC via control-plane channel. Standby date-plane app will create flows in order.
 
@@ -71,7 +75,10 @@ Refer to [SONiC DASH HLD](https://github.com/sonic-net/DASH/blob/main/documentat
 Referring to the above figure, data-plane app overall is a multi-thread vpp application, running in a standalone container. It includes these components:
 
 - vpp master, it runs dashsai server to receive dashsai requests (dash object CRUD) via northbound RPC channel and then invoke DASH SAI APIs to handle them. The server also processes flow creation/deletion notification from vpp workers.
-- vpp workers, they serve as an exception path of packet processing, running on multi-cpus. It creates a flow in local flow table and notifies dashsai server to offload it to BMv2 flow table. The packet is temporarily queued. After workers know the success of flow offloading to BMv2, they deque the packet and send it back to P4 pipeline via VPP port. The workers also do flow age-out task with proper scheduling.
+- vpp workers, they serve as an exception path of packet processing, running
+on multi-cpus. It creates a flow in local flow table and notifies dashsai
+server to offload it to BMv2 flow table. The packet is temporarily queued.
+After workers know the success of flow offloading to BMv2, they dequeue the packet and send it back to P4 pipeline via VPP port. The workers also do flow age-out task with proper scheduling.
 - flow table, is a local cache of BMv2 flow table.
 - DASH SAI, is a unique interface for DASH object CRUD of DASH pipeline, implemented by DASH BMv2.
 - VPP port, is a veth interface and connects to BMv2 via veth pair. It serves as datapath channel to receive/send all packets between date-plane app and BMv2. Generally the port supports multi RSS queues, each queue binds to one vpp worker.
@@ -84,7 +91,7 @@ Referring to the below figure from [HA API HLD], it greatly outlines the whole p
 
 ![packet flow in data plane](https://github.com/sonic-net/DASH/blob/main/documentation/high-avail/images/ha-bm-packet-flow.svg)
 
-From the perspective of DPAPP, its core task in slow path is to create flow in flow table in case of flow miss in Flow (ConnTrack) lookup stage, and then maintain flow state. The sub sections will depict these functions around flow object.
+From the perspective of DPAPP, its core task in slow path is to create flow in flow table in case of flow miss in Flow (Conntrack) lookup stage, and then maintain flow state. The sub sections will depict these functions around flow object.
 
 
 ### 6.1. DASH metadata
@@ -198,7 +205,8 @@ sequenceDiagram
 ```
 
 ### 6.4. HA flow
-Base on basic flow, HA flow adds an extra FLOW_SYNCED state, which involves extra sync req/response ping-pang between DPAPP and PEER DPAPP.
+Base on basic flow, HA flow adds an extra FLOW_SYNCED state, which involves
+extra sync for request/response ping-pang between DPAPP and PEER DPAPP.
 
 ### 6.5. HA flow resimulation
 Same as section 6.3, but also do the below:
@@ -244,7 +252,7 @@ The below table lists all test cases, all of which must be scripted based on DAS
             <li>dashsai client sends request for DASH SAI objects CRUD</li>
             <li>Verify dashsai server handles them correctly</li>
             <li>Verify dashsai server calls proper DASH SAI APIs</li>
-            <li>Verify dashsai server replys dashsai client</li>
+            <li>Verify dashsai server replies dashsai client</li>
         </ol>
     </td>
 </tr>
@@ -295,13 +303,13 @@ The below table lists all test cases, all of which must be scripted based on DAS
         <ol>
             <li>Same test steps as test case 1.2</li>
             <li>Update outbound CA->PA mapping via SAI</li>
-            <li>Verify underly DIP is changed in CA entry of table outbound_ca_to_pa</li>
+            <li>Verify underlay DIP is changed in CA entry of table outbound_ca_to_pa</li>
             <li>Get flow attr UNDERLAY_DIP via SAI flow get</li>
             <li>Verify the above attr value unchanged</li>
             <li>Send TCP DATA packet</li>
             <li>Get flow attr UNDERLAY_DIP again via SAI flow get</li>
             <li>Verify the attr value changed to new PA</li>
-            <li>Triger multiple flows of one eni</li>
+            <li>Trigger multiple flows of one eni</li>
             <li>Set eni attr FULL_RESIMULATION_REQ via SAI</li>
         </ol>
     </td>
