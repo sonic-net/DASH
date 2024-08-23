@@ -14,6 +14,7 @@ api_types:
 - SAI_API_DASH_VIP
 - SAI_API_DASH_TUNNEL
 - SAI_API_DASH_FLOW
+- SAI_API_DASH_APPLIANCE
 object_types:
 - SAI_OBJECT_TYPE_DASH_ACL_GROUP
 - SAI_OBJECT_TYPE_DASH_ACL_RULE
@@ -39,6 +40,7 @@ object_types:
 - SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION_FILTER
 - SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION
 - SAI_OBJECT_TYPE_METER_BUCKET_ENTRY
+- SAI_OBJECT_TYPE_DASH_APPLIANCE
 object_entries:
 - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
   name: direction_lookup_entry
@@ -489,3 +491,4 @@ api_groups:
 - !inc '/SAI/specs/dash_vip.yaml'
 - !inc '/SAI/specs/dash_tunnel.yaml'
 - !inc '/SAI/specs/dash_flow.yaml'
+- !inc '/SAI/specs/dash_appliance.yaml'
