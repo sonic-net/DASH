@@ -1,4 +1,4 @@
-# This Dockerfile builds an image used to compile vpp for dash date-plane app.
+# This Dockerfile builds an image used to compile/run dash date-plane app.
 FROM sonicdash.azurecr.io/dash-grpc:1.43.2 as grpc
 FROM p4lang/behavioral-model@sha256:ce45720e28a96a50f275c1b511cd84c2558b62f2cf7a7e506765183bc3fb2e32
 LABEL maintainer="SONIC-DASH Community"
