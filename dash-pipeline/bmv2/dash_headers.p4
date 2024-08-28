@@ -52,7 +52,7 @@ header encap_data_t {
     EthernetAddress underlay_dmac;
     dash_encapsulation_t dash_encapsulation;
 }
-const bit<16> ENCAP_DATA_HDR_SIZE=(24+24+32+32+48+48+16)/8;
+const bit<16> ENCAP_DATA_HDR_SIZE=encap_data_t.minSizeInBytes();
 
 header overlay_rewrite_data_t {
     EthernetAddress dmac;
@@ -63,7 +63,7 @@ header overlay_rewrite_data_t {
     bit<7> reserved;
     bool is_ipv6;
 }
-const bit<16> OVERLAY_REWRITE_DATA_HDR_SIZE=(48+128+128+128+128+8)/8;
+const bit<16> OVERLAY_REWRITE_DATA_HDR_SIZE=overlay_rewrite_data_t.minSizeInBytes();
 
 header ethernet_t {
     EthernetAddress dst_addr;
@@ -153,7 +153,6 @@ header ipv6_t {
 const bit<16> IPV6_HDR_SIZE=320/8;
 
 
-#ifdef DPAPP_CONNTRACK
 enum bit<16> dash_flow_enabled_key_t {
     ENI_ADDR = (1 << 0),
     VNI = (1 << 1),
@@ -210,7 +209,7 @@ header flow_key_t {
     bit<7> reserved;
     bit<1> is_ip_v6;
 }
-const bit<16> FLOW_KEY_HDR_SIZE=(48+16+128+128+16+16+8+8)/8;
+const bit<16> FLOW_KEY_HDR_SIZE=flow_key_t.minSizeInBytes();
 
 header flow_data_t {
     bit<7> reserved;
@@ -221,7 +220,7 @@ header flow_data_t {
     bit<32> routing_actions;
     dash_meter_class_t meter_class;
 }
-const bit<16> FLOW_DATA_HDR_SIZE=(8+32+16+16+32+32)/8;
+const bit<16> FLOW_DATA_HDR_SIZE=flow_data_t.minSizeInBytes();
 
 // dash packet metadata
 header dash_packet_meta_t {
@@ -230,15 +229,12 @@ header dash_packet_meta_t {
     dash_packet_subtype_t packet_subtype;
     bit<16>     length;
 }
-const bit<16> PACKET_META_HDR_SIZE=(8+4+4+16)/8;
+const bit<16> PACKET_META_HDR_SIZE=dash_packet_meta_t.minSizeInBytes();
 
 #define DASH_ETHTYPE 0x876d
 #define DPAPP_MAC 0x02fe23f0e413
 
-#endif // DPAPP_CONNTRACK
-
 struct headers_t {
-#ifdef DPAPP_CONNTRACK
     /* packet metadata headers */
     ethernet_t   dp_ethernet;
     dash_packet_meta_t    packet_meta;
@@ -247,7 +243,6 @@ struct headers_t {
     overlay_rewrite_data_t flow_overlay_data;
     encap_data_t flow_encap_data;
     encap_data_t flow_tunnel_data;
-#endif // DPAPP_CONNTRACK
 
     /* Underlay 1 headers */
     ethernet_t    u1_ethernet;

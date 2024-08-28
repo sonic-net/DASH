@@ -64,11 +64,11 @@ sai_apis:
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
-      id: 36648123
+      id: 39883185
       actions:
         SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ACTION_SET_ENI: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ACTION_SET_ENI
-          id: 24618133
+          id: 19019152
           attr_param_id:
             SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID: 1
 - !!python/object:utils.sai_spec.sai_api.SaiApi
@@ -1616,9 +1616,9 @@ sai_apis:
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
-      id: 45859274
+      id: 38483381
       actions:
         default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: default
-          id: 27167550
+          id: 30359009
           attr_param_id: {}

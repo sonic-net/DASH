@@ -5,7 +5,6 @@ ifeq ($(HAVE_DPAPP),y)
 DPAPP_LINK = veth4
 DPAPP_LINK_PEER = veth5
 SWITCH_PORT_DPAPP = --interface 2@$(DPAPP_LINK)
-D_DPAPP_CONNTRACK = -DDPAPP_CONNTRACK
 endif
 
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
@@ -130,7 +129,6 @@ $(P4_OUTDIR)/dash_pipeline_p4rt.txt: $(P4_SRC)
 	-w / \
 	$(DOCKER_P4C_BMV2_IMG) p4c-bm2-ss \
 		-DTARGET_BMV2_V1MODEL \
-		$(D_DPAPP_CONNTRACK) \
 	    $(P4_MAIN) \
         -o $(P4_OUTDIR)/dash_pipeline.json \
 	    --p4runtime-files $(P4_OUTDIR)/dash_pipeline_p4rt.json,$(P4_OUTDIR)/dash_pipeline_p4rt.txt \

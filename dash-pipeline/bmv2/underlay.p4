@@ -50,13 +50,12 @@ control underlay(
 
     action def_act() {
 #ifdef TARGET_BMV2_V1MODEL
-#ifdef DPAPP_CONNTRACK
         if (hdr.packet_meta.packet_source == dash_packet_source_t.DPAPP) {
-            standard_metadata.egress_spec = 0;
+            standard_metadata.egress_spec = 0; /* FIXME */
         }
-        else
-#endif // DPAPP_CONNTRACK
-        standard_metadata.egress_spec = standard_metadata.ingress_port;
+        else {
+            standard_metadata.egress_spec = standard_metadata.ingress_port;
+        }
 #endif // TARGET_BMV2_V1MODEL
 
 #ifdef TARGET_DPDK_PNA

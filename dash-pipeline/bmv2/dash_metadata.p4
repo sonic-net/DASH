@@ -182,13 +182,12 @@ struct metadata_t {
 
     // Flow data
     conntrack_data_t conntrack_data;
-#ifdef DPAPP_CONNTRACK
     flow_table_data_t flow_table;
     dash_flow_state_t flow_state;
     bit<16> bulk_get_session_id;
     bit<16> bulk_get_session_filter_id;
+    bool flow_enabled;
     bool to_dpapp;
-#endif // DPAPP_CONNTRACK
 
     // Stage transition control
     dash_pipeline_stage_t target_stage;

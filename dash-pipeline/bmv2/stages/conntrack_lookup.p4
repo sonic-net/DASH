@@ -1,7 +1,6 @@
 #ifndef _DASH_STAGE_CONNTRACK_LOOKUP_P4
 #define _DASH_STAGE_CONNTRACK_LOOKUP_P4
 
-#ifdef DPAPP_CONNTRACK
 #include "../dash_metadata.p4"
 
 action conntrack_set_meta_from_dash_header(in headers_t hdr, out metadata_t meta)
@@ -375,5 +374,4 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         flow_entry_bulk_get_session.apply();
     }
 }
-#endif // DPAPP_CONNTRACK
 #endif /* _DASH_STAGE_CONNTRACK_LOOKUP_P4 */
