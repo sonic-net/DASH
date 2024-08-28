@@ -62,6 +62,10 @@ jobs:
       run:  make docker-bmv2-bldr
     - name: Generate SAI API
       run:  DOCKER_FLAGS=$docker_fg_flags make sai
+    - name: Pull/Build docker dpapp image
+      run:  make docker-dash-dpapp
+    - name: Build bmv2 dpapp
+      run:  DOCKER_FLAGS=$docker_fg_flags make dpapp
     - name: Check if SAI spec is updated
       run:  DOCKER_FLAGS=$docker_fg_flags make check-sai-spec
     - name: Build libsai c++ tests
