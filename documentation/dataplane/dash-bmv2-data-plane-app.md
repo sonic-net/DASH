@@ -45,25 +45,49 @@ This document only focuses on describing the design of a data-plane app example,
 ## 3. Project scenario
 
 ### 3.1. Stateful packet process - flow
-- Flow Creation<br>
-In DASH pipeline, after 5-tuple flow keys are well extracted, packet goes to flow lookup stage. It does the flow lookup. If any flow is matched, packet is marked a flow-hit flag, otherwise flow-miss flag. The packet continues to go to next stages, like ACL, (destination) NAT, routing, etc. After routing stage, if route is found and packet is flow-miss, it will bypass the rest stages and be forwarded to data-plane app. The data-plane app will use dash-sai APIs to create flow in flow table, and then re-inject the packet back to pipeline.
-- Flow Deletion<br>
-In flow lookup stage, TCP FIN/RST packet is always marked flow-miss and later forwarded to data-plane app. 
-- Flow Age-out<br>
-In flow lookup stage, if packet hits one flow, it will refresh flow timestamp. Data-plane app periodically scans flow table and check if flow is timed out according to (current timestamp - flow timestamp) vs idle timeout value.
+- Flow Creation
+
+  In DASH pipeline, after flow keys are well extracted, packet goes to flow
+  lookup stage. It does the flow lookup. If any flow is matched, packet is
+  marked a flow-hit flag, otherwise flow-miss flag. If flow-hit, the packet
+  should bypass policy matching stages, such as ACL, routing, etc, and
+  continue doing the rest stages, like flow actions. If flow-miss, the packet
+  should do policy matching stages and then be forwarded to data-plane app.
+  The data-plane app will use dash-sai APIs to create flow in flow table, and
+  then re-inject the packet back to pipeline.
+
+- Flow Deletion
+
+  In flow lookup stage, TCP FIN/RST packet should be treated specially with
+  FLOW-DELETE hint and forwarded to data-plane app.
+- Flow Age-out
+
+  In flow lookup stage, if packet hits one flow, it will refresh flow
+  timestamp. Data-plane app periodically scans flow table and check if flow is
+  timed out according to (current timestamp - flow timestamp) vs idle timeout value.
 
 ### 3.2. HA
-- Inline flow replication<br>
-In HA context, Active data-plane app creates flow, replicates the flow in
-metadata, glues it with original packet, and sends the packet to Standby
-data-plane app via DPU data-plane channel. Standby data-plane app recreates
+- Inline flow replication
+
+  In HA context, Active data-plane app creates flow, serializes the flow in
+metadata header, glues it with original packet, and sends the packet to Standby
+via DPU data-plane channel. Standby data-plane app recreates
 the flow, and acknowledges Active data-plane app to finish flow creation. The
 same logic can apply for flow deletion, flow age-out.
-- Flow bulk sync<br>
-Flow bulk sync replicates batch flows from one DPU to another to make flow table consistency on Active and Standby DPUs. When HA agents starts a bulk sync via DASH SAI, Active data-plane app will walk flow table based on sync method (perfect/range), generate batch flows and send them to Standby data-plane app with gRPC via control-plane channel. Standby date-plane app will create flows in order.
+- Flow bulk sync
+
+  Flow bulk sync replicates batch flows from one DPU to another to make flow
+  table consistent on Active and Standby DPUs. When HA agents starts a bulk
+  sync via DASH SAI, Active data-plane app will walk flow table based on sync
+  method (perfect/range), generate batch flows and send them to Standby
+  data-plane app with gRPC via control-plane channel. Standby date-plane app
+  will create flows in order.
 
 ### 3.3. Flow re-simulation
-When SONiC changes polices via DASH SAI, flow could be impacted. Data-plane app is raised to re-simulate flow. In HA context, Active data-plane app also needs to sync the updated flows to Standby.
+When SONiC changes polices via DASH SAI, some flows might need to be updated
+to get the latest policy applied. Data-plane app is raised to re-simulate
+flow. In HA context, Active data-plane app also needs to sync the updated
+flows to Standby.
 
 ## 4. Resource modeling, requirement, and SLA
 Refer to [SONiC DASH HLD](https://github.com/sonic-net/DASH/blob/main/documentation/general/dash-sonic-hld.md)
@@ -87,7 +111,7 @@ After workers know the success of flow offloading to BMv2, they dequeue the pack
 
 ## 6. Detailed design
 
-Referring to the below figure from [HA API HLD], it greatly outlines the whole packet flow in data plane for both standalone and HA context.
+Referring to the below figure from [HA API HLD](https://github.com/sonic-net/DASH/blob/main/documentation/high-avail/ha-api-hld.md), it greatly outlines the whole packet flow in data plane for both standalone and HA context.
 
 ![packet flow in data plane](https://github.com/sonic-net/DASH/blob/main/documentation/high-avail/images/ha-bm-packet-flow.svg)
 
@@ -104,11 +128,11 @@ DASH metadata records the packet processing result of DASH pipeline. It can have
 
 When DASH pipeline requests DPAPP for flow creation, it encapsulates DASH metadata in an ethernet frame with EtherType DASH_METADATA and appends the original customer packet. The packet sent to DPAPP is like:
 
-<div style="text-align: center;">
-Ethernet HEADER|DASH metadata|customer packet
-</div>
+```
+    Ethernet HEADER|DASH metadata|customer packet
+```
 
- The number of DASH_METADATA is 0x876D, which reuses the number of EtherType SECURE_DATA (vpp/src/vnet/ethernet/types.def at master · FDio/vpp · GitHub).
+The number of DASH_METADATA is 0x876D, which reuses the number of EtherType SECURE_DATA (vpp/src/vnet/ethernet/types.def at master · FDio/vpp · GitHub).
 DASH metadata is encoded in protocol DASH_METADATA, whose message format is defined as the below figure:
 
 ```
@@ -206,7 +230,7 @@ sequenceDiagram
 
 ### 6.4. HA flow
 Base on basic flow, HA flow adds an extra FLOW_SYNCED state, which involves
-extra sync for request/response ping-pang between DPAPP and PEER DPAPP.
+extra sync for request/response ping-pong between DPAPP and PEER DPAPP.
 
 ### 6.5. HA flow resimulation
 Same as section 6.3, but also do the below:
@@ -226,10 +250,11 @@ Test objective:
 1.	Verify flow CRUD in standalone and HA
 2.	Verify DASH SAI
 
-Test scope:<br>
-The test only covers the functionality verification of DPAPP. The test of performance and capacity is out of scope.
+Test scope:
 
-Test environment:<br>
+  The test only covers the functionality verification of DPAPP. The test of performance and capacity is out of scope.
+
+Test environment:
 - BMv2 P4 pipeline + DPAPP
 - scapy
 
