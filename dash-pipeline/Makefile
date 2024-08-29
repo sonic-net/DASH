@@ -1,5 +1,12 @@
 SHELL = /bin/bash
 
+HAVE_DPAPP ?=
+ifeq ($(HAVE_DPAPP),y)
+DPAPP_LINK = veth4
+DPAPP_LINK_PEER = veth5
+SWITCH_PORT_DPAPP = --interface 2@$(DPAPP_LINK)
+endif
+
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
 
@@ -63,6 +70,10 @@ include dockerfiles/DOCKER_SAI_CHALLENGER_CLIENT_BLDR_IMG.env
 
 # SAIChallenger Client image built locally with saithrift client libs + PTF & Pytest frameworks
 DOCKER_SAI_CHALLENGER_CLIENT_IMG ?= local/dash-saichallenger-client:latest
+
+# Run/compile dpapp
+# include file defines DOCKER_DPAPP_IMG
+include dockerfiles/DOCKER_DPAPP_IMG.env
 
 # Set differently in CI scripts as needed, e.g. run switch container in -d mode
 DOCKER_FLAGS ?=-it
@@ -252,6 +263,53 @@ run-saithrift-bldr-bash:
 	    /bin/bash
 
 ######################################
+# bmv2 date-plane app TARGETS
+######################################
+DOCKER_RUN_DPAPP = docker run\
+	$(DOCKER_FLAGS) \
+	-v $(PWD)/bmv2:/bmv2 \
+	-v $(PWD)/$(P4_OUTDIR)/dash_pipeline.json:/etc/dash/dash_pipeline.json \
+	-v $(PWD)/$(P4_OUTDIR)/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
+	-v $(PWD)/SAI:/SAI \
+	-v $(PWD)/tests:/tests \
+	-v $(PWD)/../:/dash \
+	--network=host \
+	-u $(HOST_USER):$(HOST_GROUP) \
+	--rm \
+
+.PHONY:dpapp dpapp-clean
+dpapp-clean:
+	$(DOCKER_RUN_DPAPP) \
+	--name dash-dpapp-$(USER) \
+	-w /dash/dash-pipeline/dpapp $(DOCKER_DPAPP_IMG) \
+	make clean
+
+dpapp:
+	@echo "Compile dpapp for date-plane app ..."
+	$(DOCKER_RUN_DPAPP) \
+	--name dash-dpapp-$(USER) \
+	-w /dash/dash-pipeline/dpapp $(DOCKER_DPAPP_IMG) \
+	make
+
+run-dpapp-bash:
+	$(DOCKER_RUN_DPAPP) \
+	--privileged \
+	--name dash-dpapp-$(USER) \
+	-w /dash/dash-pipeline/dpapp $(DOCKER_DPAPP_IMG) \
+	/bin/bash
+
+run-dpapp: $(DPAPP_LINK)
+	$(DOCKER_RUN_DPAPP) \
+	--privileged \
+	-u root \
+	--name dash-dpapp-$(USER) \
+	-w /dash/dash-pipeline/dpapp $(DOCKER_DPAPP_IMG) \
+	env HOST_INTERFACE=$(DPAPP_LINK_PEER) ./dpapp.sh startup.conf
+
+kill-dpapp:
+	-docker kill dash-dpapp-$(USER)
+
+######################################
 # P4 Behavioral-model (switch) TARGETS
 ######################################
 
@@ -267,6 +325,7 @@ run-switch: network
 		simple_switch_grpc \
 		--interface 0@veth0 \
 		--interface 1@veth2 \
+		$(SWITCH_PORT_DPAPP) \
 		--log-console \
 		--no-p4
 
@@ -622,10 +681,39 @@ docker-publish-dash-grpc:
 	[ -n $(DOCKER_GRPC_IMG_CTAG) ] && docker push $(DOCKER_GRPC_IMG_NAME):$(DOCKER_GRPC_IMG_CTAG)
 
 ###############################
+
+DOCKER_DPAPP_IMG_TAG = $(shell cat dockerfiles/Dockerfile.dpapp | $(SHA1SUM))
+DOCKER_DPAPP_IMG = $(DOCKER_DPAPP_IMG_NAME):$(DOCKER_DPAPP_IMG_TAG)
+
+docker-dash-dpapp:
+	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_DPAPP_IMG); } || \
+	docker build \
+	    -f dockerfiles/Dockerfile.dpapp \
+	    -t $(DOCKER_DPAPP_IMG) \
+	    --build-arg user=$(DASH_USER) \
+	    --build-arg group=$(DASH_GROUP) \
+	    --build-arg uid=$(DASH_UID) \
+	    --build-arg guid=$(DASH_GUID) \
+	    --build-arg hostname=$(DASH_HOST) \
+	    --build-arg available_processors=$(shell nproc) \
+		dockerfiles
+	[ -n $(DOCKER_DPAPP_IMG_CTAG) ] && \
+		docker tag $(DOCKER_DPAPP_IMG) $(DOCKER_DPAPP_IMG_NAME):$(DOCKER_DPAPP_IMG_CTAG)
+
+docker-pull-dash-dpapp:
+	docker pull $(DOCKER_DPAPP_IMG)
+
+docker-publish-dash-dpapp:
+	@echo "Publish $(DOCKER_DPAPP_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_DPAPP_IMG)
+	[ -n $(DOCKER_DPAPP_IMG_CTAG) ] && \
+		docker push $(DOCKER_DPAPP_IMG_NAME):$(DOCKER_DPAPP_IMG_CTAG)
+
+###############################
 # BMV2-PKTGEN NETWORKING TARGETS
 ###############################
 
-network:veth0 veth2 disable-ipv6
+network:veth0 veth2 $(DPAPP_LINK) disable-ipv6
 
 veth0: /sys/class/net/veth0
 /sys/class/net/veth0:
@@ -644,13 +732,27 @@ veth2: /sys/class/net/veth2
 	sudo ip link set veth2 mtu 9500
 	sudo ip link set veth3 mtu 9500
 
+ifeq ($(HAVE_DPAPP),y)
+$(DPAPP_LINK): /sys/class/net/$(DPAPP_LINK)
+/sys/class/net/$(DPAPP_LINK):
+	sudo ip link add name $(DPAPP_LINK) type veth peer name $(DPAPP_LINK_PEER)
+	sudo ip link set dev $(DPAPP_LINK) up
+	sudo ip link set dev $(DPAPP_LINK_PEER) up
+	sudo ip link set $(DPAPP_LINK) mtu 9500
+	sudo ip link set $(DPAPP_LINK_PEER) mtu 9500
+endif
+
 disable-ipv6:
-	./disable_veth_ipv6.sh
+	DPAPP_LINK=$(DPAPP_LINK) DPAPP_LINK_PEER=$(DPAPP_LINK_PEER) ./disable_veth_ipv6.sh
 
 # Delete veth's, test existence to avoid needless use of sudo
 network-clean:
 	@-([ -e /sys/class/net/veth0 ] && sudo ip link delete dev veth0 && echo "Deleted veth0/1") || echo "No veth0, not deleting"
 	@-([ -e /sys/class/net/veth2 ] && sudo ip link delete dev veth2 && echo "Deleted veth2/3") || echo "No veth2, not deleting"
+ifeq ($(HAVE_DPAPP),y)
+	@-([ -e /sys/class/net/$(DPAPP_LINK) ] && sudo ip link delete dev $(DPAPP_LINK) \
+		&& echo "Deleted $(DPAPP_LINK)") || echo "No $(DPAPP_LINK), not deleting"
+endif
 
 ###############################
 # IXIA-C TARGETS
