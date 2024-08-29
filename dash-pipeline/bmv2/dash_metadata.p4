@@ -52,7 +52,7 @@ enum bit<16> dash_pipeline_stage_t {
 };
 
 enum bit<16> dash_flow_enabled_key_t {
-    ENI_ADDR = (1 << 0),
+    ENI_MAC = (1 << 0),
     VNI = (1 << 1),
     PROTOCOL = (1 << 2),
     SRC_IP = (1 << 3),
