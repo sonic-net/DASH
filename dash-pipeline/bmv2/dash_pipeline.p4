@@ -59,21 +59,38 @@ control dash_ingress(
         const default_action = deny;
     }
 
-    action set_appliance(EthernetAddress neighbor_mac,
-                         EthernetAddress mac) {
+    action set_appliance(bit<8> local_region_id) {
+        meta.local_region_id = local_region_id;
+    }
+
+    @SaiTable[name = "dash_appliance", api = "dash_appliance", order = 0, isobject="true"]
+    table appliance {
+        key = {
+            meta.appliance_id : exact @SaiVal[type="sai_object_id_t"];
+        }
+
+        actions = {
+            set_appliance;
+            @defaultonly accept;
+        }
+        const default_action = accept;
+    }
+
+    action set_underlay_mac(EthernetAddress neighbor_mac,
+                            EthernetAddress mac) {
         meta.encap_data.underlay_dmac = neighbor_mac;
         meta.encap_data.underlay_smac = mac;
     }
 
     /* This table API should be implemented manually using underlay SAI */
     @SaiTable[ignored = "true"]
-    table appliance {
+    table underlay_mac {
         key = {
             meta.appliance_id : ternary;
         }
 
         actions = {
-            set_appliance;
+            set_underlay_mac;
         }
     }
 
@@ -283,6 +300,7 @@ control dash_ingress(
         direction_lookup_stage.apply(hdr, meta);
 
         appliance.apply();
+        underlay_mac.apply();
 
         /* Outer header processing */
         eni_lookup_stage.apply(hdr, meta);
