@@ -11,17 +11,17 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
 
 # "All" type targets for convenience
-all:p4 sai dpapp saithrift-server docker-saithrift-client docker-saichallenger-client test
+all:p4 sai saithrift-server docker-saithrift-client docker-saichallenger-client test
 
 run-all-tests:run-libsai-test run-saithrift-client-tests run-saichallenger-tests
 run-saithrift-client-tests: run-saithrift-ptftests run-saithrift-pytests
 run-saithrift-client-dev-tests: run-saithrift-dev-ptftests run-saithrift-dev-pytests
 
 .PHONY:clean
-clean: kill-all p4-clean sai-clean dpapp-clean test-clean network-clean saithrift-server-clean
+clean: kill-all p4-clean sai-clean test-clean network-clean saithrift-server-clean
 	rm -rf $(P4_OUTDIR)
 
-kill-all: kill-saithrift-server kill-dpapp kill-switch undeploy-ixiac kill-saichallenger-client
+kill-all: kill-saithrift-server kill-switch undeploy-ixiac kill-saichallenger-client
 
 PWD := $(realpath $(mkfile_dir))
 DASH_USER ?=dashuser
