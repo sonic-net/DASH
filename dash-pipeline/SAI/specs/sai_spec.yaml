@@ -198,7 +198,7 @@ enums:
   description: ''
   members:
   - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: ENI_ADDR
+    name: ENI_MAC
     description: ''
     value: '1'
   - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
@@ -238,7 +238,7 @@ enums:
     description: ''
     value: '1'
   - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: ENI_ADDR
+    name: ENI_MAC
     description: ''
     value: '2'
   - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
