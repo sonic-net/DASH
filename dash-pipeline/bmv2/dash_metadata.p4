@@ -52,7 +52,7 @@ enum bit<16> dash_pipeline_stage_t {
 };
 
 enum bit<16> dash_flow_enabled_key_t {
-    ENI_ADDR = (1 << 0),
+    ENI_MAC = (1 << 0),
     VNI = (1 << 1),
     PROTOCOL = (1 << 2),
     SRC_IP = (1 << 3),
@@ -100,7 +100,7 @@ enum bit<16> dash_flow_entry_bulk_get_session_filter_key_t
 {
     INVAILD = 0,
     FLOW_TABLE_ID = 1,
-    ENI_ADDR = 2,
+    ENI_MAC = 2,
     IP_PROTOCOL = 3,
     SRC_IP_ADDR = 4,
     DST_IP_ADDR = 5,

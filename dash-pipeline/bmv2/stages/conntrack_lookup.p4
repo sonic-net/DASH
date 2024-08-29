@@ -191,7 +191,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
     apply {
         flow_table.apply();
 
-        if (meta.conntrack_data.flow_table.flow_enabled_key & dash_flow_enabled_key_t.ENI_ADDR != 0) {
+        if (meta.conntrack_data.flow_table.flow_enabled_key & dash_flow_enabled_key_t.ENI_MAC != 0) {
             meta.conntrack_data.flow_key.eni_mac = meta.eni_addr;
         }
 

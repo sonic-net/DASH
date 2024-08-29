@@ -97,7 +97,7 @@ typedef enum _sai_dash_flow_enabled_key_t
 {
     SAI_DASH_FLOW_ENABLED_KEY_NONE = 0,
 
-    SAI_DASH_FLOW_ENABLED_KEY_ENI_ADDR = 1 << 1,
+    SAI_DASH_FLOW_ENABLED_KEY_ENI_MAC = 1 << 1,
   
     SAI_DASH_FLOW_ENABLED_KEY_VNI = 1 << 2,
 
@@ -517,7 +517,7 @@ uint32_t attr_count = 3;
 sai_attribute_t attr_list[3];
 attr_list[0].id = SAI_FLOW_TABLE_ATTR_DASH_FLOW_ENABLED_KEY;
 attr_list[0].value = SAI_DASH_FLOW_ENABLED_KEY_PROTOCOL |
-                         SAI_DASH_FLOW_ENABLED_KEY_ENI_ADDR |
+                         SAI_DASH_FLOW_ENABLED_KEY_ENI_MAC |
                          SAI_DASH_FLOW_ENABLED_KEY_VNI |
                          SAI_DASH_FLOW_ENABLED_KEY_SRC_IP | 
                          SAI_DASH_FLOW_ENABLED_KEY_DST_IP | 
