@@ -100,7 +100,7 @@ enum bit<16> dash_flow_entry_bulk_get_session_filter_key_t
 {
     INVAILD = 0,
     FLOW_TABLE_ID = 1,
-    ENI_ADDR = 2,
+    ENI_MAC = 2,
     IP_PROTOCOL = 3,
     SRC_IP_ADDR = 4,
     DST_IP_ADDR = 5,
