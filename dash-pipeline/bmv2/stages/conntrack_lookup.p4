@@ -290,8 +290,8 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         bit<32> bulk_get_entry_limitation,
 
         /* GRPC Session server IP and port */
-        IPv4ORv6Address bulk_get_session_ip,
-        bit<16> bulk_get_session_port,
+        IPv4ORv6Address bulk_get_session_server_ip,
+        bit<16> bulk_get_session_server_port,
 
         /* Session filters */
         @SaiVal[type="sai_object_id_t"] bit<16> first_flow_entry_bulk_get_session_filter_id,

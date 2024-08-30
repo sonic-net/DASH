@@ -684,8 +684,8 @@ sai_apis:
     is_vlan: false
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_IP
-    description: Action parameter bulk get session IP
+    name: SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_SERVER_IP
+    description: Action parameter bulk get session server IP
     type: sai_ip_address_t
     attr_value_field: ipaddr
     default: 0.0.0.0
@@ -697,8 +697,8 @@ sai_apis:
     is_vlan: false
     deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_PORT
-    description: Action parameter bulk get session port
+    name: SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_SERVER_PORT
+    description: Action parameter bulk get session server port
     type: sai_uint16_t
     attr_value_field: u16
     default: '0'
