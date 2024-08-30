@@ -28,7 +28,7 @@ sai_apis:
     description: Action parameter DASH flow enabled key
     type: sai_dash_flow_enabled_key_t
     attr_value_field: s32
-    default: SAI_DASH_FLOW_ENABLED_KEY_ENI_ADDR
+    default: SAI_DASH_FLOW_ENABLED_KEY_ENI_MAC
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
