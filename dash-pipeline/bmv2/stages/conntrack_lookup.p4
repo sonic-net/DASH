@@ -330,7 +330,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         hdr.flow_key.setValid();
         hdr.flow_key.is_ip_v6 = meta.is_overlay_ip_v6;
         // TODO remove hardcode flow_enabled_key later
-        meta.flow_table.flow_enabled_key = dash_flow_enabled_key_t.ENI_ADDR |
+        meta.flow_table.flow_enabled_key = dash_flow_enabled_key_t.ENI_MAC |
                                            dash_flow_enabled_key_t.VNI |
                                            dash_flow_enabled_key_t.PROTOCOL |
                                            dash_flow_enabled_key_t.SRC_IP |
@@ -338,7 +338,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
                                            dash_flow_enabled_key_t.SRC_PORT |
                                            dash_flow_enabled_key_t.DST_PORT;
 
-        if (meta.flow_table.flow_enabled_key & dash_flow_enabled_key_t.ENI_ADDR != 0) {
+        if (meta.flow_table.flow_enabled_key & dash_flow_enabled_key_t.ENI_MAC != 0) {
             hdr.flow_key.eni_mac = meta.eni_addr;
         }
         if (meta.flow_table.flow_enabled_key & dash_flow_enabled_key_t.VNI != 0) {
