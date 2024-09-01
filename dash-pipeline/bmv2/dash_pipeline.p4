@@ -10,6 +10,7 @@
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"
 #include "stages/conntrack_lookup.p4"
+#include "stages/flow_action_apply.p4"
 #include "stages/direction_lookup.p4"
 #include "stages/eni_lookup.p4"
 #include "stages/ha.p4"
@@ -340,7 +341,7 @@ control dash_ingress(
 
         conntrack_lookup_stage.apply(hdr, meta);
 
-        // 
+        flow_action_apply.apply(hdr, meta);
 
         UPDATE_ENI_COUNTER(eni_rx);
         if (meta.is_fast_path_icmp_flow_redirection_packet) {

@@ -69,7 +69,8 @@ struct flow_table_data_t {
 }
 
 enum bit<32> dash_flow_action_t {
-    NONE = 0
+    ENCAP = (1 << 0),
+    OVERLAY_REWRITE = (1 << 1)
 }
 
 struct flow_key_t {
