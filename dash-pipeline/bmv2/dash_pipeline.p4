@@ -340,6 +340,8 @@ control dash_ingress(
 
         conntrack_lookup_stage.apply(hdr, meta);
 
+        // 
+
         UPDATE_ENI_COUNTER(eni_rx);
         if (meta.is_fast_path_icmp_flow_redirection_packet) {
             UPDATE_ENI_COUNTER(eni_lb_fast_path_icmp_in);
