@@ -13,7 +13,7 @@ enum bit<32> dash_routing_actions_t {
     NAT64 = (1 << 3),
     NAT_PORT = (1 << 4),
     TUNNEL = (1 << 5),
-    REVERSE_TUNNEL = (1 << 6),
+    REVERSE_TUNNEL = (1 << 6)
 };
 
 enum bit<16> dash_direction_t {
