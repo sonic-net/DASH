@@ -195,6 +195,14 @@ enums:
     name: NAT_PORT
     description: ''
     value: '16'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: TUNNEL
+    description: ''
+    value: '32'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: REVERSE_TUNNEL
+    description: ''
+    value: '64'
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
   name: sai_dash_flow_enabled_key_t
   description: ''
