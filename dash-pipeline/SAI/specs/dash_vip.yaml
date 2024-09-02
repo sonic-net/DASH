@@ -45,8 +45,8 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: false
     is_vlan: false
+    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_VIP_ENTRY_ATTR_IP_ADDR_FAMILY
     description: IP address family for resource accounting
@@ -58,15 +58,15 @@ sai_apis:
     object_name: null
     allow_null: false
     valid_only: null
-    deprecated: false
     is_vlan: false
+    deprecated: false
   stats: []
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
-      id: 48212080
+      id: 36083221
       actions:
         SAI_VIP_ENTRY_ACTION_ACCEPT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_VIP_ENTRY_ACTION_ACCEPT
-          id: 22859453
+          id: 21715559
           attr_param_id: {}

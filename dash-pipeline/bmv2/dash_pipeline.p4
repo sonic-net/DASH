@@ -10,92 +10,13 @@
 #include "dash_inbound.p4"
 #include "dash_conntrack.p4"
 #include "stages/conntrack_lookup.p4"
+#include "stages/pre_pipeline.p4"
 #include "stages/direction_lookup.p4"
 #include "stages/eni_lookup.p4"
 #include "stages/ha.p4"
 #include "stages/routing_action_apply.p4"
 #include "stages/metering_update.p4"
 #include "underlay.p4"
-
-control dash_inbound_routing_stage(
-      inout headers_t hdr
-    , inout metadata_t meta
-    )
-{
-    action deny() {
-        meta.dropped = true;
-    }
-
-    action permit() {
-    }
-
-    action vxlan_decap() {}
-    action vxlan_decap_pa_validate() {}
-
-    action tunnel_decap(inout headers_t hdr,
-                        inout metadata_t meta,
-                        bit<32> meter_class_or,
-                        @SaiVal[default_value="4294967295"] bit<32> meter_class_and) {
-        set_meter_attrs(meta, meter_class_or, meter_class_and);
-    }
-
-    action tunnel_decap_pa_validate(inout headers_t hdr,
-                                    inout metadata_t meta,
-                                    @SaiVal[type="sai_object_id_t"] bit<16> src_vnet_id,
-                                    bit<32> meter_class_or,
-                                    @SaiVal[default_value="4294967295"] bit<32> meter_class_and) {
-        meta.vnet_id = src_vnet_id;
-        set_meter_attrs(meta, meter_class_or, meter_class_and);
-    }
-
-    @SaiTable[name = "pa_validation", api = "dash_pa_validation"]
-    table pa_validation {
-        key = {
-            meta.vnet_id: exact @SaiVal[type="sai_object_id_t"];
-            hdr.u0_ipv4.src_addr : exact @SaiVal[name = "sip", type="sai_ip_address_t"];
-        }
-
-        actions = {
-            permit;
-            @defaultonly deny;
-        }
-
-        const default_action = deny;
-    }
-
-    @SaiTable[name = "inbound_routing", api = "dash_inbound_routing"]
-    table inbound_routing {
-        key = {
-            meta.eni_id: exact @SaiVal[type="sai_object_id_t"];
-            hdr.u0_vxlan.vni : exact @SaiVal[name = "VNI"];
-            hdr.u0_ipv4.src_addr : ternary @SaiVal[name = "sip", type="sai_ip_address_t"];
-        }
-        actions = {
-            tunnel_decap(hdr, meta);
-            tunnel_decap_pa_validate(hdr, meta);
-            vxlan_decap;                // Deprecated, but cannot be removed until SWSS is updated.
-            vxlan_decap_pa_validate;    // Deprecated, but cannot be removed until SWSS is updated.
-            @defaultonly deny;
-        }
-
-        const default_action = deny;
-    }
-
-    apply {
-        if (meta.direction != dash_direction_t.INBOUND) {
-            return;
-        }
-
-        switch (inbound_routing.apply().action_run) {
-            tunnel_decap_pa_validate: {
-                pa_validation.apply();
-            }
-            deny: {
-                UPDATE_ENI_COUNTER(inbound_routing_entry_miss_drop);
-            }
-        }
-    }
-}
 
 control dash_eni_stage(
       inout headers_t hdr
@@ -218,114 +139,10 @@ control dash_lookup_stage(
         meta.dropped = true;
     }
 
-    action accept() {
-    }
-
-    @SaiTable[name = "vip", api = "dash_vip"]
-    table vip {
-        key = {
-            hdr.u0_ipv4.dst_addr : exact @SaiVal[name = "VIP", type="sai_ip_address_t"];
-        }
-
-        actions = {
-            accept;
-            @defaultonly deny;
-        }
-
-        const default_action = deny;
-    }
-
-    action set_appliance(bit<8> local_region_id) {
-        meta.local_region_id = local_region_id;
-    }
-
-    @SaiTable[name = "dash_appliance", api = "dash_appliance", order = 0, isobject="true"]
-    table appliance {
-        key = {
-            meta.appliance_id : exact @SaiVal[type="sai_object_id_t"];
-        }
-
-        actions = {
-            set_appliance;
-            @defaultonly accept;
-        }
-        const default_action = accept;
-    }
-
-    action set_underlay_mac(EthernetAddress neighbor_mac,
-                         EthernetAddress mac) {
-        meta.encap_data.underlay_dmac = neighbor_mac;
-        meta.encap_data.underlay_smac = mac;
-    }
-
-    /* This table API should be implemented manually using underlay SAI */
-    @SaiTable[ignored = "true"]
-    table underlay_mac {
-        key = {
-            meta.appliance_id : ternary;
-        }
-
-        actions = {
-            set_underlay_mac;
-        }
-    }
-
     apply {
-        if (meta.is_fast_path_icmp_flow_redirection_packet) {
-            UPDATE_COUNTER(port_lb_fast_path_icmp_in, 0);
-        }
-
-        if (vip.apply().hit) {
-            /* Use the same VIP that was in packet's destination if it's
-               present in the VIP table */
-            meta.encap_data.underlay_sip = hdr.u0_ipv4.dst_addr;
-        } else {
-            UPDATE_COUNTER(vip_miss_drop, 0);
-
-            if (meta.is_fast_path_icmp_flow_redirection_packet) {
-            }
-        }
-
+        pre_pipeline_stage.apply(hdr, meta);
         direction_lookup_stage.apply(hdr, meta);
-
-        appliance.apply();
-        underlay_mac.apply();
-
-        /* Outer header processing */
         eni_lookup_stage.apply(hdr, meta);
-
-        // Save the original DSCP value
-        meta.eni_data.dscp_mode = dash_tunnel_dscp_mode_t.PRESERVE_MODEL;
-        meta.eni_data.dscp = (bit<6>)hdr.u0_ipv4.diffserv;
-
-        dash_inbound_routing_stage.apply(hdr, meta);
-
-        do_tunnel_decap(hdr, meta);
-
-        /* At this point the processing is done on customer headers */
-
-        meta.is_overlay_ip_v6 = 0;
-        meta.ip_protocol = 0;
-        meta.dst_ip_addr = 0;
-        meta.src_ip_addr = 0;
-        if (hdr.customer_ipv6.isValid()) {
-            meta.ip_protocol = hdr.customer_ipv6.next_header;
-            meta.src_ip_addr = hdr.customer_ipv6.src_addr;
-            meta.dst_ip_addr = hdr.customer_ipv6.dst_addr;
-            meta.is_overlay_ip_v6 = 1;
-        } else if (hdr.customer_ipv4.isValid()) {
-            meta.ip_protocol = hdr.customer_ipv4.protocol;
-            meta.src_ip_addr = (bit<128>)hdr.customer_ipv4.src_addr;
-            meta.dst_ip_addr = (bit<128>)hdr.customer_ipv4.dst_addr;
-        }
-
-        if (hdr.customer_tcp.isValid()) {
-            meta.src_l4_port = hdr.customer_tcp.src_port;
-            meta.dst_l4_port = hdr.customer_tcp.dst_port;
-        } else if (hdr.customer_udp.isValid()) {
-            meta.src_l4_port = hdr.customer_udp.src_port;
-            meta.dst_l4_port = hdr.customer_udp.dst_port;
-        }
 
         dash_eni_stage.apply(hdr, meta);
 
@@ -334,6 +151,13 @@ control dash_lookup_stage(
         }
         
         UPDATE_ENI_COUNTER(eni_rx);
+
+        if (meta.direction == dash_direction_t.OUTBOUND) {
+            UPDATE_ENI_COUNTER(eni_outbound_rx);
+        } else if (meta.direction == dash_direction_t.INBOUND) {
+            UPDATE_ENI_COUNTER(eni_inbound_rx);
+        }
+
         if (meta.is_fast_path_icmp_flow_redirection_packet) {
             UPDATE_ENI_COUNTER(eni_lb_fast_path_icmp_in);
         }
@@ -371,12 +195,10 @@ control dash_match_stage(
         acl_group.apply();
 
         if (meta.direction == dash_direction_t.OUTBOUND) {
-            UPDATE_ENI_COUNTER(eni_outbound_rx);
-
             meta.target_stage = dash_pipeline_stage_t.OUTBOUND_ROUTING;
             outbound.apply(hdr, meta);
         } else if (meta.direction == dash_direction_t.INBOUND) {
-            UPDATE_ENI_COUNTER(eni_inbound_rx);
+            meta.target_stage = dash_pipeline_stage_t.INBOUND_ROUTING;
             inbound.apply(hdr, meta);
         }
 
@@ -437,6 +259,8 @@ control dash_ingress(
         if (meta.flow_enabled) {
             conntrack_lookup_stage.apply(hdr, meta);
         }
+
+        do_tunnel_decap(hdr, meta);
 
         ha_stage.apply(hdr, meta);
 
