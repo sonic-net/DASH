@@ -598,6 +598,19 @@ sai_apis:
     valid_only: null
     is_vlan: false
     deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_ENI_ATTR_REVERSE_TUNNEL_SIP
+    description: Action parameter reverse tunnel sip
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
   stats:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_RX_BYTES

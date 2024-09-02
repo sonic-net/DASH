@@ -80,6 +80,8 @@ control dash_ingress(
                          bit<1> full_flow_resimulation_requested,
                          bit<64> max_resimulated_flow_per_second,
                          @SaiVal[type="sai_object_id_t"] bit<16> outbound_routing_group_id,
+                         @SaiVal[type="sai_ip_address_t"] IPv4ORv6Address reverse_tunnel_sip,
+                         bit<1> reverse_tunnel_sip_is_v6,
                          bit<1> is_ha_flow_owner)
     {
         meta.eni_data.cps                                                   = cps;
