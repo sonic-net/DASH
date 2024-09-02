@@ -230,6 +230,7 @@ control dash_ingress(
     apply {
         meta.flow_enabled = false;
 
+        meta.rx_encap.setValid();
         meta.encap_data.setValid();
         meta.tunnel_data.setValid();
         meta.overlay_data.setValid();

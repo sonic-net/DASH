@@ -40,14 +40,16 @@ parser dash_parser(
         transition select(hd.u0_ethernet.ether_type) {
             IPV4_ETHTYPE:  parse_u0_ipv4;
             IPV6_ETHTYPE:  parse_u0_ipv6;
-            DASH_ETHTYPE:  parse_dash;
+            DASH_ETHTYPE:  parse_dash_hdr;
             default: accept;
         }
     }
 
-    state parse_dash {
+    state parse_dash_hdr {
         packet.extract(hd.packet_meta);
-        if (hd.packet_meta.packet_subtype != dash_packet_subtype_t.NONE) {
+        if (hd.packet_meta.packet_subtype == dash_packet_subtype_t.FLOW_CREATE
+            || hd.packet_meta.packet_subtype == dash_packet_subtype_t.FLOW_UPDATE
+            || hd.packet_meta.packet_subtype == dash_packet_subtype_t.FLOW_DELETE) {
             // Flow create/update/delete, extract flow_key
             packet.extract(hd.flow_key);
         }

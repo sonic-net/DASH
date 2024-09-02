@@ -142,7 +142,7 @@ struct ha_data_t {
     bit<16> dp_channel_src_port_max;
 
     // HA packet/flow state
-    dash_flow_state_t flow_sync_state;
+    dash_flow_state_t ha_flow_state;
 }
 
 struct metadata_t {
