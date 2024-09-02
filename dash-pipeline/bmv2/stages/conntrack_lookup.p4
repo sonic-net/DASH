@@ -235,7 +235,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         meta.tunnel_data.dash_encapsulation = tunnel_data_dash_encapsulation;
 
         /* Set overlay rewrite metadata */
-        meta.overlay_data.is_ipv6 = (bool)overlay_data_is_ipv6;
+        meta.overlay_data.is_ipv6 = overlay_data_is_ipv6;
         meta.overlay_data.dmac = overlay_data_dst_mac;
         meta.overlay_data.sip = overlay_data_sip;
         meta.overlay_data.dip = overlay_data_dip;

@@ -61,7 +61,7 @@ header overlay_rewrite_data_t {
     IPv6Address sip_mask;
     IPv6Address dip_mask;
     bit<7> reserved;
-    bool is_ipv6;
+    bit<1> is_ipv6;
 }
 const bit<16> OVERLAY_REWRITE_DATA_HDR_SIZE=overlay_rewrite_data_t.minSizeInBytes();
 
