@@ -145,6 +145,31 @@ struct ha_data_t {
     dash_flow_state_t ha_flow_state;
 }
 
+#ifdef TARGET_DPDK_PNA
+// redefine encap_data_t -> meta_encap_data_t
+// redefine overlay_rewrite_data_t -> meta_overlay_rewrite_data_t
+// header in struct is not well supported for target dpdk-pna
+struct meta_encap_data_t {
+    bit<24> vni;
+    bit<24> dest_vnet_vni;
+    IPv4Address underlay_sip;
+    IPv4Address underlay_dip;
+    EthernetAddress underlay_smac;
+    EthernetAddress underlay_dmac;
+    dash_encapsulation_t dash_encapsulation;
+}
+
+struct meta_overlay_rewrite_data_t {
+    EthernetAddress dmac;
+    IPv4ORv6Address sip;
+    IPv4ORv6Address dip;
+    IPv6Address sip_mask;
+    IPv6Address dip_mask;
+    bit<7> reserved;
+    bit<1> is_ipv6;
+}
+#endif // TARGET_DPDK_PNA
+
 struct metadata_t {
     // Packet type
     dash_packet_source_t packet_source; // TODO: Parse packet source in parser.
@@ -154,7 +179,11 @@ struct metadata_t {
     dash_direction_t direction;
     dash_eni_mac_type_t eni_mac_type;
     dash_eni_mac_override_type_t eni_mac_override_type;
+#ifdef TARGET_DPDK_PNA
+    meta_encap_data_t rx_encap;
+#else
     encap_data_t rx_encap;
+#endif // TARGET_DPDK_PNA
     EthernetAddress eni_addr;
     bit<16> vnet_id;
     bit<16> dst_vnet_id;
@@ -200,11 +229,19 @@ struct metadata_t {
 
     // Action data
     bool dropped;
+#ifdef TARGET_DPDK_PNA
+    // encap_data is for underlay
+    meta_encap_data_t encap_data;
+    // tunnel_data is used by dash_tunnel_id
+    meta_encap_data_t tunnel_data;
+    meta_overlay_rewrite_data_t overlay_data;
+#else
     // encap_data is for underlay
     encap_data_t encap_data;
     // tunnel_data is used by dash_tunnel_id
     encap_data_t tunnel_data;
     overlay_rewrite_data_t overlay_data;
+#endif // TARGET_DPDK_PNA
     bit<16> dash_tunnel_id;
     bit<32> meter_class;
     bit<8> local_region_id;

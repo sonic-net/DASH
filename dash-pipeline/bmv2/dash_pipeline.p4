@@ -230,10 +230,12 @@ control dash_ingress(
     apply {
         meta.flow_enabled = false;
 
+#ifndef TARGET_DPDK_PNA
         meta.rx_encap.setValid();
         meta.encap_data.setValid();
         meta.tunnel_data.setValid();
         meta.overlay_data.setValid();
+#endif // TARGET_DPDK_PNA
 
 #ifdef TARGET_DPDK_PNA
 #ifdef DPDK_PNA_SEND_TO_PORT_FIX_MERGED

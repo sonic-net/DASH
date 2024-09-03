@@ -12,13 +12,42 @@ action conntrack_set_meta_from_dash_header(in headers_t hdr, out metadata_t meta
     meta.meter_class = hdr.flow_data.meter_class;
 
     /* encapsulation metadata */
+#ifdef TARGET_DPDK_PNA
+    meta.encap_data.vni = hdr.flow_encap_data.vni;
+    meta.encap_data.dest_vnet_vni = hdr.flow_encap_data.dest_vnet_vni;
+    meta.encap_data.underlay_sip = hdr.flow_encap_data.underlay_sip;
+    meta.encap_data.underlay_dip = hdr.flow_encap_data.underlay_dip;
+    meta.encap_data.underlay_smac = hdr.flow_encap_data.underlay_smac;
+    meta.encap_data.underlay_dmac = hdr.flow_encap_data.underlay_dmac;
+    meta.encap_data.dash_encapsulation = hdr.flow_encap_data.dash_encapsulation;
+#else
     meta.encap_data = hdr.flow_encap_data;
+#endif // TARGET_DPDK_PNA
 
     /* tunnel metadata */
+#ifdef TARGET_DPDK_PNA
+    meta.tunnel_data.vni = hdr.flow_tunnel_data.vni;
+    meta.tunnel_data.dest_vnet_vni = hdr.flow_tunnel_data.dest_vnet_vni;
+    meta.tunnel_data.underlay_sip = hdr.flow_tunnel_data.underlay_sip;
+    meta.tunnel_data.underlay_dip = hdr.flow_tunnel_data.underlay_dip;
+    meta.tunnel_data.underlay_smac = hdr.flow_tunnel_data.underlay_smac;
+    meta.tunnel_data.underlay_dmac = hdr.flow_tunnel_data.underlay_dmac;
+    meta.tunnel_data.dash_encapsulation = hdr.flow_tunnel_data.dash_encapsulation;
+#else
     meta.tunnel_data = hdr.flow_tunnel_data;
+#endif // TARGET_DPDK_PNA
 
     /* overlay rewrite metadata */
+#ifdef TARGET_DPDK_PNA
+    meta.overlay_data.dmac = hdr.flow_overlay_data.dmac;
+    meta.overlay_data.sip = hdr.flow_overlay_data.sip;
+    meta.overlay_data.dip = hdr.flow_overlay_data.dip;
+    meta.overlay_data.sip_mask = hdr.flow_overlay_data.sip_mask;
+    meta.overlay_data.dip_mask = hdr.flow_overlay_data.dip_mask;
+    meta.overlay_data.is_ipv6 = hdr.flow_overlay_data.is_ipv6;
+#else
     meta.overlay_data = hdr.flow_overlay_data;
+#endif // TARGET_DPDK_PNA
 }
 
 action conntrack_strip_dash_header(inout headers_t hdr)
@@ -48,17 +77,49 @@ control conntrack_build_dash_header(inout headers_t hdr, in metadata_t meta,
         length = length + FLOW_DATA_HDR_SIZE;
 
         if (meta.routing_actions & dash_routing_actions_t.STATIC_ENCAP != 0) {
+#ifdef TARGET_DPDK_PNA
+            hdr.flow_encap_data.setValid();
+            hdr.flow_encap_data.vni = meta.encap_data.vni;
+            hdr.flow_encap_data.dest_vnet_vni = meta.encap_data.dest_vnet_vni;
+            hdr.flow_encap_data.underlay_sip = meta.encap_data.underlay_sip;
+            hdr.flow_encap_data.underlay_dip = meta.encap_data.underlay_dip;
+            hdr.flow_encap_data.underlay_smac = meta.encap_data.underlay_smac;
+            hdr.flow_encap_data.underlay_dmac = meta.encap_data.underlay_dmac;
+            hdr.flow_encap_data.dash_encapsulation = meta.encap_data.dash_encapsulation;
+#else
             hdr.flow_encap_data= meta.encap_data;
+#endif // TARGET_DPDK_PNA
             length = length + ENCAP_DATA_HDR_SIZE;
         }
 
         if (meta.dash_tunnel_id != 0) {
+#ifdef TARGET_DPDK_PNA
+            hdr.flow_tunnel_data.setValid();
+            hdr.flow_tunnel_data.vni = meta.tunnel_data.vni;
+            hdr.flow_tunnel_data.dest_vnet_vni = meta.tunnel_data.dest_vnet_vni;
+            hdr.flow_tunnel_data.underlay_sip = meta.tunnel_data.underlay_sip;
+            hdr.flow_tunnel_data.underlay_dip = meta.tunnel_data.underlay_dip;
+            hdr.flow_tunnel_data.underlay_smac = meta.tunnel_data.underlay_smac;
+            hdr.flow_tunnel_data.underlay_dmac = meta.tunnel_data.underlay_dmac;
+            hdr.flow_tunnel_data.dash_encapsulation = meta.tunnel_data.dash_encapsulation;
+#else
             hdr.flow_tunnel_data= meta.tunnel_data;
+#endif // TARGET_DPDK_PNA
             length = length + ENCAP_DATA_HDR_SIZE;
         }
 
         if (meta.routing_actions != 0) {
+#ifdef TARGET_DPDK_PNA
+            hdr.flow_overlay_data.setValid();
+            hdr.flow_overlay_data.dmac = meta.overlay_data.dmac;
+            hdr.flow_overlay_data.sip = meta.overlay_data.sip;
+            hdr.flow_overlay_data.dip = meta.overlay_data.dip;
+            hdr.flow_overlay_data.sip_mask = meta.overlay_data.sip_mask;
+            hdr.flow_overlay_data.dip_mask = meta.overlay_data.dip_mask;
+            hdr.flow_overlay_data.is_ipv6 = meta.overlay_data.is_ipv6;
+#else
             hdr.flow_overlay_data= meta.overlay_data;
+#endif // TARGET_DPDK_PNA
             length = length + OVERLAY_REWRITE_DATA_HDR_SIZE;
         }
 
