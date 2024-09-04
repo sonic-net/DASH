@@ -100,7 +100,6 @@ configs
 Conntrack
 Containerlab
 CP
-cpus
 CPUs
 CreatedHalfOpenFlow
 CreatedOtherFlow

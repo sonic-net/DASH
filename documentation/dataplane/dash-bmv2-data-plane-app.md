@@ -62,9 +62,12 @@ This document only focuses on describing the design of a data-plane app example,
   FLOW-DELETE hint and forwarded to data-plane app.
 - Flow Age-out
 
-  In flow lookup stage, if packet hits one flow, it will refresh flow
-  timestamp. Data-plane app periodically scans flow table and check if flow is
-  timed out according to (current timestamp - flow timestamp) vs idle timeout value.
+  Data-plane app can help the data plane implement the flow age-out
+  mechanism by bridging the gap in the current data plane engine - bmv2.
+  For example, in flow lookup stage, if packet hits one flow, pipeline may refresh
+  flow timestamp via p4 extern function. Data-plane app periodically scans flow table
+  and check if flow is timed out according to (current timestamp - flow timestamp) vs idle
+  timeout value.
 
 ### 3.2. HA
 - Inline flow replication
@@ -96,18 +99,18 @@ Refer to [SONiC DASH HLD](https://github.com/sonic-net/DASH/blob/main/documentat
 
 ![dash_dpapp_arch](images/dash-bmv2-data-plane-app-arch.drawio.svg)
 
-Referring to the above figure, data-plane app overall is a multi-thread vpp application, running in a standalone container. It includes these components:
+Referring to the above figure, data-plane app overall is a multi-thread application based on vpp, running in a standalone container. It includes these components:
 
-- vpp master, it runs dashsai server to receive dashsai requests (dash object CRUD) via northbound RPC channel and then invoke DASH SAI APIs to handle them. The server also processes flow creation/deletion notification from vpp workers.
-- vpp workers, they serve as an exception path of packet processing, running
-on multi-cpus. It creates a flow in local flow table and notifies dashsai
+- master thread, it runs dashsai server to receive dashsai requests (dash object CRUD) via northbound RPC channel and then invoke DASH SAI APIs to handle them. The server also processes flow creation/deletion notification from workers.
+- worker threads, they serve as an exception (slow) path of packet processing, running
+on multiple CPUs. It creates a flow in local flow table and notifies dashsai
 server to offload it to BMv2 flow table. The packet is temporarily queued.
-After workers know the success of flow offloading to BMv2, they dequeue the packet and send it back to P4 pipeline via VPP port. The workers also do flow age-out task with proper scheduling.
+After workers know the success of flow offloading to BMv2, they dequeue the packet and send it back to P4 pipeline via DPAPP port. The workers also do flow age-out task with proper scheduling.
 - flow table, is a local cache of BMv2 flow table.
 - DASH SAI, is a unique interface for DASH object CRUD of DASH pipeline, implemented by DASH BMv2.
-- VPP port, is a veth interface and connects to BMv2 via veth pair. It serves as datapath channel to receive/send all packets between date-plane app and BMv2. Generally the port supports multi RSS queues, each queue binds to one vpp worker.
+- DPAPP port, is a veth interface and connects to BMv2 via veth pair. It serves as datapath channel to receive/send all packets between date-plane app and BMv2. Generally the port supports multi RSS queues, each queue binds to one worker thread.
 
-**Note:** For simplicity and concept verification, vpp workers may directly call DASH SAI to offload flow to BMv2. The concern is that DASH SAI blocking API can block packet processing of vpp workers.
+**Note:** For simplicity and concept verification, worker threads may directly call DASH SAI to offload flow to BMv2. The concern is that DASH SAI blocking API can block packet processing of workers.
 
 ## 6. Detailed design
 
@@ -129,7 +132,7 @@ DASH metadata records the packet processing result of DASH pipeline. It can have
 When DASH pipeline requests DPAPP for flow creation, it encapsulates DASH metadata in an ethernet frame with EtherType DASH_METADATA and appends the original customer packet. The packet sent to DPAPP is like:
 
 ```
-    Ethernet HEADER|DASH metadata|customer packet
+    Ethernet HEADER | DASH metadata | customer packet
 ```
 
 The number of DASH_METADATA is 0x876D, which reuses the number of EtherType SECURE_DATA (vpp/src/vnet/ethernet/types.def at master · FDio/vpp · GitHub).
@@ -194,8 +197,8 @@ The below sequence chart shows the detail steps of flow creation, flow state bec
 sequenceDiagram
     participant P as P4 Pipeline
     participant R as P4 Runtime
-    participant W as VPP worker
-    participant M as VPP master
+    participant W as DPAPP worker
+    participant M as DPAPP master
     autonumber
     P->>+W: DASH metadata (source PIPELINE) + customer packet
     W->>+W: Create flow in local flow table
@@ -207,7 +210,7 @@ sequenceDiagram
     W->>P: DASH metadata (source DPAPP) + customer packet
 ```
 
-It is remarkable that VPP worker should not call DASH SAI API directly, otherwise DASH SAI may block VPP worker to handle other packets. Each flow has a packet queue. In step 3, it enqueues current packet firstly and then requests flow offload. In step 8, it dequeues the packet and then sends the packet back to P4 pipeline.
+It is remarkable that DPAPP worker should not call DASH SAI API directly, otherwise DASH SAI may block DPAPP worker to handle other packets. Each flow has a packet queue. In step 3, it enqueues current packet firstly and then requests flow offload. In step 8, it dequeues the packet and then sends the packet back to P4 pipeline.
 
 ### 6.3. Flow resimulation
 
@@ -216,7 +219,7 @@ sequenceDiagram
     participant C as DASH SAI Client
     participant P as P4 Pipeline
     participant R as P4 Runtime
-    participant W as VPP worker
+    participant W as DPAPP worker
     participant S as DASH SAI Server
     autonumber
     C->>+S: ENI_ATTR_FULL_FLOW_RESIMULATION_REQUESTED
@@ -227,6 +230,8 @@ sequenceDiagram
     P->>+P: packet comes and starts flow resimulation due to eni.epoch > flow.epoch
     P->>+W: slow-path, update flow data
 ```
+Note: epoch could be an internal attribute of eni and flow, which is not
+visible in public SAI.
 
 ### 6.4. HA flow
 Base on basic flow, HA flow adds an extra FLOW_SYNCED state, which involves
