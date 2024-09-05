@@ -58,17 +58,16 @@ parser dash_parser(
             // Flow delete, extract flow_data ...
             packet.extract(hd.flow_data);
 
-            if (hd.flow_data.routing_actions != 0) {
+            if (hd.flow_data.actions != 0) {
                 packet.extract(hd.flow_overlay_data);
             }
 
-            if (hd.flow_data.routing_actions & dash_routing_actions_t.STATIC_ENCAP != 0) {
+            if (hd.flow_data.actions & dash_routing_actions_t.STATIC_ENCAP != 0) {
                 packet.extract(hd.flow_encap_data);
             }
 
-            if (hd.flow_data.tunnel_id != 0) {
-                packet.extract(hd.flow_tunnel_data);
-            }
+            // FIXME: assume no tunnel data
+            // packet.extract(hd.flow_tunnel_data);
         }
 
         transition parse_customer_ethernet;

@@ -7,14 +7,13 @@ action conntrack_set_meta_from_dash_header(in headers_t hdr, out metadata_t meta
 {
     /* basic metadata */
     meta.direction = hdr.flow_data.direction;
-    meta.dash_tunnel_id = hdr.flow_data.tunnel_id;
-    meta.routing_actions = hdr.flow_data.routing_actions;
+    meta.dash_tunnel_id = 0;
+    meta.routing_actions = (bit<32>)hdr.flow_data.actions;
     meta.meter_class = hdr.flow_data.meter_class;
 
     /* encapsulation metadata */
 #ifdef TARGET_DPDK_PNA
     meta.encap_data.vni = hdr.flow_encap_data.vni;
-    meta.encap_data.dest_vnet_vni = hdr.flow_encap_data.dest_vnet_vni;
     meta.encap_data.underlay_sip = hdr.flow_encap_data.underlay_sip;
     meta.encap_data.underlay_dip = hdr.flow_encap_data.underlay_dip;
     meta.encap_data.underlay_smac = hdr.flow_encap_data.underlay_smac;
@@ -27,7 +26,6 @@ action conntrack_set_meta_from_dash_header(in headers_t hdr, out metadata_t meta
     /* tunnel metadata */
 #ifdef TARGET_DPDK_PNA
     meta.tunnel_data.vni = hdr.flow_tunnel_data.vni;
-    meta.tunnel_data.dest_vnet_vni = hdr.flow_tunnel_data.dest_vnet_vni;
     meta.tunnel_data.underlay_sip = hdr.flow_tunnel_data.underlay_sip;
     meta.tunnel_data.underlay_dip = hdr.flow_tunnel_data.underlay_dip;
     meta.tunnel_data.underlay_smac = hdr.flow_tunnel_data.underlay_smac;
@@ -71,8 +69,7 @@ control conntrack_build_dash_header(inout headers_t hdr, in metadata_t meta,
         hdr.flow_data.is_unidirectional = 0;
         hdr.flow_data.version = 0;
         hdr.flow_data.direction = meta.direction;
-        hdr.flow_data.tunnel_id = meta.dash_tunnel_id;
-        hdr.flow_data.routing_actions = meta.routing_actions;
+        hdr.flow_data.actions = (dash_flow_action_t)meta.routing_actions;
         hdr.flow_data.meter_class = meta.meter_class;
         length = length + FLOW_DATA_HDR_SIZE;
 
@@ -80,7 +77,6 @@ control conntrack_build_dash_header(inout headers_t hdr, in metadata_t meta,
 #ifdef TARGET_DPDK_PNA
             hdr.flow_encap_data.setValid();
             hdr.flow_encap_data.vni = meta.encap_data.vni;
-            hdr.flow_encap_data.dest_vnet_vni = meta.encap_data.dest_vnet_vni;
             hdr.flow_encap_data.underlay_sip = meta.encap_data.underlay_sip;
             hdr.flow_encap_data.underlay_dip = meta.encap_data.underlay_dip;
             hdr.flow_encap_data.underlay_smac = meta.encap_data.underlay_smac;
@@ -96,7 +92,6 @@ control conntrack_build_dash_header(inout headers_t hdr, in metadata_t meta,
 #ifdef TARGET_DPDK_PNA
             hdr.flow_tunnel_data.setValid();
             hdr.flow_tunnel_data.vni = meta.tunnel_data.vni;
-            hdr.flow_tunnel_data.dest_vnet_vni = meta.tunnel_data.dest_vnet_vni;
             hdr.flow_tunnel_data.underlay_sip = meta.tunnel_data.underlay_sip;
             hdr.flow_tunnel_data.underlay_dip = meta.tunnel_data.underlay_dip;
             hdr.flow_tunnel_data.underlay_smac = meta.tunnel_data.underlay_smac;
@@ -178,11 +173,11 @@ control conntrack_flow_created_handle(inout headers_t hdr, inout metadata_t meta
 control conntrack_flow_handle(inout headers_t hdr, inout metadata_t meta)
 {
     apply {
-        switch (meta.flow_state) {
-            dash_flow_state_t.FLOW_MISS: {
+        switch (meta.flow_data.sync_state) {
+            dash_flow_sync_state_t.FLOW_MISS: {
                 conntrack_flow_miss_handle.apply(hdr, meta);
             }
-            dash_flow_state_t.FLOW_CREATED: {
+            dash_flow_sync_state_t.FLOW_CREATED: {
                 conntrack_flow_created_handle.apply(hdr, meta);
             }
         }
@@ -225,87 +220,91 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
     //
     action set_flow_entry_attr(
         /* Flow basic metadata */
-        bit<1> is_unidirectional,
-        dash_flow_state_t state,
         bit<32> version,
         @SaiVal[type="sai_dash_direction_t"] dash_direction_t dash_direction,
-        bit<16> tunnel_id,
-        bit<32> routing_actions,
+        @SaiVal[type="sai_dash_flow_action_t"] dash_flow_action_t dash_flow_action,
         bit<32> meter_class,
+        bit<1> is_unidirectional_flow,
+        @SaiVal[type="sai_dash_flow_sync_state_t"] dash_flow_sync_state_t dash_flow_sync_state,
+
+        /* Reverse flow key */
+        EthernetAddress reverse_flow_eni_mac,
+        bit<16> reverse_flow_vnet_id,
+        bit<8> reverse_flow_ip_proto,
+        IPv4ORv6Address reverse_flow_src_ip,
+        IPv4ORv6Address reverse_flow_dst_ip,
+        bit<16> reverse_flow_src_port,
+        bit<16> reverse_flow_dst_port,
 
         /* Flow encap related attributes */
-        bit<24> encap_data_vni,
-        bit<24> encap_data_dest_vnet_vni,
-        IPv4Address encap_data_underlay_sip,
-        IPv4Address encap_data_underlay_dip,
-        EthernetAddress encap_data_underlay_smac,
-        EthernetAddress encap_data_underlay_dmac,
-        @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t encap_data_dash_encapsulation,
+        bit<24> underlay0_vnet_id,
+        IPv4Address underlay0_sip,
+        IPv4Address underlay0_dip,
+        EthernetAddress underlay0_smac,
+        EthernetAddress underlay0_dmac,
+        @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t underlay0_dash_encapsulation,
 
-        /* Flow tunnel related attributes */
-        bit<24> tunnel_data_vni,
-        bit<24> tunnel_data_dest_vnet_vni,
-        IPv4Address tunnel_data_underlay_sip,
-        IPv4Address tunnel_data_underlay_dip,
-        EthernetAddress tunnel_data_underlay_smac,
-        EthernetAddress tunnel_data_underlay_dmac,
-        @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t tunnel_data_dash_encapsulation,
+        bit<24> underlay1_vnet_id,
+        IPv4Address underlay1_sip,
+        IPv4Address underlay1_dip,
+        EthernetAddress underlay1_smac,
+        EthernetAddress underlay1_dmac,
+        @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t underlay1_dash_encapsulation,
 
         /* Flow overlay rewrite related attributes */
-        bit<1> overlay_data_is_ipv6,
-        EthernetAddress overlay_data_dst_mac,
-        IPv4ORv6Address overlay_data_sip,
-        IPv4ORv6Address overlay_data_dip,
-        IPv6Address overlay_data_sip_mask,
-        IPv6Address overlay_data_dip_mask,
+        EthernetAddress dst_mac,
+        IPv4ORv6Address sip,
+        IPv4ORv6Address dip,
+        IPv6Address sip_mask,
+        IPv6Address dip_mask,
+        @SaiVal[name = "ip_is_v6"]bit<1> is_ipv6,
 
-        /* Extra flow metadata, unused */
+        /* Extra flow metadata */
         @SaiVal[type="sai_u8_list_t"] bit<16> vendor_metadata,
         @SaiVal[type="sai_u8_list_t"] bit<16> flow_data_pb)
     {
-        meta.flow_state = state;
-        // TODO check FLOW_SYNCED in ha
-        // Do state FSM later
-        if (state != dash_flow_state_t.FLOW_CREATED) {
-            return;
-        }
+        /* Set Flow basic metadata */
+        meta.flow_data.version = version;
+        meta.flow_data.direction = dash_direction;
+        meta.flow_data.actions = dash_flow_action;
+        meta.flow_data.meter_class = meter_class;
+        meta.flow_data.is_unidirectional= is_unidirectional_flow;
+        meta.flow_data.sync_state = dash_flow_sync_state;
 
-        /* Set basic metadata */
+        /* Also set basic metadata */
         meta.direction = dash_direction;
-        meta.dash_tunnel_id = tunnel_id;
-        meta.routing_actions = routing_actions;
+        meta.routing_actions = (bit<32>)dash_flow_action;
         meta.meter_class = meter_class;
 
+        /* Reverse flow key is not used by now */
+        ;
+
         /* Set encapsulation metadata */
-        meta.encap_data.vni = encap_data_vni;
-        meta.encap_data.dest_vnet_vni = encap_data_dest_vnet_vni;
-        meta.encap_data.underlay_sip = encap_data_underlay_sip;
-        meta.encap_data.underlay_dip = encap_data_underlay_dip;
-        meta.encap_data.underlay_smac = encap_data_underlay_smac;
-        meta.encap_data.underlay_dmac = encap_data_underlay_dmac;
-        meta.encap_data.dash_encapsulation = encap_data_dash_encapsulation;
+        meta.encap_data.vni = underlay0_vnet_id;
+        meta.encap_data.underlay_sip = underlay0_sip;
+        meta.encap_data.underlay_dip = underlay0_dip;
+        meta.encap_data.dash_encapsulation = underlay0_dash_encapsulation;
+        meta.encap_data.underlay_smac = underlay0_smac;
+        meta.encap_data.underlay_dmac = underlay0_dmac;
 
-
-        /* Set tunnel metadata */
-        meta.tunnel_data.vni = tunnel_data_vni;
-        meta.tunnel_data.dest_vnet_vni = tunnel_data_dest_vnet_vni;
-        meta.tunnel_data.underlay_sip = tunnel_data_underlay_sip;
-        meta.tunnel_data.underlay_dip = tunnel_data_underlay_dip;
-        meta.tunnel_data.underlay_smac = tunnel_data_underlay_smac;
-        meta.tunnel_data.underlay_dmac = tunnel_data_underlay_dmac;
-        meta.tunnel_data.dash_encapsulation = tunnel_data_dash_encapsulation;
+        meta.tunnel_data.vni = underlay1_vnet_id;
+        meta.tunnel_data.underlay_sip = underlay1_sip;
+        meta.tunnel_data.underlay_dip = underlay1_dip;
+        meta.tunnel_data.dash_encapsulation = underlay1_dash_encapsulation;
+        meta.tunnel_data.underlay_smac = underlay1_smac;
+        meta.tunnel_data.underlay_dmac = underlay1_dmac;
 
         /* Set overlay rewrite metadata */
-        meta.overlay_data.is_ipv6 = overlay_data_is_ipv6;
-        meta.overlay_data.dmac = overlay_data_dst_mac;
-        meta.overlay_data.sip = overlay_data_sip;
-        meta.overlay_data.dip = overlay_data_dip;
-        meta.overlay_data.sip_mask = overlay_data_sip_mask;
-        meta.overlay_data.dip_mask = overlay_data_dip_mask;
+        meta.overlay_data.dmac = dst_mac;
+        meta.overlay_data.sip = sip;
+        meta.overlay_data.dip = dip;
+        meta.overlay_data.sip_mask = sip_mask;
+        meta.overlay_data.dip_mask = dip_mask;
+        meta.overlay_data.is_ipv6 = is_ipv6;
     }
 
     action flow_miss() {
-        meta.flow_state = dash_flow_state_t.FLOW_MISS;
+        meta.flow_data.sync_state = dash_flow_sync_state_t.FLOW_MISS;
     }
 
     @SaiTable[name = "flow", api = "dash_flow", order = 1, enable_bulk_get_api = "true", enable_bulk_get_server = "true"]

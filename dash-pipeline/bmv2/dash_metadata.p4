@@ -117,15 +117,6 @@ enum bit<8> dash_ha_state_t {
     SWITCHING_TO_STANDALONE = 12
 };
 
-// Flow state
-enum bit<8> dash_flow_state_t {
-    FLOW_MISS = 0,                  // Flow not created yet
-    FLOW_CREATED = 1,               // Flow is created but not synched or waiting for ack
-    FLOW_SYNCED = 2,                // Flow has been synched to its peer
-    FLOW_PENDING_DELETE = 3,        // Flow is pending deletion, waiting for ack
-    FLOW_PENDING_RESIMULATION = 4   // Flow is marked as pending resimulation
-};
-
 struct ha_data_t {
     // HA scope settings
     bit<16> ha_scope_id;
@@ -140,18 +131,24 @@ struct ha_data_t {
     bit<16> dp_channel_dst_port;
     bit<16> dp_channel_src_port_min;
     bit<16> dp_channel_src_port_max;
-
-    // HA packet/flow state
-    dash_flow_state_t ha_flow_state;
 }
 
 #ifdef TARGET_DPDK_PNA
 // redefine encap_data_t -> meta_encap_data_t
 // redefine overlay_rewrite_data_t -> meta_overlay_rewrite_data_t
 // header in struct is not well supported for target dpdk-pna
+struct meta_flow_data_t {
+    bit<7> reserved;
+    bit<1> is_unidirectional;
+    dash_flow_sync_state_t sync_state;
+    dash_direction_t direction;
+    bit<32> version;
+    dash_flow_action_t actions;
+    dash_meter_class_t meter_class;
+}
 struct meta_encap_data_t {
     bit<24> vni;
-    bit<24> dest_vnet_vni;
+    bit<8>  reserved;
     IPv4Address underlay_sip;
     IPv4Address underlay_dip;
     EthernetAddress underlay_smac;
@@ -214,8 +211,12 @@ struct metadata_t {
 
     // Flow data
     conntrack_data_t conntrack_data;
+#ifdef TARGET_DPDK_PNA
+    meta_flow_data_t flow_data;
+#else
+    flow_data_t flow_data;
+#endif // TARGET_DPDK_PNA
     flow_table_data_t flow_table;
-    dash_flow_state_t flow_state;
     bit<16> bulk_get_session_id;
     bit<16> bulk_get_session_filter_id;
     bool flow_enabled;

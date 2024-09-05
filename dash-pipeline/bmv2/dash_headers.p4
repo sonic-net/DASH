@@ -45,7 +45,7 @@ enum bit<16> dash_encapsulation_t {
 
 header encap_data_t {
     bit<24> vni;
-    bit<24> dest_vnet_vni;
+    bit<8>  reserved;
     IPv4Address underlay_sip;
     IPv4Address underlay_dip;
     EthernetAddress underlay_smac;
@@ -153,6 +153,19 @@ header ipv6_t {
 const bit<16> IPV6_HDR_SIZE=320/8;
 
 
+// Flow sync state
+enum bit<8> dash_flow_sync_state_t {
+    FLOW_MISS = 0,                  // Flow not created yet
+    FLOW_CREATED = 1,               // Flow is created but not synched or waiting for ack
+    FLOW_SYNCED = 2,                // Flow has been synched to its peer
+    FLOW_PENDING_DELETE = 3,        // Flow is pending deletion, waiting for ack
+    FLOW_PENDING_RESIMULATION = 4   // Flow is marked as pending resimulation
+}
+
+enum bit<32> dash_flow_action_t {
+    NONE = 0
+}
+
 enum bit<16> dash_flow_enabled_key_t {
     ENI_MAC = (1 << 0),
     VNI = (1 << 1),
@@ -214,10 +227,10 @@ const bit<16> FLOW_KEY_HDR_SIZE=flow_key_t.minSizeInBytes();
 header flow_data_t {
     bit<7> reserved;
     bit<1> is_unidirectional;
-    bit<32> version;
+    dash_flow_sync_state_t sync_state;
     dash_direction_t direction;
-    bit<16> tunnel_id;
-    bit<32> routing_actions;
+    bit<32> version;
+    dash_flow_action_t actions;
     dash_meter_class_t meter_class;
 }
 const bit<16> FLOW_DATA_HDR_SIZE=flow_data_t.minSizeInBytes();

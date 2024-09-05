@@ -9,6 +9,7 @@
 | 0.5 | 04/08/2024 | Riff Jiang | Added support for bulk sync. |
 | 0.6 | 04/09/2024 | Riff Jiang | Added support for flow reconcile for planned and unplanned switchover. |
 | 0.7 | 06/20/2024 | Mukesh Velayudhan  | Added DPU scope DPU driven attributes and description. |
+| 0.8 | 09/10/2024 | Junhua Zhai| Updated flow attr name and type for flow sync state. |
 
 1. [1. Terminology](#1-terminology)
 2. [2. Background](#2-background)
@@ -175,20 +176,20 @@ To support HA, each flow contains the following SAI attributes:
 
 | Attribute name | Type | Description |
 | -------------- | ---- | ----------- |
-| SAI_FLOW_ATTR_FLOW_VERSION | `sai_uint32_t` | The flow version. |
-| SAI_FLOW_ATTR_FLOW_SYNC_STATE | `sai_dash_ha_flow_sync_state_t` | The flow sync state. |
+| SAI_FLOW_ENTRY_ATTR_VERSION | `sai_uint32_t` | The flow version. |
+| SAI_FLOW_ENTRY_ATTR_DASH_FLOW_SYNC_STATE | `sai_dash_flow_sync_state_t` | The flow sync state. |
 
 The flow sync state is defined as below:
 
 ```c
-typedef enum _sai_dash_ha_flow_sync_state_t
+typedef enum _sai_dash_flow_sync_state_t
 {
-    SAI_DASH_HA_FLOW_SYNC_STATE_FLOW_MISS,
-    SAI_DASH_HA_FLOW_SYNC_STATE_FLOW_CREATED,
-    SAI_DASH_HA_FLOW_SYNC_STATE_FLOW_SYNCED,
-    SAI_DASH_HA_FLOW_SYNC_STATE_FLOW_PENDING_DELETE,
-    SAI_DASH_HA_FLOW_SYNC_STATE_FLOW_PENDING_RESIMULATION
-} sai_dash_ha_flow_sync_state_t;
+    SAI_DASH_FLOW_SYNC_STATE_FLOW_MISS,
+    SAI_DASH_FLOW_SYNC_STATE_FLOW_CREATED,
+    SAI_DASH_FLOW_SYNC_STATE_FLOW_SYNCED,
+    SAI_DASH_FLOW_SYNC_STATE_FLOW_PENDING_DELETE,
+    SAI_DASH_FLOW_SYNC_STATE_FLOW_PENDING_RESIMULATION
+} sai_dash_flow_sync_state_t;
 ```
 
 The flow sync state is a small state machine that represents if the flow is synched or not, so we can make the packet processing decision accordingly to achieve HA.

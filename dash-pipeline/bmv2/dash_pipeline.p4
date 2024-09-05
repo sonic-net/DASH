@@ -232,6 +232,7 @@ control dash_ingress(
 
 #ifndef TARGET_DPDK_PNA
         meta.rx_encap.setValid();
+        meta.flow_data.setValid();
         meta.encap_data.setValid();
         meta.tunnel_data.setValid();
         meta.overlay_data.setValid();
@@ -268,7 +269,7 @@ control dash_ingress(
         ha_stage.apply(hdr, meta);
 
         if (!meta.flow_enabled ||
-            (meta.flow_state == dash_flow_state_t.FLOW_MISS &&
+            (meta.flow_data.sync_state == dash_flow_sync_state_t.FLOW_MISS &&
              hdr.packet_meta.packet_source == dash_packet_source_t.EXTERNAL))
         {
             dash_match_stage.apply(hdr, meta);
