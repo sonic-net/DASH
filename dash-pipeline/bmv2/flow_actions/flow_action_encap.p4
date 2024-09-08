@@ -75,7 +75,6 @@ control do_action_encap(
             }
         }
 
-        meta.tunnel_pointer = meta.tunnel_pointer + 1;
     }
 }
 
