@@ -12,7 +12,8 @@ control do_action_overlay_rewrite(
 
         REQUIRES(meta.overlay_data.is_ipv6 == false);
 
-        hdr.customer_ipv4.setValid();
+        // hdr.customer_ipv4.setValid();
+
         hdr.customer_ipv4.dst_addr = (IPv4Address)((IPv6Address)meta.overlay_data.dip & meta.overlay_data.dip_mask);
         hdr.customer_ipv4.src_addr = (IPv4Address)((IPv6Address)meta.overlay_data.sip & meta.overlay_data.sip_mask);
         hdr.customer_ethernet.dst_addr = meta.overlay_data.dmac;
