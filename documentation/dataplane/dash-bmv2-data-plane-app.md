@@ -148,26 +148,28 @@ DASH metadata is encoded in protocol DASH_METADATA, whose message format is defi
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                           Flow data                           :
    :                                                               |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-   Source: Where is packet from, dash_packet_source_t               
-   Type: Packet type under certain source 
-   Subtype: Packet subtype under certain type 
+   Source: Where is packet from, dash_packet_source_t
+   Type: Packet type under certain source
+   Subtype: Packet subtype under certain type
    Length: Total length of DASH header
    Flow key entry: eni_mac, 5-tuples
    Flow data: As next figure
 ```
-                                      
+
 ```
    0                   1                   2                   3   
    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  |D|                     Version                                 |
+  |  Reserved   |U|  Sync State   |          Direction            |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |                       Version                                 |
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
   |                       Action                                  |
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
   |                       Meter Class                             |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                                                                 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
   |                       [overlay rewrite]                       :
   :                                                               |
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -178,10 +180,12 @@ DASH metadata is encoded in protocol DASH_METADATA, whose message format is defi
   :                                                               |
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                                                                    
-  D: flow direction, 0, oubound; 1, inbound                                             
-  Version: flow version                               
-  Action: flow data – action
-  Meter: Meter class
+  U: flag is-unidirectional, 0, false, 1, true
+  Sync State: flow sync state
+  Direction: flow direction, 0, oubound; 1, inbound
+  Version: flow version
+  Action: flow action
+  Meter Class: Meter class object
   ...
 ```
 
