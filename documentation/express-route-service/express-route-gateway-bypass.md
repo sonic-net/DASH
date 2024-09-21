@@ -141,13 +141,16 @@ Furthermore, when MSEE failover, we need to update the reverse tunnel on all exi
 
 #### 5.2.2. MSEE device selection
 
-To handle this, we learn the PLS-to-MSEE tunnel information from the first packet when flow is created, including the encap type, key, and destination IP, and create the reverse tunnel in the reverse flow, which make sure the return traffic will be sent back to the originating MSEE.
+Unlike VM-to-* scenarios, the reverse tunnel can only have 1 single destination IP that specified using the `SAI_ENI_ATTR_VM_UNDERLAY_DIP` attribute. MSEE devices can have active-active pairs, so this single IP solution won't work.
 
-In some cases, we will need the ability to specify the source IP of the reverse tunnel. To support this, we will add a new attribute in the ENI object:
+To handle this, we learn the PLS-to-MSEE tunnel information from the first packet when flow is created, including the encap type, key, and destination IP, and create the reverse tunnel in the reverse flow, which make sure the return traffic will be sent back to the originating MSEE. To avoid changing the behavior of VM-to-* scenarios, this behavior can be turned on or off by the SDN controller for each ENI using a dedicated attribute (see below).
+
+In some cases, we will need the ability to specify the source IP of the reverse tunnel. To support this, we added another new attribute in the ENI object.
 
 | SAI attribute name | Type | Description |
 | --------------- | ---- | ----------- |
 | SAI_ENI_ATTR_REVERSE_TUNNEL_SIP | sai_ip_address_t | Source IP used in the reverse tunnel. |
+| SAI_ENI_ATTR_ENABLE_REVERSE_TUNNEL_LEARNING | bool | If true, the reverse tunnel will be learned from the first packet. |
 
 #### 5.2.3. MSEE failover handling using flow resimulation
 
