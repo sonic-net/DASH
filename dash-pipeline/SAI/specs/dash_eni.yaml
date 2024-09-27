@@ -598,7 +598,6 @@ sai_apis:
     valid_only: null
     is_vlan: false
     deprecated: false
-    deprecated: false
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_ATTR_ENABLE_REVERSE_TUNNEL_LEARNING
     description: Action parameter enable reverse tunnel learning
@@ -624,6 +623,7 @@ sai_apis:
     allow_null: false
     valid_only: null
     is_vlan: false
+    deprecated: false
   stats:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_RX_BYTES
