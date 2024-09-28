@@ -19,6 +19,7 @@ class DashP4TableAttribute(DashP4Object):
         self.skipattr: Optional[str] = None
         self.match_type: str = ""
         self.validonly: Optional[str] = None
+        self.is_object_key: bool = False
 
     def _parse_sai_table_attribute_annotation(
         self, p4rt_anno_list: Dict[str, Any]
@@ -66,6 +67,8 @@ class DashP4TableAttribute(DashP4Object):
                         self.match_type = str(kv["value"]["stringValue"])
                     elif kv["key"] == "validonly":
                         self.validonly = str(kv["value"]["stringValue"])
+                    elif kv["key"] == "is_object_key":
+                        self.is_object_key = kv["value"]["stringValue"] == "true"
                     else:
                         raise ValueError("Unknown attr annotation " + kv["key"])
 
