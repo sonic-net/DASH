@@ -62,6 +62,8 @@ jobs:
       run:  make docker-bmv2-bldr
     - name: Generate SAI API
       run:  DOCKER_FLAGS=$docker_fg_flags make sai
+    - name: Check if SAI spec is updated
+      run:  DOCKER_FLAGS=$docker_fg_flags make check-sai-spec
     - name: Build libsai c++ tests
       run:  DOCKER_FLAGS=$docker_fg_flags make test
     - name: Prepare network
@@ -90,4 +92,10 @@ jobs:
       run:  DOCKER_FLAGS=$docker_fg_flags make docker-saichallenger-client
     - name: Run SAI-Challenger Tests
       run:  DOCKER_FLAGS=$docker_fg_root_flags make run-saichallenger-tests
-      
+    - name: Build libsai debian packages
+      run:  DOCKER_FLAGS=$docker_fg_root_flags make libsai-debs
+    - uses: actions/upload-artifact@v3
+      with:
+        name: libsai-debian-packages
+        path: /home/runner/work/DASH/DASH/dash-pipeline/SAI/debian/*deb
+        if-no-files-found: error

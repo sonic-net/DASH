@@ -53,6 +53,15 @@
     ]
   },
   {
+    "name": "rg",
+    "op": "create",
+    "type": "SAI_OBJECT_TYPE_OUTBOUND_ROUTING_GROUP",
+    "attributes": [
+      "SAI_OUTBOUND_ROUTING_GROUP_ATTR_DISABLED",
+      "False"
+    ]
+  },
+  {
     "name": "eni_id",
     "op": "create",
     "type": "SAI_OBJECT_TYPE_ENI",
@@ -65,12 +74,22 @@
       "100000",
       "SAI_ENI_ATTR_ADMIN_STATE",
       "True",
+      "SAI_ENI_ATTR_HA_SCOPE_ID",
+      "True",
       "SAI_ENI_ATTR_VM_UNDERLAY_DIP",
       "10.10.2.10",
       "SAI_ENI_ATTR_VM_VNI",
       "9",
       "SAI_ENI_ATTR_VNET_ID",
       "$vnet_1",
+      "SAI_ENI_ATTR_OUTBOUND_ROUTING_GROUP_ID",
+      "$rg",
+      "SAI_ENI_ATTR_PL_SIP",
+      "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+      "SAI_ENI_ATTR_PL_SIP_MASK",
+      "2001:0db8:85a3:0000:0000:0000:0000:0000",
+      "SAI_ENI_ATTR_PL_UNDERLAY_SIP",
+      "10.0.0.18",
       "SAI_ENI_ATTR_INBOUND_V4_STAGE1_DASH_ACL_GROUP_ID",
       "$acl_in_1",
       "SAI_ENI_ATTR_INBOUND_V4_STAGE2_DASH_ACL_GROUP_ID",
@@ -114,6 +133,16 @@
       "SAI_ENI_ATTR_V4_METER_POLICY_ID",
       "0",
       "SAI_ENI_ATTR_V6_METER_POLICY_ID",
+      "0",
+      "SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE",
+      "SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL",
+      "SAI_ENI_ATTR_DSCP",
+      "0",
+      "SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION",
+      "False",
+      "SAI_ENI_ATTR_FULL_FLOW_RESIMULATION_REQUESTED",
+      "False",
+      "SAI_ENI_ATTR_MAX_RESIMULATED_FLOW_PER_SECOND",
       "0"
     ]
   },
@@ -126,6 +155,8 @@
       "address": "00:AA:AA:AA:AA:00"
     },
     "attributes": [
+      "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ACTION",
+      "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ACTION_SET_ENI",
       "SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID",
       "$eni_id"
     ]
@@ -144,9 +175,13 @@
     },
     "attributes": [
       "SAI_INBOUND_ROUTING_ENTRY_ATTR_ACTION",
-      "SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE",
+      "SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE",
       "SAI_INBOUND_ROUTING_ENTRY_ATTR_SRC_VNET_ID",
-      "$vnet_1"
+      "$vnet_1",
+      "SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR",
+      "0",
+      "SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND",
+      "-1"
     ]
   },
   {

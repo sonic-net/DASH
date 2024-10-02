@@ -1,0 +1,86 @@
+# This Dockerfile builds an image used to compile/run dash date-plane app.
+FROM sonicdash.azurecr.io/dash-grpc:1.43.2 as grpc
+FROM p4lang/behavioral-model@sha256:ce45720e28a96a50f275c1b511cd84c2558b62f2cf7a7e506765183bc3fb2e32
+LABEL maintainer="SONIC-DASH Community"
+LABEL description="DASH date-plane app using vpp"
+
+# Configure make to run as many parallel jobs as cores available
+ARG available_processors
+ARG MAKEFLAGS=-j$available_processors
+
+ARG sswitch_grpc=yes
+ARG CC=gcc
+ARG CXX=g++
+# Set TZ to avoid interactive installer
+ENV TZ=America/Los_Angeles
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ENV GIT_SSL_NO_VERIFY=true
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+            git \
+            build-essential \
+            autoconf \
+            libtool \
+            libtool-bin \
+            pkg-config \
+            patchelf \
+            sudo \
+            iproute2 net-tools iputils-ping \
+            make
+
+## Install vpp
+RUN apt-get install -y curl
+RUN curl -s https://packagecloud.io/install/repositories/fdio/release/script.deb.sh | bash -x
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+            vpp vpp-plugin-core vpp-plugin-dpdk vpp-dbg vpp-dev
+
+# vpp development environment
+RUN echo "wireshark-common wireshark-common/install-setuid boolean true" | debconf-set-selections
+WORKDIR /var
+RUN (git clone https://gerrit.fd.io/r/vpp && \
+     cd vpp && UNATTENDED=y make install-dep)
+
+
+WORKDIR /usr/local/lib/
+
+# Copy libabsl .a files from p4pi, make shared lib for our use and delete .a's
+COPY --from=grpc /usr/local/lib/lib*grpc*.so* \
+        /usr/local/lib/libabsl*.so* \
+        /usr/local/lib/libgpr*.so* \
+        /usr/local/lib/libupb*.so* \
+        /usr/local/lib/libre2*.so* \
+        /usr/local/lib/libaddress_sorting*.so* \
+        /usr/local/lib/libssl*.so* \
+        /usr/local/lib/libcrypto*.so* \
+        ./
+
+# Specify dash sai libs dependency on vpp
+RUN patchelf --set-rpath /SAI/lib /usr/bin/vpp
+RUN patchelf --add-needed libsai.so \
+             --add-needed libprotobuf.so \
+             --add-needed libpiprotobuf.so \
+             --add-needed libpiprotogrpc.so \
+             --add-needed libgrpc++.so.1.43 \
+             /usr/bin/vpp
+RUN ldconfig
+
+WORKDIR /
+
+ARG user
+ARG uid
+ARG group
+ARG guid
+ARG hostname
+
+ENV BUILD_HOSTNAME $hostname
+ENV USER $user
+
+RUN groupadd -f -r -g $guid $group
+RUN useradd $user -l -u $uid -g $guid -d /var/$user -m -s /bin/bash
+RUN echo "$user ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers
+
+USER $user
+
+CMD /bin/bash

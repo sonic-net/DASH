@@ -42,39 +42,42 @@ control ConntrackIn(inout headers_t hdr,
   action conntrackIn_allow (IPv4Address original_overlay_sip, IPv4Address original_overlay_dip) {
   /* Invalidate entry based on TCP flags */
           // If FIN is 1 (0b000001), or if RST is 1 (0b000100):
-          if ((hdr.tcp.flags & 0b000101 /* FIN/RST */) != 0) {
+          if ((hdr.customer_tcp.flags & 0b000101 /* FIN/RST */) != 0) {
             set_entry_expire_time(EXPIRE_TIME_PROFILE_NOW); // New PNA extern
             /* set entry to be purged */
           }
           restart_expire_timer(); // reset expiration timer for entry
           meta.conntrack_data.allow_in = true;
-          meta.encap_data.original_overlay_sip = original_overlay_sip;
-          meta.encap_data.original_overlay_dip = original_overlay_dip;
+          meta.overlay_data.is_ipv6 = false;
+          meta.overlay_data.sip = (IPv4ORv6Address)original_overlay_sip;
+          meta.overlay_data.dip = (IPv4ORv6Address)original_overlay_dip;
   }
 
   action conntrackIn_miss() {
           // TODO: Should this be ((hdr.tcp.flags & 0x2) != 0) instead?
-          if (hdr.tcp.flags == 0x2 /* SYN */) {
+          if (hdr.customer_tcp.flags == 0x2 /* SYN */) {
             if (meta.direction == dash_direction_t.OUTBOUND) {
-               // New PNA Extern
-               add_entry("conntrackIn_allow",
-                         {meta.encap_data.original_overlay_sip, meta.encap_data.original_overlay_dip},
-                         EXPIRE_TIME_PROFILE_LONG);
-               //adding failure to be eventually handled
+                if (meta.routing_actions & dash_routing_actions_t.NAT46 != 0) {
+                    // New PNA Extern
+                    add_entry("conntrackIn_allow",
+                                {(IPv4Address)meta.src_ip_addr, (IPv4Address)meta.dst_ip_addr},
+                                EXPIRE_TIME_PROFILE_LONG);
+                }
+                //adding failure to be eventually handled
             }
           }
   }
 
   table conntrackIn {
       key = {
-          directionNeutralAddr(meta.direction, hdr.ipv4.src_addr, hdr.ipv4.dst_addr):
+          directionNeutralAddr(meta.direction, hdr.customer_ipv4.src_addr, hdr.customer_ipv4.dst_addr):
               exact @name("ipv4_addr1");
-          directionNeutralAddr(meta.direction, hdr.ipv4.dst_addr, hdr.ipv4.src_addr):
+          directionNeutralAddr(meta.direction, hdr.customer_ipv4.dst_addr, hdr.customer_ipv4.src_addr):
               exact @name("ipv4_addr2");
-          hdr.ipv4.protocol : exact;
-          directionNeutralPort(meta.direction, hdr.tcp.src_port, hdr.tcp.dst_port):
+          hdr.customer_ipv4.protocol : exact;
+          directionNeutralPort(meta.direction, hdr.customer_tcp.src_port, hdr.customer_tcp.dst_port):
               exact @name("tcp_port1");
-          directionNeutralPort(meta.direction, hdr.tcp.dst_port, hdr.tcp.src_port):
+          directionNeutralPort(meta.direction, hdr.customer_tcp.dst_port, hdr.customer_tcp.src_port):
               exact @name("tcp_port2");
           meta.eni_id : exact;
       }
@@ -99,7 +102,7 @@ control ConntrackOut(inout headers_t hdr,
   action conntrackOut_allow () {
   /* Invalidate entry based on TCP flags */
           // If FIN is 1 (0b000001), or if RST is 1 (0b000100):
-          if ((hdr.tcp.flags & 0b000101 /* FIN/RST */) != 0) {
+          if ((hdr.customer_tcp.flags & 0b000101 /* FIN/RST */) != 0) {
             set_entry_expire_time(EXPIRE_TIME_PROFILE_NOW); // New PNA extern
             /* set entry to be purged */
           }
@@ -109,7 +112,7 @@ control ConntrackOut(inout headers_t hdr,
 
   action conntrackOut_miss() {
           // TODO: Should this be ((hdr.tcp.flags & 0x2) != 0) instead?
-          if (hdr.tcp.flags == 0x2 /* SYN */) {
+          if (hdr.customer_tcp.flags == 0x2 /* SYN */) {
             if (meta.direction == dash_direction_t.INBOUND) {
                // New PNA Extern
                add_entry("conntrackOut_allow", {}, EXPIRE_TIME_PROFILE_LONG);
@@ -120,14 +123,14 @@ control ConntrackOut(inout headers_t hdr,
 
   table conntrackOut {
       key = {
-          directionNeutralAddr(meta.direction, hdr.ipv4.src_addr, hdr.ipv4.dst_addr):
+          directionNeutralAddr(meta.direction, hdr.customer_ipv4.src_addr, hdr.customer_ipv4.dst_addr):
               exact @name("ipv4_addr1");
-          directionNeutralAddr(meta.direction, hdr.ipv4.dst_addr, hdr.ipv4.src_addr):
+          directionNeutralAddr(meta.direction, hdr.customer_ipv4.dst_addr, hdr.customer_ipv4.src_addr):
               exact @name("ipv4_addr2");
-          hdr.ipv4.protocol : exact;
-          directionNeutralPort(meta.direction, hdr.tcp.src_port, hdr.tcp.dst_port):
+          hdr.customer_ipv4.protocol : exact;
+          directionNeutralPort(meta.direction, hdr.customer_tcp.src_port, hdr.customer_tcp.dst_port):
               exact @name("tcp_port1");
-          directionNeutralPort(meta.direction, hdr.tcp.dst_port, hdr.tcp.src_port):
+          directionNeutralPort(meta.direction, hdr.customer_tcp.dst_port, hdr.customer_tcp.src_port):
               exact @name("tcp_port2");
           meta.eni_id : exact;
       }

@@ -52,13 +52,16 @@ class UnderlayRouteTest(VnetApiEndpoints, VnetTrafficMixin):
         src_vnet = self.vnet_create(vni=self.tx_host.client.vni)
         dst_vnet = self.vnet_create(vni=self.rx_host.client.vni)
 
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
+
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
-                                 vnet_id=src_vnet)
+                                 vnet_id=src_vnet,
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id, self.tx_host.client.mac)  # ENI MAC
 
-        self.outbound_routing_vnet_create(eni_id=eni_id, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="192.168.1.0/24",
                                           dst_vnet_id=dst_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet,
                                       dip=self.rx_host.client.ip,
@@ -70,7 +73,7 @@ class UnderlayRouteTest(VnetApiEndpoints, VnetTrafficMixin):
         self.host_1 = self.tx_host
         self.host_2 = self.rx_host
 
-        self.configure_underlay(self.host_1, self.host_2)
+        #self.configure_underlay(self.host_1, self.host_2)
 
     def verifyOverlayOutboundConfigTest(self):
 
@@ -116,11 +119,10 @@ class UnderlayRouteTest(VnetApiEndpoints, VnetTrafficMixin):
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetInboundDecapPaValidateSinglePortTest(VnetApiEndpoints, VnetTrafficMixin):
     """
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP_PA_VALIDATE inbound routing entry action
+    TUNNEL_DECAP_PA_VALIDATE inbound routing entry action
     with underlay config (neighbour + next hop) but without underlay routes
 
     Verifies positive and negative scenarios
@@ -130,7 +132,7 @@ class Vnet2VnetInboundDecapPaValidateSinglePortTest(VnetApiEndpoints, VnetTraffi
         # Reconfigure configuration for tx equal to rx
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.tx_host, add_routes=False)
+        #self.configure_underlay(self.tx_host, add_routes=False)
 
         self.vnet2VnetInboundRoutingTest(tx_equal_to_rx=True)
         self.vnet2VnetInboundNegativeTest()
@@ -155,8 +157,9 @@ class Vnet2VnetInboundDecapPaValidateSinglePortTest(VnetApiEndpoints, VnetTraffi
         self.eni_mac_map_create(eni_id, self.rx_host.client.mac)  # ENI MAC
 
         # Inbound routing PA Validate
+        addr_mask = self.tx_host.ip_prefix.split('/')
         self.inbound_routing_decap_validate_create(eni_id, vni=self.tx_host.client.vni,
-                                                   sip=self.tx_host.ip, sip_mask="255.255.255.0",
+                                                   sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]),
                                                    src_vnet_id=src_vnet)
         # PA validation entry with Permit action
         self.pa_validation_create(self.tx_host.ip, src_vnet)
@@ -203,12 +206,11 @@ class Vnet2VnetInboundDecapPaValidateSinglePortTest(VnetApiEndpoints, VnetTraffi
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetInboundDecapPaValidateSinglePortOverlayIpv6Test(Vnet2VnetInboundDecapPaValidateSinglePortTest):
     """
     Underlay IPv4 and Overlay IPv6 configs
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP_PA_VALIDATE inbound routing entry action
+    TUNNEL_DECAP_PA_VALIDATE inbound routing entry action
     with underlay config (neighbour + next hop) but without underlay routes
 
     Verifies positive and negative scenarios
@@ -223,7 +225,7 @@ class Vnet2VnetInboundDecapPaValidateSinglePortOverlayIpv6Test(Vnet2VnetInboundD
 class Vnet2VnetInboundDecapPaValidateTwoPortsTest(Vnet2VnetInboundDecapPaValidateSinglePortTest):
     """
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP_PA_VALIDATE inbound routing entry action
+    TUNNEL_DECAP_PA_VALIDATE inbound routing entry action
     with full underlay config (2 neighbours, 2 next-hops, 2 routes)
 
     Verifies positive scenario
@@ -231,7 +233,7 @@ class Vnet2VnetInboundDecapPaValidateTwoPortsTest(Vnet2VnetInboundDecapPaValidat
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host)
+        # self.configure_underlay(self.tx_host, self.rx_host)
 
         self.vnet2VnetInboundRoutingTest(tx_equal_to_rx=False)
         self.vnet2VnetInboundNegativeTest()
@@ -243,7 +245,7 @@ class Vnet2VnetInboundDecapPaValidateTwoPortsOverlayIpv6Test(Vnet2VnetInboundDec
     """
     Underlay IPv4 and Overlay IPv6 configs
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP_PA_VALIDATE inbound routing entry action
+    TUNNEL_DECAP_PA_VALIDATE inbound routing entry action
     with full underlay config (2 neighbours, 2 next-hops, 2 routes)
 
     Verifies positive scenario
@@ -251,17 +253,16 @@ class Vnet2VnetInboundDecapPaValidateTwoPortsOverlayIpv6Test(Vnet2VnetInboundDec
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host)
+        # self.configure_underlay(self.tx_host, self.rx_host)
 
         self.vnet2VnetInboundRoutingTest(tx_equal_to_rx=False)
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetInboundDecapSinglePortTest(Vnet2VnetInboundDecapPaValidateSinglePortTest):
     """
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP inbound routing entry action
+    TUNNEL_DECAP inbound routing entry action
     with underlay config (neighbour + next hop) but without underlay routes
 
     Verifies positive and negative scenarios
@@ -286,8 +287,9 @@ class Vnet2VnetInboundDecapSinglePortTest(Vnet2VnetInboundDecapPaValidateSingleP
         self.eni_mac_map_create(eni_id, self.rx_host.client.mac)  # ENI MAC
 
         # Inbound routing PA Validate
+        addr_mask = self.tx_host.ip_prefix.split('/')
         self.inbound_routing_decap_create(eni_id, vni=self.tx_host.client.vni,
-                                          sip=self.tx_host.ip, sip_mask="255.255.255.0")
+                                          sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]))
 
     def vnet2VnetInboundNegativeTest(self):
         """
@@ -314,12 +316,11 @@ class Vnet2VnetInboundDecapSinglePortTest(Vnet2VnetInboundDecapPaValidateSingleP
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetInboundDecapSinglePortOverlayIpv6Test(Vnet2VnetInboundDecapSinglePortTest):
     """
     Underlay IPv4 and Overlay IPv6 configs
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP inbound routing entry action
+    TUNNEL_DECAP inbound routing entry action
     with underlay config (neighbour + next hop) but without underlay routes
 
     Verifies positive and negative scenarios
@@ -334,7 +335,7 @@ class Vnet2VnetInboundDecapSinglePortOverlayIpv6Test(Vnet2VnetInboundDecapSingle
 class Vnet2VnetInboundDecapTwoPortsTest(Vnet2VnetInboundDecapSinglePortTest):
     """
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP inbound routing entry action
+    TUNNEL_DECAP inbound routing entry action
     with full underlay config (2 neighbours, 2 next-hops, 2 routes)
 
     Verifies positive scenario
@@ -342,7 +343,7 @@ class Vnet2VnetInboundDecapTwoPortsTest(Vnet2VnetInboundDecapSinglePortTest):
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host)
+        # self.configure_underlay(self.tx_host, self.rx_host)
 
         self.vnet2VnetInboundRoutingTest(tx_equal_to_rx=False)
         self.vnet2VnetInboundNegativeTest()
@@ -354,7 +355,7 @@ class Vnet2VnetInboundDecapTwoPortsOverlayIpv6Test(Vnet2VnetInboundDecapSinglePo
     """
     Underlay IPv4 and Overlay IPv6 configs
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP inbound routing entry action
+    TUNNEL_DECAP inbound routing entry action
     with full underlay config (2 neighbours, 2 next-hops, 2 routes)
 
     Verifies positive scenario
@@ -362,13 +363,12 @@ class Vnet2VnetInboundDecapTwoPortsOverlayIpv6Test(Vnet2VnetInboundDecapSinglePo
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host)
+        # self.configure_underlay(self.tx_host, self.rx_host)
 
         self.vnet2VnetInboundRoutingTest(tx_equal_to_rx=False)
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetInboundMultiplePaValidatesSingleEniSinglePortTest(VnetApiEndpoints, VnetTrafficMixin):
     """
     Inbound Vnet to Vnet scenario test case with single eni and
@@ -392,7 +392,7 @@ class Vnet2VnetInboundMultiplePaValidatesSingleEniSinglePortTest(VnetApiEndpoint
         # Reconfigure configuration for tx equal to rx
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.tx_host, add_routes=False)
+        # self.configure_underlay(self.tx_host, add_routes=False)
 
         self.vnet2VnetInboundRoutingPositiveTest(tx_equal_to_rx=True)
         self.vnet2VnetInboundRoutingNegativeTest()
@@ -428,7 +428,7 @@ class Vnet2VnetInboundMultiplePaValidatesSingleEniSinglePortTest(VnetApiEndpoint
         self.tx_host_3 = self.define_neighbor_network(port=self.tx_host_0.port,
                                                       mac=self.tx_host_0.mac,
                                                       ip="11.0.0.1",
-                                                      ip_prefix="11.0.0.1/24",
+                                                      ip_prefix="11.0.0.0/24",
                                                       peer_port=self.tx_host_0.peer.port,
                                                       peer_mac=self.tx_host_0.peer.mac,
                                                       peer_ip=self.tx_host_0.peer.ip,
@@ -454,26 +454,30 @@ class Vnet2VnetInboundMultiplePaValidatesSingleEniSinglePortTest(VnetApiEndpoint
         self.eni_mac_map_create(eni_id, self.rx_host.client.mac)  # ENI MAC
 
         # Inbound routing decap
+        addr_mask = self.tx_host_3.ip_prefix.split('/')
         self.inbound_routing_decap_create(eni_id, vni=self.tx_host_3.client.vni,
-                                          sip=self.tx_host_3.ip, sip_mask="255.255.255.0")
+                                          sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]))
 
         # Inbound routing decap PA Validate tx_host_0
+        addr_mask = self.tx_host_0.ip_prefix.split('/')
         self.inbound_routing_decap_validate_create(eni_id, vni=self.tx_host_0.client.vni,
-                                                   sip=self.tx_host_0.ip, sip_mask="255.255.255.0",
+                                                   sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]),
                                                    src_vnet_id=src_vnet_0)
         # PA validation entry with Permit action tx_host_0
         self.pa_validation_create(self.tx_host_0.ip, src_vnet_0)
 
         # Inbound routing decap PA Validate tx_host_1
+        addr_mask = self.tx_host_1.ip_prefix.split('/')
         self.inbound_routing_decap_validate_create(eni_id, vni=self.tx_host_1.client.vni,
-                                                   sip=self.tx_host_1.ip, sip_mask="255.255.255.0",
+                                                   sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]),
                                                    src_vnet_id=src_vnet_1)
         # PA validation entry with Permit action tx_host_1
         self.pa_validation_create(self.tx_host_1.ip, src_vnet_1)
 
         # Inbound routing decap PA Validate tx_host_2
+        addr_mask = self.tx_host_2.ip_prefix.split('/')
         self.inbound_routing_decap_validate_create(eni_id, vni=self.tx_host_2.client.vni,
-                                                   sip=self.tx_host_2.ip, sip_mask="255.255.255.0",
+                                                   sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]),
                                                    src_vnet_id=src_vnet_2)
         # PA validation entry with Permit action tx_host_2
         self.pa_validation_create(self.tx_host_2.ip, src_vnet_2)
@@ -552,7 +556,6 @@ class Vnet2VnetInboundMultiplePaValidatesSingleEniSinglePortTest(VnetApiEndpoint
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetInboundMultiplePaValidatesSingleEniSinglePortOverlayIpv6Test(Vnet2VnetInboundMultiplePaValidatesSingleEniSinglePortTest):
     """
     Underlay IPv4 and Overlay IPv6 configs
@@ -575,7 +578,7 @@ class Vnet2VnetInboundMultiplePaValidatesSingleEniSinglePortOverlayIpv6Test(Vnet
         # Reconfigure configuration for tx equal to rx
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.tx_host, add_routes=False)
+        # self.configure_underlay(self.tx_host, add_routes=False)
 
         self.vnet2VnetInboundRoutingPositiveTest(tx_equal_to_rx=True)
 
@@ -610,7 +613,7 @@ class Vnet2VnetInboundMultiplePaValidatesSingleEniSinglePortOverlayIpv6Test(Vnet
         self.tx_host_3 = self.define_neighbor_network(port=self.tx_host_0.port,
                                                       mac=self.tx_host_0.mac,
                                                       ip="11.0.0.1",
-                                                      ip_prefix="11.0.0.1/24",
+                                                      ip_prefix="11.0.0.0/24",
                                                       peer_port=self.tx_host_0.peer.port,
                                                       peer_mac=self.tx_host_0.peer.mac,
                                                       peer_ip=self.tx_host_0.peer.ip,
@@ -636,26 +639,30 @@ class Vnet2VnetInboundMultiplePaValidatesSingleEniSinglePortOverlayIpv6Test(Vnet
         self.eni_mac_map_create(eni_id, self.rx_host.client.mac)  # ENI MAC
 
         # Inbound routing decap
+        addr_mask = self.tx_host_3.ip_prefix.split('/')
         self.inbound_routing_decap_create(eni_id, vni=self.tx_host_3.client.vni,
-                                          sip=self.tx_host_3.ip, sip_mask="255.255.255.0")
+                                          sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]))
 
         # Inbound routing decap PA Validate tx_host_0
+        addr_mask = self.tx_host_0.ip_prefix.split('/')
         self.inbound_routing_decap_validate_create(eni_id, vni=self.tx_host_0.client.vni,
-                                                   sip=self.tx_host_0.ip, sip_mask="255.255.255.0",
+                                                   sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]),
                                                    src_vnet_id=src_vnet_0)
         # PA validation entry with Permit action tx_host_0
         self.pa_validation_create(self.tx_host_0.ip, src_vnet_0)
 
         # Inbound routing decap PA Validate tx_host_1
+        addr_mask = self.tx_host_1.ip_prefix.split('/')
         self.inbound_routing_decap_validate_create(eni_id, vni=self.tx_host_1.client.vni,
-                                                   sip=self.tx_host_1.ip, sip_mask="255.255.255.0",
+                                                   sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]),
                                                    src_vnet_id=src_vnet_1)
         # PA validation entry with Permit action tx_host_1
         self.pa_validation_create(self.tx_host_1.ip, src_vnet_1)
 
         # Inbound routing decap PA Validate tx_host_2
+        addr_mask = self.tx_host_2.ip_prefix.split('/')
         self.inbound_routing_decap_validate_create(eni_id, vni=self.tx_host_2.client.vni,
-                                                   sip=self.tx_host_2.ip, sip_mask="255.255.255.0",
+                                                   sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]),
                                                    src_vnet_id=src_vnet_2)
         # PA validation entry with Permit action tx_host_2
         self.pa_validation_create(self.tx_host_2.ip, src_vnet_2)
@@ -678,7 +685,7 @@ class Vnet2VnetInboundMultiplePaValidatesSingleEniTwoPortsTest(Vnet2VnetInboundM
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay()
+        #self.configure_underlay()
 
         self.vnet2VnetInboundRoutingPositiveTest(tx_equal_to_rx=False)
 
@@ -720,7 +727,7 @@ class Vnet2VnetInboundMultiplePaValidatesSingleEniTwoPortsOverlayIpv6Test(Vnet2V
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay()
+        #self.configure_underlay()
 
         self.vnet2VnetInboundRoutingPositiveTest(tx_equal_to_rx=False)
 
@@ -744,7 +751,6 @@ class Vnet2VnetInboundMultiplePaValidatesSingleEniTwoPortsOverlayIpv6Test(Vnet2V
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetInboundMultiplePaValidatesMultipleEniSinglePortTest(VnetApiEndpoints, VnetTrafficMixin):
     """
     Inbound Vnet to Vnet scenario test case with
@@ -766,7 +772,7 @@ class Vnet2VnetInboundMultiplePaValidatesMultipleEniSinglePortTest(VnetApiEndpoi
         # Reconfigure configuration for tx equal to rx
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.tx_host, add_routes=False)
+        # self.configure_underlay(self.tx_host, add_routes=False)
 
         self.vnet2VnetInboundRoutingPositiveTest(tx_equal_to_rx=True)
         self.vnet2VnetInboundRoutingNegativeTest()
@@ -832,12 +838,14 @@ class Vnet2VnetInboundMultiplePaValidatesMultipleEniSinglePortTest(VnetApiEndpoi
         self.eni_mac_map_create(eni_id_0, self.rx_host_0.client.mac)  # ENI MAC
 
         # Inbound routing decap
+        addr_mask = self.tx_host_2.ip_prefix.split('/')
         self.inbound_routing_decap_create(eni_id_0, vni=self.tx_host_2.client.vni,
-                                          sip=self.tx_host_2.ip, sip_mask="255.255.255.0")
+                                          sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]))
 
         # Inbound routing decap PA Validate
+        addr_mask = self.tx_host_0.ip_prefix.split('/')
         self.inbound_routing_decap_validate_create(eni_id_0, vni=self.tx_host_0.client.vni,
-                                                   sip=self.tx_host_0.ip, sip_mask="255.255.255.0",
+                                                   sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]),
                                                    src_vnet_id=src_vnet_0)
         # PA validation entry with Permit action
         self.pa_validation_create(self.tx_host_0.ip, src_vnet_0)
@@ -850,8 +858,9 @@ class Vnet2VnetInboundMultiplePaValidatesMultipleEniSinglePortTest(VnetApiEndpoi
         self.eni_mac_map_create(eni_id_1, self.rx_host_1.client.mac)  # ENI MAC
 
         # Inbound routing PA Validate
+        addr_mask = self.tx_host_1.ip_prefix.split('/')
         self.inbound_routing_decap_validate_create(eni_id_1, vni=self.tx_host_1.client.vni,
-                                                   sip=self.tx_host_1.ip, sip_mask="255.255.255.0",
+                                                   sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]),
                                                    src_vnet_id=src_vnet_1)
         # PA validation entry with Permit action
         self.pa_validation_create(self.tx_host_1.ip, src_vnet_1)
@@ -936,7 +945,7 @@ class Vnet2VnetInboundMultiplePaValidatesMultipleEniSinglePortOverlayIpv6Test(Vn
         # Reconfigure configuration for tx equal to rx
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.tx_host, add_routes=False)
+        # self.configure_underlay(self.tx_host, add_routes=False)
 
         self.vnet2VnetInboundRoutingPositiveTest(tx_equal_to_rx=True)
 
@@ -1001,12 +1010,13 @@ class Vnet2VnetInboundMultiplePaValidatesMultipleEniSinglePortOverlayIpv6Test(Vn
         self.eni_mac_map_create(eni_id_0, self.rx_host_0.client.mac)  # ENI MAC
 
         # Inbound routing decap
+        addr_mask = self.tx_host_2.ip_prefix.split('/')
         self.inbound_routing_decap_create(eni_id_0, vni=self.tx_host_2.client.vni,
-                                          sip=self.tx_host_2.ip, sip_mask="255.255.255.0")
+                                          sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]))
 
         # Inbound routing decap PA Validate
         self.inbound_routing_decap_validate_create(eni_id_0, vni=self.tx_host_0.client.vni,
-                                                   sip=self.tx_host_0.ip, sip_mask="255.255.255.0",
+                                                   sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]),
                                                    src_vnet_id=src_vnet_0)
         # PA validation entry with Permit action
         self.pa_validation_create(self.tx_host_0.ip, src_vnet_0)
@@ -1019,8 +1029,9 @@ class Vnet2VnetInboundMultiplePaValidatesMultipleEniSinglePortOverlayIpv6Test(Vn
         self.eni_mac_map_create(eni_id_1, self.rx_host_1.client.mac)  # ENI MAC
 
         # Inbound routing PA Validate
+        addr_mask = self.tx_host_1.ip_prefix.split('/')
         self.inbound_routing_decap_validate_create(eni_id_1, vni=self.tx_host_1.client.vni,
-                                                   sip=self.tx_host_1.ip, sip_mask="255.255.255.0",
+                                                   sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]),
                                                    src_vnet_id=src_vnet_1)
         # PA validation entry with Permit action
         self.pa_validation_create(self.tx_host_1.ip, src_vnet_1)
@@ -1043,7 +1054,7 @@ class Vnet2VnetInboundMultiplePaValidatesMultipleEniTwoPortsTest(Vnet2VnetInboun
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay()
+        # self.configure_underlay()
 
         self.vnet2VnetInboundRoutingPositiveTest(tx_equal_to_rx=False)
 
@@ -1080,7 +1091,7 @@ class Vnet2VnetInboundMultiplePaValidatesMultipleEniTwoPortsOverlayIpv6Test(Vnet
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay()
+        # self.configure_underlay()
 
         self.vnet2VnetInboundRoutingPositiveTest(tx_equal_to_rx=False)
 
@@ -1100,11 +1111,10 @@ class Vnet2VnetInboundMultiplePaValidatesMultipleEniTwoPortsOverlayIpv6Test(Vnet
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetSingleInboundRouteMultiplePaValidateSinglePortTest(VnetApiEndpoints, VnetTrafficMixin):
     """
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP_PA_VALIDATE inbound routing entry action with multiple PA validate entries
+    TUNNEL_DECAP_PA_VALIDATE inbound routing entry action with multiple PA validate entries
     with underlay config (neighbour + next hop) but without underlay routes
 
     Verifies positive and negative scenarios
@@ -1114,7 +1124,7 @@ class Vnet2VnetSingleInboundRouteMultiplePaValidateSinglePortTest(VnetApiEndpoin
         # Reconfigure configuration for tx equal to rx
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.tx_host_0, add_routes=False)
+        # self.configure_underlay(self.tx_host_0, add_routes=False)
 
         self.vnet2VnetInboundRoutingTest(tx_equal_to_rx=True)
 
@@ -1183,8 +1193,9 @@ class Vnet2VnetSingleInboundRouteMultiplePaValidateSinglePortTest(VnetApiEndpoin
         self.eni_mac_map_create(eni_id, self.rx_host.client.mac)  # ENI MAC
 
         # Inbound routing PA Validate
+        addr_mask = self.tx_host_0.ip_prefix.split('/')
         self.inbound_routing_decap_validate_create(eni_id, vni=self.tx_host_0.client.vni,
-                                                   sip=self.tx_host_0.ip, sip_mask="255.255.255.0",
+                                                   sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]),
                                                    src_vnet_id=src_vnet)
         # PA validation entries with Permit action
         self.pa_validation_create(self.tx_host_0.ip, src_vnet)
@@ -1219,12 +1230,11 @@ class Vnet2VnetSingleInboundRouteMultiplePaValidateSinglePortTest(VnetApiEndpoin
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetSingleInboundRouteMultiplePaValidateSinglePortIpv6Test(Vnet2VnetSingleInboundRouteMultiplePaValidateSinglePortTest):
     """
     Underlay IPv4 and Overlay IPv6 configs
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP_PA_VALIDATE inbound routing entry action with multiple PA validate entries
+    TUNNEL_DECAP_PA_VALIDATE inbound routing entry action with multiple PA validate entries
     with underlay config (neighbour + next hop) but without underlay routes
 
     Verifies positive and negative scenarios
@@ -1237,7 +1247,7 @@ class Vnet2VnetSingleInboundRouteMultiplePaValidateSinglePortIpv6Test(Vnet2VnetS
         # Reconfigure configuration for tx equal to rx
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.tx_host_0, add_routes=False)
+        # self.configure_underlay(self.tx_host_0, add_routes=False)
 
         self.vnet2VnetInboundRoutingTest(tx_equal_to_rx=True)
 
@@ -1306,8 +1316,9 @@ class Vnet2VnetSingleInboundRouteMultiplePaValidateSinglePortIpv6Test(Vnet2VnetS
         self.eni_mac_map_create(eni_id, self.rx_host.client.mac)  # ENI MAC
 
         # Inbound routing PA Validate
+        addr_mask = self.tx_host_0.ip_prefix.split('/')
         self.inbound_routing_decap_validate_create(eni_id, vni=self.tx_host_0.client.vni,
-                                                   sip=self.tx_host_0.ip, sip_mask="255.255.255.0",
+                                                   sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]),
                                                    src_vnet_id=src_vnet)
         # PA validation entries with Permit action
         self.pa_validation_create(self.tx_host_0.ip, src_vnet)
@@ -1320,7 +1331,7 @@ class Vnet2VnetSingleInboundRouteMultiplePaValidateSinglePortIpv6Test(Vnet2VnetS
 class Vnet2VnetSingleInboundRouteMultiplePaValidateTwoPortsTest(Vnet2VnetSingleInboundRouteMultiplePaValidateSinglePortTest):
     """
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP_PA_VALIDATE inbound routing entry action with multiple PA validate entries
+    TUNNEL_DECAP_PA_VALIDATE inbound routing entry action with multiple PA validate entries
     with full underlay config (2 neighbours + 2 next hops + 2 routes)
 
     Verifies positive and negative scenarios
@@ -1328,7 +1339,7 @@ class Vnet2VnetSingleInboundRouteMultiplePaValidateTwoPortsTest(Vnet2VnetSingleI
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host_0, self.rx_host)
+        # self.configure_underlay(self.tx_host_0, self.rx_host)
 
         self.vnet2VnetInboundRoutingTest(tx_equal_to_rx=False)
 
@@ -1339,7 +1350,7 @@ class Vnet2VnetSingleInboundRouteMultiplePaValidateTwoPortsIpv6Test(Vnet2VnetSin
     """
     Underlay IPv4 and Overlay IPv6 configs
     Inbound Vnet to Vnet scenario test case with
-    VXLAN_DECAP_PA_VALIDATE inbound routing entry action with multiple PA validate entries
+    TUNNEL_DECAP_PA_VALIDATE inbound routing entry action with multiple PA validate entries
     with underlay config (2 neighbours + 2 next hops + 2 routes)
 
     Verifies positive and negative scenarios
@@ -1347,7 +1358,7 @@ class Vnet2VnetSingleInboundRouteMultiplePaValidateTwoPortsIpv6Test(Vnet2VnetSin
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host_0, self.rx_host)
+        # self.configure_underlay(self.tx_host_0, self.rx_host)
 
         self.vnet2VnetInboundRoutingTest(tx_equal_to_rx=False)
 
@@ -1364,7 +1375,7 @@ class Vnet2VnetInboundEniSetUpDownSinglePortTest(VnetApiEndpoints, VnetTrafficMi
         # Reconfigure configuration for tx equal to rx
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.tx_host, add_routes=False)
+        # self.configure_underlay(self.tx_host, add_routes=False)
 
         self.vnet2VnetEniUpTrafficTest(tx_equal_to_rx=True)
         self.eni_set_admin_state(self.eni_id, "down")
@@ -1391,8 +1402,9 @@ class Vnet2VnetInboundEniSetUpDownSinglePortTest(VnetApiEndpoints, VnetTrafficMi
         self.eni_mac_map_create(self.eni_id, self.rx_host.client.mac)  # ENI MAC
 
         # Inbound routing PA Validate
+        addr_mask = self.tx_host.ip_prefix.split('/')
         self.inbound_routing_decap_create(self.eni_id, vni=self.tx_host.client.vni,
-                                          sip=self.tx_host.ip, sip_mask="255.255.255.0")
+                                          sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]))
 
     def vnet2VnetEniUpTrafficTest(self, tx_equal_to_rx):
         """
@@ -1425,7 +1437,7 @@ class Vnet2VnetInboundEniSetUpDownTwoPortsTest(Vnet2VnetInboundEniSetUpDownSingl
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host)
+        # self.configure_underlay(self.tx_host, self.rx_host)
 
         self.vnet2VnetEniUpTrafficTest(tx_equal_to_rx=True)
         self.eni_set_admin_state(self.eni_id, "down")
@@ -1435,7 +1447,6 @@ class Vnet2VnetInboundEniSetUpDownTwoPortsTest(Vnet2VnetInboundEniSetUpDownSingl
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetOutboundRouteVnetDirectSinglePortTest(VnetApiEndpoints, VnetTrafficMixin):
     """
     Outbound Vnet to Vnet test scenario with Outbound routing entry
@@ -1447,7 +1458,7 @@ class Vnet2VnetOutboundRouteVnetDirectSinglePortTest(VnetApiEndpoints, VnetTraff
         # Reconfigure configuration for tx equal to rx
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.tx_host, add_routes=False)
+        # self.configure_underlay(self.tx_host, add_routes=False)
 
         self.vnet2VnetOutboundRoutingTest(tx_equal_to_rx=True)
         self.vnet2VnetOutboundNegativeTest()
@@ -1465,13 +1476,16 @@ class Vnet2VnetOutboundRouteVnetDirectSinglePortTest(VnetApiEndpoints, VnetTraff
         src_vnet = self.vnet_create(vni=self.tx_host.client.vni)
         dst_vnet = self.vnet_create(vni=self.rx_host.client.vni)
 
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
+
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
-                                 vnet_id=src_vnet)
+                                 vnet_id=src_vnet,
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id, self.tx_host.client.mac)  # ENI MAC
         # outbound routing
-        self.outbound_routing_vnet_direct_create(eni_id, "192.168.1.0/24", dst_vnet,
+        self.outbound_routing_vnet_direct_create(outbound_routing_group_id, "192.168.1.0/24", dst_vnet,
                                                  overlay_ip="192.168.1.10")
         self.outbound_ca_to_pa_create(dst_vnet,  # DST vnet id
                                       "192.168.1.10",  # DST IP addr
@@ -1510,7 +1524,6 @@ class Vnet2VnetOutboundRouteVnetDirectSinglePortTest(VnetApiEndpoints, VnetTraff
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetOutboundRouteVnetDirectSinglePortOverlayIpv6Test(Vnet2VnetOutboundRouteVnetDirectSinglePortTest):
     """
     Underlay IPv4 and Overlay IPv6 configs
@@ -1535,13 +1548,16 @@ class Vnet2VnetOutboundRouteVnetDirectSinglePortOverlayIpv6Test(Vnet2VnetOutboun
         src_vnet = self.vnet_create(vni=self.tx_host.client.vni)
         dst_vnet = self.vnet_create(vni=self.rx_host.client.vni)
 
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
+
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
-                                 vnet_id=src_vnet)
+                                 vnet_id=src_vnet,
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id, self.tx_host.client.mac)  # ENI MAC
         # outbound routing
-        self.outbound_routing_vnet_direct_create(eni_id, "bbbb::0/64", dst_vnet,
+        self.outbound_routing_vnet_direct_create(outbound_routing_group_id, "bbbb::0/64", dst_vnet,
                                                  overlay_ip="bbbb::bc")
         self.outbound_ca_to_pa_create(dst_vnet,  # DST vnet id
                                       "bbbb::bc",  # DST IP addr
@@ -1579,7 +1595,7 @@ class Vnet2VnetOutboundRouteVnetDirectTwoPortsTest(Vnet2VnetOutboundRouteVnetDir
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host)
+        # self.configure_underlay(self.tx_host, self.rx_host)
 
         self.vnet2VnetOutboundRoutingTest(tx_equal_to_rx=False)
         self.vnet2VnetOutboundNegativeTest()
@@ -1597,13 +1613,12 @@ class Vnet2VnetOutboundRouteVnetDirectTwoPortsOverlayIpv6Test(Vnet2VnetOutboundR
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host)
+        # self.configure_underlay(self.tx_host, self.rx_host)
 
         self.vnet2VnetOutboundRoutingTest(tx_equal_to_rx=False)
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetOutboundRouteVnetSinglePortTest(VnetApiEndpoints, VnetTrafficMixin):
     """
     Outbound Vnet to Vnet test scenario with outbound routing entry
@@ -1615,7 +1630,7 @@ class Vnet2VnetOutboundRouteVnetSinglePortTest(VnetApiEndpoints, VnetTrafficMixi
         # Reconfigure configuration for tx equal to rx
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.tx_host, add_routes=False)
+        # self.configure_underlay(self.tx_host, add_routes=False)
 
         self.vnet2VnetOutboundRoutingTest(tx_equal_to_rx=True)
         self.vnet2VnetOutboundNegativeTest()
@@ -1633,13 +1648,16 @@ class Vnet2VnetOutboundRouteVnetSinglePortTest(VnetApiEndpoints, VnetTrafficMixi
         src_vnet = self.vnet_create(vni=self.tx_host.client.vni)
         dst_vnet = self.vnet_create(vni=self.rx_host.client.vni)
 
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
+
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
-                                 vnet_id=src_vnet)
+                                 vnet_id=src_vnet,
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id, self.tx_host.client.mac)  # ENI MAC
 
-        self.outbound_routing_vnet_create(eni_id=eni_id, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="192.168.1.0/24",
                                           dst_vnet_id=dst_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet,
                                       dip=self.rx_host.client.ip,
@@ -1685,7 +1703,6 @@ class Vnet2VnetOutboundRouteVnetSinglePortTest(VnetApiEndpoints, VnetTrafficMixi
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetOutboundRouteVnetSinglePortOverlayIpv6Test(Vnet2VnetOutboundRouteVnetSinglePortTest):
     """
     Underlay IPv4 and Overlay IPv6 configs
@@ -1709,13 +1726,16 @@ class Vnet2VnetOutboundRouteVnetSinglePortOverlayIpv6Test(Vnet2VnetOutboundRoute
         src_vnet = self.vnet_create(vni=self.tx_host.client.vni)
         dst_vnet = self.vnet_create(vni=self.rx_host.client.vni)
 
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
+
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
-                                 vnet_id=src_vnet)
+                                 vnet_id=src_vnet,
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id, self.tx_host.client.mac)  # ENI MAC
 
-        self.outbound_routing_vnet_create(eni_id=eni_id, lpm="bbbb::0/64",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="bbbb::0/64",
                                           dst_vnet_id=dst_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet,
                                       dip=self.rx_host.client.ip,
@@ -1760,7 +1780,7 @@ class Vnet2VnetOutboundRouteVnetTwoPortsTest(Vnet2VnetOutboundRouteVnetSinglePor
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host)
+        # self.configure_underlay(self.tx_host, self.rx_host)
 
         self.vnet2VnetOutboundRoutingTest(tx_equal_to_rx=False)
         self.vnet2VnetOutboundNegativeTest()
@@ -1778,7 +1798,7 @@ class Vnet2VnetOutboundRouteVnetTwoPortsOverlayIpv6Test(Vnet2VnetOutboundRouteVn
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host)
+        # self.configure_underlay(self.tx_host, self.rx_host)
 
         self.vnet2VnetOutboundRoutingTest(tx_equal_to_rx=False)
 
@@ -1795,7 +1815,7 @@ class Vnet2VnetOutboundEniSetUpDownSinglePortTest(VnetApiEndpoints, VnetTrafficM
         # Reconfigure configuration for tx equal to rx
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.tx_host, add_routes=False)
+        # self.configure_underlay(self.tx_host, add_routes=False)
 
         self.vnet2VnetEniUpTrafficTest(tx_equal_to_rx=True)
         self.eni_set_admin_state(self.eni_id, "down")
@@ -1816,13 +1836,16 @@ class Vnet2VnetOutboundEniSetUpDownSinglePortTest(VnetApiEndpoints, VnetTrafficM
         src_vnet = self.vnet_create(vni=self.tx_host.client.vni)
         dst_vnet = self.vnet_create(vni=self.rx_host.client.vni)
 
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
+
         self.eni_id = self.eni_create(admin_state=True,
                                       vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                       vm_vni=self.tx_host.client.vni,
-                                      vnet_id=src_vnet)
+                                      vnet_id=src_vnet,
+                                      outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(self.eni_id, self.tx_host.client.mac)  # ENI MAC
 
-        self.outbound_routing_vnet_create(eni_id=self.eni_id, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="192.168.1.0/24",
                                           dst_vnet_id=dst_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet,
                                       dip=self.rx_host.client.ip,
@@ -1861,7 +1884,7 @@ class Vnet2VnetOutboundEniSetUpDownTwoPortsTest(Vnet2VnetOutboundEniSetUpDownSin
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host)
+        # self.configure_underlay(self.tx_host, self.rx_host)
 
         self.vnet2VnetEniUpTrafficTest(tx_equal_to_rx=True)
         self.eni_set_admin_state(self.eni_id, "down")
@@ -1882,7 +1905,7 @@ class Vnet2VnetOutboundRouteDirectSinglePortTest(VnetApiEndpoints, VnetTrafficMi
     def runTest(self):
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.tx_host, add_routes=False)
+        # self.configure_underlay(self.tx_host, add_routes=False)
 
         self.outboundRouteDirectTest(tx_equal_to_rx=True)
         self.outboundRouteDirectNegativeTest()
@@ -2014,7 +2037,7 @@ class Vnet2VnetOutboundRouteDirectTwoPortsTest(Vnet2VnetOutboundRouteDirectSingl
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host)
+        # self.configure_underlay(self.tx_host, self.rx_host)
 
         self.outboundRouteDirectTest(tx_equal_to_rx=False)
 
@@ -2031,13 +2054,12 @@ class Vnet2VnetOutboundRouteDirectTwoPortsOverlayIpv6Test(Vnet2VnetOutboundRoute
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host)
+        # self.configure_underlay(self.tx_host, self.rx_host)
 
         self.outboundRouteDirectTest(tx_equal_to_rx=False)
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetSingleOutboundRouteMultipleCa2PaSinglePortTest(VnetApiEndpoints, VnetTrafficMixin):
     """
     Outbound Vnet to Vnet test scenario with outbound routing entry
@@ -2049,7 +2071,7 @@ class Vnet2VnetSingleOutboundRouteMultipleCa2PaSinglePortTest(VnetApiEndpoints, 
         # Reconfigure configuration for tx equal to rx
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.tx_host, add_routes=False)
+        # self.configure_underlay(self.tx_host, add_routes=False)
 
         self.vnet2VnetOutboundRoutingTest(tx_equal_to_rx=True)
         self.vnet2VnetOutboundNegativeTest()
@@ -2101,13 +2123,16 @@ class Vnet2VnetSingleOutboundRouteMultipleCa2PaSinglePortTest(VnetApiEndpoints, 
         src_vnet = self.vnet_create(vni=self.tx_host.client.vni)
         dst_vnet = self.vnet_create(vni=self.rx_host_0.client.vni)
 
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
+
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
-                                 vnet_id=src_vnet)
+                                 vnet_id=src_vnet,
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id, self.tx_host.client.mac)  # ENI MAC
 
-        self.outbound_routing_vnet_create(eni_id=eni_id, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="192.168.1.0/24",
                                           dst_vnet_id=dst_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet,
                                       dip=self.rx_host_0.client.ip,
@@ -2240,13 +2265,16 @@ class Vnet2VnetSingleOutboundRouteMultipleCa2PaSinglePortIpv6Test(Vnet2VnetSingl
         src_vnet = self.vnet_create(vni=self.tx_host.client.vni)
         dst_vnet = self.vnet_create(vni=self.rx_host_0.client.vni)
 
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
+
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
-                                 vnet_id=src_vnet)
+                                 vnet_id=src_vnet,
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id, self.tx_host.client.mac)  # ENI MAC
 
-        self.outbound_routing_vnet_create(eni_id=eni_id, lpm="bbbb::0/64",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="bbbb::0/64",
                                           dst_vnet_id=dst_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet,
                                       dip=self.rx_host_0.client.ip,
@@ -2305,7 +2333,7 @@ class Vnet2VnetSingleOutboundRouteMultipleCa2PaTwoPortsTest(Vnet2VnetSingleOutbo
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host_0)
+        # self.configure_underlay(self.tx_host, self.rx_host_0)
 
         self.vnet2VnetOutboundRoutingTest(tx_equal_to_rx=False)
 
@@ -2322,13 +2350,12 @@ class Vnet2VnetSingleOutboundRouteMultipleCa2PaTwoPortsIpv6Test(Vnet2VnetSingleO
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host_0)
+        # self.configure_underlay(self.tx_host, self.rx_host_0)
 
         self.vnet2VnetOutboundRoutingTest(tx_equal_to_rx=False)
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortTest(VnetApiEndpoints, VnetTrafficMixin):
     """
     Outbound Vnet to Vnet test scenario that verifies
@@ -2340,7 +2367,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortTest(VnetApiEndpoints, VnetTr
     def runTest(self):
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.tx_host, add_routes=False)
+        # self.configure_underlay(self.tx_host, add_routes=False)
 
         self.vnet2VnetOutboundDstVnetIdTrueTest(tx_equal_to_rx=True)
         self.vnet2VnetOutboundDstVnetIdFalseTest(tx_equal_to_rx=True)
@@ -2373,15 +2400,18 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortTest(VnetApiEndpoints, VnetTr
         dst_vnet_0 = self.vnet_create(vni=self.rx_host_0.client.vni)
         dst_vnet_1 = self.vnet_create(vni=self.rx_host_1.client.vni)
 
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
+
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
-                                 vnet_id=src_vnet)
+                                 vnet_id=src_vnet,
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id=eni_id, mac=self.tx_host.client.mac)
 
         # Outbound routing and CA to PA entries creation
         #  for use_dst_vnet_vni=True
-        self.outbound_routing_vnet_create(eni_id=eni_id, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="192.168.1.0/24",
                                           dst_vnet_id=dst_vnet_0)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_0,
                                       dip=self.rx_host_0.client.ip,
@@ -2390,7 +2420,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortTest(VnetApiEndpoints, VnetTr
                                       use_dst_vnet_vni=True)
 
         # for use_dst_vnet_vni=False
-        self.outbound_routing_vnet_create(eni_id=eni_id, lpm="192.168.2.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="192.168.2.0/24",
                                           dst_vnet_id=dst_vnet_1)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_1,
                                       dip=self.rx_host_1.client.ip,
@@ -2417,7 +2447,6 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortTest(VnetApiEndpoints, VnetTr
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortOverlayIpv6Test(Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortTest):
     """
     Underlay IPv4 and Overlay IPv6 configs
@@ -2458,15 +2487,18 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortOverlayIpv6Test(Vnet2VnetOutb
         dst_vnet_0 = self.vnet_create(vni=self.rx_host_0.client.vni)
         dst_vnet_1 = self.vnet_create(vni=self.rx_host_1.client.vni)
 
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
+
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
-                                 vnet_id=src_vnet)
+                                 vnet_id=src_vnet,
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id=eni_id, mac=self.tx_host.client.mac)
 
         # Outbound routing and CA to PA entries creation
         #  for use_dst_vnet_vni=True
-        self.outbound_routing_vnet_create(eni_id=eni_id, lpm="bbbb::0/64",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="bbbb::0/64",
                                           dst_vnet_id=dst_vnet_0)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_0,
                                       dip=self.rx_host_0.client.ip,
@@ -2475,7 +2507,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortOverlayIpv6Test(Vnet2VnetOutb
                                       use_dst_vnet_vni=True)
 
         # for use_dst_vnet_vni=False
-        self.outbound_routing_vnet_create(eni_id=eni_id, lpm="cccc::0/64",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="cccc::0/64",
                                           dst_vnet_id=dst_vnet_1)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_1,
                                       dip=self.rx_host_1.client.ip,
@@ -2496,7 +2528,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetTwoPortsTest(Vnet2VnetOutboundDstVnetId
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host_0)
+        # self.configure_underlay(self.tx_host, self.rx_host_0)
 
         self.vnet2VnetOutboundDstVnetIdTrueTest(tx_equal_to_rx=False)
         self.vnet2VnetOutboundDstVnetIdFalseTest(tx_equal_to_rx=False)
@@ -2515,14 +2547,13 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetTwoPortsOverlayIpv6Test(Vnet2VnetOutbou
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host_0)
+        # self.configure_underlay(self.tx_host, self.rx_host_0)
 
         self.vnet2VnetOutboundDstVnetIdTrueTest(tx_equal_to_rx=False)
         self.vnet2VnetOutboundDstVnetIdFalseTest(tx_equal_to_rx=False)
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortTest(Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortTest):
     """
     Outbound Vnet to Vnet test scenario that verifies
@@ -2534,7 +2565,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortTest(Vnet2VnetOutboundD
     def runTest(self):
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.tx_host, add_routes=False)
+        # self.configure_underlay(self.tx_host, add_routes=False)
 
         self.vnet2VnetOutboundDstVnetIdTrueTest(tx_equal_to_rx=True)
         self.vnet2VnetOutboundDstVnetIdFalseTest(tx_equal_to_rx=True)
@@ -2567,15 +2598,18 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortTest(Vnet2VnetOutboundD
         dst_vnet_0 = self.vnet_create(vni=self.rx_host_0.client.vni)
         dst_vnet_1 = self.vnet_create(vni=self.rx_host_1.client.vni)
 
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
+
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
-                                 vnet_id=src_vnet)
+                                 vnet_id=src_vnet,
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id=eni_id, mac=self.tx_host.client.mac)
 
         # Outbound routing and CA to PA entries creation
         #  for use_dst_vnet_vni=True
-        self.outbound_routing_vnet_direct_create(eni_id=eni_id, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_direct_create(outbound_routing_group_id=outbound_routing_group_id, lpm="192.168.1.0/24",
                                                  dst_vnet_id=dst_vnet_0,
                                                  overlay_ip="192.168.1.111")
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_0,
@@ -2585,7 +2619,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortTest(Vnet2VnetOutboundD
                                       use_dst_vnet_vni=True)
 
         # for use_dst_vnet_vni=False
-        self.outbound_routing_vnet_direct_create(eni_id=eni_id, lpm="192.168.2.0/24",
+        self.outbound_routing_vnet_direct_create(outbound_routing_group_id=outbound_routing_group_id, lpm="192.168.2.0/24",
                                                  dst_vnet_id=dst_vnet_1,
                                                  overlay_ip="192.168.2.222")
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_1,
@@ -2596,7 +2630,6 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortTest(Vnet2VnetOutboundD
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortOverlayIpv6Test(Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortTest):
     """
     Underlay IPv4 and Overlay IPv6 configs
@@ -2637,15 +2670,18 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortOverlayIpv6Test(Vnet2Vn
         dst_vnet_0 = self.vnet_create(vni=self.rx_host_0.client.vni)
         dst_vnet_1 = self.vnet_create(vni=self.rx_host_1.client.vni)
 
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
+
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
-                                 vnet_id=src_vnet)
+                                 vnet_id=src_vnet,
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id=eni_id, mac=self.tx_host.client.mac)
 
         # Outbound routing and CA to PA entries creation
         #  for use_dst_vnet_vni=True
-        self.outbound_routing_vnet_direct_create(eni_id=eni_id, lpm="bbbb::0/64",
+        self.outbound_routing_vnet_direct_create(outbound_routing_group_id=outbound_routing_group_id, lpm="bbbb::0/64",
                                                  dst_vnet_id=dst_vnet_0,
                                                  overlay_ip="bbbb::bc")
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_0,
@@ -2655,7 +2691,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortOverlayIpv6Test(Vnet2Vn
                                       use_dst_vnet_vni=True)
 
         # for use_dst_vnet_vni=False
-        self.outbound_routing_vnet_direct_create(eni_id=eni_id, lpm="cccc::0/64",
+        self.outbound_routing_vnet_direct_create(outbound_routing_group_id=outbound_routing_group_id, lpm="cccc::0/64",
                                                  dst_vnet_id=dst_vnet_1,
                                                  overlay_ip="cccc::bc")
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_1,
@@ -2677,7 +2713,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetDirectTwoPortsTest(Vnet2VnetOutboundDst
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host_0)
+        # self.configure_underlay(self.tx_host, self.rx_host_0)
 
         self.vnet2VnetOutboundDstVnetIdTrueTest(tx_equal_to_rx=False)
         self.vnet2VnetOutboundDstVnetIdFalseTest(tx_equal_to_rx=False)
@@ -2696,7 +2732,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetDirectTwoPortstOverlayIpv6Test(Vnet2Vne
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host_0)
+        # self.configure_underlay(self.tx_host, self.rx_host_0)
 
         self.vnet2VnetOutboundDstVnetIdTrueTest(tx_equal_to_rx=False)
         self.vnet2VnetOutboundDstVnetIdFalseTest(tx_equal_to_rx=False)
@@ -2714,7 +2750,7 @@ class Vnet2VnetInboundOutboundMultipleConfigsSinglePortTest(VnetApiEndpoints, Vn
     def runTest(self):
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.host_0, self.host_2, add_routes=False)
+        # self.configure_underlay(self.host_0, self.host_2, add_routes=False)
 
         self.outboundHost0toHost2Test(tx_equal_to_rx=True)
         self.inboundHost2toHost0Test(tx_equal_to_rx=True)
@@ -2767,26 +2803,32 @@ class Vnet2VnetInboundOutboundMultipleConfigsSinglePortTest(VnetApiEndpoints, Vn
         host_2_vnet = self.vnet_create(vni=self.host_2.client.vni)
         host_3_vnet = self.vnet_create(vni=self.host_3.client.vni)
 
+        outbound_routing_group_id_0 = self.outbound_routing_group_create(disabled=False)
+        outbound_routing_group_id_3 = self.outbound_routing_group_create(disabled=False)
+
         eni_id_0 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.host_0.ip),
                                    vm_vni=self.host_0.client.vni,
-                                   vnet_id=host_0_vnet)
+                                   vnet_id=host_0_vnet,
+                                   outbound_routing_group_id=outbound_routing_group_id_0)
         self.eni_mac_map_create(eni_id_0, self.host_0.client.mac)
 
         eni_id_3 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.host_3.ip),
                                    vm_vni=self.host_3.client.vni,
-                                   vnet_id=host_3_vnet)
+                                   vnet_id=host_3_vnet,
+                                   outbound_routing_group_id=outbound_routing_group_id_3)
         self.eni_mac_map_create(eni_id_3, self.host_3.client.mac)
 
         # ENI 0 inbound/outbound routing
+        addr_mask = self.host_2.ip_prefix.split('/')
         self.inbound_routing_decap_validate_create(eni_id=eni_id_0, vni=self.host_2.client.vni,
-                                                   sip=self.host_2.ip, sip_mask="255.255.255.0",
+                                                   sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]),
                                                    src_vnet_id=host_2_vnet)
         self.pa_validation_create(sip=self.host_2.ip,
                                   vnet_id=host_2_vnet)
 
-        self.outbound_routing_vnet_create(eni_id_0, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id_0, lpm="192.168.1.0/24",
                                           dst_vnet_id=host_2_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=host_2_vnet,
                                       dip=self.host_2.client.ip,
@@ -2794,13 +2836,14 @@ class Vnet2VnetInboundOutboundMultipleConfigsSinglePortTest(VnetApiEndpoints, Vn
                                       overlay_dmac=self.host_2.client.mac)
 
         # ENI 3 inbound/outbound routing
+        addr_mask = self.host_1.ip_prefix.split('/')
         self.inbound_routing_decap_validate_create(eni_id=eni_id_3, vni=self.host_1.client.vni,
-                                                   sip=self.host_1.ip, sip_mask="255.255.255.0",
+                                                   sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]),
                                                    src_vnet_id=host_1_vnet)
         self.pa_validation_create(sip=self.host_1.ip,
                                   vnet_id=host_1_vnet)
 
-        self.outbound_routing_vnet_create(eni_id_3, lpm="192.168.2.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id_3, lpm="192.168.2.0/24",
                                           dst_vnet_id=host_1_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=host_1_vnet,
                                       dip=self.host_1.client.ip,
@@ -2903,26 +2946,32 @@ class Vnet2VnetInboundOutboundMultipleConfigsSinglePortOverlayIpv6Test(Vnet2Vnet
         host_2_vnet = self.vnet_create(vni=self.host_2.client.vni)
         host_3_vnet = self.vnet_create(vni=self.host_3.client.vni)
 
+        outbound_routing_group_id_0 = self.outbound_routing_group_create(disabled=False)
+        outbound_routing_group_id_3 = self.outbound_routing_group_create(disabled=False)
+
         eni_id_0 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.host_0.ip),
                                    vm_vni=self.host_0.client.vni,
-                                   vnet_id=host_0_vnet)
+                                   vnet_id=host_0_vnet,
+                                   outbound_routing_group_id=outbound_routing_group_id_0)
         self.eni_mac_map_create(eni_id_0, self.host_0.client.mac)
 
         eni_id_3 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.host_3.ip),
                                    vm_vni=self.host_3.client.vni,
-                                   vnet_id=host_3_vnet)
+                                   vnet_id=host_3_vnet,
+                                   outbound_routing_group_id=outbound_routing_group_id_3)
         self.eni_mac_map_create(eni_id_3, self.host_3.client.mac)
 
         # ENI 0 inbound/outbound routing
+        addr_mask = self.host_2.ip_prefix.split('/')
         self.inbound_routing_decap_validate_create(eni_id=eni_id_0, vni=self.host_2.client.vni,
-                                                   sip=self.host_2.ip, sip_mask="255.255.255.0",
+                                                   sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]),
                                                    src_vnet_id=host_2_vnet)
         self.pa_validation_create(sip=self.host_2.ip,
                                   vnet_id=host_2_vnet)
 
-        self.outbound_routing_vnet_create(eni_id_0, lpm="bbbb::0/64",
+        self.outbound_routing_vnet_create(outbound_routing_group_id_0, lpm="bbbb::0/64",
                                           dst_vnet_id=host_2_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=host_2_vnet,
                                       dip=self.host_2.client.ip,
@@ -2930,13 +2979,14 @@ class Vnet2VnetInboundOutboundMultipleConfigsSinglePortOverlayIpv6Test(Vnet2Vnet
                                       overlay_dmac=self.host_2.client.mac)
 
         # ENI 3 inbound/outbound routing
+        addr_mask = self.host_1.ip_prefix.split('/')
         self.inbound_routing_decap_validate_create(eni_id=eni_id_3, vni=self.host_1.client.vni,
-                                                   sip=self.host_1.ip, sip_mask="255.255.255.0",
+                                                   sip=addr_mask[0], sip_mask=num_to_dotted_quad(addr_mask[1]),
                                                    src_vnet_id=host_1_vnet)
         self.pa_validation_create(sip=self.host_1.ip,
                                   vnet_id=host_1_vnet)
 
-        self.outbound_routing_vnet_create(eni_id_3, lpm="cccc::0/64",
+        self.outbound_routing_vnet_create(outbound_routing_group_id_3, lpm="cccc::0/64",
                                           dst_vnet_id=host_1_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=host_1_vnet,
                                       dip=self.host_1.client.ip,
@@ -2955,8 +3005,8 @@ class Vnet2VnetInboundOutboundMultipleConfigsTwoPortsTest(Vnet2VnetInboundOutbou
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.host_0, self.host_2,
-                                add_routes=True)
+        # self.configure_underlay(self.host_0, self.host_2,
+        #                        add_routes=True)
 
         self.outboundHost0toHost2Test(tx_equal_to_rx=False)
         self.inboundHost2toHost0Test(tx_equal_to_rx=False)
@@ -2977,8 +3027,8 @@ class Vnet2VnetInboundOutboundMultipleConfigsTwoPortsOverlayIpv6Test(Vnet2VnetIn
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.host_0, self.host_2,
-                                add_routes=True)
+        # self.configure_underlay(self.host_0, self.host_2,
+        #                        add_routes=True)
 
         self.outboundHost0toHost2Test(tx_equal_to_rx=False)
         self.inboundHost2toHost0Test(tx_equal_to_rx=False)
@@ -2988,7 +3038,6 @@ class Vnet2VnetInboundOutboundMultipleConfigsTwoPortsOverlayIpv6Test(Vnet2VnetIn
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortTest(VnetApiEndpoints, VnetTrafficMixin):
     """
     Outbound Vnet to Vnet test scenario when multiple ENI and
@@ -2999,7 +3048,7 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortTest(VnetApiEndpoints, V
     def runTest(self):
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.tx_host_0, add_routes=False)
+        # self.configure_underlay(self.tx_host_0, add_routes=False)
 
         self.outboundEni0Test(tx_equal_to_rx=True)
         self.outboundEni1Test(tx_equal_to_rx=True)
@@ -3079,27 +3128,35 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortTest(VnetApiEndpoints, V
         dst_vnet_1 = self.vnet_create(vni=self.rx_host_1.client.vni)
         dst_vnet_2 = self.vnet_create(vni=self.rx_host_2.client.vni)
 
+        outbound_routing_group_id_0 = self.outbound_routing_group_create(disabled=False)
+        outbound_routing_group_id_1 = self.outbound_routing_group_create(disabled=False)
+        outbound_routing_group_id_2 = self.outbound_routing_group_create(disabled=False)
+        outbound_routing_group_id_3 = self.outbound_routing_group_create(disabled=False)
+
         eni_id_0 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.tx_host_0.ip),
                                    vm_vni=self.tx_host_0.client.vni,
-                                   vnet_id=src_vnet_0)
+                                   vnet_id=src_vnet_0,
+                                   outbound_routing_group_id=outbound_routing_group_id_0)
         self.eni_mac_map_create(eni_id=eni_id_0, mac=self.tx_host_0.client.mac)
 
         eni_id_1 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.tx_host_1.ip),
                                    vm_vni=self.tx_host_1.client.vni,
-                                   vnet_id=src_vnet_1)
+                                   vnet_id=src_vnet_1,
+                                   outbound_routing_group_id=outbound_routing_group_id_1)
         self.eni_mac_map_create(eni_id=eni_id_1, mac=self.tx_host_1.client.mac)
 
         eni_id_2 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.tx_host_2.ip),
                                    vm_vni=self.tx_host_2.client.vni,
-                                   vnet_id=src_vnet_2)
+                                   vnet_id=src_vnet_2,
+                                   outbound_routing_group_id=outbound_routing_group_id_2)
         self.eni_mac_map_create(eni_id=eni_id_2, mac=self.tx_host_2.client.mac)
 
         # Outbound routing and CA to PA entries creation
         #  for use_dst_vnet_vni=True
-        self.outbound_routing_vnet_create(eni_id=eni_id_0, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id_0, lpm="192.168.1.0/24",
                                           dst_vnet_id=dst_vnet_0)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_0,
                                       dip=self.rx_host_0.client.ip,
@@ -3108,7 +3165,7 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortTest(VnetApiEndpoints, V
                                       use_dst_vnet_vni=True)
 
         # for use_dst_vnet_vni=False
-        self.outbound_routing_vnet_create(eni_id=eni_id_1, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id_1, lpm="192.168.1.0/24",
                                           dst_vnet_id=dst_vnet_1)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_1,
                                       dip=self.rx_host_1.client.ip,
@@ -3116,7 +3173,7 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortTest(VnetApiEndpoints, V
                                       overlay_dmac=self.rx_host_1.client.mac,
                                       use_dst_vnet_vni=False)
 
-        self.outbound_routing_vnet_direct_create(eni_id=eni_id_2, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_direct_create(outbound_routing_group_id=outbound_routing_group_id_2, lpm="192.168.1.0/24",
                                                  dst_vnet_id=dst_vnet_2,
                                                  overlay_ip="192.168.1.111")
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_2,
@@ -3160,7 +3217,6 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortTest(VnetApiEndpoints, V
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortOverlayIpv6Test(Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortTest):
     """
     Underlay IPv4 and Overlay IPv6 configs
@@ -3246,27 +3302,34 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortOverlayIpv6Test(Vnet2Vne
         dst_vnet_1 = self.vnet_create(vni=self.rx_host_1.client.vni)
         dst_vnet_2 = self.vnet_create(vni=self.rx_host_2.client.vni)
 
+        outbound_routing_group_id_0 = self.outbound_routing_group_create(disabled=False)
+        outbound_routing_group_id_1 = self.outbound_routing_group_create(disabled=False)
+        outbound_routing_group_id_2 = self.outbound_routing_group_create(disabled=False)
+
         eni_id_0 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.tx_host_0.ip),
                                    vm_vni=self.tx_host_0.client.vni,
-                                   vnet_id=src_vnet_0)
+                                   vnet_id=src_vnet_0,
+                                   outbound_routing_group_id=outbound_routing_group_id_0)
         self.eni_mac_map_create(eni_id=eni_id_0, mac=self.tx_host_0.client.mac)
 
         eni_id_1 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.tx_host_1.ip),
                                    vm_vni=self.tx_host_1.client.vni,
-                                   vnet_id=src_vnet_1)
+                                   vnet_id=src_vnet_1,
+                                   outbound_routing_group_id=outbound_routing_group_id_1)
         self.eni_mac_map_create(eni_id=eni_id_1, mac=self.tx_host_1.client.mac)
 
         eni_id_2 = self.eni_create(admin_state=True,
                                    vm_underlay_dip=sai_ipaddress(self.tx_host_2.ip),
                                    vm_vni=self.tx_host_2.client.vni,
-                                   vnet_id=src_vnet_2)
+                                   vnet_id=src_vnet_2,
+                                   outbound_routing_group_id=outbound_routing_group_id_2)
         self.eni_mac_map_create(eni_id=eni_id_2, mac=self.tx_host_2.client.mac)
 
         # Outbound routing and CA to PA entries creation
         # for use_dst_vnet_vni=True
-        self.outbound_routing_vnet_create(eni_id=eni_id_0, lpm="bbbb::0/64",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id_0, lpm="bbbb::0/64",
                                           dst_vnet_id=dst_vnet_0)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_0,
                                       dip=self.rx_host_0.client.ip,
@@ -3275,7 +3338,7 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortOverlayIpv6Test(Vnet2Vne
                                       use_dst_vnet_vni=True)
 
         # for use_dst_vnet_vni=False
-        self.outbound_routing_vnet_create(eni_id=eni_id_1, lpm="bbbb::0/64",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id_1, lpm="bbbb::0/64",
                                           dst_vnet_id=dst_vnet_1)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_1,
                                       dip=self.rx_host_1.client.ip,
@@ -3283,7 +3346,7 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortOverlayIpv6Test(Vnet2Vne
                                       overlay_dmac=self.rx_host_1.client.mac,
                                       use_dst_vnet_vni=False)
 
-        self.outbound_routing_vnet_direct_create(eni_id=eni_id_2, lpm="bbbb::0/64",
+        self.outbound_routing_vnet_direct_create(outbound_routing_group_id=outbound_routing_group_id_2, lpm="bbbb::0/64",
                                                  dst_vnet_id=dst_vnet_2,
                                                  overlay_ip="bbbb::bc")
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_2,
@@ -3304,7 +3367,7 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixTwoPortsTest(Vnet2VnetOutboundMult
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host_0, self.rx_host_0)
+        # self.configure_underlay(self.tx_host_0, self.rx_host_0)
 
         self.outboundEni0Test(tx_equal_to_rx=False)
         self.outboundEni1Test(tx_equal_to_rx=False)
@@ -3323,7 +3386,7 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixTwoPortsOverlayIpv6Test(Vnet2VnetO
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host_0, self.rx_host_0)
+        # self.configure_underlay(self.tx_host_0, self.rx_host_0)
 
         self.outboundEni0Test(tx_equal_to_rx=False)
         self.outboundEni1Test(tx_equal_to_rx=False)
@@ -3331,7 +3394,6 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixTwoPortsOverlayIpv6Test(Vnet2VnetO
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortTest(VnetApiEndpoints, VnetTrafficMixin):
     """
     Outbound Vnet to Vnet test scenario with single ENI and
@@ -3342,7 +3404,7 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortTest(VnetApiEndpoints,
     def runTest(self):
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.tx_host, add_routes=False)
+        # self.configure_underlay(self.tx_host, add_routes=False)
 
         self.singleEniToOutboundVm1Test(tx_equal_to_rx=True)
         self.singleEniToOutboundVm2Test(tx_equal_to_rx=True)
@@ -3409,15 +3471,18 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortTest(VnetApiEndpoints,
         dst_vnet_1 = self.vnet_create(vni=self.rx_host_1.client.vni)
         dst_vnet_2 = self.vnet_create(vni=self.rx_host_2.client.vni)
 
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
+
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
-                                 vnet_id=src_vnet)
+                                 vnet_id=src_vnet,
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id=eni_id, mac=self.tx_host.client.mac)
 
         # Outbound routing and CA to PA entries creation
         #  for use_dst_vnet_vni=True
-        self.outbound_routing_vnet_create(eni_id=eni_id, lpm=rx_host_0_client_ip_prefix,
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm=rx_host_0_client_ip_prefix,
                                           dst_vnet_id=dst_vnet_0)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_0,
                                       dip=self.rx_host_0.client.ip,
@@ -3426,7 +3491,7 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortTest(VnetApiEndpoints,
                                       use_dst_vnet_vni=True)
 
         # for use_dst_vnet_vni=False
-        self.outbound_routing_vnet_create(eni_id=eni_id, lpm=rx_host_1_client_ip_prefix,
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm=rx_host_1_client_ip_prefix,
                                           dst_vnet_id=dst_vnet_1)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_1,
                                       dip=self.rx_host_1.client.ip,
@@ -3434,7 +3499,7 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortTest(VnetApiEndpoints,
                                       overlay_dmac=self.rx_host_1.client.mac,
                                       use_dst_vnet_vni=True)
 
-        self.outbound_routing_vnet_create(eni_id=eni_id, lpm=rx_host_2_client_ip_prefix,
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm=rx_host_2_client_ip_prefix,
                                           dst_vnet_id=dst_vnet_2)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_2,
                                       dip=self.rx_host_2.client.ip,
@@ -3489,7 +3554,6 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortTest(VnetApiEndpoints,
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortOverlayIpv6Test(Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortTest):
     """
     Underlay IPv4 and Overlay IPv6 configs
@@ -3556,15 +3620,18 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortOverlayIpv6Test(Vnet2V
         dst_vnet_1 = self.vnet_create(vni=self.rx_host_1.client.vni)
         dst_vnet_2 = self.vnet_create(vni=self.rx_host_2.client.vni)
 
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
+
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
-                                 vnet_id=src_vnet)
+                                 vnet_id=src_vnet,
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id=eni_id, mac=self.tx_host.client.mac)
 
         # Outbound routing and CA to PA entries creation
         #  for use_dst_vnet_vni=True
-        self.outbound_routing_vnet_create(eni_id=eni_id, lpm=rx_host_0_client_ip_prefix,
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm=rx_host_0_client_ip_prefix,
                                           dst_vnet_id=dst_vnet_0)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_0,
                                       dip=self.rx_host_0.client.ip,
@@ -3573,7 +3640,7 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortOverlayIpv6Test(Vnet2V
                                       use_dst_vnet_vni=True)
 
         # for use_dst_vnet_vni=False
-        self.outbound_routing_vnet_create(eni_id=eni_id, lpm=rx_host_1_client_ip_prefix,
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm=rx_host_1_client_ip_prefix,
                                           dst_vnet_id=dst_vnet_1)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_1,
                                       dip=self.rx_host_1.client.ip,
@@ -3581,7 +3648,7 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortOverlayIpv6Test(Vnet2V
                                       overlay_dmac=self.rx_host_1.client.mac,
                                       use_dst_vnet_vni=True)
 
-        self.outbound_routing_vnet_create(eni_id=eni_id, lpm=rx_host_2_client_ip_prefix,
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm=rx_host_2_client_ip_prefix,
                                           dst_vnet_id=dst_vnet_2)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_2,
                                       dip=self.rx_host_2.client.ip,
@@ -3601,7 +3668,7 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixTwoPortsTest(Vnet2VnetOutboundSi
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host_0)
+        # self.configure_underlay(self.tx_host, self.rx_host_0)
 
         self.singleEniToOutboundVm1Test(tx_equal_to_rx=False)
         self.singleEniToOutboundVm2Test(tx_equal_to_rx=False)
@@ -3620,7 +3687,7 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixTwoPortsOverlayIpv6Test(Vnet2Vne
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host_0)
+        # self.configure_underlay(self.tx_host, self.rx_host_0)
 
         self.singleEniToOutboundVm1Test(tx_equal_to_rx=False)
         self.singleEniToOutboundVm2Test(tx_equal_to_rx=False)
@@ -3628,7 +3695,6 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixTwoPortsOverlayIpv6Test(Vnet2Vne
 
 
 @group("draft")
-@skipIf(test_param_get('target') == 'bmv2', "Blocked on BMv2 by Issue #236")
 class Vnet2VnetOutboundSameCaPaIpPrefixesSinglePortTest(VnetApiEndpoints, VnetTrafficMixin):
     """
     Outbound Vnet to Vnet test scenario with the same
@@ -3638,7 +3704,7 @@ class Vnet2VnetOutboundSameCaPaIpPrefixesSinglePortTest(VnetApiEndpoints, VnetTr
     def runTest(self):
         self.update_configuration_for_tx_equal_to_rx()
         self.configureTest()
-        self.configure_underlay(self.tx_host, add_routes=False)
+        # self.configure_underlay(self.tx_host, add_routes=False)
 
         self.vnet2VnetOutboundRouteVnetTest(tx_equal_to_rx=True)
 
@@ -3663,13 +3729,16 @@ class Vnet2VnetOutboundSameCaPaIpPrefixesSinglePortTest(VnetApiEndpoints, VnetTr
         src_vnet = self.vnet_create(vni=self.tx_host.client.vni)
         dst_vnet = self.vnet_create(vni=self.rx_host.client.vni)
 
+        outbound_routing_group_id = self.outbound_routing_group_create(disabled=False)
+
         eni_id = self.eni_create(admin_state=True,
                                  vm_underlay_dip=sai_ipaddress(self.tx_host.ip),
                                  vm_vni=self.tx_host.client.vni,
-                                 vnet_id=src_vnet)
+                                 vnet_id=src_vnet,
+                                 outbound_routing_group_id=outbound_routing_group_id)
         self.eni_mac_map_create(eni_id, self.tx_host.client.mac)  # ENI MAC
 
-        self.outbound_routing_vnet_create(eni_id=eni_id, lpm="192.168.1.0/24",
+        self.outbound_routing_vnet_create(outbound_routing_group_id=outbound_routing_group_id, lpm="192.168.1.0/24",
                                           dst_vnet_id=dst_vnet)
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet,
                                       dip=self.rx_host.client.ip,
@@ -3702,6 +3771,6 @@ class Vnet2VnetOutboundSameCaPaIpPrefixesTwoPortsTest(Vnet2VnetOutboundSameCaPaI
 
     def runTest(self):
         self.configureTest()
-        self.configure_underlay(self.tx_host, self.rx_host)
+        # self.configure_underlay(self.tx_host, self.rx_host)
 
         self.vnet2VnetOutboundRouteVnetTest(tx_equal_to_rx=False)

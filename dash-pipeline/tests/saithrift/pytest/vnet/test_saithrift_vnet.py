@@ -35,14 +35,26 @@ def test_sai_thrift_create_eni(saithrift_client):
 
         vm_underlay_dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
                                                   addr=sai_thrift_ip_addr_t(ip4="172.16.3.1"))
+        pl_sip_mask = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV6,
+                                              addr=sai_thrift_ip_addr_t(ip6="2001:0db8:85a3:0000:0000:0000:0000:0000"))
+        pl_sip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV6,
+                                         addr=sai_thrift_ip_addr_t(ip6="2001:0db8:85a3:0000:0000:8a2e:0370:7334"))
+        pl_underlay_sip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
+                                                  addr=sai_thrift_ip_addr_t(ip4="10.0.0.18"))
         eni = sai_thrift_create_eni(saithrift_client, cps=10000,
                                     pps=100000, flows=100000,
                                     admin_state=True,
+                                    ha_scope_id=0,
                                     vm_underlay_dip=vm_underlay_dip,
                                     vm_vni=9,
                                     vnet_id=vnet,
+                                    pl_sip = pl_sip,
+                                    pl_sip_mask = pl_sip_mask,
+                                    pl_underlay_sip = pl_underlay_sip,
                                     v4_meter_policy_id = 0,
                                     v6_meter_policy_id = 0,
+                                    dash_tunnel_dscp_mode = SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL,
+                                    dscp = 0,
                                     inbound_v4_stage1_dash_acl_group_id = in_acl_group_id,
                                     inbound_v4_stage2_dash_acl_group_id = in_acl_group_id,
                                     inbound_v4_stage3_dash_acl_group_id = in_acl_group_id,
@@ -62,7 +74,11 @@ def test_sai_thrift_create_eni(saithrift_client):
                                     outbound_v6_stage2_dash_acl_group_id = 0,
                                     outbound_v6_stage3_dash_acl_group_id = 0,
                                     outbound_v6_stage4_dash_acl_group_id = 0,
-                                    outbound_v6_stage5_dash_acl_group_id = 0)
+                                    outbound_v6_stage5_dash_acl_group_id = 0,
+                                    disable_fast_path_icmp_flow_redirection = 0,
+                                    full_flow_resimulation_requested = False,
+                                    max_resimulated_flow_per_second = 0,
+                                    outbound_routing_group_id = 0)
         assert (eni != SAI_NULL_OBJECT_ID);
 
         eam = sai_thrift_eni_ether_address_map_entry_t(switch_id=switch_id, address = eth_addr)

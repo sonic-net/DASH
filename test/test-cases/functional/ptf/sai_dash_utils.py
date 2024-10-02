@@ -140,11 +140,17 @@ class VnetAPI(VnetObjects):
             "pps": 100000,
             "flows": 100000,
             "admin_state": True,
+            "ha_scope_id": 0,
             "vm_underlay_dip": sai_ipaddress("0.0.0.0"),
             "vm_vni": 1,
             "vnet_id": 1,
+            "pl_sip" : sai_ipaddress("2001:0db8:85a3:0000:0000:8a2e:0370:7334"),
+            "pl_sip_mask": sai_ipaddress("2001:0db8:85a3:0000:0000:0000:0000:0000"),
+            "pl_underlay_sip": sai_ipaddress("10.0.0.18"),
             "v4_meter_policy_id": 0,
             "v6_meter_policy_id": 0,
+            "dash_tunnel_dscp_mode": SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL,
+            "dscp": 0,
             "inbound_v4_stage1_dash_acl_group_id": 0,
             "inbound_v4_stage2_dash_acl_group_id": 0,
             "inbound_v4_stage3_dash_acl_group_id": 0,
@@ -164,7 +170,11 @@ class VnetAPI(VnetObjects):
             "outbound_v6_stage2_dash_acl_group_id": 0,
             "outbound_v6_stage3_dash_acl_group_id": 0,
             "outbound_v6_stage4_dash_acl_group_id": 0,
-            "outbound_v6_stage5_dash_acl_group_id": 0
+            "outbound_v6_stage5_dash_acl_group_id": 0,
+            "disable_fast_path_icmp_flow_redirection": 0,
+            "outbound_routing_group_id": 0,
+            "full_flow_resimulation_requested": False,
+            "max_resimulated_flow_per_second": 0
         }
         default_kwargs.update(kwargs)
 
@@ -230,19 +240,35 @@ class VnetAPI(VnetObjects):
     def vnet_remove(self, vnet_id):
         sai_thrift_remove_vnet(self.client, vnet_id)
 
+    def outbound_routing_group_create(self, disabled):
+        """
+        Create routing group
+        """
+
+        outbound_routing_group_id = sai_thrift_create_outbound_routing_group(self.client, disabled=disabled)
+        self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
+        self.assertNotEqual(outbound_routing_group_id, 0)
+        self.add_teardown_obj(self.outbound_routing_group_remove, outbound_routing_group_id)
+
+        return outbound_routing_group_id
+
+    def outbound_routing_group_remove(self, outbound_routing_group_id):
+        sai_thrift_remove_outbound_routing_group(self.client, outbound_routing_group_id)
+
     def inbound_routing_decap_validate_create(self, eni_id, vni, sip, sip_mask, src_vnet_id):
         """
         Create inbound routing entry with
-        SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE action
+        SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE action
         """
 
         inbound_routing_entry = sai_thrift_inbound_routing_entry_t(
             switch_id=self.switch_id, vni=vni,
             eni_id=eni_id, sip=sai_ipaddress(sip),
-            sip_mask=sai_ipaddress(sip_mask), priority=0)
+            sip_mask=sai_ipaddress(sip_mask), priority=1)
         sai_thrift_create_inbound_routing_entry(self.client, inbound_routing_entry,
-                                                action=SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE,
-                                                src_vnet_id=src_vnet_id)
+                                                action=SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE,
+                                                src_vnet_id=src_vnet_id,
+                                                meter_class_or=0, meter_class_and=-1)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.inbound_routing_remove, inbound_routing_entry)
         return inbound_routing_entry
@@ -250,15 +276,16 @@ class VnetAPI(VnetObjects):
     def inbound_routing_decap_create(self, eni_id, vni, sip, sip_mask):
         """
         Create inbound routing entry with
-        SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP action
+        SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP action
         """
 
         inbound_routing_entry = sai_thrift_inbound_routing_entry_t(
             switch_id=self.switch_id, vni=vni,
             eni_id=eni_id, sip=sai_ipaddress(sip),
-            sip_mask=sai_ipaddress(sip_mask), priority=0)
+            sip_mask=sai_ipaddress(sip_mask), priority=1)
         sai_thrift_create_inbound_routing_entry(self.client, inbound_routing_entry,
-                                                action=SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP)
+                                                action=SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP,
+                                                meter_class_or=0, meter_class_and=-1)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.inbound_routing_remove, inbound_routing_entry)
         return inbound_routing_entry
@@ -285,54 +312,55 @@ class VnetAPI(VnetObjects):
     def pa_validation_remove(self, pa_validation_entry):
         sai_thrift_remove_pa_validation_entry(self.client, pa_validation_entry)
 
-    def outbound_routing_vnet_direct_create(self, eni_id, lpm, dst_vnet_id,
-                                            overlay_ip, counter_id=None):
+    def outbound_routing_vnet_direct_create(self, outbound_routing_group_id, lpm, dst_vnet_id,
+                                            overlay_ip, counter_id=None, dash_tunnel_id=0):
         """
         Create outband vnet direct routing entry
         """
 
         outbound_routing_entry = sai_thrift_outbound_routing_entry_t(
-            switch_id=self.switch_id, eni_id=eni_id,
+            switch_id=self.switch_id, outbound_routing_group_id=outbound_routing_group_id,
             destination=sai_ipprefix(lpm))
         sai_thrift_create_outbound_routing_entry(self.client,
                                                  outbound_routing_entry, dst_vnet_id=dst_vnet_id,
                                                  action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT,
                                                  overlay_ip=sai_ipaddress(overlay_ip), counter_id=counter_id,
-                                                 meter_policy_en=False, meter_class=0)
+                                                 meter_class_or=0, meter_class_and=-1, dash_tunnel_id=dash_tunnel_id, routing_actions_disabled_in_flow_resimulation = 0)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_routing_vnet_direct_remove, outbound_routing_entry)
 
         return outbound_routing_entry
 
-    def outbound_routing_direct_create(self, eni_id, lpm, counter_id=None):
+    def outbound_routing_direct_create(self, outbound_routing_group_id, lpm, counter_id=None, dash_tunnel_id=0):
         """
         Create outband vnet direct routing entry
         """
 
         outbound_routing_entry = sai_thrift_outbound_routing_entry_t(
-            switch_id=self.switch_id, eni_id=eni_id,
+            switch_id=self.switch_id, outbound_routing_group_id=outbound_routing_group_id,
             destination=sai_ipprefix(lpm))
         sai_thrift_create_outbound_routing_entry(self.client, outbound_routing_entry, counter_id=counter_id,
                                                  action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_DIRECT,
-                                                 meter_policy_en=False, meter_class=0)
+                                                 meter_class_or=0, meter_class_and=-1, dash_tunnel_id=dash_tunnel_id, routing_actions_disabled_in_flow_resimulation = 0)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_routing_vnet_direct_remove, outbound_routing_entry)
 
         return outbound_routing_entry
 
-    def outbound_routing_vnet_create(self, eni_id, lpm, dst_vnet_id, counter_id=None):
+    def outbound_routing_vnet_create(self, outbound_routing_group_id, lpm, dst_vnet_id, counter_id=None, dash_tunnel_id=0):
         """
         Create outbound vnet routing entry
         """
 
         outbound_routing_entry = sai_thrift_outbound_routing_entry_t(
-            switch_id=self.switch_id, eni_id=eni_id,
+            switch_id=self.switch_id, outbound_routing_group_id=outbound_routing_group_id,
             destination=sai_ipprefix(lpm))
         sai_thrift_create_outbound_routing_entry(self.client,
                                                  outbound_routing_entry, dst_vnet_id=dst_vnet_id,
                                                  counter_id=counter_id,
                                                  action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET,
-                                                 meter_policy_en=False, meter_class=0)
+                                                 meter_class_or=0, meter_class_and=-1,
+                                                 dash_tunnel_id=dash_tunnel_id, routing_actions_disabled_in_flow_resimulation = 0)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_routing_vnet_direct_remove, outbound_routing_entry)
 
@@ -340,7 +368,7 @@ class VnetAPI(VnetObjects):
         sai_thrift_remove_outbound_routing_entry(self.client, entry)
 
     def outbound_ca_to_pa_create(self, dst_vnet_id, dip, underlay_dip,
-                                 use_dst_vnet_vni=True, overlay_dmac=None):
+                                 use_dst_vnet_vni=True, overlay_dmac=None, dash_tunnel_id=0):
         """
         Create outband CA PA mapping
         """
@@ -349,10 +377,14 @@ class VnetAPI(VnetObjects):
                                                               dst_vnet_id=dst_vnet_id,
                                                               dip=sai_ipaddress(dip))
         sai_thrift_create_outbound_ca_to_pa_entry(self.client, ca_to_pa_entry,
+                                                  action=SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING,
                                                   underlay_dip=sai_ipaddress(underlay_dip),
                                                   use_dst_vnet_vni=use_dst_vnet_vni,
                                                   overlay_dmac=overlay_dmac,
-                                                  meter_class=0, meter_class_override=False)
+                                                  meter_class_or=0,
+                                                  dash_tunnel_id=dash_tunnel_id,
+                                                  flow_resimulation_requested = False,
+                                                  routing_actions_disabled_in_flow_resimulation = 0)
         self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
         self.add_teardown_obj(self.outbound_ca_to_pa_remove, ca_to_pa_entry)
 
@@ -436,8 +468,8 @@ class VnetAPI(VnetObjects):
                                                src_mac=neighbor.peer.mac)
             nhop = self.nexthop_create(rif, neighbor.ip)
             self.neighbor_create(rif, neighbor.ip, neighbor.mac)
-            if add_routes is True:
-                self.route_create(neighbor.ip_prefix, nhop)
+            #if add_routes is True:
+            #    self.route_create(neighbor.ip_prefix, nhop)
 
 
 class VnetApiEndpoints(VnetAPI):
@@ -541,10 +573,14 @@ class VnetApiEndpoints(VnetAPI):
         """
 
         self.rx_host.port = self.tx_host.port
-        self.rx_host.mac = self.tx_host.mac
+        # MAC address is hardcoded to 0 since underlay routing is not completely implemented.
+        self.rx_host.mac = "00:00:00:00:00:00"
+        #self.rx_host.mac = self.tx_host.mac
 
         self.rx_host.peer.port = self.tx_host.peer.port
-        self.rx_host.peer.mac = self.tx_host.peer.mac
+        # MAC address is hardcoded to 0 since underlay routing is not completely implemented.
+        self.rx_host.peer.mac = "00:00:00:00:00:00"
+        #self.rx_host.peer.mac = self.tx_host.peer.mac
         self.rx_host.peer.ip = self.tx_host.peer.ip
 
     @staticmethod
@@ -592,6 +628,12 @@ class VnetTrafficMixin:
     """
     Mixin class with methods dedicated for Vnet use cases traffic verification
     """
+
+    # Disable UDP checksum for behavioral model
+    if test_param_get('target') == 'bmv2':
+        with_udp_chksum = False
+    else:
+        with_udp_chksum = True
 
     # TCP flags
     SYN = "S"
@@ -952,7 +994,7 @@ class VnetTrafficMixin:
                                                     eth_src=client.mac,
                                                     **{self.ip_dst_outer_pkt: client.peer.ip},  # VIP
                                                     **{self.ip_src_outer_pkt: client.ip},
-                                                    with_udp_chksum=True,
+                                                    with_udp_chksum=self.with_udp_chksum,
                                                     vxlan_vni=client.client.vni,
                                                     inner_frame=client_inner_pkt)
 
@@ -960,7 +1002,8 @@ class VnetTrafficMixin:
                                                         eth_src=server.peer.mac,
                                                         **{self.ip_dst_outer_pkt: server.ip},
                                                         **{self.ip_src_outer_pkt: server.peer.ip},  # VIP
-                                                        with_udp_chksum=True,
+                                                        with_udp_chksum=self.with_udp_chksum,
+                                                        udp_sport=0,
                                                         vxlan_vni=server.client.vni,
                                                         inner_frame=exp_client_inner_pkt)
 
@@ -1004,7 +1047,7 @@ class VnetTrafficMixin:
                                                        eth_src=server.mac,
                                                        **{self.ip_dst_outer_pkt: server.peer.ip},  # VIP
                                                        **{self.ip_src_outer_pkt: server.ip},
-                                                       with_udp_chksum=True,
+                                                       with_udp_chksum=self.with_udp_chksum,
                                                        vxlan_vni=server.client.vni,
                                                        inner_frame=server_inner_pkt)
 
@@ -1012,7 +1055,8 @@ class VnetTrafficMixin:
                                                            eth_src=client.peer.mac,
                                                            **{self.ip_dst_outer_pkt: client.ip},
                                                            **{self.ip_src_outer_pkt: client.peer.ip},  # VIP
-                                                           with_udp_chksum=True,
+                                                           with_udp_chksum=self.with_udp_chksum,
+                                                           udp_sport=0,
                                                            vxlan_vni=client.client.vni,
                                                            inner_frame=server_inner_pkt)
 
@@ -1099,7 +1143,7 @@ class VnetTrafficMixin:
                                                     eth_src=client.mac,
                                                     **{self.ip_dst_outer_pkt: client.peer.ip},  # VIP
                                                     **{self.ip_src_outer_pkt: client.ip},
-                                                    with_udp_chksum=True,
+                                                    with_udp_chksum=self.with_udp_chksum,
                                                     vxlan_vni=client.client.vni,
                                                     inner_frame=client_inner_pkt)
 
@@ -1161,7 +1205,8 @@ class VnetTrafficMixin:
                                                            eth_src=client.peer.mac,
                                                            **{self.ip_dst_inner_pkt: client.ip},
                                                            **{self.ip_src_inner_pkt: client.peer.ip},  # VIP
-                                                           with_udp_chksum=True,
+                                                           with_udp_chksum=self.with_udp_chksum,
+                                                           udp_sport=0,
                                                            vxlan_vni=client.client.vni,
                                                            inner_frame=exp_server_inner_pkt)
 
@@ -1255,7 +1300,7 @@ class VnetTrafficMixin:
                                             eth_src=client.mac,
                                             **{self.ip_dst_outer_pkt: client.peer.ip},  # VIP
                                             **{self.ip_src_outer_pkt: client.ip},
-                                            with_udp_chksum=True,
+                                            with_udp_chksum=self.with_udp_chksum,
                                             vxlan_vni=client.client.vni,
                                             inner_frame=client_inner_pkt)
 
@@ -1263,7 +1308,8 @@ class VnetTrafficMixin:
                                                 eth_src=server.peer.mac,
                                                 **{self.ip_dst_outer_pkt: server.ip},
                                                 **{self.ip_src_outer_pkt: server.peer.ip},  # VIP
-                                                with_udp_chksum=True,
+                                                with_udp_chksum=self.with_udp_chksum,
+                                                udp_sport=0,
                                                 vxlan_vni=server.client.vni,
                                                 inner_frame=exp_client_inner_pkt)
 
@@ -1271,7 +1317,7 @@ class VnetTrafficMixin:
                                             eth_src=server.mac,
                                             **{self.ip_dst_outer_pkt: server.peer.ip},  # VIP
                                             **{self.ip_src_outer_pkt: server.ip},
-                                            with_udp_chksum=True,
+                                            with_udp_chksum=self.with_udp_chksum,
                                             vxlan_vni=server.client.vni,
                                             inner_frame=server_inner_pkt)
 
@@ -1279,7 +1325,8 @@ class VnetTrafficMixin:
                                                 eth_src=client.peer.mac,
                                                 **{self.ip_dst_outer_pkt: client.ip},
                                                 **{self.ip_src_outer_pkt: client.peer.ip},  # VIP
-                                                with_udp_chksum=True,
+                                                with_udp_chksum=self.with_udp_chksum,
+                                                udp_sport=0,
                                                 vxlan_vni=client.client.vni,
                                                 inner_frame=server_inner_pkt)
         send_packets = OrderedDict()
@@ -1333,7 +1380,7 @@ class VnetTrafficMixin:
                                             eth_src=client.mac,
                                             **{self.ip_dst_outer_pkt: client.peer.ip},  # VIP
                                             **{self.ip_src_outer_pkt: client.ip},
-                                            with_udp_chksum=True,
+                                            with_udp_chksum=self.with_udp_chksum,
                                             vxlan_vni=client.client.vni,
                                             inner_frame=client_inner_pkt)
 
@@ -1341,7 +1388,8 @@ class VnetTrafficMixin:
                                                 eth_src=server.peer.mac,
                                                 **{self.ip_dst_outer_pkt: server.ip},
                                                 **{self.ip_src_outer_pkt: server.peer.ip},  # VIP
-                                                with_udp_chksum=True,
+                                                with_udp_chksum=self.with_udp_chksum,
+                                                udp_sport=0,
                                                 vxlan_vni=server.client.vni,
                                                 inner_frame=exp_client_inner_pkt)
 
@@ -1349,7 +1397,7 @@ class VnetTrafficMixin:
                                             eth_src=server.mac,
                                             **{self.ip_dst_outer_pkt: server.peer.ip},  # VIP
                                             **{self.ip_src_outer_pkt: server.ip},
-                                            with_udp_chksum=True,
+                                            with_udp_chksum=self.with_udp_chksum,
                                             vxlan_vni=server.client.vni,
                                             inner_frame=server_inner_pkt)
 
@@ -1357,7 +1405,8 @@ class VnetTrafficMixin:
                                                 eth_src=client.peer.mac,
                                                 **{self.ip_dst_outer_pkt: client.ip},
                                                 **{self.ip_src_outer_pkt: client.peer.ip},
-                                                with_udp_chksum=True,
+                                                with_udp_chksum=self.with_udp_chksum,
+                                                udp_sport=0,
                                                 vxlan_vni=client.client.vni,
                                                 inner_frame=server_inner_pkt)
         send_packets = OrderedDict()
@@ -1446,7 +1495,7 @@ class VnetTrafficMixin:
                                      eth_src=client.mac,
                                      **{self.ip_dst_outer_pkt: client.peer.ip},  # VIP
                                      **{self.ip_src_outer_pkt: client.ip},
-                                     with_udp_chksum=True,
+                                     with_udp_chksum=self.with_udp_chksum,
                                      vxlan_vni=client.client.vni,
                                      inner_frame=inner_pkt)
 
@@ -1454,7 +1503,8 @@ class VnetTrafficMixin:
                                          eth_src=server.peer.mac,
                                          **{self.ip_dst_outer_pkt: server.ip},
                                          **{self.ip_src_outer_pkt: server.peer.ip},  # VIP
-                                         with_udp_chksum=True,
+                                         with_udp_chksum=self.with_udp_chksum,
+                                         udp_sport=0,
                                          vxlan_vni=server.client.vni,
                                          inner_frame=exp_inner_pkt)
 

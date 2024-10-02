@@ -54,16 +54,31 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         self.vnet = sai_thrift_create_vnet(self.client, vni=self.vnet_vni)
         assert (self.vnet != SAI_NULL_OBJECT_ID)
 
+        self.outbound_routing_group = sai_thrift_create_outbound_routing_group(self.client, disabled=False)
+        assert (self.outbound_routing_group != SAI_NULL_OBJECT_ID)
+
         vm_underlay_dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
                                                   addr=sai_thrift_ip_addr_t(ip4=self.src_vm_pa_ip))
+        pl_sip_mask = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV6,
+                addr=sai_thrift_ip_addr_t(ip6="2001:0db8:85a3:0000:0000:0000:0000:0000"))
+        pl_sip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV6,
+                addr=sai_thrift_ip_addr_t(ip6="2001:0db8:85a3:0000:0000:8a2e:0370:7334"))
+        pl_underlay_sip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
+                addr=sai_thrift_ip_addr_t(ip4="10.0.0.18"))
         self.eni = sai_thrift_create_eni(self.client, cps=10000,
                                          pps=100000, flows=100000,
                                          admin_state=True,
+                                         ha_scope_id=0,
                                          vm_underlay_dip=vm_underlay_dip,
                                          vm_vni=9,
                                          vnet_id=self.vnet,
+                                         pl_sip = pl_sip,
+                                         pl_sip_mask = pl_sip_mask,
+                                         pl_underlay_sip = pl_underlay_sip,
                                          v4_meter_policy_id = 0,
                                          v6_meter_policy_id = 0,
+                                         dash_tunnel_dscp_mode=SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL,
+                                         dscp=0,
                                          # TODO: Enable ACL rule
                                          #inbound_v4_stage1_dash_acl_group_id = self.in_acl_group_id,
                                          #inbound_v4_stage2_dash_acl_group_id = self.in_acl_group_id,
@@ -94,7 +109,11 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
                                          outbound_v6_stage2_dash_acl_group_id = 0,
                                          outbound_v6_stage3_dash_acl_group_id = 0,
                                          outbound_v6_stage4_dash_acl_group_id = 0,
-                                         outbound_v6_stage5_dash_acl_group_id = 0)
+                                         outbound_v6_stage5_dash_acl_group_id = 0,
+                                         disable_fast_path_icmp_flow_redirection = 0,
+                                         full_flow_resimulation_requested=False,
+                                         max_resimulated_flow_per_second=0,
+                                         outbound_routing_group_id=self.outbound_routing_group)
 
         self.eam = sai_thrift_eni_ether_address_map_entry_t(switch_id=self.switch_id, address = self.eni_mac)
         status = sai_thrift_create_eni_ether_address_map_entry(self.client,
@@ -114,19 +133,22 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         ca_prefix = sai_thrift_ip_prefix_t(addr_family=self.sai_ip_addr_family,
                                             addr=sai_thrift_ip_addr_t(**{self.ip_addr_family_attr: self.ca_prefix_addr}),
                                             mask=sai_thrift_ip_addr_t(**{self.ip_addr_family_attr: self.ca_prefix_mask}))
-        self.ore = sai_thrift_outbound_routing_entry_t(switch_id=self.switch_id, eni_id=self.eni, destination=ca_prefix)
+        self.ore = sai_thrift_outbound_routing_entry_t(switch_id=self.switch_id, outbound_routing_group_id=self.outbound_routing_group, destination=ca_prefix)
         status = sai_thrift_create_outbound_routing_entry(self.client, self.ore,
                                                           action=SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET,
                                                           dst_vnet_id=self.vnet,
-                                                          meter_policy_en=False, meter_class=0)
+                                                          meter_class_or=0, meter_class_and=-1,
+                                                          dash_tunnel_id=0, routing_actions_disabled_in_flow_resimulation = 0)
         assert(status == SAI_STATUS_SUCCESS)
 
         underlay_dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
                                                addr=sai_thrift_ip_addr_t(ip4=self.dst_pa_ip))
         self.ocpe = sai_thrift_outbound_ca_to_pa_entry_t(switch_id=self.switch_id, dst_vnet_id=self.vnet, dip=dip)
-        status = sai_thrift_create_outbound_ca_to_pa_entry(self.client, self.ocpe, underlay_dip = underlay_dip,
+        status = sai_thrift_create_outbound_ca_to_pa_entry(self.client, self.ocpe, action=SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING,
+                                                           underlay_dip = underlay_dip,
                                                            overlay_dmac=self.dst_ca_mac, use_dst_vnet_vni = True,
-                                                           meter_class=0, meter_class_override=False)
+                                                           meter_class_or=0, flow_resimulation_requested = False, dash_tunnel_id=0,
+                                                           routing_actions_disabled_in_flow_resimulation = 0)
         assert(status == SAI_STATUS_SUCCESS)
 
         print(f"\n{self.__class__.__name__} configureVnet OK")
@@ -220,10 +242,6 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
                                         with_udp_chksum=False,
                                         vxlan_vni=self.vnet_vni,
                                         inner_frame=inner_exp_pkt)
-        # TODO: Fix IP chksum
-        vxlan_exp_pkt[IP].chksum = 0
-        # TODO: Fix UDP length
-        vxlan_exp_pkt[IP][UDP][VXLAN].flags = 0
 
         self.pkt_exp = vxlan_exp_pkt
         print("\tSending outbound packet...")
@@ -378,10 +396,6 @@ class SaiThriftVnetOutboundUdpV6PktTest(SaiThriftVnetOutboundUdpPktTest):
                                         with_udp_chksum=False,
                                         vxlan_vni=self.vnet_vni,
                                         inner_frame=inner_exp_pkt)
-        # TODO: Fix IP chksum
-        vxlan_exp_pkt[IP].chksum = 0
-        # TODO: Fix UDP length
-        vxlan_exp_pkt[IP][UDP][VXLAN].flags = 0
 
         self.pkt_exp = vxlan_exp_pkt
         print("\tSending outbound packet...")

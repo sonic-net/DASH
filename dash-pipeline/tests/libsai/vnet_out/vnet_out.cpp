@@ -43,6 +43,12 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    // check if dtel create will work
+
+    sai_dtel_api_t *dtel_api;
+    status = sai_api_query((sai_api_t)SAI_API_DTEL, (void**)&dtel_api);
+    QUERY_STATUS_CHECK(status, SAI_API_DTEL);
+
     sai_dash_direction_lookup_api_t *dash_direction_lookup_api;
     status = sai_api_query((sai_api_t)SAI_API_DASH_DIRECTION_LOOKUP, (void**)&dash_direction_lookup_api);
     QUERY_STATUS_CHECK(status, SAI_API_DASH_DIRECTION_LOOKUP);
@@ -126,6 +132,10 @@ int main(int argc, char **argv)
     attr.value.booldata = true;
     attrs.push_back(attr);
 
+    attr.id = SAI_ENI_ATTR_HA_SCOPE_ID;
+    attr.value.oid = SAI_NULL_OBJECT_ID;
+    attrs.push_back(attr);
+
     attr.id = SAI_ENI_ATTR_VM_UNDERLAY_DIP;
     sai_ip_addr_t u_dip_addr = {.ip4 = 0x010310ac};
     sai_ip_address_t u_dip = {.addr_family = SAI_IP_ADDR_FAMILY_IPV4,
@@ -147,6 +157,14 @@ int main(int argc, char **argv)
 
     attr.id = SAI_ENI_ATTR_V6_METER_POLICY_ID;
     attr.value.oid = SAI_NULL_OBJECT_ID;
+    attrs.push_back(attr);
+
+    attr.id = SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE;
+    attr.value.s32 = SAI_DASH_TUNNEL_DSCP_MODE_PRESERVE_MODEL;
+    attrs.push_back(attr);
+
+    attr.id = SAI_ENI_ATTR_DSCP;
+    attr.value.u8 = 0;
     attrs.push_back(attr);
 
     std::unordered_map<uint32_t, uint16_t> acl_group_ids = {
@@ -177,7 +195,36 @@ int main(int argc, char **argv)
         attrs.push_back(attr);
     }
 
+    attr.id = SAI_ENI_ATTR_PL_SIP;
+    attr.value.u32 = 0;
+    attrs.push_back(attr);
+
+    attr.id = SAI_ENI_ATTR_PL_SIP_MASK;
+    attr.value.u32 = 0;
+    attrs.push_back(attr);
+
+    attr.id = SAI_ENI_ATTR_PL_UNDERLAY_SIP;
+    attr.value.u32 = 0;
+    attrs.push_back(attr);
+
+    attr.id = SAI_ENI_ATTR_DISABLE_FAST_PATH_ICMP_FLOW_REDIRECTION;
+    attr.value.booldata = false;
+    attrs.push_back(attr);
+
+    attr.id = SAI_ENI_ATTR_OUTBOUND_ROUTING_GROUP_ID;
+    attr.value.oid = SAI_NULL_OBJECT_ID;
+    attrs.push_back(attr);
+
+    attr.id = SAI_ENI_ATTR_FULL_FLOW_RESIMULATION_REQUESTED;
+    attr.value.booldata = false;
+    attrs.push_back(attr);
+
+    attr.id = SAI_ENI_ATTR_MAX_RESIMULATED_FLOW_PER_SECOND;
+    attr.value.u64 = 0;
+    attrs.push_back(attr);
+
     status = dash_eni_api->create_eni(&eni_id, switch_id, attrs.size(), attrs.data());
+
     if (status != SAI_STATUS_SUCCESS)
     {
         std::cout << "Failed to create ENI object" << std::endl;
@@ -194,6 +241,10 @@ int main(int argc, char **argv)
     eam.address[3] = 0xcc;
     eam.address[4] = 0xcc;
     eam.address[5] = 0xcc;
+
+    attr.id = SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ACTION;
+    attr.value.u32 = SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ACTION_SET_ENI;
+    attrs.push_back(attr);
 
     attr.id = SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID;
     attr.value.u16 = eni_id;

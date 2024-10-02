@@ -1,0 +1,78 @@
+!!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
+name: dash_pa_validation
+description: DASH PA validation
+api_type: overlay
+sai_apis:
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: pa_validation_entry
+  description: PA validation entry
+  is_object: false
+  enums:
+  - !!python/object:utils.sai_spec.sai_enum.SaiEnum
+    name: sai_pa_validation_entry_action_t
+    description: 'Attribute data for #SAI_PA_VALIDATION_ENTRY_ATTR_ACTION'
+    members:
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_PA_VALIDATION_ENTRY_ACTION_PERMIT
+      description: ''
+      value: '0'
+  structs:
+  - !!python/object:utils.sai_spec.sai_struct.SaiStruct
+    name: sai_pa_validation_entry_t
+    description: Entry for pa_validation_entry
+    members:
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: switch_id
+      description: Switch ID
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_SWITCH
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: vnet_id
+      description: Exact matched key vnet_id
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_VNET
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: sip
+      description: Exact matched key sip
+      type: sai_ip_address_t
+      objects: null
+      valid_only: null
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_PA_VALIDATION_ENTRY_ATTR_ACTION
+    description: Action
+    type: sai_pa_validation_entry_action_t
+    attr_value_field: null
+    default: SAI_PA_VALIDATION_ENTRY_ACTION_PERMIT
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    deprecated: false
+    is_vlan: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_PA_VALIDATION_ENTRY_ATTR_IP_ADDR_FAMILY
+    description: IP address family for resource accounting
+    type: sai_ip_addr_family_t
+    attr_value_field: null
+    default: null
+    isresourcetype: true
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    deprecated: false
+    is_vlan: false
+  stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 41827129
+      actions:
+        SAI_PA_VALIDATION_ENTRY_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_PA_VALIDATION_ENTRY_ACTION_PERMIT
+          id: 31497578
+          attr_param_id: {}

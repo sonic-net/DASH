@@ -1,5 +1,9 @@
 #include "dashsai.h"
 
+extern "C" {
+#include "saimetadata.h"
+}
+
 #include <cstdlib>
 
 using namespace dash;
@@ -235,7 +239,11 @@ sai_status_t DashSai::createSwitch(
 
     for (uint32_t i = 0; i < attr_count; i++)
     {
-        DASH_LOG_WARN("attr id %d is NOT IMPLEMENTED, ignored", attr_list[i].id);
+        auto *md = sai_metadata_get_attr_metadata(SAI_OBJECT_TYPE_SWITCH, attr_list[i].id);
+
+        const char* attrName = md ? md->attridname : "unknown";
+
+        DASH_LOG_WARN("attr id %d %s is NOT IMPLEMENTED, ignored", attr_list[i].id, attrName);
 
         if (attr_list[i].id == SAI_SWITCH_ATTR_SWITCH_HARDWARE_INFO)
         {
@@ -307,6 +315,10 @@ sai_status_t DashSai::setSwitchAttribute(
     DASH_LOG_ENTER();
     DASH_CHECK_API_INITIALIZED();
 
+    auto *md = sai_metadata_get_attr_metadata(SAI_OBJECT_TYPE_SWITCH, attr->id);
+
+    const char* attrName = md ? md->attridname : "unknown";
+
     switch (attr->id)
     {
         case SAI_SWITCH_ATTR_SWITCH_STATE_CHANGE_NOTIFY:
@@ -317,13 +329,13 @@ sai_status_t DashSai::setSwitchAttribute(
         case SAI_SWITCH_ATTR_QUEUE_PFC_DEADLOCK_NOTIFY:
         case SAI_SWITCH_ATTR_BFD_SESSION_STATE_CHANGE_NOTIFY:
 
-            DASH_LOG_NOTICE("setting dummy notification callback (attr id: %d)", attr->id);
+            DASH_LOG_NOTICE("setting dummy notification callback (attr id: %d %s)", attr->id, attrName);
 
             return SAI_STATUS_SUCCESS;
 
         default:
 
-            DASH_LOG_ERROR("set attr %d NOT IMPLEMENTED", attr->id);
+            DASH_LOG_ERROR("set attr %d %s NOT IMPLEMENTED", attr->id, attrName);
 
             return SAI_STATUS_NOT_IMPLEMENTED;
     }
@@ -341,6 +353,10 @@ sai_status_t DashSai::getSwitchAttribute(
 
     for (uint32_t i = 0; i < attr_count ; i++, attr++)
     {
+        auto *md = sai_metadata_get_attr_metadata(SAI_OBJECT_TYPE_SWITCH, attr->id);
+
+        const char* attrName = md ? md->attridname : "unknown";
+
         switch(attr->id)
         {
             case SAI_SWITCH_ATTR_NUMBER_OF_ACTIVE_PORTS:
@@ -421,12 +437,12 @@ sai_status_t DashSai::getSwitchAttribute(
 
                 if (getenv(DASH_USE_NOT_SUPPORTED))
                 {
-                    DASH_LOG_WARN("[%d] attr %d is NOT SUPPORTED", i, attr->id);
+                    DASH_LOG_WARN("[%d] attr %d %s is NOT SUPPORTED", i, attr->id, attrName);
 
                     return SAI_STATUS_NOT_SUPPORTED;
                 }
 
-                DASH_LOG_WARN("[%d] attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", i, attr->id);
+                DASH_LOG_WARN("[%d] attr %d %s is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", i, attr->id, attrName);
 
                 memset(&attr->value, 0, sizeof(attr->value)); // clear potential caller garbage
 
@@ -449,6 +465,10 @@ sai_status_t DashSai::getPortAttribute(
 
     for (uint32_t i = 0; i < attr_count ; i++, attr++)
     {
+        auto *md = sai_metadata_get_attr_metadata(SAI_OBJECT_TYPE_PORT, attr->id);
+
+        const char* attrName = md ? md->attridname : "unknown";
+
         switch(attr->id)
         {
             case SAI_PORT_ATTR_QOS_NUMBER_OF_QUEUES:
@@ -488,12 +508,12 @@ sai_status_t DashSai::getPortAttribute(
 
                 if (getenv(DASH_USE_NOT_SUPPORTED))
                 {
-                    DASH_LOG_WARN("[%d] attr %d is NOT SUPPORTED", i, attr->id);
+                    DASH_LOG_WARN("[%d] attr %d %s is NOT SUPPORTED", i, attr->id, attrName);
 
                     return SAI_STATUS_NOT_SUPPORTED;
                 }
 
-                DASH_LOG_WARN("[%d] attr %d is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", i, attr->id);
+                DASH_LOG_WARN("[%d] attr %d %s is NOT SUPPORTED, but returning SAI_STATUS_SUCCESS", i, attr->id, attrName);
 
                 memset(&attr->value, 0, sizeof(attr->value)); // clear potential caller garbage
 
@@ -702,7 +722,11 @@ sai_status_t DashSai::create(
 
     *objectId = m_objectIdManager->allocateNewObjectId(objectType, m_switchId);
 
-    DASH_LOG_WARN("creating dummy object for object type %d: 0x%lx", objectType, *objectId);
+    auto* ot = sai_metadata_get_object_type_info(objectType);
+
+    const char* otName = ot ? ot->objecttypename : "unknown";
+
+    DASH_LOG_WARN("creating dummy object for object type %d %s: 0x%lx", objectType, otName, *objectId);
 
     return SAI_STATUS_SUCCESS;
 }
@@ -733,7 +757,11 @@ sai_status_t DashSai::set(
     if (objectType == SAI_OBJECT_TYPE_SWITCH)
         return setSwitchAttribute(objectId, attr);
 
-    DASH_LOG_WARN("dummy set: 0x%lx, attr id: %d", objectId, attr->id);
+    auto *md = sai_metadata_get_attr_metadata(objectType, attr->id);
+
+    const char* attrName = md ? md->attridname : "unknown";
+
+    DASH_LOG_WARN("dummy set: 0x%lx, attr id: %d %s", objectId, attr->id, attrName);
 
     return SAI_STATUS_SUCCESS;
 }
@@ -753,7 +781,126 @@ sai_status_t DashSai::get(
     if (objectType == SAI_OBJECT_TYPE_SWITCH)
         return getSwitchAttribute(objectId, attr_count, attr_list);
 
-    DASH_LOG_ERROR("not implemented for object type %d", objectType);
+    auto* ot = sai_metadata_get_object_type_info(objectType);
+
+    const char* otName = ot ? ot->objecttypename : "unknown";
+
+    DASH_LOG_ERROR("not implemented for object type %d %s", objectType, otName);
 
     return SAI_STATUS_NOT_IMPLEMENTED;
+}
+
+/**
+ * @brief Populate default attributes.
+ *
+ * Since BMv2 dont's support default attributes, we will add to existing
+ * attributes all the ones that have default values, except those that
+ * have valid only condition not met, since then BMv2 will fail.
+ *
+ * @objectType object type for list of attributes
+ * @attr_count attributes count
+ * @attr_list attributes list
+ *
+ * @return List of attributes with possible added attributes with default values.
+ */
+std::vector<sai_attribute_t> DashSai::populateDefaultAttributes(
+        _In_ sai_object_type_t objectType,
+        _In_ uint32_t attr_count,
+        _In_ const sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
+
+    // populate existing attributes
+
+    std::vector<sai_attribute_t> attrs(attr_list, attr_list + attr_count);
+
+    auto* info = sai_metadata_get_object_type_info(objectType);
+
+    if (info == nullptr)
+    {
+        DASH_LOG_ERROR("failed to get metadata info for object type %d", objectType);
+        return attrs;
+    }
+
+    // iterate over all possible attributes
+
+    for (size_t idx = 0; idx < info->attrmetadatalength; idx++)
+    {
+        auto* md = info->attrmetadata[idx];
+
+        auto* attr = sai_metadata_get_attr_by_id(md->attrid, (uint32_t)attrs.size(), attrs.data());
+
+        if (attr)
+            continue;   // attribute already exists on current attribute list
+
+        if (md->isconditional)
+            continue;   // conditional attributes should be populated by user
+
+        if (md->isreadonly)
+            continue;   // can't be read only
+
+        if (md->ismandatoryoncreate)
+            continue;   // can't be mandatory on create
+
+        if (md->defaultvaluetype == SAI_DEFAULT_VALUE_TYPE_NONE)
+            continue;   // there is no default value
+
+        if (md->isvalidonly)
+        {
+            bool haveActionAttribute = false;
+
+            for (size_t i = 0; i < md->validonlylength; i++)
+            {
+                auto *condmd = sai_metadata_get_attr_metadata(objectType, md->validonly[i]->attrid);
+
+                if (condmd && strstr(condmd->attridname, "_ATTR_ACTION"))
+                {
+                    haveActionAttribute = true;
+                    break;
+                }
+            }
+
+            if (haveActionAttribute == false)
+            {
+                // always set default attribute in this case, even if condition is not set
+                // (see github discussion https://github.com/sonic-net/DASH/pull/547)
+            }
+            else if (sai_metadata_is_validonly_met(md, (uint32_t)attrs.size(), attrs.data()) == false)
+            {
+                // attribute is valid only, but condition is not met based on current attributes
+                continue;
+            }
+        }
+
+        if (md->defaultvaluetype == SAI_DEFAULT_VALUE_TYPE_CONST)
+        {
+            sai_attribute_t a;
+
+            a.id = md->attrid;
+            a.value = *md->defaultvalue;
+
+            DASH_LOG_NOTICE("adding %s with default value", md->attridname);
+
+            attrs.push_back(a);
+
+        }
+        else if (md->defaultvaluetype == SAI_DEFAULT_VALUE_TYPE_EMPTY_LIST)
+        {
+            sai_attribute_t a;
+
+            a.id = md->attrid;
+            a.value.objlist.count = 0;
+            a.value.objlist.list = nullptr;
+
+            DASH_LOG_NOTICE("adding %s with default value", md->attridname);
+
+            attrs.push_back(a);
+        }
+        else
+        {
+            DASH_LOG_WARN("skipping default value for %s, default value type %d is not supported", md->attridname, md->defaultvaluetype);
+        }
+    }
+
+    return attrs;
 }

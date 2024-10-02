@@ -8,7 +8,7 @@ CXXFLAGS_COMMON+= -Wcast-align
 CXXFLAGS_COMMON+= -Wcast-qual
 CXXFLAGS_COMMON+= -Wconversion
 CXXFLAGS_COMMON+= -Wdisabled-optimization
-#CXXFLAGS_COMMON+= -Werror  # disabled until warnings will be fixed
+CXXFLAGS_COMMON+= -Werror
 CXXFLAGS_COMMON+= -Wextra
 CXXFLAGS_COMMON+= -Wfloat-equal
 CXXFLAGS_COMMON+= -Wformat=2
@@ -43,6 +43,7 @@ CXXFLAGS_COMMON+= -Wno-switch-default
 CXXFLAGS_COMMON+= -Wconversion
 CXXFLAGS_COMMON+= -Wno-psabi
 CXXFLAGS_COMMON+= -Wno-unused-label
+CXXFLAGS_COMMON+= -Wno-unused-result
 
 # Sources from OCP SAI Repo:
 SAI_DIR=../SAI/meta/

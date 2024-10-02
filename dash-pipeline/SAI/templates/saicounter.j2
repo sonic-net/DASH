@@ -1,0 +1,19 @@
+{% set sai_counter_ns = namespace(is_first_attr = is_first_attr) %}
+{% for counter in sai_counters %}
+    /**
+     * @brief DASH counter {{ counter.name | upper }}
+     *
+     * @type sai_object_id_t
+     * @flags CREATE_AND_SET
+     * @objects SAI_OBJECT_TYPE_COUNTER
+     * @allownull true
+     * @default SAI_NULL_OBJECT_ID
+     */
+    {% if sai_counter_ns.is_first_attr == true %}
+    SAI_{{ table_name | upper }}_ATTR_{{ counter.name | upper }} = SAI_{{ table_name | upper }}_ATTR_EXTENSIONS_RANGE_START,
+    {% set sai_counter_ns.is_first_attr = false %}
+    {% else %}
+    SAI_{{ table_name | upper }}_ATTR_{{ counter.name | upper }},
+    {% endif %}
+
+{% endfor %}

@@ -1,8 +1,19 @@
 {% for enum in sai_enums %}
+/**
+ * @brief Defines a list of enums for {{ enum.name }}
+{% if enum.explicit_value %}
+ * 
+ * @flags strict
+{% endif %}
+ */
 typedef enum _sai_{{ enum.name }}_t
 {
 {% for member in enum.members %}
-    SAI_{{ enum.name | upper }}_{{ member.sai_name | upper }},
+{% if enum.explicit_value %}
+    SAI_{{ enum.name | upper }}_{{ member.name | upper }} = {{ member.enum_value }},
+{% else %}
+    SAI_{{ enum.name | upper }}_{{ member.name | upper }},
+{% endif %}
 
 {% endfor %}
 } sai_{{ enum.name }}_t;

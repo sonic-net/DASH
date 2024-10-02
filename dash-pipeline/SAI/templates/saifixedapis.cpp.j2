@@ -27,6 +27,8 @@ sai_status_t sai_api_query(
         API(PORT,port);
         API(ROUTER_INTERFACE,router_interface);
         API(SWITCH,switch);
+        API(BUFFER,buffer);
+        API(DTEL,dtel);
 
 {% for api in api_names %}
         case SAI_API_{{ api | upper }}:

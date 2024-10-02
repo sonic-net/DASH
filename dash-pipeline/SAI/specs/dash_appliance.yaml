@@ -1,0 +1,35 @@
+!!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
+name: dash_appliance
+description: DASH appliance
+api_type: overlay
+sai_apis:
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: dash_appliance
+  description: DASH appliance
+  is_object: true
+  enums: []
+  structs: []
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_APPLIANCE_ATTR_LOCAL_REGION_ID
+    description: Action parameter local region id
+    type: sai_uint8_t
+    attr_value_field: u8
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 41082190
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 29775410
+          attr_param_id: {}

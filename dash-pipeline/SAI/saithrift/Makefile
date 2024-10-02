@@ -34,6 +34,7 @@ saithrift-server: host
 
 	# Install vendor specific SAI library i.e. DASH bmv2 libsai.so in /usr/lib.
 	sudo cp $(LIB)/libsai.so /usr/lib
+	sudo cp $(META)/libsaimetadata.so /usr/lib
 
 	@echo "Build SAI thrift server and libraries..."
 	$(SUDO) mkdir -p $(RPC_INST_DIR)
