@@ -80,6 +80,8 @@ control dash_ingress(
                          bit<1> full_flow_resimulation_requested,
                          bit<64> max_resimulated_flow_per_second,
                          @SaiVal[type="sai_object_id_t"] bit<16> outbound_routing_group_id,
+                         bit<1> enable_reverse_tunnel_learning,
+                         @SaiVal[type="sai_ip_address_t"] IPv4Address reverse_tunnel_sip,
                          bit<1> is_ha_flow_owner)
     {
         meta.eni_data.cps                                                   = cps;
@@ -98,6 +100,11 @@ control dash_ingress(
          * and not a VNET identifier */
         meta.encap_data.vni           = vm_vni;
         meta.vnet_id                  = vnet_id;
+
+        meta.enable_reverse_tunnel_learning = enable_reverse_tunnel_learning;
+        meta.reverse_tunnel_sip             = reverse_tunnel_sip;
+
+        meta.routing_actions = meta.routing_actions | dash_routing_actions_t.REVERSE_TUNNEL;
 
         if (meta.is_overlay_ip_v6 == 1) {
             if (meta.direction == dash_direction_t.OUTBOUND) {
