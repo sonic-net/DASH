@@ -16,6 +16,7 @@ class DashP4TableAttribute(DashP4Object):
         self.isresourcetype: Optional[str] = None
         self.isreadonly: Optional[str] = None
         self.iscreateonly: Optional[str] = None
+        self.ismandatory: Optional[str] = None
         self.object_name: Optional[str] = None
         self.skipattr: Optional[str] = None
         self.match_type: str = ""
@@ -62,6 +63,8 @@ class DashP4TableAttribute(DashP4Object):
                         self.isreadonly = str(kv["value"]["stringValue"])
                     elif kv["key"] == "iscreateonly":
                         self.iscreateonly = str(kv["value"]["stringValue"])
+                    elif kv["key"] == "ismandatory":
+                        self.ismandatory = str(kv["value"]["stringValue"])
                     elif kv["key"] == "objects":
                         self.object_name = str(kv["value"]["stringValue"])
                     elif kv["key"] == "skipattr":
@@ -140,16 +143,23 @@ class DashP4TableAttribute(DashP4Object):
             sai_flags = "READ_ONLY"
             default_value = None
         elif self.iscreateonly == "true":
-            if self.default == None:
+            if self.default == None or self.ismandatory == "true":
                 sai_flags = "MANDATORY_ON_CREATE | CREATE_ONLY"
+                default_value = None
+                allow_null = False
             else:
                 sai_flags = "CREATE_ONLY"
+                default_value = self.default
 
-            default_value = self.default
             allow_null = False
         else:
-            sai_flags = "CREATE_AND_SET"
-            default_value = self.default
+            if self.ismandatory == "true":
+                sai_flags = "MANDATORY_ON_CREATE | CREATE_AND_SET"
+                default_value = None
+                allow_null = False
+            else:
+                sai_flags = "CREATE_AND_SET"
+                default_value = self.default
 
         valid_only_checks = []
         if add_action_valid_only_check:

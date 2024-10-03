@@ -128,9 +128,6 @@ class DashP4Table(DashP4Object):
         for p4rt_table_key in p4rt_table[MATCH_FIELDS_TAG]:
             table_key = DashP4TableKey.from_p4rt(p4rt_table_key)
             
-            # For table keys, we currently require the values to be explicitly set.
-            table_key.default = None
-
             if self.is_object != "false":
                 table_key.is_entry_key = False
 

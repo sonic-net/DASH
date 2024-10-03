@@ -12,6 +12,7 @@ class DashP4TableKey(DashP4TableAttribute):
     def __init__(self):
         super().__init__()
         self.iscreateonly: str = "true"
+        self.ismandatory: str = "true"
         self.ip_is_v6_field_id: int = 0
 
     def parse_p4rt(self, p4rt_table_key: Dict[str, Any]) -> None:
@@ -55,6 +56,9 @@ class DashP4TableKey(DashP4TableAttribute):
             )
 
         self.set_sai_type(sai_type_info)
+
+        # For table keys, we currently require the values to be explicitly set.
+        self.default = None
 
         return
 
