@@ -166,6 +166,8 @@ typedef enum _sai_{{ table.name }}_attr_t
      * @type {{ sai_attr.type }}
 {% if sai_attr.isreadonly == 'true' %}
      * @flags READ_ONLY
+{% else if sai_attr.iscreateonly == 'true' %}
+     * @flags CREATE_ONLY
 {% else %}
      * @flags CREATE_AND_SET
 {% endif %}

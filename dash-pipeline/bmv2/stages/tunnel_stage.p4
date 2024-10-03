@@ -11,12 +11,17 @@ control tunnel_stage(
 
         bit<24> tunnel_key,
 
+        @SaiVal[default_value="1", iscreateonly="true"]
+        bit<32> max_member_size,
+
         @SaiVal[type="sai_ip_address_t"]
         IPv4Address dip,
 
         @SaiVal[type="sai_ip_address_t"]
         IPv4Address sip)
     {
+        meta.dash_tunnel_max_member_size = max_member_size;
+
         meta.tunnel_data.dash_encapsulation = dash_encapsulation;
         meta.tunnel_data.vni = tunnel_key;
         meta.tunnel_data.underlay_sip = sip == 0 ? hdr.u0_ipv4.src_addr : sip;
@@ -100,12 +105,19 @@ control tunnel_stage(
 
         tunnel.apply();
 
-        if (meta.tunnel_data.underlay_dip == 0) {
-            // If underlay_dip is not set by the tunnel, we are using the tunnel as ECMP group.
-
-            // TODO: Calculate based on packet and tunnel member size.
-            // Currently, we will have to use 0 here, because we don't know how many tunnel members we will have.
+        // If max member size is greater than 1, the tunnel is programmed with multiple members.
+        if (meta.dash_tunnel_max_member_size > 1) {
+#if defined(TARGET_BMV2_V1MODEL)
+            // Select tunnel member based on the hash of the packet tuples.
+            hash(meta.dash_tunnel_member_index, HashAlgorithm.crc32, (bit<32>)0, {
+                meta.dst_ip_addr,
+                meta.src_ip_addr,
+                meta.src_l4_port,
+                meta.dst_l4_port
+            }, meta.dash_tunnel_max_member_size);
+#else
             meta.dash_tunnel_member_index = 0;
+#endif
             tunnel_member_select.apply();
 
             tunnel_member.apply();

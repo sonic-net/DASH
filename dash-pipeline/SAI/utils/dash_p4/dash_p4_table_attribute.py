@@ -15,6 +15,7 @@ class DashP4TableAttribute(DashP4Object):
         self.bitwidth: int = 0
         self.isresourcetype: Optional[str] = None
         self.isreadonly: Optional[str] = None
+        self.iscreateonly: Optional[str] = None
         self.object_name: Optional[str] = None
         self.skipattr: Optional[str] = None
         self.match_type: str = ""
@@ -59,6 +60,8 @@ class DashP4TableAttribute(DashP4Object):
                         self.isresourcetype = str(kv["value"]["stringValue"])
                     elif kv["key"] == "isreadonly":
                         self.isreadonly = str(kv["value"]["stringValue"])
+                    elif kv["key"] == "iscreateonly":
+                        self.iscreateonly = str(kv["value"]["stringValue"])
                     elif kv["key"] == "objects":
                         self.object_name = str(kv["value"]["stringValue"])
                     elif kv["key"] == "skipattr":
@@ -125,7 +128,7 @@ class DashP4TableAttribute(DashP4Object):
 
         return entries
 
-    def to_sai_attribute(self, table_name: str, create_only: bool = False, add_action_valid_only_check: bool = False) -> List[SaiAttribute]:
+    def to_sai_attribute(self, table_name: str, add_action_valid_only_check: bool = False) -> List[SaiAttribute]:
         name = self.get_sai_name(table_name)
         description = self.get_sai_description(table_name)
 
@@ -136,9 +139,13 @@ class DashP4TableAttribute(DashP4Object):
         if self.isreadonly == "true":
             sai_flags = "READ_ONLY"
             default_value = None
-        elif create_only:
-            sai_flags = "MANDATORY_ON_CREATE | CREATE_ONLY"
-            default_value = None
+        elif self.iscreateonly == "true":
+            if self.default == None:
+                sai_flags = "MANDATORY_ON_CREATE | CREATE_ONLY"
+            else:
+                sai_flags = "CREATE_ONLY"
+
+            default_value = self.default
             allow_null = False
         else:
             sai_flags = "CREATE_AND_SET"

@@ -30,7 +30,8 @@ Available tags are:
 - `default_value`: Override the default value for this key or action parameter.
 - `isresourcetype`: When set to "true", we generate a corresponding SAI tag in SAI APIs: `@isresourcetype true`.
 - `objects`: Space separated list of SAI object type this value accepts. When set, we force this value to be a SAI object id, and generate a corresponding SAI tag in SAI APIs: `@objects <list>`.
-- `isreadonly`: When set to "true", we generate force this value to be read-only in SAI API using: `@flags READ_ONLY`, otherwise, we generate `@flags CREATE_AND_SET`.
+- `isreadonly`: When set to "true", we generate force this value to be read-only in SAI API using: `@flags READ_ONLY`, otherwise, we generate `@flags CREATE_AND_SET`. It cannot be used with `iscreateonly`.
+- `iscreateonly`: When set to "true", we generate force this value to be create-only in SAI API using: `@flags CREATE_ONLY`, otherwise, we generate `@flags CREATE_AND_SET`. It cannot be used with `isreadonly`.
 - `skipattr`: When set to "true", we skip this attribute in SAI API generation.
 
 #### `@SaiCounter`: Counters
