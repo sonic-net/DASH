@@ -223,7 +223,7 @@ one item to note here is to characterize what happens when the flow table is ful
 ### Background UDP flows
 
 Validate it works in isolation before running full hero test.
-Tune packet size to ensure 50% - 80% bandwidth utilization (including TCP backround flows) and keep 20% - 30% bandwidth available for the CPS traffic.
+Tune packet size to ensure 50% - 80% bandwidth utilization (including TCP background flows) and keep 20% - 30% bandwidth available for the CPS traffic.
 
 ### Background TCP flows
 
