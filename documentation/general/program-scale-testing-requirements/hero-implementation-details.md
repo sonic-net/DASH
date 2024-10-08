@@ -49,7 +49,7 @@ The most economical option is to use DAC cables, although optical fibers will be
 
 #### Layer 1 considerations
 
-- Device port speeds for DASH are 100G or 200G or 400G, PAM4 or NRZ are UHD400C device port speeds are 100G or 200G or 400G, PAM4 or NRZ so far the 2 should interface with no issues.
+- Device port speeds for DASH are 100G or 200G or 400G, PAM4 or NRZ and UHD400C device port speeds are 100G or 200G or 400G, PAM4 or NRZ so far the 2 should interface with no issues.
 - IEEE defaults autonegotiation is preferable but at a minimum if AN is disabled please ensure FEC is enabled. With FEC disabled we observed few packet drops in the DACs and that can create a lot of hassle hunting down a lost packet that has nothing to do with DASH performance.  
 
 #### Testbed examples
@@ -222,9 +222,14 @@ one item to note here is to characterize what happens when the flow table is ful
 
 ### Background UDP flows
 
+Validate it works in isolation before running full hero test.
+Tune packet size to ensure 50% - 80% bandwidth utilization (including TCP backround flows) and keep 20% - 30% bandwidth available for the CPS traffic.
 
-### Background UDP flows
+### Background TCP flows
 
+Validate it works in isolation before running full hero test.
+Note down how much bandwidth it uses.
+If any bandwidth adjustments are needed we can change the PUT or GET response size.
 
 ### Hero test
 
