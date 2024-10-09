@@ -294,7 +294,7 @@ sai_apis:
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
-      id: 44010720
+      id: 38546097
       actions:
         SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET
@@ -367,9 +367,9 @@ sai_apis:
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
-      id: 34522254
+      id: 40572680
       actions:
         default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: default
-          id: 20489967
+          id: 30077100
           attr_param_id: {}

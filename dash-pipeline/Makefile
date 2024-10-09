@@ -576,7 +576,7 @@ run-saithrift-ptftests: disable-ipv6
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
 	-w /tests/ \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
-	./functional/ptf/run-tests.sh
+	env DPAPP_LINK_PEER=$(VPP_LINK_PEER) ./functional/ptf/run-tests.sh
 
 # Run "dev" PTF tests mounted from host
 # Note - if add ixia-c usage to PTF tests, add dependency deploy-ixiac
@@ -585,14 +585,14 @@ run-saithrift-dev-ptftests: disable-ipv6
 	-v $(PWD)/../test/test-cases/:/tests-dev/ \
 	-w /tests-dev/ \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
-	./functional/ptf/run-tests.sh
+	env DPAPP_LINK_PEER=$(VPP_LINK_PEER) ./functional/ptf/run-tests.sh
 
 run-saithrift-client-bash:
 	$(DOCKER_RUN_SAITHRIFT_CLIENT) \
 	-v $(PWD)/../test/test-cases/:/tests-dev/ \
 	-w /tests-dev/ \
 	$(DOCKER_SAITHRIFT_CLIENT_IMG) \
-	/bin/bash
+	env DPAPP_LINK_PEER=$(VPP_LINK_PEER) /bin/bash
 
 ###############################
 

@@ -90,12 +90,17 @@ IFS="," read -a iface_array <<< $INTERFACES
 
 validate_parameters
 
+if [ $DPAPP_LINK_PEER ]; then
+INTERFACE_DPAPP="--interface 2@$DPAPP_LINK_PEER"
+fi
+
 set -x
 ptf \
     --test-dir ${TEST_DIR}\
     --pypath /SAI/ptf \
     --interface 0@${iface_array[0]} \
     --interface 1@${iface_array[1]} \
+    $INTERFACE_DPAPP \
     --test-case-timeout=${TIMEOUT} \
     --test-params="connection='${CONNECTION}';target='${TARGET}';traffic_check='${TRAFFIC}';${TEST_PARAMS}" \
     ${EXTRA_PARAMETERS}
