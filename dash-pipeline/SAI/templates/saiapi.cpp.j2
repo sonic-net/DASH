@@ -59,15 +59,16 @@ static sai_status_t dash_sai_create_{{ table.name }}(
 
     matchActionEntry->set_table_id(tableId);
 
-    {% if table['keys'] | length== 1 %}
-    // SAI object table with single P4 key - object ID itself is the P4 table key
-    // Generate a SAI object ID and fill it as the P4 table key
-    auto mf = matchActionEntry->add_match();
-    mf->set_field_id({{table['keys'][0].id}});
-    auto mf_exact = mf->mutable_exact();
-    //{{table['keys'][0].field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
-      {{table['keys'][0].field}}SetVal(static_cast<uint{{ table['keys'][0].bitwidth }}_t>(objId), mf_exact, {{ table['keys'][0].bitwidth }}); 
-    {% else %}
+    {% for key in table['keys'] %}
+    {% if key.is_object_key %}
+    auto key_mf = matchActionEntry->add_match();
+    key_mf->set_field_id({{key.id}});
+    auto key_mf_exact = key_mf->mutable_exact();
+    // {{key.field}}SetVal(objId, key_mf_exact, {{key.bitwidth}});
+    {{key.field}}SetVal(static_cast<uint{{ key.bitwidth }}_t>(objId), key_mf_exact, {{ key.bitwidth }}); 
+    {% endif %}
+    {% endfor %}
+
     // SAI object table with multiple P4 table keys
     // Copy P4 table keys from appropriate SAI attributes
     for (uint32_t i = 0; i < attr_count; i++)
@@ -79,6 +80,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
         switch(attr_list[i].id)
         {
             {% for key in table['keys'] %}
+            {% if not key.is_object_key %}
             case SAI_{{ table.name | upper }}_ATTR_{{ key.name | upper }}:
             {
                 auto mf = matchActionEntry->add_match();
@@ -138,6 +140,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 {% endif %}
                 break;
             }
+            {% endif%}
             {% endfor %}
             {% if table['keys'] | selectattr('match_type', 'ne', 'exact') | list | length > 0 %}
             {% if table['keys'] | selectattr('match_type', 'eq', 'lpm') | list | length == 0 %}
@@ -154,7 +157,6 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 break;
         }
     }
-    {% endif %}
 
     // If there is only one action, simply set it.
     // Else, search in the attrs.

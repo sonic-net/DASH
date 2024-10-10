@@ -41,6 +41,8 @@ object_types:
 - SAI_OBJECT_TYPE_FLOW_ENTRY_BULK_GET_SESSION
 - SAI_OBJECT_TYPE_METER_BUCKET_ENTRY
 - SAI_OBJECT_TYPE_DASH_APPLIANCE
+- SAI_OBJECT_TYPE_DASH_TUNNEL_MEMBER
+- SAI_OBJECT_TYPE_DASH_TUNNEL_NEXT_HOP
 object_entries:
 - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
   name: direction_lookup_entry
