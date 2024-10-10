@@ -53,9 +53,9 @@ sai_apis:
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
-      id: 44400659
+      id: 34128771
       actions:
         default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: default
-          id: 27891720
+          id: 18727423
           attr_param_id: {}
