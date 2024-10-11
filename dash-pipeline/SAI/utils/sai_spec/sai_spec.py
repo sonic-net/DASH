@@ -39,7 +39,7 @@ class SaiSpec:
                 f.write(yaml.dump(api_group, indent=2, sort_keys=False))
 
             yaml_inc_files.append(
-                yaml_include.Data(urlpath=sai_api_group_spec_file_path)
+                yaml_include.Data(urlpath=os.path.relpath(sai_api_group_spec_file_path, spec_dir))
             )
 
         api_groups = self.api_groups
