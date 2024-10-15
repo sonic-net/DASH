@@ -4,7 +4,7 @@
 # SONiC-DASH - Disaggregated API for SONiC Hosts - extending functionality to stateful workloads!
 [DASH YouTube Videos](https://www.youtube.com/channel/UCNE3zNwJqcEyLX9ejKrLtUA)
 
-## SONiC-DASH is an open source project with the goal to "deliver enterprise network performance to critical cloud applications".  The project extends functionality to stateful workloads.  
+## SONiC-DASH is an open source project with the goal to "deliver enterprise network performance to critical cloud applications".  The project extends functionality to stateful workloads.  DASH has joined the Linux Foundation to participate in the large communities of developers and users contributing there, and also collaborates with OCP.    
 
 We are developing set of APIs and object models describing network services for the cloud, and will work with all cloud providers and enterprise hybrid clouds to develop further functionality. We believe the DASH program describes a comprehensive set of services that are required by the vast majority of clouds. The goal of DASH is to be specific enough for SMART Programmable Technologies to optimize network performance and leverage commodity **hardware** technology to achieve 10x or even 100x stateful connection performance.
 
