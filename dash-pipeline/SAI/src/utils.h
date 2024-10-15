@@ -285,7 +285,7 @@ namespace dash
         template<typename T>
             void u8listSetVal(const sai_attribute_value_t &value, T &t, int bits = -1)
             {
-                assert (0 && "NYI");
+                t->set_value(value.u8list.list, value.u8list.count);
             }
 
         template<typename T>
