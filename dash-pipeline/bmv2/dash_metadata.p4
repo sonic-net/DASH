@@ -263,6 +263,8 @@ struct ha_data_t {
     bit<16> dp_channel_dst_port;
     bit<16> dp_channel_src_port_min;
     bit<16> dp_channel_src_port_max;
+    bit<1> peer_bounceback_ip_is_v6;
+    IPv4ORv6Address peer_bounceback_ip;
 
     // HA packet/flow state
     dash_ha_flow_sync_state_t flow_sync_state;
