@@ -100,6 +100,7 @@ configs
 Conntrack
 Containerlab
 CP
+CPUs
 CreatedHalfOpenFlow
 CreatedOtherFlow
 CreatedTcpFlow
@@ -120,6 +121,7 @@ CurrentUdpFlow
 customizable
 Cx
 cyberithub
+dashsai
 dashsubmodule
 DASHOrch
 dashorch
@@ -146,6 +148,8 @@ decap'ing
 decaps
 deliverables
 DemoDays
+dequeue
+dequeues
 designator
 DEST
 dest
@@ -171,6 +175,8 @@ dockerized
 DoS
 DotNet
 downcasting
+dpapp
+DPAPP
 DPDK
 DPU
 dpu
@@ -215,11 +221,14 @@ eni
 Eni
 ENIs
 ENI's
+enqueue
+enqueues
 entrypoints
 enum
 EPUs
 EPYC
 ethernet
+EtherType
 executables
 ExpressRoute
 extern
@@ -229,6 +238,7 @@ failovers
 fakesai
 FastPath
 fc
+FDio
 FEC
 ffe
 FINPackets
@@ -508,6 +518,7 @@ routable
 RPC
 RPCs
 RPF
+RSS
 RST
 RSTPackets
 RSTs
@@ -696,6 +707,9 @@ vport
 VPort
 vPORT
 VPorts
+vpp
+VPP
+vppctl
 VTEP
 VTEPs
 VxLAN

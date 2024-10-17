@@ -3,6 +3,7 @@
 | Rev | Date | Author | Change Description |
 | --- | ---- | ------ | ------------------ |
 | 0.1 | 07/09/2024 | Riff Jiang | Initial version |
+| 0.2 | 08/30/2024 | Riff Jiang | Simplify the MSEE failover handling |
 
 1. [1. Terminology](#1-terminology)
 2. [2. Background](#2-background)
@@ -18,10 +19,6 @@
    2. [5.2. MSEE selection and failover handling](#52-msee-selection-and-failover-handling)
       1. [5.2.1. Background](#521-background)
       2. [5.2.2. MSEE device selection](#522-msee-device-selection)
-         1. [5.2.2.1. Reverse routing stage](#5221-reverse-routing-stage)
-            1. [5.2.2.1.1. Reverse routing group](#52211-reverse-routing-group)
-            2. [5.2.2.1.2. Reverse routing group entry](#52212-reverse-routing-group-entry)
-         2. [5.2.2.2. Reverse tunnel table and entry](#5222-reverse-tunnel-table-and-entry)
       3. [5.2.3. MSEE failover handling using flow resimulation](#523-msee-failover-handling-using-flow-resimulation)
          1. [5.2.3.1. Reverse tunnel updates](#5231-reverse-tunnel-updates)
          2. [5.2.3.2. Maintaining per connection consistency (PCC)](#5232-maintaining-per-connection-consistency-pcc)
@@ -138,92 +135,32 @@ typedef enum _sai_direction_lookup_entry_attr_t {
 
 #### 5.2.1. Background
 
-In the ER gateway bypass scenario, the return traffic needs to be routed back to MSEE per customer's configuration, which is a MSEE device list per subnet.
+In the ER gateway bypass scenario, return traffic needs to be routed back to MSEE where the traffic is originated.
 
-Since the flow creation happens at the MSEE-to-PLS direction, as this is where the first packet lands on DASH. This configuration is essentially a LPM table lookup using the source IP to find the reverse tunnel to use. The tunnel provides a list of next hops as an ECMP group. And DASH needs to select a valid next hop to use and save it into the reverse flow to avoid further lookup.
-
-Furthermore, when MSEE failover, we need to update the reverse tunnel on all existing flows to point to the working ones.
+Furthermore, when MSEE failover, we need to update the reverse tunnel on all existing flows to point to the new MSEE where the traffic will be coming from after failover.
 
 #### 5.2.2. MSEE device selection
 
-To handle this, we are leveraging similar concepts as the RPF (Reverse Path Forwarding) in network devices, which checks the source IP during the forwarding path.
+Unlike VM-to-* scenarios, the reverse tunnel can only have 1 single destination IP that specified using the `SAI_ENI_ATTR_VM_UNDERLAY_DIP` attribute. MSEE devices can have active-active pairs, so this single IP solution won't work.
 
-##### 5.2.2.1. Reverse routing stage
+To handle this, we learn the PLS-to-MSEE tunnel information from the first packet when flow is created, including the encap type, key, and destination IP, and create the reverse tunnel in the reverse flow, which make sure the return traffic will be sent back to the originating MSEE. To avoid changing the behavior of VM-to-* scenarios, this behavior can be turned on or off by the SDN controller for each ENI using a dedicated attribute (see below).
 
-To support this behavior, we add the reverse routing stage in DASH.
-
-Unlike the regular routing stage, the reverse routing stage will not be specified in the routing types and will be default to be executed before the action apply stage.
-
-If no route entries are being hit in this stage, the packet should not be dropped but continue to later stages. This behavior is the same as having a default route with allow action.
-
-###### 5.2.2.1.1. Reverse routing group
-
-The reverse routing group is used for defining the reverse routing table. Once created, we can bind its object id to ENI to make it taking effect:
+In some cases, we will need the ability to specify the source IP of the reverse tunnel. To support this, we added another new attribute in the ENI object.
 
 | SAI attribute name | Type | Description |
 | --------------- | ---- | ----------- |
-| SAI_OUTBOUND_REVERSE_ROUTING_GROUP_ATTR_DISABLED | bool | If true, this entries in this routing group will not take effect, but won't drop the packets. |
-
-To specify which reverse group should be used on an ENI, we add the following attribute on ENI:
-
-| SAI attribute name | Type | Description |
-| --------------- | ---- | ----------- |
-| SAI_ENI_ATTR_OUTBOUND_REVERSE_ROUTING_GROUP_ID | sai_object_id_t | Reverse routing group object ID |
-
-###### 5.2.2.1.2. Reverse routing group entry
-
-The reverse routing table is essentially a LPM lookup table with each entry takes the IP prefix as key:
-
-| SAI entry field | Type | Description |
-| --------------- | ---- | ----------- |
-| outbound_reverse_routing_group_id | sai_object_id_t | SAI object ID of the reverse routing table |
-| source | sai_ip_prefix_t | Source IP prefix |
-
-The attributes will only have action and reverse tunnel id, as it won't change anything else:
-
-| SAI attribute name | Type | Description |
-| ------------------ | ---- | ----------- |
-| SAI_OUTBOUND_REVERSE_ROUTE_ENTRY_ATTR_ACTION | sai_outbound_reverse_route_entry_action_t | Action to take |
-| SAI_OUTBOUND_REVERSE_ROUTE_ENTRY_ATTR_REVERSE_TUNNEL_ID | sai_object_id_t | SAI object ID of the reverse tunnel |
-| SAI_OUTBOUND_REVERSE_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION | sai_uint64_t | Routing actions that need to be disabled in flow resimulation. |
-
-##### 5.2.2.2. Reverse tunnel table and entry
-
-Besides the reverse routing stage, we also need to split the tunnel table into tunnel and reverse tunnel table. It makes the API clean, also allows P4 to support it, because each P4 table can be only matched once in the pipeline:
-
-The reverse tunnel table will have the following attributes that is common to all next hops:
-
-| Attribute name | Type | Description |
-| --- | --- | --- |
-| SAI_DASH_REVERSE_TUNNEL_ATTR_DASH_ENCAPSULATION | sai_dash_encapsulation_t | Encapsulation type, such as VxLan, NvGRE. Optional. If not specified, the encap from tunnel will be used. |
-| SAI_DASH_REVERSE_TUNNEL_ATTR_TUNNEL_KEY | sai_uint32_t | Tunnel key used in the encap, e.g. VNI in VxLAN. |
-
-A reverse tunnel supports multiple destination IPs as an ECMP group, the reverse tunnel member and reverse tunnel next hop objects will be used to specify these information:
-
-- The reverse tunnel next hop object defines the tunnel information for each destination:
-
-  | Attribute name | Type | Description |
-  | --- | --- | --- |
-  | SAI_DASH_REVERSE_TUNNEL_NEXT_HOP_ATTR_DIP | sai_ip_address_t | Destination IP used in tunnel. |
-  | SAI_DASH_REVERSE_TUNNEL_NEXT_HOP_ATTR_SIP | sai_ip_address_t | Source IP used in tunnel. |
-
-- The reverse tunnel member defines the bindings between tunnel and next hop:
-
-  | Attribute name | Type | Description |
-  | --- | --- | --- |
-  | SAI_DASH_REVERSE_TUNNEL_MEMBER_ATTR_TUNNEL_ID | sai_object_id_t | Tunnel Id |
-  | SAI_DASH_REVERSE_TUNNEL_MEMBER_ATTR_TUNNEL_NEXT_HOP_ID | sai_object_id_t | Tunnel next hop id |
+| SAI_ENI_ATTR_REVERSE_TUNNEL_SIP | sai_ip_address_t | Source IP used in the reverse tunnel. |
+| SAI_ENI_ATTR_ENABLE_REVERSE_TUNNEL_LEARNING | bool | If true, the reverse tunnel will be learned from the first packet. |
 
 #### 5.2.3. MSEE failover handling using flow resimulation
 
 ##### 5.2.3.1. Reverse tunnel updates
 
-When MSEE failover, the tunnel configuration will be updated. Since the tunnel is route based, we can leverage the existing [flow resimulation APIs](../dataplane/dash-flow-resimulation.md) to update the nexthop list.
+When MSEE failover, it could impact all flows that are created. In this case, we will leverage the full flow resimulation API in the existing [flow resimulation APIs](../dataplane/dash-flow-resimulation.md) to help us keep the reverse tunnel updated.
 
-Whenever the reverse tunnel id is set, we consider the reverse tunnel routing action bit is set in the pipeline, this allows us to control the flow resimulation behavior using the same mechanism.
+Following the flow resimulation design, all flow resimulation request will be explicitly requested by the SDN controller. Hence, when MSEE failover, the SDN controller will request a full flow resimulation that marks all flows as resimulation needed.
 
-1. Step 1: Update the DIP list in the reverse tunnel object, which will cover all the new flows.
-2. Step 2: Request a full flow resimulation, which will cover the existing flows.
+When the next packet from MSEE comes in for a flow, the flow will be resimulated and the reverse tunnel will be updated accordingly, by picking up the new MSEE tunnel information.
 
 ##### 5.2.3.2. Maintaining per connection consistency (PCC)
 
@@ -236,15 +173,15 @@ For more information, please refer to the [flow resimulation scope control APIs]
 
 ##### 5.2.3.3. Flow resimulation on return path
 
-In flow resimulation, flow is usually updated when packets lands on the forwarding path, however this introduces extra downtime for the reverse tunnel update. The reason is that the return packet will still take the old tunnel in the flow, and being sent to the wrong destination, although the policy is updated and flow resimulation is triggered.
+As we can see, in flow resimulation, flow is updated when packets lands on the forwarding path, which introduces extra downtime for the reverse tunnel update. The reason is that the return packet will still take the old tunnel in the flow, and being sent to the wrong destination, until the next MSEE-to-PLS packet comes in and updates the flow.
 
-To avoid this impact, it is required for the return packet to check the resimulation status and update the reverse tunnel in the flow if needed. This means when a packet coming from PLS to MSEE, if reverse tunnel is changed, the reverse routing stage should be evaluated and updating the flow accordingly.
+For now, this behavior will be acceptable, as the downtime is limited to the time between the MSEE failover and the next packet from MSEE. However, this behavior will be improved in the future.
 
 ##### 5.2.3.4. Flow resimulation on flow redirected flows
 
 Another thing in flow resimulation is [load balancer fast path flow redirection](../load-bal-service/fast-path-icmp-flow-redirection.md) related. When a flow is redirected by fast path ICMP packet, this flow will be ignored in the flow resimulation. However, this behavior should only apply for the forwarding side of transformation, but not the reverse side.
 
-This means when a packet lands on DASH pipeline and it belongs to a flow that is redirected by fast path ICMP packet, the reverse routing stage should be evaluated and updating the flow accordingly.
+This means when a packet lands on DASH pipeline and it belongs to a flow that is redirected by fast path ICMP packet, the reverse tunnel should still be evaluated and updating accordingly.
 
 ## 6. References
 

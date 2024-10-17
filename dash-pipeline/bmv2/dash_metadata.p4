@@ -11,7 +11,9 @@ enum bit<32> dash_routing_actions_t {
     NAT = (1 << 1),
     NAT46 = (1 << 2),
     NAT64 = (1 << 3),
-    NAT_PORT = (1 << 4)
+    NAT_PORT = (1 << 4),
+    TUNNEL = (1 << 5),
+    REVERSE_TUNNEL = (1 << 6)
 };
 
 // Pipeline stages:
@@ -241,6 +243,8 @@ struct metadata_t {
     encap_data_t encap_data;
     // tunnel_data is used by dash_tunnel_id
     encap_data_t tunnel_data;
+    bit<1> enable_reverse_tunnel_learning;
+    IPv4Address reverse_tunnel_sip;
     overlay_rewrite_data_t overlay_data;
 #endif // TARGET_DPDK_PNA
     bit<16> dash_tunnel_id;
