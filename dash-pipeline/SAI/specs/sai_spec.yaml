@@ -331,6 +331,42 @@ enums:
     name: NONE
     description: ''
     value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: ENCAP_U0
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: ENCAP_U1
+    description: ''
+    value: '2'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SET_SMAC
+    description: ''
+    value: '4'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SET_DMAC
+    description: ''
+    value: '8'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: NAT
+    description: ''
+    value: '16'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: NAT46
+    description: ''
+    value: '32'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: NAT64
+    description: ''
+    value: '64'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: NAT_PORT
+    description: ''
+    value: '128'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: REVERSE_TUNNEL
+    description: ''
+    value: '256'
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
   name: sai_dash_ha_state_t
   description: ''

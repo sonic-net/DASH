@@ -62,12 +62,13 @@ parser dash_parser(
                 packet.extract(hd.flow_overlay_data);
             }
 
-            if (hd.flow_data.actions & dash_routing_actions_t.STATIC_ENCAP != 0) {
+            if (hd.flow_data.actions & dash_routing_actions_t.ENCAP_U0 != 0) {
                 packet.extract(hd.flow_encap_data);
             }
 
-            // FIXME: assume no tunnel data
-            // packet.extract(hd.flow_tunnel_data);
+            if (hd.flow_data.actions & dash_routing_actions_t.ENCAP_U1 != 0) {
+                packet.extract(hd.flow_tunnel_data);
+            }
         }
 
         transition parse_customer_ethernet;

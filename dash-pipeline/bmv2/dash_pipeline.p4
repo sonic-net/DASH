@@ -168,6 +168,8 @@ control dash_lookup_stage(
         if (meta.is_fast_path_icmp_flow_redirection_packet) {
             UPDATE_ENI_COUNTER(eni_lb_fast_path_icmp_in);
         }
+
+        do_tunnel_decap(hdr, meta);
     }
 }
 
@@ -209,7 +211,6 @@ control dash_match_stage(
             inbound.apply(hdr, meta);
         }
 
-        tunnel_stage.apply(hdr, meta);
     }
 }
 
@@ -259,7 +260,7 @@ control dash_ingress(
 #endif  // DPDK_PNA_SEND_TO_PORT_FIX_MERGED
 #endif // TARGET_DPDK_PNA
 
-        // If packet is from DPAPP, just do conntrack_lookup
+        // If packet is from DPAPP, not do common lookup
         if (hdr.packet_meta.packet_source != dash_packet_source_t.DPAPP) {
             dash_lookup_stage.apply(hdr, meta);
         }
@@ -270,8 +271,6 @@ control dash_ingress(
         if (meta.flow_enabled) {
             conntrack_lookup_stage.apply(hdr, meta);
         }
-
-        do_tunnel_decap(hdr, meta);
 
         ha_stage.apply(hdr, meta);
 
@@ -302,8 +301,6 @@ control dash_ingress(
         }
 
         routing_action_apply.apply(hdr, meta);
-
-        tunnel_stage_encap.apply(hdr, meta);
 
         /* Underlay routing */
         meta.dst_ip_addr = (bit<128>)hdr.u0_ipv4.dst_addr;

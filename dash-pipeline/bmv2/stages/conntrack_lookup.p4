@@ -73,7 +73,7 @@ control conntrack_build_dash_header(inout headers_t hdr, in metadata_t meta,
         hdr.flow_data.meter_class = meta.meter_class;
         length = length + FLOW_DATA_HDR_SIZE;
 
-        if (meta.routing_actions & dash_routing_actions_t.STATIC_ENCAP != 0) {
+        if (meta.routing_actions & dash_routing_actions_t.ENCAP_U0 != 0) {
 #ifdef TARGET_DPDK_PNA
             hdr.flow_encap_data.setValid();
             hdr.flow_encap_data.vni = meta.encap_data.vni;
@@ -88,7 +88,7 @@ control conntrack_build_dash_header(inout headers_t hdr, in metadata_t meta,
             length = length + ENCAP_DATA_HDR_SIZE;
         }
 
-        if (meta.dash_tunnel_id != 0) {
+        if (meta.routing_actions & dash_routing_actions_t.ENCAP_U1 != 0) {
 #ifdef TARGET_DPDK_PNA
             hdr.flow_tunnel_data.setValid();
             hdr.flow_tunnel_data.vni = meta.tunnel_data.vni;
@@ -273,7 +273,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
 
         /* Also set basic metadata */
         meta.direction = dash_direction;
-        meta.routing_actions = (bit<32>)dash_flow_action;
+        meta.routing_actions = dash_flow_action;
         meta.meter_class = meter_class;
 
         /* Reverse flow key is not used by now */

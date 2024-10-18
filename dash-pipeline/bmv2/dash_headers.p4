@@ -163,7 +163,16 @@ enum bit<8> dash_flow_sync_state_t {
 }
 
 enum bit<32> dash_flow_action_t {
-    NONE = 0
+    NONE = 0,
+    ENCAP_U0 = (1 << 0),
+    ENCAP_U1 = (1 << 1),
+    SET_SMAC = (1 << 2),
+    SET_DMAC = (1 << 3),
+    NAT = (1 << 4),
+    NAT46 = (1 << 5),
+    NAT64 = (1 << 6),
+    NAT_PORT = (1 << 7),
+    REVERSE_TUNNEL = (1 << 8)
 }
 
 enum bit<16> dash_flow_enabled_key_t {

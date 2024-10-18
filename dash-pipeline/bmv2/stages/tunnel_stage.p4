@@ -11,13 +11,24 @@ control tunnel_stage(
             @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"]
             dash_encapsulation_t dash_encapsulation,
             bit<24> tunnel_key) {
-    push_action_static_encap(hdr = hdr,
-                            meta = meta,
-                            encap = dash_encapsulation,
-                            vni = tunnel_key,
-                            underlay_sip = hdr.u0_ipv4.src_addr,
-                            underlay_dip = dip,
-                            overlay_dmac = hdr.u0_ethernet.dst_addr);
+        if (meta.routing_actions & dash_routing_actions_t.ENCAP_U0 == 0) {
+            meta.tunnel_pointer = 0;
+            push_action_encap_u0(hdr = hdr,
+                                 meta = meta,
+                                 encap = dash_encapsulation,
+                                 vni = tunnel_key,
+                                 underlay_sip = hdr.customer_ipv4.src_addr,
+                                 underlay_dip = dip);
+        }
+        else {
+            meta.tunnel_pointer = 1;
+            push_action_encap_u1(hdr = hdr,
+                                 meta = meta,
+                                 encap = dash_encapsulation,
+                                 vni = tunnel_key,
+                                 underlay_sip = hdr.u0_ipv4.src_addr,
+                                 underlay_dip = dip);
+        }
     }
 
     @SaiTable[name = "dash_tunnel", api = "dash_tunnel", order = 0, isobject="true"]
@@ -32,24 +43,8 @@ control tunnel_stage(
     }
 
     apply {
-        tunnel.apply();
-    }
-}
-
-control tunnel_stage_encap(
-    inout headers_t hdr,
-    inout metadata_t meta)
-{
-    apply {
         if (meta.dash_tunnel_id != 0) {
-                do_tunnel_encap(hdr, meta,
-                            meta.overlay_data.dmac,
-                            meta.tunnel_data.underlay_dmac,
-                            meta.tunnel_data.underlay_smac,
-                            meta.tunnel_data.underlay_dip,
-                            meta.tunnel_data.underlay_sip,
-                            meta.tunnel_data.dash_encapsulation,
-                            meta.tunnel_data.vni);
+            tunnel.apply();
         }
     }
 }

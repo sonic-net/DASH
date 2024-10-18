@@ -6,15 +6,7 @@
 #define MAX_ENI 64
 #define MAX_HA_SET 1
 
-enum bit<32> dash_routing_actions_t {
-    STATIC_ENCAP = (1 << 0),
-    NAT = (1 << 1),
-    NAT46 = (1 << 2),
-    NAT64 = (1 << 3),
-    NAT_PORT = (1 << 4),
-    TUNNEL = (1 << 5),
-    REVERSE_TUNNEL = (1 << 6)
-};
+typedef dash_flow_action_t dash_routing_actions_t;
 
 // Pipeline stages:
 enum bit<16> dash_pipeline_stage_t {

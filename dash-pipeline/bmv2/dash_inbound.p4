@@ -39,7 +39,6 @@ control inbound(inout headers_t hdr,
 
         do_tunnel_encap(hdr,
                      meta,
-                     meta.overlay_data.dmac,
                      meta.encap_data.underlay_dmac,
                      meta.encap_data.underlay_smac,
                      meta.encap_data.underlay_dip,
