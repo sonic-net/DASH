@@ -231,10 +231,10 @@ struct metadata_t {
 #else
     encap_data_t u0_encap_data;
     encap_data_t u1_encap_data;
-    bit<1> enable_reverse_tunnel_learning;
-    IPv4Address reverse_tunnel_sip;
     overlay_rewrite_data_t overlay_data;
 #endif // TARGET_DPDK_PNA
+    bit<1> enable_reverse_tunnel_learning;
+    IPv4Address reverse_tunnel_sip;
     bit<16> dash_tunnel_id;
     bit<32> meter_class;
     bit<8> local_region_id;
