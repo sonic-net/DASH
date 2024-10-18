@@ -75,14 +75,14 @@ control dash_eni_stage(
         meta.eni_data.pl_sip                                                = pl_sip;
         meta.eni_data.pl_sip_mask                                           = pl_sip_mask;
         meta.eni_data.pl_underlay_sip                                       = pl_underlay_sip;
-        meta.encap_data.underlay_dip                                        = vm_underlay_dip;
+        meta.u0_encap_data.underlay_dip                                     = vm_underlay_dip;
         meta.eni_data.outbound_routing_group_data.outbound_routing_group_id = outbound_routing_group_id;
         if (dash_tunnel_dscp_mode == dash_tunnel_dscp_mode_t.PIPE_MODEL) {
             meta.eni_data.dscp = dscp;
         }
         /* vm_vni is the encap VNI used for tunnel between inbound DPU -> VM
          * and not a VNET identifier */
-        meta.encap_data.vni           = vm_vni;
+        meta.u0_encap_data.vni        = vm_vni;
         meta.vnet_id                  = vnet_id;
 
         meta.enable_reverse_tunnel_learning = enable_reverse_tunnel_learning;
@@ -241,8 +241,8 @@ control dash_ingress(
 #ifndef TARGET_DPDK_PNA
         meta.rx_encap.setValid();
         meta.flow_data.setValid();
-        meta.encap_data.setValid();
-        meta.tunnel_data.setValid();
+        meta.u0_encap_data.setValid();
+        meta.u1_encap_data.setValid();
         meta.overlay_data.setValid();
 #endif // TARGET_DPDK_PNA
 

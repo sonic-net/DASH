@@ -13,13 +13,13 @@ action push_action_encap_u0(
 {
     meta.routing_actions = meta.routing_actions | dash_routing_actions_t.ENCAP_U0;
 
-    meta.encap_data.dash_encapsulation = encap;
-    meta.encap_data.vni = vni == 0 ? meta.encap_data.vni : vni;
+    meta.u0_encap_data.dash_encapsulation = encap;
+    meta.u0_encap_data.vni = vni == 0 ? meta.u0_encap_data.vni : vni;
 
-    meta.encap_data.underlay_smac = underlay_smac == 0 ? meta.encap_data.underlay_smac : underlay_smac;
-    meta.encap_data.underlay_dmac = underlay_dmac == 0 ? meta.encap_data.underlay_dmac : underlay_dmac;
-    meta.encap_data.underlay_sip = underlay_sip == 0 ? meta.encap_data.underlay_sip : underlay_sip;
-    meta.encap_data.underlay_dip = underlay_dip == 0 ? meta.encap_data.underlay_dip : underlay_dip;
+    meta.u0_encap_data.underlay_smac = underlay_smac == 0 ? meta.u0_encap_data.underlay_smac : underlay_smac;
+    meta.u0_encap_data.underlay_dmac = underlay_dmac == 0 ? meta.u0_encap_data.underlay_dmac : underlay_dmac;
+    meta.u0_encap_data.underlay_sip = underlay_sip == 0 ? meta.u0_encap_data.underlay_sip : underlay_sip;
+    meta.u0_encap_data.underlay_dip = underlay_dip == 0 ? meta.u0_encap_data.underlay_dip : underlay_dip;
 }
 
 action push_action_encap_u1(
@@ -34,13 +34,13 @@ action push_action_encap_u1(
 {
     meta.routing_actions = meta.routing_actions | dash_routing_actions_t.ENCAP_U1;
 
-    meta.tunnel_data.dash_encapsulation = encap;
-    meta.tunnel_data.vni = vni == 0 ? meta.tunnel_data.vni : vni;
+    meta.u1_encap_data.dash_encapsulation = encap;
+    meta.u1_encap_data.vni = vni == 0 ? meta.u1_encap_data.vni : vni;
 
-    meta.tunnel_data.underlay_smac = underlay_smac == 0 ? meta.tunnel_data.underlay_smac : underlay_smac;
-    meta.tunnel_data.underlay_dmac = underlay_dmac == 0 ? meta.tunnel_data.underlay_dmac : underlay_dmac;
-    meta.tunnel_data.underlay_sip = underlay_sip == 0 ? meta.tunnel_data.underlay_sip : underlay_sip;
-    meta.tunnel_data.underlay_dip = underlay_dip == 0 ? meta.tunnel_data.underlay_dip : underlay_dip;
+    meta.u1_encap_data.underlay_smac = underlay_smac == 0 ? meta.u1_encap_data.underlay_smac : underlay_smac;
+    meta.u1_encap_data.underlay_dmac = underlay_dmac == 0 ? meta.u1_encap_data.underlay_dmac : underlay_dmac;
+    meta.u1_encap_data.underlay_sip = underlay_sip == 0 ? meta.u1_encap_data.underlay_sip : underlay_sip;
+    meta.u1_encap_data.underlay_dip = underlay_dip == 0 ? meta.u1_encap_data.underlay_dip : underlay_dip;
 }
 
 control do_action_encap_u0(
@@ -52,21 +52,21 @@ control do_action_encap_u0(
             return;
         }
 
-        if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {
+        if (meta.u0_encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {
             push_vxlan_tunnel_u0(hdr,
-                        meta.encap_data.underlay_dmac,
-                        meta.encap_data.underlay_smac,
-                        meta.encap_data.underlay_dip,
-                        meta.encap_data.underlay_sip,
-                        meta.encap_data.vni);
+                        meta.u0_encap_data.underlay_dmac,
+                        meta.u0_encap_data.underlay_smac,
+                        meta.u0_encap_data.underlay_dip,
+                        meta.u0_encap_data.underlay_sip,
+                        meta.u0_encap_data.vni);
         }
-        else if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
+        else if (meta.u0_encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
             push_vxlan_tunnel_u0(hdr,
-                        meta.encap_data.underlay_dmac,
-                        meta.encap_data.underlay_smac,
-                        meta.encap_data.underlay_dip,
-                        meta.encap_data.underlay_sip,
-                        meta.encap_data.vni);
+                        meta.u0_encap_data.underlay_dmac,
+                        meta.u0_encap_data.underlay_smac,
+                        meta.u0_encap_data.underlay_dip,
+                        meta.u0_encap_data.underlay_sip,
+                        meta.u0_encap_data.vni);
         }
     }
 }
@@ -80,21 +80,21 @@ control do_action_encap_u1(
             return;
         }
 
-        if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {
+        if (meta.u0_encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {
             push_vxlan_tunnel_u1(hdr,
-                        meta.encap_data.underlay_dmac,
-                        meta.encap_data.underlay_smac,
-                        meta.encap_data.underlay_dip,
-                        meta.encap_data.underlay_sip,
-                        meta.encap_data.vni);
+                        meta.u0_encap_data.underlay_dmac,
+                        meta.u0_encap_data.underlay_smac,
+                        meta.u0_encap_data.underlay_dip,
+                        meta.u0_encap_data.underlay_sip,
+                        meta.u0_encap_data.vni);
         }
-        else if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
+        else if (meta.u0_encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
             push_vxlan_tunnel_u1(hdr,
-                        meta.encap_data.underlay_dmac,
-                        meta.encap_data.underlay_smac,
-                        meta.encap_data.underlay_dip,
-                        meta.encap_data.underlay_sip,
-                        meta.encap_data.vni);
+                        meta.u0_encap_data.underlay_dmac,
+                        meta.u0_encap_data.underlay_smac,
+                        meta.u0_encap_data.underlay_dip,
+                        meta.u0_encap_data.underlay_sip,
+                        meta.u0_encap_data.vni);
         }
     }
 }

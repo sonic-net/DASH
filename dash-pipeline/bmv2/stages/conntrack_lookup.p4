@@ -13,26 +13,26 @@ action conntrack_set_meta_from_dash_header(in headers_t hdr, out metadata_t meta
 
     /* encapsulation metadata */
 #ifdef TARGET_DPDK_PNA
-    meta.encap_data.vni = hdr.flow_encap_data.vni;
-    meta.encap_data.underlay_sip = hdr.flow_encap_data.underlay_sip;
-    meta.encap_data.underlay_dip = hdr.flow_encap_data.underlay_dip;
-    meta.encap_data.underlay_smac = hdr.flow_encap_data.underlay_smac;
-    meta.encap_data.underlay_dmac = hdr.flow_encap_data.underlay_dmac;
-    meta.encap_data.dash_encapsulation = hdr.flow_encap_data.dash_encapsulation;
+    meta.u0_encap_data.vni = hdr.flow_u0_encap_data.vni;
+    meta.u0_encap_data.underlay_sip = hdr.flow_u0_encap_data.underlay_sip;
+    meta.u0_encap_data.underlay_dip = hdr.flow_u0_encap_data.underlay_dip;
+    meta.u0_encap_data.underlay_smac = hdr.flow_u0_encap_data.underlay_smac;
+    meta.u0_encap_data.underlay_dmac = hdr.flow_u0_encap_data.underlay_dmac;
+    meta.u0_encap_data.dash_encapsulation = hdr.flow_u0_encap_data.dash_encapsulation;
 #else
-    meta.encap_data = hdr.flow_encap_data;
+    meta.u0_encap_data = hdr.flow_u0_encap_data;
 #endif // TARGET_DPDK_PNA
 
     /* tunnel metadata */
 #ifdef TARGET_DPDK_PNA
-    meta.tunnel_data.vni = hdr.flow_tunnel_data.vni;
-    meta.tunnel_data.underlay_sip = hdr.flow_tunnel_data.underlay_sip;
-    meta.tunnel_data.underlay_dip = hdr.flow_tunnel_data.underlay_dip;
-    meta.tunnel_data.underlay_smac = hdr.flow_tunnel_data.underlay_smac;
-    meta.tunnel_data.underlay_dmac = hdr.flow_tunnel_data.underlay_dmac;
-    meta.tunnel_data.dash_encapsulation = hdr.flow_tunnel_data.dash_encapsulation;
+    meta.u1_encap_data.vni = hdr.flow_u1_encap_data.vni;
+    meta.u1_encap_data.underlay_sip = hdr.flow_u1_encap_data.underlay_sip;
+    meta.u1_encap_data.underlay_dip = hdr.flow_u1_encap_data.underlay_dip;
+    meta.u1_encap_data.underlay_smac = hdr.flow_u1_encap_data.underlay_smac;
+    meta.u1_encap_data.underlay_dmac = hdr.flow_u1_encap_data.underlay_dmac;
+    meta.u1_encap_data.dash_encapsulation = hdr.flow_u1_encap_data.dash_encapsulation;
 #else
-    meta.tunnel_data = hdr.flow_tunnel_data;
+    meta.u1_encap_data = hdr.flow_u1_encap_data;
 #endif // TARGET_DPDK_PNA
 
     /* overlay rewrite metadata */
@@ -55,8 +55,8 @@ action conntrack_strip_dash_header(inout headers_t hdr)
     hdr.flow_key.setInvalid();
     hdr.flow_data.setInvalid();
     hdr.flow_overlay_data.setInvalid();
-    hdr.flow_encap_data.setInvalid();
-    hdr.flow_tunnel_data.setInvalid();
+    hdr.flow_u0_encap_data.setInvalid();
+    hdr.flow_u1_encap_data.setInvalid();
 }
 
 control conntrack_build_dash_header(inout headers_t hdr, in metadata_t meta,
@@ -75,30 +75,30 @@ control conntrack_build_dash_header(inout headers_t hdr, in metadata_t meta,
 
         if (meta.routing_actions & dash_routing_actions_t.ENCAP_U0 != 0) {
 #ifdef TARGET_DPDK_PNA
-            hdr.flow_encap_data.setValid();
-            hdr.flow_encap_data.vni = meta.encap_data.vni;
-            hdr.flow_encap_data.underlay_sip = meta.encap_data.underlay_sip;
-            hdr.flow_encap_data.underlay_dip = meta.encap_data.underlay_dip;
-            hdr.flow_encap_data.underlay_smac = meta.encap_data.underlay_smac;
-            hdr.flow_encap_data.underlay_dmac = meta.encap_data.underlay_dmac;
-            hdr.flow_encap_data.dash_encapsulation = meta.encap_data.dash_encapsulation;
+            hdr.flow_u0_encap_data.setValid();
+            hdr.flow_u0_encap_data.vni = meta.u0_encap_data.vni;
+            hdr.flow_u0_encap_data.underlay_sip = meta.u0_encap_data.underlay_sip;
+            hdr.flow_u0_encap_data.underlay_dip = meta.u0_encap_data.underlay_dip;
+            hdr.flow_u0_encap_data.underlay_smac = meta.u0_encap_data.underlay_smac;
+            hdr.flow_u0_encap_data.underlay_dmac = meta.u0_encap_data.underlay_dmac;
+            hdr.flow_u0_encap_data.dash_encapsulation = meta.u0_encap_data.dash_encapsulation;
 #else
-            hdr.flow_encap_data= meta.encap_data;
+            hdr.flow_u0_encap_data= meta.u0_encap_data;
 #endif // TARGET_DPDK_PNA
             length = length + ENCAP_DATA_HDR_SIZE;
         }
 
         if (meta.routing_actions & dash_routing_actions_t.ENCAP_U1 != 0) {
 #ifdef TARGET_DPDK_PNA
-            hdr.flow_tunnel_data.setValid();
-            hdr.flow_tunnel_data.vni = meta.tunnel_data.vni;
-            hdr.flow_tunnel_data.underlay_sip = meta.tunnel_data.underlay_sip;
-            hdr.flow_tunnel_data.underlay_dip = meta.tunnel_data.underlay_dip;
-            hdr.flow_tunnel_data.underlay_smac = meta.tunnel_data.underlay_smac;
-            hdr.flow_tunnel_data.underlay_dmac = meta.tunnel_data.underlay_dmac;
-            hdr.flow_tunnel_data.dash_encapsulation = meta.tunnel_data.dash_encapsulation;
+            hdr.flow_u1_encap_data.setValid();
+            hdr.flow_u1_encap_data.vni = meta.u1_encap_data.vni;
+            hdr.flow_u1_encap_data.underlay_sip = meta.u1_encap_data.underlay_sip;
+            hdr.flow_u1_encap_data.underlay_dip = meta.u1_encap_data.underlay_dip;
+            hdr.flow_u1_encap_data.underlay_smac = meta.u1_encap_data.underlay_smac;
+            hdr.flow_u1_encap_data.underlay_dmac = meta.u1_encap_data.underlay_dmac;
+            hdr.flow_u1_encap_data.dash_encapsulation = meta.u1_encap_data.dash_encapsulation;
 #else
-            hdr.flow_tunnel_data= meta.tunnel_data;
+            hdr.flow_u1_encap_data= meta.u1_encap_data;
 #endif // TARGET_DPDK_PNA
             length = length + ENCAP_DATA_HDR_SIZE;
         }
@@ -128,7 +128,7 @@ control conntrack_build_dash_header(inout headers_t hdr, in metadata_t meta,
 
         hdr.dp_ethernet.setValid();
         hdr.dp_ethernet.dst_addr = DPAPP_MAC;
-        hdr.dp_ethernet.src_addr = meta.encap_data.underlay_smac;
+        hdr.dp_ethernet.src_addr = meta.u0_encap_data.underlay_smac;
         hdr.dp_ethernet.ether_type = DASH_ETHTYPE;
     }
 }
@@ -280,19 +280,19 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         ;
 
         /* Set encapsulation metadata */
-        meta.encap_data.vni = underlay0_vnet_id;
-        meta.encap_data.underlay_sip = underlay0_sip;
-        meta.encap_data.underlay_dip = underlay0_dip;
-        meta.encap_data.dash_encapsulation = underlay0_dash_encapsulation;
-        meta.encap_data.underlay_smac = underlay0_smac;
-        meta.encap_data.underlay_dmac = underlay0_dmac;
+        meta.u0_encap_data.vni = underlay0_vnet_id;
+        meta.u0_encap_data.underlay_sip = underlay0_sip;
+        meta.u0_encap_data.underlay_dip = underlay0_dip;
+        meta.u0_encap_data.dash_encapsulation = underlay0_dash_encapsulation;
+        meta.u0_encap_data.underlay_smac = underlay0_smac;
+        meta.u0_encap_data.underlay_dmac = underlay0_dmac;
 
-        meta.tunnel_data.vni = underlay1_vnet_id;
-        meta.tunnel_data.underlay_sip = underlay1_sip;
-        meta.tunnel_data.underlay_dip = underlay1_dip;
-        meta.tunnel_data.dash_encapsulation = underlay1_dash_encapsulation;
-        meta.tunnel_data.underlay_smac = underlay1_smac;
-        meta.tunnel_data.underlay_dmac = underlay1_dmac;
+        meta.u1_encap_data.vni = underlay1_vnet_id;
+        meta.u1_encap_data.underlay_sip = underlay1_sip;
+        meta.u1_encap_data.underlay_dip = underlay1_dip;
+        meta.u1_encap_data.dash_encapsulation = underlay1_dash_encapsulation;
+        meta.u1_encap_data.underlay_smac = underlay1_smac;
+        meta.u1_encap_data.underlay_dmac = underlay1_dmac;
 
         /* Set overlay rewrite metadata */
         meta.overlay_data.dmac = dst_mac;

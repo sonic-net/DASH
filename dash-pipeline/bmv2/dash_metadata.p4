@@ -225,16 +225,12 @@ struct metadata_t {
     // Action data
     bool dropped;
 #ifdef TARGET_DPDK_PNA
-    // encap_data is for underlay
-    meta_encap_data_t encap_data;
-    // tunnel_data is used by dash_tunnel_id
-    meta_encap_data_t tunnel_data;
+    meta_encap_data_t u0_encap_data;
+    meta_encap_data_t u1_encap_data;
     meta_overlay_rewrite_data_t overlay_data;
 #else
-    // encap_data is for underlay
-    encap_data_t encap_data;
-    // tunnel_data is used by dash_tunnel_id
-    encap_data_t tunnel_data;
+    encap_data_t u0_encap_data;
+    encap_data_t u1_encap_data;
     bit<1> enable_reverse_tunnel_learning;
     IPv4Address reverse_tunnel_sip;
     overlay_rewrite_data_t overlay_data;

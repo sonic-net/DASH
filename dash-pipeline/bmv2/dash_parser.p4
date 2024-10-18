@@ -63,11 +63,11 @@ parser dash_parser(
             }
 
             if (hd.flow_data.actions & dash_routing_actions_t.ENCAP_U0 != 0) {
-                packet.extract(hd.flow_encap_data);
+                packet.extract(hd.flow_u0_encap_data);
             }
 
             if (hd.flow_data.actions & dash_routing_actions_t.ENCAP_U1 != 0) {
-                packet.extract(hd.flow_tunnel_data);
+                packet.extract(hd.flow_u1_encap_data);
             }
         }
 
@@ -180,8 +180,8 @@ control dash_deparser(
         packet.emit(hdr.flow_key);
         packet.emit(hdr.flow_data);
         packet.emit(hdr.flow_overlay_data);
-        packet.emit(hdr.flow_encap_data);
-        packet.emit(hdr.flow_tunnel_data);
+        packet.emit(hdr.flow_u0_encap_data);
+        packet.emit(hdr.flow_u1_encap_data);
 
         packet.emit(hdr.u0_ethernet);
         packet.emit(hdr.u0_ipv4);

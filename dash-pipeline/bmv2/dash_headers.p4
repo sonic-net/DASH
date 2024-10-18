@@ -263,8 +263,8 @@ struct headers_t {
     flow_key_t   flow_key;
     flow_data_t  flow_data; // flow common data
     overlay_rewrite_data_t flow_overlay_data;
-    encap_data_t flow_encap_data;
-    encap_data_t flow_tunnel_data;
+    encap_data_t flow_u0_encap_data;
+    encap_data_t flow_u1_encap_data;
 
     /* Underlay 1 headers */
     ethernet_t    u1_ethernet;

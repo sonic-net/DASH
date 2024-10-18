@@ -39,12 +39,12 @@ control inbound(inout headers_t hdr,
 
         do_tunnel_encap(hdr,
                      meta,
-                     meta.encap_data.underlay_dmac,
-                     meta.encap_data.underlay_smac,
-                     meta.encap_data.underlay_dip,
-                     meta.encap_data.underlay_sip,
+                     meta.u0_encap_data.underlay_dmac,
+                     meta.u0_encap_data.underlay_smac,
+                     meta.u0_encap_data.underlay_dip,
+                     meta.u0_encap_data.underlay_sip,
                      dash_encapsulation_t.VXLAN,
-                     meta.encap_data.vni);
+                     meta.u0_encap_data.vni);
     }
 }
 
