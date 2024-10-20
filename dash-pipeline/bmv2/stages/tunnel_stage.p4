@@ -6,12 +6,13 @@ control tunnel_stage(
     inout metadata_t meta)
 {
     action set_tunnel_attrs(
-        @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"]
+        @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN", create_only="true"]
         dash_encapsulation_t dash_encapsulation,
 
+        @SaiVal[create_only="true"]
         bit<24> tunnel_key,
 
-        @SaiVal[default_value="1", iscreateonly="true"]
+        @SaiVal[default_value="1", create_only="true"]
         bit<32> max_member_size,
 
         @SaiVal[type="sai_ip_address_t"]
@@ -60,8 +61,8 @@ control tunnel_stage(
     }
 
     action set_tunnel_member_attrs(
-        @SaiVal[type="sai_object_id_t", ismandatory="true", iscreateonly="true"] bit<16> dash_tunnel_id,
-        @SaiVal[type="sai_object_id_t", ismandatory="true"] bit<16> dash_tunnel_next_hop_id)
+        @SaiVal[type="sai_object_id_t", mandatory="true", create_only="true"] bit<16> dash_tunnel_id,
+        @SaiVal[type="sai_object_id_t", mandatory="true"] bit<16> dash_tunnel_next_hop_id)
     {
         // dash_tunnel_id in tunnel member must match the metadata
         REQUIRES(meta.dash_tunnel_id == dash_tunnel_id);

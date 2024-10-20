@@ -15,8 +15,8 @@ class DashP4TableAttribute(DashP4Object):
         self.bitwidth: int = 0
         self.isresourcetype: Optional[str] = None
         self.isreadonly: Optional[str] = None
-        self.iscreateonly: Optional[str] = None
-        self.ismandatory: Optional[str] = None
+        self.is_create_only: Optional[str] = None
+        self.is_mandatory: Optional[str] = None
         self.object_name: Optional[str] = None
         self.skipattr: Optional[str] = None
         self.match_type: str = ""
@@ -61,10 +61,10 @@ class DashP4TableAttribute(DashP4Object):
                         self.isresourcetype = str(kv["value"]["stringValue"])
                     elif kv["key"] == "isreadonly":
                         self.isreadonly = str(kv["value"]["stringValue"])
-                    elif kv["key"] == "iscreateonly":
-                        self.iscreateonly = str(kv["value"]["stringValue"])
-                    elif kv["key"] == "ismandatory":
-                        self.ismandatory = str(kv["value"]["stringValue"])
+                    elif kv["key"] == "create_only":
+                        self.is_create_only = str(kv["value"]["stringValue"])
+                    elif kv["key"] == "mandatory":
+                        self.is_mandatory = str(kv["value"]["stringValue"])
                     elif kv["key"] == "objects":
                         self.object_name = str(kv["value"]["stringValue"])
                     elif kv["key"] == "skipattr":
@@ -142,8 +142,8 @@ class DashP4TableAttribute(DashP4Object):
         if self.isreadonly == "true":
             sai_flags = "READ_ONLY"
             default_value = None
-        elif self.iscreateonly == "true":
-            if self.default == None or self.ismandatory == "true":
+        elif self.is_create_only == "true":
+            if self.default == None or self.is_mandatory == "true":
                 sai_flags = "MANDATORY_ON_CREATE | CREATE_ONLY"
                 default_value = None
                 allow_null = False
@@ -153,7 +153,7 @@ class DashP4TableAttribute(DashP4Object):
 
             allow_null = False
         else:
-            if self.ismandatory == "true":
+            if self.is_mandatory == "true":
                 sai_flags = "MANDATORY_ON_CREATE | CREATE_AND_SET"
                 default_value = None
                 allow_null = False
