@@ -255,25 +255,7 @@ static sai_status_t dash_sai_create_{{ table.name }}s(
         _Out_ sai_status_t *object_statuses)
 {
     DASH_LOG_ENTER();
-
-    sai_status_t agg_status = SAI_STATUS_SUCCESS;
-
-    for (uint32_t i = 0; i < object_count; i++)
-    {
-        object_statuses[i] = dash_sai_create_{{ table.name }}(&object_id[i], switch_id, attr_count[i], attr_list[i]);
-
-        if (object_statuses[i] != SAI_STATUS_SUCCESS)
-        {
-            agg_status = SAI_STATUS_FAILURE;
-        }
-
-        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR)
-        {
-            return agg_status;
-        }
-    }
-
-    return agg_status;
+    return dash::DashSai::bulk_create_objects(dash_sai_create_{{ table.name }}, switch_id, object_count, attr_count, attr_list, mode, object_id, object_statuses);
 }
 
 static sai_status_t dash_sai_remove_{{ table.name }}(
@@ -296,25 +278,7 @@ static sai_status_t dash_sai_remove_{{ table.name }}s(
         _Out_ sai_status_t *object_statuses)
 {
     DASH_LOG_ENTER();
-
-    sai_status_t agg_status = SAI_STATUS_SUCCESS;
-
-    for (uint32_t i = 0; i < object_count; i++)
-    {
-        object_statuses[i] = dash_sai_remove_{{ table.name }}(object_id[i]);
-
-        if (object_statuses[i] != SAI_STATUS_SUCCESS)
-        {
-            agg_status = SAI_STATUS_FAILURE;
-        }
-
-        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR)
-        {
-            return agg_status;
-        }
-    }
-
-    return agg_status;
+    return dash::DashSai::bulk_remove_objects(dash_sai_remove_{{ table.name }}, object_count, object_id, mode, object_statuses);
 }
 
 static sai_status_t dash_sai_set_{{ table.name }}_attribute (
