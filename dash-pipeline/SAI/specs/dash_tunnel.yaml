@@ -30,7 +30,7 @@ sai_apis:
     attr_value_field: s32
     default: SAI_DASH_ENCAPSULATION_VXLAN
     isresourcetype: false
-    flags: CREATE_AND_SET
+    flags: CREATE_ONLY
     object_name: null
     allow_null: false
     valid_only: null
@@ -43,7 +43,7 @@ sai_apis:
     attr_value_field: u32
     default: '0'
     isresourcetype: false
-    flags: CREATE_AND_SET
+    flags: CREATE_ONLY
     object_name: null
     allow_null: false
     valid_only: null
