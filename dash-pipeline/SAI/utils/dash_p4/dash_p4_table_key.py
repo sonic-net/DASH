@@ -11,8 +11,8 @@ class DashP4TableKey(DashP4TableAttribute):
 
     def __init__(self):
         super().__init__()
-        self.iscreateonly: str = "true"
-        self.ismandatory: str = "true"
+        self.is_create_only: str = "true"
+        self.is_mandatory: str = "true"
         self.ip_is_v6_field_id: int = 0
 
     def parse_p4rt(self, p4rt_table_key: Dict[str, Any]) -> None:
