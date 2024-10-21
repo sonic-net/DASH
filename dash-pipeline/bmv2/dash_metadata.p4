@@ -210,6 +210,7 @@ struct metadata_t {
 #else
     flow_data_t flow_data;
 #endif // TARGET_DPDK_PNA
+    dash_flow_sync_state_t flow_sync_state;
     flow_table_data_t flow_table;
     bit<16> bulk_get_session_id;
     bit<16> bulk_get_session_filter_id;

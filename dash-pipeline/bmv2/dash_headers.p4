@@ -236,7 +236,6 @@ const bit<16> FLOW_KEY_HDR_SIZE=flow_key_t.minSizeInBytes();
 header flow_data_t {
     bit<7> reserved;
     bit<1> is_unidirectional;
-    dash_flow_sync_state_t sync_state;
     dash_direction_t direction;
     bit<32> version;
     dash_flow_action_t actions;

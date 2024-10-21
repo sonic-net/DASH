@@ -173,7 +173,7 @@ control conntrack_flow_created_handle(inout headers_t hdr, inout metadata_t meta
 control conntrack_flow_handle(inout headers_t hdr, inout metadata_t meta)
 {
     apply {
-        switch (meta.flow_data.sync_state) {
+        switch (meta.flow_sync_state) {
             dash_flow_sync_state_t.FLOW_MISS: {
                 conntrack_flow_miss_handle.apply(hdr, meta);
             }
@@ -269,9 +269,9 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         meta.flow_data.actions = dash_flow_action;
         meta.flow_data.meter_class = meter_class;
         meta.flow_data.is_unidirectional= is_unidirectional_flow;
-        meta.flow_data.sync_state = dash_flow_sync_state;
 
         /* Also set basic metadata */
+        meta.flow_sync_state = dash_flow_sync_state;
         meta.direction = dash_direction;
         meta.routing_actions = dash_flow_action;
         meta.meter_class = meter_class;
@@ -304,7 +304,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
     }
 
     action flow_miss() {
-        meta.flow_data.sync_state = dash_flow_sync_state_t.FLOW_MISS;
+        meta.flow_sync_state = dash_flow_sync_state_t.FLOW_MISS;
     }
 
     @SaiTable[name = "flow", api = "dash_flow", order = 1, enable_bulk_get_api = "true", enable_bulk_get_server = "true"]
