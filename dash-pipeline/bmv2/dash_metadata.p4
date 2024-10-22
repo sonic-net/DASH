@@ -326,6 +326,10 @@ struct metadata_t {
     IPv4Address reverse_tunnel_sip;
     overlay_rewrite_data_t overlay_data;
     bit<16> dash_tunnel_id;
+    bit<32> dash_tunnel_max_member_size;
+    bit<16> dash_tunnel_member_index;
+    bit<16> dash_tunnel_member_id;
+    bit<16> dash_tunnel_next_hop_id;
     bit<32> meter_class;
     bit<8> local_region_id;
 }
