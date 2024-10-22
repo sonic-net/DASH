@@ -235,6 +235,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         IPv4ORv6Address reverse_flow_dst_ip,
         bit<16> reverse_flow_src_port,
         bit<16> reverse_flow_dst_port,
+        bit<1> reverse_flow_dst_ip_is_v6,
 
         /* Flow encap related attributes */
         bit<24> underlay0_vnet_id,
@@ -257,7 +258,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         IPv4ORv6Address dip,
         IPv6Address sip_mask,
         IPv6Address dip_mask,
-        @SaiVal[name = "ip_is_v6"]bit<1> is_ipv6,
+        bit<1> dip_is_v6,
 
         /* Extra flow metadata */
         @SaiVal[type="sai_u8_list_t"] bit<16> vendor_metadata,
@@ -300,7 +301,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         meta.overlay_data.dip = dip;
         meta.overlay_data.sip_mask = sip_mask;
         meta.overlay_data.dip_mask = dip_mask;
-        meta.overlay_data.is_ipv6 = is_ipv6;
+        meta.overlay_data.is_ipv6 = dip_is_v6;
     }
 
     action flow_miss() {
