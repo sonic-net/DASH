@@ -21,6 +21,7 @@ libsai_$(VERSION)_amd64.deb: ../lib/libsai.so
 	mkdir -p -m 755 libsai_$(VERSION)_amd64/usr/lib/x86_64-linux-gnu/
 	find -type d |xargs chmod go-w
 	install -vCD ../lib/libsai.so libsai_$(VERSION)_amd64/usr/lib/x86_64-linux-gnu/libsai.so
+	install -vCD ../SAI/meta/libsaimetadata.so libsai_$(VERSION)_amd64/usr/lib/x86_64-linux-gnu/libdashsaimetadata.so
 	cd libsai_$(VERSION)_amd64 && find usr -type f | xargs md5sum > DEBIAN/md5sums
 	dpkg-deb --build --root-owner-group libsai_$(VERSION)_amd64
 
