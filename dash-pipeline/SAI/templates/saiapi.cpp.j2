@@ -59,15 +59,16 @@ static sai_status_t dash_sai_create_{{ table.name }}(
 
     matchActionEntry->set_table_id(tableId);
 
-    {% if table['keys'] | length== 1 %}
-    // SAI object table with single P4 key - object ID itself is the P4 table key
-    // Generate a SAI object ID and fill it as the P4 table key
-    auto mf = matchActionEntry->add_match();
-    mf->set_field_id({{table['keys'][0].id}});
-    auto mf_exact = mf->mutable_exact();
-    //{{table['keys'][0].field}}SetVal(objId, mf_exact, {{table['keys'][0].bitwidth}});
-      {{table['keys'][0].field}}SetVal(static_cast<uint{{ table['keys'][0].bitwidth }}_t>(objId), mf_exact, {{ table['keys'][0].bitwidth }}); 
-    {% else %}
+    {% for key in table['keys'] %}
+    {% if key.is_object_key %}
+    auto key_mf = matchActionEntry->add_match();
+    key_mf->set_field_id({{key.id}});
+    auto key_mf_exact = key_mf->mutable_exact();
+    // {{key.field}}SetVal(objId, key_mf_exact, {{key.bitwidth}});
+    {{key.field}}SetVal(static_cast<uint{{ key.bitwidth }}_t>(objId), key_mf_exact, {{ key.bitwidth }}); 
+    {% endif %}
+    {% endfor %}
+
     // SAI object table with multiple P4 table keys
     // Copy P4 table keys from appropriate SAI attributes
     for (uint32_t i = 0; i < attr_count; i++)
@@ -79,6 +80,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
         switch(attr_list[i].id)
         {
             {% for key in table['keys'] %}
+            {% if not key.is_object_key %}
             case SAI_{{ table.name | upper }}_ATTR_{{ key.name | upper }}:
             {
                 auto mf = matchActionEntry->add_match();
@@ -138,6 +140,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 {% endif %}
                 break;
             }
+            {% endif%}
             {% endfor %}
             {% if table['keys'] | selectattr('match_type', 'ne', 'exact') | list | length > 0 %}
             {% if table['keys'] | selectattr('match_type', 'eq', 'lpm') | list | length == 0 %}
@@ -154,7 +157,6 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                 break;
         }
     }
-    {% endif %}
 
     // If there is only one action, simply set it.
     // Else, search in the attrs.
@@ -255,25 +257,7 @@ static sai_status_t dash_sai_create_{{ table.name }}s(
         _Out_ sai_status_t *object_statuses)
 {
     DASH_LOG_ENTER();
-
-    sai_status_t agg_status = SAI_STATUS_SUCCESS;
-
-    for (uint32_t i = 0; i < object_count; i++)
-    {
-        object_statuses[i] = dash_sai_create_{{ table.name }}(&object_id[i], switch_id, attr_count[i], attr_list[i]);
-
-        if (object_statuses[i] != SAI_STATUS_SUCCESS)
-        {
-            agg_status = SAI_STATUS_FAILURE;
-        }
-
-        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR)
-        {
-            return agg_status;
-        }
-    }
-
-    return agg_status;
+    return dash::DashSai::bulk_create_objects(dash_sai_create_{{ table.name }}, switch_id, object_count, attr_count, attr_list, mode, object_id, object_statuses);
 }
 
 static sai_status_t dash_sai_remove_{{ table.name }}(
@@ -296,25 +280,7 @@ static sai_status_t dash_sai_remove_{{ table.name }}s(
         _Out_ sai_status_t *object_statuses)
 {
     DASH_LOG_ENTER();
-
-    sai_status_t agg_status = SAI_STATUS_SUCCESS;
-
-    for (uint32_t i = 0; i < object_count; i++)
-    {
-        object_statuses[i] = dash_sai_remove_{{ table.name }}(object_id[i]);
-
-        if (object_statuses[i] != SAI_STATUS_SUCCESS)
-        {
-            agg_status = SAI_STATUS_FAILURE;
-        }
-
-        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR)
-        {
-            return agg_status;
-        }
-    }
-
-    return agg_status;
+    return dash::DashSai::bulk_remove_objects(dash_sai_remove_{{ table.name }}, object_count, object_id, mode, object_statuses);
 }
 
 static sai_status_t dash_sai_set_{{ table.name }}_attribute (

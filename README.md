@@ -1,13 +1,16 @@
 [![DASH-bmv2-CI](https://github.com/sonic-net/DASH/workflows/DASH-BMV2-CI/badge.svg?branch=main)](https://github.com/sonic-net/DASH/actions/workflows/dash-bmv2-ci.yml)
 [![Spellcheck](https://github.com/sonic-net/DASH/actions/workflows/dash-md-spellcheck.yml/badge.svg)](https://github.com/sonic-net/DASH/actions/workflows/dash-md-spellcheck.yml) 
 
-# SONiC-DASH - Disaggregated API for SONiC Hosts - DRAFT/Work in Progress
+# SONiC-DASH - Disaggregated API for SONiC Hosts - extending functionality to stateful workloads!
+[DASH YouTube Videos](https://www.youtube.com/channel/UCNE3zNwJqcEyLX9ejKrLtUA)
 
-## SONiC-DASH is a new open source project that will "deliver enterprise network performance to critical cloud applications".  The project extends functionality to stateful workloads.  
+## SONiC-DASH is an open source project with the goal to "deliver enterprise network performance to critical cloud applications".  The project extends functionality to stateful workloads.  DASH has joined the Linux Foundation to participate in the large communities of developers and users contributing there, and also collaborates with OCP.    
 
 We are developing set of APIs and object models describing network services for the cloud, and will work with all cloud providers and enterprise hybrid clouds to develop further functionality. We believe the DASH program describes a comprehensive set of services that are required by the vast majority of clouds. The goal of DASH is to be specific enough for SMART Programmable Technologies to optimize network performance and leverage commodity **hardware** technology to achieve 10x or even 100x stateful connection performance.
 
 The technology has multiple applications such as 1) NIC on a host, 2) a Smart Switch, 3) Network Disaggregation, and 4) high performance Network Appliances. Many technology companies have committed to further developing this new open technology and its community. The best minds and practitioners are actively collaborating to optimize performance of the cloud by extending SONiC to include stateful workloads. 
+
+With the development of a Behavioral Model, we hope to push the boundaries of what P4, PNA, BMv2, and P4 DPDK can do, and contribute to shape the future of networking technology.  Together these components provide a cohesive environment for developing, validating, and deploying programmable network devices that can operate consistently across different HW and SW platforms.  Behavioral models help in understanding, designing, and analyzing the dynamic behavior of a system, ensuring that it meets its functional requirements.  We plan to develop scenarios and  test cases that verify the system behaves as expected under various conditions.  The Behavioral Model can also be used to simulate a system's behavior before actual implementation, helping to identify potential issues early.  
  
 Future innovations for in-service software upgrades and ultra-high availability for stateful connections will also be developed with the utmost importance. 
 
@@ -18,11 +21,12 @@ Visit the [Documentation table of contents](documentation/README.md) for access 
 
 For a quick technical deep-dive, please begin with:
 
-1. Peruse the [DASH high level design](documentation/general/dash-high-level-design.md) for an overview of DASH architecture. 
-1. The [SDN Packet Transforms](documentation/general/sdn-features-packet-transforms.md) document, this facilitates understanding of the program goal and the 7 networking scenarios that Azure has defined.  
-1. [Program Scale Testing Requirements - Draft](documentation/general/program-scale-testing-requirements-draft.md) for an example of a test to stress DPU/NIC hardware.
+1. Peruse the [DASH high level design](documentation/general/dash-high-level-design.md) for an overview of DASH architecture.
+2. [SONiC-DASH High Level Design](https://github.com/sonic-net/DASH/blob/main/documentation/general/dash-sonic-hld.md) 
+3. The [SDN Packet Transforms](documentation/general/sdn-features-packet-transforms.md) document, this facilitates understanding of the program goal and the 7 networking scenarios that Azure has defined.  
+4. [HERO Test](documentation/general/program-scale-testing-requirements-draft.md) for an example of a test to stress DPU/NIC hardware.
 
-The API and Object Model for VNET<->VNET is in draft; the remaining services will be posted over as we move forward.
+The API and Object Model for VNET<->VNET has been posted; the remaining services will be added into the dash-sonic-hld.md as as we move forward.
 
 DASH Testing is covered  under the [test/](test/README.md) directory and is a work in progress.
 
