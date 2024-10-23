@@ -20,4 +20,4 @@ This folder contains DASH general design and requirements documents.
 | Document                                               | Description                                |
 | ---------------------------------------------------------------------------------- | ------------------------------------------ |
 | [dash-general-compliance-requirements.md](dash-general-compliance-requirements.md) | DASH General Compliance Requirements    |
-| [program-scale-testing-requirements-draft.md](program-scale-testing-requirements-draft.md) | DASH scale and performance requirements   |
+| [program-scale-testing-requirement](program-scale-testing-requirements) | DASH scale and performance requirements   |
