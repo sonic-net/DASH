@@ -168,11 +168,12 @@ enum bit<32> dash_flow_action_t {
     ENCAP_U1 = (1 << 1),
     SET_SMAC = (1 << 2),
     SET_DMAC = (1 << 3),
-    NAT = (1 << 4),
-    NAT46 = (1 << 5),
-    NAT64 = (1 << 6),
-    NAT_PORT = (1 << 7),
-    REVERSE_TUNNEL = (1 << 8)
+    SNAT  = (1 << 4),
+    DNAT  = (1 << 5),
+    NAT46 = (1 << 6),
+    NAT64 = (1 << 7),
+    SNAT_PORT = (1 << 8),
+    DNAT_PORT = (1 << 9)
 }
 
 enum bit<16> dash_flow_enabled_key_t {

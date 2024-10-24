@@ -88,8 +88,6 @@ control dash_eni_stage(
         meta.enable_reverse_tunnel_learning = enable_reverse_tunnel_learning;
         meta.reverse_tunnel_sip             = reverse_tunnel_sip;
 
-        meta.routing_actions = meta.routing_actions | dash_routing_actions_t.REVERSE_TUNNEL;
-
         if (meta.is_overlay_ip_v6 == 1) {
             if (meta.direction == dash_direction_t.OUTBOUND) {
                 ACL_GROUPS_COPY_TO_META(outbound_v6);
