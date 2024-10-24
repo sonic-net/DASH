@@ -237,6 +237,10 @@ struct metadata_t {
     bit<1> enable_reverse_tunnel_learning;
     IPv4Address reverse_tunnel_sip;
     bit<16> dash_tunnel_id;
+    bit<32> dash_tunnel_max_member_size;
+    bit<16> dash_tunnel_member_index;
+    bit<16> dash_tunnel_member_id;
+    bit<16> dash_tunnel_next_hop_id;
     bit<32> meter_class;
     bit<8> local_region_id;
 }

@@ -30,7 +30,7 @@ sai_apis:
     attr_value_field: s32
     default: SAI_DASH_ENCAPSULATION_VXLAN
     isresourcetype: false
-    flags: CREATE_AND_SET
+    flags: CREATE_ONLY
     object_name: null
     allow_null: false
     valid_only: null
@@ -42,6 +42,32 @@ sai_apis:
     type: sai_uint32_t
     attr_value_field: u32
     default: '0'
+    isresourcetype: false
+    flags: CREATE_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_TUNNEL_ATTR_MAX_MEMBER_SIZE
+    description: Action parameter max member size
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '1'
+    isresourcetype: false
+    flags: CREATE_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_TUNNEL_ATTR_SIP
+    description: Action parameter sip
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -58,4 +84,77 @@ sai_apis:
         default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: default
           id: 27084508
+          attr_param_id: {}
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: dash_tunnel_member
+  description: DASH tunnel member
+  is_object: true
+  enums: []
+  structs: []
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_TUNNEL_MEMBER_ATTR_DASH_TUNNEL_ID
+    description: Action parameter DASH tunnel id
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: null
+    isresourcetype: false
+    flags: MANDATORY_ON_CREATE | CREATE_ONLY
+    object_name: SAI_OBJECT_TYPE_DASH_TUNNEL
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_TUNNEL_MEMBER_ATTR_DASH_TUNNEL_NEXT_HOP_ID
+    description: Action parameter DASH tunnel next hop id
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: null
+    isresourcetype: false
+    flags: MANDATORY_ON_CREATE | CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_DASH_TUNNEL_NEXT_HOP
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 40012474
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 23738116
+          attr_param_id: {}
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: dash_tunnel_next_hop
+  description: DASH tunnel next hop
+  is_object: true
+  enums: []
+  structs: []
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_DASH_TUNNEL_NEXT_HOP_ATTR_DIP
+    description: Action parameter dip
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 34229686
+      actions:
+        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: default
+          id: 31749609
           attr_param_id: {}
