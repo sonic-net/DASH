@@ -123,14 +123,16 @@ action route_service_tunnel(
 #ifndef DISABLE_128BIT_ARITHMETIC
     // As of 2024-Feb-09, p4c-dpdk does not yet support arithmetic on 128-bit operands.
     // This lack of support extends to cast operations.
-    push_action_static_encap(hdr = hdr,
-                            meta = meta,
-                            encap = dash_encapsulation,
-                            vni = tunnel_key,
-                            underlay_sip = underlay_sip == 0 ? hdr.u0_ipv4.src_addr : (IPv4Address)underlay_sip,
-                            underlay_dip = underlay_dip == 0 ? hdr.u0_ipv4.dst_addr : (IPv4Address)underlay_dip,
-                            overlay_dmac = hdr.u0_ethernet.dst_addr);
+    push_action_set_dmac(hdr,
+                         meta,
+                         hdr.u0_ethernet.dst_addr);
 
+    push_action_encap_u0(hdr = hdr,
+                         meta = meta,
+                         encap = dash_encapsulation,
+                         vni = tunnel_key,
+                         underlay_sip = underlay_sip == 0 ? hdr.u0_ipv4.src_addr : (IPv4Address)underlay_sip,
+                         underlay_dip = underlay_dip == 0 ? hdr.u0_ipv4.dst_addr : (IPv4Address)underlay_dip);
 #endif
 
     set_meter_attrs(meta, meter_class_or, meter_class_and);
@@ -154,10 +156,13 @@ action set_tunnel_mapping(
     if (use_dst_vnet_vni == 1)
         meta.vnet_id = meta.dst_vnet_id;
 
-    push_action_static_encap(hdr = hdr,
-                            meta = meta,
-                            underlay_dip = underlay_dip,
-                            overlay_dmac = overlay_dmac);
+    push_action_set_dmac(hdr,
+                         meta,
+                         overlay_dmac);
+
+    push_action_encap_u0(hdr = hdr,
+                         meta = meta,
+                         underlay_dip = underlay_dip);
 
     set_meter_attrs(meta, meter_class_or, 0xffffffff);
 }
@@ -181,14 +186,17 @@ action set_private_link_mapping(
     meta.target_stage = dash_pipeline_stage_t.OUTBOUND_PRE_ROUTING_ACTION_APPLY;
     meta.dash_tunnel_id = dash_tunnel_id;
     
-    push_action_static_encap(hdr = hdr,
-                            meta = meta,
-                            encap = dash_encapsulation,
-                            vni = tunnel_key,
-                            // PL has its own underlay SIP, so override
-                            underlay_sip = meta.eni_data.pl_underlay_sip,
-                            underlay_dip = underlay_dip,
-                            overlay_dmac = hdr.u0_ethernet.dst_addr);
+    push_action_set_dmac(hdr,
+                         meta,
+                         hdr.u0_ethernet.dst_addr);
+
+    push_action_encap_u0(hdr = hdr,
+                         meta = meta,
+                         encap = dash_encapsulation,
+                         vni = tunnel_key,
+                         // PL has its own underlay SIP, so override
+                         underlay_sip = meta.eni_data.pl_underlay_sip,
+                         underlay_dip = underlay_dip);
 
 #ifndef DISABLE_128BIT_ARITHMETIC
     // As of 2024-Feb-09, p4c-dpdk does not yet support arithmetic on
