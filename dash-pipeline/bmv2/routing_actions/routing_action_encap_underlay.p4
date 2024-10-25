@@ -61,7 +61,7 @@ control do_action_encap_u0(
                         meta.u0_encap_data.vni);
         }
         else if (meta.u0_encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
-            push_vxlan_tunnel_u0(hdr,
+            push_nvgre_tunnel_u0(hdr,
                         meta.u0_encap_data.underlay_dmac,
                         meta.u0_encap_data.underlay_smac,
                         meta.u0_encap_data.underlay_dip,
@@ -89,7 +89,7 @@ control do_action_encap_u1(
                         meta.u0_encap_data.vni);
         }
         else if (meta.u0_encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
-            push_vxlan_tunnel_u1(hdr,
+            push_nvgre_tunnel_u1(hdr,
                         meta.u0_encap_data.underlay_dmac,
                         meta.u0_encap_data.underlay_smac,
                         meta.u0_encap_data.underlay_dip,
