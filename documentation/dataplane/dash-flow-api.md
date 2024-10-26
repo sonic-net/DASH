@@ -3,6 +3,7 @@
 | Rev | Date | Author | Change Description |
 | --- | ---- | ------ | ------------------ |
 | 0.1 | 03/20/2024 | Zhixiong Niu | Initial version |
+| 0.2 | 09/10/2024 | Junhua Zhai  | Added flow attributes - flow_sync_state, underlay0 SMAC/DMAC |
 
 ## Table of Contents
 
@@ -207,6 +208,7 @@ These are the basic attributes of flow entry.
 | SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION       | `sai_dash_flow_action_t` | Action to be applied on the flow                             |
 | SAI_FLOW_ENTRY_ATTR_METER_CLASS            | `sai_uint32_t`           | Meter class for flow entry, used for traffic metering and policing. |
 | SAI_FLOW_ENTRY_ATTR_IS_UNIDIRECTIONAL_FLOW | `bool`                   | Indicates if the flow is unidirectional                      |
+| SAI_FLOW_ENTRY_ATTR_DASH_FLOW_SYNC_STATE   | `sai_dash_flow_sync_state_t` | [Flow sync state](https://github.com/sonic-net/DASH/blob/main/documentation/high-avail/ha-api-hld.md#44-flow) |
 
 #### Reverse flow key
 
@@ -231,6 +233,8 @@ These are the related attributes of flow encapsulation.
 | SAI_FLOW_ENTRY_ATTR_UNDERLAY0_VNI                | `sai_uint32_t`             | Destination VNI in the underlay network                      |
 | SAI_FLOW_ENTRY_ATTR_UNDERLAY0_SIP                | `sai_uint32_t`             | Source IP address in the underlay network                    |
 | SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DIP                | `sai_uint32_t`             | Destination IP address in the underlay network               |
+| SAI_FLOW_ENTRY_ATTR_UNDERLAY0_SMAC               | `sai_mac_t`                | Source MAC address in the underlay network                   |
+| SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DMAC               | `sai_mac_t`                | Destination MAC address in the underlay network              |
 | SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DASH_ENCAPSULATION | `sai_dash_encapsulation_t` | Encapsulation method for DASH traffic in the underlay network |
 | SAI_FLOW_ENTRY_ATTR_UNDERLAY1_VNI                | `sai_uint32_t`             | Destination VNI in the 2nd underlay network                  |
 | SAI_FLOW_ENTRY_ATTR_UNDERLAY1_SIP                | `sai_uint32_t`             | Source IP address in the 2nd underlay network                |

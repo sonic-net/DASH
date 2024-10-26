@@ -18,27 +18,11 @@
 #include "stages/metering_update.p4"
 #include "underlay.p4"
 
-control dash_ingress(
+control dash_eni_stage(
       inout headers_t hdr
     , inout metadata_t meta
-#ifdef TARGET_BMV2_V1MODEL
-    , inout standard_metadata_t standard_metadata
-#endif // TARGET_BMV2_V1MODEL
-#ifdef TARGET_DPDK_PNA
-    , in    pna_main_input_metadata_t  istd
-    , inout pna_main_output_metadata_t ostd
-#endif // TARGET_DPDK_PNA
     )
 {
-    action drop_action() {
-#ifdef TARGET_BMV2_V1MODEL
-        mark_to_drop(standard_metadata);
-#endif // TARGET_BMV2_V1MODEL
-#ifdef TARGET_DPDK_PNA
-        drop_packet();
-#endif // TARGET_DPDK_PNA
-    }
-
     action deny() {
         meta.dropped = true;
     }
@@ -91,20 +75,18 @@ control dash_ingress(
         meta.eni_data.pl_sip                                                = pl_sip;
         meta.eni_data.pl_sip_mask                                           = pl_sip_mask;
         meta.eni_data.pl_underlay_sip                                       = pl_underlay_sip;
-        meta.encap_data.underlay_dip                                        = vm_underlay_dip;
+        meta.u0_encap_data.underlay_dip                                     = vm_underlay_dip;
         meta.eni_data.outbound_routing_group_data.outbound_routing_group_id = outbound_routing_group_id;
         if (dash_tunnel_dscp_mode == dash_tunnel_dscp_mode_t.PIPE_MODEL) {
             meta.eni_data.dscp = dscp;
         }
         /* vm_vni is the encap VNI used for tunnel between inbound DPU -> VM
          * and not a VNET identifier */
-        meta.encap_data.vni           = vm_vni;
+        meta.u0_encap_data.vni        = vm_vni;
         meta.vnet_id                  = vnet_id;
 
         meta.enable_reverse_tunnel_learning = enable_reverse_tunnel_learning;
         meta.reverse_tunnel_sip             = reverse_tunnel_sip;
-
-        meta.routing_actions = meta.routing_actions | dash_routing_actions_t.REVERSE_TUNNEL;
 
         if (meta.is_overlay_ip_v6 == 1) {
             if (meta.direction == dash_direction_t.OUTBOUND) {
@@ -145,6 +127,55 @@ control dash_ingress(
         const default_action = deny;
     }
 
+    apply {
+        if (!eni.apply().hit) {
+            UPDATE_COUNTER(eni_miss_drop, 0);
+        }
+    }
+}
+
+// direction lookup, eni lookup, etc
+control dash_lookup_stage(
+      inout headers_t hdr
+    , inout metadata_t meta
+    )
+{
+    action deny() {
+        meta.dropped = true;
+    }
+
+    apply {
+        pre_pipeline_stage.apply(hdr, meta);
+        direction_lookup_stage.apply(hdr, meta);
+        eni_lookup_stage.apply(hdr, meta);
+
+        dash_eni_stage.apply(hdr, meta);
+
+        if (meta.eni_data.admin_state == 0) {
+            deny();
+        }
+        
+        UPDATE_ENI_COUNTER(eni_rx);
+
+        if (meta.direction == dash_direction_t.OUTBOUND) {
+            UPDATE_ENI_COUNTER(eni_outbound_rx);
+        } else if (meta.direction == dash_direction_t.INBOUND) {
+            UPDATE_ENI_COUNTER(eni_inbound_rx);
+        }
+
+        if (meta.is_fast_path_icmp_flow_redirection_packet) {
+            UPDATE_ENI_COUNTER(eni_lb_fast_path_icmp_in);
+        }
+
+        do_tunnel_decap(hdr, meta);
+    }
+}
+
+control dash_match_stage(
+      inout headers_t hdr
+    , inout metadata_t meta
+    )
+{
     action set_acl_group_attrs(@SaiVal[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
         if (ip_addr_family == 0) /* SAI_IP_ADDR_FAMILY_IPV4 */ {
             if (meta.is_overlay_ip_v6 == 1) {
@@ -168,6 +199,50 @@ control dash_ingress(
     }
 
     apply {
+        acl_group.apply();
+
+        if (meta.direction == dash_direction_t.OUTBOUND) {
+            meta.target_stage = dash_pipeline_stage_t.OUTBOUND_ROUTING;
+            outbound.apply(hdr, meta);
+        } else if (meta.direction == dash_direction_t.INBOUND) {
+            meta.target_stage = dash_pipeline_stage_t.INBOUND_ROUTING;
+            inbound.apply(hdr, meta);
+        }
+
+    }
+}
+
+control dash_ingress(
+      inout headers_t hdr
+    , inout metadata_t meta
+#ifdef TARGET_BMV2_V1MODEL
+    , inout standard_metadata_t standard_metadata
+#endif // TARGET_BMV2_V1MODEL
+#ifdef TARGET_DPDK_PNA
+    , in    pna_main_input_metadata_t  istd
+    , inout pna_main_output_metadata_t ostd
+#endif // TARGET_DPDK_PNA
+    )
+{
+    action drop_action() {
+#ifdef TARGET_BMV2_V1MODEL
+        mark_to_drop(standard_metadata);
+#endif // TARGET_BMV2_V1MODEL
+#ifdef TARGET_DPDK_PNA
+        drop_packet();
+#endif // TARGET_DPDK_PNA
+    }
+
+    apply {
+        meta.flow_enabled = false;
+
+#ifndef TARGET_DPDK_PNA
+        meta.rx_encap.setValid();
+        meta.flow_data.setValid();
+        meta.u0_encap_data.setValid();
+        meta.u1_encap_data.setValid();
+        meta.overlay_data.setValid();
+#endif // TARGET_DPDK_PNA
 
 #ifdef TARGET_DPDK_PNA
 #ifdef DPDK_PNA_SEND_TO_PORT_FIX_MERGED
@@ -183,52 +258,47 @@ control dash_ingress(
 #endif  // DPDK_PNA_SEND_TO_PORT_FIX_MERGED
 #endif // TARGET_DPDK_PNA
 
-        pre_pipeline_stage.apply(hdr, meta);
-        direction_lookup_stage.apply(hdr, meta);
-        eni_lookup_stage.apply(hdr, meta);
-
-        if (!eni.apply().hit) {
-            UPDATE_COUNTER(eni_miss_drop, 0);
-            deny();
+        // If packet is from DPAPP, not do common lookup
+        if (hdr.packet_meta.packet_source != dash_packet_source_t.DPAPP) {
+            dash_lookup_stage.apply(hdr, meta);
+        }
+        else {
+            meta.flow_enabled = true;
         }
 
-        if (meta.eni_data.admin_state == 0) {
-            deny();
+        if (meta.flow_enabled) {
+            conntrack_lookup_stage.apply(hdr, meta);
         }
 
-        conntrack_lookup_stage.apply(hdr, meta);
-
-        UPDATE_ENI_COUNTER(eni_rx);
-
-        if (meta.direction == dash_direction_t.OUTBOUND) {
-            UPDATE_ENI_COUNTER(eni_outbound_rx);
-        } else if (meta.direction == dash_direction_t.INBOUND) {
-            UPDATE_ENI_COUNTER(eni_inbound_rx);
-        }
-
-        if (meta.is_fast_path_icmp_flow_redirection_packet) {
-            UPDATE_ENI_COUNTER(eni_lb_fast_path_icmp_in);
-        }
-
-        do_tunnel_decap(hdr, meta);
-        
         ha_stage.apply(hdr, meta);
 
-        acl_group.apply();
-
-        if (meta.direction == dash_direction_t.OUTBOUND) {
-            meta.target_stage = dash_pipeline_stage_t.OUTBOUND_ROUTING;
-            outbound.apply(hdr, meta);
-        } else if (meta.direction == dash_direction_t.INBOUND) {
-            meta.target_stage = dash_pipeline_stage_t.INBOUND_ROUTING;
-            inbound.apply(hdr, meta);
+        if (!meta.flow_enabled ||
+            (meta.flow_sync_state == dash_flow_sync_state_t.FLOW_MISS &&
+             hdr.packet_meta.packet_source == dash_packet_source_t.EXTERNAL))
+        {
+            dash_match_stage.apply(hdr, meta);
+            if (meta.dropped) {
+                drop_action();
+                return;
+            }
         }
 
-        tunnel_stage.apply(hdr, meta);
+        if (meta.flow_enabled) {
+            conntrack_flow_handle.apply(hdr, meta);
+            if (meta.to_dpapp) {
+#ifdef TARGET_BMV2_V1MODEL
+                standard_metadata.egress_spec = 2; //FIXME hard-code vpp port
+#else //FIXME DPDK_PNA
+                drop_action();
+#endif // TARGET_BMV2_V1MODEL
+                return;
+            }
+        }
+        else {
+            hdr.packet_meta.setInvalid();
+        }
 
         routing_action_apply.apply(hdr, meta);
-
-        tunnel_stage_encap.apply(hdr, meta);
 
         /* Underlay routing */
         meta.dst_ip_addr = (bit<128>)hdr.u0_ipv4.dst_addr;

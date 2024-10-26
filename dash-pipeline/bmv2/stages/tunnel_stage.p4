@@ -5,6 +5,12 @@ control tunnel_stage(
     inout headers_t hdr,
     inout metadata_t meta)
 {
+#ifdef TARGET_DPDK_PNA
+    meta_encap_data_t tunnel_data;
+#else
+    encap_data_t tunnel_data;
+#endif // TARGET_DPDK_PNA
+
     action set_tunnel_attrs(
         @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN", create_only="true"]
         dash_encapsulation_t dash_encapsulation,
@@ -23,10 +29,10 @@ control tunnel_stage(
     {
         meta.dash_tunnel_max_member_size = max_member_size;
 
-        meta.tunnel_data.dash_encapsulation = dash_encapsulation;
-        meta.tunnel_data.vni = tunnel_key;
-        meta.tunnel_data.underlay_sip = sip == 0 ? hdr.u0_ipv4.src_addr : sip;
-        meta.tunnel_data.underlay_dip = dip;
+        tunnel_data.dash_encapsulation = dash_encapsulation;
+        tunnel_data.vni = tunnel_key;
+        tunnel_data.underlay_sip = sip == 0 ? hdr.u0_ipv4.src_addr : sip;
+        tunnel_data.underlay_dip = dip;
     }
 
     @SaiTable[name = "dash_tunnel", api = "dash_tunnel", order = 0, isobject="true"]
@@ -85,7 +91,8 @@ control tunnel_stage(
         @SaiVal[type="sai_ip_address_t"]
         IPv4Address dip)
     {
-        meta.tunnel_data.underlay_dip = dip == 0 ? meta.tunnel_data.underlay_dip : dip;
+        REQUIRES(dip != 0);
+        tunnel_data.underlay_dip = dip;
     }
 
     @SaiTable[name = "dash_tunnel_next_hop", api = "dash_tunnel", order = 2, isobject="true"]
@@ -125,30 +132,23 @@ control tunnel_stage(
             tunnel_next_hop.apply();
         }
 
-        push_action_static_encap(hdr = hdr,
+        if (meta.routing_actions & dash_routing_actions_t.ENCAP_U0 == 0) {
+            meta.tunnel_pointer = 0;
+            push_action_encap_u0(hdr = hdr,
                                  meta = meta,
-                                 encap = meta.tunnel_data.dash_encapsulation,
-                                 vni = meta.tunnel_data.vni,
-                                 underlay_sip = meta.tunnel_data.underlay_sip,
-                                 underlay_dip = meta.tunnel_data.underlay_dip,
-                                 overlay_dmac = hdr.u0_ethernet.dst_addr);
-    }
-}
-
-control tunnel_stage_encap(
-    inout headers_t hdr,
-    inout metadata_t meta)
-{
-    apply {
-        if (meta.dash_tunnel_id != 0) {
-                do_tunnel_encap(hdr, meta,
-                            meta.overlay_data.dmac,
-                            meta.tunnel_data.underlay_dmac,
-                            meta.tunnel_data.underlay_smac,
-                            meta.tunnel_data.underlay_dip,
-                            meta.tunnel_data.underlay_sip,
-                            meta.tunnel_data.dash_encapsulation,
-                            meta.tunnel_data.vni);
+                                 encap = tunnel_data.dash_encapsulation,
+                                 vni = tunnel_data.vni,
+                                 underlay_sip = tunnel_data.underlay_sip,
+                                 underlay_dip = tunnel_data.underlay_dip);
+        }
+        else {
+            meta.tunnel_pointer = 1;
+            push_action_encap_u1(hdr = hdr,
+                                 meta = meta,
+                                 encap = tunnel_data.dash_encapsulation,
+                                 vni = tunnel_data.vni,
+                                 underlay_sip = tunnel_data.underlay_sip,
+                                 underlay_dip = tunnel_data.underlay_dip);
         }
     }
 }
