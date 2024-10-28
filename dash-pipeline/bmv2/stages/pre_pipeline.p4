@@ -6,7 +6,9 @@ control pre_pipeline_stage(inout headers_t hdr,
 {
     action accept() {}
 
-    action set_appliance(bit<8> local_region_id) {
+    action set_appliance(
+        @SaiVal[create_only="true"]
+        bit<8> local_region_id) {
         meta.local_region_id = local_region_id;
     }
 
