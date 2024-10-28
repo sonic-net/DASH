@@ -127,7 +127,7 @@ class DashP4Table(DashP4Object):
     def __parse_table_keys(self, p4rt_table: Dict[str, Any]) -> None:
         for p4rt_table_key in p4rt_table[MATCH_FIELDS_TAG]:
             table_key = DashP4TableKey.from_p4rt(p4rt_table_key)
-
+            
             if self.is_object != "false":
                 table_key.is_entry_key = False
 
@@ -372,9 +372,13 @@ class DashP4Table(DashP4Object):
 
     def create_sai_attributes(self, sai_api: SaiApi) -> None:
         # If the table is an object with more one key (table entry id), we need to add all the keys into the attributes.
-        if self.is_object == "true" and len(self.keys) > 1:
-            for key in self.keys:
-                sai_api.attributes.extend(key.to_sai_attribute(self.name, create_only=True))
+        if self.is_object == "true":
+            if len(self.keys) == 1:
+                self.keys[0].is_object_key = True
+            elif len(self.keys) > 1:
+                for key in self.keys:
+                    if not key.is_object_key:
+                        sai_api.attributes.extend(key.to_sai_attribute(self.name))
 
         # Add all the action parameters into the attributes.
         for attr in self.sai_attributes:

@@ -30,7 +30,7 @@ control outbound_mapping_stage(
     }
 
     action set_vnet_attrs(bit<24> vni) {
-        meta.encap_data.vni = vni;
+        meta.u0_encap_data.vni = vni;
     }
 
     @SaiTable[name = "vnet", api = "dash_vnet", isobject="true"]

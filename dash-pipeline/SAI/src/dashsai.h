@@ -102,6 +102,32 @@ namespace dash
                     _In_ uint32_t attr_count,
                     _In_ const sai_attribute_t *attr_list);
 
+            typedef sai_status_t (*sai_create_object_fn)(
+                _Out_ sai_object_id_t *object_id,
+                _In_ sai_object_id_t switch_id,
+                _In_ uint32_t attr_count,
+                _In_ const sai_attribute_t *attr_list);
+
+            typedef sai_status_t (*sai_remove_object_fn)(
+                _In_ sai_object_id_t object_id);
+
+            static sai_status_t bulk_create_objects(
+                _In_ sai_create_object_fn create_fn,
+                _In_ sai_object_id_t switch_id,
+                _In_ uint32_t object_count,
+                _In_ const uint32_t *attr_count,
+                _In_ const sai_attribute_t **attr_list,
+                _In_ sai_bulk_op_error_mode_t mode,
+                _Out_ sai_object_id_t *object_id,
+                _Out_ sai_status_t *object_statuses);
+
+            static sai_status_t bulk_remove_objects(
+                _In_ sai_remove_object_fn remove_fn,
+                _In_ uint32_t object_count,
+                _In_ const sai_object_id_t *object_id,
+                _In_ sai_bulk_op_error_mode_t mode,
+                _Out_ sai_status_t *object_statuses);
+
         private: // private helper methods
 
             static std::shared_ptr<p4::config::v1::P4Info> parse_p4info(

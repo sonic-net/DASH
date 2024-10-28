@@ -50,7 +50,12 @@ control underlay(
 
     action def_act() {
 #ifdef TARGET_BMV2_V1MODEL
-        standard_metadata.egress_spec = standard_metadata.ingress_port;
+        if (hdr.packet_meta.packet_source == dash_packet_source_t.DPAPP) {
+            standard_metadata.egress_spec = 0; /* FIXME */
+        }
+        else {
+            standard_metadata.egress_spec = standard_metadata.ingress_port;
+        }
 #endif // TARGET_BMV2_V1MODEL
 
 #ifdef TARGET_DPDK_PNA
@@ -82,6 +87,8 @@ control underlay(
             /* Send packet on same port it arrived (echo) by default */
             @defaultonly def_act;
         }
+
+        const default_action = def_act;
     }
 
     apply {
