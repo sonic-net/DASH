@@ -19,4 +19,7 @@ sai_buffer_api_t dash_sai_buffer_api_impl = {
     .clear_ingress_priority_group_stats = 0,
 
     DASH_GENERIC_QUAD_API(buffer_profile)
+
+    .set_ingress_priority_groups_attribute = 0,
+    .get_ingress_priority_groups_attribute = 0,
 };
