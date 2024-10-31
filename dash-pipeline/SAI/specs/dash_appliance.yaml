@@ -17,7 +17,7 @@ sai_apis:
     attr_value_field: u8
     default: '0'
     isresourcetype: false
-    flags: CREATE_AND_SET
+    flags: CREATE_ONLY
     object_name: null
     allow_null: false
     valid_only: null
