@@ -26,12 +26,14 @@ control pre_pipeline_stage(inout headers_t hdr,
     }
 
     action set_internal_config(EthernetAddress neighbor_mac,
-                            EthernetAddress mac) {
+                            EthernetAddress mac,
+                            bit<1> flow_enabled) {
         meta.u0_encap_data.underlay_dmac = neighbor_mac;
         meta.u0_encap_data.underlay_smac = mac;
+        meta.flow_enabled = flow_enabled;
     }
 
-    /* This table API should be implemented manually using underlay SAI */
+    /* This table API should be implemented manually using SAI */
     @SaiTable[ignored = "true"]
     table internal_config {
         key = {
