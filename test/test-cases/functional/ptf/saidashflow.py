@@ -8,7 +8,7 @@ from sai_base_test import *
 from sai_dash_utils import VnetAPI
 
 
-class FlowHitActionTest(object):
+class FlowTest(object):
     def __init__(self,
                  saithrift,
                  protocol = 17,
@@ -21,6 +21,7 @@ class FlowHitActionTest(object):
                  exp_receive = False,
                  create_entry = False,
                  test_smac = None,
+                 test_dmac = None,
                  test_sip = None,
                  test_dip = None,
                  test_sport = None,
@@ -36,6 +37,39 @@ class FlowHitActionTest(object):
         self.exp_receive = exp_receive
         self.src_port = src_port
         self.dst_port = dst_port
+        # set default value for test dmac
+        self.test_dmac = self.saithrift.dst_ca_mac
+
+
+        if test_sip:
+            self.test_sip = test_sip
+        else:
+            self.test_sip = self.sip
+
+        if test_dip:
+            self.test_dip = test_dip
+        else:
+            self.test_dip = self.dip
+        
+        if test_sport:
+            self.test_sport = test_sport
+        else:
+            self.test_sport = self.src_port
+
+        if test_dport:
+            self.test_dport = test_dport
+        else:
+            self.test_dport = self.dst_port
+        
+        if self.action == SAI_DASH_FLOW_ACTION_NONE:
+            pass    
+        elif self.action == SAI_DASH_FLOW_ACTION_SET_SMAC:
+            self.test_smac = test_smac
+        elif self.action == SAI_DASH_FLOW_ACTION_SET_DMAC:
+            if test_dmac:
+                self.test_dmac = test_dmac
+            else:
+                self.test_dmac = self.saithrift.dummy_mac
 
         if create_entry == True:
             # Create flow entry
@@ -84,7 +118,7 @@ class FlowHitActionTest(object):
                                 underlay1_dmac=self.saithrift.dummy_mac,
                                 underlay1_dash_encapsulation=SAI_DASH_ENCAPSULATION_INVALID,
                                 # Flow overlay rewrite related attributes
-                                dst_mac=self.saithrift.dummy_mac,
+                                dst_mac=self.test_dmac,
                                 sip=None,
                                 dip=None,
                                 sip_mask=None,
@@ -94,32 +128,6 @@ class FlowHitActionTest(object):
                                 vendor_metadata=None,
                                 flow_data_pb=None
                             )
-
-
-        if test_sip:
-            self.test_sip = test_sip
-        else:
-            self.test_sip = self.sip
-
-        if test_dip:
-            self.test_dip = test_dip
-        else:
-            self.test_dip = self.dip
-        
-        if test_sport:
-            self.test_sport = test_sport
-        else:
-            self.test_sport = self.src_port
-
-        if test_dport:
-            self.test_dport = test_dport
-        else:
-            self.test_dport = self.dst_port
-        
-        if self.action == SAI_DASH_FLOW_ACTION_NONE:
-            pass    
-        # elif self.action == SAI_DASH_FLOW_ACTION_SET_SMAC:
-        #     self.test_smac = test_smac
 
         self.meta = copy.copy(self.__dict__)
         del self.meta["saithrift"]
@@ -145,15 +153,14 @@ class FlowHitActionTest(object):
 
         # Expected packet
         inner_exp_pkt = simple_udp_packet(
-                # ip_ihl = 5,
-                eth_dst=self.saithrift.dst_ca_mac,
+                # eth_dst=self.saithrift.dst_ca_mac,
+                eth_dst=self.test_dmac,
                 eth_src=self.saithrift.eni_mac,
                 ip_dst=self.test_dip,
                 ip_src=self.test_sip,
                 udp_sport=self.test_sport,
                 udp_dport=self.test_dport)
         vxlan_exp_pkt = simple_vxlan_packet(
-            # ip_ihl = 5,
             eth_dst="00:00:00:00:00:00",
             eth_src="00:00:00:00:00:00",
             ip_dst=self.saithrift.dst_pa_ip,
@@ -318,7 +325,7 @@ class SaiThriftDashFlowTest(VnetAPI):
 
     def setupTest(self):
         # Test case 1: flow hit + no action
-        self.tests.append(FlowHitActionTest(self,
+        self.tests.append(FlowTest(self,
                                       protocol=17,
                                       sip="10.1.1.1",
                                       dip=self.dst_ca_ip,
@@ -326,8 +333,8 @@ class SaiThriftDashFlowTest(VnetAPI):
                                       action=SAI_DASH_FLOW_ACTION_NONE,
                                       exp_receive=True,
                                       create_entry=True))
-        # Test case 1: flow miss + no action
-        # self.tests.append(FlowHitActionTest(self,
+        # Test case 2: flow miss + no action
+        # self.tests.append(FlowTest(self,
         #                               protocol=17,
         #                               sip="10.1.1.2",
         #                               dip=self.dst_ca_ip,
@@ -335,6 +342,16 @@ class SaiThriftDashFlowTest(VnetAPI):
         #                               action=None,
         #                               exp_receive=True,
         #                               create_entry=False))
+        # Test case 3: flow hit + set smac
+        # self.tests.append(FlowTest(self,
+        #                               protocol=17,
+        #                               sip="10.1.1.1",
+        #                               dip=self.dst_ca_ip,
+        #                               priority=1,
+        #                               action=SAI_DASH_FLOW_ACTION_SET_DMAC,
+        #                               test_dmac="01:02:03:04:05:06",
+        #                               exp_receive=True,
+        #                               create_entry=True))
 
     def setUp(self):
         super(SaiThriftDashFlowTest, self).setUp()
