@@ -25,7 +25,7 @@ control pre_pipeline_stage(inout headers_t hdr,
         const default_action = accept;
     }
 
-    action set_underlay_mac(EthernetAddress neighbor_mac,
+    action set_internal_config(EthernetAddress neighbor_mac,
                             EthernetAddress mac) {
         meta.u0_encap_data.underlay_dmac = neighbor_mac;
         meta.u0_encap_data.underlay_smac = mac;
@@ -33,13 +33,13 @@ control pre_pipeline_stage(inout headers_t hdr,
 
     /* This table API should be implemented manually using underlay SAI */
     @SaiTable[ignored = "true"]
-    table underlay_mac {
+    table internal_config {
         key = {
             meta.appliance_id : ternary;
         }
 
         actions = {
-            set_underlay_mac;
+            set_internal_config;
         }
     }
 
@@ -120,7 +120,7 @@ control pre_pipeline_stage(inout headers_t hdr,
         }
 
         appliance.apply();
-        underlay_mac.apply();
+        internal_config.apply();
     }
 }
 
