@@ -234,7 +234,6 @@ control dash_ingress(
     }
 
     apply {
-        meta.flow_enabled = false;
 
 #ifndef TARGET_DPDK_PNA
         meta.rx_encap.setValid();
