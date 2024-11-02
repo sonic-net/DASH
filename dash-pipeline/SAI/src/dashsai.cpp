@@ -57,6 +57,16 @@ DashSai::~DashSai()
     }
 }
 
+template <typename T>
+uint32_t get_id(const google::protobuf::RepeatedPtrField<T>& container, const std::string& name) {
+    for (const auto& item : container) {
+        if (item.preamble().name() == name) {
+            return item.preamble().id();
+        }
+    }
+    throw std::runtime_error("ID not found for " + name);
+}
+
 sai_status_t DashSai::apiInitialize(
         _In_ uint64_t flags,
         _In_ const sai_service_method_table_t *services)
@@ -175,6 +185,69 @@ sai_status_t DashSai::apiInitialize(
     m_objectIdManager = std::make_shared<ObjectIdManager>();
 
     m_apiInitialized = true;
+
+    // // Function to get ID from p4info
+    // auto get_id = [](const google::protobuf::RepeatedPtrField<T>& container, const std::string& name) {
+    //     for (const auto& item : container) {
+    //         if (item.preamble().name() == name) {
+    //             return item.preamble().id();
+    //         }
+    //     }
+    //     throw std::runtime_error("ID not found for " + name);
+    // };
+
+    // Get IDs from p4info
+    uint32_t table_id = get_id(p4info->tables(), "dash_ingress.dash_lookup_stage.pre_pipeline_stage.internal_config");
+    uint32_t action_id = get_id(p4info->actions(), "dash_ingress.dash_lookup_stage.pre_pipeline_stage.set_internal_config");
+
+    // Extract the table and action objects
+    const auto& table = p4info->tables().Get(table_id);
+    const auto& action = p4info->actions().Get(action_id);
+
+    // Access the match fields and params
+    uint32_t field_id = table.match_fields(0).id();
+    uint32_t param_id_neighbor_mac = action.params(0).id();
+    uint32_t param_id_mac = action.params(1).id();
+    uint32_t param_id_flow_enabled = action.params(2).id();
+
+    // Define the table entry
+    auto table_entry = std::make_shared<p4::v1::TableEntry>();
+    table_entry->set_table_id(table_id);
+
+    // Define the match field
+    auto match = table_entry->add_match();
+    match->set_field_id(field_id);
+    auto ternary = match->mutable_ternary();
+    ternary->set_value("\x01"); // Example value
+    ternary->set_mask("\x01");  // Example mask
+
+    // Define the action
+    auto action_entry = table_entry->mutable_action()->mutable_action();
+    action_entry->set_action_id(action_id);
+
+    // Define the action parameters
+    auto param1 = action_entry->add_params();
+    param1->set_param_id(param_id_neighbor_mac);
+    param1->set_value("\x00\x11\x22\x33\x44\x55"); // Example MAC address for neighbor_mac
+
+    auto param2 = action_entry->add_params();
+    param2->set_param_id(param_id_mac);
+    param2->set_value("\x66\x77\x88\x99\xAA\xBB"); // Example MAC address for mac
+
+    auto param3 = action_entry->add_params();
+    param3->set_param_id(param_id_flow_enabled);
+    param3->set_value("\x01"); // Example value for flow_enabled (True)
+
+    // Send the WriteRequest to insert the entry
+    auto retCode = mutateTableEntry(table_entry, p4::v1::Update_Type_INSERT);
+
+    if (grpc::StatusCode::OK != retCode)
+    {
+        DASH_LOG_ERROR("Failed to insert entry into internal_config table");
+        return SAI_STATUS_FAILURE;
+    }
+
+    printf("Inserted entry into internal_config table successfully");
 
     return SAI_STATUS_SUCCESS;
 }
