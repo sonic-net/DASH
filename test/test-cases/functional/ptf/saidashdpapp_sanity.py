@@ -15,7 +15,6 @@ class SaiThriftDpappPktTest(SaiHelperSimplified):
         self.our_mac = "00:00:02:03:04:05"
         self.dst_ca_mac = "00:dd:dd:dd:dd:dd"
         self.vip = "172.16.1.100"
-        self.outbound_vni = 100
         self.ca_prefix_addr = "10.1.0.0"
         self.ca_prefix_mask = "255.255.0.0"
         self.dst_ca_ip = "10.1.2.50"
@@ -155,7 +154,7 @@ class SaiThriftDpappPktTest(SaiHelperSimplified):
         assert(status == SAI_STATUS_SUCCESS)
 
 
-        print(f"\n{self.__class__.__name__} configureVnet OK")
+        print(f"\n{self.__class__.__name__} configureVnet OK\n")
         self.configured = True
 
     def trafficUdpTest(self):
@@ -191,11 +190,13 @@ class SaiThriftDpappPktTest(SaiHelperSimplified):
                                         inner_frame=inner_exp_pkt)
 
         self.pkt_exp = vxlan_exp_pkt
-        print("\tSending outbound packet...")
+        print("\tSending outbound udp packet...")
         send_packet(self, 0, vxlan_pkt)
-        print("\tVerifying packet in dpapp port...")
+        print("\tVerifying packet...")
         verify_packet(self, self.pkt_exp, 0)
-        print ("SaiThriftDpappUdpPktTest OK")
+        print("\tVerifying flow created...")
+        verify_flow(self.eni_mac, self.vnet & 0xffff, inner_pkt)
+        print(f"{self.__class__.__name__} trafficUdpTest OK\n")
 
     def trafficTcpTest(self):
 
@@ -238,10 +239,12 @@ class SaiThriftDpappPktTest(SaiHelperSimplified):
                                         inner_frame=inner_exp_pkt)
 
         self.pkt_exp = vxlan_exp_pkt
-        print("\tSending outbound packet...")
+        print("\tSending outbound packet TCP SYN ...")
         send_packet(self, 0, vxlan_pkt)
-        print("\tVerifying packet in dpapp port...")
+        print("\tVerifying packet...")
         verify_packet(self, self.pkt_exp, 0)
+        print("\tVerifying flow created...")
+        verify_flow(self.eni_mac, self.vnet & 0xffff, inner_pkt)
 
         # customer packet: tcp FIN
         inner_pkt = simple_tcp_packet(eth_dst="02:02:02:02:02:02",
@@ -279,10 +282,12 @@ class SaiThriftDpappPktTest(SaiHelperSimplified):
         self.pkt_exp = vxlan_exp_pkt
         print("\tSending outbound packet TCP FIN ...")
         send_packet(self, 0, vxlan_pkt)
-        print("\tVerifying packet in dpapp port...")
+        print("\tVerifying packet...")
         verify_packet(self, self.pkt_exp, 0)
+        print("\tVerifying flow deleted...")
+        verify_no_flow(self.eni_mac, self.vnet & 0xffff, inner_pkt)
 
-        print ("SaiThriftDpappTcpPktTest OK")
+        print(f"{self.__class__.__name__} trafficTcpTest OK\n")
 
     def runTest(self):
 
