@@ -77,13 +77,12 @@ The scaling requirement for PL redirect map are listed as below. The metrics are
 
 | Metric | Requirement |
 | ------ | ----------- |
-| # of ENIs per DPU | 32 |
+| # of ENIs per DPU (every 200G) | 32 |
 | # of VNET mapping per ENI | 64K |
 | # of PPS | 64M |
-| VNET mapping change rate (CRUD) | (TBD) |
+| # of VNI per ENI | 1 |
+| # of MSEE source PA per ENI (v4 + v6, mixed) | 64 |
 | # of fast path packets | Same as CPS. 3M per card. |
-| # of tunnels | (TBD) |
-| # of next hop in each tunnel | (TBD)  |
 
 ### 4.2. Reliability requirements
 
