@@ -7,169 +7,273 @@ from sai_base_test import *
 
 from sai_dash_utils import VnetAPI
 
-
+# Flow test class. 
 class FlowTest(object):
     def __init__(self,
-                 saithrift,
-                 protocol = 17,
-                 sip = None,
-                 dip = None,
-                 src_port = 1234,
-                 dst_port = 90,
-                 priority = 1,
-                 action = None,
-                 exp_receive = False,
-                 create_entry = False,
-                 test_smac = None,
-                 test_dmac = None,
-                 test_sip = None,
-                 test_dip = None,
-                 test_sport = None,
-                 test_dport = None):
+                saithrift,
+                # Parameters for the flow table. We always create a new flow table 
+                max_flow_count = 1000, 
+                dash_flow_enabled_key = (SAI_DASH_FLOW_ENABLED_KEY_ENI_MAC | SAI_DASH_FLOW_ENABLED_KEY_VNI | SAI_DASH_FLOW_ENABLED_KEY_PROTOCOL | SAI_DASH_FLOW_ENABLED_KEY_SRC_IP | SAI_DASH_FLOW_ENABLED_KEY_DST_IP | SAI_DASH_FLOW_ENABLED_KEY_SRC_PORT | SAI_DASH_FLOW_ENABLED_KEY_DST_PORT),
+                flow_ttl_in_milliseconds = 1,
+                # Indicate that an entry should be created
+                create_entry = False,
+                switch_id = 0,
+                vnet_vni = 100,
+                outbound_vni = 60,
+                eni_mac = "00:00:00:00:00:00",
+                outer_smac = "00:00:00:00:00:00",
+                outer_dmac = "00:00:00:00:00:00",
+                outer_sip = "0.0.0.0",
+                outer_dip = "0.0.0.0",
+                inner_smac = "00:00:00:00:00:00",
+                inner_dmac = "00:00:00:00:00:00",
+                inner_sip = "10.1.2.51",
+                inner_dip = "10.1.2.50",
+                protocol = 17,
+                inner_sport = 1234,
+                inner_dport = 90,
+                priority = 1,
+                action = SAI_DASH_FLOW_ACTION_NONE,
+                exp_receive = False,
+                # Expected packet fields (overide values)
+                exp_outer_smac = "00:00:00:00:00:00",
+                exp_outer_dmac = "00:00:00:00:00:00",
+                exp_outer_sip = None,
+                exp_outer_dip = None,
+                exp_inner_smac = "00:00:00:00:00:00",
+                exp_inner_dmac = "00:00:00:00:00:00",
+                exp_inner_sip = None,
+                exp_inner_dip = None,
+                exp_inner_sport = None,
+                exp_inner_dport = None):
+        
+        # Initialize parameters of the test. For setting the state of switch target, e.g. creating entries, they will done in the runTest function.
         self.saithrift = saithrift
-        # self.switch_id = switch_id
-        # self.eni_mac = eni_mac
+        self.client = saithrift.client
+        self.ft = None
+        self.max_flow_count = max_flow_count
+        self.dash_flow_enabled_key = dash_flow_enabled_key
+        self.flow_ttl_in_milliseconds = flow_ttl_in_milliseconds
+        self.fe = None
+        self.create_entry = create_entry
+        self.switch_id = switch_id
+        self.outbound_vni = outbound_vni
+        self.vnet_vni = vnet_vni
+        self.eni_mac = eni_mac
+        self.outer_smac = outer_smac
+        self.outer_dmac = outer_dmac
+        self.outer_sip = outer_sip
+        self.outer_dip = outer_dip
+        self.inner_smac = inner_smac
+        self.inner_dmac = inner_dmac
+        self.inner_sip = inner_sip
+        self.inner_dip = inner_dip
         self.protocol = protocol
-        self.sip = sip
-        self.dip = dip
+        self.inner_sport = inner_sport
+        self.inner_dport = inner_dport
         self.priority = priority
         self.action = action
         self.exp_receive = exp_receive
-        self.src_port = src_port
-        self.dst_port = dst_port
-        # set default value for test dmac
-        self.test_dmac = self.saithrift.dst_ca_mac
+        self.exp_outer_smac = exp_outer_smac
+        self.exp_outer_dmac = exp_outer_dmac
+        self.exp_outer_sip = exp_outer_sip
+        self.exp_outer_dip = exp_outer_dip
+        self.exp_inner_smac = exp_inner_smac
+        self.exp_inner_dmac = exp_inner_dmac
+        self.exp_inner_sip = exp_inner_sip
+        self.exp_inner_dip = exp_inner_dip
+        self.exp_inner_sport = exp_inner_sport
+        self.exp_inner_dport = exp_inner_dport
 
+        # Setting values for expected packet fields. Overide field for the expected packet if they are not None.
+        # Expected outer packet fields
+        # if exp_outer_smac:
+        #     # If not None, overide, else use the same value as test packet
+        #     self.exp_outer_smac = exp_outer_smac
+        # else:
+        #     self.exp_outer_smac = self.outer_smac
 
-        if test_sip:
-            self.test_sip = test_sip
-        else:
-            self.test_sip = self.sip
+        # if exp_outer_dmac:
+        #     self.exp_outer_dmac = exp_outer_dmac
+        # else:
+        #     self.exp_outer_dmac = self.outer_dmac
 
-        if test_dip:
-            self.test_dip = test_dip
-        else:
-            self.test_dip = self.dip
+        # if exp_outer_sip:
+        #     self.exp_outer_sip = exp_outer_sip
+        # else:   
+        #     self.exp_outer_sip = self.outer_sip
         
-        if test_sport:
-            self.test_sport = test_sport
-        else:
-            self.test_sport = self.src_port
+        # if exp_outer_dip:
+        #     self.exp_outer_dip = exp_outer_dip
+        # else:
+        #     self.exp_outer_dip = self.outer_dip
 
-        if test_dport:
-            self.test_dport = test_dport
-        else:
-            self.test_dport = self.dst_port
+        # # Expected inner packet fields
+        # if exp_inner_smac:
+        #     self.exp_inner_smac = exp_inner_smac
+        # else:
+        #     self.exp_inner_smac = self.inner_smac
+
+        # if exp_inner_dmac:
+        #     self.exp_inner_dmac = exp_inner_dmac
+        # else:
+        #     self.exp_inner_dmac = self.inner_dmac
+
+        # if exp_inner_sip:
+        #     self.exp_inner_sip = exp_inner_sip
+        # else:
+        #     self.exp_inner_sip = self.inner_sip
+
+        # if exp_inner_dip:
+        #     self.exp_inner_dip = exp_inner_dip
+        # else:
+        #     self.exp_inner_dip = self.inner_dip
         
-        if self.action == SAI_DASH_FLOW_ACTION_NONE:
-            pass    
-        elif self.action == SAI_DASH_FLOW_ACTION_SET_SMAC:
-            self.test_smac = test_smac
-        elif self.action == SAI_DASH_FLOW_ACTION_SET_DMAC:
-            if test_dmac:
-                self.test_dmac = test_dmac
-            else:
-                self.test_dmac = self.saithrift.dummy_mac
+        # if exp_inner_sport:
+        #     self.exp_inner_sport = exp_inner_sport
+        # else:
+        #     self.exp_inner_sport = self.inner_sport
 
-        if create_entry == True:
-            # Create flow entry
-            sip_t = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
-                                        addr=sai_thrift_ip_addr_t(ip4=self.sip))
-            dip_t = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
-                                    addr=sai_thrift_ip_addr_t(ip4=self.dip))
-            # sip_t = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
-            #                             addr=sai_thrift_ip_addr_t(ip4="0.0.0.0"))
-            # dip_t = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
-            #                         addr=sai_thrift_ip_addr_t(ip4="0.0.0.0"))
-            # self.fe = sai_thrift_flow_entry_t(switch_id=self.saithrift.switch_id, eni_mac=self.saithrift.eni_mac, vnet_id=self.saithrift.vnet_vni, ip_proto=self.protocol, src_ip=sip_t, dst_ip=dip_t, src_port=self.src_port, dst_port=self.dst_port)
-            self.fe = sai_thrift_flow_entry_t(switch_id=0, eni_mac="00:00:00:00:00:00", vnet_id=0, ip_proto=self.protocol, src_ip=sip_t, dst_ip=dip_t, src_port=0, dst_port=0)
-            print("Creating flow entry...\n", self.fe.__repr__())
-            self.saithrift.create_entry(
-                                create_func = sai_thrift_create_flow_entry, 
-                                remove_func = sai_thrift_remove_flow_entry,
-                                entry = self.fe, 
-                                # flow basic metadata 
-                                action = SAI_FLOW_ENTRY_ACTION_SET_FLOW_ENTRY_ATTR,
-                                version=4,
-                                dash_direction=SAI_DASH_DIRECTION_OUTBOUND,
-                                dash_flow_action=self.action,
-                                meter_class=None,
-                                is_unidirectional_flow=True,
-                                dash_flow_sync_state=SAI_DASH_FLOW_SYNC_STATE_FLOW_SYNCED,
-                                reverse_flow_eni_mac=self.saithrift.eni_mac,
-                                reverse_flow_vnet_id=self.saithrift.vnet_vni,
-                                reverse_flow_ip_proto=self.protocol,
-                                reverse_flow_src_ip=dip_t,
-                                reverse_flow_dst_ip=sip_t,
-                                reverse_flow_src_port=self.dst_port,
-                                reverse_flow_dst_port=self.src_port,
-                                # reverse_flow_dst_ip_is_v6=False,
-                                # Flow encap related attributes
-                                underlay0_vnet_id=None,
-                                underlay0_sip=None,
-                                underlay0_dip=None,
-                                underlay0_smac=self.saithrift.dummy_mac,
-                                underlay0_dmac=self.saithrift.dummy_mac,
-                                underlay0_dash_encapsulation=SAI_DASH_ENCAPSULATION_INVALID,
-                                underlay1_vnet_id=None,
-                                underlay1_sip=None,
-                                underlay1_dip=None,
-                                underlay1_smac=self.saithrift.dummy_mac,
-                                underlay1_dmac=self.saithrift.dummy_mac,
-                                underlay1_dash_encapsulation=SAI_DASH_ENCAPSULATION_INVALID,
-                                # Flow overlay rewrite related attributes
-                                dst_mac=self.test_dmac,
-                                sip=None,
-                                dip=None,
-                                sip_mask=None,
-                                dip_mask=None,
-                                # dip_is_v6=False,
-                                # Extra flow metadata
-                                vendor_metadata=None,
-                                flow_data_pb=None
-                            )
+        # if exp_inner_dport:
+        #     self.exp_inner_dport = exp_inner_dport
+        # else:
+        #     self.exp_inner_dport = self.inner_dport
+        
+        
+        # if self.action == SAI_DASH_FLOW_ACTION_SET_SMAC:
+        #     if exp_inner_smac:
+        #         self.exp_inner_smac = exp_inner_smac
+        #     else:
+        #         self.exp_inner_smac = self.saithrift.dummy_mac
+        # elif self.action == SAI_DASH_FLOW_ACTION_SET_DMAC:
+        #     if exp_inner_dmac:
+        #         self.exp_inner_dmac = exp_inner_dmac
+        #     else:
+        #         self.exp_inner_dmac = self.saithrift.dummy_mac
 
         self.meta = copy.copy(self.__dict__)
-        del self.meta["saithrift"]
+        # del self.meta["saithrift"]
+
+    # Since we may adjust the flow table and flow entry for each test, we do not add them to the teardown stack.
+    def create_flow_table(self, *args, **kwargs):
+        print("Creating flow table...\n", args)
+        ft = sai_thrift_create_flow_table(self.client, *args, **kwargs)
+        assert (ft != SAI_NULL_OBJECT_ID)
+        return ft
+
+    def remove_flow_table(self):
+        print("Removing flow table...\n", self.ft.__repr__())
+        status = sai_thrift_remove_flow_table(self.client, self.ft)
+        assert (status == SAI_STATUS_SUCCESS)
+        return status
+
+    def create_flow_entry(self, entry, *args, **kwargs):
+        print("Creating flow entry...\n", self.fe.__repr__())
+        status = sai_thrift_create_flow_entry(self.client, entry, *args, **kwargs)
+        assert (status == SAI_STATUS_SUCCESS)
+        return status
+    
+    def remove_flow_entry(self):
+        print("Removing flow entry...\n", self.fe.__repr__())
+        status= sai_thrift_remove_flow_entry(self.client, self.fe)
+        assert (status == SAI_STATUS_SUCCESS)
+        return status
+
 
     def runTest(self):
-        # Test packet
+        self.ft = self.create_flow_table(max_flow_count = self.max_flow_count, 
+                                  dash_flow_enabled_key = self.dash_flow_enabled_key, 
+                                  flow_ttl_in_milliseconds = self.flow_ttl_in_milliseconds)
+        if self.create_entry == True:
+            # Create flow entry
+            sip_t = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
+                                        addr=sai_thrift_ip_addr_t(ip4=self.inner_sip))
+            dip_t = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
+                                    addr=sai_thrift_ip_addr_t(ip4=self.inner_dip))
+            # Assemble flow entry
+            self.fe = sai_thrift_flow_entry_t(switch_id=self.switch_id, eni_mac=self.eni_mac, vnet_id=self.vnet_vni, ip_proto=self.protocol, src_ip=sip_t, dst_ip=dip_t, src_port=self.inner_sport, dst_port=self.inner_dport)
+            self.create_flow_entry(
+                entry = self.fe, 
+                # Flow basic metadata 
+                action = SAI_FLOW_ENTRY_ACTION_SET_FLOW_ENTRY_ATTR,
+                version=4,
+                dash_direction=SAI_DASH_DIRECTION_OUTBOUND,
+                dash_flow_action=self.action,
+                meter_class=None,
+                is_unidirectional_flow=True,
+                dash_flow_sync_state=SAI_DASH_FLOW_SYNC_STATE_FLOW_SYNCED,
+                # Reverse flow key
+                reverse_flow_eni_mac=self.eni_mac,
+                reverse_flow_vnet_id=self.vnet_vni,
+                reverse_flow_ip_proto=self.protocol,
+                reverse_flow_src_ip=dip_t,
+                reverse_flow_dst_ip=sip_t,
+                reverse_flow_src_port=self.inner_dport,
+                reverse_flow_dst_port=self.inner_sport,
+                # reverse_flow_dst_ip_is_v6=False,
+                # Flow encap related attributes
+                underlay0_vnet_id=None,
+                underlay0_sip=None,
+                underlay0_dip=None,
+                underlay0_smac="00:00:00:00:00:00",
+                underlay0_dmac="00:00:00:00:00:00",
+                underlay0_dash_encapsulation=SAI_DASH_ENCAPSULATION_INVALID,
+                underlay1_vnet_id=None,
+                underlay1_sip=None,
+                underlay1_dip=None,
+                underlay1_smac="00:00:00:00:00:00",
+                underlay1_dmac="00:00:00:00:00:00",
+                underlay1_dash_encapsulation=SAI_DASH_ENCAPSULATION_INVALID,
+                # Flow overlay rewrite related attributes
+                dst_mac=self.exp_inner_dmac,
+                # sip=self.exp_inner_sip,
+                # dip=self.exp_inner_dip,
+                sip=None,
+                dip=None,
+                sip_mask=None,
+                dip_mask=None,
+                # dip_is_v6=False,
+                # Extra flow metadata
+                vendor_metadata=None,
+                flow_data_pb=None
+                )
+        
+        # Assemble test packet sent by VM
         inner_pkt = simple_udp_packet(                            
-            eth_dst=self.saithrift.dst_ca_mac,
-            eth_src=self.saithrift.eni_mac,
-            ip_dst=self.test_dip,
-            ip_src=self.test_sip,
-            udp_sport=self.test_sport,
-            udp_dport=self.test_dport
+            eth_dst=self.inner_dmac,
+            eth_src=self.inner_smac,
+            ip_dst=self.exp_inner_dip,
+            ip_src=self.exp_inner_sip,
+            udp_sport=self.exp_inner_sport,
+            udp_dport=self.exp_inner_dport
             )
         vxlan_pkt = simple_vxlan_packet(
-            eth_dst=self.saithrift.our_mac,
-            ip_dst=self.saithrift.vip,
-            ip_src=self.saithrift.src_vm_pa_ip,
+            eth_dst=self.outer_dmac,
+            ip_dst=self.outer_dip,
+            ip_src=self.outer_sip,
             udp_sport=11638,
             with_udp_chksum=False,
-            vxlan_vni=self.saithrift.outbound_vni,
+            vxlan_vni=self.outbound_vni,
             inner_frame=inner_pkt)
 
-        # Expected packet
+        # Assemble expected packet from ENI
         inner_exp_pkt = simple_udp_packet(
-                # eth_dst=self.saithrift.dst_ca_mac,
-                eth_dst=self.test_dmac,
-                eth_src=self.saithrift.eni_mac,
-                ip_dst=self.test_dip,
-                ip_src=self.test_sip,
-                udp_sport=self.test_sport,
-                udp_dport=self.test_dport)
+            eth_dst=self.exp_inner_dmac,
+            eth_src=self.exp_inner_smac,
+            ip_dst=self.exp_inner_dip,
+            ip_src=self.exp_inner_sip,
+            udp_sport=self.exp_inner_sport,
+            udp_dport=self.exp_inner_dport)
         vxlan_exp_pkt = simple_vxlan_packet(
-            eth_dst="00:00:00:00:00:00",
-            eth_src="00:00:00:00:00:00",
-            ip_dst=self.saithrift.dst_pa_ip,
-            ip_src=self.saithrift.vip,
-            udp_sport=0,
+            eth_dst=self.exp_outer_dmac,
+            eth_src=self.exp_outer_smac,
+            ip_dst=self.exp_outer_dip,
+            ip_src=self.exp_outer_sip,
             with_udp_chksum=False,
-            vxlan_vni=self.saithrift.vnet_vni,
+            vxlan_vni=self.vnet_vni,
             inner_frame=inner_exp_pkt)
         pkt_exp = vxlan_exp_pkt
+
         print("Sending packet...\n", vxlan_pkt.__repr__())
         send_packet(self.saithrift, 0, vxlan_pkt)
         print("\n")
@@ -183,6 +287,12 @@ class FlowTest(object):
             verify_no_other_packets(self.saithrift)
             print("\n")
             print("Flow miss test {} OK".format(self.meta))
+
+        # Clean up flow table and flow entry
+        if self.create_entry == True:
+            print("Creating flow entry...\n", self.fe.__repr__())
+            self.remove_flow_entry()
+        self.remove_flow_table()
         
 
 
@@ -204,21 +314,21 @@ class SaiThriftDashFlowTest(VnetAPI):
     # Set up the switch to support a Vnet with an ENI
     def setUpSwitch(self):
         self.switch_id = 5
-        self.outbound_vni = 60
+        self.outbound_vni = 60 # reserved vni for outbound direction lookup
         self.vnet_vni = 100
         self.eni_mac = "00:cc:cc:cc:cc:cc"
         self.our_mac = "00:00:02:03:04:05"
         self.dst_ca_mac = "00:dd:dd:dd:dd:dd"
         self.vip = "172.16.1.100"
-        self.outbound_vni = 100
         self.dst_ca_ip = "10.1.2.50"
         self.dst_pa_ip = "172.16.1.20"
+        self.src_vm_ca_ip = "10.1.2.51"
         self.src_vm_pa_ip = "172.16.1.1"
 
-        self.dummy_mac = "00:00:00:00:00:00"
-        self.dummy_ip = "0.0.0.0"
+        # self.dummy_mac = "00:00:00:00:00:00"
+        # self.dummy_ip = "0.0.0.0"
 
-        # Add a VIP entry
+        # Add a VIP entry (pre-pipeline)
         vip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
                                       addr=sai_thrift_ip_addr_t(ip4=self.vip))
         self.vpe = sai_thrift_vip_entry_t(
@@ -226,17 +336,14 @@ class SaiThriftDashFlowTest(VnetAPI):
         self.create_entry(sai_thrift_create_vip_entry, sai_thrift_remove_vip_entry,
                           self.vpe, action=SAI_VIP_ENTRY_ACTION_ACCEPT)
 
+        # Add an appliance entry (pre-pipeline)
+
         # Add a direction lookup entry
         self.dle = sai_thrift_direction_lookup_entry_t(
             switch_id=self.switch_id, vni=self.outbound_vni)
         self.create_entry(sai_thrift_create_direction_lookup_entry, sai_thrift_remove_direction_lookup_entry,
                           self.dle, action=SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION)
 
-        # Create flow table
-        self.ft = self.create_obj(sai_thrift_create_flow_table,sai_thrift_remove_flow_table,
-                                  max_flow_count = 1000, 
-                                  dash_flow_enabled_key = (SAI_DASH_FLOW_ENABLED_KEY_PROTOCOL), 
-                                  flow_ttl_in_milliseconds = 1)
 
         # Create a Vnet entry
         self.vnet = self.create_obj(
@@ -292,8 +399,10 @@ class SaiThriftDashFlowTest(VnetAPI):
                                    max_resimulated_flow_per_second=0,
                                    outbound_routing_group_id=0)
 
+        # self.eam = sai_thrift_eni_ether_address_map_entry_t(
+        #     switch_id=self.switch_id, address=self.eni_mac)
         self.eam = sai_thrift_eni_ether_address_map_entry_t(
-            switch_id=self.switch_id, address=self.eni_mac)
+            switch_id=self.switch_id, address=self.our_mac)
 
         self.create_entry(sai_thrift_create_eni_ether_address_map_entry,
                           sai_thrift_remove_eni_ether_address_map_entry, self.eam, eni_id=self.eni)
@@ -324,34 +433,86 @@ class SaiThriftDashFlowTest(VnetAPI):
                           flow_resimulation_requested = False, routing_actions_disabled_in_flow_resimulation = 0)
 
     def setupTest(self):
-        # Test case 1: flow hit + no action
-        self.tests.append(FlowTest(self,
-                                      protocol=17,
-                                      sip="10.1.1.1",
-                                      dip=self.dst_ca_ip,
-                                      priority=1,
-                                      action=SAI_DASH_FLOW_ACTION_NONE,
-                                      exp_receive=True,
-                                      create_entry=True))
+        # Test case 1: flow hit (5 tuple) + no action
+        # Expected: dropped due to outbound routing mismatch (not encapsulated correctly)
+        self.tests.append(FlowTest(saithrift = self,
+                                create_entry = True,
+                                switch_id = self.switch_id,
+                                vnet_vni = self.vnet_vni,
+                                outbound_vni = self.outbound_vni,
+                                eni_mac = self.eni_mac,
+                                outer_smac = "00:00:00:00:00:00",
+                                outer_dmac = "00:00:00:00:00:00",
+                                outer_sip = self.src_vm_pa_ip,
+                                outer_dip = self.vip,
+                                inner_smac = self.our_mac,
+                                inner_dmac = self.eni_mac,
+                                protocol = 17,
+                                inner_sip = self.src_vm_ca_ip,
+                                inner_dip = self.dst_ca_ip,
+                                inner_sport = 1234,
+                                inner_dport = 90,
+                                priority = 1,
+                                action = SAI_DASH_FLOW_ACTION_NONE,
+                                exp_receive = True,
+                                exp_outer_smac = self.eni_mac,
+                                exp_outer_dmac = self.dst_ca_mac,
+                                exp_outer_sip = self.src_vm_pa_ip,
+                                exp_outer_dip = self.dst_pa_ip
+                                ))
         # Test case 2: flow miss + no action
-        # self.tests.append(FlowTest(self,
-        #                               protocol=17,
-        #                               sip="10.1.1.2",
-        #                               dip=self.dst_ca_ip,
-        #                               priority=2,
-        #                               action=None,
-        #                               exp_receive=True,
-        #                               create_entry=False))
-        # Test case 3: flow hit + set smac
-        # self.tests.append(FlowTest(self,
-        #                               protocol=17,
-        #                               sip="10.1.1.1",
-        #                               dip=self.dst_ca_ip,
-        #                               priority=1,
-        #                               action=SAI_DASH_FLOW_ACTION_SET_DMAC,
-        #                               test_dmac="01:02:03:04:05:06",
-        #                               exp_receive=True,
-        #                               create_entry=True))
+        # self.tests.append(FlowTest(saithrift = self,
+        #                         create_entry = False,
+        #                         switch_id = self.switch_id,
+        #                         vnet_vni = self.vnet_vni,
+        #                         outbound_vni = self.outbound_vni,
+        #                         eni_mac = self.eni_mac,
+        #                         outer_smac = "00:00:00:00:00:00",
+        #                         outer_dmac = "00:00:00:00:00:00",
+        #                         outer_sip = self.src_vm_pa_ip,
+        #                         outer_dip = self.vip,
+        #                         inner_smac = self.our_mac,
+        #                         inner_dmac = self.eni_mac,
+        #                         protocol = 17,
+        #                         inner_sip = self.src_vm_ca_ip,
+        #                         inner_dip = self.dst_ca_ip,
+        #                         inner_sport = 1234,
+        #                         inner_dport = 90,
+        #                         priority = 1,
+        #                         action = SAI_DASH_FLOW_ACTION_NONE,
+        #                         exp_receive = True,
+        #                         exp_outer_smac = self.eni_mac,
+        #                         exp_outer_dmac = self.dst_ca_mac,
+        #                         exp_outer_sip = self.src_vm_pa_ip,
+        #                         exp_outer_dip = self.dst_pa_ip
+        #                         ))
+        # Test case 3: flow hit (5 tuple) + overlay dmac rewrite
+        # self.tests.append(FlowTest(saithrift = self,
+        #                         create_entry = True,
+        #                         switch_id = self.switch_id,
+        #                         vnet_vni = self.vnet_vni,
+        #                         outbound_vni = self.outbound_vni,
+        #                         eni_mac = self.eni_mac,
+        #                         outer_smac = "00:00:00:00:00:00",
+        #                         outer_dmac = "00:00:00:00:00:00",
+        #                         outer_sip = self.src_vm_pa_ip,
+        #                         outer_dip = self.vip,
+        #                         inner_smac = self.our_mac,
+        #                         inner_dmac = self.eni_mac,
+        #                         protocol = 17,
+        #                         inner_sip = self.src_vm_ca_ip,
+        #                         inner_dip = self.dst_ca_ip,
+        #                         inner_sport = 1234,
+        #                         inner_dport = 90,
+        #                         priority = 1,
+        #                         action = SAI_DASH_FLOW_ACTION_SET_DMAC,
+        #                         exp_receive = True,
+        #                         exp_outer_smac = self.eni_mac,
+        #                         exp_outer_dmac = self.dst_ca_mac,
+        #                         exp_outer_sip = self.src_vm_pa_ip,
+        #                         exp_outer_dip = self.dst_pa_ip,
+        #                         exp_inner_dmac = "01:02:03:04:05:06" # rewrite the overlay dmac
+        #                         ))
 
     def setUp(self):
         super(SaiThriftDashFlowTest, self).setUp()
