@@ -239,15 +239,15 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
 
         /* Flow encap related attributes */
         bit<24> underlay0_vnet_id,
-        IPv4Address underlay0_sip,
-        IPv4Address underlay0_dip,
+        @SaiVal[type="sai_ip_address_t"] IPv4Address underlay0_sip,
+        @SaiVal[type="sai_ip_address_t"] IPv4Address underlay0_dip,
         EthernetAddress underlay0_smac,
         EthernetAddress underlay0_dmac,
         @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t underlay0_dash_encapsulation,
 
         bit<24> underlay1_vnet_id,
-        IPv4Address underlay1_sip,
-        IPv4Address underlay1_dip,
+        @SaiVal[type="sai_ip_address_t"] IPv4Address underlay1_sip,
+        @SaiVal[type="sai_ip_address_t"] IPv4Address underlay1_dip,
         EthernetAddress underlay1_smac,
         EthernetAddress underlay1_dmac,
         @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t underlay1_dash_encapsulation,
