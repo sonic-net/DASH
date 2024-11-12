@@ -189,7 +189,7 @@ integrators to track and test the designs in a common manner.
         -   6 packets: SYN, SYN-ACK, ACK, FIN, FIN-ACK, ACK
         -   Flow Table Size: (2 \* CPS) + 15M + 15M
             //For 5M CPS, Flow Table Size: (2 \* 1000) + 15M + 15M = ~30M
-            - CPS test is opening and closing so fast that concurent connections number added is very small (hundreds to thousands)
+            - CPS test is opening and closing so fast that concurrent connections number added is very small (hundreds to thousands)
         -   Effective PPS: Sustained CPS \* 6 + PPS for background flows.
 
 -   CPS and flow results will be measured while channel bandwidth is
