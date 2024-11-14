@@ -26,8 +26,8 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         self.sai_ip_addr_family = SAI_IP_ADDR_FAMILY_IPV4
 
         self.dut_mac   = get_mac("veth0")
-        self.host0_mac = get_mac("veth1") # ptf port0
-        set_internal_config(neighbor_mac = mac_in_bytes(self.host0_mac),
+        self.neighbor_mac = get_mac("veth1")
+        set_internal_config(neighbor_mac = mac_in_bytes(self.neighbor_mac),
                             mac = mac_in_bytes(self.dut_mac))
 
         # Flag to indicate whether configureVnet were successful or not.
@@ -170,7 +170,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
                                         ip_dst=self.dst_ca_ip,
                                         ip_src=src_vm_ip)
         vxlan_pkt = simple_vxlan_packet(eth_dst=self.dut_mac,
-                                        eth_src=self.host0_mac,
+                                        eth_src=self.neighbor_mac,
                                         ip_dst=wrong_vip,
                                         ip_src=self.src_vm_pa_ip,
                                         udp_sport=11638,
@@ -189,7 +189,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
                                         ip_dst=wrong_dst_ca,
                                         ip_src=src_vm_ip)
         vxlan_pkt = simple_vxlan_packet(eth_dst=self.dut_mac,
-                                        eth_src=self.host0_mac,
+                                        eth_src=self.neighbor_mac,
                                         ip_dst=self.vip,
                                         ip_src=self.src_vm_pa_ip,
                                         udp_sport=11638,
@@ -208,7 +208,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
                                         ip_dst=wrong_dst_ca,
                                         ip_src=src_vm_ip)
         vxlan_pkt = simple_vxlan_packet(eth_dst=self.dut_mac,
-                                        eth_src=self.host0_mac,
+                                        eth_src=self.neighbor_mac,
                                         ip_dst=self.vip,
                                         ip_src=self.src_vm_pa_ip,
                                         udp_sport=11638,
@@ -226,7 +226,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
                                         ip_dst=self.dst_ca_ip,
                                         ip_src=src_vm_ip)
         vxlan_pkt = simple_vxlan_packet(eth_dst=self.dut_mac,
-                                        eth_src=self.host0_mac,
+                                        eth_src=self.neighbor_mac,
                                         ip_dst=self.vip,
                                         ip_src=self.src_vm_pa_ip,
                                         udp_sport=11638,
@@ -238,7 +238,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
                                         eth_src=self.eni_mac,
                                         ip_dst=self.dst_ca_ip,
                                         ip_src=src_vm_ip)
-        vxlan_exp_pkt = simple_vxlan_packet(eth_dst=self.host0_mac,
+        vxlan_exp_pkt = simple_vxlan_packet(eth_dst=self.neighbor_mac,
                                         eth_src=self.dut_mac,
                                         ip_dst=self.dst_pa_ip,
                                         ip_src=self.vip,
@@ -326,7 +326,7 @@ class SaiThriftVnetOutboundUdpV6PktTest(SaiThriftVnetOutboundUdpPktTest):
                                         ipv6_dst=self.dst_ca_ip,
                                         ipv6_src=src_vm_ip)
         vxlan_pkt = simple_vxlan_packet(eth_dst=self.dut_mac,
-                                        eth_src=self.host0_mac,
+                                        eth_src=self.neighbor_mac,
                                         ip_dst=wrong_vip,
                                         ip_src=self.src_vm_pa_ip,
                                         udp_sport=11638,
@@ -345,7 +345,7 @@ class SaiThriftVnetOutboundUdpV6PktTest(SaiThriftVnetOutboundUdpPktTest):
                                         ipv6_dst=wrong_dst_ca,
                                         ipv6_src=src_vm_ip)
         vxlan_pkt = simple_vxlan_packet(eth_dst=self.dut_mac,
-                                        eth_src=self.host0_mac,
+                                        eth_src=self.neighbor_mac,
                                         ip_dst=self.vip,
                                         ip_src=self.src_vm_pa_ip,
                                         udp_sport=11638,
@@ -364,7 +364,7 @@ class SaiThriftVnetOutboundUdpV6PktTest(SaiThriftVnetOutboundUdpPktTest):
                                         ipv6_dst=wrong_dst_ca,
                                         ipv6_src=src_vm_ip)
         vxlan_pkt = simple_vxlan_packet(eth_dst=self.dut_mac,
-                                        eth_src=self.host0_mac,
+                                        eth_src=self.neighbor_mac,
                                         ip_dst=self.vip,
                                         ip_src=self.src_vm_pa_ip,
                                         udp_sport=11638,
@@ -382,7 +382,7 @@ class SaiThriftVnetOutboundUdpV6PktTest(SaiThriftVnetOutboundUdpPktTest):
                                         ipv6_dst=self.dst_ca_ip,
                                         ipv6_src=src_vm_ip)
         vxlan_pkt = simple_vxlan_packet(eth_dst=self.dut_mac,
-                                        eth_src=self.host0_mac,
+                                        eth_src=self.neighbor_mac,
                                         ip_dst=self.vip,
                                         ip_src=self.src_vm_pa_ip,
                                         udp_sport=11638,
@@ -394,7 +394,7 @@ class SaiThriftVnetOutboundUdpV6PktTest(SaiThriftVnetOutboundUdpPktTest):
                                         eth_src=self.eni_mac,
                                         ipv6_dst=self.dst_ca_ip,
                                         ipv6_src=src_vm_ip)
-        vxlan_exp_pkt = simple_vxlan_packet(eth_dst=self.host0_mac,
+        vxlan_exp_pkt = simple_vxlan_packet(eth_dst=self.neighbor_mac,
                                         eth_src=self.dut_mac,
                                         ip_dst=self.dst_pa_ip,
                                         ip_src=self.vip,
