@@ -311,9 +311,9 @@ sai_apis:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_FLOW_ENTRY_ATTR_UNDERLAY0_SIP
     description: Action parameter underlay0 sip
-    type: sai_uint32_t
-    attr_value_field: u32
-    default: '0'
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -324,9 +324,9 @@ sai_apis:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DIP
     description: Action parameter underlay0 dip
-    type: sai_uint32_t
-    attr_value_field: u32
-    default: '0'
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -363,9 +363,9 @@ sai_apis:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_FLOW_ENTRY_ATTR_UNDERLAY1_SIP
     description: Action parameter underlay1 sip
-    type: sai_uint32_t
-    attr_value_field: u32
-    default: '0'
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -376,9 +376,9 @@ sai_apis:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DIP
     description: Action parameter underlay1 dip
-    type: sai_uint32_t
-    attr_value_field: u32
-    default: '0'
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
