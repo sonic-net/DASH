@@ -2,6 +2,19 @@ import grpc
 from p4.v1 import p4runtime_pb2
 from p4.v1 import p4runtime_pb2_grpc
 
+
+def get_mac(interface):
+    try:
+        mac = open('/sys/class/net/'+interface+'/address').readline().strip()
+    except:
+        mac = "00:00:00:00:00:00"
+    return mac
+
+
+def mac_in_bytes(mac):
+    return bytes(int(b, 16) for b in mac.split(":"))
+
+
 class P4info():
     def __init__(self, stub):
         self.config = P4info.get_pipeline_config(stub)
@@ -32,7 +45,15 @@ class P4info():
         return None
 
 
-def toggle_flow_lookup(enabled):
+def set_internal_config(neighbor_mac :bytes = None,
+                        mac :bytes = None,
+                        flow_enabled :bytes = None):
+    '''
+    Set dash pipeline internal config by updating table entry of internal_config.
+
+    if one argument is not specifed, the action param is not changed in the
+    existing table entry, otherwise set default value in new table entry.
+    '''
     channel = grpc.insecure_channel('localhost:9559')
     stub = p4runtime_pb2_grpc.P4RuntimeStub(channel)
 
@@ -56,11 +77,26 @@ def toggle_flow_lookup(enabled):
         if not response.entities:
             continue
         entry = response.entities[0].table_entry
-        param = entry.action.action.params[2] #flow_enabled
-        if param.value[0] == enabled:
+        changed = 0
+
+        param = entry.action.action.params[0]
+        if neighbor_mac and neighbor_mac != param.value:
+            param.value = neighbor_mac
+            changed += 1
+
+        param = entry.action.action.params[1]
+        if mac and mac != param.value:
+            param.value = mac
+            changed += 1
+
+        param = entry.action.action.params[2]
+        if flow_enabled and flow_enabled != param.value:
+            param.value = flow_enabled
+            changed += 1
+
+        if not changed:
             return # none of change
 
-        param.value = b'\x01' if enabled else b'\x00'
         req = p4runtime_pb2.WriteRequest()
         req.device_id = 0
         update = req.updates.add()
@@ -73,15 +109,27 @@ def toggle_flow_lookup(enabled):
     set_internal_config = p4info.get_action("dash_ingress.dash_lookup_stage.pre_pipeline_stage.set_internal_config")
     entry.action.action.action_id = set_internal_config.preamble.id
     action = entry.action.action
+
     param = action.params.add()
     param.param_id = 1
-    param.value = b'\x00\x00\x00\x00\x00\x00'
+    if neighbor_mac:
+        param.value = neighbor_mac
+    else:   # default value
+        param.value = b'\x00\x00\x00\x00\x00\x00'
+
     param = action.params.add()
     param.param_id = 2
-    param.value = b'\x00\x00\x00\x00\x00\x00'
+    if mac:
+        param.value = mac
+    else:   # default value
+        param.value = b'\x00\x00\x00\x00\x00\x00'
+
     param = action.params.add()
     param.param_id = 3
-    param.value = b'\x01' if enabled else b'\x00'
+    if flow_enabled:
+        param.value = flow_enabled
+    else:   # default value
+        param.value = b'\x00'
 
     req = p4runtime_pb2.WriteRequest()
     req.device_id = 0
@@ -99,12 +147,12 @@ def use_flow(cls):
         if _setUp is not None:
             _setUp(self, *args, **kwargs)
         print(f'*** Enable Flow lookup')
-        toggle_flow_lookup(True)
+        set_internal_config(flow_enabled = b'\x01')
         return
 
     def tearDown(self, *args, **kwargs):
         print(f'*** Disable Flow lookup')
-        toggle_flow_lookup(False)
+        set_internal_config(flow_enabled = b'\x00')
         if _tearDown is not None:
             _tearDown(self, *args, **kwargs)
         return
