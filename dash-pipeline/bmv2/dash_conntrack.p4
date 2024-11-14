@@ -48,7 +48,7 @@ control ConntrackIn(inout headers_t hdr,
           }
           restart_expire_timer(); // reset expiration timer for entry
           meta.conntrack_data.allow_in = true;
-          meta.overlay_data.is_ipv6 = false;
+          meta.overlay_data.is_ipv6 = 0;
           meta.overlay_data.sip = (IPv4ORv6Address)original_overlay_sip;
           meta.overlay_data.dip = (IPv4ORv6Address)original_overlay_dip;
   }

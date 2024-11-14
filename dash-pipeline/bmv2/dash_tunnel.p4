@@ -6,13 +6,11 @@
 #ifdef TARGET_BMV2_V1MODEL
 #define PUSH_VXLAN_TUNNEL_DEF(underlay_id, overlay_id) \
 action push_vxlan_tunnel_ ## underlay_id ## (inout headers_t hdr, \
-                                       in EthernetAddress overlay_dmac, \
                                        in EthernetAddress underlay_dmac, \
                                        in EthernetAddress underlay_smac, \
                                        in IPv4Address underlay_dip, \
                                        in IPv4Address underlay_sip, \
                                        in bit<24> tunnel_key) { \
-    hdr. ## overlay_id ## _ethernet.dst_addr = (overlay_dmac == 0) ? hdr. ## overlay_id ## _ethernet.dst_addr : overlay_dmac; \
     hdr. ## underlay_id ## _ethernet.setValid(); \
     hdr. ## underlay_id ## _ethernet.dst_addr = underlay_dmac; \
     hdr. ## underlay_id ## _ethernet.src_addr = underlay_smac; \
@@ -60,13 +58,11 @@ action push_vxlan_tunnel_ ## underlay_id ## (inout headers_t hdr, \
 #ifdef TARGET_DPDK_PNA
 #define PUSH_VXLAN_TUNNEL_DEF(underlay_id, overlay_id) \
 action push_vxlan_tunnel_ ## underlay_id ## (inout headers_t hdr, \
-                                       in EthernetAddress overlay_dmac, \
                                        in EthernetAddress underlay_dmac, \
                                        in EthernetAddress underlay_smac, \
                                        in IPv4Address underlay_dip, \
                                        in IPv4Address underlay_sip, \
                                        in bit<24> tunnel_key) { \
-    hdr. ## overlay_id ## _ethernet.dst_addr = overlay_dmac; \
     hdr. ## underlay_id ## _ethernet.setValid(); \
     hdr. ## underlay_id ## _ethernet.dst_addr = underlay_dmac; \
     hdr. ## underlay_id ## _ethernet.src_addr = underlay_smac; \
@@ -113,13 +109,11 @@ action push_vxlan_tunnel_ ## underlay_id ## (inout headers_t hdr, \
 #ifdef TARGET_BMV2_V1MODEL
 #define PUSH_NVGRE_TUNNEL_DEF(underlay_id, overlay_id) \
 action push_nvgre_tunnel_ ## underlay_id ## (inout headers_t hdr, \
-                                       in EthernetAddress overlay_dmac, \
                                        in EthernetAddress underlay_dmac, \
                                        in EthernetAddress underlay_smac, \
                                        in IPv4Address underlay_dip, \
                                        in IPv4Address underlay_sip, \
                                        in bit<24> tunnel_key) { \
-    hdr. ## overlay_id ## _ethernet.dst_addr = overlay_dmac; \
     hdr. ## underlay_id ## _ethernet.setValid(); \
     hdr. ## underlay_id ## _ethernet.dst_addr = underlay_dmac; \
     hdr. ## underlay_id ## _ethernet.src_addr = underlay_smac; \
@@ -159,13 +153,11 @@ action push_nvgre_tunnel_ ## underlay_id ## (inout headers_t hdr, \
 #ifdef TARGET_DPDK_PNA
 #define PUSH_NVGRE_TUNNEL_DEF(underlay_id, overlay_id) \
 action push_nvgre_tunnel_ ## underlay_id ## (inout headers_t hdr, \
-                                       in EthernetAddress overlay_dmac, \
                                        in EthernetAddress underlay_dmac, \
                                        in EthernetAddress underlay_smac, \
                                        in IPv4Address underlay_dip, \
                                        in IPv4Address underlay_sip, \
                                        in bit<24> tunnel_key) { \
-    hdr. ## overlay_id ## _ethernet.dst_addr = overlay_dmac; \
     hdr. ## underlay_id ## _ethernet.setValid(); \
     hdr. ## underlay_id ## _ethernet.dst_addr = underlay_dmac; \
     hdr. ## underlay_id ## _ethernet.src_addr = underlay_smac; \
@@ -213,7 +205,6 @@ PUSH_NVGRE_TUNNEL_DEF(u1, u0)
 
 #define do_tunnel_encap(hdr, \
                     meta, \
-                    overlay_dmac, \
                     underlay_dmac, \
                     underlay_smac, \
                     underlay_dip, \
@@ -223,7 +214,6 @@ PUSH_NVGRE_TUNNEL_DEF(u1, u0)
     if (dash_encapsulation == dash_encapsulation_t.VXLAN) { \
         if (meta.tunnel_pointer == 0) { \
             push_vxlan_tunnel_u0(hdr, \
-                           overlay_dmac, \
                            underlay_dmac, \
                            underlay_smac, \
                            underlay_dip, \
@@ -231,7 +221,6 @@ PUSH_NVGRE_TUNNEL_DEF(u1, u0)
                            tunnel_key); \
         } else if (meta.tunnel_pointer == 1) { \
             push_vxlan_tunnel_u1(hdr, \
-                           overlay_dmac, \
                            underlay_dmac, \
                            underlay_smac, \
                            underlay_dip, \
@@ -241,7 +230,6 @@ PUSH_NVGRE_TUNNEL_DEF(u1, u0)
     } else if (dash_encapsulation == dash_encapsulation_t.NVGRE) { \
         if (meta.tunnel_pointer == 0) { \
             push_nvgre_tunnel_u0(hdr, \
-                           overlay_dmac, \
                            underlay_dmac, \
                            underlay_smac, \
                            underlay_dip, \
@@ -249,7 +237,6 @@ PUSH_NVGRE_TUNNEL_DEF(u1, u0)
                            tunnel_key); \
         } else if (meta.tunnel_pointer == 1) { \
             push_nvgre_tunnel_u1(hdr, \
-                           overlay_dmac, \
                            underlay_dmac, \
                            underlay_smac, \
                            underlay_dip, \

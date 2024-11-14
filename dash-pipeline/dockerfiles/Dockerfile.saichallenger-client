@@ -11,15 +11,15 @@ ADD SAI/rpc/saithrift-0.9.tar.gz /
 
 # Install the python libraries
 RUN cd /saithrift-0.9 && \
-        python3 setup.py install && \
+        pip3 install . && \
     cd / && \
         rm -rf saithrift-0.9 &&\
     cd thrift-0.11.0 && \
-        python3 setup.py install && \
+        pip3 install . && \
     cd / &&\
         rm -rf thrift-0.11.0 && \
     cd /SAI/test/ptf && \
-        python3 setup.py install && \
+        pip3 install . && \
     ln -s ${DASH_PATH}/test/test-cases/scale/saic ${SAI_CHALLENGER_PATH}/dash_tests
 
 CMD ["/usr/bin/supervisord"]

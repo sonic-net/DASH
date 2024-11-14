@@ -9,7 +9,7 @@ action push_action_nat64(
 {
     meta.routing_actions = meta.routing_actions | dash_routing_actions_t.NAT64;
     
-    meta.overlay_data.is_ipv6 = false;
+    meta.overlay_data.is_ipv6 = 0;
     meta.overlay_data.sip = (IPv4ORv6Address)src;
     meta.overlay_data.dip = (IPv4ORv6Address)dst;
 }
@@ -23,7 +23,7 @@ control do_action_nat64(
             return;
         }
 
-        REQUIRES(meta.overlay_data.is_ipv6 == false);
+        REQUIRES(meta.overlay_data.is_ipv6 == 0);
 
         hdr.u0_ipv4.setValid();
         hdr.u0_ipv4.version = 4;

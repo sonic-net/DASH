@@ -6,35 +6,7 @@
 #define MAX_ENI 64
 #define MAX_HA_SET 1
 
-enum bit<32> dash_routing_actions_t {
-    STATIC_ENCAP = (1 << 0),
-    NAT = (1 << 1),
-    NAT46 = (1 << 2),
-    NAT64 = (1 << 3),
-    NAT_PORT = (1 << 4),
-    TUNNEL = (1 << 5),
-    REVERSE_TUNNEL = (1 << 6)
-};
-
-enum bit<16> dash_direction_t {
-    INVALID = 0,
-    OUTBOUND = 1,
-    INBOUND = 2
-};
-
-enum bit<8> dash_packet_source_t {
-    EXTERNAL = 0,           // Packets from external sources.
-    DPAPP = 1,              // Packets from data plane app.
-    PEER = 2                // Packets from the paired DPU.
-};
-
-enum bit<8> dash_packet_type_t {
-    REGULAR = 0,            // Regular packets from external sources.
-    FLOW_SYNC_REQ = 1,      // Flow sync request packet.
-    FLOW_SYNC_ACK = 2,      // Flow sync ack packet.
-    DP_PROBE_REQ = 3,       // Data plane probe packet.
-    DP_PROBE_ACK = 4        // Data plane probe ack packet.
-};
+typedef dash_flow_action_t dash_routing_actions_t;
 
 // Pipeline stages:
 enum bit<16> dash_pipeline_stage_t {
@@ -54,74 +26,6 @@ enum bit<16> dash_pipeline_stage_t {
     ROUTING_ACTION_APPLY = 300
 };
 
-enum bit<16> dash_flow_enabled_key_t {
-    ENI_MAC = (1 << 0),
-    VNI = (1 << 1),
-    PROTOCOL = (1 << 2),
-    SRC_IP = (1 << 3),
-    DST_IP = (1 << 4),
-    SRC_PORT = (1 << 5),
-    DST_PORT = (1 << 6)
-}
-
-struct flow_table_data_t {
-    bit<16> id;
-    bit<32> max_flow_count;
-    dash_flow_enabled_key_t flow_enabled_key;
-    bit<32> flow_ttl_in_milliseconds;
-}
-
-enum bit<32> dash_flow_action_t {
-    NONE = 0
-}
-
-struct flow_key_t {
-    EthernetAddress eni_mac;
-    bit<8> ip_proto;
-    bit<16> vnet_id;
-    IPv4ORv6Address src_ip;
-    IPv4ORv6Address dst_ip;
-    bit<16> src_port;
-    bit<16> dst_port;
-    bool is_ipv6;
-}
-
-struct flow_data_t {
-    bit<32> version;
-    dash_direction_t dash_direction;
-    dash_flow_action_t actions;
-}
-
-enum bit<16> dash_flow_entry_bulk_get_session_mode_t {
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_GRPC = 0,
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_VENDOR = 1,
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_EVENT = 2,
-    SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE_EVENT_WITHOUT_FLOW_STATE = 3
-}
-
-enum bit<16> dash_flow_entry_bulk_get_session_filter_key_t
-{
-    INVAILD = 0,
-    FLOW_TABLE_ID = 1,
-    ENI_MAC = 2,
-    IP_PROTOCOL = 3,
-    SRC_IP_ADDR = 4,
-    DST_IP_ADDR = 5,
-    SRC_L4_PORT = 6,
-    DST_L4_PORT = 7,
-    KEY_VERSION = 8
-}
-
-enum bit<8> dash_flow_entry_bulk_get_session_op_key_t
-{
-    FILTER_OP_INVALID = 0,
-    FILTER_OP_EQUAL_TO = 1,
-    FILTER_OP_GREATER_THAN = 2,
-    FILTER_OP_GREATER_THAN_OR_EQUAL_TO = 3,
-    FILTER_OP_LESS_THAN = 4,
-    FILTER_OP_LESS_THAN_OR_EQUAL_TO = 5
-}
-
 enum bit<8> dash_eni_mac_override_type_t {
     NONE = 0,
     SRC_MAC = 1,
@@ -136,14 +40,6 @@ enum bit<8> dash_eni_mac_type_t {
 struct conntrack_data_t {
     bool allow_in;
     bool allow_out;
-    flow_table_data_t flow_table;
-    EthernetAddress eni_mac;
-    flow_data_t flow_data;
-    flow_key_t flow_key;
-    flow_key_t reverse_flow_key;
-    bit<1> is_unidirectional_flow;
-    bit<16> bulk_get_session_id;
-    bit<16> bulk_get_session_filter_id;
 }
 
 enum bit<16> dash_tunnel_dscp_mode_t {
@@ -175,24 +71,6 @@ struct meter_context_t {
     bit<32> meter_class_and;
     bit<16> meter_policy_id;
     IPv4ORv6Address meter_policy_lookup_ip;
-}
-
-struct encap_data_t {
-    bit<24> vni;
-    IPv4Address underlay_sip;
-    IPv4Address underlay_dip;
-    dash_encapsulation_t dash_encapsulation;
-    EthernetAddress underlay_smac;
-    EthernetAddress underlay_dmac;
-}
-
-struct overlay_rewrite_data_t {
-    bool is_ipv6;
-    EthernetAddress dmac;
-    IPv4ORv6Address sip;
-    IPv4ORv6Address dip;
-    IPv6Address sip_mask;
-    IPv6Address dip_mask;
 }
 
 // HA roles
@@ -233,22 +111,6 @@ enum bit<8> dash_ha_state_t {
     SWITCHING_TO_STANDALONE = 12
 };
 
-// Flow sync state
-enum bit<8> dash_ha_flow_sync_state_t {
-    FLOW_MISS = 0,                  // Flow not created yet
-    FLOW_CREATED = 1,               // Flow is created but not synched or waiting for ack
-    FLOW_SYNCED = 2,                // Flow has been synched to its peer
-    FLOW_PENDING_DELETE = 3,        // Flow is pending deletion, waiting for ack
-    FLOW_PENDING_RESIMULATION = 4   // Flow is marked as pending resimulation
-};
-
-// HA flow sync operations
-enum bit<8> dash_ha_flow_sync_op_t {
-    FLOW_CREATE = 0, // New flow creation.
-    FLOW_UPDATE = 1, // Flow resimulation or any other reason causing existing flow to be updated.
-    FLOW_DELETE = 2  // Flow deletion.
-};
-
 struct ha_data_t {
     // HA scope settings
     bit<16> ha_scope_id;
@@ -265,10 +127,41 @@ struct ha_data_t {
     bit<16> dp_channel_src_port_max;
     bit<1> peer_bounceback_ip_is_v6;
     IPv4ORv6Address peer_bounceback_ip;
-
-    // HA packet/flow state
-    dash_ha_flow_sync_state_t flow_sync_state;
 }
+
+#ifdef TARGET_DPDK_PNA
+// redefine encap_data_t -> meta_encap_data_t
+// redefine overlay_rewrite_data_t -> meta_overlay_rewrite_data_t
+// header in struct is not well supported for target dpdk-pna
+struct meta_flow_data_t {
+    bit<7> reserved;
+    bit<1> is_unidirectional;
+    dash_flow_sync_state_t sync_state;
+    dash_direction_t direction;
+    bit<32> version;
+    dash_flow_action_t actions;
+    dash_meter_class_t meter_class;
+}
+struct meta_encap_data_t {
+    bit<24> vni;
+    bit<8>  reserved;
+    IPv4Address underlay_sip;
+    IPv4Address underlay_dip;
+    EthernetAddress underlay_smac;
+    EthernetAddress underlay_dmac;
+    dash_encapsulation_t dash_encapsulation;
+}
+
+struct meta_overlay_rewrite_data_t {
+    EthernetAddress dmac;
+    IPv4ORv6Address sip;
+    IPv4ORv6Address dip;
+    IPv6Address sip_mask;
+    IPv6Address dip_mask;
+    bit<7> reserved;
+    bit<1> is_ipv6;
+}
+#endif // TARGET_DPDK_PNA
 
 struct metadata_t {
     // Packet type
@@ -279,7 +172,11 @@ struct metadata_t {
     dash_direction_t direction;
     dash_eni_mac_type_t eni_mac_type;
     dash_eni_mac_override_type_t eni_mac_override_type;
+#ifdef TARGET_DPDK_PNA
+    meta_encap_data_t rx_encap;
+#else
     encap_data_t rx_encap;
+#endif // TARGET_DPDK_PNA
     EthernetAddress eni_addr;
     bit<16> vnet_id;
     bit<16> dst_vnet_id;
@@ -310,24 +207,42 @@ struct metadata_t {
 
     // Flow data
     conntrack_data_t conntrack_data;
+#ifdef TARGET_DPDK_PNA
+    meta_flow_data_t flow_data;
+#else
+    flow_data_t flow_data;
+#endif // TARGET_DPDK_PNA
+    dash_flow_sync_state_t flow_sync_state;
+    flow_table_data_t flow_table;
+    bit<16> bulk_get_session_id;
+    bit<16> bulk_get_session_filter_id;
+    bool flow_enabled;
+    bool to_dpapp;
 
     // Stage transition control
     dash_pipeline_stage_t target_stage;
 
     // Actions
     bit<32> routing_actions;
-    bit<32> flow_actions;
 
     // Action data
     bool dropped;
-    // encap_data is for underlay
-    encap_data_t encap_data;
-    // tunnel_data is used by dash_tunnel_id
-    encap_data_t tunnel_data;
+#ifdef TARGET_DPDK_PNA
+    meta_encap_data_t u0_encap_data;
+    meta_encap_data_t u1_encap_data;
+    meta_overlay_rewrite_data_t overlay_data;
+#else
+    encap_data_t u0_encap_data;
+    encap_data_t u1_encap_data;
+    overlay_rewrite_data_t overlay_data;
+#endif // TARGET_DPDK_PNA
     bit<1> enable_reverse_tunnel_learning;
     IPv4Address reverse_tunnel_sip;
-    overlay_rewrite_data_t overlay_data;
     bit<16> dash_tunnel_id;
+    bit<32> dash_tunnel_max_member_size;
+    bit<16> dash_tunnel_member_index;
+    bit<16> dash_tunnel_member_id;
+    bit<16> dash_tunnel_next_hop_id;
     bit<32> meter_class;
     bit<8> local_region_id;
 }

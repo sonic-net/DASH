@@ -11,7 +11,7 @@ action push_action_nat46(
 {
     meta.routing_actions = meta.routing_actions | dash_routing_actions_t.NAT46;
     
-    meta.overlay_data.is_ipv6 = true;
+    meta.overlay_data.is_ipv6 = 1;
     meta.overlay_data.sip = sip;
     meta.overlay_data.sip_mask = sip_mask;
     meta.overlay_data.dip = dip;
@@ -27,7 +27,7 @@ control do_action_nat46(
             return;
         }
 
-        REQUIRES(meta.overlay_data.is_ipv6 == true);
+        REQUIRES(meta.overlay_data.is_ipv6 == 1);
 
         hdr.u0_ipv6.setValid();
         hdr.u0_ipv6.version = 6;

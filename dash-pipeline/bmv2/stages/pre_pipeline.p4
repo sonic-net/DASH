@@ -6,7 +6,9 @@ control pre_pipeline_stage(inout headers_t hdr,
 {
     action accept() {}
 
-    action set_appliance(bit<8> local_region_id) {
+    action set_appliance(
+        @SaiVal[create_only="true"]
+        bit<8> local_region_id) {
         meta.local_region_id = local_region_id;
     }
 
@@ -23,21 +25,23 @@ control pre_pipeline_stage(inout headers_t hdr,
         const default_action = accept;
     }
 
-    action set_underlay_mac(EthernetAddress neighbor_mac,
-                            EthernetAddress mac) {
-        meta.encap_data.underlay_dmac = neighbor_mac;
-        meta.encap_data.underlay_smac = mac;
+    action set_internal_config(EthernetAddress neighbor_mac,
+                            EthernetAddress mac,
+                            bit<1> flow_enabled) {
+        meta.u0_encap_data.underlay_dmac = neighbor_mac;
+        meta.u0_encap_data.underlay_smac = mac;
+        meta.flow_enabled = (bool)flow_enabled;
     }
 
-    /* This table API should be implemented manually using underlay SAI */
+    /* This table API should be implemented manually using SAI */
     @SaiTable[ignored = "true"]
-    table underlay_mac {
+    table internal_config {
         key = {
             meta.appliance_id : ternary;
         }
 
         actions = {
-            set_underlay_mac;
+            set_internal_config;
         }
     }
 
@@ -109,7 +113,7 @@ control pre_pipeline_stage(inout headers_t hdr,
 
         if (vip.apply().hit) {
             /* Use the same VIP that was in packet's destination if it's present in the VIP table */
-            meta.encap_data.underlay_sip = meta.rx_encap.underlay_dip;
+            meta.u0_encap_data.underlay_sip = meta.rx_encap.underlay_dip;
         } else {
             UPDATE_COUNTER(vip_miss_drop, 0);
 
@@ -118,7 +122,7 @@ control pre_pipeline_stage(inout headers_t hdr,
         }
 
         appliance.apply();
-        underlay_mac.apply();
+        internal_config.apply();
     }
 }
 
