@@ -2,6 +2,7 @@
 #define _DASH_STAGE_OUTBOUND_MAPPING_P4_
 
 #include "../dash_routing_types.p4"
+#include "../defines.h"
 
 control outbound_mapping_stage(
     inout headers_t hdr,
@@ -23,7 +24,7 @@ control outbound_mapping_stage(
             set_private_link_mapping(hdr, meta);
             @defaultonly drop(meta);
         }
-        size = 8 * 1024 * 1024;
+        size = TABLE_CA_TO_PA_SIZE;
         const default_action = drop(meta);
 
         ATTACH_TABLE_COUNTER(ca_to_pa_counter)
