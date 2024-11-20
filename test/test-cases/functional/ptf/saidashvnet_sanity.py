@@ -25,7 +25,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         # SAI address family
         self.sai_ip_addr_family = SAI_IP_ADDR_FAMILY_IPV4
 
-        self.dut_mac   = get_mac("veth0")
+        self.dut_mac = get_mac("veth0")
         self.neighbor_mac = get_mac("veth1")
         set_internal_config(neighbor_mac = mac_in_bytes(self.neighbor_mac),
                             mac = mac_in_bytes(self.dut_mac))

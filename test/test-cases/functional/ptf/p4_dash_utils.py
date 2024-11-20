@@ -47,7 +47,7 @@ class P4info():
 
 def set_internal_config(neighbor_mac :bytes = None,
                         mac :bytes = None,
-                        dpapp_mac :bytes = None,
+                        cpu_mac :bytes = None,
                         flow_enabled :bytes = None):
     '''
     Set dash pipeline internal config by updating table entry of internal_config.
@@ -91,8 +91,8 @@ def set_internal_config(neighbor_mac :bytes = None,
             changed += 1
 
         param = entry.action.action.params[2]
-        if dpapp_mac and dpapp_mac != param.value:
-            param.value = dpapp_mac
+        if cpu_mac and cpu_mac != param.value:
+            param.value = cpu_mac
             changed += 1
 
         param = entry.action.action.params[3]
@@ -132,8 +132,8 @@ def set_internal_config(neighbor_mac :bytes = None,
 
     param = action.params.add()
     param.param_id = 3
-    if dpapp_mac:
-        param.value = dpapp_mac
+    if cpu_mac:
+        param.value = cpu_mac
     else:   # default value
         param.value = b'\x00\x00\x00\x00\x00\x00'
 
@@ -160,7 +160,7 @@ def use_flow(cls):
         if _setUp is not None:
             _setUp(self, *args, **kwargs)
         print(f'*** Enable Flow lookup')
-        set_internal_config(dpapp_mac = mac_in_bytes(get_mac("veth5")),
+        set_internal_config(cpu_mac = mac_in_bytes(get_mac("veth5")),
                             flow_enabled = b'\x01')
         return
 
