@@ -243,6 +243,7 @@ struct metadata_t {
     bit<16> dash_tunnel_next_hop_id;
     bit<32> meter_class;
     bit<8> local_region_id;
+    EthernetAddress cpu_mac;
 }
 
 #endif /* _SIRIUS_METADATA_P4_ */

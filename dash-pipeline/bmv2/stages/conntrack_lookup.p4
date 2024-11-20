@@ -127,7 +127,7 @@ control conntrack_build_dash_header(inout headers_t hdr, in metadata_t meta,
         hdr.packet_meta.length = length + PACKET_META_HDR_SIZE;
 
         hdr.dp_ethernet.setValid();
-        hdr.dp_ethernet.dst_addr = DPAPP_MAC;
+        hdr.dp_ethernet.dst_addr = meta.cpu_mac;
         hdr.dp_ethernet.src_addr = meta.u0_encap_data.underlay_smac;
         hdr.dp_ethernet.ether_type = DASH_ETHTYPE;
     }

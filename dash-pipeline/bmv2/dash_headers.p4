@@ -254,7 +254,6 @@ header dash_packet_meta_t {
 const bit<16> PACKET_META_HDR_SIZE=dash_packet_meta_t.minSizeInBytes();
 
 #define DASH_ETHTYPE 0x876d
-#define DPAPP_MAC 0x02fe23f0e413    /* FIXME temp hardcode */
 
 struct headers_t {
     /* packet metadata headers */
