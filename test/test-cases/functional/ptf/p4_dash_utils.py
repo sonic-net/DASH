@@ -267,7 +267,7 @@ def verify_flow(eni_mac, vnet_id, packet, existed = True):
         sport = packet['UDP'].sport
         dport = packet['UDP'].dport
     else:   # TODO: later for other ip proto
-        assert(False)
+        assert False, "Not TCP/UDP packet"
 
     flow_table = P4FlowTable()
     flow = flow_table.get_flow_entry(eni_mac, vnet_id,
@@ -277,9 +277,9 @@ def verify_flow(eni_mac, vnet_id, packet, existed = True):
                                      dport,
                                      packet['IP'].proto)
     if existed:
-        assert(flow)
+        assert flow, "flow not found"
     else:
-        assert(not flow)
+        assert not flow, "flow still found"
 
 
 def verify_no_flow(eni_mac, vnet_id, packet):
