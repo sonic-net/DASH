@@ -6,7 +6,7 @@ set -m
 sysctl vm.nr_hugepages=32
 
 /usr/bin/vpp -c ${1:-/etc/vpp/startup.conf} &
-sleep 3
+sleep 5
 
 # Create a host interface which connects p4 bmv2 simple_switch
 HOST_INTERFACE=${HOST_INTERFACE:-veth5}

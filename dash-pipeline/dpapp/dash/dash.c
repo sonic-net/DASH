@@ -1,17 +1,3 @@
-/*
- * Copyright (c) 2015 Cisco and/or its affiliates.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at:
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 /**
  * @file
  * @brief Dash Plugin, plugin API / trace / CLI handling.
@@ -183,19 +169,15 @@ VNET_FEATURE_ARC_INIT (dash_pipeline, static) =
 static uword
 dash_timer_process (vlib_main_t * vm, vlib_node_runtime_t * rt, vlib_frame_t * f)
 {
-
-  int i;
   f64 sleep_duration = 1.0;
-
-  unix_sleep (5.0); /* FIXME: delay 5s */
 
   while (1)
   {
-      /* FIXME: Use time-wheel per-worker thread later */
-      //for (i = 1; i < vlib_get_n_threads(); i++) {
-          vlib_node_set_interrupt_pending (vlib_get_main_by_index(1),
-            dash_flow_scan_node.index);
-      //}
+      /*
+       * Notify the first worker thread to scan flow table
+       */
+      vlib_node_set_interrupt_pending (vlib_get_main_by_index(1),
+        dash_flow_scan_node.index);
 
       vlib_process_suspend (vm, sleep_duration);
   }

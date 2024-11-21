@@ -311,6 +311,8 @@ dash_flow_show_walk_cb (BVT (clib_bihash_kv) * kvp, void *arg)
           offsetof(dash_flow_entry_t, flow_data));
 
   vlib_cli_output (ctx->vm, "%6u: %U", flow->index, dash_flow_format, flow);
+
+  return BIHASH_WALK_CONTINUE;
 }
 
 static clib_error_t *
@@ -382,13 +384,13 @@ dash_cmd_show_flow_stats_fn (vlib_main_t * vm,
   clib_error_t *error = 0;
   dash_flow_table_t *flow_table = dash_flow_table_get();
 
-  vlib_cli_output (vm, "%10s: %u", "create_ok",
+  vlib_cli_output (vm, "%12s: %u", "create_ok",
                    flow_table->flow_stats.create_ok);
-  vlib_cli_output (vm, "%10s: %u", "create_fail",
+  vlib_cli_output (vm, "%12s: %u", "create_fail",
                    flow_table->flow_stats.create_fail);
-  vlib_cli_output (vm, "%10s: %u", "remove_ok",
+  vlib_cli_output (vm, "%12s: %u", "remove_ok",
                    flow_table->flow_stats.remove_ok);
-  vlib_cli_output (vm, "%10s: %u", "remove_fail",
+  vlib_cli_output (vm, "%12s: %u", "remove_fail",
                    flow_table->flow_stats.remove_fail);
 
   return error;
