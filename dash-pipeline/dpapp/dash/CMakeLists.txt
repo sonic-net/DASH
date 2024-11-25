@@ -18,13 +18,13 @@ include_directories(${CMAKE_BINARY_DIR})
 
 add_vpp_plugin(dash
   SOURCES
-  node.c
   dash.c
+  dash_node.c
   flow.c
   saiapi.c
 
   MULTIARCH_SOURCES
-  node.c
+  dash_node.c
 
   API_FILES
   dash.api
