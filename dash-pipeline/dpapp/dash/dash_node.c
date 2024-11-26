@@ -103,58 +103,58 @@ static inline dash_error_t process_one_buffer(vlib_buffer_t *buffer)
 VLIB_NODE_FN (dash_node) (vlib_main_t * vm, vlib_node_runtime_t * node,
                           vlib_frame_t * frame)
 {
-    u32 n_left_from, *from, *to_next;
+    u32 current_pkt_vector_size, *current_pkt_vector, *next_pkt_vector;
     dash_next_t next_index;
     dash_error_t error;
     u32 pkts_counter[DASH_N_ERROR] = { 0 };
 
-    from = vlib_frame_vector_args (frame);
-    n_left_from = frame->n_vectors;
+    current_pkt_vector = vlib_frame_vector_args (frame);
+    current_pkt_vector_size = frame->n_vectors;
     next_index = node->cached_next_index;
 
-    while (n_left_from > 0)
+    while (current_pkt_vector_size > 0)
     {
-        u32 n_left_to_next;
+        u32 next_pkt_vector_left_size;
 
-        vlib_get_next_frame (vm, node, next_index, to_next, n_left_to_next);
+        vlib_get_next_frame (vm, node, next_index, next_pkt_vector, next_pkt_vector_left_size);
 
-        while (n_left_from > 0 && n_left_to_next > 0)
+        while (current_pkt_vector_size > 0 && next_pkt_vector_left_size > 0)
         {
-            u32 bi0;
-            vlib_buffer_t *b0;
-            u32 next0 = DASH_NEXT_INTERFACE_OUTPUT;
+            u32 buffer_index;
+            vlib_buffer_t *buffer;
+            u32 dst_next_index = DASH_NEXT_INTERFACE_OUTPUT;
 
             /* speculatively enqueue buffer to the current next frame */
-            bi0 = from[0];
-            to_next[0] = bi0;
-            from += 1;
-            to_next += 1;
-            n_left_from -= 1;
-            n_left_to_next -= 1;
+            buffer_index = current_pkt_vector[0];
+            next_pkt_vector[0] = buffer_index;
+            current_pkt_vector += 1;
+            next_pkt_vector += 1;
+            current_pkt_vector_size -= 1;
+            next_pkt_vector_left_size -= 1;
 
-            b0 = vlib_get_buffer (vm, bi0);
-            error = process_one_buffer (b0);
+            buffer = vlib_get_buffer (vm, buffer_index);
+            error = process_one_buffer (buffer);
             if (error != DASH_ERROR_OK) {
-                next0 = DASH_NEXT_DROP;
+                dst_next_index = DASH_NEXT_DROP;
             }
 
             pkts_counter[error] += 1;
 
             if (PREDICT_FALSE ((node->flags & VLIB_NODE_FLAG_TRACE) &&
-                               (b0->flags & VLIB_BUFFER_IS_TRACED)))
+                               (buffer->flags & VLIB_BUFFER_IS_TRACED)))
             {
-                dash_trace_t *t = vlib_add_trace (vm, node, b0, sizeof (*t));
-                t->next_index = next0;
+                dash_trace_t *t = vlib_add_trace (vm, node, buffer, sizeof (*t));
+                t->next_index = dst_next_index;
                 t->error = error;
             }
 
             /* verify speculative enqueue, maybe switch current next frame */
             vlib_validate_buffer_enqueue_x1 (vm, node, next_index,
-                                             to_next, n_left_to_next,
-                                             bi0, next0);
+                                             next_pkt_vector, next_pkt_vector_left_size,
+                                             buffer_index, dst_next_index);
         }
 
-        vlib_put_next_frame (vm, node, next_index, n_left_to_next);
+        vlib_put_next_frame (vm, node, next_index, next_pkt_vector_left_size);
     }
 
     for (error = 0; error < DASH_N_ERROR; error++) {
