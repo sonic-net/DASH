@@ -1,6 +1,8 @@
 import grpc
 from p4.v1 import p4runtime_pb2
 from p4.v1 import p4runtime_pb2_grpc
+from ipaddress import ip_address
+from scapy.all import *
 
 
 def get_mac(interface):
@@ -175,3 +177,110 @@ def use_flow(cls):
     setattr(cls, "tearDown", tearDown)
     return cls
 
+
+class P4Table():
+    def __init__(self):
+        channel = grpc.insecure_channel('localhost:9559')
+        self.stub = p4runtime_pb2_grpc.P4RuntimeStub(channel)
+        self.p4info = P4info(self.stub)
+
+    def read(self, table_id, match_list = None):
+        entry = p4runtime_pb2.TableEntry()
+        entry.table_id = table_id
+        if match_list:
+            entry.match.extend(match_list)
+
+        req = p4runtime_pb2.ReadRequest()
+        req.device_id = 0
+        entity = req.entities.add()
+        entity.table_entry.CopyFrom(entry)
+        for response in self.stub.Read(req):
+            for entity in response.entities:
+                yield entity.table_entry
+
+
+class P4FlowTable(P4Table):
+    def __init__(self):
+        super(P4FlowTable, self).__init__()
+        self.p4info_table_flow = self.p4info.get_table("dash_ingress.conntrack_lookup_stage.flow_entry")
+
+    def print_flow_table(self):
+        for entry in self.read(self.p4info_table_flow.preamble.id):
+            print(entry)
+
+    def get_flow_entry(self, eni_mac, vnet_id,
+                       src_ip, dst_ip,
+                       src_port, dst_port, ip_proto):
+        match_list = []
+
+        match = p4runtime_pb2.FieldMatch()
+        match.field_id = 1
+        match.exact.value = mac_in_bytes(eni_mac)
+        match_list.append(match)
+
+        match = p4runtime_pb2.FieldMatch()
+        match.field_id = 2
+        match.exact.value = vnet_id.to_bytes(2, byteorder='big')
+        match_list.append(match)
+
+        match = p4runtime_pb2.FieldMatch()
+        match.field_id = 3
+        match.exact.value = ip_address(src_ip).packed
+        match_list.append(match)
+
+        match = p4runtime_pb2.FieldMatch()
+        match.field_id = 4
+        match.exact.value = ip_address(dst_ip).packed
+        match_list.append(match)
+
+        match = p4runtime_pb2.FieldMatch()
+        match.field_id = 5
+        match.exact.value = src_port.to_bytes(2, byteorder='big')
+        match_list.append(match)
+
+        match = p4runtime_pb2.FieldMatch()
+        match.field_id = 6
+        match.exact.value = dst_port.to_bytes(2, byteorder='big')
+        match_list.append(match)
+
+        match = p4runtime_pb2.FieldMatch()
+        match.field_id = 7
+        match.exact.value = ip_proto.to_bytes(1, byteorder='big')
+        match_list.append(match)
+
+        match = p4runtime_pb2.FieldMatch()
+        match.field_id = 8
+        match.exact.value = b'\x00' if ip_address(src_ip).version == 4 else b'\x01'
+        match_list.append(match)
+
+        for entry in self.read(self.p4info_table_flow.preamble.id, match_list):
+            return entry
+
+        return None
+
+
+def verify_flow(eni_mac, vnet_id, packet, existed = True):
+    if packet.haslayer(TCP):
+        sport = packet['TCP'].sport
+        dport = packet['TCP'].dport
+    elif packet.haslayer(UDP):
+        sport = packet['UDP'].sport
+        dport = packet['UDP'].dport
+    else:   # TODO: later for other ip proto
+        assert False, "Not TCP/UDP packet"
+
+    flow_table = P4FlowTable()
+    flow = flow_table.get_flow_entry(eni_mac, vnet_id,
+                                     packet['IP'].src,
+                                     packet['IP'].dst,
+                                     sport,
+                                     dport,
+                                     packet['IP'].proto)
+    if existed:
+        assert flow, "flow not found"
+    else:
+        assert not flow, "flow still found"
+
+
+def verify_no_flow(eni_mac, vnet_id, packet):
+    verify_flow(eni_mac, vnet_id, packet, existed = False)

@@ -62,18 +62,24 @@ jobs:
       run:  make docker-bmv2-bldr
     - name: Generate SAI API
       run:  DOCKER_FLAGS=$docker_fg_flags make sai
+    - name: Pull/Build docker dpapp image
+      run:  make docker-dash-dpapp
+    - name: Build bmv2 dpapp
+      run:  DOCKER_FLAGS=$docker_fg_flags make dpapp
     - name: Check if SAI spec is updated
       run:  DOCKER_FLAGS=$docker_fg_flags make check-sai-spec
     - name: Build libsai c++ tests
       run:  DOCKER_FLAGS=$docker_fg_flags make test
     - name: Prepare network
-      run:  DOCKER_FLAGS=$docker_fg_flags make network
+      run:  DOCKER_FLAGS=$docker_fg_flags make network HAVE_DPAPP=y
     - name: Run P4 software switch (bmv2) with P4Runtime
-      run:  DOCKER_FLAGS=$docker_bg_flags make run-switch
+      run:  DOCKER_FLAGS=$docker_bg_flags make run-switch HAVE_DPAPP=y
     - name: Force bmv2 to load forwarding pipeline config via dummy libsai call
       run:  DOCKER_FLAGS=$docker_fg_flags make init-switch
     - name: Test SAI library over P4RT to switch
       run:  DOCKER_FLAGS=$docker_fg_flags make run-libsai-test
+    - name: Run dpapp
+      run:  DOCKER_FLAGS=$docker_bg_flags make run-dpapp HAVE_DPAPP=y
     - name: Generate saithrift-server
       run:  DOCKER_FLAGS=$docker_fg_flags make saithrift-server
     - name: Generate saithrift-client local docker
