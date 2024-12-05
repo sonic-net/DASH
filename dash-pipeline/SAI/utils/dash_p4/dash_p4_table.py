@@ -5,7 +5,8 @@ from .dash_p4_counter import *
 from .dash_p4_table_action_param import *
 from .dash_p4_table_key import *
 from .dash_p4_table_action import *
-from ..sai_spec import SaiApi, SaiStruct, SaiEnum, SaiEnumMember, SaiAttribute, SaiApiP4MetaAction, SaiApiP4MetaTable
+from ..sai_spec import SaiApi, SaiStruct, SaiEnum, SaiEnumMember, SaiAttribute, \
+     SaiApiP4MetaAction, SaiApiP4MetaActionParam, SaiApiP4MetaKey, SaiApiP4MetaTable
 
 
 @dash_p4rt_parser
@@ -264,24 +265,31 @@ class DashP4Table(DashP4Object):
     #
     def to_sai(self) -> SaiApi:
         sai_api = SaiApi(self.name, self.name.replace('_', ' '), self.is_object != "false")
-        sai_api.p4_meta.tables.append(SaiApiP4MetaTable(self.id))
+        sai_api.p4_meta.tables.append(SaiApiP4MetaTable(self.id, self.stage))
 
         self.create_sai_action_enum(sai_api)
         self.create_sai_structs(sai_api)
         self.create_sai_attributes(sai_api)
         self.create_sai_stats(sai_api)
+        self.create_p4_meta_keys(sai_api)
 
         return sai_api
 
-    def create_sai_action_enum(self, sai_api: SaiApi) -> None:
-        # If the table represents an SAI object, it should not have an action enum.
-        # If the table has only 1 action, we don't need to create the action enum.
-        if len(self.actions) <= 1 and self.is_object != "false":
-            # We still need to create the p4 meta action here for generating default action code in libsai.
-            if len(self.actions) == 1:
-                sai_api.p4_meta.tables[0].actions["default"] = SaiApiP4MetaAction("default", self.actions[0].id)
-            return
+    def create_p4_meta_keys(self, sai_api: SaiApi) -> None:
+        for key in self.keys:
+            sai_api.p4_meta.tables[0].keys.append(
+                SaiApiP4MetaKey(
+                    name=key.name,
+                    id=key.id,
+                    match_type=key.match_type,
+                    field=key.field,
+                    bitwidth=key.bitwidth,
+                    ip_is_v6_field_id=key.ip_is_v6_field_id,
+                    is_object_key=key.is_object_key,
+                )
+            )
 
+    def create_sai_action_enum(self, sai_api: SaiApi) -> None:
         action_enum_member_value = 0
         action_enum_members: List[SaiEnumMember] = []
         for action in self.actions:
@@ -301,11 +309,23 @@ class DashP4Table(DashP4Object):
             )
 
             for action_param in action.params:
-                p4_meta_action.attr_param_id[action_param.get_sai_name(self.name)] = action_param.id
+                p4_meta_action.attr_params[action_param.get_sai_name(self.name)] = \
+                    SaiApiP4MetaActionParam(
+                        id=action_param.id,
+                        field=action_param.field,
+                        bitwidth=action_param.bitwidth,
+                        ip_is_v6_field_id=action_param.ip_is_v6_field_id,
+                        skipattr=action_param.skipattr,
+                    )
 
             sai_api.p4_meta.tables[0].actions[action_enum_member_name] = p4_meta_action
 
             action_enum_member_value += 1
+
+        # If the table represents an SAI object, it should not have an action enum.
+        # If the table has only 1 action, we don't need to create the action enum.
+        if len(self.actions) <= 1 and self.is_object != "false":
+            return
 
         action_enum_type_name = f"sai_{self.name.lower()}_action_t"
 

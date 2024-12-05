@@ -7,4 +7,5 @@ from .sai_enum_member import SaiEnumMember
 from .sai_struct import SaiStruct
 from .sai_struct_entry import SaiStructEntry
 from .sai_attribute import SaiAttribute
-from .sai_api_p4_meta import SaiApiP4Meta, SaiApiP4MetaTable, SaiApiP4MetaAction
+from .sai_api_p4_meta import SaiApiP4Meta, SaiApiP4MetaTable, \
+    SaiApiP4MetaAction, SaiApiP4MetaActionParam, SaiApiP4MetaKey

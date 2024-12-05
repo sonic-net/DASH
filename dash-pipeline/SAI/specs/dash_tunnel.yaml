@@ -80,11 +80,51 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 49206552
+      stage: null
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dash_tunnel_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: true
       actions:
-        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
-          name: default
+        SAI_DASH_TUNNEL_ACTION_SET_TUNNEL_ATTRS: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_TUNNEL_ACTION_SET_TUNNEL_ATTRS
           id: 27084508
-          attr_param_id: {}
+          attr_params:
+            SAI_DASH_TUNNEL_ATTR_DASH_ENCAPSULATION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 1
+              field: s32
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_DASH_TUNNEL_ATTR_TUNNEL_KEY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 2
+              field: u32
+              bitwidth: 24
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_DASH_TUNNEL_ATTR_MAX_MEMBER_SIZE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 3
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_DASH_TUNNEL_ATTR_DIP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 4
+              field: ipaddr
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_DASH_TUNNEL_ATTR_SIP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 5
+              field: ipaddr
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: dash_tunnel_member
   description: DASH tunnel member
@@ -123,11 +163,33 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 41269458
+      stage: null
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dash_tunnel_member_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: true
       actions:
-        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
-          name: default
+        SAI_DASH_TUNNEL_MEMBER_ACTION_SET_TUNNEL_MEMBER_ATTRS: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_TUNNEL_MEMBER_ACTION_SET_TUNNEL_MEMBER_ATTRS
           id: 19698973
-          attr_param_id: {}
+          attr_params:
+            SAI_DASH_TUNNEL_MEMBER_ATTR_DASH_TUNNEL_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 1
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_DASH_TUNNEL_MEMBER_ATTR_DASH_TUNNEL_NEXT_HOP_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 2
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: dash_tunnel_next_hop
   description: DASH tunnel next hop
@@ -153,8 +215,24 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 37329198
+      stage: null
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dash_tunnel_next_hop_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: true
       actions:
-        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
-          name: default
+        SAI_DASH_TUNNEL_NEXT_HOP_ACTION_SET_TUNNEL_NEXT_HOP_ATTRS: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_TUNNEL_NEXT_HOP_ACTION_SET_TUNNEL_NEXT_HOP_ATTRS
           id: 17571304
-          attr_param_id: {}
+          attr_params:
+            SAI_DASH_TUNNEL_NEXT_HOP_ATTR_DIP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 1
+              field: ipaddr
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null

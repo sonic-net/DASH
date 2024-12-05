@@ -405,11 +405,81 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 45319666
+      stage: null
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: ha_set_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: true
       actions:
-        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
-          name: default
+        SAI_HA_SET_ACTION_SET_HA_SET_ATTR: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_HA_SET_ACTION_SET_HA_SET_ATTR
           id: 21324178
-          attr_param_id: {}
+          attr_params:
+            SAI_HA_SET_ATTR_LOCAL_IP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 2
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 1
+              skipattr: null
+            SAI_HA_SET_ATTR_PEER_IP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 4
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 3
+              skipattr: null
+            SAI_HA_SET_ATTR_CP_DATA_CHANNEL_PORT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 5
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_HA_SET_ATTR_DP_CHANNEL_DST_PORT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 6
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_HA_SET_ATTR_DP_CHANNEL_MIN_SRC_PORT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 7
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_HA_SET_ATTR_DP_CHANNEL_MAX_SRC_PORT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 8
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_HA_SET_ATTR_DP_CHANNEL_PROBE_INTERVAL_MS: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 9
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_HA_SET_ATTR_DP_CHANNEL_PROBE_FAIL_THRESHOLD: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 10
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_HA_SET_ATTR_DP_CHANNEL_IS_ALIVE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 11
+              field: booldata
+              bitwidth: 1
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_HA_SET_ATTR_DPU_DRIVEN_HA_SWITCHOVER_WAIT_TIME_MS: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 12
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: ha_scope
   description: HA scope
@@ -552,8 +622,78 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 49681752
+      stage: null
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: ha_scope_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: true
       actions:
-        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
-          name: default
+        SAI_HA_SCOPE_ACTION_SET_HA_SCOPE_ATTR: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_HA_SCOPE_ACTION_SET_HA_SCOPE_ATTR
           id: 25507507
-          attr_param_id: {}
+          attr_params:
+            SAI_HA_SCOPE_ATTR_HA_SET_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 1
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_HA_SCOPE_ATTR_DASH_HA_ROLE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 2
+              field: s32
+              bitwidth: 8
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_HA_SCOPE_ATTR_FLOW_VERSION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 3
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_HA_SCOPE_ATTR_FLOW_RECONCILE_REQUESTED: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 4
+              field: booldata
+              bitwidth: 1
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_HA_SCOPE_ATTR_FLOW_RECONCILE_NEEDED: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 5
+              field: booldata
+              bitwidth: 1
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_HA_SCOPE_ATTR_VIP_V4: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 6
+              field: ipaddr
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_HA_SCOPE_ATTR_VIP_V6: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 7
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_HA_SCOPE_ATTR_ADMIN_STATE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 8
+              field: booldata
+              bitwidth: 1
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_HA_SCOPE_ATTR_ACTIVATE_ROLE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 9
+              field: booldata
+              bitwidth: 1
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_HA_SCOPE_ATTR_DASH_HA_STATE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 10
+              field: s32
+              bitwidth: 8
+              ip_is_v6_field_id: 0
+              skipattr: null

@@ -295,54 +295,207 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 38546097
+      stage: null
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: outbound_routing_group_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: destination
+        id: 3
+        match_type: lpm
+        field: ipPrefix
+        bitwidth: 128
+        ip_is_v6_field_id: 2
+        is_object_key: false
       actions:
         SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET
           id: 21392322
-          attr_param_id:
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID: 1
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_TUNNEL_ID: 2
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR: 3
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND: 4
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: 5
+          attr_params:
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 1
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_TUNNEL_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 2
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 3
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 4
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 5
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
         SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_VNET_DIRECT
           id: 24813914
-          attr_param_id:
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID: 1
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_TUNNEL_ID: 2
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_IP: 4
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR: 5
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND: 6
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: 7
+          attr_params:
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DST_VNET_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 1
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_TUNNEL_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 2
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_IP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 4
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 3
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 5
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 6
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 7
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
         SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_DIRECT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_DIRECT
           id: 31102279
-          attr_param_id:
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_TUNNEL_ID: 1
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR: 2
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND: 3
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: 4
+          attr_params:
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_TUNNEL_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 1
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 2
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 3
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 4
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
         SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_SERVICE_TUNNEL: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_ROUTE_SERVICE_TUNNEL
           id: 26982790
-          attr_param_id:
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_DIP: 2
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_DIP_MASK: 4
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_SIP: 6
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_SIP_MASK: 8
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_UNDERLAY_DIP: 10
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_UNDERLAY_SIP: 12
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_ENCAPSULATION: 13
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_TUNNEL_KEY: 14
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_TUNNEL_ID: 15
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR: 16
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND: 17
-            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: 18
+          attr_params:
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_DIP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 2
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 1
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_DIP_MASK: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 4
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 3
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_SIP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 6
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 5
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_OVERLAY_SIP_MASK: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 8
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 7
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_UNDERLAY_DIP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 10
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 9
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_UNDERLAY_SIP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 12
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 11
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_ENCAPSULATION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 13
+              field: s32
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_TUNNEL_KEY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 14
+              field: u32
+              bitwidth: 24
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_DASH_TUNNEL_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 15
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 16
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 17
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_ROUTING_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 18
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
         SAI_OUTBOUND_ROUTING_ENTRY_ACTION_DROP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_OUTBOUND_ROUTING_ENTRY_ACTION_DROP
           id: 18759588
-          attr_param_id: {}
+          attr_params: {}
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: outbound_routing_group
   description: outbound routing group
@@ -368,8 +521,24 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 40572680
+      stage: null
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: outbound_routing_group_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: true
       actions:
-        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
-          name: default
+        SAI_OUTBOUND_ROUTING_GROUP_ACTION_SET_OUTBOUND_ROUTING_GROUP_ATTR: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_OUTBOUND_ROUTING_GROUP_ACTION_SET_OUTBOUND_ROUTING_GROUP_ATTR
           id: 30077100
-          attr_param_id: {}
+          attr_params:
+            SAI_OUTBOUND_ROUTING_GROUP_ATTR_DISABLED: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 1
+              field: booldata
+              bitwidth: 1
+              ip_is_v6_field_id: 0
+              skipattr: null
