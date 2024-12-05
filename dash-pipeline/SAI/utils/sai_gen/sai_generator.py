@@ -44,9 +44,6 @@ class SAIGenerator:
         if sai_api.api_type != "underlay":
             self.generate_dash_sai_definitions_for_api(unique_sai_api)
 
-        # Generate SAI API implementation for all APIs.
-        self.generate_sai_impl_file_for_api(sai_api)
-
     def generate_dash_sai_definitions_for_api(self, sai_api: DashP4TableGroup) -> None:
         # SAI header file
         sai_header_file_name = (

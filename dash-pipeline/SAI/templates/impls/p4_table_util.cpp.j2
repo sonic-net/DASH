@@ -1,0 +1,70 @@
+{% macro set_key_exact(key, value) %}
+        auto mf_exact = mf->mutable_exact();
+    {% if key.field in ['ipaddr','mac'] or key.bitwidth in [24] %}
+        {{key.field}}SetVal({{value}}, mf_exact, {{key.bitwidth}});
+    {%- else %}
+        {{key.field}}SetVal(static_cast<uint{{key.bitwidth}}_t>({{value}}), mf_exact, {{key.bitwidth}});
+    {%- endif %}
+{%- endmacro -%}
+
+{% macro set_key_in_attr_exact(key, value) %}
+        auto mf_exact = mf->mutable_exact();
+        {{key.field}}SetVal({{value}}, mf_exact, {{key.bitwidth}});
+{%- endmacro -%}
+
+{% macro set_key_lpm(key, value) %}
+    {% if key.field == 'ipPrefix' %}
+        if (getPrefixLength({{value}}) == 0)
+        {
+            // https://github.com/p4lang/PI/blob/24e0a3c08c964e36d235973556b90e0ae922b894/proto/frontend/src/device_mgr.cpp#L2242-L2246
+            DASH_LOG_WARN("Invalid reprsentation of 'don't care' LPM match, omit match field instead of using a prefix length of 0");
+            return SAI_STATUS_SUCCESS;
+        }
+    {% endif %}
+        auto mf_lpm = mf->mutable_lpm();
+        {{key.field}}SetVal({{value}}, mf_lpm, {{key.bitwidth}});
+{%- endmacro -%}
+
+{% macro set_key_in_attr_ternary(api, key, value) %}
+        auto mf_ternary = mf->mutable_ternary();
+        {{key.field}}SetVal({{value}}, mf_ternary, {{key.bitwidth}});
+        auto mask = getMaskAttr(SAI_{{ api.name | upper }}_ATTR_{{ key.name | upper }}_MASK, attr_count, attr_list);
+        assert(mask && "SAI_{{ api.name | upper }}_ATTR_{{ key.name | upper }}_MASK isn't provided");
+        {{key.field}}SetMask(mask->value, mf_ternary, {{key.bitwidth}});
+{%- endmacro -%}
+
+{% macro set_key_ternary(key, value) %}
+        auto mf_ternary = mf->mutable_ternary();
+        {{key.field}}SetVal({{value}}, mf_ternary, {{key.bitwidth}});
+        {{key.field}}SetMask({{value}}_mask, mf_ternary, {{key.bitwidth}});
+        matchActionEntry->set_priority(tableEntry->priority);
+{%- endmacro -%}
+
+{% macro set_key_optional(key, value) %}
+        auto mf_optional = mf->mutable_optional();
+        {{key.field}}SetVal({{value}}, mf_optional, {{key.bitwidth}});
+{%- endmacro -%}
+
+{% macro set_key_list(key, value) %}
+        // BMv2 doesn't support "list" match type, and we are using "optional" match in v1model as our implementation.
+        // Hence, here we only take the first item from the list and program it as optional match.
+        assert({{value}}.{{key.field}}.count == 1 && "BMv2 only supports one item in list match type");
+        auto mf_optional = mf->mutable_optional();
+        sai_attribute_value_t attr_val;
+    {% if key.field == 'ipprefixlist' %}
+        attr_val.ipaddr.addr_family = {{value}}.ipprefixlist.list[0].addr_family;
+        attr_val.ipaddr.addr = {{value}}.ipprefixlist.list[0].addr;
+        ipaddrSetVal(attr_val, mf_optional, {{key.bitwidth}});
+    {%- else %}
+        attr_val.{{ key.field | replace('list', '') }} = {{value}}.{{key.field}}.list[0];
+        {{ key.field | replace('list', '') }}SetVal(attr_val, mf_optional, {{key.bitwidth}});
+    {%- endif %}
+{%- endmacro -%}
+
+{% macro set_key_range_list(key, value) %}
+        // BMv2 doesn't support "range_list" match type, and we are using "optional" match in v1model as our implementation.
+        // Hence, here we only take the first item from the list and program the range start as optional match.
+        assert(attr_list[i].value.{{key.field}}.count == 1 && "BMv2 only supports one item in list match type");
+        auto mf_optional = mf->mutable_optional();
+        {{ key.field | replace('rangelist', '') }}SetVal(attr_list[i].value.{{key.field}}.list[0].min, mf_optional, {{key.bitwidth}});
+{%- endmacro -%}

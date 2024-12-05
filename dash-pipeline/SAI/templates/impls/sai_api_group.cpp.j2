@@ -1,0 +1,46 @@
+#include "utils.h"
+#include "saiimpl.h"
+
+extern "C" {
+#include "saimetadata.h"
+}
+
+using namespace dash::utils;
+
+
+{% for api in api_group.sai_apis %}
+{% set table = api.p4_meta.tables[0] -%}
+{% include 'templates/impls/sai_api_func_quad.cpp.j2' %}
+
+{% if api.stats | length > 0 %}
+{% include 'templates/impls/sai_api_func_stats.cpp.j2' %}
+
+{% endif %}
+{% include 'templates/impls/sai_api_func_bulk.cpp.j2' %}
+
+{% endfor %}
+/* TODO [cs] Generate .h file for _impl to use within sai_api_query() */
+sai_{{ api_group.name }}_api_t dash_sai_{{ api_group.name }}_api_impl = {
+{% for api in api_group.sai_apis %}
+    .create_{{ api.name }} = dash_sai_create_{{ api.name }},
+    .remove_{{ api.name }} = dash_sai_remove_{{ api.name }},
+    .set_{{ api.name }}_attribute = dash_sai_set_{{ api.name }}_attribute,
+    .get_{{ api.name }}_attribute = dash_sai_get_{{ api.name }}_attribute,
+{% if api.stats | length > 0 %}
+    .get_{{ api.name }}_stats = dash_sai_get_{{ api.name }}_stats,
+    .get_{{ api.name }}_stats_ext = dash_sai_get_{{ api.name }}_stats_ext,
+    .clear_{{ api.name }}_stats = dash_sai_clear_{{ api.name }}_stats,
+{% endif %}
+{% if api.is_object %}
+    .create_{{ api.name }}s = dash_sai_create_{{ api.name }}s,
+    .remove_{{ api.name }}s = dash_sai_remove_{{ api.name }}s,
+{% else %}
+    .create_{{ api.name | replace("entry", "entries") }} = dash_sai_create_{{ api.name | replace("entry", "entries") }},
+    .remove_{{ api.name | replace("entry", "entries") }} = dash_sai_remove_{{ api.name | replace("entry", "entries") }},
+{% endif %}
+{% if api.name == 'route_entry' %}
+    .set_{{ api.name | replace("entry", "entries") }}_attribute = dash_sai_set_{{ api.name | replace("entry", "entries") }}_attribute,
+    .get_{{ api.name | replace("entry", "entries") }}_attribute = dash_sai_get_{{ api.name | replace("entry", "entries") }}_attribute,
+{% endif %}
+{% endfor %}
+};

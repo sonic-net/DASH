@@ -16,7 +16,7 @@ try:
     from utils.dash_p4 import DashP4SAIExtensions
     from utils.p4ir import P4IRTree, P4VarRefGraph
     from utils.sai_spec import SaiSpec
-    from utils.sai_gen import SAIGenerator, SaiHeaderGenerator
+    from utils.sai_gen import SAIGenerator, SaiHeaderGenerator, SaiImplGenerator
 except ImportError as ie:
     print("Import failed for " + ie.name)
     exit(1)
@@ -75,3 +75,4 @@ if __name__ == "__main__":
     # Generate and update all SAI files
     SAIGenerator(dash_sai_exts).generate()
     SaiHeaderGenerator(sai_spec).generate()
+    SaiImplGenerator(sai_spec).generate()
