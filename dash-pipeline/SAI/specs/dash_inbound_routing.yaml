@@ -142,25 +142,76 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 35881437
+      stage: null
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: eni_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: VNI
+        id: 2
+        match_type: exact
+        field: u32
+        bitwidth: 24
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: sip
+        id: 3
+        match_type: ternary
+        field: ipaddr
+        bitwidth: 32
+        ip_is_v6_field_id: 0
+        is_object_key: false
       actions:
         SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP
           id: 26741158
-          attr_param_id:
-            SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR: 1
-            SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND: 2
+          attr_params:
+            SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 1
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 2
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
         SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_INBOUND_ROUTING_ENTRY_ACTION_TUNNEL_DECAP_PA_VALIDATE
           id: 26064107
-          attr_param_id:
-            SAI_INBOUND_ROUTING_ENTRY_ATTR_SRC_VNET_ID: 1
-            SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR: 2
-            SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND: 3
+          attr_params:
+            SAI_INBOUND_ROUTING_ENTRY_ATTR_SRC_VNET_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 1
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_OR: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 2
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_INBOUND_ROUTING_ENTRY_ATTR_METER_CLASS_AND: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 3
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
         SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP
           id: 24482615
-          attr_param_id: {}
+          attr_params: {}
         SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_INBOUND_ROUTING_ENTRY_ACTION_VXLAN_DECAP_PA_VALIDATE
           id: 24695752
-          attr_param_id: {}
+          attr_params: {}
