@@ -65,7 +65,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
     key_mf->set_field_id({{key.id}});
     auto key_mf_exact = key_mf->mutable_exact();
     // {{key.field}}SetVal(objId, key_mf_exact, {{key.bitwidth}});
-    {{key.field}}SetVal(static_cast<uint{{ key.bitwidth }}_t>(objId), key_mf_exact, {{ key.bitwidth }}); 
+    {{key.field}}SetVal(static_cast<uint{{ key.bitwidth }}_t>(objId), key_mf_exact, {{ key.bitwidth }});
     {% endif %}
     {% endfor %}
 
@@ -115,7 +115,7 @@ static sai_status_t dash_sai_create_{{ table.name }}(
                     {% endif %}
                 {% elif key.match_type == 'range_list' %}
                 // BMv2 doesn't support "range_list" match type, and we are using "optional" match in v1model as our implementation.
-                // Hence, here we only take the first item from the list and program it as optional match.
+                // Hence, here we only take the first item from the list and program the range start as optional match.
                 assert(attr_list[i].value.{{key.field}}.count == 1 && "BMv2 only supports one item in list match type");
                 auto mf_optional = mf->mutable_optional();
                 {{ key.field | replace('rangelist', '') }}SetVal(attr_list[i].value.{{key.field}}.list[0].min, mf_optional, {{key.bitwidth}});
@@ -190,7 +190,6 @@ static sai_status_t dash_sai_create_{{ table.name }}(
         }
     }
     {% endif %}
-
     action->set_action_id(actionId);
 
     for (uint32_t i = 0; i < attr_count; i++)
@@ -247,19 +246,6 @@ ErrRet:
     return SAI_STATUS_FAILURE;
 }
 
-static sai_status_t dash_sai_create_{{ table.name }}s(
-        _In_ sai_object_id_t switch_id,
-        _In_ uint32_t object_count,
-        _In_ const uint32_t *attr_count,
-        _In_ const sai_attribute_t **attr_list,
-        _In_ sai_bulk_op_error_mode_t mode,
-        _Out_ sai_object_id_t *object_id,
-        _Out_ sai_status_t *object_statuses)
-{
-    DASH_LOG_ENTER();
-    return dash::DashSai::bulk_create_objects(dash_sai_create_{{ table.name }}, switch_id, object_count, attr_count, attr_list, mode, object_id, object_statuses);
-}
-
 static sai_status_t dash_sai_remove_{{ table.name }}(
         _In_ sai_object_id_t {{ table.name }}_id)
 {
@@ -273,17 +259,7 @@ static sai_status_t dash_sai_remove_{{ table.name }}(
     return SAI_STATUS_FAILURE;
 }
 
-static sai_status_t dash_sai_remove_{{ table.name }}s(
-        _In_ uint32_t object_count,
-        _In_ const sai_object_id_t *object_id,
-        _In_ sai_bulk_op_error_mode_t mode,
-        _Out_ sai_status_t *object_statuses)
-{
-    DASH_LOG_ENTER();
-    return dash::DashSai::bulk_remove_objects(dash_sai_remove_{{ table.name }}, object_count, object_id, mode, object_statuses);
-}
-
-static sai_status_t dash_sai_set_{{ table.name }}_attribute (
+static sai_status_t dash_sai_set_{{ table.name }}_attribute(
         _In_ sai_object_id_t {{ table.name }}_id,
         _In_ const sai_attribute_t *attr)
 {
@@ -335,7 +311,30 @@ static sai_status_t dash_sai_clear_{{ table.name }}_stats(
     assert(0 && "sai_clear_{{ table.name }}_stats NYI");
     return SAI_STATUS_FAILURE;
 }
+
 {% endif %}
+static sai_status_t dash_sai_create_{{ table.name }}s(
+        _In_ sai_object_id_t switch_id,
+        _In_ uint32_t object_count,
+        _In_ const uint32_t *attr_count,
+        _In_ const sai_attribute_t **attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_object_id_t *object_id,
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+    return dash::DashSai::bulk_create_objects(dash_sai_create_{{ table.name }}, switch_id, object_count, attr_count, attr_list, mode, object_id, object_statuses);
+}
+
+static sai_status_t dash_sai_remove_{{ table.name }}s(
+        _In_ uint32_t object_count,
+        _In_ const sai_object_id_t *object_id,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+    return dash::DashSai::bulk_remove_objects(dash_sai_remove_{{ table.name }}, object_count, object_id, mode, object_statuses);
+}
 {% else %}
 static sai_status_t dash_sai_create_{{ table.name }}(
         _In_ const sai_{{ table.name }}_t *{{ table.name }},
@@ -366,13 +365,12 @@ static sai_status_t dash_sai_create_{{ table.name }}(
         mf->set_field_id({{key.id}});
         {% if key.match_type == 'exact' %}
         auto mf_exact = mf->mutable_exact();
-        //{{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
         {% set keyfield = key.field %}
         {% set bitwidth = key.bitwidth %}
-        {% if keyfield in ['ipaddr','mac'] or bitwidth in [24] %} 
-          {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
-        {% else %} 
-          {{key.field}}SetVal(static_cast<uint{{key.bitwidth}}_t>(tableEntry->{{ key.name | lower }}), mf_exact, {{key.bitwidth}});
+        {% if keyfield in ['ipaddr','mac'] or bitwidth in [24] %}
+        {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
+        {% else %}
+        {{key.field}}SetVal(static_cast<uint{{key.bitwidth}}_t>(tableEntry->{{ key.name | lower }}), mf_exact, {{key.bitwidth}});
         {% endif %}
         {% elif key.match_type == 'lpm' %}
         {% if key.field == 'ipPrefix' %}
@@ -508,36 +506,6 @@ ErrRet:
     return SAI_STATUS_FAILURE;
 }
 
-static sai_status_t dash_sai_create_{{ table.name | replace("entry", "entries") }}(
-        _In_ uint32_t object_count,
-        _In_ const sai_{{ table.name }}_t *{{ table.name }},
-        _In_ const uint32_t *attr_count,
-        _In_ const sai_attribute_t **attr_list,
-        _In_ sai_bulk_op_error_mode_t mode,
-        _Out_ sai_status_t *object_statuses)
-{
-    DASH_LOG_ENTER();
-
-    sai_status_t agg_status = SAI_STATUS_SUCCESS;
-
-    for (uint32_t i = 0; i < object_count; i++)
-    {
-        object_statuses[i] = dash_sai_create_{{ table.name }}(&{{ table.name }}[i], attr_count[i], attr_list[i]);
-
-        if (object_statuses[i] != SAI_STATUS_SUCCESS)
-        {
-            agg_status = SAI_STATUS_FAILURE;
-        }
-
-        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR)
-        {
-            return agg_status;
-        }
-    }
-
-    return agg_status;
-}
-
 static sai_status_t dash_sai_remove_{{ table.name }}(
         _In_ const sai_{{ table.name }}_t *{{ table.name }})
 {
@@ -558,11 +526,10 @@ static sai_status_t dash_sai_remove_{{ table.name }}(
         {% set keyfield = key.field %}
         {% set bitwidth = key.bitwidth %}
         {% if keyfield in ['ipaddr','mac'] or bitwidth in [24] %}
-           {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
+        {{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
         {% else %}
-          {{key.field}}SetVal(static_cast<uint{{key.bitwidth}}_t>(tableEntry->{{ key.name | lower }}), mf_exact, {{key.bitwidth}});
-        {% endif %}  
-        //{{key.field}}SetVal(tableEntry->{{ key.name | lower }}, mf_exact, {{key.bitwidth}});
+        {{key.field}}SetVal(static_cast<uint{{key.bitwidth}}_t>(tableEntry->{{ key.name | lower }}), mf_exact, {{key.bitwidth}});
+        {% endif %}
         {% elif key.match_type == 'lpm' %}
         {% if key.field == 'ipPrefix' %}
         if (getPrefixLength(tableEntry->{{ key.name | lower }}) == 0)
@@ -624,34 +591,6 @@ ErrRet:
     return SAI_STATUS_FAILURE;
 }
 
-static sai_status_t dash_sai_remove_{{ table.name | replace("entry", "entries") }}(
-        _In_ uint32_t object_count,
-        _In_ const sai_{{ table.name }}_t *{{ table.name }},
-        _In_ sai_bulk_op_error_mode_t mode,
-        _Out_ sai_status_t *object_statuses)
-{
-    DASH_LOG_ENTER();
-
-    sai_status_t agg_status = SAI_STATUS_SUCCESS;
-
-    for (uint32_t i = 0; i < object_count; i++)
-    {
-        object_statuses[i] = dash_sai_remove_{{ table.name }}(&{{ table.name }}[i]);
-
-        if (object_statuses[i] != SAI_STATUS_SUCCESS)
-        {
-            agg_status = SAI_STATUS_FAILURE;
-        }
-
-        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR)
-        {
-            return agg_status;
-        }
-    }
-
-    return agg_status;
-}
-
 static sai_status_t dash_sai_set_{{ table.name }}_attribute(
         _In_ const sai_{{ table.name }}_t *{{ table.name }},
         _In_ const sai_attribute_t *attr)
@@ -704,7 +643,65 @@ static sai_status_t dash_sai_clear_{{ table.name }}_stats(
     assert(0 && "sai_clear_{{ table.name }}_stats NYI");
     return SAI_STATUS_FAILURE;
 }
+
 {% endif %}
+static sai_status_t dash_sai_create_{{ table.name | replace("entry", "entries") }}(
+        _In_ uint32_t object_count,
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+        _In_ const uint32_t *attr_count,
+        _In_ const sai_attribute_t **attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+
+    sai_status_t agg_status = SAI_STATUS_SUCCESS;
+
+    for (uint32_t i = 0; i < object_count; i++)
+    {
+        object_statuses[i] = dash_sai_create_{{ table.name }}(&{{ table.name }}[i], attr_count[i], attr_list[i]);
+
+        if (object_statuses[i] != SAI_STATUS_SUCCESS)
+        {
+            agg_status = SAI_STATUS_FAILURE;
+        }
+
+        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR)
+        {
+            return agg_status;
+        }
+    }
+
+    return agg_status;
+}
+
+static sai_status_t dash_sai_remove_{{ table.name | replace("entry", "entries") }}(
+        _In_ uint32_t object_count,
+        _In_ const sai_{{ table.name }}_t *{{ table.name }},
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+
+    sai_status_t agg_status = SAI_STATUS_SUCCESS;
+
+    for (uint32_t i = 0; i < object_count; i++)
+    {
+        object_statuses[i] = dash_sai_remove_{{ table.name }}(&{{ table.name }}[i]);
+
+        if (object_statuses[i] != SAI_STATUS_SUCCESS)
+        {
+            agg_status = SAI_STATUS_FAILURE;
+        }
+
+        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR)
+        {
+            return agg_status;
+        }
+    }
+
+    return agg_status;
+}
 {% if table.name == 'route_entry' %}
 
 static sai_status_t dash_sai_set_{{ table.name | replace("entry", "entries") }}_attribute(
@@ -731,7 +728,6 @@ static sai_status_t dash_sai_get_{{ table.name | replace("entry", "entries") }}_
     assert(0 && "sai_get_{{ table.name | replace("entry", "entries") }}_attribute NYI");
     return SAI_STATUS_FAILURE;
 }
-
 {% endif %}
 {% endif %}
 {% endfor %}
