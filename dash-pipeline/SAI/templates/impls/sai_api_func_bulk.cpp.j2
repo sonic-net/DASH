@@ -1,0 +1,110 @@
+{% if api.is_object == True %}
+static sai_status_t dash_sai_create_{{ api.name }}s(
+        _In_ sai_object_id_t switch_id,
+        _In_ uint32_t object_count,
+        _In_ const uint32_t *attr_count,
+        _In_ const sai_attribute_t **attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_object_id_t *object_id,
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+    return dash::DashSai::bulk_create_objects(dash_sai_create_{{ api.name }}, switch_id, object_count, attr_count, attr_list, mode, object_id, object_statuses);
+}
+
+static sai_status_t dash_sai_remove_{{ api.name }}s(
+        _In_ uint32_t object_count,
+        _In_ const sai_object_id_t *object_id,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+    return dash::DashSai::bulk_remove_objects(dash_sai_remove_{{ api.name }}, object_count, object_id, mode, object_statuses);
+}
+{% else %}
+static sai_status_t dash_sai_create_{{ api.name | replace("entry", "entries") }}(
+        _In_ uint32_t object_count,
+        _In_ const sai_{{ api.name }}_t *{{ api.name }},
+        _In_ const uint32_t *attr_count,
+        _In_ const sai_attribute_t **attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+
+    sai_status_t agg_status = SAI_STATUS_SUCCESS;
+
+    for (uint32_t i = 0; i < object_count; i++)
+    {
+        object_statuses[i] = dash_sai_create_{{ api.name }}(&{{ api.name }}[i], attr_count[i], attr_list[i]);
+
+        if (object_statuses[i] != SAI_STATUS_SUCCESS)
+        {
+            agg_status = SAI_STATUS_FAILURE;
+        }
+
+        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR)
+        {
+            return agg_status;
+        }
+    }
+
+    return agg_status;
+}
+
+static sai_status_t dash_sai_remove_{{ api.name | replace("entry", "entries") }}(
+        _In_ uint32_t object_count,
+        _In_ const sai_{{ api.name }}_t *{{ api.name }},
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+
+    sai_status_t agg_status = SAI_STATUS_SUCCESS;
+
+    for (uint32_t i = 0; i < object_count; i++)
+    {
+        object_statuses[i] = dash_sai_remove_{{ api.name }}(&{{ api.name }}[i]);
+
+        if (object_statuses[i] != SAI_STATUS_SUCCESS)
+        {
+            agg_status = SAI_STATUS_FAILURE;
+        }
+
+        if (agg_status == SAI_STATUS_FAILURE && mode == SAI_BULK_OP_ERROR_MODE_STOP_ON_ERROR)
+        {
+            return agg_status;
+        }
+    }
+
+    return agg_status;
+}
+{% if api.name == 'route_entry' %}
+
+static sai_status_t dash_sai_set_{{ api.name | replace("entry", "entries") }}_attribute(
+        _In_ uint32_t object_count,
+        _In_ const sai_route_entry_t *route_entry,
+        _In_ const sai_attribute_t *attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_set_{{ api.name | replace("entry", "entries") }}_attribute NYI");
+    return SAI_STATUS_FAILURE;
+}
+
+static sai_status_t dash_sai_get_{{ api.name | replace("entry", "entries") }}_attribute(
+        _In_ uint32_t object_count,
+        _In_ const sai_route_entry_t *route_entry,
+        _In_ const uint32_t *attr_count,
+        _Inout_ sai_attribute_t **attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses)
+{
+    DASH_LOG_ENTER();
+    assert(0 && "sai_get_{{ api.name | replace("entry", "entries") }}_attribute NYI");
+    return SAI_STATUS_FAILURE;
+}
+{% endif %}
+{% endif %}
+

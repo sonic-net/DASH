@@ -1,0 +1,24 @@
+    {% import 'templates/impls/p4_table_util.cpp.j2' as util %}
+    {% for key in table['keys'] %}
+    {% set value = 'tableEntry->' ~ key.name|lower %}
+    {
+        auto mf = matchActionEntry->add_match();
+        mf->set_field_id({{key.id}});
+        {% if key.match_type == 'exact' %}{{ util.set_key_exact(key, value) }}
+        {% elif key.match_type == 'lpm' %}{{ util.set_key_lpm(key, value) }}
+        {% elif key.match_type == 'ternary' %}{{ util.set_key_ternary(key, value) }}
+        {% elif key.match_type == 'optional' %}{{ util.set_key_optional(key, value) }}
+        {% elif key.match_type == 'list' %}{{ util.set_key_list(key, value) }}
+        {% elif key.match_type == 'range_list' %}{{ util.set_key_range_list(key, value) }}
+        {% endif %}
+    }
+    {% if key.ip_is_v6_field_id != 0 %}
+    {
+        // set ip_is_v6_field_id field
+        auto mf = matchActionEntry->add_match();
+        mf->set_field_id({{key.ip_is_v6_field_id}});
+        auto mf_exact = mf->mutable_exact();
+        booldataSetVal(({{value}}.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
+    }
+    {% endif %}
+    {% endfor %}
