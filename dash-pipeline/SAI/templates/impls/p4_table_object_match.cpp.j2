@@ -1,0 +1,66 @@
+    {% import 'templates/impls/p4_table_util.cpp.j2' as util %}
+    {% for key in table['keys'] %}
+    {% if key.is_object_key %}
+    auto key_mf = matchActionEntry->add_match();
+    key_mf->set_field_id({{key.id}});
+    auto key_mf_exact = key_mf->mutable_exact();
+    // {{key.field}}SetVal(objId, key_mf_exact, {{key.bitwidth}});
+    {{key.field}}SetVal(static_cast<uint{{ key.bitwidth }}_t>(objId), key_mf_exact, {{ key.bitwidth }});
+    {% endif %}
+    {% endfor %}
+
+    // SAI object table with multiple P4 table keys
+    // Copy P4 table keys from appropriate SAI attributes
+    for (uint32_t i = 0; i < attr_count; i++)
+    {
+        auto *md = sai_metadata_get_attr_metadata((sai_object_type_t)SAI_OBJECT_TYPE_{{ api.name | upper }}, attr_list[i].id);
+
+        const char* attrName = md ? md->attridname : "unknown";
+
+        switch(attr_list[i].id)
+        {
+            {% for key in table['keys'] %}
+            {% if not key.is_object_key %}
+            {% set value = 'attr_list[i].value' %}
+            case SAI_{{ api.name | upper }}_ATTR_{{ key.name | upper }}:
+            {
+                auto mf = matchActionEntry->add_match();
+                mf->set_field_id({{key.id}});
+            {% filter indent(8, True) %}
+                {% if key.match_type == 'exact' %}{{ util.set_key_in_attr_exact(key, value) }}
+                {% elif key.match_type == 'lpm' %}{{ util.set_key_lpm(key, value) }}
+                {% elif key.match_type == 'ternary' %}{{ util.set_key_in_attr_ternary(api, key, value) }}
+                {% elif key.match_type == 'optional' %}{{ util.set_key_optional(key, value) }}
+                {% elif key.match_type == 'list' %}{{ util.set_key_list(key, value) }}
+                {% elif key.match_type == 'range_list' %}{{ util.set_key_range_list(key, value) }}
+                {% endif %}
+            {% endfilter %}
+                {% if key.ip_is_v6_field_id != 0 %}
+                {
+                    // set ip_is_v6_field_id field
+                    auto mf = matchActionEntry->add_match();
+                    mf->set_field_id({{key.ip_is_v6_field_id}});
+                    auto mf_exact = mf->mutable_exact();
+                    booldataSetVal(({{value}}.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
+                }
+                {% endif %}
+                break;
+            }
+            {% endif%}
+            {% endfor %}
+            {% if table['keys'] | selectattr('match_type', 'ne', 'exact') | list | length > 0 %}
+            {% if table['keys'] | selectattr('match_type', 'eq', 'lpm') | list | length == 0 %}
+            // Table has non lpm ternary keys - add priority field
+            case SAI_{{ api.name | upper }}_ATTR_PRIORITY:
+            {
+                matchActionEntry->set_priority(attr_list[i].value.u32);
+                break;
+            }
+            {% endif %}
+            {% endif %}
+            default:
+                DASH_LOG_ERROR("attribute [%d] %d %s not supported yet", i, attr_list[i].id, attrName);
+                break;
+        }
+    }
+
