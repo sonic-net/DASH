@@ -1,0 +1,38 @@
+DASH in 'VM' Mode
+
+DASh in 'Floating NIC' Mode
+
+
+
+
+Current Scenario:
+
+Packet Flow Using NVA VM (Current Scenario)  
+
+The diagram below demonstrates the current legacy scenario. 
+Here the packet flows from the source and needs to transit a VM for processing before making its way to the destination.  
+
+
+Packet Flow USING FLOATING NIC (New Scenario)
+
+The diagram below builds upon the legacy scenario. Here the NVA VM is completely removed and just a NIC exists. This NIC is termed “floating” since it is not attached to any VM.  
+
+
+
+
+Example DPU (as Floating NIC) Accelerated Scenarios 
+
+Floating NIC – PL Fast Path  
+
+On-prem to Azure Connectivity via GW  
+
+
+Example PL Fast Path: Onprem to Azure Connectivity via Sirius Appliance 
+
+
+Floating NIC - Pl Fast Path [DPU Apliance]  
+
+ON-Prem to PE CA  
+
+
+PE-CA to Onprem  
