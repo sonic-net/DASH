@@ -10,6 +10,56 @@ using namespace dash::utils;
 
 {% for api in api_group.sai_apis %}
 {% set table = api.p4_meta.tables[0] -%}
+{% set meta_table = api.name ~ '_meta_table' -%}
+static dash::P4MetaTable {{meta_table}} (
+    {{table.id}},
+    { // meta table keys
+        {% for key in table['keys'] %}
+        {% if not key.is_object_key %}
+        {
+            {% if api.is_object %}
+            SAI_{{ api.name | upper }}_ATTR_{{ key.name | upper }},
+            {% else %}
+            SAI_{{ api.name | upper }}_ATTR_END,
+            {% endif%}
+            "{{key.name}}",
+            {{key.id}},
+            "{{key.match_type}}",
+            "{{key.field}}",
+            {{key.bitwidth}},
+            {{key.ip_is_v6_field_id}}
+        },
+        {% endif%}
+        {% endfor %}
+    },
+    { // meta table actions
+        {% for name, action in table.actions.items() %}
+        {
+            {{action.id}},
+            {
+                "{{name}}",
+                {{action.id}},
+                {
+                    {% for param_name, param in action.attr_params.items() %}
+                    {% if param.skipattr != 'true' %}
+                    {
+                        {{param_name}},
+                        "{{param_name}}",
+                        {{param.id}},
+                        "{{param.field}}",
+                        {{param.bitwidth}},
+                        {{param.ip_is_v6_field_id}}
+                    },
+                    {% endif%}
+                    {% endfor %}
+                }
+
+            },
+        },
+        {% endfor %}
+    }
+);
+
 {% include 'templates/impls/sai_api_func_quad.cpp.j2' %}
 
 {% if api.stats | length > 0 %}
