@@ -1,26 +1,12 @@
 {% if not api.is_object %}
-static void table_{{api.name}}_add_keys(
+static sai_status_t table_{{api.name}}_add_keys(
         _In_ const sai_{{ api.name }}_t *{{ api.name }},
         _Inout_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry)
 {
     auto tableEntry = {{ api.name }};
-    {% for key in table['keys'] %}
-    {% set value = 'tableEntry->' ~ key.name|lower%}
-    {
-        auto meta_key = {{meta_table}}.get_meta_key("{{key.name}}");
-        auto mf = matchActionEntry->add_match();
-        mf->set_field_id(meta_key->id);
-        dash::set_key_value(*meta_key, {{value}}, mf);
-    {% if key.ip_is_v6_field_id != 0 %}
+    {% include 'templates/impls/p4_table_entry_match.cpp.j2' %}
 
-        // set ip_is_v6_field_id field
-        mf = matchActionEntry->add_match();
-        mf->set_field_id(meta_key->ip_is_v6_field_id);
-        auto mf_exact = mf->mutable_exact();
-        booldataSetVal(({{value}}.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1, mf_exact, 1);
-    {% endif %}
-    }
-    {% endfor %}
+    return SAI_STATUS_SUCCESS;
 }
 
 {% endif %}

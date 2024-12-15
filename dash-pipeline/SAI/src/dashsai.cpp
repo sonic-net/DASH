@@ -636,6 +636,7 @@ grpc::StatusCode DashSai::readTableEntry(
     p4::v1::ReadResponse rep;
     if (client_reader->Read(&rep)) {
         assert(rep.entities_size() == 1);
+        entity->release_table_entry();
         entity = rep.mutable_entities(0);
         entry->CopyFrom(entity->table_entry());
     }
@@ -1060,17 +1061,13 @@ sai_status_t DashSai::set(
     pi_p4_id_t action_id = action->action_id();
     auto meta_param = meta_table.get_meta_action_param(action_id, attr->id);
     if (meta_param) {
-        for (int i = 0; i < action->params_size(); i++) {
-            auto param = action->mutable_params(i);
-            // Update table action param
-            if (param->param_id() == meta_param->id) {
-                set_value(meta_param->field, meta_param->bitwidth, attr->value, param);
-            }
-            else if (param->param_id() == meta_param->ip_is_v6_field_id) {
-                booldataSetVal((attr->value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1,
-                               param, 1);
-            }
+        auto pair_param = get_action_param(meta_param, matchActionEntry);
+        if (pair_param.second) {
+            set_ipaddr_family(attr->value, pair_param.second);
         }
+
+        assert(pair_param.first);
+        set_value(meta_param->field, meta_param->bitwidth, attr->value, pair_param.first);
 
         auto ret = mutateTableEntry(matchActionEntry, p4::v1::Update_Type_MODIFY);
         return ret == grpc::StatusCode::OK ? SAI_STATUS_SUCCESS : SAI_STATUS_FAILURE;
@@ -1082,17 +1079,18 @@ sai_status_t DashSai::set(
         std::shared_ptr<p4::v1::TableEntry> new_entry = std::make_shared<p4::v1::TableEntry>();
         new_entry->CopyFrom(*matchActionEntry);
 
-        for (int i = 0; i < new_entry->match_size(); i++) {
-            auto mf = new_entry->mutable_match(i);
-            // Update table match field
-            if (mf->field_id() == meta_key->id) {
-                set_key_value(*meta_key, attr->value, mf);
-            }
-            else if (mf->field_id() == meta_key->ip_is_v6_field_id) {
-                auto mf_exact = mf->mutable_exact();
-                booldataSetVal((attr->value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1,
-                               mf_exact, 1);
-            }
+        auto pair_key = get_key(meta_key, new_entry);
+        if (pair_key.second) {
+            set_ipaddr_family(attr->value, pair_key.second->mutable_exact());
+        }
+
+        assert(pair_key.first);
+        if (meta_key->match_type == "ternary" && has_suffix(meta_key->name, "_MASK")) {
+            set_mask(meta_key->field, meta_key->bitwidth, attr->value,
+                     pair_key.first->mutable_ternary());
+        }
+        else {
+            set_key_value(*meta_key, attr->value, pair_key.first);
         }
 
         removeFromTable(objectId);
@@ -1120,17 +1118,13 @@ sai_status_t DashSai::set(
     pi_p4_id_t action_id = action->action_id();
     auto meta_param = meta_table.get_meta_action_param(action_id, attr->id);
     if (meta_param) {
-        for (int i = 0; i < action->params_size(); i++) {
-            auto param = action->mutable_params(i);
-            // Update table action param
-            if (param->param_id() == meta_param->id) {
-                set_value(meta_param->field, meta_param->bitwidth, attr->value, param);
-            }
-            else if (param->param_id() == meta_param->ip_is_v6_field_id) {
-                booldataSetVal((attr->value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) ? 0 : 1,
-                               param, 1);
-            }
+        auto pair_param = get_action_param(meta_param, matchActionEntry);
+        if (pair_param.second) {
+            set_ipaddr_family(attr->value, pair_param.second);
         }
+
+        assert(pair_param.first);
+        set_value(meta_param->field, meta_param->bitwidth, attr->value, pair_param.first);
 
         auto ret = mutateTableEntry(matchActionEntry, p4::v1::Update_Type_MODIFY);
         return ret == grpc::StatusCode::OK ? SAI_STATUS_SUCCESS : SAI_STATUS_FAILURE;
@@ -1171,18 +1165,24 @@ sai_status_t DashSai::get(
             // attr in table keys
             auto pair_key = get_key(meta_key, matchActionEntry);
             if (pair_key.second) {
-                get_ipaddr_family(pair_key.second, attr_list[i].value);
+                get_ipaddr_family(pair_key.second->mutable_exact(), attr_list[i].value);
             }
 
             assert(pair_key.first);
-            get_value(meta_key->field, meta_key->bitwidth, pair_key.first, attr_list[i].value);
+            if (meta_key->match_type == "ternary" && has_suffix(meta_key->name, "_MASK")) {
+                get_mask(meta_key->field, meta_key->bitwidth,
+                         pair_key.first->mutable_ternary(), attr_list[i].value);
+            }
+            else {
+                get_key_value(*meta_key, pair_key.first, attr_list[i].value);
+            }
         }
         else {
             DASH_LOG_ERROR("failed to get value for attr %d", attr_list[i].id);
         }
     }
 
-    return SAI_STATUS_FAILURE;
+    return SAI_STATUS_SUCCESS;
 }
 
 sai_status_t DashSai::get(
@@ -1217,6 +1217,6 @@ sai_status_t DashSai::get(
         }
     }
 
-    return SAI_STATUS_FAILURE;
+    return SAI_STATUS_SUCCESS;
 }
 

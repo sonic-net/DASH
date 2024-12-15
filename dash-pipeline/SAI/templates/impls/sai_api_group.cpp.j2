@@ -29,6 +29,17 @@ static dash::P4MetaTable {{meta_table}} (
             {{key.bitwidth}},
             {{key.ip_is_v6_field_id}}
         },
+        {% if api.is_object and key.match_type == 'ternary'%}
+        { // extra added for set_mask of ternary key
+            SAI_{{ api.name | upper }}_ATTR_{{ key.name | upper }}_MASK,
+            "{{key.name}}_MASK",
+            {{key.id}},
+            "{{key.match_type}}",
+            "{{key.field}}",
+            {{key.bitwidth}},
+            {{key.ip_is_v6_field_id}}
+        },
+        {% endif%}
         {% endif%}
         {% endfor %}
     },
