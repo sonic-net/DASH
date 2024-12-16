@@ -2,6 +2,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string.h>
+#include <cassert>
 
 extern "C" {
 #include <sai.h>
@@ -113,6 +114,15 @@ int main(int argc, char **argv)
         std::cout << "Failed to create VNET table entry" << std::endl;
         return 1;
     }
+
+    attr.value.u32 = 10;
+    status = dash_vnet_api->set_vnet_attribute(vnet_id, &attr);
+    assert(status == SAI_STATUS_SUCCESS);
+
+    attr.value.u32 = 0;
+    status = dash_vnet_api->get_vnet_attribute(vnet_id, 1, &attr);
+    assert(status == SAI_STATUS_SUCCESS);
+    assert(attr.value.u32 == 10);
 
     attrs.clear();
 
@@ -231,6 +241,12 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    attr.id = SAI_ENI_ATTR_VM_UNDERLAY_DIP;
+    attr.value.ipaddr.addr = {0};
+    status = dash_eni_api->get_eni_attribute(eni_id, 1, &attr);
+    assert(status == SAI_STATUS_SUCCESS);
+    assert(attr.value.ipaddr.addr.ip4 == u_dip_addr.ip4);
+
     attrs.clear();
 
     sai_eni_ether_address_map_entry_t eam;
@@ -247,7 +263,7 @@ int main(int argc, char **argv)
     attrs.push_back(attr);
 
     attr.id = SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID;
-    attr.value.u16 = eni_id;
+    attr.value.u16 = (uint16_t)eni_id;
     attrs.push_back(attr);
 
     status = dash_eni_api->create_eni_ether_address_map_entry(&eam, attrs.size(), attrs.data());
@@ -256,6 +272,12 @@ int main(int argc, char **argv)
         std::cout << "Failed to create ENI Lookup From VM" << std::endl;
         return 1;
     }
+
+    attr.id = SAI_ENI_ETHER_ADDRESS_MAP_ENTRY_ATTR_ENI_ID;
+    attr.value.u16 -= 1;
+    status = dash_eni_api->get_eni_ether_address_map_entry_attribute(&eam, 1, &attr);
+    assert(status == SAI_STATUS_SUCCESS);
+    assert(attr.value.u16 == (uint16_t)eni_id);
 
     // Delete everything in reverse order
     status = dash_eni_api->remove_eni_ether_address_map_entry(&eam);
