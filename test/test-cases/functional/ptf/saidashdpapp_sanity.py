@@ -334,7 +334,7 @@ class SaiThriftDpappPktTest(SaiHelperSimplified):
         send_packet(self, 0, vxlan_pkt)
         print("\tVerifying flow created...")
         verify_flow(self.eni_mac, self.vnet & 0xffff, inner_pkt)
-        time.sleep(30)
+        time.sleep(35)
         print("\tVerifying flow aged out...")
         verify_no_flow(self.eni_mac, self.vnet & 0xffff, inner_pkt)
         
