@@ -27,9 +27,11 @@ control pre_pipeline_stage(inout headers_t hdr,
 
     action set_internal_config(EthernetAddress neighbor_mac,
                             EthernetAddress mac,
+                            EthernetAddress cpu_mac,
                             bit<1> flow_enabled) {
         meta.u0_encap_data.underlay_dmac = neighbor_mac;
         meta.u0_encap_data.underlay_smac = mac;
+        meta.cpu_mac = cpu_mac;
         meta.flow_enabled = (bool)flow_enabled;
     }
 

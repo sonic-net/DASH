@@ -54,11 +54,39 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 38557285
+      stage: null
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: true
       actions:
-        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
-          name: default
+        SAI_FLOW_TABLE_ACTION_SET_FLOW_TABLE_ATTR: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_FLOW_TABLE_ACTION_SET_FLOW_TABLE_ATTR
           id: 33071001
-          attr_param_id: {}
+          attr_params:
+            SAI_FLOW_TABLE_ATTR_MAX_FLOW_COUNT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 1
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_TABLE_ATTR_DASH_FLOW_ENABLED_KEY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 2
+              field: s32
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_TABLE_ATTR_FLOW_TTL_IN_MILLISECONDS: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 3
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: flow_entry
   description: flow entry
@@ -311,9 +339,9 @@ sai_apis:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_FLOW_ENTRY_ATTR_UNDERLAY0_SIP
     description: Action parameter underlay0 sip
-    type: sai_uint32_t
-    attr_value_field: u32
-    default: '0'
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -324,9 +352,9 @@ sai_apis:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DIP
     description: Action parameter underlay0 dip
-    type: sai_uint32_t
-    attr_value_field: u32
-    default: '0'
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -363,9 +391,9 @@ sai_apis:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_FLOW_ENTRY_ATTR_UNDERLAY1_SIP
     description: Action parameter underlay1 sip
-    type: sai_uint32_t
-    attr_value_field: u32
-    default: '0'
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -376,9 +404,9 @@ sai_apis:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DIP
     description: Action parameter underlay1 dip
-    type: sai_uint32_t
-    attr_value_field: u32
-    default: '0'
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -573,43 +601,261 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 49035675
+      stage: null
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: eni_mac
+        id: 1
+        match_type: exact
+        field: mac
+        bitwidth: 48
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: vnet_id
+        id: 2
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: src_ip
+        id: 3
+        match_type: exact
+        field: ipaddr
+        bitwidth: 128
+        ip_is_v6_field_id: 8
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dst_ip
+        id: 4
+        match_type: exact
+        field: ipaddr
+        bitwidth: 128
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: src_port
+        id: 5
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dst_port
+        id: 6
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: ip_proto
+        id: 7
+        match_type: exact
+        field: u8
+        bitwidth: 8
+        ip_is_v6_field_id: 0
+        is_object_key: false
       actions:
         SAI_FLOW_ENTRY_ACTION_SET_FLOW_ENTRY_ATTR: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_FLOW_ENTRY_ACTION_SET_FLOW_ENTRY_ATTR
           id: 26241621
-          attr_param_id:
-            SAI_FLOW_ENTRY_ATTR_VERSION: 1
-            SAI_FLOW_ENTRY_ATTR_DASH_DIRECTION: 2
-            SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION: 3
-            SAI_FLOW_ENTRY_ATTR_METER_CLASS: 4
-            SAI_FLOW_ENTRY_ATTR_IS_UNIDIRECTIONAL_FLOW: 5
-            SAI_FLOW_ENTRY_ATTR_DASH_FLOW_SYNC_STATE: 6
-            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_ENI_MAC: 7
-            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_VNET_ID: 8
-            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_IP_PROTO: 9
-            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_SRC_IP: 10
-            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_DST_IP: 11
-            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_SRC_PORT: 12
-            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_DST_PORT: 13
-            SAI_FLOW_ENTRY_ATTR_UNDERLAY0_VNET_ID: 15
-            SAI_FLOW_ENTRY_ATTR_UNDERLAY0_SIP: 16
-            SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DIP: 17
-            SAI_FLOW_ENTRY_ATTR_UNDERLAY0_SMAC: 18
-            SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DMAC: 19
-            SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DASH_ENCAPSULATION: 20
-            SAI_FLOW_ENTRY_ATTR_UNDERLAY1_VNET_ID: 21
-            SAI_FLOW_ENTRY_ATTR_UNDERLAY1_SIP: 22
-            SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DIP: 23
-            SAI_FLOW_ENTRY_ATTR_UNDERLAY1_SMAC: 24
-            SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DMAC: 25
-            SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DASH_ENCAPSULATION: 26
-            SAI_FLOW_ENTRY_ATTR_DST_MAC: 27
-            SAI_FLOW_ENTRY_ATTR_SIP: 28
-            SAI_FLOW_ENTRY_ATTR_DIP: 29
-            SAI_FLOW_ENTRY_ATTR_SIP_MASK: 30
-            SAI_FLOW_ENTRY_ATTR_DIP_MASK: 31
-            SAI_FLOW_ENTRY_ATTR_VENDOR_METADATA: 33
-            SAI_FLOW_ENTRY_ATTR_FLOW_DATA_PB: 34
+          attr_params:
+            SAI_FLOW_ENTRY_ATTR_VERSION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 1
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_DASH_DIRECTION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 2
+              field: s32
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_DASH_FLOW_ACTION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 3
+              field: s32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_METER_CLASS: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 4
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_IS_UNIDIRECTIONAL_FLOW: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 5
+              field: booldata
+              bitwidth: 1
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_DASH_FLOW_SYNC_STATE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 6
+              field: s32
+              bitwidth: 8
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_ENI_MAC: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 7
+              field: mac
+              bitwidth: 48
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_VNET_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 8
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_IP_PROTO: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 9
+              field: u8
+              bitwidth: 8
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_SRC_IP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 10
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_DST_IP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 11
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 14
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_SRC_PORT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 12
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_REVERSE_FLOW_DST_PORT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 13
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY0_VNET_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 15
+              field: u32
+              bitwidth: 24
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY0_SIP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 16
+              field: ipaddr
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DIP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 17
+              field: ipaddr
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY0_SMAC: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 18
+              field: mac
+              bitwidth: 48
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DMAC: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 19
+              field: mac
+              bitwidth: 48
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY0_DASH_ENCAPSULATION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 20
+              field: s32
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY1_VNET_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 21
+              field: u32
+              bitwidth: 24
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY1_SIP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 22
+              field: ipaddr
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DIP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 23
+              field: ipaddr
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY1_SMAC: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 24
+              field: mac
+              bitwidth: 48
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DMAC: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 25
+              field: mac
+              bitwidth: 48
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_UNDERLAY1_DASH_ENCAPSULATION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 26
+              field: s32
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_DST_MAC: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 27
+              field: mac
+              bitwidth: 48
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_SIP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 28
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_DIP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 29
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 32
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_SIP_MASK: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 30
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_DIP_MASK: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 31
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_VENDOR_METADATA: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 33
+              field: u8list
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_ATTR_FLOW_DATA_PB: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 34
+              field: u8list
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: flow_entry_bulk_get_session_filter
   description: flow entry bulk get session filter
@@ -687,11 +933,51 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 38861669
+      stage: null
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: bulk_get_session_filter_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: true
       actions:
-        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
-          name: default
+        SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ACTION_SET_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ACTION_SET_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR
           id: 19436677
-          attr_param_id: {}
+          attr_params:
+            SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 1
+              field: s32
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_OP_KEY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 2
+              field: s32
+              bitwidth: 8
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_INT_VALUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 3
+              field: u64
+              bitwidth: 64
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_IP_VALUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 4
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ATTR_MAC_VALUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 5
+              field: mac
+              bitwidth: 48
+              ip_is_v6_field_id: 0
+              skipattr: null
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: flow_entry_bulk_get_session
   description: flow entry bulk get session
@@ -821,8 +1107,72 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 38230977
+      stage: null
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: bulk_get_session_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: true
       actions:
-        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
-          name: default
+        SAI_FLOW_ENTRY_BULK_GET_SESSION_ACTION_SET_FLOW_ENTRY_BULK_GET_SESSION_ATTR: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_FLOW_ENTRY_BULK_GET_SESSION_ACTION_SET_FLOW_ENTRY_BULK_GET_SESSION_ATTR
           id: 24218189
-          attr_param_id: {}
+          attr_params:
+            SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_DASH_FLOW_ENTRY_BULK_GET_SESSION_MODE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 1
+              field: s32
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_ENTRY_LIMITATION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 2
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_SERVER_IP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 3
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_BULK_GET_SESSION_SERVER_PORT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 4
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FIRST_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 5
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_SECOND_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 6
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_THIRD_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 7
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FOURTH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 8
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_FLOW_ENTRY_BULK_GET_SESSION_ATTR_FIFTH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 9
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null

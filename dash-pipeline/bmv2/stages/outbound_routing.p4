@@ -2,6 +2,7 @@
 #define _DASH_STAGE_OUTBOUND_ROUTING_P4_
 
 #include "../dash_routing_types.p4"
+#include "../defines.h"
 
 control outbound_routing_stage(
     inout headers_t hdr,
@@ -40,7 +41,7 @@ control outbound_routing_stage(
             route_service_tunnel(hdr, meta);
             drop(meta);
         }
-        size = 4 * 1024 * 1024;
+        size = TABLE_ROUTING_SIZE;
         const default_action = drop(meta);
 
         ATTACH_TABLE_COUNTER(routing_counter)

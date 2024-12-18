@@ -28,8 +28,24 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 45177948
+      stage: null
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: appliance_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 8
+        ip_is_v6_field_id: 0
+        is_object_key: true
       actions:
-        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
-          name: default
+        SAI_DASH_APPLIANCE_ACTION_SET_APPLIANCE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_APPLIANCE_ACTION_SET_APPLIANCE
           id: 17143042
-          attr_param_id: {}
+          attr_params:
+            SAI_DASH_APPLIANCE_ATTR_LOCAL_REGION_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 1
+              field: u8
+              bitwidth: 8
+              ip_is_v6_field_id: 0
+              skipattr: null

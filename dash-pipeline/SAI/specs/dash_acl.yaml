@@ -28,11 +28,27 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 37949057
+      stage: null
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dash_acl_group_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: true
       actions:
-        default: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
-          name: default
+        SAI_DASH_ACL_GROUP_ACTION_SET_ACL_GROUP_ATTRS: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_DASH_ACL_GROUP_ACTION_SET_ACL_GROUP_ATTRS
           id: 21989040
-          attr_param_id: {}
+          attr_params:
+            SAI_DASH_ACL_GROUP_ATTR_IP_ADDR_FAMILY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 1
+              field: u32
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
 - !!python/object:utils.sai_spec.sai_api.SaiApi
   name: dash_acl_rule
   description: DASH ACL rule
@@ -195,115 +211,415 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 43936368
+      stage: acl.stage1
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dash_acl_group_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dip
+        id: 2
+        match_type: list
+        field: ipprefixlist
+        bitwidth: 128
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: sip
+        id: 3
+        match_type: list
+        field: ipprefixlist
+        bitwidth: 128
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: protocol
+        id: 4
+        match_type: list
+        field: u8list
+        bitwidth: 8
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: src_port
+        id: 5
+        match_type: range_list
+        field: u16rangelist
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dst_port
+        id: 6
+        match_type: range_list
+        field: u16rangelist
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
       actions:
         SAI_DASH_ACL_RULE_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_PERMIT
           id: 24892843
-          attr_param_id: {}
+          attr_params: {}
         SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
           id: 26577723
-          attr_param_id: {}
+          attr_params: {}
         SAI_DASH_ACL_RULE_ACTION_DENY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_DENY
           id: 31332881
-          attr_param_id: {}
+          attr_params: {}
         SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
           id: 24146215
-          attr_param_id: {}
+          attr_params: {}
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 48549629
+      stage: acl.stage2
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dash_acl_group_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dip
+        id: 2
+        match_type: list
+        field: ipprefixlist
+        bitwidth: 128
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: sip
+        id: 3
+        match_type: list
+        field: ipprefixlist
+        bitwidth: 128
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: protocol
+        id: 4
+        match_type: list
+        field: u8list
+        bitwidth: 8
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: src_port
+        id: 5
+        match_type: range_list
+        field: u16rangelist
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dst_port
+        id: 6
+        match_type: range_list
+        field: u16rangelist
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
       actions:
         SAI_DASH_ACL_RULE_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_PERMIT
           id: 24892843
-          attr_param_id: {}
+          attr_params: {}
         SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
           id: 26577723
-          attr_param_id: {}
+          attr_params: {}
         SAI_DASH_ACL_RULE_ACTION_DENY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_DENY
           id: 31332881
-          attr_param_id: {}
+          attr_params: {}
         SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
           id: 24146215
-          attr_param_id: {}
+          attr_params: {}
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 40869404
+      stage: acl.stage3
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dash_acl_group_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dip
+        id: 2
+        match_type: list
+        field: ipprefixlist
+        bitwidth: 128
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: sip
+        id: 3
+        match_type: list
+        field: ipprefixlist
+        bitwidth: 128
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: protocol
+        id: 4
+        match_type: list
+        field: u8list
+        bitwidth: 8
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: src_port
+        id: 5
+        match_type: range_list
+        field: u16rangelist
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dst_port
+        id: 6
+        match_type: range_list
+        field: u16rangelist
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
       actions:
         SAI_DASH_ACL_RULE_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_PERMIT
           id: 24892843
-          attr_param_id: {}
+          attr_params: {}
         SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
           id: 26577723
-          attr_param_id: {}
+          attr_params: {}
         SAI_DASH_ACL_RULE_ACTION_DENY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_DENY
           id: 31332881
-          attr_param_id: {}
+          attr_params: {}
         SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
           id: 24146215
-          attr_param_id: {}
+          attr_params: {}
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 49672642
+      stage: acl.stage1
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dash_acl_group_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dip
+        id: 2
+        match_type: list
+        field: ipprefixlist
+        bitwidth: 128
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: sip
+        id: 3
+        match_type: list
+        field: ipprefixlist
+        bitwidth: 128
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: protocol
+        id: 4
+        match_type: list
+        field: u8list
+        bitwidth: 8
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: src_port
+        id: 5
+        match_type: range_list
+        field: u16rangelist
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dst_port
+        id: 6
+        match_type: range_list
+        field: u16rangelist
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
       actions:
         SAI_DASH_ACL_RULE_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_PERMIT
           id: 22622424
-          attr_param_id: {}
+          attr_params: {}
         SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
           id: 27458076
-          attr_param_id: {}
+          attr_params: {}
         SAI_DASH_ACL_RULE_ACTION_DENY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_DENY
           id: 27228779
-          attr_param_id: {}
+          attr_params: {}
         SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
           id: 29275145
-          attr_param_id: {}
+          attr_params: {}
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 37932124
+      stage: acl.stage2
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dash_acl_group_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dip
+        id: 2
+        match_type: list
+        field: ipprefixlist
+        bitwidth: 128
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: sip
+        id: 3
+        match_type: list
+        field: ipprefixlist
+        bitwidth: 128
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: protocol
+        id: 4
+        match_type: list
+        field: u8list
+        bitwidth: 8
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: src_port
+        id: 5
+        match_type: range_list
+        field: u16rangelist
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dst_port
+        id: 6
+        match_type: range_list
+        field: u16rangelist
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
       actions:
         SAI_DASH_ACL_RULE_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_PERMIT
           id: 22622424
-          attr_param_id: {}
+          attr_params: {}
         SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
           id: 27458076
-          attr_param_id: {}
+          attr_params: {}
         SAI_DASH_ACL_RULE_ACTION_DENY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_DENY
           id: 27228779
-          attr_param_id: {}
+          attr_params: {}
         SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
           id: 29275145
-          attr_param_id: {}
+          attr_params: {}
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 46113118
+      stage: acl.stage3
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dash_acl_group_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dip
+        id: 2
+        match_type: list
+        field: ipprefixlist
+        bitwidth: 128
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: sip
+        id: 3
+        match_type: list
+        field: ipprefixlist
+        bitwidth: 128
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: protocol
+        id: 4
+        match_type: list
+        field: u8list
+        bitwidth: 8
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: src_port
+        id: 5
+        match_type: range_list
+        field: u16rangelist
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dst_port
+        id: 6
+        match_type: range_list
+        field: u16rangelist
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
       actions:
         SAI_DASH_ACL_RULE_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_PERMIT
           id: 22622424
-          attr_param_id: {}
+          attr_params: {}
         SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_PERMIT_AND_CONTINUE
           id: 27458076
-          attr_param_id: {}
+          attr_params: {}
         SAI_DASH_ACL_RULE_ACTION_DENY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_DENY
           id: 27228779
-          attr_param_id: {}
+          attr_params: {}
         SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_DASH_ACL_RULE_ACTION_DENY_AND_CONTINUE
           id: 29275145
-          attr_param_id: {}
+          attr_params: {}
