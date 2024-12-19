@@ -1,3 +1,15 @@
+{% if not api.is_object %}
+static sai_status_t table_{{api.name}}_add_keys(
+        _In_ const sai_{{ api.name }}_t *{{ api.name }},
+        _Inout_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry)
+{
+    auto tableEntry = {{ api.name }};
+    {% include 'templates/impls/p4_table_entry_match.cpp.j2' %}
+
+    return SAI_STATUS_SUCCESS;
+}
+
+{% endif %}
 static sai_status_t dash_sai_create_{{ api.name }}(
 {% if api.is_object %}
         _Out_ sai_object_id_t *{{ api.name }}_id,
@@ -144,9 +156,15 @@ static sai_status_t dash_sai_set_{{ api.name }}_attribute(
         {% include 'templates/headers/sai_api_param_object_id.j2' %},
         _In_ const sai_attribute_t *attr)
 {
-    DASH_LOG_ENTER();
-    assert(0 && "sai_set_{{ api.name }}_attribute NYI");
-    return SAI_STATUS_FAILURE;
+{% if api.is_object %}
+    return dashSai->set({{meta_table}}, {{ api.name }}_id, attr);
+{% else %}
+    std::shared_ptr<p4::v1::TableEntry> matchActionEntry = std::make_shared<p4::v1::TableEntry>();
+    matchActionEntry->set_table_id({{meta_table}}.id);
+
+    table_{{api.name}}_add_keys({{ api.name }}, matchActionEntry);
+    return dashSai->set({{meta_table}}, matchActionEntry, attr);
+{% endif %}
 }
 
 static sai_status_t dash_sai_get_{{ api.name }}_attribute(
@@ -154,8 +172,14 @@ static sai_status_t dash_sai_get_{{ api.name }}_attribute(
         _In_ uint32_t attr_count,
         _Inout_ sai_attribute_t *attr_list)
 {
-    DASH_LOG_ENTER();
-    assert(0 && "sai_get_{{ api.name }}_attribute NYI");
-    return SAI_STATUS_FAILURE;
+{% if api.is_object %}
+    return dashSai->get({{meta_table}}, {{ api.name }}_id, attr_count, attr_list);
+{% else %}
+    std::shared_ptr<p4::v1::TableEntry> matchActionEntry = std::make_shared<p4::v1::TableEntry>();
+    matchActionEntry->set_table_id({{meta_table}}.id);
+
+    table_{{api.name}}_add_keys({{ api.name }}, matchActionEntry);
+    return dashSai->get({{meta_table}}, matchActionEntry, attr_count, attr_list);
+{% endif %}
 }
 
