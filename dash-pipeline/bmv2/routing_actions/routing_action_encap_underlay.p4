@@ -80,21 +80,21 @@ control do_action_encap_u1(
             return;
         }
 
-        if (meta.u0_encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {
+        if (meta.u1_encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {
             push_vxlan_tunnel_u1(hdr,
-                        meta.u0_encap_data.underlay_dmac,
-                        meta.u0_encap_data.underlay_smac,
-                        meta.u0_encap_data.underlay_dip,
-                        meta.u0_encap_data.underlay_sip,
-                        meta.u0_encap_data.vni);
+                        meta.u1_encap_data.underlay_dmac,
+                        meta.u1_encap_data.underlay_smac,
+                        meta.u1_encap_data.underlay_dip,
+                        meta.u1_encap_data.underlay_sip,
+                        meta.u1_encap_data.vni);
         }
-        else if (meta.u0_encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
+        else if (meta.u1_encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
             push_nvgre_tunnel_u1(hdr,
-                        meta.u0_encap_data.underlay_dmac,
-                        meta.u0_encap_data.underlay_smac,
-                        meta.u0_encap_data.underlay_dip,
-                        meta.u0_encap_data.underlay_sip,
-                        meta.u0_encap_data.vni);
+                        meta.u1_encap_data.underlay_dmac,
+                        meta.u1_encap_data.underlay_smac,
+                        meta.u1_encap_data.underlay_dip,
+                        meta.u1_encap_data.underlay_sip,
+                        meta.u1_encap_data.vni);
         }
     }
 }
