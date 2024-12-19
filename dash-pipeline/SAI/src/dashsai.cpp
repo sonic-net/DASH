@@ -1098,7 +1098,8 @@ sai_status_t DashSai::create(
             set_attr_to_p4_match(meta_key, &attr_list[i], matchActionEntry);
         }
         else {
-            // FIXME: check extra fields
+            // attr in extra fields
+            set_attr_to_p4_misc(meta_table, &attr_list[i], matchActionEntry);
         }
     }
 
@@ -1140,7 +1141,8 @@ sai_status_t DashSai::create(
             set_attr_to_p4_action(meta_param, &attr_list[i], action);
         }
         else {
-            // FIXME: check extra fields
+            // attr in extra fields
+            set_attr_to_p4_misc(meta_table, &attr_list[i], matchActionEntry);
         }
     }
 
@@ -1315,7 +1317,7 @@ sai_status_t DashSai::get(
             }
         }
         else {
-            DASH_LOG_ERROR("failed to get value for attr %d", attr_list[i].id);
+            get_attr_from_p4_misc(meta_table, matchActionEntry, &attr_list[i]);
         }
     }
 
@@ -1350,7 +1352,7 @@ sai_status_t DashSai::get(
             get_attr_value_from_p4(meta_param->field, meta_param->bitwidth, pair_param.first, attr_list[i].value);
         }
         else {
-            DASH_LOG_ERROR("failed to get value for attr %d", attr_list[i].id);
+            get_attr_from_p4_misc(meta_table, matchActionEntry, &attr_list[i]);
         }
     }
 

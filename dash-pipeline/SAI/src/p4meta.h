@@ -55,15 +55,18 @@ namespace dash
         const P4MetaKey* get_meta_key(
                 _In_ const std::string &key_name) const;
 
-		const P4MetaKey* get_meta_object_key() const;
+        const P4MetaKey* get_meta_object_key() const;
 
-		const P4MetaActionParam* get_meta_action_param(
-				_In_ uint32_t action_id,
-				_In_ sai_attr_id_t attr_id) const;
+        const P4MetaActionParam* get_meta_action_param(
+                _In_ uint32_t action_id,
+                _In_ sai_attr_id_t attr_id) const;
 
-		pi_p4_id_t find_action_id(
-				_In_ uint32_t attr_count,
-				_In_ const sai_attribute_t *attr_list) const;
+        pi_p4_id_t find_action_id(
+                _In_ uint32_t attr_count,
+                _In_ const sai_attribute_t *attr_list) const;
+
+        uint32_t find_action_enum_id(
+                _In_ uint32_t action_id) const;
     };
 
 
@@ -221,6 +224,16 @@ namespace dash
             _In_ const P4MetaActionParam *meta_param,
             _In_ const sai_attribute_t *attr,
             _Out_ p4::v1::Action *action);
+
+    void  set_attr_to_p4_misc(
+            _In_ const P4MetaTable &meta_table,
+            _In_ const sai_attribute_t *attr,
+            _Inout_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry);
+
+    void  get_attr_from_p4_misc(
+            _In_ const P4MetaTable &meta_table,
+            _In_ const std::shared_ptr<p4::v1::TableEntry> matchActionEntry,
+            _Inout_ sai_attribute_t *attr);
 
     std::pair<p4::v1::FieldMatch*, p4::v1::FieldMatch*> get_match_pair_from_p4_table_entry(
             _In_ const P4MetaKey *meta_key,
