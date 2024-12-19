@@ -88,6 +88,17 @@ namespace dash
         return 0; // invalid p4 action id
     }
 
+    uint32_t P4MetaTable::find_action_enum_id(
+            _In_ uint32_t action_id) const
+    {
+        auto itr = actions.find(action_id);
+        if (itr != actions.end()) {
+            return itr->second.enum_id;
+        }
+
+        return ~0u;
+    }
+
     //
     // helper functions, set/get attr to/from p4 match|action
     //
@@ -309,6 +320,41 @@ namespace dash
         auto param = action->add_params();
         param->set_param_id(meta_param->id);
         set_attr_value_to_p4(meta_param->field, meta_param->bitwidth, attr->value, param);
+    }
+
+    void  set_attr_to_p4_misc(
+            _In_ const P4MetaTable &meta_table,
+            _In_ const sai_attribute_t *attr,
+            _Inout_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry)
+    {
+        for (auto &extra_attr: meta_table.extra_fields) {
+            if (extra_attr.second == attr->id) {
+                if (extra_attr.first == "PRIORITY") {
+                    matchActionEntry->set_priority(attr->value.u32);
+                    break;
+                }
+            }
+        }
+    }
+
+    void  get_attr_from_p4_misc(
+            _In_ const P4MetaTable &meta_table,
+            _In_ const std::shared_ptr<p4::v1::TableEntry> matchActionEntry,
+            _Inout_ sai_attribute_t *attr)
+    {
+        for (auto &extra_attr: meta_table.extra_fields) {
+            if (extra_attr.second == attr->id) {
+                if (extra_attr.first == "ACTION") {
+                    auto action = matchActionEntry->mutable_action()->mutable_action();
+                    auto action_id = action->action_id();
+                    attr->value.u32 = meta_table.find_action_enum_id(action_id);
+                }
+                else if (extra_attr.first == "PRIORITY") {
+                    attr->value.u32 = matchActionEntry->priority();
+                    break;
+                }
+            }
+        }
     }
 
     std::pair<p4::v1::FieldMatch*, p4::v1::FieldMatch*> get_match_pair_from_p4_table_entry(
