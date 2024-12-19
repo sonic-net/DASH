@@ -81,6 +81,8 @@ namespace dash
             return u8SetVal(value, p4_key_or_param, bitwidth);
         if (field == "u16")
             return u16SetVal(value, p4_key_or_param, bitwidth);
+        if (field == "s32")
+            return s32SetVal(value, p4_key_or_param, bitwidth);
         if (field == "u32")
             return u32SetVal(value, p4_key_or_param, bitwidth);
         if (field == "u64")
@@ -120,6 +122,10 @@ namespace dash
         else if (field == "u16") {
            uint16_t val = *(const uint16_t*)v;
            value.u16 = ntohs(val);
+        }
+        else if (field == "s32") {
+           int32_t val = *(const int32_t*)v;
+           value.s32 = ntohl(val) >> (32 - bitwidth);
         }
         else if (field == "u32") {
            uint32_t val = *(const uint32_t*)v;
