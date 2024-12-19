@@ -20,99 +20,16 @@ static sai_status_t dash_sai_create_{{ api.name }}(
         _In_ uint32_t attr_count,
         _In_ const sai_attribute_t *attr_list)
 {
-    DASH_LOG_ENTER();
-
-    auto attrs = dash::DashSai::populateDefaultAttributes((sai_object_type_t)SAI_OBJECT_TYPE_{{ api.name | upper }}, attr_count, attr_list);
-    attr_count = (uint32_t)attrs.size();
-    attr_list = attrs.data();
+    auto obj_type = (sai_object_type_t)SAI_OBJECT_TYPE_{{ api.name | upper }};
 
 {% if api.is_object %}
-    std::shared_ptr<p4::v1::TableEntry> matchActionEntry;
-    pi_p4_id_t tableId = 0;
-    // There shall be one and only one action_type
-    p4::v1::TableAction* entry = nullptr;
-    p4::v1::Action* action = nullptr;
-    //auto expectedParams = 0;
-    //auto matchedParams = 0;
-    sai_object_id_t objId = 0;
-    // Search the action
-    pi_p4_id_t actionId = 0;
-
-    {% for table in api.p4_meta.tables %}
-    {% if table.stage != None %}
-    // For stage {{ table.stage }}
-    {% endif %}
-    matchActionEntry = std::make_shared<p4::v1::TableEntry>();
-    tableId = {{table.id}};
-    entry = matchActionEntry->mutable_action();
-    action = entry->mutable_action();
-    //expectedParams = 0;
-    //matchedParams = 0;
-    objId = dashSai->getNextObjectId((sai_object_type_t)SAI_OBJECT_TYPE_{{ api.name | upper }});
-
-    if (objId == SAI_NULL_OBJECT_ID)
-    {
-        DASH_LOG_ERROR("getNextObjectId failed for SAI_OBJECT_TYPE_{{ api.name | upper }}");
-        // TODO clean resources
-        return SAI_STATUS_FAILURE;
-    }
-
-    matchActionEntry->set_table_id(tableId);
-
-    {% include 'templates/impls/p4_table_object_match.cpp.j2' %}
-
-    // If there is only one action, simply set it.
-    // Else, search in the attrs.
-    {% include 'templates/impls/p4_table_action.cpp.j2' %}
-
-    //assert((matchedParams == expectedParams));
-
-    //if (matchedParams != expectedParams) {
-    //    goto ErrRet;
-    //}
-    if (false == dashSai->insertInTable(matchActionEntry, objId)) {
-        goto ErrRet;
-    }
-
-    {% endfor %}
-
-    *{{ api.name }}_id = objId;
-    return SAI_STATUS_SUCCESS;
-ErrRet:
-    dashSai->removeFromTable(*{{ api.name }}_id);
-    return SAI_STATUS_FAILURE;
+    return dashSai->create({{meta_table}}, obj_type, {{ api.name }}_id, switch_id, attr_count, attr_list);
 {% else %}
     std::shared_ptr<p4::v1::TableEntry> matchActionEntry = std::make_shared<p4::v1::TableEntry>();
-    pi_p4_id_t tableId = {{table.id}};
-    matchActionEntry->set_table_id(tableId);
-    auto tableEntry = {{ api.name }};
-    // There shall be one and only one action_type
-    auto entry = matchActionEntry->mutable_action();
-    auto action = entry->mutable_action();
-    //auto expectedParams = 0;
-    //auto matchedParams = 0;
-    pi_p4_id_t actionId;
-    grpc::StatusCode retCode;
+    matchActionEntry->set_table_id({{meta_table}}.id);
 
-    {% include 'templates/impls/p4_table_entry_match.cpp.j2' %}
-
-
-    {% include 'templates/impls/p4_table_action.cpp.j2' %}
-
-    //assert((matchedParams == expectedParams));
-
-    //if (matchedParams != expectedParams) {
-    //    goto ErrRet;
-    //}
-    // TODO: ternaly needs to set priority
-    retCode = dashSai->mutateTableEntry(matchActionEntry, p4::v1::Update_Type_INSERT);
-
-    if (grpc::StatusCode::OK == retCode)
-    {
-        return SAI_STATUS_SUCCESS;
-    }
-ErrRet:
-    return SAI_STATUS_FAILURE;
+    table_{{api.name}}_add_keys({{ api.name }}, matchActionEntry);
+    return dashSai->create({{meta_table}}, obj_type, matchActionEntry, attr_count, attr_list);
 {% endif %}
 }
 
@@ -120,35 +37,13 @@ static sai_status_t dash_sai_remove_{{ api.name }}(
         {% include 'templates/headers/sai_api_param_object_id.j2' %})
 {
 {% if api.is_object %}
-    DASH_LOG_ENTER();
-
-    if (dashSai->removeFromTable({{ api.name }}_id))
-    {
-        return SAI_STATUS_SUCCESS;
-    }
-
-    return SAI_STATUS_FAILURE;
+    return dashSai->remove({{ api.name }}_id);
 {% else %}
-    DASH_LOG_ENTER();
-
     std::shared_ptr<p4::v1::TableEntry> matchActionEntry = std::make_shared<p4::v1::TableEntry>();
-    pi_p4_id_t tableId = {{table.id}};
-    matchActionEntry->set_table_id(tableId);
-    auto tableEntry = {{ api.name }};
-    grpc::StatusCode retCode;
+    matchActionEntry->set_table_id({{meta_table}}.id);
 
-    {% include 'templates/impls/p4_table_entry_match.cpp.j2' %}
-
-    retCode = dashSai->mutateTableEntry(matchActionEntry, p4::v1::Update_Type_DELETE);
-
-    if (grpc::StatusCode::OK == retCode)
-    {
-        return SAI_STATUS_SUCCESS;
-    }
-
-ErrRet:
-
-    return SAI_STATUS_FAILURE;
+    table_{{api.name}}_add_keys({{ api.name }}, matchActionEntry);
+    return dashSai->remove(matchActionEntry);
 {% endif %}
 }
 
