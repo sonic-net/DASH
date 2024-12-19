@@ -1061,13 +1061,13 @@ sai_status_t DashSai::set(
     pi_p4_id_t action_id = action->action_id();
     auto meta_param = meta_table.get_meta_action_param(action_id, attr->id);
     if (meta_param) {
-        auto pair_param = get_action_param(meta_param, matchActionEntry);
+        auto pair_param = get_action_param_pair_from_p4_table_entry(meta_param, matchActionEntry);
         if (pair_param.second) {
-            set_ipaddr_family(attr->value, pair_param.second);
+            set_attr_ipaddr_family_to_p4(attr->value, pair_param.second);
         }
 
         assert(pair_param.first);
-        set_value(meta_param->field, meta_param->bitwidth, attr->value, pair_param.first);
+        set_attr_value_to_p4(meta_param->field, meta_param->bitwidth, attr->value, pair_param.first);
 
         auto ret = mutateTableEntry(matchActionEntry, p4::v1::Update_Type_MODIFY);
         return ret == grpc::StatusCode::OK ? SAI_STATUS_SUCCESS : SAI_STATUS_FAILURE;
@@ -1079,18 +1079,18 @@ sai_status_t DashSai::set(
         std::shared_ptr<p4::v1::TableEntry> new_entry = std::make_shared<p4::v1::TableEntry>();
         new_entry->CopyFrom(*matchActionEntry);
 
-        auto pair_key = get_key(meta_key, new_entry);
+        auto pair_key = get_match_pair_from_p4_table_entry(meta_key, new_entry);
         if (pair_key.second) {
-            set_ipaddr_family(attr->value, pair_key.second->mutable_exact());
+            set_attr_ipaddr_family_to_p4(attr->value, pair_key.second->mutable_exact());
         }
 
         assert(pair_key.first);
-        if (meta_key->match_type == "ternary" && has_suffix(meta_key->name, "_MASK")) {
-            set_mask(meta_key->field, meta_key->bitwidth, attr->value,
+        if (meta_key->match_type == "ternary" && string_has_suffix(meta_key->name, "_MASK")) {
+            set_attr_value_mask_to_p4_ternary(meta_key->field, meta_key->bitwidth, attr->value,
                      pair_key.first->mutable_ternary());
         }
         else {
-            set_key_value(*meta_key, attr->value, pair_key.first);
+            set_attr_value_to_p4_match(*meta_key, attr->value, pair_key.first);
         }
 
         removeFromTable(objectId);
@@ -1118,13 +1118,13 @@ sai_status_t DashSai::set(
     pi_p4_id_t action_id = action->action_id();
     auto meta_param = meta_table.get_meta_action_param(action_id, attr->id);
     if (meta_param) {
-        auto pair_param = get_action_param(meta_param, matchActionEntry);
+        auto pair_param = get_action_param_pair_from_p4_table_entry(meta_param, matchActionEntry);
         if (pair_param.second) {
-            set_ipaddr_family(attr->value, pair_param.second);
+            set_attr_ipaddr_family_to_p4(attr->value, pair_param.second);
         }
 
         assert(pair_param.first);
-        set_value(meta_param->field, meta_param->bitwidth, attr->value, pair_param.first);
+        set_attr_value_to_p4(meta_param->field, meta_param->bitwidth, attr->value, pair_param.first);
 
         auto ret = mutateTableEntry(matchActionEntry, p4::v1::Update_Type_MODIFY);
         return ret == grpc::StatusCode::OK ? SAI_STATUS_SUCCESS : SAI_STATUS_FAILURE;
@@ -1153,28 +1153,28 @@ sai_status_t DashSai::get(
     for (uint32_t i = 0; i < attr_count; i++) {
         if (auto meta_param = meta_table.get_meta_action_param(action_id, attr_list[i].id)) {
             // attr in table action params
-            auto pair_param = get_action_param(meta_param, matchActionEntry);
+            auto pair_param = get_action_param_pair_from_p4_table_entry(meta_param, matchActionEntry);
             if (pair_param.second) {
-                get_ipaddr_family(pair_param.second, attr_list[i].value);
+                get_attr_ipaddr_family_from_p4(pair_param.second, attr_list[i].value);
             }
 
             assert(pair_param.first);
-            get_value(meta_param->field, meta_param->bitwidth, pair_param.first, attr_list[i].value);
+            get_attr_value_from_p4(meta_param->field, meta_param->bitwidth, pair_param.first, attr_list[i].value);
         }
         else if (auto meta_key = meta_table.get_meta_key(attr_list[i].id)) {
             // attr in table keys
-            auto pair_key = get_key(meta_key, matchActionEntry);
+            auto pair_key = get_match_pair_from_p4_table_entry(meta_key, matchActionEntry);
             if (pair_key.second) {
-                get_ipaddr_family(pair_key.second->mutable_exact(), attr_list[i].value);
+                get_attr_ipaddr_family_from_p4(pair_key.second->mutable_exact(), attr_list[i].value);
             }
 
             assert(pair_key.first);
-            if (meta_key->match_type == "ternary" && has_suffix(meta_key->name, "_MASK")) {
-                get_mask(meta_key->field, meta_key->bitwidth,
+            if (meta_key->match_type == "ternary" && string_has_suffix(meta_key->name, "_MASK")) {
+                get_attr_value_mask_from_p4_ternary(meta_key->field, meta_key->bitwidth,
                          pair_key.first->mutable_ternary(), attr_list[i].value);
             }
             else {
-                get_key_value(*meta_key, pair_key.first, attr_list[i].value);
+                get_attr_value_from_p4_match(*meta_key, pair_key.first, attr_list[i].value);
             }
         }
         else {
@@ -1204,13 +1204,13 @@ sai_status_t DashSai::get(
     for (uint32_t i = 0; i < attr_count; i++) {
         if (auto meta_param = meta_table.get_meta_action_param(action_id, attr_list[i].id)) {
             // attr in table action params
-            auto pair_param = get_action_param(meta_param, matchActionEntry);
+            auto pair_param = get_action_param_pair_from_p4_table_entry(meta_param, matchActionEntry);
             if (pair_param.second) {
-                get_ipaddr_family(pair_param.second, attr_list[i].value);
+                get_attr_ipaddr_family_from_p4(pair_param.second, attr_list[i].value);
             }
 
             assert(pair_param.first);
-            get_value(meta_param->field, meta_param->bitwidth, pair_param.first, attr_list[i].value);
+            get_attr_value_from_p4(meta_param->field, meta_param->bitwidth, pair_param.first, attr_list[i].value);
         }
         else {
             DASH_LOG_ERROR("failed to get value for attr %d", attr_list[i].id);
