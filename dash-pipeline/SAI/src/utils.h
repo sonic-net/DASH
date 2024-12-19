@@ -243,12 +243,6 @@ namespace dash
         int getPrefixLength(const sai_attribute_value_t &value);
 
         template<typename T>
-            void ipPrefixSetVal(const sai_attribute_value_t &value, T &t, int bits = -1)
-            {
-                ipPrefixSetVal(value.ipprefix, t);
-            }
-
-        template<typename T>
             void ipPrefixSetVal(const sai_ip_prefix_t &value, T &t, int bits = -1)
             {
                 switch(value.addr_family)
@@ -280,6 +274,12 @@ namespace dash
                     default:
                         assert(0 && "unrecognzed value.ipaddr.addr_family");
                 }
+            }
+
+        template<typename T>
+            void ipPrefixSetVal(const sai_attribute_value_t &value, T &t, int bits = -1)
+            {
+                ipPrefixSetVal(value.ipprefix, t);
             }
 
         template<typename T>
