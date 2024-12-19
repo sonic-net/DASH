@@ -311,6 +311,21 @@ namespace dash
         set_attr_value_to_p4(meta_param->field, meta_param->bitwidth, attr->value, param);
     }
 
+    void  set_attr_to_p4_misc(
+            _In_ const P4MetaTable &meta_table,
+            _In_ const sai_attribute_t *attr,
+            _Inout_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry)
+    {
+        for (auto &extra_attr: meta_table.extra_fields) {
+            if (extra_attr.second == attr->id) {
+                if (extra_attr.first == "PRIORITY") {
+                    matchActionEntry->set_priority(attr->value.u32);
+                    break;
+                }
+            }
+        }
+    }
+
     std::pair<p4::v1::FieldMatch*, p4::v1::FieldMatch*> get_match_pair_from_p4_table_entry(
             _In_ const P4MetaKey *meta_key,
             _In_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry)

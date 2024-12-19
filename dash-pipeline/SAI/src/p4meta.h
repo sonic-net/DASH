@@ -222,6 +222,11 @@ namespace dash
             _In_ const sai_attribute_t *attr,
             _Out_ p4::v1::Action *action);
 
+    void  set_attr_to_p4_misc(
+            _In_ const P4MetaTable &meta_table,
+            _In_ const sai_attribute_t *attr,
+            _Inout_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry);
+
     std::pair<p4::v1::FieldMatch*, p4::v1::FieldMatch*> get_match_pair_from_p4_table_entry(
             _In_ const P4MetaKey *meta_key,
             _In_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry);

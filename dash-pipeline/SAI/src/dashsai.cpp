@@ -1098,7 +1098,8 @@ sai_status_t DashSai::create(
             set_attr_to_p4_match(meta_key, &attr_list[i], matchActionEntry);
         }
         else {
-            // FIXME: check extra fields
+            // attr in extra fields
+            set_attr_to_p4_misc(meta_table, &attr_list[i], matchActionEntry);
         }
     }
 
@@ -1140,7 +1141,8 @@ sai_status_t DashSai::create(
             set_attr_to_p4_action(meta_param, &attr_list[i], action);
         }
         else {
-            // FIXME: check extra fields
+            // attr in extra fields
+            set_attr_to_p4_misc(meta_table, &attr_list[i], matchActionEntry);
         }
     }
 
