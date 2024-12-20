@@ -1104,6 +1104,7 @@ sai_status_t DashSai::create(
     }
 
     if (insertInTable(matchActionEntry, objId)) {
+        mutateSiblingTablesEntry(meta_table, matchActionEntry, p4::v1::Update_Type_INSERT, action_id);
         *objectId = objId;
         return SAI_STATUS_SUCCESS;
     }
@@ -1148,6 +1149,7 @@ sai_status_t DashSai::create(
 
     auto ret = mutateTableEntry(matchActionEntry, p4::v1::Update_Type_INSERT);
     if (grpc::StatusCode::OK == ret) {
+        mutateSiblingTablesEntry(meta_table, matchActionEntry, p4::v1::Update_Type_INSERT, action_id);
         return SAI_STATUS_SUCCESS;
     }
 
@@ -1155,12 +1157,19 @@ sai_status_t DashSai::create(
 }
 
 sai_status_t DashSai::remove(
-		_In_ sai_object_id_t objectId)
+        _In_ const P4MetaTable &meta_table,
+        _In_ sai_object_id_t objectId)
 {
     DASH_LOG_ENTER();
     DASH_CHECK_API_INITIALIZED();
 
+    std::shared_ptr<p4::v1::TableEntry> matchActionEntry = nullptr;
+    if (!getFromTable(objectId, matchActionEntry)) {
+        return SAI_STATUS_FAILURE;
+    }
+
     if (removeFromTable(objectId)) {
+        mutateSiblingTablesEntry(meta_table, matchActionEntry, p4::v1::Update_Type_DELETE);
         return SAI_STATUS_SUCCESS;
     }
 
@@ -1168,7 +1177,8 @@ sai_status_t DashSai::remove(
 }
 
 sai_status_t DashSai::remove(
-		_Inout_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry)
+        _In_ const P4MetaTable &meta_table,
+        _Inout_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry)
 {
     DASH_LOG_ENTER();
     DASH_CHECK_API_INITIALIZED();
@@ -1176,6 +1186,7 @@ sai_status_t DashSai::remove(
     auto ret = mutateTableEntry(matchActionEntry, p4::v1::Update_Type_DELETE);
 
     if (grpc::StatusCode::OK == ret) {
+        mutateSiblingTablesEntry(meta_table, matchActionEntry, p4::v1::Update_Type_DELETE);
         return SAI_STATUS_SUCCESS;
     }
 
@@ -1209,6 +1220,9 @@ sai_status_t DashSai::set(
         set_attr_value_to_p4(meta_param->field, meta_param->bitwidth, attr->value, pair_param.first);
 
         auto ret = mutateTableEntry(matchActionEntry, p4::v1::Update_Type_MODIFY);
+        if (ret == grpc::StatusCode::OK) {
+            mutateSiblingTablesEntry(meta_table, matchActionEntry, p4::v1::Update_Type_MODIFY, action_id);
+        }
         return ret == grpc::StatusCode::OK ? SAI_STATUS_SUCCESS : SAI_STATUS_FAILURE;
     }
 
@@ -1233,8 +1247,12 @@ sai_status_t DashSai::set(
         }
 
         removeFromTable(objectId);
-        auto ret = insertInTable(new_entry, objectId);
-        return ret ? SAI_STATUS_SUCCESS : SAI_STATUS_FAILURE;
+        mutateSiblingTablesEntry(meta_table, matchActionEntry, p4::v1::Update_Type_DELETE);
+
+        if (insertInTable(new_entry, objectId)) {
+            mutateSiblingTablesEntry(meta_table, new_entry, p4::v1::Update_Type_INSERT, action_id);
+            return SAI_STATUS_SUCCESS;
+        }
     }
 
     return SAI_STATUS_FAILURE;
@@ -1266,6 +1284,9 @@ sai_status_t DashSai::set(
         set_attr_value_to_p4(meta_param->field, meta_param->bitwidth, attr->value, pair_param.first);
 
         auto ret = mutateTableEntry(matchActionEntry, p4::v1::Update_Type_MODIFY);
+        if (ret == grpc::StatusCode::OK) {
+            mutateSiblingTablesEntry(meta_table, matchActionEntry, p4::v1::Update_Type_MODIFY, action_id);
+        }
         return ret == grpc::StatusCode::OK ? SAI_STATUS_SUCCESS : SAI_STATUS_FAILURE;
     }
 
@@ -1359,3 +1380,29 @@ sai_status_t DashSai::get(
     return SAI_STATUS_SUCCESS;
 }
 
+void DashSai::mutateSiblingTablesEntry(
+        _In_ const P4MetaTable &meta_table,
+        _In_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry,
+        _In_ p4::v1::Update_Type updateType,
+        _In_ uint32_t action_id)
+{
+    if (meta_table.sibling_tables.empty()) {
+        return;
+    }
+
+    std::shared_ptr<p4::v1::TableEntry> entry = std::make_shared<p4::v1::TableEntry>();
+    entry->CopyFrom(*matchActionEntry);
+    auto action = entry->mutable_action()->mutable_action();
+
+    for (auto &sibling: meta_table.sibling_tables) {
+        entry->set_table_id(sibling.id);
+
+        if (updateType != p4::v1::Update_Type_DELETE) {
+            auto enum_id = meta_table.find_action_enum_id(action_id);
+            auto sibling_action_id = sibling.actions.at(enum_id);
+            action->set_action_id(sibling_action_id);
+        }
+
+        mutateTableEntry(entry, updateType);
+    }
+}

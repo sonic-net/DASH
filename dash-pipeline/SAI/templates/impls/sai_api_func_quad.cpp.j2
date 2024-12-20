@@ -37,13 +37,13 @@ static sai_status_t dash_sai_remove_{{ api.name }}(
         {% include 'templates/headers/sai_api_param_object_id.j2' %})
 {
 {% if api.is_object %}
-    return dashSai->remove({{ api.name }}_id);
+    return dashSai->remove({{meta_table}}, {{ api.name }}_id);
 {% else %}
     std::shared_ptr<p4::v1::TableEntry> matchActionEntry = std::make_shared<p4::v1::TableEntry>();
     matchActionEntry->set_table_id({{meta_table}}.id);
 
     table_{{api.name}}_add_keys({{ api.name }}, matchActionEntry);
-    return dashSai->remove(matchActionEntry);
+    return dashSai->remove({{meta_table}}, matchActionEntry);
 {% endif %}
 }
 
