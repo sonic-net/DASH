@@ -34,18 +34,27 @@ namespace dash
         std::vector<P4MetaActionParam> params;
     };
 
+    struct P4MetaSiblingTable {
+        uint32_t id;
+        // action enum id -> p4 action id
+        std::map<uint32_t, uint32_t> actions;
+    };
+
     struct P4MetaTable {
         uint32_t id;
         std::vector<P4MetaKey> keys;
         std::map<uint32_t, P4MetaAction> actions;
         std::map<std::string, sai_attr_id_t> extra_fields;
+        std::vector<P4MetaSiblingTable> sibling_tables;
 
         P4MetaTable(
                 uint32_t table_id,
                 std::initializer_list<P4MetaKey> init_keys,
                 std::initializer_list<std::map<uint32_t, P4MetaAction>::value_type> init_actions,
-                std::initializer_list<std::map<std::string, sai_attr_id_t>::value_type> extras
-                ) : id(table_id), keys(init_keys), actions(init_actions), extra_fields(extras)
+                std::initializer_list<std::map<std::string, sai_attr_id_t>::value_type> extras,
+                std::initializer_list<P4MetaSiblingTable> sibling_list = {}
+                ) : id(table_id), keys(init_keys), actions(init_actions),
+                    extra_fields(extras), sibling_tables(sibling_list)
 
         {}
 

@@ -69,9 +69,11 @@ namespace dash
                     _In_ const sai_attribute_t *attr_list);
 
             sai_status_t remove(
+                    _In_ const P4MetaTable &meta_table,
                     _In_ sai_object_id_t objectId);
 
             sai_status_t remove(
+                    _In_ const P4MetaTable &meta_table,
                     _Inout_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry);
 
             sai_status_t set(
@@ -146,6 +148,14 @@ namespace dash
             bool getFromTable(
                     _In_ sai_object_id_t id,
                     _Out_ std::shared_ptr<p4::v1::TableEntry> &entry);
+
+        private: // private helper methods
+
+			void mutateSiblingTablesEntry(
+					_In_ const P4MetaTable &meta_table,
+					_In_ std::shared_ptr<p4::v1::TableEntry>,
+					_In_ p4::v1::Update_Type updateType,
+					_In_ uint32_t action_id = 0);
 
         public: // default attributes helper
 
