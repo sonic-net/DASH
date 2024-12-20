@@ -10,6 +10,102 @@ using namespace dash::utils;
 
 {% for api in api_group.sai_apis %}
 {% set table = api.p4_meta.tables[0] -%}
+{% set meta_table = api.name ~ '_meta_table' -%}
+static dash::P4MetaTable {{meta_table}} (
+    {{table.id}},   // p4 table id
+    { // meta table keys
+        {% for key in table['keys'] %}
+        {
+        {% if api.is_object and not key.is_object_key %}
+            SAI_{{ api.name | upper }}_ATTR_{{ key.name | upper }},
+        {% else %}
+            ~0u, // key is not ATTR
+        {% endif%}
+        {% if key.is_object_key %}
+            "{{key.name}}_OBJECT_KEY",  // p4 match name
+        {% else %}
+            "{{key.name}}",    // p4 match name
+        {% endif%}
+            {{key.id}},        // p4 match field id
+            "{{key.match_type}}",   // p4 match type
+            "{{key.field}}",   // field
+            {{key.bitwidth}},  // bitwidth
+            {{key.ip_is_v6_field_id}}   // ip_is_v6_field_id
+        },
+        {% if api.is_object and key.match_type == 'ternary'%}
+        { // extra added for set_mask of ternary key
+            SAI_{{ api.name | upper }}_ATTR_{{ key.name | upper }}_MASK,
+            "{{key.name}}_MASK",    // p4 match name
+            {{key.id}},        // p4 match field id
+            "{{key.match_type}}",   // p4 match type
+            "{{key.field}}",   // field
+            {{key.bitwidth}},  // bitwidth
+            {{key.ip_is_v6_field_id}}   // ip_is_v6_field_id
+        },
+        {% endif%}
+        {% endfor %}
+    },
+    { // meta table actions
+        {% for name, action in table.actions.items() %}
+        {
+            {{action.id}},  // p4 action id
+            {
+                {% if api.is_object and table.actions|length == 1 %}
+                ~0u, // Have no ATTR ACTION value for oid API with 1 action
+                {% elif api_group.api_type == "underlay" %}
+                ~0u, // Have no ATTR ACTION value for underlay api type
+                {% else %}
+                {{name}},   // attr action enum id
+                {% endif %}
+                {
+                    {% for param_name, param in action.attr_params.items() %}
+                    {% if param.skipattr != 'true' %}
+                    {
+                        {{param_name}}, // attr id
+                        {{param.id}},   // p4 action param id
+                        "{{param.field}}",  // field
+                        {{param.bitwidth}}, // bitwidth
+                        {{param.ip_is_v6_field_id}} // ip_is_v6_field_id
+                    },
+                    {% endif%}
+                    {% endfor %}
+                }
+
+            },
+        },
+        {% endfor %}
+    },
+    { // extra fields for SAI object attributes
+    {% if api_group.api_type != "underlay" %}
+    {% for attr in api.attributes %}
+        {% if attr.name.endswith("ATTR_ACTION") %}
+        {"ACTION", {{attr.name}}},
+        {% elif attr.name.endswith("ATTR_PRIORITY") %}
+        {"PRIORITY", {{attr.name}}},
+        {% elif attr.name.endswith("ATTR_COUNTER_ID") %}
+        {"COUNTER_ID", {{attr.name}}},
+        {% elif attr.name.endswith("ATTR_IP_ADDR_FAMILY") %}
+        {"IP_ADDR_FAMILY", {{attr.name}}},
+        {% endif%}
+    {% endfor %}
+    {% endif%}
+    }
+{% if api.p4_meta.tables|length > 1 %}
+    ,{   // sibling table list for multiple stages
+    {% for sibling_table in api.p4_meta.tables[1:] %}
+        {
+            {{sibling_table.id}}, // {{ sibling_table.stage }}
+            { // map of action enum id -> action id
+                {% for name, action in sibling_table.actions.items() %}
+                { {{name}}, {{action.id}} },
+                {% endfor %}
+            }
+        },
+    {% endfor %}
+    }
+{% endif %}
+);
+
 {% include 'templates/impls/sai_api_func_quad.cpp.j2' %}
 
 {% if api.stats | length > 0 %}
