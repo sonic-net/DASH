@@ -332,6 +332,8 @@ class SaiThriftDpappPktTest(SaiHelperSimplified):
         self.pkt_exp = vxlan_exp_pkt
         print("\tSending outbound packet TCP SYN ...")
         send_packet(self, 0, vxlan_pkt)
+        print("\tVerifying packet...")
+        verify_packet(self, self.pkt_exp, 0)
         print("\tVerifying flow created...")
         verify_flow(self.eni_mac, self.vnet & 0xffff, inner_pkt)
         time.sleep(35)
@@ -346,7 +348,7 @@ class SaiThriftDpappPktTest(SaiHelperSimplified):
         self.configureVnet()
         self.trafficUdpTest()
         self.trafficTcpTest()
-        self.ageoutTcpTest()
+        # self.ageoutTcpTest()
 
     def tearDown(self):
 

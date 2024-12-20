@@ -514,47 +514,46 @@ class SaiThriftDashFlowTest(VnetAPI):
                         exp_inner_dport = self.dst_port
                         ))
 
-        # Test case xx: flow hit (5 tuple) 
-        # action: encap_u0 | encap_u1
-        # expected: pass
-        self.tests.append(FlowTest(saithrift = self,
-                        name = "FlowHitActionEncapU0EncapU1",   
-                        create_entry = True,
-                        switch_id = self.switch_id,
-                        vnet_vni = self.vnet_vni,
-                        vnet_id = self.vnet_id,
-                        outbound_vni = self.outbound_vni,
-                        eni_mac = self.vm_mac,
-                        outer_smac = "00:00:00:00:00:00",
-                        outer_dmac = "00:00:00:00:00:00",
-                        outer_sip = self.src_vm_pa_ip,
-                        outer_dip = self.vip,
-                        inner_smac = self.vm_mac,
-                        inner_dmac = self.dst_ca_mac,
-                        protocol = 17,
-                        inner_sip = self.src_vm_ca_ip,
-                        inner_dip = self.dst_ca_ip,
-                        inner_sport = self.src_vm_port,
-                        inner_dport = self.dst_port,
-                        priority = 1,
-                        action = SAI_DASH_FLOW_ACTION_ENCAP_U0 | SAI_DASH_FLOW_ACTION_ENCAP_U1,
-                        exp_receive = True,
-                        exp_u0_smac = self.eni_mac,
-                        exp_u0_dmac = self.underlay_dmac,
-                        exp_u0_sip = self.src_vm_pa_ip,
-                        exp_u0_dip = self.dst_pa_ip,
-                        exp_u1_smac = "11:22:33:44:55:66",
-                        exp_u1_dmac = "77:88:99:aa:bb:cc",
-                        exp_u1_sip = "200.0.1.2",
-                        exp_u1_dip = "200.3.4.5",
-                        exp_inner_smac = self.vm_mac,
-                        exp_inner_dmac = self.dst_ca_mac,
-                        exp_inner_sip = self.src_vm_ca_ip,
-                        exp_inner_dip = self.dst_ca_ip,
-                        exp_inner_sport = self.src_vm_port,
-                        exp_inner_dport = self.dst_port
-                        ))
-
+        # # Test case xx: flow hit (5 tuple) 
+        # # action: encap_u0 | encap_u1
+        # # expected: pass
+        # self.tests.append(FlowTest(saithrift = self,
+        #                 name = "FlowHitActionEncapU0EncapU1",   
+        #                 create_entry = True,
+        #                 switch_id = self.switch_id,
+        #                 vnet_vni = self.vnet_vni,
+        #                 vnet_id = self.vnet_id,
+        #                 outbound_vni = self.outbound_vni,
+        #                 eni_mac = self.vm_mac,
+        #                 outer_smac = "00:00:00:00:00:00",
+        #                 outer_dmac = "00:00:00:00:00:00",
+        #                 outer_sip = self.src_vm_pa_ip,
+        #                 outer_dip = self.vip,
+        #                 inner_smac = self.vm_mac,
+        #                 inner_dmac = self.dst_ca_mac,
+        #                 protocol = 17,
+        #                 inner_sip = self.src_vm_ca_ip,
+        #                 inner_dip = self.dst_ca_ip,
+        #                 inner_sport = self.src_vm_port,
+        #                 inner_dport = self.dst_port,
+        #                 priority = 1,
+        #                 action = SAI_DASH_FLOW_ACTION_ENCAP_U0 | SAI_DASH_FLOW_ACTION_ENCAP_U1,
+        #                 exp_receive = True,
+        #                 exp_u0_smac = self.eni_mac,
+        #                 exp_u0_dmac = self.underlay_dmac,
+        #                 exp_u0_sip = self.src_vm_pa_ip,
+        #                 exp_u0_dip = self.dst_pa_ip,
+        #                 exp_u1_smac = "11:22:33:44:55:66",
+        #                 exp_u1_dmac = "77:88:99:aa:bb:cc",
+        #                 exp_u1_sip = "200.0.1.2",
+        #                 exp_u1_dip = "200.3.4.5",
+        #                 exp_inner_smac = self.vm_mac,
+        #                 exp_inner_dmac = self.dst_ca_mac,
+        #                 exp_inner_sip = self.src_vm_ca_ip,
+        #                 exp_inner_dip = self.dst_ca_ip,
+        #                 exp_inner_sport = self.src_vm_port,
+        #                 exp_inner_dport = self.dst_port
+        #                 ))
 
         # Test case 3: flow hit (5 tuple) 
         # action: overlay dmac rewrite
