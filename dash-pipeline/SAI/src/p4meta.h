@@ -11,7 +11,8 @@ using namespace dash::utils;
 
 namespace dash
 {
-    struct P4MetaKey {
+    struct P4MetaKey
+    {
         sai_attr_id_t attr_id;
         std::string name;
         uint32_t id;
@@ -21,7 +22,8 @@ namespace dash
         uint32_t ip_is_v6_field_id;
     };
 
-    struct P4MetaActionParam {
+    struct P4MetaActionParam
+    {
         sai_attr_id_t attr_id;
         uint32_t id;
         std::string field;
@@ -29,18 +31,21 @@ namespace dash
         uint32_t ip_is_v6_field_id;
     };
 
-    struct P4MetaAction {
+    struct P4MetaAction
+    {
         uint32_t enum_id;
         std::vector<P4MetaActionParam> params;
     };
 
-    struct P4MetaSiblingTable {
+    struct P4MetaSiblingTable
+    {
         uint32_t id;
         // action enum id -> p4 action id
         std::map<uint32_t, uint32_t> actions;
     };
 
-    struct P4MetaTable {
+    struct P4MetaTable
+    {
         uint32_t id;
         std::vector<P4MetaKey> keys;
         std::map<uint32_t, P4MetaAction> actions;
@@ -106,7 +111,7 @@ namespace dash
         if (field == "u8list")
             return u8listSetVal(value, p4_key_or_param, bitwidth);
 
-        assert(0);
+        assert(0 && "unsupported field");
     }
 
     void  set_attr_value_to_p4(
@@ -125,50 +130,64 @@ namespace dash
     {
         const char *v = p4_key_or_param->value().c_str();
 
-        if (field == "booldata") {
+        if (field == "booldata")
+        {
            value.booldata = *(const bool*)v;
         }
-        else if (field == "u8") {
+        else if (field == "u8")
+        {
            value.u8 = *(const uint8_t*)v;
         }
-        else if (field == "u16") {
+        else if (field == "u16")
+        {
            uint16_t val = *(const uint16_t*)v;
            value.u16 = ntohs(val);
         }
-        else if (field == "s32") {
+        else if (field == "s32")
+        {
            int32_t val = *(const int32_t*)v;
            value.s32 = ntohl(val) >> (32 - bitwidth);
         }
-        else if (field == "u32") {
+        else if (field == "u32")
+        {
            uint32_t val = *(const uint32_t*)v;
            value.u32 = ntohl(val) >> (32 - bitwidth);
         }
-        else if (field == "u64") {
+        else if (field == "u64")
+        {
            uint64_t val = *(const uint64_t*)v;
-           if (*reinterpret_cast<const char*>("\0\x01") == 0) { // Little Endian
+           if (*reinterpret_cast<const char*>("\0\x01") == 0)
+           { // Little Endian
                value.u64 = be64toh(val) >> (64 - bitwidth);
            }
-           else {
+           else
+           {
                value.u64 = val & ((1ul<<bitwidth) - 1);
            }
         }
-        else if (field == "ipaddr") {
-            if (value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4) {
+        else if (field == "ipaddr")
+        {
+            if (value.ipaddr.addr_family == SAI_IP_ADDR_FAMILY_IPV4)
+            {
                 uint32_t val = *(const uint32_t*)v;
                 value.ipaddr.addr.ip4 = val;
             }
-            else {
+            else
+            {
                 memcpy(value.ipaddr.addr.ip6, v, 16);
             }
         }
-        else if (field == "mac") {
+        else if (field == "mac")
+        {
             memcpy(value.mac, v, 6);
         }
-        else if (field == "u8list") {
+        else if (field == "u8list")
+        {
             memcpy(value.u8list.list, v, p4_key_or_param->value().size());
         }
-        else {
-            assert(0);
+        else
+        {
+            assert(0 && "unsupported field");
         }
     }
 
