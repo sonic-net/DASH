@@ -90,6 +90,20 @@ static dash::P4MetaTable {{meta_table}} (
     {% endfor %}
     {% endif%}
     }
+{% if api.p4_meta.tables|length > 1 %}
+    ,{   // sibling table list for multiple stages
+    {% for sibling_table in api.p4_meta.tables[1:] %}
+        {
+            {{sibling_table.id}}, // {{ sibling_table.stage }}
+            { // map of action enum id -> action id
+                {% for name, action in sibling_table.actions.items() %}
+                { {{name}}, {{action.id}} },
+                {% endfor %}
+            }
+        },
+    {% endfor %}
+    }
+{% endif %}
 );
 
 {% include 'templates/impls/sai_api_func_quad.cpp.j2' %}
