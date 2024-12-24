@@ -37,7 +37,7 @@ namespace dash
     const P4MetaKey* P4MetaTable::get_meta_object_key() const
     {
         for (auto i=0u; i<keys.size(); i++) {
-            if (string_has_suffix(keys[i].name, "_OBJECT_KEY")) {
+            if (string_ends_with(keys[i].name, "_OBJECT_KEY")) {
                 return &keys[i];
             }
         }
@@ -297,7 +297,7 @@ namespace dash
 
         auto mf = matchActionEntry->add_match();
         mf->set_field_id(meta_key->id);
-        if (meta_key->match_type == "ternary" && string_has_suffix(meta_key->name, "_MASK")) {
+        if (meta_key->match_type == "ternary" && string_ends_with(meta_key->name, "_MASK")) {
             set_attr_value_mask_to_p4_ternary(meta_key->field, meta_key->bitwidth, attr->value,
                      mf->mutable_ternary());
         }
@@ -376,7 +376,7 @@ namespace dash
         return pair_key;
     }
 
-    std::pair<p4::v1::Action_Param*, p4::v1::Action_Param*> get_action_param_pair_from_p4_table_entry(
+    std::pair<p4::v1::Action_Param*, p4::v1::Action_Param*> get_action_param_with_is_v6_flag_from_p4_table_entry(
             _In_ const P4MetaActionParam *meta_param,
             _In_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry)
     {
@@ -396,7 +396,7 @@ namespace dash
         return pair_param;
     }
 
-    bool string_has_suffix(const std::string &str, const std::string &suffix)
+    bool string_ends_with(const std::string &str, const std::string &suffix)
     {
         if (str.length() < suffix.length())
             return false;

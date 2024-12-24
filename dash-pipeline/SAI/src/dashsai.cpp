@@ -1211,7 +1211,7 @@ sai_status_t DashSai::set(
     pi_p4_id_t action_id = action->action_id();
     auto meta_param = meta_table.get_meta_action_param(action_id, attr->id);
     if (meta_param) {
-        auto pair_param = get_action_param_pair_from_p4_table_entry(meta_param, matchActionEntry);
+        auto pair_param = get_action_param_with_is_v6_flag_from_p4_table_entry(meta_param, matchActionEntry);
         if (pair_param.second) {
             set_attr_ipaddr_family_to_p4(attr->value, pair_param.second);
         }
@@ -1238,7 +1238,7 @@ sai_status_t DashSai::set(
         }
 
         assert(pair_key.first);
-        if (meta_key->match_type == "ternary" && string_has_suffix(meta_key->name, "_MASK")) {
+        if (meta_key->match_type == "ternary" && string_ends_with(meta_key->name, "_MASK")) {
             set_attr_value_mask_to_p4_ternary(meta_key->field, meta_key->bitwidth, attr->value,
                      pair_key.first->mutable_ternary());
         }
@@ -1275,7 +1275,7 @@ sai_status_t DashSai::set(
     pi_p4_id_t action_id = action->action_id();
     auto meta_param = meta_table.get_meta_action_param(action_id, attr->id);
     if (meta_param) {
-        auto pair_param = get_action_param_pair_from_p4_table_entry(meta_param, matchActionEntry);
+        auto pair_param = get_action_param_with_is_v6_flag_from_p4_table_entry(meta_param, matchActionEntry);
         if (pair_param.second) {
             set_attr_ipaddr_family_to_p4(attr->value, pair_param.second);
         }
@@ -1313,7 +1313,7 @@ sai_status_t DashSai::get(
     for (uint32_t i = 0; i < attr_count; i++) {
         if (auto meta_param = meta_table.get_meta_action_param(action_id, attr_list[i].id)) {
             // attr in table action params
-            auto pair_param = get_action_param_pair_from_p4_table_entry(meta_param, matchActionEntry);
+            auto pair_param = get_action_param_with_is_v6_flag_from_p4_table_entry(meta_param, matchActionEntry);
             if (pair_param.second) {
                 get_attr_ipaddr_family_from_p4(pair_param.second, attr_list[i].value);
             }
@@ -1329,7 +1329,7 @@ sai_status_t DashSai::get(
             }
 
             assert(pair_key.first);
-            if (meta_key->match_type == "ternary" && string_has_suffix(meta_key->name, "_MASK")) {
+            if (meta_key->match_type == "ternary" && string_ends_with(meta_key->name, "_MASK")) {
                 get_attr_value_mask_from_p4_ternary(meta_key->field, meta_key->bitwidth,
                          pair_key.first->mutable_ternary(), attr_list[i].value);
             }
@@ -1364,7 +1364,7 @@ sai_status_t DashSai::get(
     for (uint32_t i = 0; i < attr_count; i++) {
         if (auto meta_param = meta_table.get_meta_action_param(action_id, attr_list[i].id)) {
             // attr in table action params
-            auto pair_param = get_action_param_pair_from_p4_table_entry(meta_param, matchActionEntry);
+            auto pair_param = get_action_param_with_is_v6_flag_from_p4_table_entry(meta_param, matchActionEntry);
             if (pair_param.second) {
                 get_attr_ipaddr_family_from_p4(pair_param.second, attr_list[i].value);
             }

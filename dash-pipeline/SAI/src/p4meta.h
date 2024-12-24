@@ -248,9 +248,9 @@ namespace dash
             _In_ const P4MetaKey *meta_key,
             _In_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry);
 
-    std::pair<p4::v1::Action_Param*, p4::v1::Action_Param*> get_action_param_pair_from_p4_table_entry(
+    std::pair<p4::v1::Action_Param*, p4::v1::Action_Param*> get_action_param_with_is_v6_flag_from_p4_table_entry(
             _In_ const P4MetaActionParam *meta_param,
             _In_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry);
 
-    bool string_has_suffix(const std::string &str, const std::string &suffix);
+    bool string_ends_with(const std::string &str, const std::string &suffix);
 }
