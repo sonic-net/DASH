@@ -156,14 +156,13 @@ namespace dash
         else if (field == "u64")
         {
            uint64_t val = *(const uint64_t*)v;
-           if (*reinterpret_cast<const char*>("\0\x01") == 0)
-           { // Little Endian
-               value.u64 = be64toh(val) >> (64 - bitwidth);
-           }
-           else
-           {
-               value.u64 = val & ((1ul<<bitwidth) - 1);
-           }
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+           value.u64 = be64toh(val) >> (64 - bitwidth);
+#elif __BYTE_ORDER == __BIG_ENDIAN
+           value.u64 = val & ((1ul<<bitwidth) - 1);
+#else
+#error  "Please fix <asm/byteorder.h>"
+#endif
         }
         else if (field == "ipaddr")
         {

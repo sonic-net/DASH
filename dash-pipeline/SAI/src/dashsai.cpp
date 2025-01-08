@@ -1075,7 +1075,8 @@ sai_status_t DashSai::create(
         return SAI_STATUS_FAILURE;
     }
 
-    if (auto meta_object_key = meta_table.get_meta_object_key())
+    auto meta_object_key = meta_table.get_meta_object_key();
+    if (meta_object_key)
     {
         auto key_mf = matchActionEntry->add_match();
         auto key_mf_exact = key_mf->mutable_exact();
@@ -1096,12 +1097,16 @@ sai_status_t DashSai::create(
 
     for (uint32_t i = 0; i < attr_count; i++)
     {
-        if (auto meta_param = meta_table.get_meta_action_param(action_id, attr_list[i].id))
+        auto meta_param = meta_table.get_meta_action_param(action_id, attr_list[i].id);
+        if (meta_param)
         {
             // attr in table action params
             set_attr_to_p4_action(meta_param, &attr_list[i], action);
+            continue;
         }
-        else if (auto meta_key = meta_table.get_meta_key(attr_list[i].id))
+
+        auto meta_key = meta_table.get_meta_key(attr_list[i].id);
+        if (meta_key)
         {
             // attr in table keys
             set_attr_to_p4_match(meta_key, &attr_list[i], matchActionEntry);
@@ -1150,7 +1155,8 @@ sai_status_t DashSai::create(
 
     for (uint32_t i = 0; i < attr_count; i++)
     {
-        if (auto meta_param = meta_table.get_meta_action_param(action_id, attr_list[i].id))
+        auto meta_param = meta_table.get_meta_action_param(action_id, attr_list[i].id);
+        if (meta_param)
         {
             // attr in table action params
             set_attr_to_p4_action(meta_param, &attr_list[i], action);
@@ -1345,7 +1351,8 @@ sai_status_t DashSai::get(
 
     for (uint32_t i = 0; i < attr_count; i++)
     {
-        if (auto meta_param = meta_table.get_meta_action_param(action_id, attr_list[i].id))
+        auto meta_param = meta_table.get_meta_action_param(action_id, attr_list[i].id);
+        if (meta_param)
         {
             // attr in table action params
             auto pair_param = get_action_param_with_is_v6_flag_from_p4_table_entry(meta_param, matchActionEntry);
@@ -1356,8 +1363,11 @@ sai_status_t DashSai::get(
 
             assert(pair_param.first);
             get_attr_value_from_p4(meta_param->field, meta_param->bitwidth, pair_param.first, attr_list[i].value);
+            continue;
         }
-        else if (auto meta_key = meta_table.get_meta_key(attr_list[i].id))
+
+        auto meta_key = meta_table.get_meta_key(attr_list[i].id);
+        if (meta_key)
         {
             // attr in table keys
             auto pair_key = get_match_pair_from_p4_table_entry(meta_key, matchActionEntry);
@@ -1405,7 +1415,8 @@ sai_status_t DashSai::get(
 
     for (uint32_t i = 0; i < attr_count; i++)
     {
-        if (auto meta_param = meta_table.get_meta_action_param(action_id, attr_list[i].id))
+        auto meta_param = meta_table.get_meta_action_param(action_id, attr_list[i].id);
+        if (meta_param)
         {
             // attr in table action params
             auto pair_param = get_action_param_with_is_v6_flag_from_p4_table_entry(meta_param, matchActionEntry);
@@ -1437,6 +1448,8 @@ void DashSai::mutateSiblingTablesEntry(
         return;
     }
 
+    // Entry in sibling table is almost same as the original table entry,
+    // only table id and table action id are different.
     std::shared_ptr<p4::v1::TableEntry> entry = std::make_shared<p4::v1::TableEntry>();
     entry->CopyFrom(*matchActionEntry);
     auto action = entry->mutable_action()->mutable_action();
