@@ -634,20 +634,26 @@ grpc::StatusCode DashSai::readTableEntry(
     assert(client_reader);
 
     p4::v1::ReadResponse rep;
-    if (client_reader->Read(&rep)) {
+    if (client_reader->Read(&rep))
+    {
         assert(rep.entities_size() == 1);
         entity->release_table_entry();
         entity = rep.mutable_entities(0);
         entry->CopyFrom(entity->table_entry());
     }
+    else
+    {
+        entity->release_table_entry();
+    }
 
     auto status = client_reader->Finish();
 
-exit:
-    if (status.ok()) {
+    if (status.ok())
+    {
         DASH_LOG_NOTICE("GRPC call Read OK %s", entry->ShortDebugString().c_str());
     }
-    else {
+    else
+    {
         DASH_LOG_ERROR("GRPC ERROR[%d]: %s, %s", status.error_code(), status.error_message().c_str(), status.error_details().c_str());
     }
 
@@ -1043,6 +1049,175 @@ sai_status_t DashSai::bulk_remove_objects(
     return agg_status;
 }
 
+sai_status_t DashSai::create(
+        _In_ const P4MetaTable &meta_table,
+        _In_ sai_object_type_t objectType,
+        _Out_ sai_object_id_t* objectId,
+        _In_ sai_object_id_t switchId,
+        _In_ uint32_t attr_count,
+        _In_ const sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
+    DASH_CHECK_API_INITIALIZED();
+
+    auto attrs = DashSai::populateDefaultAttributes(objectType, attr_count, attr_list);
+    attr_count = (uint32_t)attrs.size();
+    attr_list = attrs.data();
+
+    std::shared_ptr<p4::v1::TableEntry> matchActionEntry;
+    matchActionEntry = std::make_shared<p4::v1::TableEntry>();
+    matchActionEntry->set_table_id(meta_table.id);
+
+    sai_object_id_t objId = getNextObjectId(objectType);
+    if (objId == SAI_NULL_OBJECT_ID)
+    {
+        DASH_LOG_ERROR("getNextObjectId failed for OBJECT_TYPE %u", objectType);
+        return SAI_STATUS_FAILURE;
+    }
+
+    auto meta_object_key = meta_table.get_meta_object_key();
+    if (meta_object_key)
+    {
+        auto key_mf = matchActionEntry->add_match();
+        auto key_mf_exact = key_mf->mutable_exact();
+
+        key_mf->set_field_id(meta_object_key->id);
+        u16SetVal((uint16_t)objId, key_mf_exact, 16);
+    }
+
+    pi_p4_id_t action_id = meta_table.find_action_id(attr_count, attr_list);
+    if (!action_id)
+    {
+        DASH_LOG_ERROR("Not find p4 table action");
+        return SAI_STATUS_FAILURE;
+    }
+
+    auto action = matchActionEntry->mutable_action()->mutable_action();
+    action->set_action_id(action_id);
+
+    for (uint32_t i = 0; i < attr_count; i++)
+    {
+        auto meta_param = meta_table.get_meta_action_param(action_id, attr_list[i].id);
+        if (meta_param)
+        {
+            // attr in table action params
+            set_attr_to_p4_action(meta_param, &attr_list[i], action);
+            continue;
+        }
+
+        auto meta_key = meta_table.get_meta_key(attr_list[i].id);
+        if (meta_key)
+        {
+            // attr in table keys
+            set_attr_to_p4_match(meta_key, &attr_list[i], matchActionEntry);
+        }
+        else
+        {
+            // attr in extra fields
+            set_attr_to_p4_misc(meta_table, &attr_list[i], matchActionEntry);
+        }
+    }
+
+    if (insertInTable(matchActionEntry, objId))
+    {
+        mutateSiblingTablesEntry(meta_table, matchActionEntry, p4::v1::Update_Type_INSERT, action_id);
+        *objectId = objId;
+        return SAI_STATUS_SUCCESS;
+    }
+
+    return SAI_STATUS_FAILURE;
+}
+
+sai_status_t DashSai::create(
+        _In_ const P4MetaTable &meta_table,
+        _In_ sai_object_type_t objectType,
+        _Inout_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry,
+        _In_ uint32_t attr_count,
+        _In_ const sai_attribute_t *attr_list)
+{
+    DASH_LOG_ENTER();
+    DASH_CHECK_API_INITIALIZED();
+
+    auto attrs = DashSai::populateDefaultAttributes(objectType, attr_count, attr_list);
+    attr_count = (uint32_t)attrs.size();
+    attr_list = attrs.data();
+
+    matchActionEntry->set_table_id(meta_table.id);
+
+    pi_p4_id_t action_id = meta_table.find_action_id(attr_count, attr_list);
+    if (!action_id)
+    {
+        DASH_LOG_ERROR("Not find p4 table action");
+        return SAI_STATUS_FAILURE;
+    }
+    auto action = matchActionEntry->mutable_action()->mutable_action();
+    action->set_action_id(action_id);
+
+    for (uint32_t i = 0; i < attr_count; i++)
+    {
+        auto meta_param = meta_table.get_meta_action_param(action_id, attr_list[i].id);
+        if (meta_param)
+        {
+            // attr in table action params
+            set_attr_to_p4_action(meta_param, &attr_list[i], action);
+        }
+        else
+        {
+            // attr in extra fields
+            set_attr_to_p4_misc(meta_table, &attr_list[i], matchActionEntry);
+        }
+    }
+
+    auto ret = mutateTableEntry(matchActionEntry, p4::v1::Update_Type_INSERT);
+    if (grpc::StatusCode::OK == ret)
+    {
+        mutateSiblingTablesEntry(meta_table, matchActionEntry, p4::v1::Update_Type_INSERT, action_id);
+        return SAI_STATUS_SUCCESS;
+    }
+
+    return SAI_STATUS_FAILURE;
+}
+
+sai_status_t DashSai::remove(
+        _In_ const P4MetaTable &meta_table,
+        _In_ sai_object_id_t objectId)
+{
+    DASH_LOG_ENTER();
+    DASH_CHECK_API_INITIALIZED();
+
+    std::shared_ptr<p4::v1::TableEntry> matchActionEntry = nullptr;
+    if (!getFromTable(objectId, matchActionEntry))
+    {
+        return SAI_STATUS_FAILURE;
+    }
+
+    if (removeFromTable(objectId))
+    {
+        mutateSiblingTablesEntry(meta_table, matchActionEntry, p4::v1::Update_Type_DELETE);
+        return SAI_STATUS_SUCCESS;
+    }
+
+    return SAI_STATUS_FAILURE;
+}
+
+sai_status_t DashSai::remove(
+        _In_ const P4MetaTable &meta_table,
+        _Inout_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry)
+{
+    DASH_LOG_ENTER();
+    DASH_CHECK_API_INITIALIZED();
+
+    auto ret = mutateTableEntry(matchActionEntry, p4::v1::Update_Type_DELETE);
+
+    if (grpc::StatusCode::OK == ret)
+    {
+        mutateSiblingTablesEntry(meta_table, matchActionEntry, p4::v1::Update_Type_DELETE);
+        return SAI_STATUS_SUCCESS;
+    }
+
+    return SAI_STATUS_FAILURE;
+}
+
 sai_status_t DashSai::set(
         _In_ const P4MetaTable &meta_table,
         _In_ sai_object_id_t objectId,
@@ -1052,7 +1227,8 @@ sai_status_t DashSai::set(
     DASH_CHECK_API_INITIALIZED();
 
     std::shared_ptr<p4::v1::TableEntry> matchActionEntry = nullptr;
-    if (!getFromTable(objectId, matchActionEntry)) {
+    if (!getFromTable(objectId, matchActionEntry))
+    {
         return SAI_STATUS_FAILURE;
     }
 
@@ -1060,9 +1236,11 @@ sai_status_t DashSai::set(
     auto action = matchActionEntry->mutable_action()->mutable_action();
     pi_p4_id_t action_id = action->action_id();
     auto meta_param = meta_table.get_meta_action_param(action_id, attr->id);
-    if (meta_param) {
-        auto pair_param = get_action_param_pair_from_p4_table_entry(meta_param, matchActionEntry);
-        if (pair_param.second) {
+    if (meta_param)
+    {
+        auto pair_param = get_action_param_with_is_v6_flag_from_p4_table_entry(meta_param, matchActionEntry);
+        if (pair_param.second)
+        {
             set_attr_ipaddr_family_to_p4(attr->value, pair_param.second);
         }
 
@@ -1070,32 +1248,45 @@ sai_status_t DashSai::set(
         set_attr_value_to_p4(meta_param->field, meta_param->bitwidth, attr->value, pair_param.first);
 
         auto ret = mutateTableEntry(matchActionEntry, p4::v1::Update_Type_MODIFY);
+        if (ret == grpc::StatusCode::OK)
+        {
+            mutateSiblingTablesEntry(meta_table, matchActionEntry, p4::v1::Update_Type_MODIFY, action_id);
+        }
         return ret == grpc::StatusCode::OK ? SAI_STATUS_SUCCESS : SAI_STATUS_FAILURE;
     }
 
     // Search attr in table match fields
     auto meta_key = meta_table.get_meta_key(attr->id);
-    if (meta_key) {
+    if (meta_key)
+    {
         std::shared_ptr<p4::v1::TableEntry> new_entry = std::make_shared<p4::v1::TableEntry>();
         new_entry->CopyFrom(*matchActionEntry);
 
         auto pair_key = get_match_pair_from_p4_table_entry(meta_key, new_entry);
-        if (pair_key.second) {
+        if (pair_key.second)
+        {
             set_attr_ipaddr_family_to_p4(attr->value, pair_key.second->mutable_exact());
         }
 
         assert(pair_key.first);
-        if (meta_key->match_type == "ternary" && string_has_suffix(meta_key->name, "_MASK")) {
+        if (meta_key->match_type == "ternary" && string_ends_with(meta_key->name, "_MASK"))
+        {
             set_attr_value_mask_to_p4_ternary(meta_key->field, meta_key->bitwidth, attr->value,
                      pair_key.first->mutable_ternary());
         }
-        else {
+        else
+        {
             set_attr_value_to_p4_match(*meta_key, attr->value, pair_key.first);
         }
 
         removeFromTable(objectId);
-        auto ret = insertInTable(new_entry, objectId);
-        return ret ? SAI_STATUS_SUCCESS : SAI_STATUS_FAILURE;
+        mutateSiblingTablesEntry(meta_table, matchActionEntry, p4::v1::Update_Type_DELETE);
+
+        if (insertInTable(new_entry, objectId))
+        {
+            mutateSiblingTablesEntry(meta_table, new_entry, p4::v1::Update_Type_INSERT, action_id);
+            return SAI_STATUS_SUCCESS;
+        }
     }
 
     return SAI_STATUS_FAILURE;
@@ -1109,7 +1300,8 @@ sai_status_t DashSai::set(
     DASH_LOG_ENTER();
     DASH_CHECK_API_INITIALIZED();
 
-    if (grpc::StatusCode::OK != readTableEntry(matchActionEntry)) {
+    if (grpc::StatusCode::OK != readTableEntry(matchActionEntry))
+    {
         return SAI_STATUS_FAILURE;
     }
 
@@ -1117,9 +1309,11 @@ sai_status_t DashSai::set(
     auto action = matchActionEntry->mutable_action()->mutable_action();
     pi_p4_id_t action_id = action->action_id();
     auto meta_param = meta_table.get_meta_action_param(action_id, attr->id);
-    if (meta_param) {
-        auto pair_param = get_action_param_pair_from_p4_table_entry(meta_param, matchActionEntry);
-        if (pair_param.second) {
+    if (meta_param)
+    {
+        auto pair_param = get_action_param_with_is_v6_flag_from_p4_table_entry(meta_param, matchActionEntry);
+        if (pair_param.second)
+        {
             set_attr_ipaddr_family_to_p4(attr->value, pair_param.second);
         }
 
@@ -1127,6 +1321,10 @@ sai_status_t DashSai::set(
         set_attr_value_to_p4(meta_param->field, meta_param->bitwidth, attr->value, pair_param.first);
 
         auto ret = mutateTableEntry(matchActionEntry, p4::v1::Update_Type_MODIFY);
+        if (ret == grpc::StatusCode::OK)
+        {
+            mutateSiblingTablesEntry(meta_table, matchActionEntry, p4::v1::Update_Type_MODIFY, action_id);
+        }
         return ret == grpc::StatusCode::OK ? SAI_STATUS_SUCCESS : SAI_STATUS_FAILURE;
     }
 
@@ -1143,42 +1341,55 @@ sai_status_t DashSai::get(
     DASH_CHECK_API_INITIALIZED();
 
     std::shared_ptr<p4::v1::TableEntry> matchActionEntry = nullptr;
-    if (!getFromTable(objectId, matchActionEntry)) {
+    if (!getFromTable(objectId, matchActionEntry))
+    {
         return SAI_STATUS_FAILURE;
     }
 
     auto action = matchActionEntry->mutable_action()->mutable_action();
     pi_p4_id_t action_id = action->action_id();
 
-    for (uint32_t i = 0; i < attr_count; i++) {
-        if (auto meta_param = meta_table.get_meta_action_param(action_id, attr_list[i].id)) {
+    for (uint32_t i = 0; i < attr_count; i++)
+    {
+        auto meta_param = meta_table.get_meta_action_param(action_id, attr_list[i].id);
+        if (meta_param)
+        {
             // attr in table action params
-            auto pair_param = get_action_param_pair_from_p4_table_entry(meta_param, matchActionEntry);
-            if (pair_param.second) {
+            auto pair_param = get_action_param_with_is_v6_flag_from_p4_table_entry(meta_param, matchActionEntry);
+            if (pair_param.second)
+            {
                 get_attr_ipaddr_family_from_p4(pair_param.second, attr_list[i].value);
             }
 
             assert(pair_param.first);
             get_attr_value_from_p4(meta_param->field, meta_param->bitwidth, pair_param.first, attr_list[i].value);
+            continue;
         }
-        else if (auto meta_key = meta_table.get_meta_key(attr_list[i].id)) {
+
+        auto meta_key = meta_table.get_meta_key(attr_list[i].id);
+        if (meta_key)
+        {
             // attr in table keys
             auto pair_key = get_match_pair_from_p4_table_entry(meta_key, matchActionEntry);
-            if (pair_key.second) {
+            if (pair_key.second)
+            {
                 get_attr_ipaddr_family_from_p4(pair_key.second->mutable_exact(), attr_list[i].value);
             }
 
             assert(pair_key.first);
-            if (meta_key->match_type == "ternary" && string_has_suffix(meta_key->name, "_MASK")) {
+            if (meta_key->match_type == "ternary" && string_ends_with(meta_key->name, "_MASK"))
+            {
                 get_attr_value_mask_from_p4_ternary(meta_key->field, meta_key->bitwidth,
                          pair_key.first->mutable_ternary(), attr_list[i].value);
             }
-            else {
+            else
+            {
                 get_attr_value_from_p4_match(*meta_key, pair_key.first, attr_list[i].value);
             }
         }
-        else {
-            DASH_LOG_ERROR("failed to get value for attr %d", attr_list[i].id);
+        else
+        {
+            get_attr_from_p4_misc(meta_table, matchActionEntry, &attr_list[i]);
         }
     }
 
@@ -1194,29 +1405,66 @@ sai_status_t DashSai::get(
     DASH_LOG_ENTER();
     DASH_CHECK_API_INITIALIZED();
 
-    if (grpc::StatusCode::OK != readTableEntry(matchActionEntry)) {
+    if (grpc::StatusCode::OK != readTableEntry(matchActionEntry))
+    {
         return SAI_STATUS_FAILURE;
     }
 
     auto action = matchActionEntry->mutable_action()->mutable_action();
     pi_p4_id_t action_id = action->action_id();
 
-    for (uint32_t i = 0; i < attr_count; i++) {
-        if (auto meta_param = meta_table.get_meta_action_param(action_id, attr_list[i].id)) {
+    for (uint32_t i = 0; i < attr_count; i++)
+    {
+        auto meta_param = meta_table.get_meta_action_param(action_id, attr_list[i].id);
+        if (meta_param)
+        {
             // attr in table action params
-            auto pair_param = get_action_param_pair_from_p4_table_entry(meta_param, matchActionEntry);
-            if (pair_param.second) {
+            auto pair_param = get_action_param_with_is_v6_flag_from_p4_table_entry(meta_param, matchActionEntry);
+            if (pair_param.second)
+            {
                 get_attr_ipaddr_family_from_p4(pair_param.second, attr_list[i].value);
             }
 
             assert(pair_param.first);
             get_attr_value_from_p4(meta_param->field, meta_param->bitwidth, pair_param.first, attr_list[i].value);
         }
-        else {
-            DASH_LOG_ERROR("failed to get value for attr %d", attr_list[i].id);
+        else
+        {
+            get_attr_from_p4_misc(meta_table, matchActionEntry, &attr_list[i]);
         }
     }
 
     return SAI_STATUS_SUCCESS;
 }
 
+void DashSai::mutateSiblingTablesEntry(
+        _In_ const P4MetaTable &meta_table,
+        _In_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry,
+        _In_ p4::v1::Update_Type updateType,
+        _In_ uint32_t action_id)
+{
+    if (meta_table.sibling_tables.empty())
+    {
+        return;
+    }
+
+    // Entry in sibling table is almost same as the original table entry,
+    // only table id and table action id are different.
+    std::shared_ptr<p4::v1::TableEntry> entry = std::make_shared<p4::v1::TableEntry>();
+    entry->CopyFrom(*matchActionEntry);
+    auto action = entry->mutable_action()->mutable_action();
+
+    for (auto &sibling: meta_table.sibling_tables)
+    {
+        entry->set_table_id(sibling.id);
+
+        if (updateType != p4::v1::Update_Type_DELETE)
+        {
+            auto enum_id = meta_table.find_action_enum_id(action_id);
+            auto sibling_action_id = sibling.actions.at(enum_id);
+            action->set_action_id(sibling_action_id);
+        }
+
+        mutateTableEntry(entry, updateType);
+    }
+}
