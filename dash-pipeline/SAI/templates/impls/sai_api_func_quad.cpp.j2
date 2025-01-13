@@ -28,7 +28,11 @@ static sai_status_t dash_sai_create_{{ api.name }}(
     std::shared_ptr<p4::v1::TableEntry> matchActionEntry = std::make_shared<p4::v1::TableEntry>();
     matchActionEntry->set_table_id({{meta_table}}.id);
 
-    table_{{api.name}}_add_keys({{ api.name }}, matchActionEntry);
+    if (table_{{api.name}}_add_keys({{ api.name }}, matchActionEntry) == SAI_STATUS_NOT_SUPPORTED)
+    {
+        DASH_LOG_WARN("match field in {{ api.name }} not supported, API does nothing!");
+        return SAI_STATUS_SUCCESS;  // bypass
+    }
     return dashSai->create({{meta_table}}, obj_type, matchActionEntry, attr_count, attr_list);
 {% endif %}
 }
@@ -42,7 +46,11 @@ static sai_status_t dash_sai_remove_{{ api.name }}(
     std::shared_ptr<p4::v1::TableEntry> matchActionEntry = std::make_shared<p4::v1::TableEntry>();
     matchActionEntry->set_table_id({{meta_table}}.id);
 
-    table_{{api.name}}_add_keys({{ api.name }}, matchActionEntry);
+    if (table_{{api.name}}_add_keys({{ api.name }}, matchActionEntry) == SAI_STATUS_NOT_SUPPORTED)
+    {
+        DASH_LOG_WARN("match field in {{ api.name }} not supported, API does nothing!");
+        return SAI_STATUS_SUCCESS;  // bypass
+    }
     return dashSai->remove({{meta_table}}, matchActionEntry);
 {% endif %}
 }
@@ -57,7 +65,11 @@ static sai_status_t dash_sai_set_{{ api.name }}_attribute(
     std::shared_ptr<p4::v1::TableEntry> matchActionEntry = std::make_shared<p4::v1::TableEntry>();
     matchActionEntry->set_table_id({{meta_table}}.id);
 
-    table_{{api.name}}_add_keys({{ api.name }}, matchActionEntry);
+    if (table_{{api.name}}_add_keys({{ api.name }}, matchActionEntry) == SAI_STATUS_NOT_SUPPORTED)
+    {
+        DASH_LOG_WARN("match field in {{ api.name }} not supported, API does nothing!");
+        return SAI_STATUS_SUCCESS;  // bypass
+    }
     return dashSai->set({{meta_table}}, matchActionEntry, attr);
 {% endif %}
 }
@@ -73,7 +85,11 @@ static sai_status_t dash_sai_get_{{ api.name }}_attribute(
     std::shared_ptr<p4::v1::TableEntry> matchActionEntry = std::make_shared<p4::v1::TableEntry>();
     matchActionEntry->set_table_id({{meta_table}}.id);
 
-    table_{{api.name}}_add_keys({{ api.name }}, matchActionEntry);
+    if (table_{{api.name}}_add_keys({{ api.name }}, matchActionEntry) == SAI_STATUS_NOT_SUPPORTED)
+    {
+        DASH_LOG_WARN("match field in {{ api.name }} not supported, API does nothing!");
+        return SAI_STATUS_SUCCESS;  // bypass
+    }
     return dashSai->get({{meta_table}}, matchActionEntry, attr_count, attr_list);
 {% endif %}
 }

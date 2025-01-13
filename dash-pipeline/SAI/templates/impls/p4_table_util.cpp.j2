@@ -18,7 +18,7 @@
         {
             // https://github.com/p4lang/PI/blob/24e0a3c08c964e36d235973556b90e0ae922b894/proto/frontend/src/device_mgr.cpp#L2242-L2246
             DASH_LOG_WARN("Invalid reprsentation of 'don't care' LPM match, omit match field instead of using a prefix length of 0");
-            return SAI_STATUS_SUCCESS;
+            return SAI_STATUS_NOT_SUPPORTED;
         }
     {% endif %}
         auto mf_lpm = mf->mutable_lpm();
