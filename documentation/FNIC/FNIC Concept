@@ -1,13 +1,13 @@
-Floating NIC Concept: 
+### Floating NIC Concept: 
 Here we describe its purpose and how it can be used to accelerate VMs and provide routing functionality without the need for a VM.
 
-Concept Introduction: This concept aims to optimize network performance and reduce the reliance on VMs for certain tasks.
+**Concept Introduction:** This concept aims to optimize network performance and reduce the reliance on VMs for certain tasks.
 
-Current Pipeline: Our current pipeline focuses on accelerating VMs by offloading rule processing to the Smart Switch DPU. The Floating concept builds on this by eliminating the need for a VM in certain scenarios.
+**Current Pipeline:** Our current pipeline focuses on accelerating VMs by offloading rule processing to the Smart Switch DPU. The Floating concept builds on this by eliminating the need for a VM in certain scenarios.
 	
-Routing Functionality: the Floating Nic can handle routing tasks that would typically require a VM. This includes evaluating policies and bouncing packets within the Smart Switch DPU, thus improving efficiency and performance.
+**Routing Functionality:** the Floating Nic can handle routing tasks that would typically require a VM. This includes evaluating policies and bouncing packets within the Smart Switch DPU, thus improving efficiency and performance.
 
-Floating NIC Scenarios: 
+**Floating NIC Scenarios:** 
 Traffic inspection between virtual networks, ACL and Routing Policy application to streamline the process and improve performance
 
 On-Prem Connectivity: 
@@ -27,16 +27,16 @@ Future Developments:
 Future developments could include optimizing the pipeline and introducing packet-based configuration for even greater flexibility and performance.
 
 
-Examples:  
+### Examples:  
 
-DASH in 'VM' Mode
+**DASH in 'VM' Mode**
 
 Packet Flow Using NVA VM (Current Scenario)  
 
 The diagram below demonstrates the current legacy scenario. 
 Here the packet flows from the source and needs to transit a VM for processing before making its way to the destination
 
-DASH in 'Floating NIC' Mode
+**DASH in 'Floating NIC' Mode**
 
 Packet Flow USING FLOATING NIC (New Scenario)
 
