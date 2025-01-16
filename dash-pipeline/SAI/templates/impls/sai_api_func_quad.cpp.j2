@@ -31,7 +31,7 @@ static sai_status_t dash_sai_create_{{ api.name }}(
     if (table_{{api.name}}_add_keys({{ api.name }}, matchActionEntry) == SAI_STATUS_NOT_SUPPORTED)
     {
         DASH_LOG_WARN("match field in {{ api.name }} not supported, API does nothing!");
-        return SAI_STATUS_SUCCESS;  // bypass
+        return SAI_STATUS_SUCCESS;  // bypass, temporary workaround for issue #656
     }
     return dashSai->create({{meta_table}}, obj_type, matchActionEntry, attr_count, attr_list);
 {% endif %}
@@ -49,7 +49,7 @@ static sai_status_t dash_sai_remove_{{ api.name }}(
     if (table_{{api.name}}_add_keys({{ api.name }}, matchActionEntry) == SAI_STATUS_NOT_SUPPORTED)
     {
         DASH_LOG_WARN("match field in {{ api.name }} not supported, API does nothing!");
-        return SAI_STATUS_SUCCESS;  // bypass
+        return SAI_STATUS_SUCCESS;  // bypass, temporary workaround for issue #656
     }
     return dashSai->remove({{meta_table}}, matchActionEntry);
 {% endif %}
@@ -68,7 +68,7 @@ static sai_status_t dash_sai_set_{{ api.name }}_attribute(
     if (table_{{api.name}}_add_keys({{ api.name }}, matchActionEntry) == SAI_STATUS_NOT_SUPPORTED)
     {
         DASH_LOG_WARN("match field in {{ api.name }} not supported, API does nothing!");
-        return SAI_STATUS_SUCCESS;  // bypass
+        return SAI_STATUS_SUCCESS;  // bypass, temporary workaround for issue #656
     }
     return dashSai->set({{meta_table}}, matchActionEntry, attr);
 {% endif %}
@@ -88,7 +88,7 @@ static sai_status_t dash_sai_get_{{ api.name }}_attribute(
     if (table_{{api.name}}_add_keys({{ api.name }}, matchActionEntry) == SAI_STATUS_NOT_SUPPORTED)
     {
         DASH_LOG_WARN("match field in {{ api.name }} not supported, API does nothing!");
-        return SAI_STATUS_SUCCESS;  // bypass
+        return SAI_STATUS_SUCCESS;  // bypass, temporary workaround for issue #656
     }
     return dashSai->get({{meta_table}}, matchActionEntry, attr_count, attr_list);
 {% endif %}
