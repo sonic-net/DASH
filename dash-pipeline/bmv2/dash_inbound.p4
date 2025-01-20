@@ -44,7 +44,7 @@ control inbound(inout headers_t hdr,
                      meta.u0_encap_data.underlay_smac,
                      meta.u0_encap_data.underlay_dip,
                      meta.u0_encap_data.underlay_sip,
-                     dash_encapsulation_t.VXLAN,
+                     meta.eni_data.inbound_dash_encapsulation,
                      meta.u0_encap_data.vni);
     }
 }

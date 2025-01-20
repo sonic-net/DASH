@@ -639,6 +639,19 @@ sai_apis:
     valid_only: null
     is_vlan: false
     deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_ENI_ATTR_INBOUND_DASH_ENCAPSULATION
+    description: Action parameter inbound DASH encapsulation
+    type: sai_dash_encapsulation_t
+    attr_value_field: s32
+    default: SAI_DASH_ENCAPSULATION_VXLAN
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
   stats:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_RX_BYTES
@@ -1923,5 +1936,11 @@ sai_apis:
               id: 42
               field: booldata
               bitwidth: 1
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_ENI_ATTR_INBOUND_DASH_ENCAPSULATION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 43
+              field: s32
+              bitwidth: 16
               ip_is_v6_field_id: 0
               skipattr: null

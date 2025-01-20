@@ -103,6 +103,7 @@ parser dash_parser(
         transition select(hd.u0_ipv6.next_header) {
             UDP_PROTO: parse_u0_udp;
             TCP_PROTO: parse_u0_tcp;
+            NVGRE_PROTO: parse_u0_nvgre;
             default: accept;
         }
     }
@@ -122,6 +123,11 @@ parser dash_parser(
 
     state parse_u0_vxlan {
         packet.extract(hd.u0_vxlan);
+        transition parse_customer_ethernet;
+    }
+
+    state parse_u0_nvgre {
+        packet.extract(hd.u0_nvgre);
         transition parse_customer_ethernet;
     }
 

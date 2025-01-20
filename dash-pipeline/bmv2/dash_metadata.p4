@@ -64,6 +64,7 @@ struct eni_data_t {
     dash_tunnel_dscp_mode_t dscp_mode;
     outbound_routing_group_data_t outbound_routing_group_data;
     IPv4Address vip;
+    dash_encapsulation_t inbound_dash_encapsulation;
 }
 
 struct meter_context_t {

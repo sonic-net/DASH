@@ -66,7 +66,9 @@ control dash_eni_stage(
                          @SaiVal[type="sai_object_id_t"] bit<16> outbound_routing_group_id,
                          bit<1> enable_reverse_tunnel_learning,
                          @SaiVal[type="sai_ip_address_t"] IPv4Address reverse_tunnel_sip,
-                         bit<1> is_ha_flow_owner)
+                         bit<1> is_ha_flow_owner,
+                         @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"]
+                         dash_encapsulation_t inbound_dash_encapsulation)
     {
         meta.eni_data.cps                                                   = cps;
         meta.eni_data.pps                                                   = pps;
@@ -77,6 +79,7 @@ control dash_eni_stage(
         meta.eni_data.pl_underlay_sip                                       = pl_underlay_sip;
         meta.u0_encap_data.underlay_dip                                     = vm_underlay_dip;
         meta.eni_data.outbound_routing_group_data.outbound_routing_group_id = outbound_routing_group_id;
+        meta.eni_data.inbound_dash_encapsulation                            = inbound_dash_encapsulation;
         if (dash_tunnel_dscp_mode == dash_tunnel_dscp_mode_t.PIPE_MODEL) {
             meta.eni_data.dscp = dscp;
         }
@@ -167,7 +170,13 @@ control dash_lookup_stage(
             UPDATE_ENI_COUNTER(eni_lb_fast_path_icmp_in);
         }
 
-        do_tunnel_decap(hdr, meta);
+        if (hdr.u0_vxlan.isValid()) {
+            do_tunnel_decap(hdr, meta);
+        } else if (hdr.u0_nvgre.isValid()) {
+            do_tunnel_decap(hdr, meta);
+        } else {
+            deny();
+        }
     }
 }
 
