@@ -176,6 +176,7 @@ struct metadata_t {
     encap_data_t rx_encap;
 #endif // TARGET_DPDK_PNA
     EthernetAddress eni_addr;
+    EthernetAddress vm_nic_addr;
     bit<16> vnet_id;
     bit<16> dst_vnet_id;
     bit<16> eni_id;

@@ -40,6 +40,11 @@ control outbound(inout headers_t hdr,
         outbound_mapping_stage.apply(hdr, meta);
 
         outbound_pre_routing_action_apply_stage.apply(hdr, meta);
+
+        // Fix up overlay SRC MAC to be VM MAC
+        if (meta.eni_mac_type == dash_eni_mac_type_t.DST_MAC) {
+            hdr.customer_ethernet.src_addr = meta.eni_addr;
+        }
     }
 }
 
