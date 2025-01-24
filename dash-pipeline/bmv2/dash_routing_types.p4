@@ -178,6 +178,7 @@ action set_private_link_mapping(
     IPv6Address overlay_dip_mask,
     @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t dash_encapsulation,
     bit<24> tunnel_key,
+    @SaiVal[type="sai_object_id_t"] bit<16> outbound_port_map_id,
     bit<32> meter_class_or,
     @SaiVal[type="sai_object_id_t"] bit<16> dash_tunnel_id,
     bit<1> flow_resimulation_requested,
@@ -211,6 +212,8 @@ action set_private_link_mapping(
                     sip = ((( (IPv6Address)hdr.u0_ipv4.src_addr & ~overlay_sip_mask) | overlay_sip) & ~meta.eni_data.pl_sip_mask) | meta.eni_data.pl_sip,
                     sip_mask = 0xffffffffffffffffffffffff);
 #endif /* DISABLE_128BIT_ARITHMETIC */
+
+    meta.port_map_ctx.map_id = outbound_port_map_id;
 
     set_meter_attrs(meta, meter_class_or, 0xffffffff);
 }

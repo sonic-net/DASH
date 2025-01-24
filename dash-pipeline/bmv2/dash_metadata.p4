@@ -66,6 +66,10 @@ struct eni_data_t {
     IPv4Address vip;
 }
 
+struct port_map_context_t {
+    bit<16> map_id;
+}
+
 struct meter_context_t {
     bit<32> meter_class_or;
     bit<32> meter_class_and;
@@ -134,7 +138,6 @@ struct ha_data_t {
 struct meta_flow_data_t {
     bit<7> reserved;
     bit<1> is_unidirectional;
-    dash_flow_sync_state_t sync_state;
     dash_direction_t direction;
     bit<32> version;
     dash_flow_action_t actions;
@@ -157,6 +160,8 @@ struct meta_overlay_rewrite_data_t {
     IPv4ORv6Address dip;
     IPv6Address sip_mask;
     IPv6Address dip_mask;
+    bit<16> sport;
+    bit<16> dport;
     bit<7> reserved;
     bit<1> is_ipv6;
 }
@@ -199,6 +204,7 @@ struct metadata_t {
     bit<16> tunnel_pointer;
     bool is_fast_path_icmp_flow_redirection_packet;
     bit<1> fast_path_icmp_flow_redirection_disabled;
+    port_map_context_t port_map_ctx;
     meter_context_t meter_context;
 
     // HA

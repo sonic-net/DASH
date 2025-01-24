@@ -1,0 +1,207 @@
+!!python/object:utils.sai_spec.sai_api_group.SaiApiGroup
+name: dash_outbound_port_map
+description: DASH outbound port map
+api_type: overlay
+sai_apis:
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: outbound_port_map
+  description: outbound port map
+  is_object: true
+  enums: []
+  structs: []
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_PORT_MAP_ATTR_COUNTER_ID
+    description: Attach a counter. When it is empty, then packet hits won't be counted.
+    type: sai_object_id_t
+    attr_value_field: null
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_COUNTER
+    allow_null: true
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 42579810
+      stage: null
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: outbound_port_map_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: true
+      actions:
+        SAI_OUTBOUND_PORT_MAP_ACTION_SET_PORT_MAP_ATTR: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_OUTBOUND_PORT_MAP_ACTION_SET_PORT_MAP_ATTR
+          id: 32437678
+          attr_params: {}
+- !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: outbound_port_map_port_range_entry
+  description: outbound port map port range entry
+  is_object: false
+  enums:
+  - !!python/object:utils.sai_spec.sai_enum.SaiEnum
+    name: sai_outbound_port_map_port_range_entry_action_t
+    description: 'Attribute data for #SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_ACTION'
+    members:
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ACTION_SKIP_MAPPING
+      description: ''
+      value: '0'
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ACTION_MAP_TO_PRIVATE_LINK_SERVICE
+      description: ''
+      value: '1'
+  structs:
+  - !!python/object:utils.sai_spec.sai_struct.SaiStruct
+    name: sai_outbound_port_map_port_range_entry_t
+    description: Entry for outbound_port_map_port_range_entry
+    members:
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: switch_id
+      description: Switch ID
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_SWITCH
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: outbound_port_map_id
+      description: Exact matched key outbound_port_map_id
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_OUTBOUND_PORT_MAP
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: dst_port_range
+      description: Range matched key dst_port_range
+      type: sai_u32_range_t
+      objects: null
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: priority
+      description: Rule priority in table
+      type: sai_uint32_t
+      objects: null
+      valid_only: null
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_ACTION
+    description: Action
+    type: sai_outbound_port_map_port_range_entry_action_t
+    attr_value_field: null
+    default: SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ACTION_SKIP_MAPPING
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_IP
+    description: Action parameter back end IP
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_ACTION == SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ACTION_MAP_TO_PRIVATE_LINK_SERVICE
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_MATCH_PORT_BASE
+    description: Action parameter match port base
+    type: sai_uint16_t
+    attr_value_field: u16
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_ACTION == SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ACTION_MAP_TO_PRIVATE_LINK_SERVICE
+    is_vlan: true
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_PORT_BASE
+    description: Action parameter back end port base
+    type: sai_uint16_t
+    attr_value_field: u16
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_ACTION == SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ACTION_MAP_TO_PRIVATE_LINK_SERVICE
+    is_vlan: true
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_COUNTER_ID
+    description: Attach a counter. When it is empty, then packet hits won't be counted.
+    type: sai_object_id_t
+    attr_value_field: null
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_COUNTER
+    allow_null: true
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 35152152
+      stage: null
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: outbound_port_map_id
+        id: 1
+        match_type: exact
+        field: u16
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: dst_port_range
+        id: 2
+        match_type: range
+        field: u32range
+        bitwidth: 16
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      actions:
+        SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ACTION_SKIP_MAPPING: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ACTION_SKIP_MAPPING
+          id: 22713701
+          attr_params: {}
+        SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ACTION_MAP_TO_PRIVATE_LINK_SERVICE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ACTION_MAP_TO_PRIVATE_LINK_SERVICE
+          id: 23926714
+          attr_params:
+            SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_IP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 1
+              field: ipaddr
+              bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_MATCH_PORT_BASE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 2
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_PORT_BASE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 3
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
