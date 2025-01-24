@@ -257,6 +257,19 @@ sai_apis:
     valid_only: null
     is_vlan: false
     deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OUTBOUND_PORT_MAP_ID
+    description: Action parameter outbound port map id
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_OUTBOUND_PORT_MAP
+    allow_null: true
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+    is_vlan: false
+    deprecated: false
   stats: []
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
@@ -373,26 +386,32 @@ sai_apis:
               bitwidth: 24
               ip_is_v6_field_id: 0
               skipattr: null
-            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS_OR: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OUTBOUND_PORT_MAP_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
               id: 8
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS_OR: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 9
               field: u32
               bitwidth: 32
               ip_is_v6_field_id: 0
               skipattr: null
             SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_DASH_TUNNEL_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
-              id: 9
+              id: 10
               field: u16
               bitwidth: 16
               ip_is_v6_field_id: 0
               skipattr: null
             SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_FLOW_RESIMULATION_REQUESTED: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
-              id: 10
+              id: 11
               field: booldata
               bitwidth: 1
               ip_is_v6_field_id: 0
               skipattr: null
             SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
-              id: 11
+              id: 12
               field: u32
               bitwidth: 32
               ip_is_v6_field_id: 0
