@@ -493,6 +493,7 @@ preprogrammed
 prereq
 Pritsak
 PrivateAddress
+PrivateLink
 programmability
 programmatically
 proto
@@ -630,6 +631,7 @@ subtrees
 subtype
 supportability
 SUT
+svc
 svg
 sw
 SwitchoverDone

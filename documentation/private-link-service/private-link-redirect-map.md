@@ -88,27 +88,27 @@ Say, we have a VM in on-premises network with IP 10.0.0.1, trying to reach the P
 
 #### 5.1.1 Private Link
 1. **VNI Lookup**: First, we will look up the VNI to determine the packet direction. In this case, we consider all the packets from on-premises network as outbound direction from the floating NIC perspective.
-    ```json
+```json
     "DASH_VNET_TABLE:Vnet1": { 
-        "vni": "45654",
-        "guid": "559c6ce8-26ab-4193-b946-ccc6e8f930b2"
+        "vni": "45654",
+        "guid": "559c6ce8-26ab-4193-b946-ccc6e8f930b2"
     }
-    ```
+```
 
 2. **ENI Lookup**: Then, we will use the inner MAC address to find the ENI pipeline. Then, the outer encap will be decap’ed, leaving inner packet going through the rest of pipeline.
-    ```json
+```json
     "DASH_ENI_TABLE:F4939FEFC47E": { 
-        "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
-        "mac_address": "F4-93-9F-EF-C4-7E",
-        "underlay_ip": "25.1.1.1",
-        "admin_state": "enabled",
-        "vnet": "Vnet1",
-        "pl_sip_encoding": "0x0020000000000a0b0c0d0a0b/0x002000000000ffffffffffff",
-        "pl_underlay_sip": "55.1.2.3"
+        "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
+        "mac_address": "F4-93-9F-EF-C4-7E",
+        "underlay_ip": "25.1.1.1",
+        "admin_state": "enabled",
+        "vnet": "Vnet1",
+        "pl_sip_encoding": "0x0020000000000a0b0c0d0a0b/0x002000000000ffffffffffff",
+        "pl_underlay_sip": "55.1.2.3"
     }
-    ```
+```
 
-3. **ConnTrack Lookup**: If flow already exists, we directly apply the transformation from the flow, otherwise, move on.
+3. **Conntrack Lookup**: If flow already exists, we directly apply the transformation from the flow, otherwise, move on.
 
 4. **ACL**: We don’t have any ACL rules for PL, hence no ACL rules will be hit.
 
@@ -117,49 +117,49 @@ Say, we have a VM in on-premises network with IP 10.0.0.1, trying to reach the P
     The routing stage could also define the underlay_sip in the routing stage, which is already exists in current DASH VNET model. This will be used for updating the source IP of the outer encap for PL.
 
     The goal state that routing stage uses can be defined as below:
-    ```json
+```json
     "DASH_ROUTE_TABLE:F4939FEFC47E:10.2.0.6/24": {
-        "action_type": "vnet",
-        "vnet": "Vnet1",
+        "action_type": "vnet",
+        "vnet": "Vnet1",
         "metering_class": "60000",
-        "underlay_sip": "50.2.2.6",
+        "underlay_sip": "50.2.2.6"
     },
 
     "DASH_ROUTING_TYPE_TABLE:vnet": {
-        "name": "action1",
-        "action_type": "maprouting"
+        "name": "action1",
+        "action_type": "maprouting"
     },
-    ```
+```
 
 6. **Mapping - VNET**: The inner destination IP will be used for finding the VNET mapping, which works on IP level. Because each mapping will be associated with a port-based service map, besides the information for the normal private link scenario, this mapping will also contains an rewrite info for the redirect map.
-    ```json
+```json
     "DASH_VNET_MAPPING_TABLE:Vnet1:10.2.0.6": {
-        "routing_type": "privatelink",
-        "mac_address": "F9-22-83-99-22-A2",
-        "underlay_ip": "50.2.2.6",
-        "overlay_sip": "fd40:108:0:d204:0:200::0",
-        "overlay_dip": "2603:10e1:100:2::3402:206",
-        "metering_class": "60001",
-        "svc_rewrite_info": {
-            "src_prefix": "fd40:108:0:5678:0:200::/32",
-            "dst_prefix": "2603:10e1:100:2::/32",
-            "port_map_id": "port_map_1"
+        "routing_type": "privatelink",
+        "mac_address": "F9-22-83-99-22-A2",
+        "underlay_ip": "50.2.2.6",
+        "overlay_sip": "fd40:108:0:d204:0:200::0",
+        "overlay_dip": "2603:10e1:100:2::3402:206",
+        "metering_class": "60001",
+        "svc_rewrite_info": {
+            "src_prefix": "fd40:108:0:5678:0:200::/32",
+            "dst_prefix": "2603:10e1:100:2::/32",
+            "port_map_id": "port_map_1"
         }
     },
 
     "DASH_ROUTING_TYPE_TABLE:privatelink": [
-        {
-            "name": "action1",
-            "action_type": "4to6"
-        },
-        {
-            "name": "action2",
-            "action_type": "staticencap",
-            "encap_type": "nvgre",
-            "key": "100"
-        }
+        {
+            "name": "action1",
+            "action_type": "4to6"
+        },
+        {
+            "name": "action2",
+            "action_type": "staticencap",
+            "encap_type": "nvgre",
+            "key": "100"
+        }
     ]
-    ```
+```
 
 7. **Service port rewrite**: If “port_map_id” is defined, we need to use the service port mapping defined in that map to rewrite the packet for forwarding.
 
@@ -168,20 +168,20 @@ Say, we have a VM in on-premises network with IP 10.0.0.1, trying to reach the P
     - Otherwise, the entry that covers the destination port shall be picked up for rewriting the packet.
 
 8. **Metering**: The last action we need to do is to find the corresponding metering rule.
-    ```json
+```json
     "DASH_METER:60000": {
-        "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
-        "metadata": "ROUTE_VNET1",
-        "metering_class": "60000"
+        "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
+        "metadata": "ROUTE_VNET1",
+        "metering_class": "60000"
     },
 
     "DASH_METER:60001": {
-        "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
-        "metadata": "PRIVATE_LINK_VNET1",
-        "metering_class": "60001"
+        "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
+        "metadata": "PRIVATE_LINK_VNET1",
+        "metering_class": "60001"
     },
-    ```
-9. **ConnTrack Update**: Both forwarding and reverse flows will be created by this stage.
+```
+9. **Conntrack Update**: Both forwarding and reverse flows will be created by this stage.
 
 10. **Metering Update**: Metering update will update the metering counter based on the rules that we found before.
 
@@ -194,40 +194,40 @@ The changes needed for PL NSG is mostly the same as PL - on the VNET mapping, �
 
 ```json
     "DASH_VNET_MAPPING_TABLE:Vnet1:10.2.0.9": {
-        "routing_type": "privatelinknsg",
-        "mac_address": "F9-22-83-99-22-A2",
-        "underlay_ip": "50.2.2.6",
-        "overlay_sip": "fd40:108:0:d204:0:200::0",
-        "overlay_dip": "2603:10e1:100:2::3402:206",
-        "routing_appliance_id": 22,
-        "metering_class": "60001",
-        "svc_rewrite_info": {
-            "src_prefix": "fd40:108:0:5678:0:200::/32",
-            "dst_prefix": "2603:10e1:100:2::/32",
-            "port_map_id": "port_map_1"
-        }
+        "routing_type": "privatelinknsg",
+        "mac_address": "F9-22-83-99-22-A2",
+        "underlay_ip": "50.2.2.6",
+        "overlay_sip": "fd40:108:0:d204:0:200::0",
+        "overlay_dip": "2603:10e1:100:2::3402:206",
+        "routing_appliance_id": 22,
+        "metering_class": "60001",
+        "svc_rewrite_info": {
+            "src_prefix": "fd40:108:0:5678:0:200::/32",
+            "dst_prefix": "2603:10e1:100:2::/32",
+            "port_map_id": "port_map_1"
+        }
     },
     "DASH_ROUTING_TYPE_TABLE:privatelinknsg": [
-        {
-            "name": "action1",
-            "action_type": "4to6"
-        },
-        {
-            "name": "action2",
-            "action_type": "staticencap",
-            "encap_type": "nvgre",
-            "key": "100"
-        },
-        {
-            "name": "action3",
-            "action_type": "appliance"
-        }
+        {
+            "name": "action1",
+            "action_type": "4to6"
+        },
+        {
+            "name": "action2",
+            "action_type": "staticencap",
+            "encap_type": "nvgre",
+            "key": "100"
+        },
+        {
+            "name": "action3",
+            "action_type": "appliance"
+        }
     ],
     "DASH_ROUTING_APPLIANCE_TABLE:22": {
-        "appliance_guid": "497f23d7-f0ac-4c99",
-        "addresses": "100.8.1.2",
-        "encap_type": "vxlan",
-        "vni": 101
+        "appliance_guid": "497f23d7-f0ac-4c99",
+        "addresses": "100.8.1.2",
+        "encap_type": "vxlan",
+        "vni": 101
     }
 ```
  
@@ -241,7 +241,7 @@ With flow HA, the return packet will be forwarded to the active side of the HA p
 
     The ENI goal state that we are using will be the same as before. Hence, emitted here.
 
-3. ConnTrack Lookup: The return packet transformation will be handled by reverse flow.
+3. Conntrack Lookup: The return packet transformation will be handled by reverse flow.
 4. Metering Update: Metering update will update the metering counter based on the rules that we saved in the reverse flow.
 5. Underlay routing: Underlay routing will do the real packet transformation, e.g., 6to4 transformation and adding encaps.
 
