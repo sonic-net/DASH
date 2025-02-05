@@ -72,7 +72,7 @@ Floating NIC should still have HA support, which uses the same HA model that DAS
 The key difference between the floating NIC pipeline and regular VM pipeline are 2 things:
 
 1. All packets go through the inbound pipeline first, then hits the “hairpin”, and send out via outbound pipeline. Hence, there is no direction lookup stage anymore. The VNI and ENI lookup stages are used only for locating the ENI and basic security validations.
-2. The flow lookup and creation will happen on both inbound and outbound directions. For a single network connection, there will be 4 flows being created in total: 2 for inbound and 2 for outbound.
+2. The flow lookup and creation will happen on both inbound and outbound directions. For a single network connection, there will be 4 flows being created in total: 2 for inbound and 2 for outbound. The 2 pair of flows will have different lifetime and expire independently.
 
 However, most of the functionalities of the basic stages in DASH pipeline remain the same. Only the wiring is updated as below. Here we use the private link packets in the ExpressRoute gateway bypass case as the example to show how the pipeline works:
 
