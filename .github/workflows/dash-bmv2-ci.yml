@@ -100,7 +100,7 @@ jobs:
       run:  DOCKER_FLAGS=$docker_fg_root_flags make run-saichallenger-tests
     - name: Build libsai debian packages
       run:  DOCKER_FLAGS=$docker_fg_root_flags make libsai-debs
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: libsai-debian-packages
         path: /home/runner/work/DASH/DASH/dash-pipeline/SAI/debian/*deb
