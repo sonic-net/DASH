@@ -31,13 +31,13 @@
 
 ## 2. Background
 
-Appliances are frequently used for applying SDN policies for inter-VM traffic, such as ACLs, or to provide SDN functionality for machines that do not have the SDN stack running, such as On-Prem networks or BareMetal.
+Appliances are frequently used for applying SDN policies for inter-VM traffic, such as ACLs, or to provide SDN functionality for machines that do not have the SDN stack running, such as On-Prem networks or bare metal.
 
 To support these scenarios, we propose the floating NIC (FNIC) pipeline in DASH which helps us model the SDN behavior in the context of appliances.
 
 ## 3. Project scenario
 
-At a high-level, the current Sirius Appliance accelerates VMs that do not support the SDN stack. The traffic is directed to the programmable HW via a traffic steering mechanism (VXLan tunnel for example) with a destination of the Appliance. The packet will be decapsulated in order to determine direction, and further actions to perform. This is what the floating NIC pipeline is trying to target.
+At a high-level, the current Sirius Appliance accelerates VMs that do not support the SDN stack. The traffic is directed to the programmable HW via a traffic steering mechanism (VxLan tunnel for example) with a destination of the Appliance. The outer packet will be parsed and decap'ed in order to determine direction, and further actions to perform. This is what the floating NIC pipeline is trying to target.
 
 ![DASH NVA](images/fnic/dash-nva.svg)
 
@@ -128,7 +128,7 @@ typedef enum _sai_dash_eni_mode_t
 
 ### 6.2. Capability query
 
-To query if a platform supports floating nic or not, we can the following attribute to query the supported ENI mode. If floating NIC pipeline is not supported, then the SAI implementation should only return the VM enum.
+To query if a platform supports floating NIC or not, we can the following attribute to query the supported ENI mode. If floating NIC pipeline is not supported, then the SAI implementation should only return the VM enum.
 
 ```c
 sai_status_t sai_query_attribute_enum_values_capability(
