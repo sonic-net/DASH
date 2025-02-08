@@ -52,6 +52,19 @@ FastPath is the feature that switches traffic from using VIP-to-VIP connectivity
 
 - The ICMP redirect packet might get *lost* (SLB MUX will resend it when next packet arrives on the SLB MUX and still uses VIP) *or possibly duplicated* (multiple packets that have VIP might arrive on SLB MUX, and SLB MUX may send ICMP redirect for all the packets that it receives as still using VIP).
 
+**Expected Behavior:**
+
+- NSG evaluation is skipped for the ICMP redirect packets.
+
+- ICMP Redirect packets are always GRE Encapped
+
+- SAI to expose a Global config where control plane can configure the GRE Keys expected in the encap of the icmp packet. 
+
+- The platform uses GRE Key 253 (0xfd) for PublicIP, PublicLB scenarios, and 254 (0xfe) for ServiceEndpoints, PrivateEndpoint and Internal Loadbalancer scenario. 
+
+- By having these keys specified in the global config control plane can use the config as a knob to enable/disable honoring the fastpath icmp redirect packet.
+
+
 ## Packet transformation
 
 ![packet-transform](images/packet-transform.png)
@@ -62,7 +75,7 @@ The fast path ICMP flow redirection packet is based on ICMP redirect packet ([IP
 
 The detailed packet format is described as below:
 
-|SLB IP|APPL IP|GRE|SLB MAC|VM MAC|IP|Inner Src IP|Inner Dst IP|ICMP v4/v6 Redirect|Redirect Option (IPv6 only)|Redirection Info|
+|SLB IP|APPL IP|GRE|SLB MAC|VM MAC|IP|Inner Src IP|Inner Dst IP|ICMP v4/v6 Redirect|Redirect Option|Redirection Info|
 |------|-------|---|-------|------|--|------------|------------|------------------|---------------------------|----------------|
 
 The `RedirectOption` and `RedirectInfo` structs are defined as below:
@@ -110,7 +123,7 @@ The following shall be used for translations:
 | Target Address                | Original Dst IP               |
 | Redirect Header               | Original IPv6 Header + TCP ports (5 tuple) |
 | Addr Family                   | AF_INET/AF_INET6              |
-| Encap Type                    | NVGRE 1/VXLAN 2               |
+| Encap Type                    | NVGRE 1 / VXLAN 2 / IPINIP 3  |
 | Encap Id                      | Redirect GRE Key/ VXLAN Id    |
 | Custom Redirect Info          | Redirect DIP and Dst Mac      |
 
@@ -188,3 +201,4 @@ Port level counter will be added as port stats extensions following the [SAI ext
 | -------------- | ----------- |
 | SAI_ENI_STAT_LB_FAST_PATH_FLOW_REDIRECTED_COUNT | The number of flows that redirected due to fast path packet received |
 | SAI_ENI_STAT_LB_FAST_PATH_FLOW_MISS_COUNT | The number of flows that is missing when trying to redirected by fast path packets |
+| SAI_ENI_STAT_LB_FAST_PATH_ACTIVE_FLOW_COUNT |The number of active flows that are on fastpath|
