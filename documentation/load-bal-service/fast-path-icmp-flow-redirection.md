@@ -9,7 +9,11 @@ FastPath is the feature that switches traffic from using VIP-to-VIP connectivity
 | Acronym | Definition |
 |---------|------------|
 | VIP     | Virtualized IP (load balanced IP). <br/> This is load balanced IP. |
+| ILPIP   | Instance Level Public IP. <br/> Public IP allocated to the ENI that's Routable over the internet. |
 | DIP/PA  | Physical Address / Directly Assigned IP. <br/> Actual physical address of the VM (underlay). |
+| SIPo    | Outer Source IP |
+| DIPo    | Outer Destination IP |
+| DMACi   | Inner Destination MAC Address |
 
 ## Architecture
 
@@ -30,7 +34,7 @@ FastPath is the feature that switches traffic from using VIP-to-VIP connectivity
 
     - The DMACi of the ICMP redirect packet is used to match the ENI that the fastpath belongs to.
     - The ICMP Rdedirect packet has 5-tuple information that can be used to lookup the flow that needs to be "fixed".
-    - The ICMP Refirect packet enough information that allows the the DPU to apply the same transforms to the packet that MUX had applied to the previous packet.
+    - The ICMP Redirect packet enough information that allows the the DPU to apply the same transforms to the packet that MUX had applied to the previous packet.
 
 1. The Source side (currently VFP) listens for ICMP redirect packets, and once received performs "flow fixup" (updates the flow to redirect next packets not to Destination VIP, but directly to the Destination PA/DIP that arrived in the ICMP redirect packet from SLB MUX).
 
@@ -179,24 +183,24 @@ The following shall be used for translations:
 | Custom Redirect Info          | Redirect DIP and Dst Mac      |
 
 
-# Packet transformation
+## Packet transformation
 
-## VIP / ILPIP Scenario
+### VIP / ILPIP Scenario
 In scenario applies to the ENI that's sending traffic to a VIP or PublicIP hosted by the LoadBalancer.
 
-![packet-transform](images/packet-transform.png)
+![packet-transform](images/vip-transformation.svg)
 
-### Pre-fastpath flow
+#### Pre-fastpath flow
 - Outbound flow with no encap.
 -  Traffic snatted to either the PhysicalAddress (RoutableAddress) of the ENI, or a PublicIP assigned to an ENI. 
 
-### Redirect format
+#### Redirect format
 - ICMP
 
-### GRE Key in the encapped ICMP Redirect packet
+#### GRE Key in the encapped ICMP Redirect packet
 - 0x00fd (253)
 
-### Post-fastpath flow modifications
+#### Post-fastpath flow modifications
 - Add Encap of the type RedirectInfo.EncapType. (In practice this is always NVGRE)
 - GreKey = RedirectInfo.EncapId. (this ranges from 256 to 511)
 - DIPo = RedirectInfo.Info4.DipPAv4
@@ -204,7 +208,7 @@ In scenario applies to the ENI that's sending traffic to a VIP or PublicIP hoste
 - DMACi = RedirectInfo.Info4.VMMac
 
 
-### Packet signatures from captures
+#### Packet signatures from captures
 
 - TCP handshake uses VIP (20.69.29.62)
 
@@ -218,26 +222,26 @@ In scenario applies to the ENI that's sending traffic to a VIP or PublicIP hoste
 
   ![after-ICMP-redirect](images/vip-tx-after-redirect.png)
 
-## PE / ST Scenario
+### PE / ST Scenario
 In this scenario, the ENI is sending traffic to a PrivateEndpoint or a ServiceEndpoint. Since the NPU will be operating on the source side, it should be able to honor the ICMP Redirect sent from DST MUX2, and bypass the mux in the subsequent packets.
- ![PL-packet-transform](images/pl-packet-transform.png)
+ ![PL-packet-transform](images/pl-transformation.svg)
 
-### Pre-fastpath flow
+#### Pre-fastpath flow
 - Outbound flow encapped with GRE key 0x64 (100).
 - Inner packet is IPV6.
 
-### Redirect format
+#### Redirect format
 - ICMPv6
 
-### GRE Key in the encapped ICMPv6 Redirect packet
+#### GRE Key in the encapped ICMPv6 Redirect packet
 - 0x00fe (254)
 
-### Post-fastpath flow modifications
+#### Post-fastpath flow modifications
 - GreKey = PreFastpathFlow.GreKey
 - DIPo = RedirectInfo.Info6.DipPAv6
 - DMACi = RedirectInfo.Info6.VMMac
 
-### Packet signatures from captures
+#### Packet signatures from captures
 - TCP Syn. The packet is headed to Mux with ip 52.165.104.174
 ![PE TCP-Syn](images/pe-tx-syn.png)
 
@@ -250,29 +254,29 @@ In this scenario, the ENI is sending traffic to a PrivateEndpoint or a ServiceEn
 ![after-ICMP-redirect](images/pl-tx-after-redirect.png)
 
 
-## ILB Scenario
+### ILB Scenario
 In this scenario, the ENI is sending traffic to an InternalLoadBalander. The NPU could be serving either of the Source or Destination ENIs. This specific example is shows how a Redirect packet should be handled on the source ENI. NPU should be able to honor the ICMP Redirect sent from DST MUX2, and bypass the mux in the subsequent packets.
 The behavior would be the same had we considered the case where dest ENI is receiving the Redirect
 
 Note: In the below diagram, the encap to packet 3 and 13 shows NVGRE, but we have now switched this to VXLAN encap for intra-VPC traffic.
-![ILB-packet-transform](images/ilb-packet-transform.png)
+![ILB-packet-transform](images/ilb-transformation.svg)
 
-### Pre-fastpath flow
+#### Pre-fastpath flow
 - Outbound flow VxLAN encapped with VNI belonging to ENI's VPC.
 
-### Redirect format
+#### Redirect format
 - ICMP
 
-### GRE Key in the encapped ICMPv6 Redirect packet
+#### GRE Key in the encapped ICMPv6 Redirect packet
 - 0x00fe (254)
 
-### Post-fastpath flow modifications
+#### Post-fastpath flow modifications
 - Maintain the VxLan encap from pre-fastpath flow.
-- DIPO = RedirectInfo.Info4.DipPav4
-- DMACI = RedirectInfo.Info4.VMMac
+- DIPo = RedirectInfo.Info4.DipPav4
+- DMACi = RedirectInfo.Info4.VMMac
 - VNI doesn't change
 
-### Packet signatures from captures
+#### Packet signatures from captures
 
 - TCP Syn. The packet is headed to Mux with ip 52.159.22.123
 ![ILB TCP-Syn](images/ilb-tx-syn.png)
@@ -308,7 +312,7 @@ typedef enum _sai_eni_attr_t
     // ...
 
     /**
-     * @brief Action set_eni_attrs parameter VIP_FAST_PATH_ICMP_FLOW_REDIRECTION
+     * @brief Action set_eni_attrs parameter DISABLE_VIP_FAST_PATH_ICMP_FLOW_REDIRECTION
      *
      * @type bool
      * @flags CREATE_AND_SET
@@ -317,7 +321,7 @@ typedef enum _sai_eni_attr_t
     SAI_ENI_ATTR_DISABLE_VIP_FAST_PATH_ICMP_FLOW_REDIRECTION,
 
     /**
-     * @brief Action set_eni_attrs parameter PE_FAST_PATH_ICMP_FLOW_REDIRECTION
+     * @brief Action set_eni_attrs parameter DISABLE_PE_FAST_PATH_ICMP_FLOW_REDIRECTION
      *
      * @type bool
      * @flags CREATE_AND_SET
@@ -326,7 +330,7 @@ typedef enum _sai_eni_attr_t
     SAI_ENI_ATTR_DISABLE_PE_FAST_PATH_ICMP_FLOW_REDIRECTION,
 
     /**
-     * @brief Action set_eni_attrs parameter ILB_FAST_PATH_ICMP_FLOW_REDIRECTION
+     * @brief Action set_eni_attrs parameter DISABLE_ILB_FAST_PATH_ICMP_FLOW_REDIRECTION
      *
      * @type bool
      * @flags CREATE_AND_SET
