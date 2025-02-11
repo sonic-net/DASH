@@ -13,9 +13,13 @@
 4. [Resource modeling, requirement, and SLA](#4-resource-modeling-requirement-and-sla)
     - 4.1 [Scaling requirement](#41-scaling-requirement)
     - 4.2 [Reliability requirements](#42-reliability-requirements)
-5. [DASH object model design](#5-dash-object-model-design)
-    - 5.1 [From On-Premise to PLS direction](#51-from-on-premise-to-pls-direction)
-    - 5.2 [From PLS to On-Premise direction](#52-from-pls-to-on-premise-direction)
+5. [SAI API design](#5-sai-api-design)
+    - 5.1 [DASH Outbound Port Map](#51-dash-outbound-port-map)
+    - 5.2 [DASH Outbound Port Map Port Range](#52-dash-outbound-port-map-port-range)
+    - 5.3 [DASH CA-PA mapping attributes](#53-dash-ca-pa-mapping-attributes)
+6. [DASH pipeline behavior](#6-dash-pipeline-behavior)
+    - 6.1 [VM-to-PLS direction](#61--vm-to-pls-direction-outbound)
+    - 6.2 [PLS-to-VM direction](#62-pls-to-vm-direction)
 
 ## 1. Terminology
 | Term | Explanation |
@@ -63,187 +67,104 @@ For more information on how Fast Path works, please refer to [Fast Path document
 
 ## 4. Resource modeling, requirement, and SLA
 ### 4.1 Scaling requirement
-The scaling requirement for PL redirect map are listed as below. The metrics are based on a 200Gbps DPU:
-| Metric | Requirement |
-| ---    | --- |
-| # of ENIs per DPU | 32 |
-| # of VNET mapping per ENI  | 64K |
-| # of PPS | 64M |
-| # of redirect mapping per DPU | 2000 maps (Reusable among all ENIs) |
-| # of entries in each redirect mapping | 8K |
-| VNET mapping change rate (CRUD) | <TBD> |
-| Redirect map entry change rate (CRUD) | Monthly |
-| # of fast path packets | Same as CPS. 3M per card. |
+For scaling requirement, please refer to [SONIC DASH HLD](https://github.com/sonic-net/DASH/blob/main/documentation/general/dash-sonic-hld.md#14-scaling-requirements).
 
 ### 4.2 Reliability requirements
 The flows created when redirect map will be replicated among multiple DPUs, following the SmartSwitch HA design.
 
 For more information, please refer to [SmartSwitch HA design doc](https://github.com/sonic-net/SONiC/blob/master/doc/smart-switch/high-availability/smart-switch-ha-hld.md).
 
-## 5. DASH object model design
-Now we have all action defined, we can use these actions to define our overall DASH pipeline.
+## 5. SAI API design
+### 5.1. DASH Outbound Port Map
+A new object outbound-port-map is added, which aims to define SNAT/DNAT port translation in outbound direction. It includes the following attributes:
 
-### 5.1 From On-Premise to PLS direction
-Say, we have a VM in on-premises network with IP 10.0.0.1, trying to reach the Private Endpoint in their VNET with IP 10.0.1.1, and the ExpressRoute VNI is 1000000:
+| Attribute name | Type | Description |
+| --- | --- | --- |
+| SAI_OUTBOUND_PORT_MAP_ATTR_COUNTER_ID | sai_object_id_t | Attach a counter. |
 
-#### 5.1.1 Private Link
-1. **VNI Lookup**: First, we will look up the VNI to determine the packet direction. In this case, we consider all the packets from on-premises network as outbound direction from the floating NIC perspective.
-```json
-    "DASH_VNET_TABLE:Vnet1": { 
-        "vni": "45654",
-        "guid": "559c6ce8-26ab-4193-b946-ccc6e8f930b2"
-    }
+NOTE: More attributes could be added in the future for SNAT/DNAT scenarios.
+
+### 5.2. DASH Outbound Port Map Port Range
+A new object key entry outbound-port-map-port-range is added, which aims to define port range translation in outbound direction. It is suitable for setting up the PL / PL NSG redirect map scenarios.
+
+The entry is defined like below:
+```c
+typedef struct _sai_outbound_port_map_port_range_entry_t
+{
+    /**
+     * @brief Switch ID
+     *
+     * @objects SAI_OBJECT_TYPE_SWITCH
+     */
+    sai_object_id_t switch_id;
+
+    /**
+     * @brief Exact matched key outbound_port_map_id
+     *
+     * @objects SAI_OBJECT_TYPE_OUTBOUND_PORT_MAP
+     */
+    sai_object_id_t outbound_port_map_id;
+
+    /**
+     * @brief Range matched key dst_port_range
+     */
+    sai_u32_range_t dst_port_range;
+
+    /**
+     * @brief Rule priority in table
+     */
+    sai_uint32_t priority;
+
+} sai_outbound_port_map_port_range_entry_t;
 ```
 
-2. **ENI Lookup**: Then, we will use the inner MAC address to find the ENI pipeline. Then, the outer encap will be decap’ed, leaving inner packet going through the rest of pipeline.
-```json
-    "DASH_ENI_TABLE:F4939FEFC47E": { 
-        "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
-        "mac_address": "F4-93-9F-EF-C4-7E",
-        "underlay_ip": "25.1.1.1",
-        "admin_state": "enabled",
-        "vnet": "Vnet1",
-        "pl_sip_encoding": "0x0020000000000a0b0c0d0a0b/0x002000000000ffffffffffff",
-        "pl_underlay_sip": "55.1.2.3"
-    }
+ It includes the following attributes:
+
+| Attribute name | Type | Description |
+| --- | --- | --- |
+| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_ACTION | sai_outbound_port_map_port_range_entry_action_t | Action. |
+| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_IP | sai_ip_address_t | Back end IP. |
+| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_MATCH_PORT_BASE | sai_uint16_t | Match port base. |
+| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_PORT_BASE | sai_uint16_t | Back end port base. |
+| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_COUNTER_ID | sai_object_id_t | Attach a counter. |
+
+The entry attribute **Action** is defined as below:
+```c
+typedef enum _sai_outbound_port_map_port_range_entry_action_t
+{
+    SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ACTION_SKIP_MAPPING,
+    SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ACTION_MAP_TO_PRIVATE_LINK_SERVICE,
+} sai_outbound_port_map_port_range_entry_action_t;
 ```
 
-3. **Conntrack Lookup**: If flow already exists, we directly apply the transformation from the flow, otherwise, move on.
+### 5.3. DASH CA-PA mapping attributes
 
-4. **ACL**: We don’t have any ACL rules for PL, hence no ACL rules will be hit.
+The following attributes will be added to CA-to-PA entry, for supporting service port rewrites for PL/PL NSG:
 
-5. **Routing**: The inner destination IP will be used for finding the route entry, which will be the IP range of the destination VNET. This will trigger the maprouting action to run, which makes the packet entering Mapping stage.
+| Attribute name | Type | Description |
+| --- | --- | --- |
+| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OUTBOUND_PORT_MAP_ID | sai_object_id_t | Outbound port map id. |
 
-    The routing stage could also define the underlay_sip in the routing stage, which is already exists in current DASH VNET model. This will be used for updating the source IP of the outer encap for PL.
+## 6. DASH pipeline behavior
+Following [DASH pipeline behavior of private link service](https://github.com/sonic-net/DASH/blob/main/documentation/private-link-service/private-link-service.md#6-dash-pipeline-behavior), it adds updates for redirect map.
 
-    The goal state that routing stage uses can be defined as below:
-```json
-    "DASH_ROUTE_TABLE:F4939FEFC47E:10.2.0.6/24": {
-        "action_type": "vnet",
-        "vnet": "Vnet1",
-        "metering_class": "60000",
-        "underlay_sip": "50.2.2.6"
-    },
+### 6.1  VM-to-PLS direction (Outbound)
 
-    "DASH_ROUTING_TYPE_TABLE:vnet": {
-        "name": "action1",
-        "action_type": "maprouting"
-    },
-```
+**Mapping - VNET**:
+Each mapping will be associated with a port map object:
+   | SAI field name | Type | Value |
+   | --- | --- | --- |
+   | entry.port_map_id | `sai_object_id_t` | (SAI object ID of the port map) |
 
-6. **Mapping - VNET**: The inner destination IP will be used for finding the VNET mapping, which works on IP level. Because each mapping will be associated with a port-based service map, besides the information for the normal private link scenario, this mapping will also contains an rewrite info for the redirect map.
-```json
-    "DASH_VNET_MAPPING_TABLE:Vnet1:10.2.0.6": {
-        "routing_type": "privatelink",
-        "mac_address": "F9-22-83-99-22-A2",
-        "underlay_ip": "50.2.2.6",
-        "overlay_sip": "fd40:108:0:d204:0:200::0",
-        "overlay_dip": "2603:10e1:100:2::3402:206",
-        "metering_class": "60001",
-        "svc_rewrite_info": {
-            "src_prefix": "fd40:108:0:5678:0:200::/32",
-            "dst_prefix": "2603:10e1:100:2::/32",
-            "port_map_id": "port_map_1"
-        }
-    },
+Later in the stage of outbound port map, the port map id and inner packet destination port consists of a match key to look up table outbound_port_map_port_range, the matched table entry contains a rewrite info for the redirect map.
+   | SAI field name | Type | Value |
+   | --- | --- | --- |
+   | entry.outbound_port_map_id | `sai_object_id_t` | (SAI object ID of the port map) |
+   | entry.dst_port_range | `sai_u32_range_t` | 2000-2100 |
+   | entry_attr.SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_ACTION | `sai_outbound_port_map_port_range_entry_action_t` | `SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ACTION_MAP_TO_PRIVATE_LINK_SERVICE` |
+   | entry_attr.SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_IP | `sai_ip_address_t` | `3.3.3.1` |
+   | entry_attr.SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_MATCH_PORT_BASE | `sai_uint16_t` | `2000` |
+   | entry_attr.SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_PORT_BASE | `sai_uint16_t` | `11000` |
 
-    "DASH_ROUTING_TYPE_TABLE:privatelink": [
-        {
-            "name": "action1",
-            "action_type": "4to6"
-        },
-        {
-            "name": "action2",
-            "action_type": "staticencap",
-            "encap_type": "nvgre",
-            "key": "100"
-        }
-    ]
-```
-
-7. **Service port rewrite**: If “port_map_id” is defined, we need to use the service port mapping defined in that map to rewrite the packet for forwarding.
-
-    As the policy shows below:
-    - If the destination port lives in the exempted list will be bypassed using the original config from VNET mapping for packet routing. All configs inside svc_rewrite_info shall be ignored.
-    - Otherwise, the entry that covers the destination port shall be picked up for rewriting the packet.
-
-8. **Metering**: The last action we need to do is to find the corresponding metering rule.
-```json
-    "DASH_METER:60000": {
-        "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
-        "metadata": "ROUTE_VNET1",
-        "metering_class": "60000"
-    },
-
-    "DASH_METER:60001": {
-        "eni_id": "497f23d7-f0ac-4c99-a98f-59b470e8c7bd",
-        "metadata": "PRIVATE_LINK_VNET1",
-        "metering_class": "60001"
-    },
-```
-9. **Conntrack Update**: Both forwarding and reverse flows will be created by this stage.
-
-10. **Metering Update**: Metering update will update the metering counter based on the rules that we found before.
-
-11. **Underlay routing**: Underlay routing will do the real packet transformation, e.g., 4to6 transformation and adding encaps.
-
-After all stages in the pipeline, the packet will be sent back to wire.
-
-#### 5.1.2 Private Link NSG
-The changes needed for PL NSG is mostly the same as PL - on the VNET mapping, “src_rewrite_info” field will be added for providing the redirect map.
-
-```json
-    "DASH_VNET_MAPPING_TABLE:Vnet1:10.2.0.9": {
-        "routing_type": "privatelinknsg",
-        "mac_address": "F9-22-83-99-22-A2",
-        "underlay_ip": "50.2.2.6",
-        "overlay_sip": "fd40:108:0:d204:0:200::0",
-        "overlay_dip": "2603:10e1:100:2::3402:206",
-        "routing_appliance_id": 22,
-        "metering_class": "60001",
-        "svc_rewrite_info": {
-            "src_prefix": "fd40:108:0:5678:0:200::/32",
-            "dst_prefix": "2603:10e1:100:2::/32",
-            "port_map_id": "port_map_1"
-        }
-    },
-    "DASH_ROUTING_TYPE_TABLE:privatelinknsg": [
-        {
-            "name": "action1",
-            "action_type": "4to6"
-        },
-        {
-            "name": "action2",
-            "action_type": "staticencap",
-            "encap_type": "nvgre",
-            "key": "100"
-        },
-        {
-            "name": "action3",
-            "action_type": "appliance"
-        }
-    ],
-    "DASH_ROUTING_APPLIANCE_TABLE:22": {
-        "appliance_guid": "497f23d7-f0ac-4c99",
-        "addresses": "100.8.1.2",
-        "encap_type": "vxlan",
-        "vni": 101
-    }
-```
- 
-### 5.2 From PLS to On-Premise direction
-With flow HA, the return packet will be forwarded to the active side of the HA pair, which will use the stored reversed flow to process the packet and forward it back to the MSEE.
-
-#### 5.2.1 Private Link
-1. VNI Lookup: First, we will use the VNI to determine the packet direction. In this case, since Private Link Key is not in the outbound VNI list, we consider all the packets from PLS side as inbound direction from the floating NIC perspective.
-
-2. ENI Lookup: We will again uses inner destination MAC address to find the ENI pipeline. Once found, the outer encap will be decap’ed, exposing the inner packet for later processing.
-
-    The ENI goal state that we are using will be the same as before. Hence, emitted here.
-
-3. Conntrack Lookup: The return packet transformation will be handled by reverse flow.
-4. Metering Update: Metering update will update the metering counter based on the rules that we saved in the reverse flow.
-5. Underlay routing: Underlay routing will do the real packet transformation, e.g., 6to4 transformation and adding encaps.
-
-#### 5.2.2 Private Link NSG
-Since the packet that being sent to us in PL NSG scenario will be exactly the same as regular PL, and the reverse flow that being created in the PL NSG scenario will also be the same, there is nothing we need to change for the PL NSG case.
+### 6.2. PLS-to-VM direction
+None of changes.
