@@ -1,13 +1,14 @@
-# DASH flow test
+# DASH Flow Test
+#
 # Test cases covered:
-# 0. Flow hit (ENI AMC, VNI, 5 tuple), UDP packet, flow action: NONE
-# 1. Flow miss (ENI AMC, VNI, 5 tuple), UDP packet, flow action: NONE
-# 2. Flow hit (ENI AMC, VNI, 5 tuple), UDP packet, flow action: ENCAP_U0
-# 3. Flow hit (ENI AMC, VNI, 5 tuple), UDP packet, flow action: SET_DMAC (overlay dmac rewrite)
-# 4. Flow hit (ENI AMC, VNI, 5 tuple), UDP packet, flow action: ENCAP_U0 | SET_DMAC
+#   0. Flow hit (ENI AMC, VNI, 5 tuple), UDP packet, flow action: NONE
+#   1. Flow miss (ENI AMC, VNI, 5 tuple), UDP packet, flow action: NONE
+#   2. Flow hit (ENI AMC, VNI, 5 tuple), UDP packet, flow action: ENCAP_U0
+#   3. Flow hit (ENI AMC, VNI, 5 tuple), UDP packet, flow action: SET_DMAC  (overlay dmac rewrite)
+#   4. Flow hit (ENI AMC, VNI, 5 tuple), UDP packet, flow action: ENCAP_U0 | SET_DMAC
 # SET_SMAC, SNAT, DNAT, SNAT_PORT, DNAT_PORT are not yet implemented so they are not covered in the test cases.
-# NAT46 and NAT64 are not yet supported (ipv6 address not supported) so they are not covered in the test cases.
-# ENCAP_U1 implementation seems to have some error.
+#   NAT46 and NAT64 are not yet supported (ipv6 address not supported) so they are not covered in the test cases.
+#   ENCAP_U1 implementation seems to have some error.
 import copy
 
 from sai_thrift.sai_headers import *
