@@ -299,8 +299,13 @@ control dash_ingress(
 
         routing_action_apply.apply(hdr, meta);
 
-        /* Underlay routing */
-        meta.dst_ip_addr = (bit<128>)hdr.u0_ipv4.dst_addr;
+        /* Underlay routing, using meta.dst_ip_addr as lookup key */
+        if (meta.routing_actions & dash_routing_actions_t.ENCAP_U1 != 0) {
+            meta.dst_ip_addr = (bit<128>)hdr.u1_ipv4.dst_addr;
+        }
+        else if (meta.routing_actions & dash_routing_actions_t.ENCAP_U0 != 0) {
+            meta.dst_ip_addr = (bit<128>)hdr.u0_ipv4.dst_addr;
+        }
 
         underlay.apply(
               hdr

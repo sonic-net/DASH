@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "config.h"
 #include "objectidmanager.h"
+#include "p4meta.h"
 
 namespace dash
 {
@@ -51,6 +52,52 @@ namespace dash
                     _In_ uint32_t attr_count,
                     _Inout_ sai_attribute_t *attr_list);
 
+            // QUAD api implementation, using p4 meta table
+            sai_status_t create(
+                    _In_ const P4MetaTable &meta_table,
+                    _In_ sai_object_type_t objectType,
+                    _Out_ sai_object_id_t* objectId,
+                    _In_ sai_object_id_t switchId,
+                    _In_ uint32_t attr_count,
+                    _In_ const sai_attribute_t *attr_list);
+
+            sai_status_t create(
+                    _In_ const P4MetaTable &meta_table,
+                    _In_ sai_object_type_t objectType,
+                    _Inout_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry,
+                    _In_ uint32_t attr_count,
+                    _In_ const sai_attribute_t *attr_list);
+
+            sai_status_t remove(
+                    _In_ const P4MetaTable &meta_table,
+                    _In_ sai_object_id_t objectId);
+
+            sai_status_t remove(
+                    _In_ const P4MetaTable &meta_table,
+                    _Inout_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry);
+
+            sai_status_t set(
+                    _In_ const P4MetaTable &meta_table,
+                    _In_ sai_object_id_t objectId,
+                    _In_ const sai_attribute_t *attr);
+
+            sai_status_t set(
+                    _In_ const P4MetaTable &meta_table,
+                    _Inout_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry,
+                    _In_ const sai_attribute_t *attr);
+
+            sai_status_t get(
+                    _In_ const P4MetaTable &meta_table,
+                    _In_ sai_object_id_t objectId,
+                    _In_ uint32_t attr_count,
+                    _Inout_ sai_attribute_t *attr_list);
+
+            sai_status_t get(
+                    _In_ const P4MetaTable &meta_table,
+                    _Inout_ std::shared_ptr<p4::v1::TableEntry> matchActionEntry,
+                    _In_ uint32_t attr_count,
+                    _Inout_ sai_attribute_t *attr_list);
+
         private: // QUAD api implementation
 
             // switch
@@ -85,6 +132,9 @@ namespace dash
                     _In_ std::shared_ptr<p4::v1::TableEntry>,
                     _In_ p4::v1::Update_Type updateType);
 
+            grpc::StatusCode readTableEntry(
+                    _Inout_ std::shared_ptr<p4::v1::TableEntry>);
+
             sai_object_id_t getNextObjectId(
                     _In_ sai_object_type_t objectType);
 
@@ -94,6 +144,18 @@ namespace dash
 
             bool removeFromTable(
                     _In_ sai_object_id_t id);
+
+            bool getFromTable(
+                    _In_ sai_object_id_t id,
+                    _Out_ std::shared_ptr<p4::v1::TableEntry> &entry);
+
+        private: // private helper methods
+
+            void mutateSiblingTablesEntry(
+                    _In_ const P4MetaTable &meta_table,
+                    _In_ std::shared_ptr<p4::v1::TableEntry>,
+                    _In_ p4::v1::Update_Type updateType,
+                    _In_ uint32_t action_id = 0);
 
         public: // default attributes helper
 

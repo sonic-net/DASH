@@ -37,6 +37,7 @@ control inbound(inout headers_t hdr,
 
         inbound_routing_stage.apply(hdr, meta);
 
+        meta.routing_actions = dash_routing_actions_t.ENCAP_U0;
         do_tunnel_encap(hdr,
                      meta,
                      meta.u0_encap_data.underlay_dmac,
