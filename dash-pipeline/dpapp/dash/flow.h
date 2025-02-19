@@ -10,7 +10,7 @@
 #include <vppinfra/tw_timer_2t_1w_2048sl.h>
 
 /* Default timeout in seconds */
-#define DASH_FLOW_TIMEOUT   5
+#define DASH_FLOW_TIMEOUT   30
 
 typedef enum _dash_packet_source_t {
     EXTERNAL = 0,           // Packets from external sources.
