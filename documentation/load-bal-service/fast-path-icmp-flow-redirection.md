@@ -206,7 +206,7 @@ In scenario applies to the ENI that's sending traffic to a VIP or PublicIP hoste
 
 #### Post-fastpath flow modifications
 - Add Encap of the type RedirectInfo.EncapType. (In practice this is always NVGRE)
-- GreKey = RedirectInfo.EncapId. (this ranges from 256 to 511)
+- GreKey = RedirectInfo.EncapId. (this is from the trusted VNI range)
 - DIPo = RedirectInfo.Info4.DipPAv4
 - SIPo = PreFastpathFlow.SIPo
 - DMACi = RedirectInfo.Info4.VMMac
@@ -309,6 +309,7 @@ There should be 3 knobs for controlling the 3 individual scenarios mentioned abo
 1.  ST / PE fastpath toggle - if enabled, honor ipv6 redirect packet with gre key 254
 1.  ILB fastpath toggle - if enabled, honor ipv4 redirect with gre key 254
 
+By default, the knobs are enabled. 
 This toggle is added as an attribute to ENI:
 
 ```c
@@ -351,7 +352,7 @@ typedef enum _sai_eni_attr_t
 
 For debugging purposes, we will also need to add counters in order to give insights on how fast path works internally.
 
-In order provide a unified way for retrieving all counters for any DASH counters, all counters below will be added as stats, because many DASH counters are not [regular data path counters that modeled in SAI](https://github.com/opencomputeproject/SAI/blob/master/inc/saicounter.h), which tracks packets and bytes.
+In order to provide a unified way for retrieving all counters for any DASH counters, all counters below will be added as stats, because many DASH counters are not [regular data path counters that modeled in SAI](https://github.com/opencomputeproject/SAI/blob/master/inc/saicounter.h), which tracks packets and bytes.
 
 #### Port stats attributes
 
