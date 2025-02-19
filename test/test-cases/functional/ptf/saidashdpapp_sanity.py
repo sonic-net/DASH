@@ -301,7 +301,7 @@ class SaiThriftDpappPktTest(SaiHelperSimplified):
                                       eth_src=self.eni_mac,
                                       ip_dst=self.dst_ca_ip,
                                       ip_src=src_vm_ip,
-                                      ip_ttl = 1,
+                                    #   ip_ttl = 1,
                                       tcp_sport=tcp_src_port,
                                       tcp_dport=tcp_dst_port,
                                       tcp_flags="S")
