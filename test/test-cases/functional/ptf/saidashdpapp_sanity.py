@@ -301,6 +301,7 @@ class SaiThriftDpappPktTest(SaiHelperSimplified):
                                       eth_src=self.eni_mac,
                                       ip_dst=self.dst_ca_ip,
                                       ip_src=src_vm_ip,
+                                      ip_ttl = 1,
                                       tcp_sport=tcp_src_port,
                                       tcp_dport=tcp_dst_port,
                                       tcp_flags="S")
@@ -336,7 +337,7 @@ class SaiThriftDpappPktTest(SaiHelperSimplified):
         verify_packet(self, self.pkt_exp, 0)
         print("\tVerifying flow created...")
         verify_flow(self.eni_mac, self.vnet & 0xffff, inner_pkt)
-        time.sleep(7)
+        time.sleep(35)
         print("\tVerifying flow aged out...")
         verify_no_flow(self.eni_mac, self.vnet & 0xffff, inner_pkt)
         
