@@ -47,30 +47,6 @@ class P4info():
         return None
 
 
-def use_flow(cls):
-    _setUp = getattr(cls, "setUp", None)
-    _tearDown = getattr(cls, "tearDown", None)
-    table = P4InternalConfigTable()
-
-    def setUp(self, *args, **kwargs):
-        if _setUp is not None:
-            _setUp(self, *args, **kwargs)
-        print(f'*** Enable Flow lookup')
-        table.set(cpu_mac = mac_in_bytes(get_mac("veth5")), flow_enabled = b'\x01')
-        return
-
-    def tearDown(self, *args, **kwargs):
-        print(f'*** Disable Flow lookup')
-        table.set(flow_enabled = b'\x00')
-        if _tearDown is not None:
-            _tearDown(self, *args, **kwargs)
-        return
-
-    setattr(cls, "setUp", setUp)
-    setattr(cls, "tearDown", tearDown)
-    return cls
-
-
 class P4Table():
     def __init__(self, target=None):
         if not target:
@@ -254,6 +230,30 @@ class P4FlowTable(P4Table):
             return entry
 
         return None
+
+
+def use_flow(cls):
+    _setUp = getattr(cls, "setUp", None)
+    _tearDown = getattr(cls, "tearDown", None)
+    table = P4InternalConfigTable()
+
+    def setUp(self, *args, **kwargs):
+        if _setUp is not None:
+            _setUp(self, *args, **kwargs)
+        print(f'*** Enable Flow lookup')
+        table.set(cpu_mac = mac_in_bytes(get_mac("veth5")), flow_enabled = b'\x01')
+        return
+
+    def tearDown(self, *args, **kwargs):
+        print(f'*** Disable Flow lookup')
+        table.set(flow_enabled = b'\x00')
+        if _tearDown is not None:
+            _tearDown(self, *args, **kwargs)
+        return
+
+    setattr(cls, "setUp", setUp)
+    setattr(cls, "tearDown", tearDown)
+    return cls
 
 
 def verify_flow(eni_mac, vnet_id, packet, existed = True):
