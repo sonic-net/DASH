@@ -95,6 +95,14 @@ class P4Table():
             for entity in response.entities:
                 yield entity.table_entry
 
+    def write(self, entry, update_type):
+        req = p4runtime_pb2.WriteRequest()
+        req.device_id = 0
+        update = req.updates.add()
+        update.type = update_type
+        update.entity.table_entry.CopyFrom(entry)
+        self.stub.Write(req)
+
 
 class P4InternalConfigTable(P4Table):
     def __init__(self, target=None):
@@ -144,12 +152,7 @@ class P4InternalConfigTable(P4Table):
             if not changed:
                 return # none of change
 
-            req = p4runtime_pb2.WriteRequest()
-            req.device_id = 0
-            update = req.updates.add()
-            update.type = p4runtime_pb2.Update.MODIFY
-            update.entity.table_entry.CopyFrom(entry)
-            self.stub.Write(req)
+            self.write(entry, p4runtime_pb2.Update.MODIFY)
             return
 
         # Add one entry
@@ -190,12 +193,7 @@ class P4InternalConfigTable(P4Table):
         else:   # default value
             param.value = b'\x00'
 
-        req = p4runtime_pb2.WriteRequest()
-        req.device_id = 0
-        update = req.updates.add()
-        update.type = p4runtime_pb2.Update.INSERT
-        update.entity.table_entry.CopyFrom(entry)
-        self.stub.Write(req)
+        self.write(entry, p4runtime_pb2.Update.INSERT)
 
 
 class P4FlowTable(P4Table):
@@ -283,3 +281,81 @@ def verify_flow(eni_mac, vnet_id, packet, existed = True):
 
 def verify_no_flow(eni_mac, vnet_id, packet):
     verify_flow(eni_mac, vnet_id, packet, existed = False)
+
+
+class P4UnderlayRoutingTable(P4Table):
+    def __init__(self, target=None):
+        super(P4UnderlayRoutingTable, self).__init__(target)
+        self.p4info_table_underlay = self.p4info.get_table("dash_ingress.underlay.underlay_routing")
+
+    def get(self,
+            ip_prefix :str = None, # ipv6 string, ::x.x.x.x for ipv4
+            ip_prefix_len :int = 128): # in bits
+        match = p4runtime_pb2.FieldMatch()
+        match.field_id = 1
+        match.lpm.value = socket.inet_pton(socket.AF_INET6, ip_prefix)
+        match.lpm.prefix_len = ip_prefix_len
+
+        for entry in self.read(self.p4info_table_underlay.preamble.id, [match]):
+            return entry
+
+        return None
+
+    def set(self,
+            ip_prefix :str = None, # ipv6 string, ::x.x.x.x for ipv4
+            ip_prefix_len :int = 128, # in bits
+            packet_action :int = 1, # ACTION_FORWARD
+            next_hop_id :int = 0):  # port 0
+
+        entry = self.get(ip_prefix, ip_prefix_len)
+        if entry:
+            changed = 0
+
+            param = entry.action.action.params[0]
+            byte_data = packet_action.to_bytes(2, byteorder='big')
+            if byte_data != param.value:
+                param.value = byte_data
+                changed += 1
+
+            param = entry.action.action.params[1]
+            byte_data = next_hop_id.to_bytes(2, byteorder='big')
+            if byte_data != param.value:
+                param.value = byte_data
+                changed += 1
+
+            if not changed:
+                return # none of change
+
+            self.write(entry, p4runtime_pb2.Update.MODIFY)
+            return
+
+        # Add one entry
+        entry = p4runtime_pb2.TableEntry()
+        entry.table_id = self.p4info_table_underlay.preamble.id
+        match = entry.match.add()
+        match.field_id = 1
+        match.lpm.value = socket.inet_pton(socket.AF_INET6, ip_prefix)
+        match.lpm.prefix_len = ip_prefix_len
+
+        action_pkt_act = self.p4info.get_action("dash_ingress.underlay.pkt_act")
+        entry.action.action.action_id = action_pkt_act.preamble.id
+        action = entry.action.action
+
+        param = action.params.add()
+        param.param_id = 1
+        param.value = packet_action.to_bytes(2, byteorder='big')
+
+        param = action.params.add()
+        param.param_id = 2
+        param.value = next_hop_id.to_bytes(2, byteorder='big')
+
+        self.write(entry, p4runtime_pb2.Update.INSERT)
+
+    def unset(self,
+              ip_prefix :str = None, # ipv6 string, ::x.x.x.x for ipv4
+              ip_prefix_len :int = 128): # in bits
+        entry = self.get(ip_prefix, ip_prefix_len)
+        if entry:
+            self.write(entry, p4runtime_pb2.Update.DELETE)
+        else:
+            print(f'Route entry for {ip_prefix}/{ip_prefix_len} not found.')
