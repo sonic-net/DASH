@@ -47,128 +47,21 @@ class P4info():
         return None
 
 
-def set_internal_config(neighbor_mac :bytes = None,
-                        mac :bytes = None,
-                        cpu_mac :bytes = None,
-                        flow_enabled :bytes = None):
-    '''
-    Set dash pipeline internal config by updating table entry of internal_config.
-
-    if one argument is not specifed, the action param is not changed in the
-    existing table entry, otherwise set default value in new table entry.
-    '''
-    channel = grpc.insecure_channel('localhost:9559')
-    stub = p4runtime_pb2_grpc.P4RuntimeStub(channel)
-
-    p4info = P4info(stub)
-    internal_config = p4info.get_table("dash_ingress.dash_lookup_stage.pre_pipeline_stage.internal_config")
-
-    entry = p4runtime_pb2.TableEntry()
-    entry.table_id = internal_config.preamble.id
-    entry.priority = 1
-
-    match = entry.match.add()
-    match.field_id = 1
-    match.ternary.value = b'\x00'
-    match.ternary.mask = b'\xff'
-
-    req = p4runtime_pb2.ReadRequest()
-    req.device_id = 0
-    entity = req.entities.add()
-    entity.table_entry.CopyFrom(entry)
-    for response in stub.Read(req):
-        if not response.entities:
-            continue
-        entry = response.entities[0].table_entry
-        changed = 0
-
-        param = entry.action.action.params[0]
-        if neighbor_mac and neighbor_mac != param.value:
-            param.value = neighbor_mac
-            changed += 1
-
-        param = entry.action.action.params[1]
-        if mac and mac != param.value:
-            param.value = mac
-            changed += 1
-
-        param = entry.action.action.params[2]
-        if cpu_mac and cpu_mac != param.value:
-            param.value = cpu_mac
-            changed += 1
-
-        param = entry.action.action.params[3]
-        if flow_enabled and flow_enabled != param.value:
-            param.value = flow_enabled
-            changed += 1
-
-        if not changed:
-            return # none of change
-
-        req = p4runtime_pb2.WriteRequest()
-        req.device_id = 0
-        update = req.updates.add()
-        update.type = p4runtime_pb2.Update.MODIFY
-        update.entity.table_entry.CopyFrom(entry)
-        stub.Write(req)
-        return
-
-    # Add one entry
-    set_internal_config = p4info.get_action("dash_ingress.dash_lookup_stage.pre_pipeline_stage.set_internal_config")
-    entry.action.action.action_id = set_internal_config.preamble.id
-    action = entry.action.action
-
-    param = action.params.add()
-    param.param_id = 1
-    if neighbor_mac:
-        param.value = neighbor_mac
-    else:   # default value
-        param.value = b'\x00\x00\x00\x00\x00\x00'
-
-    param = action.params.add()
-    param.param_id = 2
-    if mac:
-        param.value = mac
-    else:   # default value
-        param.value = b'\x00\x00\x00\x00\x00\x00'
-
-    param = action.params.add()
-    param.param_id = 3
-    if cpu_mac:
-        param.value = cpu_mac
-    else:   # default value
-        param.value = b'\x00\x00\x00\x00\x00\x00'
-
-    param = action.params.add()
-    param.param_id = 4
-    if flow_enabled:
-        param.value = flow_enabled
-    else:   # default value
-        param.value = b'\x00'
-
-    req = p4runtime_pb2.WriteRequest()
-    req.device_id = 0
-    update = req.updates.add()
-    update.type = p4runtime_pb2.Update.INSERT
-    update.entity.table_entry.CopyFrom(entry)
-    stub.Write(req)
-
-
 def use_flow(cls):
     _setUp = getattr(cls, "setUp", None)
     _tearDown = getattr(cls, "tearDown", None)
+    table = P4InternalConfigTable()
 
     def setUp(self, *args, **kwargs):
         if _setUp is not None:
             _setUp(self, *args, **kwargs)
         print(f'*** Enable Flow lookup')
-        set_internal_config(cpu_mac = mac_in_bytes(get_mac("veth5")),
-                            flow_enabled = b'\x01')
+        table.set(cpu_mac = mac_in_bytes(get_mac("veth5")), flow_enabled = b'\x01')
         return
 
     def tearDown(self, *args, **kwargs):
         print(f'*** Disable Flow lookup')
-        set_internal_config(flow_enabled = b'\x00')
+        table.set(flow_enabled = b'\x00')
         if _tearDown is not None:
             _tearDown(self, *args, **kwargs)
         return
@@ -179,16 +72,20 @@ def use_flow(cls):
 
 
 class P4Table():
-    def __init__(self):
-        channel = grpc.insecure_channel('localhost:9559')
+    def __init__(self, target=None):
+        if not target:
+            target='localhost:9559'
+        channel = grpc.insecure_channel(target)
         self.stub = p4runtime_pb2_grpc.P4RuntimeStub(channel)
         self.p4info = P4info(self.stub)
 
-    def read(self, table_id, match_list = None):
+    def read(self, table_id, match_list = None, priority = None):
         entry = p4runtime_pb2.TableEntry()
         entry.table_id = table_id
         if match_list:
             entry.match.extend(match_list)
+        if priority != None:
+            entry.priority = priority
 
         req = p4runtime_pb2.ReadRequest()
         req.device_id = 0
@@ -199,9 +96,111 @@ class P4Table():
                 yield entity.table_entry
 
 
+class P4InternalConfigTable(P4Table):
+    def __init__(self, target=None):
+        super(P4InternalConfigTable, self).__init__(target)
+        self.p4info_table_internal_config = self.p4info.get_table("dash_ingress.dash_lookup_stage.pre_pipeline_stage.internal_config")
+
+    def set(self,
+            neighbor_mac :bytes = None,
+            mac :bytes = None,
+            cpu_mac :bytes = None,
+            flow_enabled :bytes = None):
+        '''
+        Set dash pipeline internal config by updating table entry of internal_config.
+
+        if one argument is not specifed, the action param is not changed in the
+        existing table entry, otherwise set default value in new table entry.
+        '''
+
+        match = p4runtime_pb2.FieldMatch()
+        match.field_id = 1
+        match.ternary.value = b'\x00'
+        match.ternary.mask = b'\xff'
+
+        for entry in self.read(self.p4info_table_internal_config.preamble.id, [match], priority = 1):
+            changed = 0
+
+            param = entry.action.action.params[0]
+            if neighbor_mac and neighbor_mac != param.value:
+                param.value = neighbor_mac
+                changed += 1
+
+            param = entry.action.action.params[1]
+            if mac and mac != param.value:
+                param.value = mac
+                changed += 1
+
+            param = entry.action.action.params[2]
+            if cpu_mac and cpu_mac != param.value:
+                param.value = cpu_mac
+                changed += 1
+
+            param = entry.action.action.params[3]
+            if flow_enabled and flow_enabled != param.value:
+                param.value = flow_enabled
+                changed += 1
+
+            if not changed:
+                return # none of change
+
+            req = p4runtime_pb2.WriteRequest()
+            req.device_id = 0
+            update = req.updates.add()
+            update.type = p4runtime_pb2.Update.MODIFY
+            update.entity.table_entry.CopyFrom(entry)
+            self.stub.Write(req)
+            return
+
+        # Add one entry
+        entry = p4runtime_pb2.TableEntry()
+        entry.table_id = self.p4info_table_internal_config.preamble.id
+        entry.priority = 1
+        entry.match.append(match)
+
+        action_set_internal_config = self.p4info.get_action("dash_ingress.dash_lookup_stage.pre_pipeline_stage.set_internal_config")
+        entry.action.action.action_id = action_set_internal_config.preamble.id
+        action = entry.action.action
+
+        param = action.params.add()
+        param.param_id = 1
+        if neighbor_mac:
+            param.value = neighbor_mac
+        else:   # default value
+            param.value = b'\x00\x00\x00\x00\x00\x00'
+
+        param = action.params.add()
+        param.param_id = 2
+        if mac:
+            param.value = mac
+        else:   # default value
+            param.value = b'\x00\x00\x00\x00\x00\x00'
+
+        param = action.params.add()
+        param.param_id = 3
+        if cpu_mac:
+            param.value = cpu_mac
+        else:   # default value
+            param.value = b'\x00\x00\x00\x00\x00\x00'
+
+        param = action.params.add()
+        param.param_id = 4
+        if flow_enabled:
+            param.value = flow_enabled
+        else:   # default value
+            param.value = b'\x00'
+
+        req = p4runtime_pb2.WriteRequest()
+        req.device_id = 0
+        update = req.updates.add()
+        update.type = p4runtime_pb2.Update.INSERT
+        update.entity.table_entry.CopyFrom(entry)
+        self.stub.Write(req)
+
+
 class P4FlowTable(P4Table):
-    def __init__(self):
-        super(P4FlowTable, self).__init__()
+    def __init__(self, target=None):
+        super(P4FlowTable, self).__init__(target)
         self.p4info_table_flow = self.p4info.get_table("dash_ingress.conntrack_lookup_stage.flow_entry")
 
     def print_flow_table(self):

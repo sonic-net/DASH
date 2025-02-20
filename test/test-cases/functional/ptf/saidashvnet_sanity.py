@@ -1,6 +1,6 @@
 from sai_thrift.sai_headers import *
 from sai_base_test import *
-from dash_pipeline_utils import *
+from dash_pipeline_utils import use_flow, get_mac, mac_in_bytes, P4InternalConfigTable
 
 @use_flow
 class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
@@ -28,7 +28,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
 
         self.dut_mac = get_mac("veth0")
         self.neighbor_mac = get_mac("veth1")
-        set_internal_config(neighbor_mac = mac_in_bytes(self.neighbor_mac),
+        P4InternalConfigTable().set(neighbor_mac = mac_in_bytes(self.neighbor_mac),
                             mac = mac_in_bytes(self.dut_mac))
 
         # Flag to indicate whether configureVnet were successful or not.
@@ -289,7 +289,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
             super(SaiThriftVnetOutboundUdpPktTest, self).tearDown()
 
         # restore default internal_config
-        set_internal_config(neighbor_mac = b'\x00\x00\x00\x00\x00\x00',
+        P4InternalConfigTable().set(neighbor_mac = b'\x00\x00\x00\x00\x00\x00',
                             mac = b'\x00\x00\x00\x00\x00\x00')
 
 
