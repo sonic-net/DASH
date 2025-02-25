@@ -1,5 +1,6 @@
 from sai_thrift.sai_headers import *
 from sai_base_test import *
+from dash_pipeline_utils import P4InternalConfigTable, P4UnderlayRoutingTable
 from p4_dash_utils import *
 
 @use_flow
@@ -28,8 +29,11 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
 
         self.dut_mac = get_mac("veth0")
         self.neighbor_mac = get_mac("veth1")
-        set_internal_config(neighbor_mac = mac_in_bytes(self.neighbor_mac),
-                            mac = mac_in_bytes(self.dut_mac))
+        P4InternalConfigTable().set(neighbor_mac = self.neighbor_mac, mac = self.dut_mac)
+
+        underlay_routing = P4UnderlayRoutingTable()
+        underlay_routing.set(ip_prefix = '::'+self.dst_pa_ip, ip_prefix_len = 128, next_hop_id = 1)
+        assert(underlay_routing.get(ip_prefix = '::'+self.dst_pa_ip, ip_prefix_len = 128))
 
         # Flag to indicate whether configureVnet were successful or not.
         self.configured = False
@@ -252,7 +256,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
         print("\tSending outbound packet...")
         send_packet(self, 0, vxlan_pkt)
         print("\tVerifying packet...")
-        verify_packet(self, self.pkt_exp, 0)
+        verify_packet(self, self.pkt_exp, 1)
         print ("SaiThriftVnetOutboundUdpPktTest OK")
 
     def runTest(self):
@@ -289,8 +293,12 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
             super(SaiThriftVnetOutboundUdpPktTest, self).tearDown()
 
         # restore default internal_config
-        set_internal_config(neighbor_mac = b'\x00\x00\x00\x00\x00\x00',
-                            mac = b'\x00\x00\x00\x00\x00\x00')
+        P4InternalConfigTable().unset()
+
+        # remove underlay route for dst_pa_ip
+        underlay_routing = P4UnderlayRoutingTable()
+        underlay_routing.unset(ip_prefix = '::'+self.dst_pa_ip, ip_prefix_len = 128)
+        assert(underlay_routing.get(ip_prefix = '::'+self.dst_pa_ip, ip_prefix_len = 128) == None)
 
 
 class SaiThriftVnetOutboundUdpV6PktTest(SaiThriftVnetOutboundUdpPktTest):
@@ -308,8 +316,6 @@ class SaiThriftVnetOutboundUdpV6PktTest(SaiThriftVnetOutboundUdpPktTest):
         self.ca_prefix_addr = "2000:aaaa::"
         self.ca_prefix_mask = "ffff:ffff:ffff:ffff:ffff:ffff:ffff:0"
         self.dst_ca_ip = "2000:aaaa::232"
-        self.dst_pa_ip = "172.16.1.30"
-        self.src_vm_pa_ip = "172.16.1.2"
 
         # SAI attribute name
         self.ip_addr_family_attr = 'ip6'
@@ -408,5 +414,5 @@ class SaiThriftVnetOutboundUdpV6PktTest(SaiThriftVnetOutboundUdpPktTest):
         print("\tSending outbound packet...")
         send_packet(self, 0, vxlan_pkt)
         print("\tVerifying packet...")
-        verify_packet(self, self.pkt_exp, 0)
+        verify_packet(self, self.pkt_exp, 1)
         print ("SaiThriftVnetOutboundUdpV6PktTest OK")

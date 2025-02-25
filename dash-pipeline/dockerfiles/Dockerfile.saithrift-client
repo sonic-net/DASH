@@ -28,6 +28,12 @@ RUN cd /saithrift-0.9 && \
     cd /SAI/test/ptf && \
     sudo python3 setup.py install
 
+# Copy and install dash pipeline utils
+ADD dash-pipeline/utils/ /dash-pipeline-utils
+RUN cd /dash-pipeline-utils && \
+    sudo python3 setup.py bdist_wheel && \
+    sudo pip install dist/dash_pipeline_utils*.whl
+
 # Copy distro test-cases into container, making it standalone (doesn't need host FS contents).
 # For dev, host directories can be mounted to another container directory to "see" tests in development
 ADD test/test-cases/ tests/
