@@ -1,6 +1,6 @@
 from sai_thrift.sai_headers import *
 from sai_base_test import *
-from dash_pipeline_utils import use_flow, verify_flow, verify_no_flow
+from p4_dash_utils import *
 
 @use_flow
 class SaiThriftDpappPktTest(SaiHelperSimplified):

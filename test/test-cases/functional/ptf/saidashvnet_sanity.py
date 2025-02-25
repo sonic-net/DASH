@@ -1,7 +1,7 @@
 from sai_thrift.sai_headers import *
 from sai_base_test import *
-from dash_pipeline_utils import use_flow, get_mac, mac_in_bytes, \
-        P4InternalConfigTable, P4UnderlayRoutingTable
+from dash_pipeline_utils import P4InternalConfigTable, P4UnderlayRoutingTable
+from p4_dash_utils import *
 
 @use_flow
 class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):

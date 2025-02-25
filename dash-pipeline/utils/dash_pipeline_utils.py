@@ -1,20 +1,7 @@
 import grpc
 from p4.v1 import p4runtime_pb2
 from p4.v1 import p4runtime_pb2_grpc
-from ipaddress import ip_address
-from scapy.all import *
-
-
-def get_mac(interface):
-    try:
-        mac = open('/sys/class/net/'+interface+'/address').readline().strip()
-    except:
-        mac = "00:00:00:00:00:00"
-    return mac
-
-
-def mac_in_bytes(mac):
-    return bytes(int(b, 16) for b in mac.split(":"))
+import socket
 
 
 class P4info():
@@ -79,13 +66,75 @@ class P4Table():
         update.entity.table_entry.CopyFrom(entry)
         self.stub.Write(req)
 
+    def find(self, table_id, user_match_list, priority = None):
+        for entry in self.read(table_id, user_match_list, priority):
+            return entry
+        return None
+
+    def update(self, table_id, user_match_list, action_id, user_params, priority = None):
+        entry = self.find(table_id, user_match_list, priority)
+        if entry:
+            changed = 0
+
+            for param in entry.action.action.params:
+                if param.param_id in user_params:
+                    byte_data, _ = user_params[param.param_id]
+                    if byte_data is not None and byte_data != param.value:
+                        param.value = byte_data
+                        changed += 1
+
+            if changed:
+                self.write(entry, p4runtime_pb2.Update.MODIFY)
+            return
+
+        # Add one entry
+        entry = p4runtime_pb2.TableEntry()
+        entry.table_id = table_id
+        if priority is not None:
+            entry.priority = priority
+        entry.match.extend(user_match_list)
+
+        entry.action.action.action_id = action_id
+        action = entry.action.action
+
+        for param_id,param_value in user_params.items():
+            param = action.params.add()
+            param.param_id = param_id
+            if param_value[0] is not None:
+                param.value = param_value[0]
+            else:
+                param.value = param_value[1]
+
+        self.write(entry, p4runtime_pb2.Update.INSERT)
+
 
 class P4InternalConfigTable(P4Table):
     def __init__(self, target=None):
         super(P4InternalConfigTable, self).__init__(target)
-        self.p4info_table_internal_config = self.p4info.get_table("dash_ingress.dash_lookup_stage.pre_pipeline_stage.internal_config")
+        self.p4info_table = self.p4info.get_table("dash_ingress.dash_lookup_stage.pre_pipeline_stage.internal_config")
+        self.match_id_map = { mf.name: mf.id for mf in self.p4info_table.match_fields}
+        self.set_internal_config = self.p4info.get_action("dash_ingress.dash_lookup_stage.pre_pipeline_stage.set_internal_config")
+        self.set_internal_config_id_map = { param.name: param.id for param in self.set_internal_config.params }
+
+    def to_match_list(self, appliance_id :int = 0):
+        match = p4runtime_pb2.FieldMatch()
+        match.field_id = self.match_id_map['meta.appliance_id']
+        match.ternary.value = appliance_id.to_bytes(1, byteorder='big')
+        match.ternary.mask = b'\xff'
+
+        return [match]
+
+    def get(self, appliance_id :int = 0):
+        '''
+        Get dash pipeline internal config
+
+        '''
+
+        user_match_list = self.to_match_list(appliance_id)
+        return self.find(self.p4info_table.preamble.id, user_match_list, priority = 1)
 
     def set(self,
+            appliance_id :int = 0,
             neighbor_mac :bytes = None,
             mac :bytes = None,
             cpu_mac :bytes = None,
@@ -95,265 +144,116 @@ class P4InternalConfigTable(P4Table):
 
         if one argument is not specifed, the action param is not changed in the
         existing table entry, otherwise set default value in new table entry.
+
         '''
 
-        match = p4runtime_pb2.FieldMatch()
-        match.field_id = 1
-        match.ternary.value = b'\x00'
-        match.ternary.mask = b'\xff'
+        user_match_list = self.to_match_list(appliance_id)
 
-        for entry in self.read(self.p4info_table_internal_config.preamble.id, [match], priority = 1):
-            changed = 0
+        # param_id -> (value, default value)
+        user_params = {
+            self.set_internal_config_id_map['neighbor_mac']: (
+                neighbor_mac, b'\x00\x00\x00\x00\x00\x00'
+            ),
+            self.set_internal_config_id_map['mac']: (
+                mac, b'\x00\x00\x00\x00\x00\x00'
+            ),
+            self.set_internal_config_id_map['cpu_mac']: (
+                cpu_mac, b'\x00\x00\x00\x00\x00\x00'
+            ),
+            self.set_internal_config_id_map['flow_enabled']: (
+                flow_enabled, b'\x00'
+            )
+        }
 
-            param = entry.action.action.params[0]
-            if neighbor_mac and neighbor_mac != param.value:
-                param.value = neighbor_mac
-                changed += 1
+        self.update(self.p4info_table.preamble.id,
+                    user_match_list,
+                    self.set_internal_config.preamble.id,
+                    user_params,
+                    priority = 1)
 
-            param = entry.action.action.params[1]
-            if mac and mac != param.value:
-                param.value = mac
-                changed += 1
+    def unset(self, appliance_id :int = 0):
+        '''
+        Unset dash pipeline internal config
+        '''
 
-            param = entry.action.action.params[2]
-            if cpu_mac and cpu_mac != param.value:
-                param.value = cpu_mac
-                changed += 1
-
-            param = entry.action.action.params[3]
-            if flow_enabled and flow_enabled != param.value:
-                param.value = flow_enabled
-                changed += 1
-
-            if not changed:
-                return # none of change
-
-            self.write(entry, p4runtime_pb2.Update.MODIFY)
-            return
-
-        # Add one entry
-        entry = p4runtime_pb2.TableEntry()
-        entry.table_id = self.p4info_table_internal_config.preamble.id
-        entry.priority = 1
-        entry.match.append(match)
-
-        action_set_internal_config = self.p4info.get_action("dash_ingress.dash_lookup_stage.pre_pipeline_stage.set_internal_config")
-        entry.action.action.action_id = action_set_internal_config.preamble.id
-        action = entry.action.action
-
-        param = action.params.add()
-        param.param_id = 1
-        if neighbor_mac:
-            param.value = neighbor_mac
-        else:   # default value
-            param.value = b'\x00\x00\x00\x00\x00\x00'
-
-        param = action.params.add()
-        param.param_id = 2
-        if mac:
-            param.value = mac
-        else:   # default value
-            param.value = b'\x00\x00\x00\x00\x00\x00'
-
-        param = action.params.add()
-        param.param_id = 3
-        if cpu_mac:
-            param.value = cpu_mac
-        else:   # default value
-            param.value = b'\x00\x00\x00\x00\x00\x00'
-
-        param = action.params.add()
-        param.param_id = 4
-        if flow_enabled:
-            param.value = flow_enabled
-        else:   # default value
-            param.value = b'\x00'
-
-        self.write(entry, p4runtime_pb2.Update.INSERT)
-
-
-class P4FlowTable(P4Table):
-    def __init__(self, target=None):
-        super(P4FlowTable, self).__init__(target)
-        self.p4info_table_flow = self.p4info.get_table("dash_ingress.conntrack_lookup_stage.flow_entry")
-
-    def print_flow_table(self):
-        for entry in self.read(self.p4info_table_flow.preamble.id):
-            print(entry)
-
-    def get_flow_entry(self, eni_mac, vnet_id,
-                       src_ip, dst_ip,
-                       src_port, dst_port, ip_proto):
-        match_list = []
-
-        match = p4runtime_pb2.FieldMatch()
-        match.field_id = 1
-        match.exact.value = mac_in_bytes(eni_mac)
-        match_list.append(match)
-
-        match = p4runtime_pb2.FieldMatch()
-        match.field_id = 2
-        match.exact.value = vnet_id.to_bytes(2, byteorder='big')
-        match_list.append(match)
-
-        match = p4runtime_pb2.FieldMatch()
-        match.field_id = 3
-        match.exact.value = ip_address(src_ip).packed
-        match_list.append(match)
-
-        match = p4runtime_pb2.FieldMatch()
-        match.field_id = 4
-        match.exact.value = ip_address(dst_ip).packed
-        match_list.append(match)
-
-        match = p4runtime_pb2.FieldMatch()
-        match.field_id = 5
-        match.exact.value = src_port.to_bytes(2, byteorder='big')
-        match_list.append(match)
-
-        match = p4runtime_pb2.FieldMatch()
-        match.field_id = 6
-        match.exact.value = dst_port.to_bytes(2, byteorder='big')
-        match_list.append(match)
-
-        match = p4runtime_pb2.FieldMatch()
-        match.field_id = 7
-        match.exact.value = ip_proto.to_bytes(1, byteorder='big')
-        match_list.append(match)
-
-        match = p4runtime_pb2.FieldMatch()
-        match.field_id = 8
-        match.exact.value = b'\x00' if ip_address(src_ip).version == 4 else b'\x01'
-        match_list.append(match)
-
-        for entry in self.read(self.p4info_table_flow.preamble.id, match_list):
-            return entry
-
-        return None
-
-
-def use_flow(cls):
-    _setUp = getattr(cls, "setUp", None)
-    _tearDown = getattr(cls, "tearDown", None)
-    table = P4InternalConfigTable()
-
-    def setUp(self, *args, **kwargs):
-        if _setUp is not None:
-            _setUp(self, *args, **kwargs)
-        print(f'*** Enable Flow lookup')
-        table.set(cpu_mac = mac_in_bytes(get_mac("veth5")), flow_enabled = b'\x01')
-        return
-
-    def tearDown(self, *args, **kwargs):
-        print(f'*** Disable Flow lookup')
-        table.set(flow_enabled = b'\x00')
-        if _tearDown is not None:
-            _tearDown(self, *args, **kwargs)
-        return
-
-    setattr(cls, "setUp", setUp)
-    setattr(cls, "tearDown", tearDown)
-    return cls
-
-
-def verify_flow(eni_mac, vnet_id, packet, existed = True):
-    if packet.haslayer(TCP):
-        sport = packet['TCP'].sport
-        dport = packet['TCP'].dport
-    elif packet.haslayer(UDP):
-        sport = packet['UDP'].sport
-        dport = packet['UDP'].dport
-    else:   # TODO: later for other ip proto
-        assert False, "Not TCP/UDP packet"
-
-    flow_table = P4FlowTable()
-    flow = flow_table.get_flow_entry(eni_mac, vnet_id,
-                                     packet['IP'].src,
-                                     packet['IP'].dst,
-                                     sport,
-                                     dport,
-                                     packet['IP'].proto)
-    if existed:
-        assert flow, "flow not found"
-    else:
-        assert not flow, "flow still found"
-
-
-def verify_no_flow(eni_mac, vnet_id, packet):
-    verify_flow(eni_mac, vnet_id, packet, existed = False)
+        entry = self.get(appliance_id)
+        if entry:
+            self.write(entry, p4runtime_pb2.Update.DELETE)
+        else:
+            print(f'Internal config for appliance {appliance_id} not found.')
 
 
 class P4UnderlayRoutingTable(P4Table):
     def __init__(self, target=None):
         super(P4UnderlayRoutingTable, self).__init__(target)
-        self.p4info_table_underlay = self.p4info.get_table("dash_ingress.underlay.underlay_routing")
+        self.p4info_table = self.p4info.get_table("dash_ingress.underlay.underlay_routing")
+        self.match_id_map = { mf.name: mf.id for mf in self.p4info_table.match_fields}
+        self.pkt_act = self.p4info.get_action("dash_ingress.underlay.pkt_act")
+        self.pkt_act_id_map = { param.name: param.id for param in self.pkt_act.params }
 
-    def get(self,
-            ip_prefix :str = None, # ipv6 string, ::x.x.x.x for ipv4
+    def to_match_list(self,
+            ip_prefix :str = '::', # ipv6 string, ::x.x.x.x for ipv4
             ip_prefix_len :int = 128): # in bits
         match = p4runtime_pb2.FieldMatch()
-        match.field_id = 1
+        match.field_id = self.match_id_map['meta.dst_ip_addr']
         match.lpm.value = socket.inet_pton(socket.AF_INET6, ip_prefix)
         match.lpm.prefix_len = ip_prefix_len
 
-        for entry in self.read(self.p4info_table_underlay.preamble.id, [match]):
-            return entry
+        return [match]
 
-        return None
+    def get(self,
+            ip_prefix :str = '::', # ipv6 string, ::x.x.x.x for ipv4
+            ip_prefix_len :int = 128): # in bits
+        '''
+        Get underlay route entry with ip prefix
+
+        '''
+
+        user_match_list = self.to_match_list(ip_prefix, ip_prefix_len)
+        return self.find(self.p4info_table.preamble.id, user_match_list)
 
     def set(self,
-            ip_prefix :str = None, # ipv6 string, ::x.x.x.x for ipv4
+            ip_prefix :str = '::', # ipv6 string, ::x.x.x.x for ipv4
             ip_prefix_len :int = 128, # in bits
-            packet_action :int = 1, # ACTION_FORWARD
-            next_hop_id :int = 0):  # port 0
+            packet_action :int = None,
+            next_hop_id :int = None):
+        '''
+        Set underlay route entry with ip prefix
 
-        entry = self.get(ip_prefix, ip_prefix_len)
-        if entry:
-            changed = 0
+        if one argument is not specifed, the action param is not changed in the
+        existing table entry, otherwise set default value in new table entry.
 
-            param = entry.action.action.params[0]
-            byte_data = packet_action.to_bytes(2, byteorder='big')
-            if byte_data != param.value:
-                param.value = byte_data
-                changed += 1
+        '''
 
-            param = entry.action.action.params[1]
-            byte_data = next_hop_id.to_bytes(2, byteorder='big')
-            if byte_data != param.value:
-                param.value = byte_data
-                changed += 1
+        if packet_action is not None:
+            packet_action = packet_action.to_bytes(2, byteorder='big')
+        if next_hop_id is not None:
+            next_hop_id = next_hop_id.to_bytes(2, byteorder='big')
 
-            if not changed:
-                return # none of change
+        user_match_list = self.to_match_list(ip_prefix, ip_prefix_len)
 
-            self.write(entry, p4runtime_pb2.Update.MODIFY)
-            return
+        # param_id -> (value, default value)
+        user_params = {
+            self.pkt_act_id_map['packet_action']: (
+                packet_action, b'\x00\x01' # ACTION_FORWARD
+            ),
+            self.pkt_act_id_map['next_hop_id']: (
+                next_hop_id, b'\x00\x00' # port 0
+            )
+        }
 
-        # Add one entry
-        entry = p4runtime_pb2.TableEntry()
-        entry.table_id = self.p4info_table_underlay.preamble.id
-        match = entry.match.add()
-        match.field_id = 1
-        match.lpm.value = socket.inet_pton(socket.AF_INET6, ip_prefix)
-        match.lpm.prefix_len = ip_prefix_len
-
-        action_pkt_act = self.p4info.get_action("dash_ingress.underlay.pkt_act")
-        entry.action.action.action_id = action_pkt_act.preamble.id
-        action = entry.action.action
-
-        param = action.params.add()
-        param.param_id = 1
-        param.value = packet_action.to_bytes(2, byteorder='big')
-
-        param = action.params.add()
-        param.param_id = 2
-        param.value = next_hop_id.to_bytes(2, byteorder='big')
-
-        self.write(entry, p4runtime_pb2.Update.INSERT)
+        self.update(self.p4info_table.preamble.id,
+                    user_match_list,
+                    self.pkt_act.preamble.id,
+                    user_params)
 
     def unset(self,
-              ip_prefix :str = None, # ipv6 string, ::x.x.x.x for ipv4
+              ip_prefix :str = '::', # ipv6 string, ::x.x.x.x for ipv4
               ip_prefix_len :int = 128): # in bits
+        '''
+        Unset underlay route entry with ip prefix
+        '''
+
         entry = self.get(ip_prefix, ip_prefix_len)
         if entry:
             self.write(entry, p4runtime_pb2.Update.DELETE)
