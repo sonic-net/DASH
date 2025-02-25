@@ -4,6 +4,10 @@ from p4.v1 import p4runtime_pb2_grpc
 import socket
 
 
+def mac_in_bytes(mac):
+    return bytes(int(b, 16) for b in mac.split(":"))
+
+
 class P4info():
     def __init__(self, stub):
         self.config = P4info.get_pipeline_config(stub)
@@ -135,10 +139,10 @@ class P4InternalConfigTable(P4Table):
 
     def set(self,
             appliance_id :int = 0,
-            neighbor_mac :bytes = None,
-            mac :bytes = None,
-            cpu_mac :bytes = None,
-            flow_enabled :bytes = None):
+            neighbor_mac :str = None,
+            mac :str = None,
+            cpu_mac :str = None,
+            flow_enabled :int = None):
         '''
         Set dash pipeline internal config by updating table entry of internal_config.
 
@@ -146,6 +150,15 @@ class P4InternalConfigTable(P4Table):
         existing table entry, otherwise set default value in new table entry.
 
         '''
+
+        if neighbor_mac is not None:
+            neighbor_mac = mac_in_bytes(neighbor_mac)
+        if mac is not None:
+            mac = mac_in_bytes(mac)
+        if cpu_mac is not None:
+            cpu_mac = mac_in_bytes(cpu_mac)
+        if flow_enabled is not None:
+            flow_enabled = flow_enabled.to_bytes(1, byteorder='big')
 
         user_match_list = self.to_match_list(appliance_id)
 

@@ -1,7 +1,7 @@
 from p4.v1 import p4runtime_pb2
 from ipaddress import ip_address
 from scapy.all import *
-from dash_pipeline_utils import P4Table, P4InternalConfigTable
+from dash_pipeline_utils import P4Table, P4InternalConfigTable, mac_in_bytes
 
 def get_mac(interface):
     try:
@@ -9,10 +9,6 @@ def get_mac(interface):
     except:
         mac = "00:00:00:00:00:00"
     return mac
-
-
-def mac_in_bytes(mac):
-    return bytes(int(b, 16) for b in mac.split(":"))
 
 
 class P4FlowTable(P4Table):
@@ -82,12 +78,12 @@ def use_flow(cls):
         if _setUp is not None:
             _setUp(self, *args, **kwargs)
         print(f'*** Enable Flow lookup')
-        table.set(cpu_mac = mac_in_bytes(get_mac("veth5")), flow_enabled = b'\x01')
+        table.set(cpu_mac = get_mac("veth5"), flow_enabled = 1)
         return
 
     def tearDown(self, *args, **kwargs):
         print(f'*** Disable Flow lookup')
-        table.set(flow_enabled = b'\x00')
+        table.set(flow_enabled = 0)
         if _tearDown is not None:
             _tearDown(self, *args, **kwargs)
         return

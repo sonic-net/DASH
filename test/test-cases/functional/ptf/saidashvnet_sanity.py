@@ -29,8 +29,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
 
         self.dut_mac = get_mac("veth0")
         self.neighbor_mac = get_mac("veth1")
-        P4InternalConfigTable().set(neighbor_mac = mac_in_bytes(self.neighbor_mac),
-                            mac = mac_in_bytes(self.dut_mac))
+        P4InternalConfigTable().set(neighbor_mac = self.neighbor_mac, mac = self.dut_mac)
 
         underlay_routing = P4UnderlayRoutingTable()
         underlay_routing.set(ip_prefix = '::'+self.dst_pa_ip, ip_prefix_len = 128, next_hop_id = 1)
@@ -294,8 +293,7 @@ class SaiThriftVnetOutboundUdpPktTest(SaiHelperSimplified):
             super(SaiThriftVnetOutboundUdpPktTest, self).tearDown()
 
         # restore default internal_config
-        P4InternalConfigTable().set(neighbor_mac = b'\x00\x00\x00\x00\x00\x00',
-                            mac = b'\x00\x00\x00\x00\x00\x00')
+        P4InternalConfigTable().unset()
 
         # remove underlay route for dst_pa_ip
         underlay_routing = P4UnderlayRoutingTable()
