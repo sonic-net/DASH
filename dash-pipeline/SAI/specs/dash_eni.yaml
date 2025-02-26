@@ -639,6 +639,19 @@ sai_apis:
     valid_only: null
     is_vlan: false
     deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_ENI_ATTR_FLOW_TABLE_ID
+    description: Action parameter flow table id
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_FLOW_TABLE
+    allow_null: true
+    valid_only: null
+    is_vlan: false
+    deprecated: false
   stats:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_RX_BYTES
@@ -1923,5 +1936,11 @@ sai_apis:
               id: 42
               field: booldata
               bitwidth: 1
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_ENI_ATTR_FLOW_TABLE_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 43
+              field: u16
+              bitwidth: 16
               ip_is_v6_field_id: 0
               skipattr: null
