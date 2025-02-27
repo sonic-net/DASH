@@ -113,25 +113,25 @@ class FlowTest(object):
 
     # Since we may adjust the flow table and flow entry for each test, we do not add them to the teardown stack.
     def create_flow_table(self, *args, **kwargs):
-        print("Creating flow table...\n", args)
+        # print("Creating flow table...\n", args)
         ft = sai_thrift_create_flow_table(self.client, *args, **kwargs)
         assert (ft != SAI_NULL_OBJECT_ID)
         return ft
 
     def remove_flow_table(self):
-        print("Removing flow table...\n", self.ft.__repr__())
+        # print("Removing flow table...\n", self.ft.__repr__())
         status = sai_thrift_remove_flow_table(self.client, self.ft)
         assert (status == SAI_STATUS_SUCCESS)
         return status
 
     def create_flow_entry(self, entry, *args, **kwargs):
-        print("Creating flow entry...\n", self.fe.__repr__())
+        # print("Creating flow entry...\n", self.fe.__repr__())
         status = sai_thrift_create_flow_entry(self.client, entry, *args, **kwargs)
         assert (status == SAI_STATUS_SUCCESS)
         return status
     
     def remove_flow_entry(self):
-        print("Removing flow entry...\n", self.fe.__repr__())
+        # print("Removing flow entry...\n", self.fe.__repr__())
         status= sai_thrift_remove_flow_entry(self.client, self.fe)
         assert (status == SAI_STATUS_SUCCESS)
         return status
@@ -250,22 +250,19 @@ class FlowTest(object):
                     inner_frame=pkt_exp)
                 pkt_exp = vxlan_exp_pkt
         else: 
-            print("Expected packet without encap...")
+            # print("Expected packet without encap...")
             pkt_exp = inner_exp_pkt
 
-        print("Sending packet...\n", vxlan_pkt.__repr__())
+        # print("Sending packet...\n", vxlan_pkt.__repr__())
+        print("Sending packet...")
         send_packet(self.saithrift, 0, vxlan_pkt)
-        print("\n")
         if self.exp_receive:
-            print("Verifying packet...\n", pkt_exp.__repr__())
+            # print("Verifying packet...", pkt_exp.__repr__())
+            print("Verifying packet...")
             verify_packet(self.saithrift, pkt_exp, 0)
-            print("\n")
-            # print("Flow hit test {} OK".format(self.meta))
         else:
             print("Verifying drop...")
             verify_no_other_packets(self.saithrift)
-            print("\n")
-            # print("Flow miss test {} OK".format(self.meta))
         print(f"{self.__class__.__name__} {self.name} OK\n")
 
         # Clean up flow table and flow entry
