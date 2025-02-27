@@ -71,7 +71,7 @@ control conntrack_build_dash_header(inout headers_t hdr, in metadata_t meta,
         hdr.flow_data.direction = meta.direction;
         hdr.flow_data.actions = (dash_flow_action_t)meta.routing_actions;
         hdr.flow_data.meter_class = meta.meter_class;
-        hdr.flow_data.idle_timeout = meta.flow_data.idle_timeout;
+        hdr.flow_data.idle_timeout_in_ms = meta.flow_data.idle_timeout_in_ms;
         length = length + FLOW_DATA_HDR_SIZE;
 
         if (meta.routing_actions & dash_routing_actions_t.ENCAP_U0 != 0) {
@@ -422,7 +422,7 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
             bit<16> flow_enabled_key;
 
             if (flow_table.apply().hit) {
-                meta.flow_data.idle_timeout = meta.flow_table.flow_ttl_in_milliseconds;
+                meta.flow_data.idle_timeout_in_ms = meta.flow_table.flow_ttl_in_milliseconds;
                 flow_enabled_key = meta.flow_table.flow_enabled_key;
             }
             else {

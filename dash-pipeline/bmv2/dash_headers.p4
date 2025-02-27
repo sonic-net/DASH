@@ -241,7 +241,7 @@ header flow_data_t {
     bit<32> version;
     dash_flow_action_t actions;
     dash_meter_class_t meter_class;
-    bit<32> idle_timeout;
+    bit<32> idle_timeout_in_ms;
 }
 const bit<16> FLOW_DATA_HDR_SIZE=flow_data_t.minSizeInBytes();
 
