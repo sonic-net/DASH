@@ -65,6 +65,13 @@ dash_flow_create (dash_flow_table_t *flow_table, const dash_header_t *dh)
 
     clib_memcpy_fast(&flow->flow_data, &dh->flow_data, sizeof(dh->flow_data));
 
+    if (flow->flow_data.idle_timeout_in_ms != 0) {
+        flow->timeout = ntohl(flow->flow_data.idle_timeout_in_ms)/1000;
+        if (flow->timeout > DASH_FLOW_MAX_TIMEOUT) {
+            flow->timeout = DASH_FLOW_MAX_TIMEOUT;
+        }
+    }
+
     /* FIXME
      * Assume overlay_data, u0_encap_data, u1_encap_data in order if exists
      * Need to add their offset in generic.
@@ -209,7 +216,7 @@ dash_flow_table_init (dash_flow_table_t *flow_table)
 
     TW (tw_timer_wheel_init) (&flow_table->flow_tw,
                               dash_flow_expired_timer_callback,
-                              1.0 /* timer interval */, 1024);
+                              1.0 /* timer interval */, DASH_FLOW_MAX_TIMEOUT);
 }
 
 int

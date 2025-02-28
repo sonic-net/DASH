@@ -71,6 +71,7 @@ control conntrack_build_dash_header(inout headers_t hdr, in metadata_t meta,
         hdr.flow_data.direction = meta.direction;
         hdr.flow_data.actions = (dash_flow_action_t)meta.routing_actions;
         hdr.flow_data.meter_class = meta.meter_class;
+        hdr.flow_data.idle_timeout_in_ms = meta.flow_data.idle_timeout_in_ms;
         length = length + FLOW_DATA_HDR_SIZE;
 
         if (meta.routing_actions & dash_routing_actions_t.ENCAP_U0 != 0) {
@@ -386,48 +387,56 @@ control conntrack_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
         }
     }
 
-    action set_flow_key()
+    action set_flow_key(bit<16> flow_enabled_key)
     {
         hdr.flow_key.setValid();
         hdr.flow_key.is_ip_v6 = meta.is_overlay_ip_v6;
-        // TODO remove hardcode flow_enabled_key later
-        meta.flow_table.flow_enabled_key = dash_flow_enabled_key_t.ENI_MAC |
-                                           dash_flow_enabled_key_t.VNI |
-                                           dash_flow_enabled_key_t.PROTOCOL |
-                                           dash_flow_enabled_key_t.SRC_IP |
-                                           dash_flow_enabled_key_t.DST_IP |
-                                           dash_flow_enabled_key_t.SRC_PORT |
-                                           dash_flow_enabled_key_t.DST_PORT;
 
-        if (meta.flow_table.flow_enabled_key & dash_flow_enabled_key_t.ENI_MAC != 0) {
+        if (flow_enabled_key & dash_flow_enabled_key_t.ENI_MAC != 0) {
             hdr.flow_key.eni_mac = meta.eni_addr;
         }
-        if (meta.flow_table.flow_enabled_key & dash_flow_enabled_key_t.VNI != 0) {
+        if (flow_enabled_key & dash_flow_enabled_key_t.VNI != 0) {
             hdr.flow_key.vnet_id = meta.vnet_id;
         }
-        if (meta.flow_table.flow_enabled_key & dash_flow_enabled_key_t.PROTOCOL != 0) {
+        if (flow_enabled_key & dash_flow_enabled_key_t.PROTOCOL != 0) {
             hdr.flow_key.ip_proto = meta.ip_protocol;
         }
-        if (meta.flow_table.flow_enabled_key & dash_flow_enabled_key_t.SRC_IP != 0) {
+        if (flow_enabled_key & dash_flow_enabled_key_t.SRC_IP != 0) {
             hdr.flow_key.src_ip = meta.src_ip_addr;
         }
-        if (meta.flow_table.flow_enabled_key & dash_flow_enabled_key_t.DST_IP != 0) {
+        if (flow_enabled_key & dash_flow_enabled_key_t.DST_IP != 0) {
             hdr.flow_key.dst_ip = meta.dst_ip_addr;
         }
 
-        if (meta.flow_table.flow_enabled_key & dash_flow_enabled_key_t.SRC_PORT != 0) {
+        if (flow_enabled_key & dash_flow_enabled_key_t.SRC_PORT != 0) {
             hdr.flow_key.src_port = meta.src_l4_port;
         }
 
-        if (meta.flow_table.flow_enabled_key & dash_flow_enabled_key_t.DST_PORT != 0) {
+        if (flow_enabled_key & dash_flow_enabled_key_t.DST_PORT != 0) {
             hdr.flow_key.dst_port = meta.dst_l4_port;
         }
     }
 
     apply {
         if (!hdr.flow_key.isValid()) {
-            flow_table.apply();
-            set_flow_key();
+            bit<16> flow_enabled_key;
+
+            if (flow_table.apply().hit) {
+                meta.flow_data.idle_timeout_in_ms = meta.flow_table.flow_ttl_in_milliseconds;
+                flow_enabled_key = meta.flow_table.flow_enabled_key;
+            }
+            else {
+                // Enable all keys by default
+                flow_enabled_key = dash_flow_enabled_key_t.ENI_MAC |
+                                   dash_flow_enabled_key_t.VNI |
+                                   dash_flow_enabled_key_t.PROTOCOL |
+                                   dash_flow_enabled_key_t.SRC_IP |
+                                   dash_flow_enabled_key_t.DST_IP |
+                                   dash_flow_enabled_key_t.SRC_PORT |
+                                   dash_flow_enabled_key_t.DST_PORT;
+            }
+
+            set_flow_key(flow_enabled_key);
         }
 
         flow_entry.apply();

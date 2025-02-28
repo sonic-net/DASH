@@ -11,6 +11,8 @@
 
 /* Default timeout in seconds */
 #define DASH_FLOW_TIMEOUT   30
+/* Max timeout in seconds */
+#define DASH_FLOW_MAX_TIMEOUT   1800
 
 typedef enum _dash_packet_source_t {
     EXTERNAL = 0,           // Packets from external sources.
@@ -89,6 +91,7 @@ typedef struct flow_data {
     u32 version;
     u32 actions;
     u32 meter_class;
+    u32 idle_timeout_in_ms;
 } __clib_packed flow_data_t;
 
 typedef struct encap_data {
