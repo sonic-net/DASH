@@ -30,7 +30,7 @@ action push_vxlan_tunnel_ ## underlay_id ## (inout headers_t hdr, \
     hdr. ## underlay_id ## _ipv4.identification = 1; \
     hdr. ## underlay_id ## _ipv4.flags = 0; \
     hdr. ## underlay_id ## _ipv4.frag_offset = 0; \
-    hdr. ## underlay_id ## _ipv4.ttl = 64; \
+    hdr. ## underlay_id ## _ipv4.ttl = 255; \
     hdr. ## underlay_id ## _ipv4.protocol = UDP_PROTO; \
     hdr. ## underlay_id ## _ipv4.dst_addr = underlay_dip; \
     hdr. ## underlay_id ## _ipv4.src_addr = underlay_sip; \
@@ -85,7 +85,7 @@ action push_vxlan_tunnel_ ## underlay_id ## (inout headers_t hdr, \
     hdr. ## underlay_id ## _ipv4.identification = 1; \
     hdr. ## underlay_id ## _ipv4.flags = 0; \
     hdr. ## underlay_id ## _ipv4.frag_offset = 0; \
-    hdr. ## underlay_id ## _ipv4.ttl = 64; \
+    hdr. ## underlay_id ## _ipv4.ttl = 255; \
     hdr. ## underlay_id ## _ipv4.protocol = UDP_PROTO; \
     hdr. ## underlay_id ## _ipv4.dst_addr = underlay_dip; \
     hdr. ## underlay_id ## _ipv4.src_addr = underlay_sip; \
@@ -134,7 +134,7 @@ action push_nvgre_tunnel_ ## underlay_id ## (inout headers_t hdr, \
     hdr. ## underlay_id ## _ipv4.identification = 1; \
     hdr. ## underlay_id ## _ipv4.flags = 0; \
     hdr. ## underlay_id ## _ipv4.frag_offset = 0; \
-    hdr. ## underlay_id ## _ipv4.ttl = 64; \
+    hdr. ## underlay_id ## _ipv4.ttl = 255; \
     hdr. ## underlay_id ## _ipv4.protocol = NVGRE_PROTO; \
     hdr. ## underlay_id ## _ipv4.dst_addr = underlay_dip; \
     hdr. ## underlay_id ## _ipv4.src_addr = underlay_sip; \
@@ -182,7 +182,7 @@ action push_nvgre_tunnel_ ## underlay_id ## (inout headers_t hdr, \
     hdr. ## underlay_id ## _ipv4.identification = 1; \
     hdr. ## underlay_id ## _ipv4.flags = 0; \
     hdr. ## underlay_id ## _ipv4.frag_offset = 0; \
-    hdr. ## underlay_id ## _ipv4.ttl = 64; \
+    hdr. ## underlay_id ## _ipv4.ttl = 255; \
     hdr. ## underlay_id ## _ipv4.protocol = NVGRE_PROTO; \
     hdr. ## underlay_id ## _ipv4.dst_addr = underlay_dip; \
     hdr. ## underlay_id ## _ipv4.src_addr = underlay_sip; \
