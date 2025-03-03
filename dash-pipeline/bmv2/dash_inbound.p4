@@ -46,7 +46,14 @@ control inbound(inout headers_t hdr,
                      meta.u0_encap_data.underlay_sip,
                      dash_encapsulation_t.VXLAN,
                      meta.u0_encap_data.vni);
+
+        // Fix up overlay DST MAC to be VM MAC and SRC MAC to ENI MAC
+        if (meta.eni_mac_type == dash_eni_mac_type_t.DST_MAC) {
+            hdr.customer_ethernet.dst_addr = meta.vm_nic_addr;
+            hdr.customer_ethernet.src_addr = meta.eni_addr;
+        }
     }
+
 }
 
 #endif /* _SIRIUS_INBOUND_P4_ */
