@@ -60,13 +60,7 @@ When PL NSG is enabled, the extra encap for tunneling the packet to NSG will sti
 
 ### 3.3 Redirect map with fast path
 
-The Fast Path here is not ER Fast Path, but the fast path that required by PLS. Fast path ICMP flow redirection will still take effect when redirect map is used.
-
-- If PL NSG is not used, it changes the flow just like regular PL case.
-
-- If PL NSG is used, it only updates the PL encap, leaving the NSG encap unchanged.
-
-For more information on how Fast Path works, please refer to [Fast Path documentations](../load-bal-service/fast-path-icmp-flow-redirection.md).
+Please refer to [private link load balancer fast path support](./private-link-service.md#33-load-balancer-fast-path-support).
 
 ### 3.4 Non-required features
 
@@ -89,13 +83,13 @@ For more information, please refer to [SmartSwitch HA design doc](https://github
 
 ### 5.1. DASH Outbound Port Map
 
-A new object outbound-port-map is added, which aims to define SNAT/DNAT port translation in outbound direction. It includes the following attributes:
+A new object outbound-port-map is added, which includes the following attributes:
 
 | Attribute name | Type | Description |
 | --- | --- | --- |
-| SAI_OUTBOUND_PORT_MAP_ATTR_COUNTER_ID | sai_object_id_t | Attach a counter. |
-
-NOTE: More attributes could be added in the future for SNAT/DNAT scenarios.
+| SAI_OUTBOUND_PORT_MAP_ATTR_SVC_SRC_PREFIX | sai_ip_address_t | Service rewrite info - source ip prefix. |
+| SAI_OUTBOUND_PORT_MAP_ATTR_SVC_DST_PREFIX | sai_ip_address_t | Service rewrite info - destination ip prefix. |
+| SAI_OUTBOUND_PORT_MAP_ATTR_COUNTER_ID | sai_object_id_t | A counter of packets and bytes associated with the matching outbound-port-map. |
 
 ### 5.2. DASH Outbound Port Map Port Range
 
@@ -168,13 +162,23 @@ Following [DASH pipeline behavior of private link service](https://github.com/so
 ### 6.1  VM-to-PLS direction (Outbound)
 
 **Mapping - VNET**:
-Each mapping will be associated with a port map object:
+The inner destination IP will be used for finding the outbound CA-PA mapping entry, of which the routing type will be set to private link. The mapping entry will be associated with a port map object:
 
    | SAI field name | Type | Value |
    | --- | --- | --- |
-   | entry.port_map_id | `sai_object_id_t` | (SAI object ID of the port map) |
+   | entry_attr.outbound_port_map_id | `sai_object_id_t` | (SAI object ID of the port map) |
 
-Later in the stage of outbound port map, the port map id and inner packet destination port consists of a match key to look up table outbound_port_map_port_range, the matched table entry contains a rewrite info for the redirect map.
+**Mapping - outbound port map**:
+
+In this stage, the port map id as match key is used to look up table outbound_port_map, the matched table entry contains a service src/dst IP rewrite info for the redirect map.
+
+   | SAI field name | Type | Value |
+   | --- | --- | --- |
+   | entry.outbound_port_map_id | `sai_object_id_t` | (SAI object ID of the port map) |
+   | entry_attr.SAI_OUTBOUND_PORT_MAP_ATTR_SVC_SRC_PREFIX | `sai_ip_address_t` | `rewrite-info-src-prefix` |
+   | entry_attr.SAI_OUTBOUND_PORT_MAP_ATTR_SVC_DST_PREFIX | `sai_ip_address_t` | `rewrite-info-dst-prefix` |
+
+And then, the port map id and inner packet destination port consists of a match key to look up table outbound_port_map_port_range, the matched table entry contains a destination port rewrite info for the redirect map.
 
    | SAI field name | Type | Value |
    | --- | --- | --- |
