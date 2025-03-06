@@ -18,18 +18,16 @@
     - 5.1 [DASH Outbound Port Map](#51-dash-outbound-port-map)
     - 5.2 [DASH Outbound Port Map Port Range](#52-dash-outbound-port-map-port-range)
     - 5.3 [DASH CA-PA mapping attributes](#53-dash-ca-pa-mapping-attributes)
+    - 5.4 [DASH ENI counters](#54-dash-eni-counters)
 6. [DASH pipeline behavior](#6-dash-pipeline-behavior)
     - 6.1 [VM-to-PLS direction](#61--vm-to-pls-direction-outbound)
     - 6.2 [PLS-to-VM direction](#62-pls-to-vm-direction)
+    - 6.2 [PL NSG](#63-pl-nsg)
 
 ## 1. Terminology
 
 | Term | Explanation |
 | ---  | --- |
-| ER   | [ExpressRoute]( https://learn.microsoft.com/en-gb/azure/expressroute/expressroute-introduction)|
-| MSEE | Microsoft Enterprise Edge |
-| CE   | Customer Edge |
-| MSEE/CE routers | Microsoft Enterprise Edge / Customer Edge routers. CE and MSEE routers are directly connected and forming pairs. |
 | PL   | [PrivateLink](https://azure.microsoft.com/en-us/products/private-link) |
 | PL NSG | PrivateLink NSG. NSG here is not VNET NSG, but a set of appliances that sits between PE and ER for security checks or statistics collection. |
 | PE   | Private endpoint |
@@ -83,17 +81,15 @@ For more information, please refer to [SmartSwitch HA design doc](https://github
 
 ### 5.1. DASH Outbound Port Map
 
-A new object outbound-port-map is added, which includes the following attributes:
+A new object `outbound-port-map` is added to manage port mappings in the outbound direction, which includes the following attributes:
 
 | Attribute name | Type | Description |
 | --- | --- | --- |
-| SAI_OUTBOUND_PORT_MAP_ATTR_SVC_SRC_PREFIX | sai_ip_address_t | Service rewrite info - source ip prefix. |
-| SAI_OUTBOUND_PORT_MAP_ATTR_SVC_DST_PREFIX | sai_ip_address_t | Service rewrite info - destination ip prefix. |
-| SAI_OUTBOUND_PORT_MAP_ATTR_COUNTER_ID | sai_object_id_t | A counter of packets and bytes associated with the matching outbound-port-map. |
+| SAI_OUTBOUND_PORT_MAP_ATTR_COUNTER_ID | sai_object_id_t | A counter that tracks the number of packets and bytes associated with the matching outbound-port-map. |
 
 ### 5.2. DASH Outbound Port Map Port Range
 
-A new object key entry outbound-port-map-port-range is added, which aims to define port range translation in outbound direction. It is suitable for setting up the PL / PL NSG redirect map scenarios.
+A new object key entry `outbound-port-map-port-range` is designed to define port range translation in the outbound direction. It is particularly useful for scenarios involving Private Link (PL) or Private Link Network Security Group (PL NSG) redirect maps. The key entry for this object specifies how port ranges should be translated when traffic is directed outbound.
 
 The entry is defined like below:
 
@@ -127,15 +123,15 @@ typedef struct _sai_outbound_port_map_port_range_entry_t
 } sai_outbound_port_map_port_range_entry_t;
 ```
 
- It includes the following attributes:
+The member `dst_port_range` designates the match field of port range, targeting packet TCP/UDP destination port. The member `priority` is a selection hint if more than one entry is matched, and the higher number takes priority. The entry includes the following attributes:
 
 | Attribute name | Type | Description |
 | --- | --- | --- |
-| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_ACTION | sai_outbound_port_map_port_range_entry_action_t | Action. |
-| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_IP | sai_ip_address_t | Back end IP. |
-| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_MATCH_PORT_BASE | sai_uint16_t | Match port base. |
-| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_PORT_BASE | sai_uint16_t | Back end port base. |
-| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_COUNTER_ID | sai_object_id_t | Attach a counter. |
+| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_ACTION | sai_outbound_port_map_port_range_entry_action_t | Action `skip_mapping` or `map_to_private_link_service`. |
+| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_IP | sai_ip_address_t | Back end IP, it overrides underlay destination IP |
+| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_MATCH_PORT_BASE | sai_uint16_t | Match port base, aka begin port of port range |
+| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_PORT_BASE | sai_uint16_t | Back end port base, aka begin port of translated port range |
+| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_COUNTER_ID | sai_object_id_t | A counter that tracks the number of packets and bytes associated with the matching port range entry  |
 
 The entry attribute **Action** is defined as below:
 
@@ -147,13 +143,40 @@ typedef enum _sai_outbound_port_map_port_range_entry_action_t
 } sai_outbound_port_map_port_range_entry_action_t;
 ```
 
+The action `skip_mapping` means to skip the mapping operation. The action `map_to_private_link_service` means to do private link mapping operation as below:
+
+```c
+packet.underlay.destination_ip = entry.backend_ip
+packet.overlay.destination_port = entry.backend_port_base + (packet.overlay.destination_port - entry.match_port_base)
+```
+
 ### 5.3. DASH CA-PA mapping attributes
 
-The following attributes will be added to CA-to-PA entry, for supporting service port rewrites for PL/PL NSG:
+The following attributes will be added to CA-to-PA entry, for supporting service rewrites for PL/PL NSG redirect map:
 
 | Attribute name | Type | Description |
 | --- | --- | --- |
+| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SVC_SRC_PREFIX | sai_ip_prefix_t | Service rewrite info - source ip prefix. |
+| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SVC_DST_PREFIX | sai_ip_prefix_t | Service rewrite info - destination ip prefix. |
 | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OUTBOUND_PORT_MAP_ID | sai_object_id_t | Outbound port map id. |
+
+### 5.4. DASH ENI counters
+
+The two drop counters for port-map/port-range-entry missing are added to ENI stats as below:
+
+```c
+typedef enum _sai_eni_stat_t
+{
+    ...
+
+    /** DASH ENI OUTBOUND_PORT_MAP_MISSING_DROP_PACKETS stat count */
+    SAI_ENI_STAT_OUTBOUND_PORT_MAP_MISSING_DROP_PACKETS,
+
+    /** DASH ENI OUTBOUND_PORT_RANGE_ENTRY_MISSING_DROP_PACKETS stat count */
+    SAI_ENI_STAT_OUTBOUND_PORT_RANGE_ENTRY_MISSING_DROP_PACKETS,
+
+} sai_eni_stat_t;
+```
 
 ## 6. DASH pipeline behavior
 
@@ -162,23 +185,29 @@ Following [DASH pipeline behavior of private link service](https://github.com/so
 ### 6.1  VM-to-PLS direction (Outbound)
 
 **Mapping - VNET**:
-The inner destination IP will be used for finding the outbound CA-PA mapping entry, of which the routing type will be set to private link. The mapping entry will be associated with a port map object:
+The inner destination IP will be used for finding the outbound CA-PA mapping entry, of which the action will be set to `SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING`. The mapping entry will be associated with the service rewrite info and a port map object:
 
    | SAI field name | Type | Value |
    | --- | --- | --- |
+   | entry_attr.SAI_OUTBOUND_PORT_MAP_ATTR_SVC_REWRITE_SRC_PREFIX | `sai_ip_prefix_t` | `service-rewrite-info-src-prefix` |
+   | entry_attr.SAI_OUTBOUND_PORT_MAP_ATTR_SVC_REWRITE_DST_PREFIX | `sai_ip_prefix_t` | `service-rewrite-info-dst-prefix` |
    | entry_attr.outbound_port_map_id | `sai_object_id_t` | (SAI object ID of the port map) |
+
+The service rewrite info and the port map id could be cached in pipeline/packet metadata and later retrieved in the stage of outbound port map.
 
 **Mapping - outbound port map**:
 
-In this stage, the port map id as match key is used to look up table outbound_port_map, the matched table entry contains a service src/dst IP rewrite info for the redirect map.
+In this stage, it accomplishes the operation of PL redirect map with the following steps:
 
-   | SAI field name | Type | Value |
-   | --- | --- | --- |
-   | entry.outbound_port_map_id | `sai_object_id_t` | (SAI object ID of the port map) |
-   | entry_attr.SAI_OUTBOUND_PORT_MAP_ATTR_SVC_SRC_PREFIX | `sai_ip_address_t` | `rewrite-info-src-prefix` |
-   | entry_attr.SAI_OUTBOUND_PORT_MAP_ATTR_SVC_DST_PREFIX | `sai_ip_address_t` | `rewrite-info-dst-prefix` |
+1. It validates the port map object exists according to the port map id. If the port map is missing, eni drop counter `SAI_ENI_STAT_OUTBOUND_PORT_MAP_MISSING_DROP_PACKETS` increases with one and the pipeline drops the packet, otherwise continues to the next.
 
-And then, the port map id and inner packet destination port consists of a match key to look up table outbound_port_map_port_range, the matched table entry contains a destination port rewrite info for the redirect map.
+1. It looks up the table `outbound port range` with the match key (port_map_id, packet.overlay.destination_port). If none of table entry is matched, it drops the packet and increases eni drop counter `SAI_ENI_STAT_OUTBOUND_PORT_RANGE_ENTRY_MISSING_DROP_PACKETS` with 1, otherwise continues to the next.
+
+1. At least one table entry is matched and the one having the highest entry priority will be selected.
+
+1. If the entry attribute ACTION is `skip_mapping`, the operation in this stage will be skipped, otherwise goes to the next.
+
+1. The entry attribute ACTION must be `map_to_private_link_service`, it starts to do PL redirect map with the entry attr info and the cached service rewrite info. Assume the matched entry attributes are like below:
 
    | SAI field name | Type | Value |
    | --- | --- | --- |
@@ -189,6 +218,44 @@ And then, the port map id and inner packet destination port consists of a match 
    | entry_attr.SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_MATCH_PORT_BASE | `sai_uint16_t` | `2000` |
    | entry_attr.SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_PORT_BASE | `sai_uint16_t` | `11000` |
 
+    And packet overlay destination port is 2010, the operation details are as below:
+
+    - port translation
+
+    ```c
+    packet.overlay.destination_port = 11000 + 2010 - 2000
+    ```
+
+    - nat 4to6
+
+    ```c
+    packet.overlay.ipv6.src_addr = ((( (IPv6Address)packet.overlay.ipv4.src_addr & ~svc_rewrite_info.src_prefix_mask) | svc_rewrite_info.src_prefix_addr) & ~eni.attr_SAI_ENI_ATTR_PL_SIP_MASK) | eni.attr_SAI_ENI_ATTR_PL_SIP
+    packet.overlay.ipv6.dst_addr = (svc_rewrite_info.dst_prefix_addr & ~((bit<128>)0xFFFFFFFF)) | (bit<128>)'3.3.3.1'
+    ```
+
+    - underlay destination ip update
+
+    ```c
+    packet.underlay.destination_ip = 3.3.3.1
+    ```
+
+    - counter update
+
+    ```c
+    port_map.attr_counter.packets += 1
+    port_map.attr_counter.bytes += packet.size
+    port_map_port_range_entry.attr_counter.packets += 1
+    port_map_port_range_entry.attr_counter.bytes += packet.size
+    ```
+
+**Metering**:
+
+Same as PL scenario.
+
 ### 6.2. PLS-to-VM direction
 
 None of changes.
+
+### 6.3. PL NSG
+
+Same of section 6.1, none of extra operations..
