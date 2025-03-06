@@ -66,7 +66,8 @@ control dash_eni_stage(
                          @SaiVal[type="sai_object_id_t"] bit<16> outbound_routing_group_id,
                          bit<1> enable_reverse_tunnel_learning,
                          @SaiVal[type="sai_ip_address_t"] IPv4Address reverse_tunnel_sip,
-                         bit<1> is_ha_flow_owner)
+                         bit<1> is_ha_flow_owner,
+                         @SaiVal[type="sai_object_id_t"] bit<16> flow_table_id)
     {
         meta.eni_data.cps                                                   = cps;
         meta.eni_data.pps                                                   = pps;
@@ -112,6 +113,8 @@ control dash_eni_stage(
 
         meta.ha.ha_scope_id = ha_scope_id;
         meta.fast_path_icmp_flow_redirection_disabled = disable_fast_path_icmp_flow_redirection;
+
+        meta.flow_table.id = flow_table_id;
     }
 
     @SaiTable[name = "eni", api = "dash_eni", order=1, isobject="true"]
