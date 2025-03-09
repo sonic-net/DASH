@@ -68,6 +68,10 @@ struct eni_data_t {
 
 struct port_map_context_t {
     bit<16> map_id;
+    IPv6Address service_rewrite_sip;
+    IPv6Address service_rewrite_sip_mask;
+    IPv6Address service_rewrite_dip;
+    IPv6Address service_rewrite_dip_mask;
 }
 
 struct meter_context_t {

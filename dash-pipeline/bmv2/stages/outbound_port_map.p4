@@ -44,7 +44,13 @@ control outbound_port_map_stage(inout headers_t hdr,
 
 #ifndef DISABLE_128BIT_ARITHMETIC
         // Update overlay IP
-        meta.overlay_data.dip = (meta.overlay_data.dip & ~((bit<128>)0xFFFFFFFF)) | (bit<128>)backend_ip;
+        push_action_nat46(hdr = hdr,
+                        meta = meta,
+                        dip = (meta.port_map_ctx.service_rewrite_dip & ~((bit<128>)0xFFFFFFFF)) | (bit<128>)backend_ip,
+                        dip_mask = meta.port_map_ctx.service_rewrite_dip_mask,
+                        sip = ((meta.port_map_ctx.service_rewrite_sip | (meta.src_ip_addr & ~meta.port_map_ctx.service_rewrite_sip_mask)) \
+                               & ~meta.eni_data.pl_sip_mask) | meta.eni_data.pl_sip,
+                        sip_mask = 0xffffffffffffffffffffffff);
 #endif
 
         // Update overlay port
@@ -66,7 +72,9 @@ control outbound_port_map_stage(inout headers_t hdr,
         actions = {
             skip_mapping;
             map_to_private_link_service;
+            @defaultonly drop(meta);
         }
+        const default_action = drop(meta);
 
         ATTACH_TABLE_COUNTER(outbound_port_map_port_range_counter)
     }
@@ -76,8 +84,14 @@ control outbound_port_map_stage(inout headers_t hdr,
             return;
         }
 
-        outbound_port_map.apply();
-        outbound_port_map_port_range.apply();
+        if (!outbound_port_map.apply().hit) {
+            UPDATE_ENI_COUNTER(outbound_port_map_miss_drop);
+            return;
+        }
+
+        if (!outbound_port_map_port_range.apply().hit) {
+            UPDATE_ENI_COUNTER(outbound_port_map_port_range_entry_miss_drop);
+        }
     }
 }
 
