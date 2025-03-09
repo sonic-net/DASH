@@ -270,6 +270,58 @@ sai_apis:
     valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
     is_vlan: false
     deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_SIP
+    description: Action parameter service rewrite sip
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_SIP_MASK
+    description: Action parameter service rewrite sip mask
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_DIP
+    description: Action parameter service rewrite dip
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_DIP_MASK
+    description: Action parameter service rewrite dip mask
+    type: sai_ip_address_t
+    attr_value_field: ipaddr
+    default: 0.0.0.0
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ACTION == SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_PRIVATE_LINK_MAPPING
+    is_vlan: false
+    deprecated: false
   stats: []
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
@@ -387,33 +439,57 @@ sai_apis:
               bitwidth: 24
               ip_is_v6_field_id: 0
               skipattr: null
-            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OUTBOUND_PORT_MAP_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
-              id: 8
-              field: u16
-              bitwidth: 16
-              ip_is_v6_field_id: 0
-              skipattr: null
             SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_METER_CLASS_OR: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
-              id: 9
+              id: 8
               field: u32
               bitwidth: 32
               ip_is_v6_field_id: 0
               skipattr: null
             SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_DASH_TUNNEL_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
-              id: 10
+              id: 9
               field: u16
               bitwidth: 16
               ip_is_v6_field_id: 0
               skipattr: null
             SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_FLOW_RESIMULATION_REQUESTED: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
-              id: 11
+              id: 10
               field: booldata
               bitwidth: 1
               ip_is_v6_field_id: 0
               skipattr: null
             SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_ROUTING_ACTIONS_DISABLED_IN_FLOW_RESIMULATION: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
-              id: 12
+              id: 11
               field: u32
               bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OUTBOUND_PORT_MAP_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 12
+              field: u16
+              bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_SIP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 13
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_SIP_MASK: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 14
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_DIP: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 15
+              field: ipaddr
+              bitwidth: 128
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_DIP_MASK: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 16
+              field: ipaddr
+              bitwidth: 128
               ip_is_v6_field_id: 0
               skipattr: null

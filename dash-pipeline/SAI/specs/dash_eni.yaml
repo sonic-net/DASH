@@ -1668,6 +1668,33 @@ sai_apis:
     valid_only: null
     is_vlan: false
     deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_ENI_STAT_OUTBOUND_PORT_MAP_MISS_DROP_PACKETS
+    description: DASH ENI OUTBOUND_PORT_MAP_MISS_DROP_PACKETS stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_ENI_STAT_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_MISS_DROP_PACKETS
+    description: DASH ENI OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_MISS_DROP_PACKETS stat
+      count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
