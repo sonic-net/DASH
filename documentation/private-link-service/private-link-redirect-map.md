@@ -156,9 +156,11 @@ The following attributes will be added to CA-to-PA entry, for supporting service
 
 | Attribute name | Type | Description |
 | --- | --- | --- |
-| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SVC_SRC_PREFIX | sai_ip_prefix_t | Service rewrite info - source ip prefix. |
-| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SVC_DST_PREFIX | sai_ip_prefix_t | Service rewrite info - destination ip prefix. |
 | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OUTBOUND_PORT_MAP_ID | sai_object_id_t | Outbound port map id. |
+| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_SIP | sai_ip_address_t | Service rewrite info - source ip address. |
+| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_SIP_MASK | sai_ip_address_t| Service rewrite info - source ip mask. |
+| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_DIP | sai_ip_address_t | Service rewrite info - destination ip address. |
+| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_DIP_MASK | sai_ip_address_t| Service rewrite info - destination ip mask. |
 
 ### 5.4. DASH ENI counters
 
@@ -169,11 +171,11 @@ typedef enum _sai_eni_stat_t
 {
     ...
 
-    /** DASH ENI OUTBOUND_PORT_MAP_MISSING_DROP_PACKETS stat count */
-    SAI_ENI_STAT_OUTBOUND_PORT_MAP_MISSING_DROP_PACKETS,
+    /** DASH ENI OUTBOUND_PORT_MAP_MISS_DROP_PACKETS stat count */
+    SAI_ENI_STAT_OUTBOUND_PORT_MAP_MISS_DROP_PACKETS,
 
-    /** DASH ENI OUTBOUND_PORT_RANGE_ENTRY_MISSING_DROP_PACKETS stat count */
-    SAI_ENI_STAT_OUTBOUND_PORT_RANGE_ENTRY_MISSING_DROP_PACKETS,
+    /** DASH ENI OUTBOUND_PORT_RANGE_ENTRY_MISS_DROP_PACKETS stat count */
+    SAI_ENI_STAT_OUTBOUND_PORT_RANGE_ENTRY_MISS_DROP_PACKETS,
 
 } sai_eni_stat_t;
 ```
@@ -189,9 +191,11 @@ The inner destination IP will be used for finding the outbound CA-PA mapping ent
 
    | SAI field name | Type | Value |
    | --- | --- | --- |
-   | entry_attr.SAI_OUTBOUND_PORT_MAP_ATTR_SVC_REWRITE_SRC_PREFIX | `sai_ip_prefix_t` | `service-rewrite-info-src-prefix` |
-   | entry_attr.SAI_OUTBOUND_PORT_MAP_ATTR_SVC_REWRITE_DST_PREFIX | `sai_ip_prefix_t` | `service-rewrite-info-dst-prefix` |
    | entry_attr.outbound_port_map_id | `sai_object_id_t` | (SAI object ID of the port map) |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_SIP | `sai_ip_address_t` | `fd40:108:0:5678:0:200::` |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_SIP_MASK | `sai_ip_address_t` | `ffff:ffff:ffff:ffff:ffff:ffff::` |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_DIP | `sai_ip_address_t` | `2603:10e1:100:2::` |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_DIP_MASK | `sai_ip_address_t` | `ffff:ffff:ffff:ffff:ffff:ffff::` |
 
 The service rewrite info and the port map id could be cached in pipeline/packet metadata and later retrieved in the stage of outbound port map.
 
@@ -199,9 +203,9 @@ The service rewrite info and the port map id could be cached in pipeline/packet 
 
 In this stage, it accomplishes the operation of PL redirect map with the following steps:
 
-1. It validates the port map object exists according to the port map id. If the port map is missing, eni drop counter `SAI_ENI_STAT_OUTBOUND_PORT_MAP_MISSING_DROP_PACKETS` increases with one and the pipeline drops the packet, otherwise continues to the next.
+1. It validates the port map object exists according to the port map id. If the port map is missing, eni drop counter `SAI_ENI_STAT_OUTBOUND_PORT_MAP_MISS_DROP_PACKETS` increases with one and the pipeline drops the packet, otherwise continues to the next.
 
-1. It looks up the table `outbound port range` with the match key (port_map_id, packet.overlay.destination_port). If none of table entry is matched, it drops the packet and increases eni drop counter `SAI_ENI_STAT_OUTBOUND_PORT_RANGE_ENTRY_MISSING_DROP_PACKETS` with 1, otherwise continues to the next.
+1. It looks up the table `outbound port range` with the match key (port_map_id, packet.overlay.destination_port). If none of table entry is matched, it drops the packet and increases eni drop counter `SAI_ENI_STAT_OUTBOUND_PORT_RANGE_ENTRY_MISS_DROP_PACKETS` with 1, otherwise continues to the next.
 
 1. At least one table entry is matched and the one having the highest entry priority will be selected.
 
