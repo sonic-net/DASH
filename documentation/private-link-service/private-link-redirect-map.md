@@ -115,15 +115,10 @@ typedef struct _sai_outbound_port_map_port_range_entry_t
      */
     sai_u32_range_t dst_port_range;
 
-    /**
-     * @brief Rule priority in table
-     */
-    sai_uint32_t priority;
-
 } sai_outbound_port_map_port_range_entry_t;
 ```
 
-The member `dst_port_range` designates the match field of port range, targeting packet TCP/UDP destination port. The member `priority` is a selection hint if more than one entry is matched, and the higher number takes priority. The entry includes the following attributes:
+The member `dst_port_range` designates the match field of port range, targeting packet TCP/UDP destination port. The entry includes the following attributes:
 
 | Attribute name | Type | Description |
 | --- | --- | --- |
@@ -207,9 +202,7 @@ In this stage, it accomplishes the operation of PL redirect map with the followi
 
 1. It looks up the table `outbound port range` with the match key (port_map_id, packet.overlay.destination_port). If none of table entry is matched, it drops the packet and increases eni drop counter `SAI_ENI_STAT_OUTBOUND_PORT_RANGE_ENTRY_MISS_DROP_PACKETS` with 1, otherwise continues to the next.
 
-1. At least one table entry is matched and the one having the highest entry priority will be selected.
-
-1. If the entry attribute ACTION is `skip_mapping`, the operation in this stage will be skipped, otherwise goes to the next.
+1. One table entry is matched. If the entry attribute ACTION is `skip_mapping`, the operation in this stage will be skipped, otherwise goes to the next.
 
 1. The entry attribute ACTION must be `map_to_private_link_service`, it starts to do PL redirect map with the entry attr info and the cached service rewrite info. Assume the matched entry attributes are like below:
 
