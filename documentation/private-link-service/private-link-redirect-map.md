@@ -123,7 +123,7 @@ The member `dst_port_range` designates the match field of port range, targeting 
 | Attribute name | Type | Description |
 | --- | --- | --- |
 | SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_ACTION | sai_outbound_port_map_port_range_entry_action_t | Action `skip_mapping` or `map_to_private_link_service`. |
-| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_IP | sai_ip_address_t | Back end IP, it overrides underlay destination IP |
+| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_IP | sai_ip_address_t | Back end instance IP, used in both overlay and underlay |
 | SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_MATCH_PORT_BASE | sai_uint16_t | Match port base, aka begin port of port range |
 | SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_PORT_BASE | sai_uint16_t | Back end port base, aka begin port of translated port range |
 | SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_COUNTER_ID | sai_object_id_t | A counter that tracks the number of packets and bytes associated with the matching port range entry  |
@@ -141,8 +141,10 @@ typedef enum _sai_outbound_port_map_port_range_entry_action_t
 The action `skip_mapping` means to skip the mapping operation. The action `map_to_private_link_service` means to do private link mapping operation as below:
 
 ```c
-packet.underlay.destination_ip = entry.backend_ip
-packet.overlay.destination_port = entry.backend_port_base + (packet.overlay.destination_port - entry.match_port_base)
+packet.underlay.destination_ip = attr_BACKEND_IP
+packet.overlay.ipv6.src_addr = ((((bit<128>)packet.overlay.ipv4.src_addr & ~ca_pa.attr_SERVICE_REWRITE_SIP_MASK) | ca_pa.attr_SERVICE_REWRITE_SIP) & ~eni.attr_SAI_ENI_ATTR_PL_SIP_MASK) | eni.attr_SAI_ENI_ATTR_PL_SIP
+packet.overlay.ipv6.dst_addr = ((bit<128>)attr_BACKEND_IP & ~ca_pa.attr_SERVICE_REWRITE_DIP_MASK) | ca_pa.attr_SERVICE_REWRITE_DIP
+packet.overlay.destination_port = attr_BACKEND_PORT_BASE + (packet.overlay.destination_port - attr_MATCH_PORT_BASE)
 ```
 
 ### 5.3. DASH CA-PA mapping attributes
@@ -190,7 +192,7 @@ The inner destination IP will be used for finding the outbound CA-PA mapping ent
    | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_SIP | `sai_ip_address_t` | `fd40:108:0:5678:0:200::` |
    | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_SIP_MASK | `sai_ip_address_t` | `ffff:ffff:ffff:ffff:ffff:ffff::` |
    | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_DIP | `sai_ip_address_t` | `2603:10e1:100:2::` |
-   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_DIP_MASK | `sai_ip_address_t` | `ffff:ffff:ffff:ffff:ffff:ffff::` |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_DIP_MASK | `sai_ip_address_t` | `ffff:ffff:ffff:ffff::` |
 
 The service rewrite info and the port map id could be cached in pipeline/packet metadata and later retrieved in the stage of outbound port map.
 
@@ -226,8 +228,8 @@ In this stage, it accomplishes the operation of PL redirect map with the followi
     - nat 4to6
 
     ```c
-    packet.overlay.ipv6.src_addr = ((( (IPv6Address)packet.overlay.ipv4.src_addr & ~svc_rewrite_info.src_prefix_mask) | svc_rewrite_info.src_prefix_addr) & ~eni.attr_SAI_ENI_ATTR_PL_SIP_MASK) | eni.attr_SAI_ENI_ATTR_PL_SIP
-    packet.overlay.ipv6.dst_addr = (svc_rewrite_info.dst_prefix_addr & ~((bit<128>)0xFFFFFFFF)) | (bit<128>)'3.3.3.1'
+    packet.overlay.ipv6.src_addr = (((fd40:108:0:5678:0:200::packet.overlay.ipv4.src_addr) & ~eni.attr_SAI_ENI_ATTR_PL_SIP_MASK) | eni.attr_SAI_ENI_ATTR_PL_SIP
+    packet.overlay.ipv6.dst_addr = 2603:10e1:100:2::3.3.3.1
     ```
 
     - underlay destination ip update
