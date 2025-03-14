@@ -29,8 +29,9 @@ class SaiApiP4MetaKey:
         self.is_object_key: bool = is_object_key
 
 class SaiApiP4MetaTable:
-    def __init__(self, id: int, stage: Optional[str] = None):
+    def __init__(self, id: int, single_match_priority: bool, stage: Optional[str] = None):
         self.id: int = id
+        self.single_match_priority: bool = single_match_priority
         self.stage: Optional[str] = stage
         self.keys: List[SaiApiP4MetaKey] = []
         self.actions: Dict[str, SaiApiP4MetaAction] = {}
