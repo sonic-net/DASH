@@ -120,6 +120,12 @@ namespace dash
             _In_ const sai_attribute_value_t &value,
             _Inout_ p4::v1::FieldMatch_LPM *mf_lpm);
 
+    void  set_attr_value_to_p4(
+            _In_ const std::string &field,
+            _In_ uint32_t bitwidth,
+            _In_ const sai_attribute_value_t &value,
+            _Inout_ p4::v1::FieldMatch_Range *mf_range);
+
     template<typename T>
     static inline
     void get_attr_value_from_p4(
@@ -194,6 +200,12 @@ namespace dash
             _In_ const std::string &field,
             _In_ uint32_t bitwidth,
             _In_ const p4::v1::FieldMatch_LPM *mf_lpm,
+            _Out_ sai_attribute_value_t &value);
+
+    void get_attr_value_from_p4(
+            _In_ const std::string &field,
+            _In_ uint32_t bitwidth,
+            _In_ const p4::v1::FieldMatch_Range *mf_range,
             _Out_ sai_attribute_value_t &value);
 
     // set/get only for value.ipaddr.addr_family
