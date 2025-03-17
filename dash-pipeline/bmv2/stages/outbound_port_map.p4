@@ -62,7 +62,7 @@ control outbound_port_map_stage(inout headers_t hdr,
 
     DEFINE_TABLE_COUNTER(outbound_port_map_port_range_counter)
 
-    @SaiTable[api = "dash_outbound_port_map", order = 1]
+    @SaiTable[api = "dash_outbound_port_map", single_match_priority = "true", order = 1]
     table outbound_port_map_port_range {
         key = {
             meta.port_map_ctx.map_id: exact @SaiVal[name = "outbound_port_map_id", type = "sai_object_id_t"];

@@ -28,6 +28,7 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 42579810
+      single_match_priority: false
       stage: null
       keys:
       - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
@@ -81,12 +82,6 @@ sai_apis:
       name: dst_port_range
       description: Range matched key dst_port_range
       type: sai_u32_range_t
-      objects: null
-      valid_only: null
-    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
-      name: priority
-      description: Rule priority in table
-      type: sai_uint32_t
       objects: null
       valid_only: null
   attributes:
@@ -160,6 +155,7 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 35152152
+      single_match_priority: true
       stage: null
       keys:
       - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
