@@ -33,6 +33,7 @@ class DashP4Table(DashP4Object):
         self.stage: Optional[str] = None
         self.is_object: Optional[str] = None
         self.api_type: Optional[str] = None
+        self.single_match_priority: Optional[bool] = False
 
     def parse_p4rt(
         self,
@@ -113,6 +114,8 @@ class DashP4Table(DashP4Object):
                         self.api_name = str(kv["value"]["stringValue"])
                     elif kv["key"] == "api_type":
                         self.api_type = str(kv["value"]["stringValue"])
+                    elif kv["key"] == "single_match_priority":
+                        self.single_match_priority = kv["value"]["stringValue"] == "true"
 
         if self.is_object == None:
             self.is_object = "false"
@@ -265,7 +268,7 @@ class DashP4Table(DashP4Object):
     #
     def to_sai(self) -> SaiApi:
         sai_api = SaiApi(self.name, self.name.replace('_', ' '), self.is_object != "false")
-        sai_api.p4_meta.tables.append(SaiApiP4MetaTable(self.id, self.stage))
+        sai_api.p4_meta.tables.append(SaiApiP4MetaTable(self.id, self.single_match_priority, self.stage))
 
         self.create_sai_action_enum(sai_api)
         self.create_sai_structs(sai_api)
@@ -367,7 +370,7 @@ class DashP4Table(DashP4Object):
         # If any match key in this table supports priority, we need to add a priority attribute.
         if any([key.match_type != "exact" for key in self.keys]) and all(
             [key.match_type != "lpm" for key in self.keys]
-        ):
+        ) and not self.single_match_priority:
             priority_entry = SaiStructEntry(
                 name="priority",
                 description="Rule priority in table",
@@ -423,7 +426,7 @@ class DashP4Table(DashP4Object):
             # If any match key in this table supports priority, we need to add a priority attribute.
             if any([key.match_type != "exact" for key in self.keys]) and all(
                 [key.match_type != "lpm" for key in self.keys]
-            ):
+            ) and not self.single_match_priority:
                 priority_attr = SaiAttribute(
                     name=f"SAI_{self.name.upper()}_ATTR_PRIORITY",
                     description="Rule priority in table",

@@ -128,6 +128,16 @@ namespace dash
         return ipPrefixSetVal(value, mf_lpm, bitwidth);
     }
 
+    void  set_attr_value_to_p4(
+            _In_ const std::string &field,
+            _In_ uint32_t bitwidth,
+            _In_ const sai_attribute_value_t &value,
+            _Inout_ p4::v1::FieldMatch_Range *mf_range)
+    {
+        assert (field == "u32range");
+        return u32rangeSetVal(value, mf_range, bitwidth);
+    }
+
     void get_attr_value_from_p4(
             _In_ const std::string &field,
             _In_ uint32_t bitwidth,
@@ -160,6 +170,20 @@ namespace dash
         }
     }
 
+    void get_attr_value_from_p4(
+            _In_ const std::string &field,
+            _In_ uint32_t bitwidth,
+            _In_ const p4::v1::FieldMatch_Range *mf_range,
+            _Out_ sai_attribute_value_t &value)
+    {
+        assert (field == "u32range");
+
+        uint32_t val = *(const uint32_t*)mf_range->low().c_str();
+        value.u32range.min = ntohl(val) >> (32 - bitwidth);
+
+        val = *(const uint32_t*)mf_range->high().c_str();
+        value.u32range.max = ntohl(val) >> (32 - bitwidth);
+    }
 
     void set_attr_value_mask_to_p4_ternary(
             _In_ const std::string &field,
@@ -252,6 +276,11 @@ namespace dash
             auto mf_optional = mf->mutable_optional();
             set_attr_value_to_p4(key.field, key.bitwidth, value, mf_optional);
         }
+        else if (key.match_type == "range")
+        {
+            auto mf_range = mf->mutable_range();
+            set_attr_value_to_p4(key.field, key.bitwidth, value, mf_range);
+        }
         else if (key.match_type == "list")
         {
             // BMv2 doesn't support "list" match type, and we are using "optional" match in v1model as our implementation.
@@ -307,6 +336,11 @@ namespace dash
         {
             auto mf_optional = mf->mutable_optional();
             get_attr_value_from_p4(key.field, key.bitwidth, mf_optional, value);
+        }
+        else if (key.match_type == "range")
+        {
+            auto mf_range = mf->mutable_range();
+            get_attr_value_from_p4(key.field, key.bitwidth, mf_range, value);
         }
         else if (key.match_type == "list")
         {

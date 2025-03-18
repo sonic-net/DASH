@@ -9,6 +9,7 @@
         {% elif key.match_type == 'ternary' %}{{ util.set_key_ternary(key, value) }}
         {% elif key.match_type == 'optional' %}{{ util.set_key_optional(key, value) }}
         {% elif key.match_type == 'list' %}{{ util.set_key_list(key, value) }}
+        {% elif key.match_type == 'range' %}{{ util.set_key_range(table, key, value) }}
         {% elif key.match_type == 'range_list' %}{{ util.set_key_range_list(key, value) }}
         {% endif %}
     }

@@ -80,6 +80,7 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 49206552
+      single_match_priority: false
       stage: null
       keys:
       - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
@@ -163,6 +164,7 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 41269458
+      single_match_priority: false
       stage: null
       keys:
       - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
@@ -215,6 +217,7 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 37329198
+      single_match_priority: false
       stage: null
       keys:
       - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey

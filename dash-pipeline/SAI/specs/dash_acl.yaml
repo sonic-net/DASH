@@ -28,6 +28,7 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 37949057
+      single_match_priority: false
       stage: null
       keys:
       - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
@@ -211,6 +212,7 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 43936368
+      single_match_priority: false
       stage: acl.stage1
       keys:
       - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
@@ -280,6 +282,7 @@ sai_apis:
           attr_params: {}
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 48549629
+      single_match_priority: false
       stage: acl.stage2
       keys:
       - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
@@ -349,6 +352,7 @@ sai_apis:
           attr_params: {}
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 40869404
+      single_match_priority: false
       stage: acl.stage3
       keys:
       - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
@@ -418,6 +422,7 @@ sai_apis:
           attr_params: {}
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 49672642
+      single_match_priority: false
       stage: acl.stage1
       keys:
       - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
@@ -487,6 +492,7 @@ sai_apis:
           attr_params: {}
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 37932124
+      single_match_priority: false
       stage: acl.stage2
       keys:
       - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
@@ -556,6 +562,7 @@ sai_apis:
           attr_params: {}
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 46113118
+      single_match_priority: false
       stage: acl.stage3
       keys:
       - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
