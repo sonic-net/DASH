@@ -142,8 +142,8 @@ The action `skip_mapping` means to skip the mapping operation. The action `map_t
 
 ```c
 packet.underlay.destination_ip = attr_BACKEND_IP
-packet.overlay.ipv6.src_addr = ((((bit<128>)packet.overlay.ipv4.src_addr & ~ca_pa.attr_SERVICE_REWRITE_SIP_MASK) | ca_pa.attr_SERVICE_REWRITE_SIP) & ~eni.attr_SAI_ENI_ATTR_PL_SIP_MASK) | eni.attr_SAI_ENI_ATTR_PL_SIP
-packet.overlay.ipv6.dst_addr = ((bit<128>)attr_BACKEND_IP & ~ca_pa.attr_SERVICE_REWRITE_DIP_MASK) | ca_pa.attr_SERVICE_REWRITE_DIP
+packet.overlay.ipv6.src_addr = ((((bit<128>)packet.overlay.ipv4.src_addr & ~ca_pa.attr_OVERLAY_SIP_MASK) | ca_pa.attr_OVERLAY_SIP) & ~eni.attr_SAI_ENI_ATTR_PL_SIP_MASK) | eni.attr_SAI_ENI_ATTR_PL_SIP
+packet.overlay.ipv6.dst_addr = ((bit<128>)attr_BACKEND_IP & ~ca_pa.attr_OVERLAY_DIP_MASK) | ca_pa.attr_OVERLAY_DIP
 packet.overlay.destination_port = attr_BACKEND_PORT_BASE + (packet.overlay.destination_port - attr_MATCH_PORT_BASE)
 ```
 
@@ -154,10 +154,6 @@ The following attributes will be added to CA-to-PA entry, for supporting service
 | Attribute name | Type | Description |
 | --- | --- | --- |
 | SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OUTBOUND_PORT_MAP_ID | sai_object_id_t | Outbound port map id. |
-| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_SIP | sai_ip_address_t | Service rewrite info - source ip address. |
-| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_SIP_MASK | sai_ip_address_t| Service rewrite info - source ip mask. |
-| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_DIP | sai_ip_address_t | Service rewrite info - destination ip address. |
-| SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_DIP_MASK | sai_ip_address_t| Service rewrite info - destination ip mask. |
 
 ### 5.4. DASH ENI counters
 
@@ -189,12 +185,12 @@ The inner destination IP will be used for finding the outbound CA-PA mapping ent
    | SAI field name | Type | Value |
    | --- | --- | --- |
    | entry_attr.outbound_port_map_id | `sai_object_id_t` | (SAI object ID of the port map) |
-   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_SIP | `sai_ip_address_t` | `fd40:108:0:5678:0:200::` |
-   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_SIP_MASK | `sai_ip_address_t` | `ffff:ffff:ffff:ffff:ffff:ffff::` |
-   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_DIP | `sai_ip_address_t` | `2603:10e1:100:2::` |
-   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_SERVICE_REWRITE_DIP_MASK | `sai_ip_address_t` | `ffff:ffff:ffff:ffff::` |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP | `sai_ip_address_t` | `fd40:108:0:5678:0:200::` |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP_MASK | `sai_ip_address_t` | `ffff:ffff:ffff:ffff:ffff:ffff::` |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP | `sai_ip_address_t` | `2603:10e1:100:2::` |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP_MASK | `sai_ip_address_t` | `ffff:ffff:ffff:ffff::` |
 
-The service rewrite info and the port map id could be cached in pipeline/packet metadata and later retrieved in the stage of outbound port map.
+The attributes OVERLAY_SIP/DIP and port map id could be cached in pipeline/packet metadata and later retrieved in the stage of outbound port map.
 
 **Mapping - outbound port map**:
 
@@ -206,7 +202,7 @@ In this stage, it accomplishes the operation of PL redirect map with the followi
 
 1. One table entry is matched. If the entry attribute ACTION is `skip_mapping`, the operation in this stage will be skipped, otherwise goes to the next.
 
-1. The entry attribute ACTION must be `map_to_private_link_service`, it starts to do PL redirect map with the entry attr info and the cached service rewrite info. Assume the matched entry attributes are like below:
+1. The entry attribute ACTION must be `map_to_private_link_service`, it starts to do PL redirect map with the entry attr info and the cached CA-PA entry attributes OVERLAY_SIP/DIP. Assume the matched entry attributes are like below:
 
    | SAI field name | Type | Value |
    | --- | --- | --- |
