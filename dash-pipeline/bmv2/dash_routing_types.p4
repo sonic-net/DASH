@@ -181,7 +181,8 @@ action set_private_link_mapping(
     bit<32> meter_class_or,
     @SaiVal[type="sai_object_id_t"] bit<16> dash_tunnel_id,
     bit<1> flow_resimulation_requested,
-    dash_routing_actions_t routing_actions_disabled_in_flow_resimulation)
+    dash_routing_actions_t routing_actions_disabled_in_flow_resimulation,
+    @SaiVal[type="sai_object_id_t"] bit<16> outbound_port_map_id)
 {
     meta.target_stage = dash_pipeline_stage_t.OUTBOUND_PRE_ROUTING_ACTION_APPLY;
     meta.dash_tunnel_id = dash_tunnel_id;
@@ -208,9 +209,11 @@ action set_private_link_mapping(
                     meta = meta,
                     dip = overlay_dip,
                     dip_mask = overlay_dip_mask,
-                    sip = ((( (IPv6Address)hdr.u0_ipv4.src_addr & ~overlay_sip_mask) | overlay_sip) & ~meta.eni_data.pl_sip_mask) | meta.eni_data.pl_sip,
+                    sip = ((( meta.src_ip_addr & ~overlay_sip_mask) | overlay_sip) & ~meta.eni_data.pl_sip_mask) | meta.eni_data.pl_sip,
                     sip_mask = 0xffffffffffffffffffffffff);
 #endif /* DISABLE_128BIT_ARITHMETIC */
+
+    meta.port_map_ctx.map_id = outbound_port_map_id;
 
     set_meter_attrs(meta, meter_class_or, 0xffffffff);
 }

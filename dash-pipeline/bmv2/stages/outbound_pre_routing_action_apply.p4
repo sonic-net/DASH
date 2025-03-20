@@ -3,6 +3,8 @@
 
 #include "tunnel_stage.p4"
 
+#include "outbound_port_map.p4"
+
 control outbound_pre_routing_action_apply_stage(
     inout headers_t hdr,
     inout metadata_t meta)
@@ -12,6 +14,8 @@ control outbound_pre_routing_action_apply_stage(
         if (meta.target_stage != dash_pipeline_stage_t.OUTBOUND_PRE_ROUTING_ACTION_APPLY) {
             return;
         }
+
+        outbound_port_map_stage.apply(hdr, meta);
 
         tunnel_stage.apply(hdr, meta);
 
