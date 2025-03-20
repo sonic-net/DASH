@@ -44,13 +44,7 @@ control outbound_port_map_stage(inout headers_t hdr,
 
 #ifndef DISABLE_128BIT_ARITHMETIC
         // Update overlay IP
-        push_action_nat46(hdr = hdr,
-                        meta = meta,
-                        dip = (meta.port_map_ctx.service_rewrite_dip & ~((bit<128>)0xFFFFFFFF)) | (bit<128>)backend_ip,
-                        dip_mask = meta.port_map_ctx.service_rewrite_dip_mask,
-                        sip = ((meta.port_map_ctx.service_rewrite_sip | (meta.src_ip_addr & ~meta.port_map_ctx.service_rewrite_sip_mask)) \
-                               & ~meta.eni_data.pl_sip_mask) | meta.eni_data.pl_sip,
-                        sip_mask = 0xffffffffffffffffffffffff);
+        meta.overlay_data.dip = (meta.overlay_data.dip & meta.overlay_data.dip_mask) | (bit<128>)backend_ip;
 #endif
 
         // Update overlay port
