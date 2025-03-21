@@ -123,7 +123,7 @@ The member `dst_port_range` designates the match field of port range, targeting 
 | Attribute name | Type | Description |
 | --- | --- | --- |
 | SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_ACTION | sai_outbound_port_map_port_range_entry_action_t | Action `skip_mapping` or `map_to_private_link_service`. |
-| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_IP | sai_ip_address_t | Back end instance IP, used in both overlay and underlay |
+| SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_IP | sai_ip_address_t | The IP of private link service backend, used in both overlay and underlay |
 | SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_MATCH_PORT_BASE | sai_uint16_t | Match port base, aka begin port of port range |
 | SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_BACKEND_PORT_BASE | sai_uint16_t | Back end port base, aka begin port of translated port range |
 | SAI_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_ATTR_COUNTER_ID | sai_object_id_t | A counter that tracks the number of packets and bytes associated with the matching port range entry  |
