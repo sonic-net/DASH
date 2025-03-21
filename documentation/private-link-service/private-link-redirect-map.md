@@ -185,9 +185,9 @@ The inner destination IP will be used for finding the outbound CA-PA mapping ent
    | SAI field name | Type | Value |
    | --- | --- | --- |
    | entry_attr.outbound_port_map_id | `sai_object_id_t` | (SAI object ID of the port map) |
-   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP | `sai_ip_address_t` | `fd40:108:0:5678:0:200::` |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP | `sai_ip_address_t` | `1111:2222:3333:4444:5555:6666::` |
    | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_SIP_MASK | `sai_ip_address_t` | `ffff:ffff:ffff:ffff:ffff:ffff::` |
-   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP | `sai_ip_address_t` | `2603:10e1:100:2::` |
+   | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP | `sai_ip_address_t` | `9999:8888:7777:6666::` |
    | entry_attr.SAI_OUTBOUND_CA_TO_PA_ENTRY_ATTR_OVERLAY_DIP_MASK | `sai_ip_address_t` | `ffff:ffff:ffff:ffff::` |
 
 The attributes OVERLAY_SIP/DIP and port map id could be cached in pipeline/packet metadata and later retrieved in the stage of outbound port map.
@@ -224,8 +224,8 @@ In this stage, it accomplishes the operation of PL redirect map with the followi
     - nat 4to6
 
     ```c
-    packet.overlay.ipv6.src_addr = (((fd40:108:0:5678:0:200::packet.overlay.ipv4.src_addr) & ~eni.attr_SAI_ENI_ATTR_PL_SIP_MASK) | eni.attr_SAI_ENI_ATTR_PL_SIP
-    packet.overlay.ipv6.dst_addr = 2603:10e1:100:2::3.3.3.1
+    packet.overlay.ipv6.src_addr = (((1111:2222:3333:4444:5555:6666::packet.overlay.ipv4.src_addr) & ~eni.attr_SAI_ENI_ATTR_PL_SIP_MASK) | eni.attr_SAI_ENI_ATTR_PL_SIP
+    packet.overlay.ipv6.dst_addr = 9999:8888:7777:6666::3.3.3.1
     ```
 
     - underlay destination ip update
