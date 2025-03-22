@@ -16,6 +16,7 @@
 #include "stages/ha.p4"
 #include "stages/routing_action_apply.p4"
 #include "stages/metering_update.p4"
+#include "stages/trusted_vni.p4"
 #include "underlay.p4"
 
 control dash_eni_stage(
@@ -67,7 +68,8 @@ control dash_eni_stage(
                          bit<1> enable_reverse_tunnel_learning,
                          @SaiVal[type="sai_ip_address_t"] IPv4Address reverse_tunnel_sip,
                          bit<1> is_ha_flow_owner,
-                         @SaiVal[type="sai_object_id_t"] bit<16> flow_table_id)
+                         @SaiVal[type="sai_object_id_t"] bit<16> flow_table_id,
+                         @SaiVal[type="sai_dash_eni_mode_t"] dash_eni_mode_t dash_eni_mode)
     {
         meta.eni_data.cps                                                   = cps;
         meta.eni_data.pps                                                   = pps;
@@ -76,6 +78,7 @@ control dash_eni_stage(
         meta.eni_data.pl_sip                                                = pl_sip;
         meta.eni_data.pl_sip_mask                                           = pl_sip_mask;
         meta.eni_data.pl_underlay_sip                                       = pl_underlay_sip;
+        meta.eni_data.eni_mode                                              = dash_eni_mode;
         meta.u0_encap_data.underlay_dip                                     = vm_underlay_dip;
         meta.eni_data.outbound_routing_group_data.outbound_routing_group_id = outbound_routing_group_id;
         if (dash_tunnel_dscp_mode == dash_tunnel_dscp_mode_t.PIPE_MODEL) {
@@ -133,6 +136,9 @@ control dash_eni_stage(
     apply {
         if (!eni.apply().hit) {
             UPDATE_COUNTER(eni_miss_drop, 0);
+        }
+        else if (meta.eni_data.eni_mode == dash_eni_mode_t.FNIC) {
+            trusted_vni_stage.apply(hdr, meta);
         }
     }
 }
