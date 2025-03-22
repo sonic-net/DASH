@@ -653,6 +653,19 @@ sai_apis:
     valid_only: null
     is_vlan: false
     deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_ENI_ATTR_DASH_ENI_MODE
+    description: Action parameter DASH ENI mode
+    type: sai_dash_eni_mode_t
+    attr_value_field: s32
+    default: SAI_DASH_ENI_MODE_VM
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
   stats:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_ENI_STAT_RX_BYTES
@@ -1971,5 +1984,11 @@ sai_apis:
               id: 43
               field: u16
               bitwidth: 16
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_ENI_ATTR_DASH_ENI_MODE: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 44
+              field: s32
+              bitwidth: 8
               ip_is_v6_field_id: 0
               skipattr: null
