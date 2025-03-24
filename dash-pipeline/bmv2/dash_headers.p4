@@ -60,6 +60,8 @@ header overlay_rewrite_data_t {
     IPv4ORv6Address dip;
     IPv6Address sip_mask;
     IPv6Address dip_mask;
+    bit<16> sport;
+    bit<16> dport;
     bit<7> reserved;
     bit<1> is_ipv6;
 }

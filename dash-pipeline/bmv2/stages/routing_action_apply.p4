@@ -10,6 +10,8 @@ control routing_action_apply(
     apply {
         do_action_nat46.apply(hdr, meta);
         do_action_nat64.apply(hdr, meta);
+        do_action_snat_port.apply(hdr, meta);
+        do_action_dnat_port.apply(hdr, meta);
         do_action_set_dmac.apply(hdr, meta);
 
         // Encaps needs to be added after all other transforms, from inner ones to outer ones,
