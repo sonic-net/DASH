@@ -37,6 +37,11 @@ enum bit<8> dash_eni_mac_type_t {
     DST_MAC = 1
 };
 
+enum bit<8> dash_eni_mode_t {
+    VM = 0,
+    FNIC = 1
+};
+
 struct conntrack_data_t {
     bool allow_in;
     bool allow_out;
@@ -64,6 +69,7 @@ struct eni_data_t {
     dash_tunnel_dscp_mode_t dscp_mode;
     outbound_routing_group_data_t outbound_routing_group_data;
     IPv4Address vip;
+    dash_eni_mode_t eni_mode;
 }
 
 struct port_map_context_t {
