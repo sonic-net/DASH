@@ -660,7 +660,7 @@ sai_apis:
     attr_value_field: s32
     default: SAI_DASH_ENI_MODE_VM
     isresourcetype: false
-    flags: CREATE_AND_SET
+    flags: CREATE_ONLY
     object_name: null
     allow_null: false
     valid_only: null
