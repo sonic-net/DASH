@@ -11,6 +11,20 @@ control trusted_vni_stage(
         meta.dropped = true;
     }
 
+    @SaiTable[single_match_priority = "true", api = "dash_trusted_vni", order=1, isobject="false"]
+    table global_trusted_vni {
+        key = {
+            meta.rx_encap.vni: range @SaiVal[name = "vni_range"];
+        }
+
+        actions = {
+            permit;
+            @defaultonly deny;
+        }
+        const default_action = deny;
+    }
+
+
     @SaiTable[single_match_priority = "true", api = "dash_trusted_vni"]
     table trusted_vni {
         key = {
@@ -26,7 +40,9 @@ control trusted_vni_stage(
     }
 
     apply {
-        trusted_vni.apply();
+        if (global_trusted_vni.apply().hit) {
+            trusted_vni.apply();
+        }
     }
 }
 
