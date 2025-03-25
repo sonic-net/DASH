@@ -48,6 +48,7 @@ object_types:
 - SAI_OBJECT_TYPE_OUTBOUND_PORT_MAP
 - SAI_OBJECT_TYPE_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY
 - SAI_OBJECT_TYPE_TRUSTED_VNI_ENTRY
+- SAI_OBJECT_TYPE_GLOBAL_TRUSTED_VNI_ENTRY
 object_entries:
 - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
   name: direction_lookup_entry
@@ -121,6 +122,12 @@ object_entries:
   type: sai_trusted_vni_entry_t
   objects: null
   valid_only: object_type == SAI_OBJECT_TYPE_TRUSTED_VNI_ENTRY,
+- !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+  name: global_trusted_vni_entry
+  description: Object entry for DASH API global_trusted_vni_entry
+  type: sai_global_trusted_vni_entry_t
+  objects: null
+  valid_only: object_type == SAI_OBJECT_TYPE_GLOBAL_TRUSTED_VNI_ENTRY,
 enums:
 - !!python/object:utils.sai_spec.sai_enum.SaiEnum
   name: sai_dash_direction_t
