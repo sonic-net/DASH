@@ -32,6 +32,7 @@ control eni_lookup_stage(
             meta.eni_addr = hdr.customer_ethernet.src_addr;
         } else {
             meta.eni_addr = hdr.customer_ethernet.dst_addr;
+            meta.vm_nic_addr = hdr.customer_ethernet.src_addr;
         }
                                           
         if (!eni_ether_address_map.apply().hit) {
