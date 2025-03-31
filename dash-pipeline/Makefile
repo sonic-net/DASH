@@ -61,6 +61,9 @@ include dockerfiles/DOCKER_SAITHRIFT_BLDR_IMG.env
 # include file defines DOCKER_SAITHRIFT_CLIENT_BLDR_IMG_NAME and DOCKER_SAITHRIFT_CLIENT_BLDR_CTAG
 include dockerfiles/DOCKER_SAITHRIFT_CLIENT_BLDR_IMG.env
 
+# P4c builder - p4c build dependencies, custom p4c fork
+DOCKER_P4C_BLDR_IMG ?=chrissommers/dash-p4c-bldr:221007
+
 # Client image built locally with saithrift client libs + PTF & Pytest frameworks
 DOCKER_SAITHRIFT_CLIENT_IMG ?= local/dash-saithrift-client:latest
 
@@ -599,6 +602,19 @@ run-saithrift-client-bash:
 
 DOCKER_P4C_BMV2_IMG_TAG = $(shell cat dockerfiles/Dockerfile.p4c-bmv2 | $(SHA1SUM))
 DOCKER_P4C_BMV2_IMG = $(DOCKER_P4C_BMV2_IMG_NAME):$(DOCKER_P4C_BMV2_IMG_TAG)
+
+# Builder, has base packages to make client docker
+docker-dash-p4c-bldr:
+	docker build \
+		-f dockerfiles/Dockerfile.p4c-bldr \
+	    -t $(DOCKER_P4C_BLDR_IMG) \
+	    --build-arg user=$(DASH_USER) \
+	    --build-arg group=$(DASH_GROUP) \
+	    --build-arg uid=$(DASH_UID) \
+	    --build-arg guid=$(DASH_GUID) \
+	    --build-arg hostname=$(DASH_HOST) \
+	    --build-arg available_processors=$(shell nproc) \
+		./tests
 
 docker-dash-p4c:
 	{ [ x$(ENABLE_DOCKER_PULL) == xy ] && docker pull $(DOCKER_P4C_BMV2_IMG); } || \
