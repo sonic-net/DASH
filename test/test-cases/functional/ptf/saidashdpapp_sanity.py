@@ -46,6 +46,11 @@ class SaiThriftDpappPktTest(SaiHelperSimplified):
                                                           action=SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION)
         assert(status == SAI_STATUS_SUCCESS)
 
+        self.gtve = sai_thrift_global_trusted_vni_entry_t(switch_id=self.switch_id,
+                vni_range=sai_thrift_u32_range_t(min=self.outbound_vni, max=self.outbound_vni))
+        status = sai_thrift_create_global_trusted_vni_entry(self.client, self.gtve)
+        assert(status == SAI_STATUS_SUCCESS)
+
         self.in_acl_group_id = sai_thrift_create_dash_acl_group(self.client,
                                                                 ip_addr_family=self.sai_ip_addr_family)
         assert (self.in_acl_group_id != SAI_NULL_OBJECT_ID)
@@ -322,6 +327,7 @@ class SaiThriftDpappPktTest(SaiHelperSimplified):
             status &= sai_thrift_remove_vnet(self.client, self.vnet)
             status &= sai_thrift_remove_dash_acl_group(self.client, self.out_acl_group_id)
             status &= sai_thrift_remove_dash_acl_group(self.client, self.in_acl_group_id)
+            status &= sai_thrift_remove_global_trusted_vni_entry(self.client, self.gtve)
             status &= sai_thrift_remove_direction_lookup_entry(self.client, self.dle)
             status &= sai_thrift_remove_vip_entry(self.client, self.vpe)
             status &= sai_thrift_remove_route_entry(self.client, self.pa_route_entry)
