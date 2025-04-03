@@ -104,5 +104,6 @@ DEFINE_ENI_PACKET_COUNTER(outbound_routing_group_miss_drop)
 DEFINE_ENI_PACKET_COUNTER(outbound_routing_group_disabled_drop)
 DEFINE_ENI_PACKET_COUNTER(outbound_port_map_miss_drop)
 DEFINE_ENI_PACKET_COUNTER(outbound_port_map_port_range_entry_miss_drop)
+DEFINE_ENI_PACKET_COUNTER(eni_trusted_vni_entry_miss_drop)
 
 #endif // __DASH_COUNTERS__

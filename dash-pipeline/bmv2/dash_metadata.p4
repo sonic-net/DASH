@@ -263,4 +263,8 @@ struct metadata_t {
     EthernetAddress cpu_mac;
 }
 
+action deny(inout metadata_t meta) {
+    meta.dropped = true;
+}
+
 #endif /* _SIRIUS_METADATA_P4_ */

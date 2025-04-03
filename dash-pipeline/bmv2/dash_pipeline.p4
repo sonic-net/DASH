@@ -24,10 +24,6 @@ control dash_eni_stage(
     , inout metadata_t meta
     )
 {
-    action deny() {
-        meta.dropped = true;
-    }
-
 #define ACL_GROUPS_PARAM(prefix) \
     @SaiVal[type="sai_object_id_t"] bit<16> ## prefix ##_stage1_dash_acl_group_id, \
     @SaiVal[type="sai_object_id_t"] bit<16> ## prefix ##_stage2_dash_acl_group_id, \
@@ -128,9 +124,9 @@ control dash_eni_stage(
 
         actions = {
             set_eni_attrs;
-            @defaultonly deny;
+            @defaultonly deny(meta);
         }
-        const default_action = deny;
+        const default_action = deny(meta);
     }
 
     apply {
@@ -146,10 +142,6 @@ control dash_lookup_stage(
     , inout metadata_t meta
     )
 {
-    action deny() {
-        meta.dropped = true;
-    }
-
     apply {
         pre_pipeline_stage.apply(hdr, meta);
         direction_lookup_stage.apply(hdr, meta);
@@ -158,7 +150,7 @@ control dash_lookup_stage(
         dash_eni_stage.apply(hdr, meta);
 
         if (meta.eni_data.admin_state == 0) {
-            deny();
+            deny(meta);
         }
         
         UPDATE_ENI_COUNTER(eni_rx);

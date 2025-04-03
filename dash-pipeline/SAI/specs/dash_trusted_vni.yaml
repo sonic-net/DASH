@@ -4,22 +4,22 @@ description: DASH trusted VNI
 api_type: overlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
-  name: trusted_vni_entry
-  description: trusted VNI entry
+  name: eni_trusted_vni_entry
+  description: ENI trusted VNI entry
   is_object: false
   enums:
   - !!python/object:utils.sai_spec.sai_enum.SaiEnum
-    name: sai_trusted_vni_entry_action_t
-    description: 'Attribute data for #SAI_TRUSTED_VNI_ENTRY_ATTR_ACTION'
+    name: sai_eni_trusted_vni_entry_action_t
+    description: 'Attribute data for #SAI_ENI_TRUSTED_VNI_ENTRY_ATTR_ACTION'
     members:
     - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-      name: SAI_TRUSTED_VNI_ENTRY_ACTION_PERMIT
+      name: SAI_ENI_TRUSTED_VNI_ENTRY_ACTION_PERMIT
       description: ''
       value: '0'
   structs:
   - !!python/object:utils.sai_spec.sai_struct.SaiStruct
-    name: sai_trusted_vni_entry_t
-    description: Entry for trusted_vni_entry
+    name: sai_eni_trusted_vni_entry_t
+    description: Entry for eni_trusted_vni_entry
     members:
     - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
       name: switch_id
@@ -41,11 +41,11 @@ sai_apis:
       valid_only: null
   attributes:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_TRUSTED_VNI_ENTRY_ATTR_ACTION
+    name: SAI_ENI_TRUSTED_VNI_ENTRY_ATTR_ACTION
     description: Action
-    type: sai_trusted_vni_entry_action_t
+    type: sai_eni_trusted_vni_entry_action_t
     attr_value_field: null
-    default: SAI_TRUSTED_VNI_ENTRY_ACTION_PERMIT
+    default: SAI_ENI_TRUSTED_VNI_ENTRY_ACTION_PERMIT
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null
@@ -57,7 +57,7 @@ sai_apis:
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
-      id: 49370429
+      id: 49840895
       single_match_priority: true
       stage: null
       keys:
@@ -78,8 +78,8 @@ sai_apis:
         ip_is_v6_field_id: 0
         is_object_key: false
       actions:
-        SAI_TRUSTED_VNI_ENTRY_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
-          name: SAI_TRUSTED_VNI_ENTRY_ACTION_PERMIT
+        SAI_ENI_TRUSTED_VNI_ENTRY_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_ENI_TRUSTED_VNI_ENTRY_ACTION_PERMIT
           id: 29028174
           attr_params: {}
 - !!python/object:utils.sai_spec.sai_api.SaiApi
