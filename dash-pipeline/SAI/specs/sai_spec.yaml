@@ -47,7 +47,7 @@ object_types:
 - SAI_OBJECT_TYPE_DASH_TUNNEL_NEXT_HOP
 - SAI_OBJECT_TYPE_OUTBOUND_PORT_MAP
 - SAI_OBJECT_TYPE_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY
-- SAI_OBJECT_TYPE_TRUSTED_VNI_ENTRY
+- SAI_OBJECT_TYPE_ENI_TRUSTED_VNI_ENTRY
 - SAI_OBJECT_TYPE_GLOBAL_TRUSTED_VNI_ENTRY
 object_entries:
 - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
@@ -117,11 +117,11 @@ object_entries:
   objects: null
   valid_only: object_type == SAI_OBJECT_TYPE_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY,
 - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
-  name: trusted_vni_entry
-  description: Object entry for DASH API trusted_vni_entry
-  type: sai_trusted_vni_entry_t
+  name: eni_trusted_vni_entry
+  description: Object entry for DASH API eni_trusted_vni_entry
+  type: sai_eni_trusted_vni_entry_t
   objects: null
-  valid_only: object_type == SAI_OBJECT_TYPE_TRUSTED_VNI_ENTRY,
+  valid_only: object_type == SAI_OBJECT_TYPE_ENI_TRUSTED_VNI_ENTRY,
 - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
   name: global_trusted_vni_entry
   description: Object entry for DASH API global_trusted_vni_entry

@@ -9,10 +9,6 @@ control eni_lookup_stage(
         meta.eni_id = eni_id;
     }
 
-    action deny() {
-        meta.dropped = true;
-    }
-    
     @SaiTable[name = "eni_ether_address_map", api = "dash_eni", order=0]
     table eni_ether_address_map {
         key = {
@@ -21,9 +17,9 @@ control eni_lookup_stage(
 
         actions = {
             set_eni;
-            @defaultonly deny;
+            @defaultonly deny(meta);
         }
-        const default_action = deny;
+        const default_action = deny(meta);
     }
 
     apply {
