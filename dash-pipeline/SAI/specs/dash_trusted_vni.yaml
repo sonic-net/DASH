@@ -4,6 +4,71 @@ description: DASH trusted VNI
 api_type: overlay
 sai_apis:
 - !!python/object:utils.sai_spec.sai_api.SaiApi
+  name: global_trusted_vni_entry
+  description: global trusted VNI entry
+  is_object: false
+  enums:
+  - !!python/object:utils.sai_spec.sai_enum.SaiEnum
+    name: sai_global_trusted_vni_entry_action_t
+    description: 'Attribute data for #SAI_GLOBAL_TRUSTED_VNI_ENTRY_ATTR_ACTION'
+    members:
+    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+      name: SAI_GLOBAL_TRUSTED_VNI_ENTRY_ACTION_PERMIT
+      description: ''
+      value: '0'
+  structs:
+  - !!python/object:utils.sai_spec.sai_struct.SaiStruct
+    name: sai_global_trusted_vni_entry_t
+    description: Entry for global_trusted_vni_entry
+    members:
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: switch_id
+      description: Switch ID
+      type: sai_object_id_t
+      objects: SAI_OBJECT_TYPE_SWITCH
+      valid_only: null
+    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
+      name: vni_range
+      description: Range matched key vni_range
+      type: sai_u32_range_t
+      objects: null
+      valid_only: null
+  attributes:
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_GLOBAL_TRUSTED_VNI_ENTRY_ATTR_ACTION
+    description: Action
+    type: sai_global_trusted_vni_entry_action_t
+    attr_value_field: null
+    default: SAI_GLOBAL_TRUSTED_VNI_ENTRY_ACTION_PERMIT
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  stats: []
+  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
+    tables:
+    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
+      id: 45800410
+      single_match_priority: true
+      stage: null
+      keys:
+      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
+        name: vni_range
+        id: 1
+        match_type: range
+        field: u32range
+        bitwidth: 24
+        ip_is_v6_field_id: 0
+        is_object_key: false
+      actions:
+        SAI_GLOBAL_TRUSTED_VNI_ENTRY_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
+          name: SAI_GLOBAL_TRUSTED_VNI_ENTRY_ACTION_PERMIT
+          id: 29028174
+          attr_params: {}
+- !!python/object:utils.sai_spec.sai_api.SaiApi
   name: eni_trusted_vni_entry
   description: ENI trusted VNI entry
   is_object: false
@@ -80,70 +145,5 @@ sai_apis:
       actions:
         SAI_ENI_TRUSTED_VNI_ENTRY_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
           name: SAI_ENI_TRUSTED_VNI_ENTRY_ACTION_PERMIT
-          id: 29028174
-          attr_params: {}
-- !!python/object:utils.sai_spec.sai_api.SaiApi
-  name: global_trusted_vni_entry
-  description: global trusted VNI entry
-  is_object: false
-  enums:
-  - !!python/object:utils.sai_spec.sai_enum.SaiEnum
-    name: sai_global_trusted_vni_entry_action_t
-    description: 'Attribute data for #SAI_GLOBAL_TRUSTED_VNI_ENTRY_ATTR_ACTION'
-    members:
-    - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-      name: SAI_GLOBAL_TRUSTED_VNI_ENTRY_ACTION_PERMIT
-      description: ''
-      value: '0'
-  structs:
-  - !!python/object:utils.sai_spec.sai_struct.SaiStruct
-    name: sai_global_trusted_vni_entry_t
-    description: Entry for global_trusted_vni_entry
-    members:
-    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
-      name: switch_id
-      description: Switch ID
-      type: sai_object_id_t
-      objects: SAI_OBJECT_TYPE_SWITCH
-      valid_only: null
-    - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
-      name: vni_range
-      description: Range matched key vni_range
-      type: sai_u32_range_t
-      objects: null
-      valid_only: null
-  attributes:
-  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
-    name: SAI_GLOBAL_TRUSTED_VNI_ENTRY_ATTR_ACTION
-    description: Action
-    type: sai_global_trusted_vni_entry_action_t
-    attr_value_field: null
-    default: SAI_GLOBAL_TRUSTED_VNI_ENTRY_ACTION_PERMIT
-    isresourcetype: false
-    flags: CREATE_AND_SET
-    object_name: null
-    allow_null: false
-    valid_only: null
-    is_vlan: false
-    deprecated: false
-  stats: []
-  p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
-    tables:
-    - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
-      id: 45800410
-      single_match_priority: true
-      stage: null
-      keys:
-      - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
-        name: vni_range
-        id: 1
-        match_type: range
-        field: u32range
-        bitwidth: 24
-        ip_is_v6_field_id: 0
-        is_object_key: false
-      actions:
-        SAI_GLOBAL_TRUSTED_VNI_ENTRY_ACTION_PERMIT: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaAction
-          name: SAI_GLOBAL_TRUSTED_VNI_ENTRY_ACTION_PERMIT
           id: 29028174
           attr_params: {}
