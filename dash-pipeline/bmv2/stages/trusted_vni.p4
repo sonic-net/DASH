@@ -7,7 +7,7 @@ control trusted_vni_stage(
 {
     action permit() {}
 
-    @SaiTable[single_match_priority = "true", api = "dash_trusted_vni", order=1, isobject="false"]
+    @SaiTable[single_match_priority = "true", api = "dash_trusted_vni", order=0, isobject="false"]
     table global_trusted_vni {
         key = {
             meta.rx_encap.vni: range @SaiVal[name = "vni_range"];
@@ -18,7 +18,7 @@ control trusted_vni_stage(
         }
     }
 
-    @SaiTable[single_match_priority = "true", api = "dash_trusted_vni"]
+    @SaiTable[single_match_priority = "true", api = "dash_trusted_vni", order=1]
     table eni_trusted_vni {
         key = {
             meta.eni_id : exact @SaiVal[type="sai_object_id_t"];
