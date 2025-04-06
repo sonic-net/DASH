@@ -39,7 +39,7 @@ control ConntrackIn(inout headers_t hdr,
                 inout metadata_t meta)
 {
 
-  action conntrackIn_allow (IPv4Address original_overlay_sip, IPv4Address original_overlay_dip) {
+  action conntrackIn_allow (IPv4Address original_overlay_sip, IPv4Address original_overlay_dip, EthernetAddress vm_nic_addr) {
   /* Invalidate entry based on TCP flags */
           // If FIN is 1 (0b000001), or if RST is 1 (0b000100):
           if ((hdr.customer_tcp.flags & 0b000101 /* FIN/RST */) != 0) {
@@ -51,6 +51,7 @@ control ConntrackIn(inout headers_t hdr,
           meta.overlay_data.is_ipv6 = 0;
           meta.overlay_data.sip = (IPv4ORv6Address)original_overlay_sip;
           meta.overlay_data.dip = (IPv4ORv6Address)original_overlay_dip;
+          meta.vm_nic_addr = vm_nic_addr;
   }
 
   action conntrackIn_miss() {
@@ -60,7 +61,7 @@ control ConntrackIn(inout headers_t hdr,
                 if (meta.routing_actions & dash_routing_actions_t.NAT46 != 0) {
                     // New PNA Extern
                     add_entry("conntrackIn_allow",
-                                {(IPv4Address)meta.src_ip_addr, (IPv4Address)meta.dst_ip_addr},
+                                {(IPv4Address)meta.src_ip_addr, (IPv4Address)meta.dst_ip_addr, meta.vm_nic_addr},
                                 EXPIRE_TIME_PROFILE_LONG);
                 }
                 //adding failure to be eventually handled
