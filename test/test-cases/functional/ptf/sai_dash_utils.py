@@ -16,6 +16,7 @@
 Thrift SAI interface basic DASH utils.
 """
 
+import functools
 from sai_thrift.sai_headers import *
 from sai_base_test import *
 
@@ -470,6 +471,22 @@ class VnetAPI(VnetObjects):
             self.neighbor_create(rif, neighbor.ip, neighbor.mac)
             #if add_routes is True:
             #    self.route_create(neighbor.ip_prefix, nhop)
+
+    def global_trusted_vni_create(self, vni):
+        """
+        Create global trusted vni
+        """
+
+        global_trusted_vni_entry = sai_thrift_global_trusted_vni_entry_t(switch_id=self.switch_id,
+                vni_range=sai_thrift_u32_range_t(min=vni, max=vni))
+        sai_thrift_create_global_trusted_vni_entry(self.client, global_trusted_vni_entry)
+        self.assertEqual(self.status(), SAI_STATUS_SUCCESS)
+        self.add_teardown_obj(self.global_trusted_vni_remove, global_trusted_vni_entry)
+
+        return global_trusted_vni_entry
+
+    def global_trusted_vni_remove(self, global_trusted_vni_entry):
+        sai_thrift_remove_global_trusted_vni_entry(self.client, global_trusted_vni_entry)
 
 
 class VnetApiEndpoints(VnetAPI):
@@ -1520,3 +1537,22 @@ class VnetTrafficMixin:
 
         pkt.getlayer("TCP").seq = seq
         pkt.getlayer("TCP").ack = ack
+
+def configureTrustedVni(func):
+    @functools.wraps(func)
+    def wrapper_configureTrustedVni(self):
+        value = func(self)
+
+        vni_set = set()
+        tx_hosts = ["tx_host", "tx_host_1", "tx_host_2", "tx_host_3", "tx_host_4"]
+        for name in tx_hosts:
+            host = getattr(self, name, None)
+            if host and host.client:
+                vni_set.add(host.client.vni)
+
+        for vni in list(vni_set):
+                self.global_trusted_vni_create(vni)
+
+        return value
+
+    return wrapper_configureTrustedVni
