@@ -474,7 +474,7 @@ class VnetAPI(VnetObjects):
 
     def global_trusted_vni_create(self, vni):
         """
-        Create outband CA PA mapping
+        Create global trusted vni
         """
 
         global_trusted_vni_entry = sai_thrift_global_trusted_vni_entry_t(switch_id=self.switch_id,
