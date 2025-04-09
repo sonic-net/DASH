@@ -277,6 +277,7 @@ control dash_ingress(
             (meta.flow_sync_state == dash_flow_sync_state_t.FLOW_MISS &&
              hdr.packet_meta.packet_source == dash_packet_source_t.EXTERNAL))
         {
+            // TODO: revisit it after inbound route HLD done
             trusted_vni_stage.apply(hdr, meta);
             dash_match_stage.apply(hdr, meta);
             if (meta.dropped) {
