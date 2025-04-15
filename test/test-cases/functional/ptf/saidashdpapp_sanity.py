@@ -2,8 +2,6 @@ from sai_thrift.sai_headers import *
 from sai_base_test import *
 from p4_dash_utils import *
 
-TEST_TIMEOUT = 5
-SPARE_TIME = 2
 
 @use_flow
 class SaiThriftDpappPktTest(SaiHelperSimplified):
@@ -352,7 +350,7 @@ class SaiThriftDpappPktTest(SaiHelperSimplified):
         verify_packet(self, self.pkt_exp, 0)
         print("\tVerifying flow created...")
         verify_flow(self.eni_mac, self.vnet & 0xffff, inner_pkt)
-        time.sleep(TEST_TIMEOUT + SPARE_TIME)
+        time.sleep(6) # flow ttl has been set to 5s
         print("\tVerifying flow aged out...")
         verify_no_flow(self.eni_mac, self.vnet & 0xffff, inner_pkt)
         
