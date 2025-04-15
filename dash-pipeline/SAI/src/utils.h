@@ -283,6 +283,29 @@ namespace dash
             }
 
         template<typename T>
+            void u32rangeSetVal(const sai_u32_range_t &range, T &t, int bits = 32)
+            {
+                assert(bits <= 32);
+
+                uint32_t val;
+                int bytes = (bits + 7) / 8;
+
+                val = htonl(range.min);
+                val = val >> (32 - bits);
+                t->set_low(&val, bytes);
+
+                val = htonl(range.max);
+                val = val >> (32 - bits);
+                t->set_high(&val, bytes);
+            }
+
+        template<typename T>
+            void u32rangeSetVal(const sai_attribute_value_t &value, T &t, int bits = 32)
+            {
+                u32rangeSetVal(value.u32range, t, bits);
+            }
+
+        template<typename T>
             void u8listSetVal(const sai_attribute_value_t &value, T &t, int bits = -1)
             {
                 t->set_value(value.u8list.list, value.u8list.count);

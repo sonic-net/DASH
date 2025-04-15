@@ -61,6 +61,16 @@
     {%- endif %}
 {%- endmacro -%}
 
+{% macro set_key_range(table, key, value) %}
+        auto mf_range = mf->mutable_range();
+        {{key.field}}SetVal({{value}}, mf_range, {{key.bitwidth}});
+    {% if table.single_match_priority %}
+        matchActionEntry->set_priority(1); // set default priority
+    {%- else %}
+        matchActionEntry->set_priority(tableEntry->priority);
+    {%- endif %}
+{%- endmacro -%}
+
 {% macro set_key_range_list(key, value) %}
         // BMv2 doesn't support "range_list" match type, and we are using "optional" match in v1model as our implementation.
         // Hence, here we only take the first item from the list and program the range start as optional match.

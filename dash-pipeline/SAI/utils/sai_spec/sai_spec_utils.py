@@ -25,7 +25,8 @@ def load_word_fixers() -> None:
         "proto": "protocol",
         "smac": "source MAC",
         "dest": "destination",
-        "dpu": "DPU"
+        "dpu": "DPU",
+        "backend": "back end"
     }
 
     # Load all SAI acronyms

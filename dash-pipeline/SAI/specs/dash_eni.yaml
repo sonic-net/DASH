@@ -65,6 +65,7 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 39883185
+      single_match_priority: false
       stage: null
       keys:
       - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
@@ -636,6 +637,19 @@ sai_apis:
     flags: CREATE_AND_SET
     object_name: null
     allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_ENI_ATTR_FLOW_TABLE_ID
+    description: Action parameter flow table id
+    type: sai_object_id_t
+    attr_value_field: u16
+    default: SAI_NULL_OBJECT_ID
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: SAI_OBJECT_TYPE_FLOW_TABLE
+    allow_null: true
     valid_only: null
     is_vlan: false
     deprecated: false
@@ -1654,10 +1668,38 @@ sai_apis:
     valid_only: null
     is_vlan: false
     deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_ENI_STAT_OUTBOUND_PORT_MAP_MISS_DROP_PACKETS
+    description: DASH ENI OUTBOUND_PORT_MAP_MISS_DROP_PACKETS stat count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_ENI_STAT_OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_MISS_DROP_PACKETS
+    description: DASH ENI OUTBOUND_PORT_MAP_PORT_RANGE_ENTRY_MISS_DROP_PACKETS stat
+      count
+    type: sai_uint64_t
+    attr_value_field: u64
+    default: null
+    isresourcetype: false
+    flags: READ_ONLY
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
   p4_meta: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4Meta
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 38483381
+      single_match_priority: false
       stage: null
       keys:
       - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
@@ -1923,5 +1965,11 @@ sai_apis:
               id: 42
               field: booldata
               bitwidth: 1
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_ENI_ATTR_FLOW_TABLE_ID: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 43
+              field: u16
+              bitwidth: 16
               ip_is_v6_field_id: 0
               skipattr: null

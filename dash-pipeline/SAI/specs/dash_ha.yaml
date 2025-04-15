@@ -405,6 +405,7 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 45319666
+      single_match_priority: false
       stage: null
       keys:
       - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
@@ -622,6 +623,7 @@ sai_apis:
     tables:
     - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaTable
       id: 49681752
+      single_match_priority: false
       stage: null
       keys:
       - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey

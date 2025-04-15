@@ -41,6 +41,7 @@ saithrift-server: host
 
 	$(SUDO) bash -c 'cd $(SAI) && \
 		export SAITHRIFTV2=y && \
+		export SAI_HEADER_DIR=/usr/include/sai && \
 		export GEN_SAIRPC_OPTS="-ve" && \
 		export SAIRPC_EXTRA_LIBS="$(shell echo $(SAIRPC_EXTRA_LIBS))" && \
 		make saithrift-build && \

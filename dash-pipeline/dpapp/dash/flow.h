@@ -111,6 +111,8 @@ typedef struct overlay_rewrite_data {
     ip46_address_t dip;
     ip6_address_t  sip_mask;
     ip6_address_t  dip_mask;
+    u16 sport;
+    u16 dport;
 #if defined(__LITTLE_ENDIAN_BITFIELD)
     u8  is_ipv6  :1;
     u8  reserved :7;
