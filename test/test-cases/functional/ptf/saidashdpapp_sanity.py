@@ -2,9 +2,8 @@ from sai_thrift.sai_headers import *
 from sai_base_test import *
 from p4_dash_utils import *
 
-TEST_TIMEOUT = 1
+TEST_TIMEOUT = 5
 SPARE_TIME = 2
-TEST_TIMEOUT_MILLI = TEST_TIMEOUT * 1000
 
 @use_flow
 class SaiThriftDpappPktTest(SaiHelperSimplified):
