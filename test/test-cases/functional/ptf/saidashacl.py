@@ -150,6 +150,11 @@ class SaiThriftDashAclTest(VnetAPI):
         self.create_entry(sai_thrift_create_direction_lookup_entry, sai_thrift_remove_direction_lookup_entry,
                           self.dle, action=SAI_DIRECTION_LOOKUP_ENTRY_ACTION_SET_OUTBOUND_DIRECTION)
 
+        self.gtve = sai_thrift_global_trusted_vni_entry_t(switch_id=self.switch_id,
+                vni_range=sai_thrift_u32_range_t(min=self.outbound_vni, max=self.outbound_vni))
+        self.create_entry(sai_thrift_create_global_trusted_vni_entry, sai_thrift_remove_global_trusted_vni_entry,
+                          self.gtve)
+
         self.in_v4_stage1_acl_group_id = self.create_obj(
             sai_thrift_create_dash_acl_group, sai_thrift_remove_dash_acl_group, ip_addr_family=SAI_IP_ADDR_FAMILY_IPV4)
         self.in_v4_stage2_acl_group_id = self.create_obj(
