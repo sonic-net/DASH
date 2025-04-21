@@ -25,7 +25,7 @@ class FlowTest(object):
                 # Parameters for the flow table. We always create a new flow table 
                 max_flow_count = 1000, 
                 dash_flow_enabled_key = (SAI_DASH_FLOW_ENABLED_KEY_ENI_MAC | SAI_DASH_FLOW_ENABLED_KEY_VNI | SAI_DASH_FLOW_ENABLED_KEY_PROTOCOL | SAI_DASH_FLOW_ENABLED_KEY_SRC_IP | SAI_DASH_FLOW_ENABLED_KEY_DST_IP | SAI_DASH_FLOW_ENABLED_KEY_SRC_PORT | SAI_DASH_FLOW_ENABLED_KEY_DST_PORT),
-                flow_ttl_in_milliseconds = 1,
+                flow_ttl_in_milliseconds = 5000,
                 # Indicate that an entry should be created
                 create_entry = False,
                 switch_id = 0,
