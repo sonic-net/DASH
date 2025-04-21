@@ -24,7 +24,7 @@ on:
 jobs:
   build:
     name: Build dash-saichallenger-client-bldr-image
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       docker_fg_flags: -u root --privileged
       docker_bg_flags: -d -u root --privileged
