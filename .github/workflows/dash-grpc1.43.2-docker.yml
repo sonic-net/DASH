@@ -24,7 +24,7 @@ on:
 jobs:
   build:
     name: Build docker dash-grpc1.43.2 image
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: ./dash-pipeline

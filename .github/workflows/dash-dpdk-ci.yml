@@ -40,7 +40,7 @@ on:
 jobs:
   build:
     name: Build DASH Pipeline for P4-DPDK
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       docker_fg_flags: --privileged
       docker_fg_root_flags: --privileged -u root
