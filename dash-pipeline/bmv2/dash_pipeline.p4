@@ -16,6 +16,7 @@
 #include "stages/ha.p4"
 #include "stages/routing_action_apply.p4"
 #include "stages/metering_update.p4"
+#include "stages/trusted_vni.p4"
 #include "underlay.p4"
 
 control dash_eni_stage(
@@ -23,10 +24,6 @@ control dash_eni_stage(
     , inout metadata_t meta
     )
 {
-    action deny() {
-        meta.dropped = true;
-    }
-
 #define ACL_GROUPS_PARAM(prefix) \
     @SaiVal[type="sai_object_id_t"] bit<16> ## prefix ##_stage1_dash_acl_group_id, \
     @SaiVal[type="sai_object_id_t"] bit<16> ## prefix ##_stage2_dash_acl_group_id, \
@@ -67,7 +64,8 @@ control dash_eni_stage(
                          bit<1> enable_reverse_tunnel_learning,
                          @SaiVal[type="sai_ip_address_t"] IPv4Address reverse_tunnel_sip,
                          bit<1> is_ha_flow_owner,
-                         @SaiVal[type="sai_object_id_t"] bit<16> flow_table_id)
+                         @SaiVal[type="sai_object_id_t"] bit<16> flow_table_id,
+                         @SaiVal[type="sai_dash_eni_mode_t", create_only="true"] dash_eni_mode_t dash_eni_mode)
     {
         meta.eni_data.cps                                                   = cps;
         meta.eni_data.pps                                                   = pps;
@@ -76,6 +74,7 @@ control dash_eni_stage(
         meta.eni_data.pl_sip                                                = pl_sip;
         meta.eni_data.pl_sip_mask                                           = pl_sip_mask;
         meta.eni_data.pl_underlay_sip                                       = pl_underlay_sip;
+        meta.eni_data.eni_mode                                              = dash_eni_mode;
         meta.u0_encap_data.underlay_dip                                     = vm_underlay_dip;
         meta.eni_data.outbound_routing_group_data.outbound_routing_group_id = outbound_routing_group_id;
         if (dash_tunnel_dscp_mode == dash_tunnel_dscp_mode_t.PIPE_MODEL) {
@@ -125,9 +124,9 @@ control dash_eni_stage(
 
         actions = {
             set_eni_attrs;
-            @defaultonly deny;
+            @defaultonly deny(meta);
         }
-        const default_action = deny;
+        const default_action = deny(meta);
     }
 
     apply {
@@ -143,10 +142,6 @@ control dash_lookup_stage(
     , inout metadata_t meta
     )
 {
-    action deny() {
-        meta.dropped = true;
-    }
-
     apply {
         pre_pipeline_stage.apply(hdr, meta);
         direction_lookup_stage.apply(hdr, meta);
@@ -155,7 +150,7 @@ control dash_lookup_stage(
         dash_eni_stage.apply(hdr, meta);
 
         if (meta.eni_data.admin_state == 0) {
-            deny();
+            deny(meta);
         }
         
         UPDATE_ENI_COUNTER(eni_rx);
@@ -202,6 +197,10 @@ control dash_match_stage(
     }
 
     apply {
+        if (meta.dropped) {
+            return;
+        }
+
         acl_group.apply();
 
         if (meta.direction == dash_direction_t.OUTBOUND) {
@@ -278,6 +277,8 @@ control dash_ingress(
             (meta.flow_sync_state == dash_flow_sync_state_t.FLOW_MISS &&
              hdr.packet_meta.packet_source == dash_packet_source_t.EXTERNAL))
         {
+            // TODO: revisit it after inbound route HLD done
+            trusted_vni_stage.apply(hdr, meta);
             dash_match_stage.apply(hdr, meta);
             if (meta.dropped) {
                 drop_action();

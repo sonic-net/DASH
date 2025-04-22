@@ -38,6 +38,7 @@ class UnderlayRouteTest(VnetApiEndpoints, VnetTrafficMixin):
         self.l3UnderlayHost1toHost2RoutingTest()
         self.l3UnderlayHost2toHost1RoutingTest()
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -137,6 +138,7 @@ class Vnet2VnetInboundDecapPaValidateSinglePortTest(VnetApiEndpoints, VnetTraffi
         self.vnet2VnetInboundRoutingTest(tx_equal_to_rx=True)
         self.vnet2VnetInboundNegativeTest()
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -268,6 +270,7 @@ class Vnet2VnetInboundDecapSinglePortTest(Vnet2VnetInboundDecapPaValidateSingleP
     Verifies positive and negative scenarios
     """
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT overlay in accordance with test purpose
@@ -397,6 +400,7 @@ class Vnet2VnetInboundMultiplePaValidatesSingleEniSinglePortTest(VnetApiEndpoint
         self.vnet2VnetInboundRoutingPositiveTest(tx_equal_to_rx=True)
         self.vnet2VnetInboundRoutingNegativeTest()
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -582,6 +586,7 @@ class Vnet2VnetInboundMultiplePaValidatesSingleEniSinglePortOverlayIpv6Test(Vnet
 
         self.vnet2VnetInboundRoutingPositiveTest(tx_equal_to_rx=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -777,6 +782,7 @@ class Vnet2VnetInboundMultiplePaValidatesMultipleEniSinglePortTest(VnetApiEndpoi
         self.vnet2VnetInboundRoutingPositiveTest(tx_equal_to_rx=True)
         self.vnet2VnetInboundRoutingNegativeTest()
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -949,6 +955,7 @@ class Vnet2VnetInboundMultiplePaValidatesMultipleEniSinglePortOverlayIpv6Test(Vn
 
         self.vnet2VnetInboundRoutingPositiveTest(tx_equal_to_rx=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -1128,6 +1135,7 @@ class Vnet2VnetSingleInboundRouteMultiplePaValidateSinglePortTest(VnetApiEndpoin
 
         self.vnet2VnetInboundRoutingTest(tx_equal_to_rx=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -1251,6 +1259,7 @@ class Vnet2VnetSingleInboundRouteMultiplePaValidateSinglePortIpv6Test(Vnet2VnetS
 
         self.vnet2VnetInboundRoutingTest(tx_equal_to_rx=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -1383,6 +1392,7 @@ class Vnet2VnetInboundEniSetUpDownSinglePortTest(VnetApiEndpoints, VnetTrafficMi
         self.eni_set_admin_state(self.eni_id, "up")
         self.vnet2VnetEniUpTrafficTest(tx_equal_to_rx=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT overlay in accordance with test purpose
@@ -1463,6 +1473,7 @@ class Vnet2VnetOutboundRouteVnetDirectSinglePortTest(VnetApiEndpoints, VnetTraff
         self.vnet2VnetOutboundRoutingTest(tx_equal_to_rx=True)
         self.vnet2VnetOutboundNegativeTest()
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -1535,6 +1546,7 @@ class Vnet2VnetOutboundRouteVnetDirectSinglePortOverlayIpv6Test(Vnet2VnetOutboun
     def setUp(self):
         super(Vnet2VnetOutboundRouteVnetDirectSinglePortOverlayIpv6Test, self).setUp(overlay_ipv6=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -1635,6 +1647,7 @@ class Vnet2VnetOutboundRouteVnetSinglePortTest(VnetApiEndpoints, VnetTrafficMixi
         self.vnet2VnetOutboundRoutingTest(tx_equal_to_rx=True)
         self.vnet2VnetOutboundNegativeTest()
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -1713,6 +1726,7 @@ class Vnet2VnetOutboundRouteVnetSinglePortOverlayIpv6Test(Vnet2VnetOutboundRoute
     def setUp(self):
         super(Vnet2VnetOutboundRouteVnetSinglePortOverlayIpv6Test, self).setUp(overlay_ipv6=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -1823,6 +1837,7 @@ class Vnet2VnetOutboundEniSetUpDownSinglePortTest(VnetApiEndpoints, VnetTrafficM
         self.eni_set_admin_state(self.eni_id, "up")
         self.vnet2VnetEniUpTrafficTest(tx_equal_to_rx=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -1910,6 +1925,7 @@ class Vnet2VnetOutboundRouteDirectSinglePortTest(VnetApiEndpoints, VnetTrafficMi
         self.outboundRouteDirectTest(tx_equal_to_rx=True)
         self.outboundRouteDirectNegativeTest()
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -1978,6 +1994,7 @@ class Vnet2VnetOutboundRouteDirectSinglePortOverlayIpv6Test(Vnet2VnetOutboundRou
     def setUp(self):
         super(Vnet2VnetOutboundRouteDirectSinglePortOverlayIpv6Test, self).setUp(overlay_ipv6=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -2076,6 +2093,7 @@ class Vnet2VnetSingleOutboundRouteMultipleCa2PaSinglePortTest(VnetApiEndpoints, 
         self.vnet2VnetOutboundRoutingTest(tx_equal_to_rx=True)
         self.vnet2VnetOutboundNegativeTest()
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -2218,6 +2236,7 @@ class Vnet2VnetSingleOutboundRouteMultipleCa2PaSinglePortIpv6Test(Vnet2VnetSingl
     def setUp(self):
         super(Vnet2VnetSingleOutboundRouteMultipleCa2PaSinglePortIpv6Test, self).setUp(overlay_ipv6=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -2372,6 +2391,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortTest(VnetApiEndpoints, VnetTr
         self.vnet2VnetOutboundDstVnetIdTrueTest(tx_equal_to_rx=True)
         self.vnet2VnetOutboundDstVnetIdFalseTest(tx_equal_to_rx=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -2459,6 +2479,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortOverlayIpv6Test(Vnet2VnetOutb
     def setUp(self):
         super(Vnet2VnetOutboundDstVnetIdRouteVnetSinglePortOverlayIpv6Test, self).setUp(overlay_ipv6=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -2570,6 +2591,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortTest(Vnet2VnetOutboundD
         self.vnet2VnetOutboundDstVnetIdTrueTest(tx_equal_to_rx=True)
         self.vnet2VnetOutboundDstVnetIdFalseTest(tx_equal_to_rx=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -2642,6 +2664,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortOverlayIpv6Test(Vnet2Vn
     def setUp(self):
         super(Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortOverlayIpv6Test, self).setUp(overlay_ipv6=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -2758,6 +2781,7 @@ class Vnet2VnetInboundOutboundMultipleConfigsSinglePortTest(VnetApiEndpoints, Vn
         self.outboundHost3toHost1Test(tx_equal_to_rx=True)
         self.inboundHost1toHost3Test(tx_equal_to_rx=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -2901,6 +2925,7 @@ class Vnet2VnetInboundOutboundMultipleConfigsSinglePortOverlayIpv6Test(Vnet2Vnet
     with underlay config (neighbour + next hop) but without underlay routes
     """
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -3054,6 +3079,7 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortTest(VnetApiEndpoints, V
         self.outboundEni1Test(tx_equal_to_rx=True)
         self.outboundEni2Test(tx_equal_to_rx=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -3228,6 +3254,7 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortOverlayIpv6Test(Vnet2Vne
     def setUp(self):
         super(Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortOverlayIpv6Test, self).setUp(overlay_ipv6=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -3410,6 +3437,7 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortTest(VnetApiEndpoints,
         self.singleEniToOutboundVm2Test(tx_equal_to_rx=True)
         self.singleEniToOutboundVm3Test(tx_equal_to_rx=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -3564,6 +3592,7 @@ class Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortOverlayIpv6Test(Vnet2V
     def setUp(self):
         super(Vnet2VnetOutboundSingleEniMultipleIpPrefixSinglePortOverlayIpv6Test, self).setUp(overlay_ipv6=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
@@ -3708,6 +3737,7 @@ class Vnet2VnetOutboundSameCaPaIpPrefixesSinglePortTest(VnetApiEndpoints, VnetTr
 
         self.vnet2VnetOutboundRouteVnetTest(tx_equal_to_rx=True)
 
+    @configureTrustedVni
     def configureTest(self):
         """
         Setup DUT in accordance with test purpose
