@@ -168,3 +168,29 @@ sai_status_t sai_dbg_generate_dump(
 
     return SAI_STATUS_NOT_IMPLEMENTED;
 }
+
+sai_status_t sai_query_stats_st_capability(
+        _In_ sai_object_id_t switch_id,
+        _In_ sai_object_type_t object_type,
+        _Inout_ sai_stat_st_capability_list_t *stats_capability)
+{
+    DASH_LOG_ENTER();
+
+    DASH_LOG_WARN("not implemented");
+
+    return SAI_STATUS_NOT_IMPLEMENTED;
+}
+
+sai_status_t sai_tam_telemetry_get_data(
+        _In_ sai_object_id_t switch_id,
+        _In_ sai_object_list_t obj_list,
+        _In_ bool clear_on_read,
+        _Inout_ sai_size_t *buffer_size,
+        _Out_ void *buffer)
+{
+    DASH_LOG_ENTER();
+
+    DASH_LOG_WARN("not implemented");
+
+    return SAI_STATUS_NOT_IMPLEMENTED;
+}
