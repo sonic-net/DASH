@@ -139,6 +139,7 @@ struct ha_data_t {
     bit<16> dp_channel_dst_port;
     bit<16> dp_channel_src_port_min;
     bit<16> dp_channel_src_port_max;
+    bit<24> dp_channel_tunnel_key;
 }
 
 #ifdef TARGET_DPDK_PNA
