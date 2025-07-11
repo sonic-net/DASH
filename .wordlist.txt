@@ -258,6 +258,7 @@ FINACK
 FINPackets
 fixup
 FNI
+FNIC
 focussed
 FPGAs
 fragmention
