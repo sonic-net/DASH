@@ -63,7 +63,7 @@ FastPath is the feature that switches traffic from using VIP-to-VIP connectivity
 
 - NSG evaluation is skipped for the ICMP redirect packets.
 
-- ICMP Redirect packets are always GRE Encapped. The platform uses GRE Key 253 (0xfd) for PublicIP, PublicLB scenarios, and 254 (0xfe) for ServiceEndpoints, PrivateEndpoint and Internal Loadbalancer scenario.
+- ICMP Redirect packets are always GRE encapped. The platform uses GRE Key 253 (0xfd) for PublicIP, PublicLB scenarios, and 254 (0xfe) for ServiceEndpoint, PrivateEndpoint and Internal Loadbalancer scenario.
 
 - ICMP Redirects are generated only for TCP traffic.
 
@@ -271,7 +271,7 @@ Note: In the below diagram, the encap to packet 3 and 13 shows NVGRE, but we hav
 
 #### Post-fastpath flow modifications
 - Maintain the VxLan encap from pre-fastpath flow.
-- DIPo = RedirectInfo.Info4.DipPav4
+- DIPo = RedirectInfo.Info4.DipPAv4
 - DMACi = RedirectInfo.Info4.VMMac
 - VNI doesn't change
 
@@ -297,7 +297,7 @@ All fast path packet handling and flow manipulation are done under the SAI API, 
 In case of live sites, for example, fast path goes wrong and incorrectly updates the flow, we will need a toggle to disable this behavior.
 
 There should be 3 knobs for controlling the 3 individual scenarios mentioned above.
-1.  vip / ilpip fastpath toggle - if enabled, honor ipv4 redirect with gre key 253
+1.  vip / ILPIP fastpath toggle - if enabled, honor ipv4 redirect with gre key 253
 1.  ST / PE fastpath toggle - if enabled, honor ipv6 redirect packet with gre key 254
 1.  ILB fastpath toggle - if enabled, honor ipv4 redirect with gre key 254
 

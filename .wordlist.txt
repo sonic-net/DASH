@@ -783,11 +783,11 @@ DMACi
 ILPIP
 SIPo
 fastpath
-Encapped
+encapped
 PrivateEndpoint
 PublicIP
 PublicLB
-ServiceEndpoints
+ServiceEndpoint
 xfd
 xfe
 ICMPv
