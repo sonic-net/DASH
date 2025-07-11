@@ -28,13 +28,13 @@ FastPath is the feature that switches traffic from using VIP-to-VIP connectivity
 
 1. When traffic destined toward the VIP lands on SLB MUX (SYN packet), the MUX picks the actual destination VM (from a list of healthy VMs in the backend pool). It should redirect the packet accordingly (standard load balancing functionality).
 
-    Once the VM is selected, the SLB MUX forwards the packet to the destination VM.
-    For the packet to be accepted by the destination, the MUX needs to put the destnation VM's MacAddress into the inner packets DestMAC field.
+    - Once the VM is selected, the SLB MUX forwards the packet to the destination VM.
+    - For the packet to be accepted by the destination, the MUX needs to put the destination VM's MAC Address into the inner packets DMACi field.
 
 1. The SLB MUX (in addition to forwarding packet to destination) **may** (often is!!!) sending the ICMP redirect packet towards the source VM from which the SYN packet originated.
 
     - The DMACi of the ICMP redirect packet is used to match the ENI that the fastpath is intended for.
-    - The ICMP Rdedirect packet has 5-tuple information that can be used to lookup the flow that needs to be "fixed".
+    - The ICMP Redirect packet has 5-tuple information that can be used to lookup the flow that needs to be "fixed".
     - The ICMP Redirect packet enough information that allows the the DPU to apply the same transforms to the packet that MUX had applied to the previous packet.
 
 1. The Source side (currently VFP) listens for ICMP redirect packets, and once received performs "flow fixup" (updates the flow to redirect next packets not to Destination VIP, but directly to the Destination PA/DIP that arrived in the ICMP redirect packet from SLB MUX).
@@ -61,7 +61,7 @@ FastPath is the feature that switches traffic from using VIP-to-VIP connectivity
 
 - The Fastpath redirect packet only changes the behavior for the subsequent outbound packets. Processing of inbound packets should remain unaffected, even if the source of the inbound packet transitioned to fastpath (Outer Source IP might change).
 
-- NSG evaluation is skipped for the ICMP redirect packets. 
+- NSG evaluation is skipped for the ICMP redirect packets.
 
 - ICMP Redirect packets are always GRE Encapped. The platform uses GRE Key 253 (0xfd) for PublicIP, PublicLB scenarios, and 254 (0xfe) for ServiceEndpoints, PrivateEndpoint and Internal Loadbalancer scenario.
 
@@ -135,15 +135,13 @@ The detailed packet format is described as below:
 |SLB IP|APPL IP|GRE|SLB MAC|VM MAC|IP|Inner Src IP|Inner Dst IP|ICMP v4/v6 Redirect|Redirect Option (IPv6 only)|Redirection Info|
 |------|-------|---|-------|------|--|------------|------------|------------------|---------------------------|----------------|
 
-
-
 The `RedirectOption` and `RedirectInfo` structs are defined as below:
 
 - ICMP redirect shall have the original inner IPv6 address as the IP header's src and dst address.
 - Redirect info shall contain the transposed IPv6 address, src and dst ports, sequence number and the encap type (NVGRE in this case) in addition to redirect address.
 
 ```c
-struct 
+struct
 {
     uint8 Type;
     uint8 Length;
@@ -154,22 +152,22 @@ struct
     uint32 SequenceNumber;
 } RedirectOption;
 
-struct 
-{ 
-    uint32 Version; 
-    uint16 AddrFamily; 
-    uint16 EncapType; 
-    uint32 EncapId; 
-    union { 
-        struct { 
-            in_addr DipPAv4; 
-            char VMMac[MAC_ADDR_SIZE]; 
-        } Info4; 
-        struct { 
-            in6_addr DipPAv6; 
-            char VMMac[MAC_ADDR_SIZE]; 
-        } Info6; 
-} RedirectInfo; 
+struct
+{
+    uint32 Version;
+    uint16 AddrFamily;
+    uint16 EncapType;
+    uint32 EncapId;
+    union {
+        struct {
+            in_addr DipPAv4;
+            char VMMac[MAC_ADDR_SIZE];
+        } Info4;
+        struct {
+            in6_addr DipPAv6;
+            char VMMac[MAC_ADDR_SIZE];
+        } Info6;
+} RedirectInfo;
 ```
 
 The following shall be used for translations:
@@ -186,7 +184,6 @@ The following shall be used for translations:
 | Encap Id                      | Redirect GRE Key/ VXLAN Id    |
 | Custom Redirect Info          | Redirect DIP and Dst Mac      |
 
-
 ## Packet transformation
 
 ### VIP / ILPIP Scenario
@@ -196,7 +193,7 @@ In scenario applies to the ENI that's sending traffic to a VIP or PublicIP hoste
 
 #### Pre-fastpath flow
 - Outbound flow with no encap.
--  Traffic snatted to either the PhysicalAddress (RoutableAddress) of the ENI, or a PublicIP assigned to an ENI. 
+- Traffic snatted to either the PhysicalAddress (RoutableAddress) of the ENI, or a PublicIP assigned to an ENI.
 
 #### Redirect format
 - ICMP
@@ -210,7 +207,6 @@ In scenario applies to the ENI that's sending traffic to a VIP or PublicIP hoste
 - DIPo = RedirectInfo.Info4.DipPAv4
 - SIPo = PreFastpathFlow.SIPo
 - DMACi = RedirectInfo.Info4.VMMac
-
 
 #### Packet signatures from captures
 
@@ -258,10 +254,8 @@ In this scenario, the ENI is sending traffic to a PrivateEndpoint or a ServiceEn
 - After the ICMP redirect, the packets start using DIPo/DMACi (100.116.86.45 00:22:48:6d:27:ce)
 ![after-ICMP-redirect](images/pl-tx-after-redirect.png)
 
-
 ### ILB Scenario
-In this scenario, the ENI is sending traffic to an InternalLoadBalander. The NPU could be serving either of the Source or Destination ENIs. This specific example is shows how a Redirect packet should be handled on the source ENI. NPU should be able to honor the ICMP Redirect sent from DST side SLB MUX, and bypass the mux in the subsequent packets.
-The behavior would be the same had we considered the case where dest ENI is receiving the Redirect
+In this scenario, the ENI is sending traffic to an InternalLoadBalancer. The NPU could be serving either of the Source or Destination ENIs. This specific example is shows how a Redirect packet should be handled on the source ENI. NPU should be able to honor the ICMP Redirect sent from DST side SLB MUX, and bypass the mux in the subsequent packets. The behavior would be the same had we considered the case where dest ENI is receiving the Redirect.
 
 Note: In the below diagram, the encap to packet 3 and 13 shows NVGRE, but we have now switched this to VXLAN encap for intra-VPC traffic.
 ![ILB-packet-transform](images/ilb-transformation.svg)
@@ -292,8 +286,6 @@ Note: In the below diagram, the encap to packet 3 and 13 shows NVGRE, but we hav
 - After the ICMP redirect, the packets start using DIPo/DMACi (10.72.82.11 00:22:48:c2:ae:3f) with VNI same as pre-fastpath
 ![after-ICMP-redirect](images/ilb-tx-after-redirect.png)
 
-
-
 ## Detailed design
 
 ### SAI API for fast path implementation
@@ -309,8 +301,7 @@ There should be 3 knobs for controlling the 3 individual scenarios mentioned abo
 1.  ST / PE fastpath toggle - if enabled, honor ipv6 redirect packet with gre key 254
 1.  ILB fastpath toggle - if enabled, honor ipv4 redirect with gre key 254
 
-By default, the knobs are enabled. 
-This toggle is added as an attribute to ENI:
+By default, the knobs are enabled. This toggle is added as an attribute to ENI:
 
 ```c
 typedef enum _sai_eni_attr_t
