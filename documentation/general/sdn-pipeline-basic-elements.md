@@ -210,7 +210,7 @@ ACL groups need to be evaluated in order. The following rules apply:
   - Priority is only within rules in the same group. No priorities across groups
     are allowed. 
   - A smaller priority number means the rule will be evaluated first.
-  - Priorities are unique withing an ACL group. Priorities might overlap across
+  - Priorities are unique within an ACL group. Priorities might overlap across
     ACL groups. 
 
 #### ACL levels
