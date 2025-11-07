@@ -523,7 +523,7 @@ per scenario and document them in a repeatable format. The behavioral model is
 compiled as software to behave exactly as hardware.  From there we will be able
 to auto-generate the APIs. The *implementation* itself does not have to be P4.
 
-For more information see the [pipeline README](../../../dash-pipeline/README.md) file.
+For more information see the [pipeline README](../../dash-pipeline/README.md) file.
 
 ## SONiC Integration testing
 
