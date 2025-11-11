@@ -71,10 +71,14 @@ control ha_stage(inout headers_t hdr,
         bit<32> dp_channel_probe_interval_ms,
         bit<32> dp_channel_probe_fail_threshold,
         @SaiVal[isreadonly="true"] bit<1> dp_channel_is_alive,
-        bit<32> dpu_driven_ha_switchover_wait_time_ms
+        bit<32> dpu_driven_ha_switchover_wait_time_ms,
+        bit<1> peer_bounceback_ip_is_v6,
+        @SaiVal[type="sai_ip_address_t"] IPv4ORv6Address peer_bounceback_ip
     ) {
         meta.ha.peer_ip_is_v6 = peer_ip_is_v6;
         meta.ha.peer_ip = peer_ip;
+        meta.ha.peer_bounceback_ip_is_v6 = peer_bounceback_ip_is_v6;
+        meta.ha.peer_bounceback_ip = peer_bounceback_ip;
 
         meta.ha.dp_channel_dst_port = dp_channel_dst_port;
         meta.ha.dp_channel_src_port_min = dp_channel_min_src_port;
