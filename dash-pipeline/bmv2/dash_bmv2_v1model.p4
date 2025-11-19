@@ -5,28 +5,32 @@ control dash_verify_checksum(inout headers_t hdr,
     apply { }
 }
 
+#define UPDATE_IPV4_CHECKSUM(IPHDR) \
+    update_checksum( \
+        IPHDR.isValid(), \
+        { \
+            IPHDR.version, \
+            IPHDR.ihl, \
+            IPHDR.diffserv, \
+            IPHDR.total_len, \
+            IPHDR.identification, \
+            IPHDR.frag_offset, \
+            IPHDR.flags, \
+            IPHDR.ttl, \
+            IPHDR.protocol, \
+            IPHDR.src_addr, \
+            IPHDR.dst_addr \
+        }, \
+        IPHDR.hdr_checksum, \
+        HashAlgorithm.csum16)
+
 control dash_compute_checksum(inout headers_t hdr,
                           inout metadata_t meta)
 {
     apply {
 #ifdef TARGET_BMV2_V1MODEL
-        update_checksum(
-         hdr.u0_ipv4.isValid(),
-         {
-             hdr.u0_ipv4.version,
-             hdr.u0_ipv4.ihl,
-             hdr.u0_ipv4.diffserv,
-             hdr.u0_ipv4.total_len,
-             hdr.u0_ipv4.identification,
-             hdr.u0_ipv4.frag_offset,
-             hdr.u0_ipv4.flags,
-             hdr.u0_ipv4.ttl,
-             hdr.u0_ipv4.protocol,
-             hdr.u0_ipv4.src_addr,
-             hdr.u0_ipv4.dst_addr
-         },
-         hdr.u0_ipv4.hdr_checksum,
-         HashAlgorithm.csum16);
+        UPDATE_IPV4_CHECKSUM(hdr.u0_ipv4);
+        UPDATE_IPV4_CHECKSUM(hdr.u1_ipv4);
 #endif // TARGET_BMV2_V1MODEL
     }
 }
