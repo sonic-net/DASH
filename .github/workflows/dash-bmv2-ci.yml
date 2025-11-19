@@ -12,6 +12,7 @@ on:
       - 'test/**.yml'
       - 'dash-pipeline/**'
       - '!dash-pipeline/dockerfiles/Dockerfile.*'
+      - '!dash-pipeline/py_model*'
       - 'dash-pipeline/dockerfiles/*.env'
       - '!dash-pipeline/.dockerignore'
       - '!dash-pipeline/**.md'

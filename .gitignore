@@ -10,6 +10,9 @@ __pycache__/
 .pytest_cache/
 dash-pipeline/bmv2/dash_pipeline.bmv2/
 dash-pipeline/dpdk-pna/dash_pipeline.dpdk
+dash-pipeline/py_model/dash_pipeline.py_model/
+dash-pipeline/py_model/p4_helper/v1/__pycache__/
+dash-pipeline/py_model/p4_helper/config/__pycache__/
 dash-pipeline/SAI/lib/
 dash-pipeline/SAI/rpc/
 dash-pipeline/dpapp/build

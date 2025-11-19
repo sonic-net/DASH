@@ -1,0 +1,103 @@
+name: DASH-PYMODEL-CI
+
+on:
+  push:
+    branches: [ "**" ]
+    paths:
+      - '.gitmodules'
+      - '.github/workflows/dash-pymodel-ci.yml'
+      - 'test/**.py'
+      - 'test/**requirements.txt'
+      - 'test/**.sh'
+      - 'test/**.yml'
+      - 'dash-pipeline/**'
+      - '!dash-pipeline/dockerfiles/Dockerfile.*'
+      - '!dash-pipeline/bmv2*'
+      - 'dash-pipeline/dockerfiles/*.env'
+      - '!dash-pipeline/.dockerignore'
+      - '!dash-pipeline/**.md'
+      - '!dash-pipeline/**.svg'
+      - '!dash-pipeline/**.png'
+      - '!dash-pipeline/**.txt'
+  pull_request:
+    branches: [ "**" ]
+    paths:
+      - '.gitmodules'
+      - '.github/workflows/dash-pymodel-ci.yml'
+      - 'test/**.py'
+      - 'test/**requirements.txt'
+      - 'test/**.sh'
+      - 'test/**.yml'
+      - 'dash-pipeline/**'
+      - '!dash-pipeline/dockerfiles/Dockerfile.*'
+      - '!dash-pipeline/bmv2*'
+      - 'dash-pipeline/dockerfiles/*.env'
+      - '!dash-pipeline/.dockerignore'
+      - '!dash-pipeline/**.md'
+      - '!dash-pipeline/**.svg'
+      - '!dash-pipeline/**.png'
+      - '!dash-pipeline/**.txt'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and Test Python DASH Pipeline
+    runs-on: ubuntu-22.04
+    env:
+      docker_fg_flags: --privileged
+      docker_fg_root_flags: --privileged -u root
+      docker_bg_root_flags: -d --privileged -u root
+      docker_bg_flags: -d --privileged
+    defaults:
+      run:
+        working-directory: ./dash-pipeline
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+    - name: Upgrade pip tooling
+      run: python -m pip install --upgrade pip setuptools wheel
+    - name: Install pymodel Python dependencies
+      run: python -m pip install -r py_model/requirements.txt
+    - name: Build python based pymodel artifacts
+      run:  make py-artifacts
+    - name: Update SAI submodule
+      run:  git submodule update --init
+    - name: Pull/Build docker saithrift-bldr image
+      run:  make docker-saithrift-bldr
+    - name: Pull/Build docker pymodel-bldr image
+      run:  make docker-pymodel-bldr
+    - name: Generate SAI API
+      run:  DOCKER_FLAGS=$docker_fg_flags make sai TARGET=pymodel
+    - name: Run pymodel
+      run:  DOCKER_FLAGS=$docker_bg_root_flags make run-pymodel HAVE_DPAPP=y
+    - name: Pull/Build docker dpapp image
+      run:  make docker-dash-dpapp
+    - name: Build dpapp
+      run:  DOCKER_FLAGS=$docker_fg_flags make dpapp TARGET=pymodel
+    - name: Check if SAI spec is updated
+      run:  DOCKER_FLAGS=$docker_fg_flags make check-sai-spec
+    - name: Prepare network
+      run:  DOCKER_FLAGS=$docker_fg_flags make network HAVE_DPAPP=y
+    - name: Run dpapp
+      run:  DOCKER_FLAGS=$docker_bg_flags make run-dpapp TARGET=pymodel
+    - name: Generate saithrift-server
+      run:  DOCKER_FLAGS=$docker_fg_flags make saithrift-server
+    - name: Generate saithrift-client local docker
+      run:  DOCKER_FLAGS=$docker_fg_flags make docker-saithrift-client
+    - name: Run saithrift server
+      run:  DOCKER_FLAGS=$docker_bg_flags make run-saithrift-server TARGET=pymodel
+    - name: Run PTF Tests
+      run:  DOCKER_FLAGS=$docker_fg_root_flags make run-saithrift-ptftests
+
+    - uses: azure/docker-login@v1
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'sonic-net/DASH' }}
+      with:
+        login-server: sonicdash.azurecr.io
+        username: ${{ secrets.DASH_ACR_USERNAME }}
+        password: ${{ secrets.DASH_ACR_PASSWORD }}
+    - name: Publish DASH pymodel builder base docker image
+      run:  make docker-publish-pymodel-bldr
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'sonic-net/DASH' }}

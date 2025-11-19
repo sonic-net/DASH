@@ -1,5 +1,10 @@
 SHELL = /bin/bash
 
+TARGET ?= bmv2
+
+IFACE0 = veth0
+IFACE1 = veth2
+
 HAVE_DPAPP ?=
 ifeq ($(HAVE_DPAPP),y)
 DPAPP_LINK = veth4
@@ -53,6 +58,13 @@ include dockerfiles/DOCKER_BMV2_BLDR_IMG.env
 # Runs bmv2 process - consider slimmer if don't need sai/p4rt clients inside
 DOCKER_BMV2_RUN_IMG ?=$(DOCKER_BMV2_BLDR_IMG)
 
+# Builds sai-P4rt clients to run inside pymodel process
+# include file defines DOCKER_PYMODEL_BLDR_IMG_NAME and DOCKER_PYMODEL_BLDR_IMG_CTAG
+include dockerfiles/DOCKER_PYMODEL_BLDR_IMG.env
+
+# Runs pymodel process - consider slimmer if don't need sai/p4rt clients inside
+DOCKER_PYMODEL_RUN_IMG ?=$(DOCKER_PYMODEL_BLDR_IMG)
+
 # Compiles sai headers, libsai, saithrift server & client/server libs
 # include file defines DOCKER_SAITHRIFT_BLDR_IMG_NAME and DOCKER_SAITHRIFT_BLDR_IMG_CTAG
 include dockerfiles/DOCKER_SAITHRIFT_BLDR_IMG.env
@@ -88,7 +100,40 @@ DOCKER_RUN := docker run \
 	-u $(HOST_USER):$(HOST_GROUP) \
 	$(DOCKER_FLAGS)
 
+# Should override --name in make targets
+DOCKER_PY_RUN := docker run \
+	-v $(PWD)/py_model:/py_model \
+	-v $(PWD)/SAI:/SAI \
+	-v $(PWD)/tests:/tests \
+	--network=host \
+	--rm \
+	-u $(HOST_USER):$(HOST_GROUP) \
+	$(DOCKER_FLAGS)
+
 SHA1SUM := sha1sum | awk '{print substr($$1,0,11);}'
+
+
+ifeq ($(TARGET), pymodel)
+MODEL_DIR = \
+	-v $(PWD)/py_model:/py_model \
+
+SAI_HEADERS_DEPS := docker-saithrift-bldr-image-exists
+DOCKER_RUN_CMD := $(DOCKER_PY_RUN)
+
+PIPELINE_MOUNTS = \
+	-v $(PWD)/$(PY_OUTDIR)/dash_pipeline.json:/etc/dash/dash_pipeline.json \
+	-v $(PWD)/$(PY_OUTDIR)/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt
+else
+MODEL_DIR = \
+	-v $(PWD)/bmv2:/bmv2 \
+
+SAI_HEADERS_DEPS := p4 docker-saithrift-bldr-image-exists
+DOCKER_RUN_CMD := $(DOCKER_RUN)
+
+PIPELINE_MOUNTS = \
+	-v $(PWD)/$(P4_OUTDIR)/dash_pipeline.json:/etc/dash/dash_pipeline.json \
+	-v $(PWD)/$(P4_OUTDIR)/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt
+endif
 
 SAI/SAI: sai-submodule
 
@@ -97,6 +142,71 @@ sai-submodule:
 	git submodule update --init
 	@echo "Initializing SAI submodule..."
 	cd SAI/SAI/test && git submodule update --init ptf
+
+
+#######################################
+# Pymodel DOCKER BUILD/PUBLISH TARGETS
+#######################################
+
+DOCKER_PYMODEL_BLDR_IMG_TAG := $(shell cat dockerfiles/Dockerfile.pymodel-bldr | $(SHA1SUM) | cut -d' ' -f1)
+DOCKER_PYMODEL_BLDR_IMG = $(DOCKER_PYMODEL_BLDR_IMG_NAME):$(DOCKER_PYMODEL_BLDR_IMG_TAG)
+
+# Docker build target (local only, no pulls)
+docker-pymodel-bldr:
+	@echo "Building local PyModel image: $(DOCKER_PYMODEL_BLDR_IMG)"
+	docker build --no-cache \
+		-f dockerfiles/Dockerfile.pymodel-bldr \
+	    -t $(DOCKER_PYMODEL_BLDR_IMG) \
+	    --build-arg user=$(DASH_USER) \
+	    --build-arg group=$(DASH_GROUP) \
+	    --build-arg uid=$(DASH_UID) \
+	    --build-arg guid=$(DASH_GUID) \
+	    --build-arg hostname=$(DASH_HOST) \
+	    --build-arg available_processors=$(shell nproc) \
+	    .
+	[ -n $(DOCKER_PYMODEL_BLDR_IMG_CTAG) ] && \
+		docker tag $(DOCKER_PYMODEL_BLDR_IMG) \
+		$(DOCKER_PYMODEL_BLDR_IMG_NAME):$(DOCKER_PYMODEL_BLDR_IMG_CTAG)
+
+docker-publish-pymodel-bldr:
+	@echo "Publish $(DOCKER_PYMODEL_BLDR_IMG) - requires credentials, can only do from DASH repo, not a fork"
+	docker push $(DOCKER_PYMODEL_BLDR_IMG)
+	[ -n $(DOCKER_PYMODEL_BLDR_IMG_CTAG) ] && \
+		docker push $(DOCKER_PYMODEL_BLDR_IMG_NAME):$(DOCKER_PYMODEL_BLDR_IMG_CTAG)
+
+docker-pull-pymodel-bldr:
+	docker pull $(DOCKER_PYMODEL_BLDR_IMG)
+
+# Only used for CI publishing to save artifact between jobs:
+docker-save-pymodel-bldr:
+	docker save --output pymodel-bldr-image.tar $(DOCKER_PYMODEL_BLDR_IMG)
+docker-load-pymodel-bldr:
+	docker load --input pymodel-bldr-image.tar
+
+
+#######################
+# Python DASH Model 
+#######################
+
+PY_OUTDIR=py_model/dash_pipeline.py_model
+PY_ARTIFACTS=$(PY_OUTDIR)/dash_pipeline_p4rt.json $(PY_OUTDIR)/dash_pipeline_p4rt.txt
+
+py-artifacts:
+	@echo "Generating artifacts for pymodel..."
+	python3 -m py_model.scripts.artifacts_gen
+
+py-artifacts-clean:
+	rm -rf $(PY_OUTDIR)
+
+.PHONY:run-pymodel
+run-pymodel: network
+	$(DOCKER_PY_RUN) \
+		--name dash-pymodel-$(USER) \
+		$(DOCKER_PYMODEL_RUN_IMG) \
+		python3 -m py_model.main_dash $(IFACE0) $(IFACE1) $(DPAPP_LINK) 
+
+kill-pymodel:
+	-docker kill dash-pymodel-$(USER)
 
 
 ######################################
@@ -135,7 +245,6 @@ $(P4_OUTDIR)/dash_pipeline_p4rt.txt: $(P4_SRC)
         --toJSON $(P4_OUTDIR)/dash_pipeline_ir.json
 
 # DPDK - experimental/WIP
-
 P4_DPDK_OUTDIR=dpdk-pna/dash_pipeline.dpdk
 
 p4c-dpdk-pna:
@@ -185,7 +294,7 @@ DOCKER_RUN_SAITHRIFT_BLDR =\
 .PHONY:sai
 sai: sai-headers sai-meta libsai
 
-sai-headers: p4 docker-saithrift-bldr-image-exists | SAI/SAI
+sai-headers: $(SAI_HEADERS_DEPS) | SAI/SAI
 	@echo "Generate SAI library headers and implementation..."
 
 	# Revert any local changes before generating the new specs.
@@ -194,12 +303,11 @@ sai-headers: p4 docker-saithrift-bldr-image-exists | SAI/SAI
 
 	mkdir -p SAI/lib
 
-	$(DOCKER_RUN) \
-		$(DOCKER_FLAGS) \
+	$(DOCKER_RUN_CMD) \
 		--name build_sai-$(USER) \
 		-u $(HOST_USER):$(HOST_GROUP) \
 		-w /SAI $(DOCKER_SAITHRIFT_BLDR_IMG) \
-		make
+		make TARGET=$(TARGET)
 
 sai-meta:
 	@echo "Generate SAI metadata..."
@@ -263,13 +371,12 @@ run-saithrift-bldr-bash:
 	    /bin/bash
 
 ######################################
-# bmv2 date-plane app TARGETS
+# date-plane app TARGETS
 ######################################
 DOCKER_RUN_DPAPP = docker run\
 	$(DOCKER_FLAGS) \
-	-v $(PWD)/bmv2:/bmv2 \
-	-v $(PWD)/$(P4_OUTDIR)/dash_pipeline.json:/etc/dash/dash_pipeline.json \
-	-v $(PWD)/$(P4_OUTDIR)/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
+	$(MODEL_DIR) \
+	$(PIPELINE_MOUNTS) \
 	-v $(PWD)/SAI:/SAI \
 	-v $(PWD)/tests:/tests \
 	-v $(PWD)/../:/dash \
@@ -347,8 +454,7 @@ DOCKER_RUN_SAITHRIFT_SRVR =\
 	$(DOCKER_FLAGS) \
 	--net=host \
 	--name dash-saithrift-server-$(USER) \
-	-v $(PWD)/$(P4_OUTDIR)/dash_pipeline.json:/etc/dash/dash_pipeline.json \
-	-v $(PWD)/$(P4_OUTDIR)/dash_pipeline_p4rt.txt:/etc/dash/dash_pipeline_p4rt.txt \
+	$(PIPELINE_MOUNTS) \
 	-v $(PWD)/SAI:/SAI \
 	-v $(PWD)/SAI/SAI/meta:/meta \
 	-w /SAI/rpc/usr/sbin \
@@ -880,4 +986,8 @@ run-saichallenger-tutorials: deploy-ixiac
 	$(DOCKER_FLAGS) \
 	$(DOCKER_SAI_CHALLENGER_CLIENT_IMG) \
 	./run-tests.sh --setup=$(SAI_CHALLENGER_SETUP_FILE) tutorial
+
+
+
+
 
