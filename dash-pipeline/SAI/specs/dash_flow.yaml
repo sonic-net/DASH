@@ -870,7 +870,7 @@ sai_apis:
     description: Action parameter DASH flow entry bulk get session filter key
     type: sai_dash_flow_entry_bulk_get_session_filter_key_t
     attr_value_field: s32
-    default: SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_INVAILD
+    default: SAI_DASH_FLOW_ENTRY_BULK_GET_SESSION_FILTER_KEY_INVALID
     isresourcetype: false
     flags: CREATE_AND_SET
     object_name: null

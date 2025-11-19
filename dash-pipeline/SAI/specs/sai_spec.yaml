@@ -266,7 +266,7 @@ enums:
   description: ''
   members:
   - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
-    name: INVAILD
+    name: INVALID
     description: ''
     value: '0'
   - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
