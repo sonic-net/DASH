@@ -39,8 +39,8 @@ sai_apis:
       valid_only: null
     - !!python/object:utils.sai_spec.sai_struct_entry.SaiStructEntry
       name: dip
-      description: Exact matched key dip
-      type: sai_ip_address_t
+      description: LPM matched key dip
+      type: sai_ip_prefix_t
       objects: null
       valid_only: null
   attributes:
@@ -289,8 +289,8 @@ sai_apis:
       - !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaKey
         name: dip
         id: 3
-        match_type: exact
-        field: ipaddr
+        match_type: lpm
+        field: ipPrefix
         bitwidth: 128
         ip_is_v6_field_id: 2
         is_object_key: false

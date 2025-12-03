@@ -373,10 +373,20 @@ class VnetAPI(VnetObjects):
         """
         Create outband CA PA mapping
         """
+        
+        # Ensure dip has a prefix length for LPM matching
+        if "/" not in dip:
+            # Auto-detect IPv4 vs IPv6 and add appropriate prefix
+            if ":" in dip:
+                # IPv6 address - add /128 for single host
+                dip = dip + "/128"
+            else:
+                # IPv4 address - add /32 for single host
+                dip = dip + "/32"
 
         ca_to_pa_entry = sai_thrift_outbound_ca_to_pa_entry_t(switch_id=self.switch_id,
                                                               dst_vnet_id=dst_vnet_id,
-                                                              dip=sai_ipaddress(dip))
+                                                              dip=sai_ipprefix(dip))
         sai_thrift_create_outbound_ca_to_pa_entry(self.client, ca_to_pa_entry,
                                                   action=SAI_OUTBOUND_CA_TO_PA_ENTRY_ACTION_SET_TUNNEL_MAPPING,
                                                   underlay_dip=sai_ipaddress(underlay_dip),

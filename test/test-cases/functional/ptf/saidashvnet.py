@@ -2635,7 +2635,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortTest(Vnet2VnetOutboundD
                                                  dst_vnet_id=dst_vnet_0,
                                                  overlay_ip="192.168.1.111")
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_0,
-                                      dip="192.168.1.111",
+                                      dip="192.168.1.111/32",
                                       underlay_dip=self.rx_host_0.ip,
                                       overlay_dmac=self.rx_host.client.mac,
                                       use_dst_vnet_vni=True)
@@ -2645,7 +2645,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortTest(Vnet2VnetOutboundD
                                                  dst_vnet_id=dst_vnet_1,
                                                  overlay_ip="192.168.2.222")
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_1,
-                                      dip="192.168.2.222",
+                                      dip="192.168.2.222/32",
                                       underlay_dip=self.rx_host_1.ip,
                                       overlay_dmac=self.rx_host_1.client.mac,
                                       use_dst_vnet_vni=False)
@@ -2708,7 +2708,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortOverlayIpv6Test(Vnet2Vn
                                                  dst_vnet_id=dst_vnet_0,
                                                  overlay_ip="bbbb::bc")
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_0,
-                                      dip="bbbb::bc",
+                                      dip="bbbb::bc/128",
                                       underlay_dip=self.rx_host_0.ip,
                                       overlay_dmac=self.rx_host.client.mac,
                                       use_dst_vnet_vni=True)
@@ -2718,7 +2718,7 @@ class Vnet2VnetOutboundDstVnetIdRouteVnetDirectSinglePortOverlayIpv6Test(Vnet2Vn
                                                  dst_vnet_id=dst_vnet_1,
                                                  overlay_ip="cccc::bc")
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_1,
-                                      dip="cccc::bc",
+                                      dip="cccc::bc/128",
                                       underlay_dip=self.rx_host_1.ip,
                                       overlay_dmac=self.rx_host_1.client.mac,
                                       use_dst_vnet_vni=False)
@@ -3203,7 +3203,7 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortTest(VnetApiEndpoints, V
                                                  dst_vnet_id=dst_vnet_2,
                                                  overlay_ip="192.168.1.111")
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_2,
-                                      dip="192.168.1.111",
+                                      dip="192.168.1.111/32",
                                       underlay_dip=self.rx_host_2.ip,
                                       overlay_dmac=self.rx_host_2.client.mac,
                                       use_dst_vnet_vni=True)
@@ -3377,7 +3377,7 @@ class Vnet2VnetOutboundMultipleEniSameIpPrefixSinglePortOverlayIpv6Test(Vnet2Vne
                                                  dst_vnet_id=dst_vnet_2,
                                                  overlay_ip="bbbb::bc")
         self.outbound_ca_to_pa_create(dst_vnet_id=dst_vnet_2,
-                                      dip="bbbb::bc",
+                                      dip="bbbb::bc/128",
                                       underlay_dip=self.rx_host_2.ip,
                                       overlay_dmac=self.rx_host_2.client.mac,
                                       use_dst_vnet_vni=True)

@@ -142,8 +142,15 @@ class SaiThriftDpappPktTest(SaiHelperSimplified):
                                                                eni_id=self.eni)
         assert(status == SAI_STATUS_SUCCESS)
 
-        dip = sai_thrift_ip_address_t(addr_family=self.sai_ip_addr_family,
-                                      addr=sai_thrift_ip_addr_t(**{self.ip_addr_family_attr: self.dst_ca_ip}))
+        # Set appropriate mask for IPv4 (/32) or IPv6 (/128)
+        if self.sai_ip_addr_family == SAI_IP_ADDR_FAMILY_IPV6:
+            mask_str = "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
+        else:
+            mask_str = "255.255.255.255"
+        
+        dip = sai_thrift_ip_prefix_t(addr_family=self.sai_ip_addr_family,
+                                     addr=sai_thrift_ip_addr_t(**{self.ip_addr_family_attr: self.dst_ca_ip}),
+                                     mask=sai_thrift_ip_addr_t(**{self.ip_addr_family_attr: mask_str}))
 
         # TODO: Enable ACL rule for IPv6
         if self.sai_ip_addr_family == SAI_IP_ADDR_FAMILY_IPV4:

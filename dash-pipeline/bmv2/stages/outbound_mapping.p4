@@ -16,7 +16,7 @@ control outbound_mapping_stage(
             /* Flow for express route */
             meta.dst_vnet_id: exact @SaiVal[type="sai_object_id_t"];
             meta.is_lkup_dst_ip_v6 : exact @SaiVal[name = "dip_is_v6"];
-            meta.lkup_dst_ip_addr : exact @SaiVal[name = "dip"];
+            meta.lkup_dst_ip_addr : lpm @SaiVal[name = "dip"];
         }
 
         actions = {
