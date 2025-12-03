@@ -383,8 +383,9 @@ class SaiThriftDashFlowTest(VnetAPI):
         self.create_entry(sai_thrift_create_eni_ether_address_map_entry,
                           sai_thrift_remove_eni_ether_address_map_entry, self.eam, eni_id=self.eni)
 
-        dip = sai_thrift_ip_address_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
-                                      addr=sai_thrift_ip_addr_t(ip4=self.dst_ca_ip))
+        dip = sai_thrift_ip_prefix_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
+                                     addr=sai_thrift_ip_addr_t(ip4=self.dst_ca_ip),
+                                     mask=sai_thrift_ip_addr_t(ip4="255.255.255.255"))
 
         ca_prefix = sai_thrift_ip_prefix_t(addr_family=SAI_IP_ADDR_FAMILY_IPV4,
                                            addr=sai_thrift_ip_addr_t(
