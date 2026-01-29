@@ -132,10 +132,10 @@ SONiC            : ▓▓▓░░░░░░░  High      (3/week)
 sonic-sairedis   : ▓▓▓░░░░░░░  High      (3/week)
 sonic-gnmi       : ▓▓░░░░░░░░  Moderate  (2/week)
 sonic-dash-ha    : ▓▓░░░░░░░░  Moderate  (2/week)
-sonic-platform.. : ▓▓░░░░░░░░  Moderate  (2/week)
-DASH             : ░░░░░░░░░░  Low       (0/week)
-sonic-dash-api   : ░░░░░░░░░░  Low       (0/week)
-sonic-swss-common: ░░░░░░░░░░  Low       (0/week)
+sonic-platform-common : ▓▓░░░░░░░░  Moderate  (2/week)
+DASH                 : ░░░░░░░░░░  No activity (0/week)
+sonic-dash-api       : ░░░░░░░░░░  No activity (0/week)
+sonic-swss-common    : ░░░░░░░░░░  No activity (0/week)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Total: 40-50+ commits/week across ecosystem
 ```
@@ -177,8 +177,8 @@ Total: 40-50+ commits/week across ecosystem
         │                       │
         ▼                       ▼
 ┌───────────────────┐  ┌─────────────────┐
-│sonic-platform-    │  │  sonic-gnmi     │
-│  common           │  │  (Telemetry)    │
+│ sonic-platform-   │  │  sonic-gnmi     │
+│   common          │  │  (Telemetry)    │
 └───────────────────┘  └─────────────────┘
         │
         ▼
@@ -200,7 +200,7 @@ Total: 40-50+ commits/week across ecosystem
 |----------|-------------|--------------|
 | **C++** | Orchestration, SAI, Performance-critical | sonic-swss, sonic-sairedis, sonic-swss-common, sonic-dash-api |
 | **Python** | CLI, Testing, Platform Abstraction | sonic-utilities, sonic-mgmt, sonic-platform-common, DASH |
-| **C** | Kernel modules, Low-level | sonic-buildimage, sonic-linux-kernel |
+| **C** | Kernel modules, Low-level | sonic-buildimage |
 | **Go** | Telemetry, gNMI/gNOI | sonic-gnmi |
 | **Rust** | High-performance services | sonic-dash-ha, sonic-swss-common (bindings) |
 | **P4** | Data plane programming | DASH (dash-pipeline) |
