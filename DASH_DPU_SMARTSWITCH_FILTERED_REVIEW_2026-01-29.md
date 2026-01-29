@@ -70,69 +70,33 @@ This review focuses **exclusively on items related to DASH, DPU, SmartSwitch, an
    - Merged: Jan 26, 2026
    - Keywords: Smartswitch
 
-6. **sonic-gnmi** #564: [ssw][ha] use ProducerStateTable for DASH_HA_ tables
-   - Merged: Jan 26, 2026
-   - Keywords: [ssw], DASH
+*(Plus 16 more PRs - see full list below)*
 
-7. **sonic-sairedis** #1738: [syncd] Remove syncd redis objects if using ZMQ notifications
-   - Merged: Jan 24, 2026
-   - Keywords: (Related to DPU/SmartSwitch optimization)
+**All Merged PRs (Complete List)**:
 
-8. **sonic-gnmi** #563: [ssw][ha] use ProducerStateTable for DASH_HA_ tables
-   - Merged: Jan 23, 2026
-   - Keywords: [ssw], DASH
-
-9. **sonic-sairedis** #1725: Fix dash meter COUNTERS_DB keys to use VID instead of RID
-   - Merged: Jan 22, 2026
-   - Keywords: DASH
-
-10. **sonic-mgmt** #21846: Update the topo mark for test_dash_eni_counter
-    - Merged: Jan 22, 2026
-    - Keywords: DASH
-
-11. **sonic-mgmt** #21816: [Nvidia] Increase the memory threshold for SN4280 DPU
-    - Merged: Jan 22, 2026
-    - Keywords: DPU
-
-12. **sonic-mgmt** #21251: [Smartswitch] ENI based forwarding test
-    - Merged: Jan 22, 2026
-    - Keywords: Smartswitch
-
-13. **sonic-mgmt** #21409: Add threshold for DHCPTopoT1Test and DHCP6TopoT1Test test on smartswitch
-    - Merged: Jan 22, 2026
-    - Keywords: smartswitch
-
-14. **sonic-buildimage** #25032: Disable unwanted containers on smartswitch DPUs
-    - Merged: Jan 22, 2026
-    - Keywords: smartswitch, DPU
-
-15. **sonic-mgmt** #21902: Add amd-dpu-specific, cpu, memory & ssdhealth parameters
-    - Merged: Jan 20, 2026
-    - Keywords: DPU
-
-16. **sonic-buildimage** #25057: [Smartswitch][Mellanox] Add watchdog reset reason
-    - Merged: Jan 20, 2026
-    - Keywords: Smartswitch
-
-17. **sonic-mgmt** #21764: HA Smartswitch testcase 12 DPU Loss
-    - Merged: Jan 16, 2026
-    - Keywords: Smartswitch, DPU
-
-18. **sonic-buildimage** #25059: [Smartswitch][nvidia-bluefield] Add watchdog device mount for pmon
-    - Merged: Jan 16, 2026
-    - Keywords: Smartswitch
-
-19. **sonic-mgmt** #21782: [Smartswitch] Stabilize test cases in test_reload_dpu.py
-    - Merged: Jan 15, 2026
-    - Keywords: Smartswitch, DPU
-
-20. **sonic-mgmt** #21153: Update OVS flow rules for HA by adding output to ptf
-    - Merged: Jan 15, 2026
-    - Keywords: HA (DASH context)
-
-21. **sonic-sairedis** #1694: [syncd] Remove syncd redis objects if using ZMQ notifications
-    - Merged: Jan 15, 2026
-    - Keywords: (SmartSwitch/DPU optimization)
+| # | Repository | PR | Title | Merged | Keywords |
+|---|------------|-----|-------|--------|----------|
+| 1 | sonic-buildimage | #24795 | Use relative path for swss-common (swss and dash-ha) | Jan 27 | DASH |
+| 2 | sonic-buildimage | #25151 | [Smartswitch] Check for file while checking for reboot cause | Jan 27 | SmartSwitch |
+| 3 | sonic-mgmt | #22125 | Moved test_dpu_show_platform_temperature.py to smartswitch folder | Jan 27 | DPU, SmartSwitch |
+| 4 | sonic-mgmt | #21911 | Smartswitch DPU temperature test | Jan 26 | SmartSwitch, DPU |
+| 5 | sonic-buildimage | #25197 | [Smartswitch][Mellanox] Introduce sleep before force power on | Jan 26 | SmartSwitch |
+| 6 | sonic-gnmi | #564 | [ssw][ha] use ProducerStateTable for DASH_HA_ tables | Jan 26 | [ssw], DASH |
+| 7 | sonic-sairedis | #1738 | [syncd] Remove syncd redis objects if using ZMQ notifications | Jan 24 | DPU/SmartSwitch |
+| 8 | sonic-gnmi | #563 | [ssw][ha] use ProducerStateTable for DASH_HA_ tables | Jan 23 | [ssw], DASH |
+| 9 | sonic-sairedis | #1725 | Fix dash meter COUNTERS_DB keys to use VID instead of RID | Jan 22 | DASH |
+| 10 | sonic-mgmt | #21846 | Update the topo mark for test_dash_eni_counter | Jan 22 | DASH |
+| 11 | sonic-mgmt | #21816 | [Nvidia] Increase the memory threshold for SN4280 DPU | Jan 22 | DPU |
+| 12 | sonic-mgmt | #21251 | [Smartswitch] ENI based forwarding test | Jan 22 | SmartSwitch |
+| 13 | sonic-mgmt | #21409 | Add threshold for DHCP tests on smartswitch | Jan 22 | SmartSwitch |
+| 14 | sonic-buildimage | #25032 | Disable unwanted containers on smartswitch DPUs | Jan 22 | SmartSwitch, DPU |
+| 15 | sonic-mgmt | #21902 | Add amd-dpu-specific cpu, memory & ssdhealth parameters | Jan 20 | DPU |
+| 16 | sonic-buildimage | #25057 | [Smartswitch][Mellanox] Add watchdog reset reason | Jan 20 | SmartSwitch |
+| 17 | sonic-mgmt | #21764 | HA Smartswitch testcase 12 DPU Loss | Jan 16 | SmartSwitch, DPU |
+| 18 | sonic-buildimage | #25059 | [Smartswitch][nvidia-bluefield] Add watchdog device mount for pmon | Jan 16 | SmartSwitch |
+| 19 | sonic-mgmt | #21782 | [Smartswitch] Stabilize test cases in test_reload_dpu.py | Jan 15 | SmartSwitch, DPU |
+| 20 | sonic-mgmt | #21153 | Update OVS flow rules for HA by adding output to ptf | Jan 15 | HA (DASH) |
+| 21 | sonic-sairedis | #1694 | [syncd] Remove syncd redis objects if using ZMQ notifications | Jan 15 | SmartSwitch/DPU |
 
 ### PRs Created in Timeframe (Jan 15-27, 2026)
 
