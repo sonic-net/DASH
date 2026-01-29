@@ -1,4 +1,4 @@
-# DASH/DPU/SmartSwitch Filtered Project Review - January 29, 2026
+# DASH/DPU/SmartSwitch Filtered Project Review - January 27, 2026
 
 ## Executive Summary
 
@@ -31,33 +31,33 @@ This review focuses **exclusively on items related to DASH, DPU, SmartSwitch, an
 
 ---
 
-## Weekly Activity (Jan 22-29, 2026) - Filtered
+## Weekly Activity (Jan 15-27, 2026) - Filtered
 
 ### Commits Containing Keywords
 
 #### sonic-net/SONiC (Design Documents)
 1. **✅ [doc]: Add gnmi feedback design for SmartSwitch (#1759)**
-   - Date: Jan 29, 2026
+   - Date: Jan 27, 2026
    - Author: Ze Gan
    - **Keyword**: SmartSwitch
    - Description: Initial version of GNMI feedback design for SmartSwitch with sequence flows between GNMI client/server and between SONiC internal components on NPU and DPU
    - Related: sonic-net/sonic-swss#3490
 
 2. **✅ BMC flows in SONiC (#2062)**
-   - Date: Jan 29, 2026
+   - Date: Jan 27, 2026
    - Author: Yuanzhe Liu
    - **Keywords**: Smart (implicit - related to SmartSwitch BMC)
    - Description: Foundational support for BMC flows in SONiC using Redfish standard for BMC operations in SmartSwitch environments
 
 #### sonic-net/sonic-buildimage
 1. **✅ Revert "[Mellanox][Smartswitch] Set default reboot type as DPU reboot" (#25079)**
-   - Date: Jan 29, 2026
+   - Date: Jan 27, 2026
    - Author: Gagan Punathil Ellath
    - **Keywords**: Smartswitch, DPU
    - Description: Reverts workaround for driver issue. Changes behavior during system reboot for DPUs - DPUs will start startup process then proceed with switch reboot
 
 2. **✅ [Nvidia-Bluefield] Update SAI to SAIBuild0.0.48.0, FW to v48.0318 (#25168)**
-   - Date: Jan 28, 2026
+   - Date: Jan 27, 2026
    - **Keywords**: DPU (Bluefield is DPU)
    - Description: SDK, FW, and SAI updates for Nvidia Bluefield DPU platform
 
@@ -176,19 +176,19 @@ This review focuses **exclusively on items related to DASH, DPU, SmartSwitch, an
 
 ## SmartSwitch/DPU Feature Development
 
-### 1. **gNMI Feedback for SmartSwitch** ✅ NEW (Jan 29, 2026)
+### 1. **gNMI Feedback for SmartSwitch** ✅ NEW (Jan 27, 2026)
 - **HLD Added**: Complete design for GNMI feedback in SmartSwitch
 - **Scope**: Sequence flows between gNMI client/server and SONiC components on NPU/DPU
 - **Impact**: Enables proper feedback mechanism for SmartSwitch configuration
 - **Related PR**: sonic-net/sonic-swss#3490
 
-### 2. **BMC Integration for SmartSwitch** ✅ NEW (Jan 29, 2026)
+### 2. **BMC Integration for SmartSwitch** ✅ NEW (Jan 27, 2026)
 - **HLD Added**: Foundational BMC flows using Redfish standard
 - **Features**: BMC IP configuration, CLI commands, techsupport BMC logs
 - **Target**: SmartSwitch and DPU platforms
 - **Impact**: Unified BMC management across SmartSwitch infrastructure
 
-### 3. **DPU Reboot Management** ✅ (Jan 29, 2026)
+### 3. **DPU Reboot Management** ✅ (Jan 27, 2026)
 - **Change**: Reverted DPU-specific reboot type default
 - **Reason**: Original workaround no longer needed after driver fix
 - **Behavior**: DPUs now start startup process before switch reboot
@@ -208,7 +208,7 @@ This review focuses **exclusively on items related to DASH, DPU, SmartSwitch, an
   - Database-backed transition state
 - **Platform**: SmartSwitch DPU modules
 
-### 6. **Bluefield DPU Platform Updates** ✅ (Jan 28, 2026)
+### 6. **Bluefield DPU Platform Updates** ✅ (Jan 27, 2026)
 - **Updates**: SAI, SDK, and firmware for Nvidia Bluefield
 - **Version**: SAIBuild0.0.48.0, FW v48.0318, SDK 26.1-RC1
 - **Purpose**: Latest fixes and functionality for DPU platform
@@ -307,7 +307,7 @@ Total: 8 commits + 2 HLDs
 Grand Total: 33 DASH/DPU/SmartSwitch items
 ```
 
-### Weekly Activity (Jan 22-29, 2026)
+### Weekly Activity (Jan 15-27, 2026)
 
 | Date | Repository | Item | Keywords |
 |------|------------|------|----------|
@@ -323,7 +323,7 @@ Grand Total: 33 DASH/DPU/SmartSwitch items
 | Jan 21 | sonic-dash-ha | BFD pinned state | DASH |
 | Jan 20 | sonic-dash-ha | libboost1.83 migration | DASH |
 
-**Total This Week**: 11 items directly related to DASH/DPU/SmartSwitch
+**Total Query Period (Jan 15-27, 2026)**: 11 items directly related to DASH/DPU/SmartSwitch
 
 ---
 
@@ -578,7 +578,7 @@ The **DASH/DPU/SmartSwitch ecosystem** represents cutting-edge technology for di
 
 ---
 
-*Filtered Report Generated: January 29, 2026*  
+*Filtered Report Generated: January 27, 2026*  
 *Filter Criteria: Keywords in Title/Body - DASH, DPU, Smart, SmartSwitch, 'Smart Switch', [ssw]*  
 *Items Found: 33 commits/PRs/issues across 8 repositories*  
 *Analysis Period: 7-90 days (Nov 2025 - Jan 2026)*

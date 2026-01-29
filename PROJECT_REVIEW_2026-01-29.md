@@ -1,4 +1,4 @@
-# DASH Project Review - January 29, 2026
+# DASH Project Review - January 27, 2026
 
 ## Executive Summary
 
@@ -8,9 +8,9 @@ The **DASH (Disaggregated API for SONiC Hosts)** project is a mature open-source
 
 ---
 
-## Recent Activity (Past 7 Days - Week of January 22-29, 2026)
+## Recent Activity (Past 7 Days - Week of January 15-27, 2026)
 
-### Changes This Week
+### Changes in Query Period (Jan 15-27)
 
 **No significant commits** were merged to the main branch in the past 7 days. The most recent activity on the main branch was:
 
@@ -261,6 +261,6 @@ The DASH project maintains a **solid foundation** with comprehensive architectur
 
 ---
 
-*Report Generated: January 29, 2026*  
+*Report Generated: January 27, 2026*  
 *Repository: sonic-net/DASH*  
 *Branch: main (as of commit 8377343)*

@@ -1,4 +1,4 @@
-# DASH Ecosystem Multi-Repository Review - January 29, 2026
+# DASH Ecosystem Multi-Repository Review - January 27, 2026
 
 ## Executive Summary
 
@@ -29,7 +29,7 @@ The **DASH (Disaggregated API for SONiC Hosts) Ecosystem** comprises three prima
 
 ## Recent Activity Analysis
 
-### Weekly Activity (Jan 22-29, 2026)
+### Weekly Activity (Jan 15-27, 2026)
 
 #### sonic-net/DASH
 - **Commits**: 0 merged to main
@@ -49,7 +49,7 @@ The **DASH (Disaggregated API for SONiC Hosts) Ecosystem** comprises three prima
 
 ---
 
-### 30-Day Activity (Dec 29, 2025 - Jan 29, 2026)
+### 30-Day Activity (Dec 29, 2025 - Jan 27, 2026)
 
 #### sonic-net/DASH
 - No commits in 30-day period
@@ -72,7 +72,7 @@ The **DASH (Disaggregated API for SONiC Hosts) Ecosystem** comprises three prima
 
 ---
 
-### 90-Day Activity (Oct 29, 2025 - Jan 29, 2026)
+### 90-Day Activity (Oct 29, 2025 - Jan 27, 2026)
 
 #### Commit Volume
 - **sonic-net/DASH**: ~2 commits (minimal)
@@ -508,6 +508,6 @@ With these improvements, the DASH ecosystem is well-positioned to become the ind
 
 ---
 
-*Report Generated: January 29, 2026*  
+*Report Generated: January 27, 2026*  
 *Ecosystem: sonic-net/DASH, sonic-net/sonic-dash-api, sonic-net/sonic-dash-ha*  
-*Analysis Period: 90 days (Oct 29, 2025 - Jan 29, 2026)*
+*Analysis Period: 90 days (Oct 29, 2025 - Jan 27, 2026)*

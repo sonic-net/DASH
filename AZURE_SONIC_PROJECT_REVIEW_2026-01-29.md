@@ -1,4 +1,4 @@
-# Azure/SONiC Project Ecosystem Review - January 29, 2026
+# Azure/SONiC Project Ecosystem Review - January 27, 2026
 
 ## Executive Summary
 
@@ -34,13 +34,13 @@ This comprehensive review covers the **Azure/SONiC Project ecosystem** spanning 
 
 | Repository | Stars | Forks | Open Issues | Language | Last Update | Activity Level |
 |------------|-------|-------|-------------|----------|-------------|----------------|
-| **SONiC** | 2,677 | 1,275 | 796 | HTML | Jan 29, 2026 | 🟢 Very High |
-| **sonic-buildimage** | 913 | 1,704 | 2,606 | C | Jan 29, 2026 | 🟢 Very High |
-| **sonic-mgmt** | 234 | 936 | 2,231 | Python | Jan 29, 2026 | 🟢 Very High |
-| **sonic-swss** | 210 | 666 | 639 | C++ | Jan 29, 2026 | 🟢 Very High |
-| **sonic-utilities** | 180 | 779 | 578 | Python | Jan 29, 2026 | 🟢 Very High |
+| **SONiC** | 2,677 | 1,275 | 796 | HTML | Jan 27, 2026 | 🟢 Very High |
+| **sonic-buildimage** | 913 | 1,704 | 2,606 | C | Jan 27, 2026 | 🟢 Very High |
+| **sonic-mgmt** | 234 | 936 | 2,231 | Python | Jan 27, 2026 | 🟢 Very High |
+| **sonic-swss** | 210 | 666 | 639 | C++ | Jan 27, 2026 | 🟢 Very High |
+| **sonic-utilities** | 180 | 779 | 578 | Python | Jan 27, 2026 | 🟢 Very High |
 | **DASH** | 99 | 100 | 85 | Python | Dec 20, 2025 | 🟡 Moderate |
-| **sonic-sairedis** | 68 | 342 | 127 | C++ | Jan 29, 2026 | 🟢 High |
+| **sonic-sairedis** | 68 | 342 | 127 | C++ | Jan 27, 2026 | 🟢 High |
 | **sonic-swss-common** | 56 | 329 | 99 | C++ | Jan 6, 2026 | 🟢 High |
 | **sonic-platform-common** | 54 | 204 | 44 | Python | Jan 25, 2026 | 🟢 High |
 | **sonic-gnmi** | 42 | 96 | 81 | Go | Jan 23, 2026 | 🟢 High |
@@ -49,7 +49,7 @@ This comprehensive review covers the **Azure/SONiC Project ecosystem** spanning 
 
 ---
 
-## Weekly Activity Summary (Jan 22-29, 2026)
+## Weekly Activity Summary (Jan 15-27, 2026)
 
 ### Commits This Week (by Repository)
 
@@ -68,7 +68,7 @@ This comprehensive review covers the **Azure/SONiC Project ecosystem** spanning 
 | **sonic-dash-api** | 0 | No activity this week |
 | **sonic-swss-common** | 0 | No activity this week |
 
-**Total Weekly Commits**: **40-50+** across ecosystem
+**Total Commits in Period**: **40-50+** across ecosystem
 
 ---
 
@@ -122,7 +122,7 @@ This comprehensive review covers the **Azure/SONiC Project ecosystem** spanning 
 ### Commit Activity (Last 7 Days)
 
 ```
-Commits per Repository (Jan 22-29, 2026):
+Commits per Repository (Jan 15-27, 2026):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 sonic-buildimage : ▓▓▓▓▓▓▓▓▓▓  Very High (10+/week)
 sonic-swss       : ▓▓▓▓▓▓▓▓▓▓  Very High (10+/week)
@@ -408,7 +408,7 @@ Total: 40-50+ commits/week across ecosystem
 
 | Metric | Value | Trend |
 |--------|-------|-------|
-| Weekly Commits | 40-50+ | 📈 Increasing |
+| Commits in Period | 40-50+ | 📈 Increasing |
 | Active Contributors (30d) | 100+ | ➡️ Stable |
 | Issue Resolution Time | Days-Weeks | ➡️ Varies |
 | PR Merge Time | Days-Weeks | ➡️ Varies |
@@ -466,9 +466,9 @@ The project sets the gold standard for open-source networking infrastructure.
 
 ---
 
-*Report Generated: January 29, 2026*  
+*Report Generated: January 27, 2026*  
 *Ecosystem: Azure/SONiC Project (13+ repositories)*  
-*Analysis Period: 7-90 days (Dec 2025 - Jan 2026)*  
+*Analysis Period: Jan 15-27, 2026 (with 30/90 day context)*  
 *Total Commits Analyzed: 1000+*
 
 ---
