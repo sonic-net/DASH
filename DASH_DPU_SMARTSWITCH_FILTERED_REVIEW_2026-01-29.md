@@ -300,7 +300,7 @@ SONiC             : ▓▓░░░░░░░░   2 HLDs (High impact)
 sonic-buildimage : ▓▓░░░░░░░░   2 commits
 sonic-gnmi       : ▓░░░░░░░░░   1 commit
 sonic-sairedis   : ▓░░░░░░░░░   1 commit
-sonic-platform.. : ▓▓░░░░░░░░   2 commits
+sonic-platform-common : ▓▓░░░░░░░░   2 commits
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Total: 8 commits + 2 HLDs
 
