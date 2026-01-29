@@ -18,6 +18,9 @@ Four comprehensive review documents have been generated, each with a different s
 **Items Found**: 33 matching items
 
 **Key Sections**:
+- ✅ **Query Period Analysis** - NEW!
+  - PRs Merged (Jan 15-27): 21 PRs by repository
+  - PRs Created (Jan 15-27): 33 PRs with full table
 - ✅ Weekly Activity (Jan 15-27, 2026) - 11 items
 - ✅ DASH Ecosystem Complete Activity (25 commits/90d)
 - ✅ SmartSwitch/DPU Feature Development
@@ -27,6 +30,8 @@ Four comprehensive review documents have been generated, each with a different s
 - ✅ Recommendations by Priority
 
 **Quick Stats**:
+- **PRs Merged (Jan 15-27)**: 21 PRs
+- **PRs Created (Jan 15-27)**: 33 PRs
 - DASH ecosystem: 25 commits (sonic-dash-ha: 18, sonic-dash-api: 5, DASH: 2)
 - SmartSwitch/DPU (other repos): 8 commits + 2 HLDs
 - Total stars (all matching repos): 4,541
