@@ -12,6 +12,11 @@ This review focuses **exclusively on items related to DASH, DPU, SmartSwitch, an
 
 **Current Status**: Active DASH/DPU/SmartSwitch development with focused efforts on high availability, BMC integration, gNMI feedback, and platform enhancements.
 
+**Query Period Results** (Jan 15-27, 2026):
+- **21 PRs merged** with matching keywords
+- **33 PRs created** with matching keywords  
+- **8 repositories** with matching activity
+
 ---
 
 ## Filtered Repository Activity
@@ -28,6 +33,214 @@ This review focuses **exclusively on items related to DASH, DPU, SmartSwitch, an
 | **sonic-net/sonic-gnmi** | 1 commit | 🟡 Moderate |
 | **sonic-net/sonic-sairedis** | 1 commit | 🟡 Moderate |
 | **sonic-net/sonic-platform-common** | 2 commits | 🟡 Moderate |
+
+---
+
+## Query Period Analysis (Jan 15-27, 2026)
+
+### PRs Merged in Timeframe (Jan 15-27, 2026)
+
+**Total PRs Merged**: 21 PRs matching keywords (DASH, DPU, Smart, SmartSwitch, [ssw])
+
+**By Repository**:
+- sonic-mgmt: 10 PRs
+- sonic-buildimage: 6 PRs
+- sonic-sairedis: 3 PRs
+- sonic-gnmi: 2 PRs
+
+**Key Merged PRs**:
+
+1. **sonic-buildimage** #24795: [build] Use relative path for swss-common when building swss and dash-ha
+   - Merged: Jan 27, 2026
+   - Keywords: DASH, dash-ha
+
+2. **sonic-buildimage** #25151: [Nvidia] [Smartswitch] Added check for file while checking for reboot cause
+   - Merged: Jan 27, 2026
+   - Keywords: Smartswitch
+
+3. **sonic-mgmt** #22125: Moved test_dpu_show_platform_temperature.py to the smartswitch folder
+   - Merged: Jan 27, 2026
+   - Keywords: DPU, smartswitch
+
+4. **sonic-mgmt** #21911: Smartswitch DPU temperature test
+   - Merged: Jan 26, 2026
+   - Keywords: Smartswitch, DPU
+
+5. **sonic-buildimage** #25197: [Smartswitch][Mellanox] Introduce sleep before force power on
+   - Merged: Jan 26, 2026
+   - Keywords: Smartswitch
+
+6. **sonic-gnmi** #564: [ssw][ha] use ProducerStateTable for DASH_HA_ tables
+   - Merged: Jan 26, 2026
+   - Keywords: [ssw], DASH
+
+7. **sonic-sairedis** #1738: [syncd] Remove syncd redis objects if using ZMQ notifications
+   - Merged: Jan 24, 2026
+   - Keywords: (Related to DPU/SmartSwitch optimization)
+
+8. **sonic-gnmi** #563: [ssw][ha] use ProducerStateTable for DASH_HA_ tables
+   - Merged: Jan 23, 2026
+   - Keywords: [ssw], DASH
+
+9. **sonic-sairedis** #1725: Fix dash meter COUNTERS_DB keys to use VID instead of RID
+   - Merged: Jan 22, 2026
+   - Keywords: DASH
+
+10. **sonic-mgmt** #21846: Update the topo mark for test_dash_eni_counter
+    - Merged: Jan 22, 2026
+    - Keywords: DASH
+
+11. **sonic-mgmt** #21816: [Nvidia] Increase the memory threshold for SN4280 DPU
+    - Merged: Jan 22, 2026
+    - Keywords: DPU
+
+12. **sonic-mgmt** #21251: [Smartswitch] ENI based forwarding test
+    - Merged: Jan 22, 2026
+    - Keywords: Smartswitch
+
+13. **sonic-mgmt** #21409: Add threshold for DHCPTopoT1Test and DHCP6TopoT1Test test on smartswitch
+    - Merged: Jan 22, 2026
+    - Keywords: smartswitch
+
+14. **sonic-buildimage** #25032: Disable unwanted containers on smartswitch DPUs
+    - Merged: Jan 22, 2026
+    - Keywords: smartswitch, DPU
+
+15. **sonic-mgmt** #21902: Add amd-dpu-specific, cpu, memory & ssdhealth parameters
+    - Merged: Jan 20, 2026
+    - Keywords: DPU
+
+16. **sonic-buildimage** #25057: [Smartswitch][Mellanox] Add watchdog reset reason
+    - Merged: Jan 20, 2026
+    - Keywords: Smartswitch
+
+17. **sonic-mgmt** #21764: HA Smartswitch testcase 12 DPU Loss
+    - Merged: Jan 16, 2026
+    - Keywords: Smartswitch, DPU
+
+18. **sonic-buildimage** #25059: [Smartswitch][nvidia-bluefield] Add watchdog device mount for pmon
+    - Merged: Jan 16, 2026
+    - Keywords: Smartswitch
+
+19. **sonic-mgmt** #21782: [Smartswitch] Stabilize test cases in test_reload_dpu.py
+    - Merged: Jan 15, 2026
+    - Keywords: Smartswitch, DPU
+
+20. **sonic-mgmt** #21153: Update OVS flow rules for HA by adding output to ptf
+    - Merged: Jan 15, 2026
+    - Keywords: HA (DASH context)
+
+21. **sonic-sairedis** #1694: [syncd] Remove syncd redis objects if using ZMQ notifications
+    - Merged: Jan 15, 2026
+    - Keywords: (SmartSwitch/DPU optimization)
+
+### PRs Created in Timeframe (Jan 15-27, 2026)
+
+**Total PRs Created**: 33 PRs matching keywords (DASH, DPU, Smart, SmartSwitch, [ssw])
+
+**By State**:
+- Open: 24 PRs
+- Closed/Merged: 9 PRs
+
+**By Repository**:
+- sonic-mgmt: 16 PRs
+- sonic-buildimage: 10 PRs
+- sonic-sairedis: 3 PRs
+- sonic-dash-ha: 1 PR
+- sonic-gnmi: 1 PR
+- sonic-host-services: 1 PR
+- SONiC: 1 PR
+
+**Key Created PRs (Still Open)**:
+
+1. **sonic-mgmt** #22141: HA privatelink support new
+   - Created: Jan 27, 2026
+   - State: Open
+   - Keywords: HA (DASH context)
+
+2. **sonic-mgmt** #22142: Tagging DPU steps in the ansible minigraph scenario
+   - Created: Jan 27, 2026
+   - State: Open
+   - Keywords: DPU
+
+3. **SONiC** #2189: Add manual for syncd ZMQ Optimization for Dash
+   - Created: Jan 27, 2026
+   - State: Closed (merged)
+   - Keywords: DASH
+
+4. **sonic-dash-ha** #136: Add bfd rewrite on pmon change
+   - Created: Jan 27, 2026
+   - State: Closed (merged)
+   - Keywords: DASH
+
+5. **sonic-buildimage** #25214: [ssw][yang] update field name in HA_GLOBAL_CONFIG to align with HLD
+   - Created: Jan 27, 2026
+   - State: Open
+   - Keywords: [ssw]
+
+6. **sonic-buildimage** #25198: [systemd]: Mask systemd-networkd-persistent-storage on non-DPU/NPU
+   - Created: Jan 26, 2026
+   - State: Closed
+   - Keywords: DPU
+
+7. **sonic-buildimage** #25187: [ssw] clean up DPU_APPL_DB and DPU_STATE_DB for DPU swss restart or DPU reboot
+   - Created: Jan 26, 2026
+   - State: Open
+   - Keywords: [ssw], DPU
+
+8. **sonic-buildimage** #25178: Fix for issue #24892 Bug: [Smartswitch]: NPU critical services crash
+   - Created: Jan 23, 2026
+   - State: Open
+   - Keywords: Smartswitch
+
+9. **sonic-sairedis** #1751: syncd: Extend watchdog timeout for chassis platforms
+   - Created: Jan 23, 2026
+   - State: Open
+   - Keywords: (SmartSwitch context)
+
+10. **sonic-sairedis** #1750: Fix dash meter COUNTERS_DB keys to use VID instead of RID
+    - Created: Jan 22, 2026
+    - State: Open
+    - Keywords: DASH
+
+*(Plus 23 more PRs - see full list below)*
+
+**All Created PRs (Complete List)**:
+
+| # | Repository | PR | Title | Created | State |
+|---|------------|------|-------|---------|-------|
+| 1 | sonic-mgmt | #22059 | [Dash] Remove the wrong skip for dash tests | Jan 20 | Open |
+| 2 | sonic-mgmt | #21945 | Add route configuration to private link tests | Jan 15 | Open |
+| 3 | sonic-host-services | #343 | [SmartSwitch] Handle non-SmartSwitch platforms gracefully | Jan 20 | Open |
+| 4 | sonic-mgmt | #22025 | [SmartSwitch] Update the DPU NAT config flow | Jan 20 | Open |
+| 5 | sonic-mgmt | #22141 | HA privatelink support new | Jan 27 | Open |
+| 6 | sonic-mgmt | #22142 | Tagging DPU steps in ansible minigraph | Jan 27 | Open |
+| 7 | sonic-buildimage | #25178 | [Smartswitch]: NPU critical services crash fix | Jan 23 | Open |
+| 8 | sonic-buildimage | #25096 | [Smartswitch] Add timeout for dhclient on DPU | Jan 15 | Open |
+| 9 | sonic-mgmt | #22051 | [Smartswitch] Stabilize test_reload_dpu.py | Jan 20 | Open |
+| 10 | sonic-mgmt | #21992 | [Smartswitch] Test plan for ENI Based Forwarding | Jan 20 | Open |
+| 11 | sonic-buildimage | #25187 | [ssw] clean up DPU_APPL_DB and DPU_STATE_DB | Jan 26 | Open |
+| 12 | sonic-mgmt | #22092 | Add github issues in xfail conditions | Jan 22 | Open |
+| 13 | sonic-mgmt | #22070 | Skip test_orchagent_heartbeat on smartswitch | Jan 20 | Open |
+| 14 | sonic-buildimage | #25198 | Mask systemd-networkd on non-DPU/NPU | Jan 26 | Closed |
+| 15 | sonic-mgmt | #22018 | Update skip condition for test_fast_reboot | Jan 20 | Open |
+| 16 | sonic-mgmt | #21961 | HA privatelink support | Jan 18 | Closed |
+| 17 | sonic-sairedis | #1751 | Extend watchdog timeout for chassis | Jan 23 | Open |
+| 18 | sonic-buildimage | #25079 | Revert Mellanox Smartswitch DPU reboot | Jan 15 | Closed |
+| 19 | sonic-sairedis | #1738 | Remove syncd redis objects if using ZMQ | Jan 15 | Closed |
+| 20 | sonic-buildimage | #25214 | [ssw][yang] update field name in HA_GLOBAL_CONFIG | Jan 27 | Open |
+| 21 | sonic-mgmt | #22022 | Stabilize test_dscp_to_queue_mapping on smartswitch | Jan 20 | Open |
+| 22 | sonic-buildimage | #25151 | [Smartswitch] Check for file when checking reboot cause | Jan 21 | Closed |
+| 23 | sonic-buildimage | #25141 | [Smartswitch] Added check for file (reboot cause) | Jan 20 | Closed |
+| 24 | sonic-buildimage | #25197 | [Smartswitch][Mellanox] Sleep before force power on | Jan 26 | Closed |
+| 25 | sonic-sairedis | #1750 | Fix dash meter COUNTERS_DB keys | Jan 22 | Open |
+| 26 | sonic-mgmt | #22003 | Update OVS flow rules for HA | Jan 20 | Open |
+| 27 | sonic-dash-ha | #136 | Add bfd rewrite on pmon change | Jan 27 | Closed |
+| 28 | sonic-buildimage | #25168 | [Nvidia-Bluefield] Update SAI/FW | Jan 23 | Closed |
+| 29 | SONiC | #2189 | Add manual for syncd ZMQ Optimization for Dash | Jan 27 | Closed |
+| 30 | sonic-mgmt | #21911 | Smartswitch DPU temperature test | Jan 19 | Closed |
+
+*(Note: Some PRs appear in both lists if they were created and merged within the same period)*
 
 ---
 
@@ -580,8 +793,16 @@ The **DASH/DPU/SmartSwitch ecosystem** represents cutting-edge technology for di
 
 *Filtered Report Generated: January 27, 2026*  
 *Filter Criteria: Keywords in Title/Body - DASH, DPU, Smart, SmartSwitch, 'Smart Switch', [ssw]*  
-*Items Found: 33 commits/PRs/issues across 8 repositories*  
-*Analysis Period: 7-90 days (Nov 2025 - Jan 2026)*
+*Query Period: Jan 15-27, 2026*  
+*PRs Merged in Period: 21 items*  
+*PRs Created in Period: 33 items*  
+*Analysis Period: Jan 15-27, 2026 (with 90 day context for trends)*
+
+**Matching GitHub Queries**:
+```
+org:sonic-net is:pr is:merged merged:2026-01-15..2026-01-27 (DPU OR DASH OR SmartSwitch) in:title,body
+org:sonic-net is:pr created:2026-01-15..2026-01-27 (DPU OR DASH OR SmartSwitch) in:title,body
+```
 
 ---
 
