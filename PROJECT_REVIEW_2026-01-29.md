@@ -21,7 +21,7 @@ The **DASH (Disaggregated API for SONiC Hosts)** project is a mature open-source
 The project has seen **moderate development activity** with focused improvements:
 
 #### November 2025:
-- **PR #688** (Nov 19): Fixed typo in enum `dash_flow_entry_bulk_get_session_filter_key_t` (INVAILD → INVALID)
+- **PR #688** (Nov 19): Fixed typo in enum `dash_flow_entry_bulk_get_session_filter_key_t` (changed "INVAILD" to "INVALID")
 - **PR #447** (Nov 12): Referenced dash-sonic-hld to sonic-net repository
 
 #### October 2025:
