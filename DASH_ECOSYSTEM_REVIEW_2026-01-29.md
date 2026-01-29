@@ -52,7 +52,8 @@ The **DASH (Disaggregated API for SONiC Hosts) Ecosystem** comprises three prima
 ### 30-Day Activity (Dec 29, 2025 - Jan 29, 2026)
 
 #### sonic-net/DASH
-- 1 typo fix (Nov 19 - outside 30 days)
+- No commits in 30-day period
+- Most recent commit was Nov 19 (typo fix, 70+ days ago)
 - Minimal main branch activity
 
 #### sonic-net/sonic-dash-api
@@ -61,14 +62,13 @@ The **DASH (Disaggregated API for SONiC Hosts) Ecosystem** comprises three prima
 - **Active Development**: Build infrastructure improvements
 
 #### sonic-net/sonic-dash-ha
-- 13+ commits merged
+- 6 commits merged in 30-day period
 - Major features:
   - BFD pinned state implementation (PR #134, Jan 21)
   - libboost 1.83 migration (PR #133, Jan 20)
-  - BFD probe update fixes (PR #121, Oct 21)
-  - Route exchange improvements (multiple PRs)
-  - Neighbor resolution (PR #120, Oct 21)
+  - Build improvements (PR #135-136, Jan 27-28)
 - **Very Active**: Continuous feature development and bug fixes
+- Note: Additional commits (PRs #121, #120) outside 30-day window
 
 ---
 
@@ -147,7 +147,7 @@ The **DASH (Disaggregated API for SONiC Hosts) Ecosystem** comprises three prima
 
 | Metric | DASH | sonic-dash-api | sonic-dash-ha | Total/Avg |
 |--------|------|----------------|---------------|-----------|
-| **Active Contributors (90d)** | ~5 | ~6 | ~5 | ~16 |
+| **Active Contributors (90d)** | ~5 | ~6 | ~5 | ~10 (unique) |
 | **Commits (90d)** | 2 | 5 | 18 | 25 |
 | **Commits (30d)** | 0 | 2 | 13 | 15 |
 | **Commits (7d)** | 0 | 0 | 2 | 2 |
@@ -356,9 +356,9 @@ sonic-dash-ha:   BFD management, DPU state sync, bug fixes
 ### Immediate Actions (Next 2 Weeks)
 
 **All Repositories:**
-1. ✅ Triage all open issues, close stale ones
-2. ✅ Update documentation links (Issue #693)
-3. ✅ Set up monthly cross-repo sync meetings
+1. 📋 Triage all open issues, close stale ones
+2. 📋 Update documentation links (Issue #693)
+3. 📋 Set up monthly cross-repo sync meetings
 
 **DASH:**
 1. Review and decide on Python model PR (#687)
@@ -443,7 +443,7 @@ sonic-dash-ha:   BFD management, DPU state sync, bug fixes
 
 | Repository | Open Issues | Closed (30d) | Resolution Time (avg) |
 |------------|-------------|--------------|---------------------|
-| DASH | 10 | 0 | N/A (slow) |
+| DASH | 10 | 0 | N/A (no data) |
 | sonic-dash-api | 2 | 1 | ~4 months |
 | sonic-dash-ha | 12 | 5 | ~1-2 weeks |
 
