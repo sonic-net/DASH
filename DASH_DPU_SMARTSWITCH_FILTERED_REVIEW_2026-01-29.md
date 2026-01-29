@@ -482,16 +482,16 @@ SmartSwitch/DPU Architecture:
 |------------|-------|-------|-------------|----------|----------------------------------|
 | **SONiC** | 2,677 | 1,275 | 796 | HTML | 2 HLDs (SmartSwitch designs) |
 | **sonic-buildimage** | 913 | 1,704 | 2,606 | C | 2 commits (DPU/SmartSwitch) |
-| **sonic-mgmt** | 234 | 936 | 2,231 | Python | Testing infrastructure |
-| **sonic-swss** | 210 | 666 | 639 | C++ | 1 commit (DASH VNET) |
-| **sonic-utilities** | 180 | 779 | 578 | Python | CLI infrastructure |
+| **sonic-mgmt** | 234 | 936 | 2,231 | Python | Test infrastructure (supports DASH) |
+| **sonic-swss** | 210 | 666 | 639 | C++ | 1 commit (DASH VNET relaxation) |
+| **sonic-utilities** | 180 | 779 | 578 | Python | CLI infrastructure (supports DASH) |
 | **DASH** | 99 | 100 | 10 | Python | 2 commits (core DASH) |
-| **sonic-sairedis** | 68 | 342 | 127 | C++ | 1 commit (DASH meters) |
-| **sonic-swss-common** | 56 | 329 | 99 | C++ | Common libraries |
-| **sonic-platform-common** | 54 | 204 | 44 | Python | 2 commits (SmartSwitch DPU) |
-| **sonic-gnmi** | 42 | 96 | 81 | Go | 1 commit (DASH_HA [ssw]) |
-| **sonic-dash-api** | 5 | 27 | 2 | C++ | 5 commits (DASH API) |
-| **sonic-dash-ha** | 3 | 18 | 12 | Rust | 18 commits (DASH HA) |
+| **sonic-sairedis** | 68 | 342 | 127 | C++ | 1 commit (DASH meter fix) |
+| **sonic-swss-common** | 56 | 329 | 99 | C++ | Common libraries (DASH dependencies) |
+| **sonic-platform-common** | 54 | 204 | 44 | Python | 2 commits (SmartSwitch DPU modules) |
+| **sonic-gnmi** | 42 | 96 | 81 | Go | 1 commit (DASH HA tables [ssw]) |
+| **sonic-dash-api** | 5 | 27 | 2 | C++ | 5 commits (DASH API protobuf) |
+| **sonic-dash-ha** | 3 | 18 | 12 | Rust | 18 commits (DASH HA services) |
 | **Overall** | **4,541** | **6,476** | **7,225** | Multi | **33 items total** |
 
 **DASH Ecosystem (Subset)**
