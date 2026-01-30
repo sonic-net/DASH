@@ -21,6 +21,12 @@ Four comprehensive review documents have been generated, each with a different s
 - ✅ **Query Period Analysis** - NEW!
   - PRs Merged (Jan 15-27): 21 PRs by repository
   - PRs Created (Jan 15-27): 33 PRs with full table
+- ✅ **PR Activity Analysis** - NEW!
+  - Most commented PRs (engagement metrics)
+  - Review patterns and coverage
+  - Label activity and priorities
+  - Approval patterns and timing
+  - Engagement insights (high-discussion vs quick-merge)
 - ✅ Weekly Activity (Jan 15-27, 2026) - 11 items
 - ✅ DASH Ecosystem Complete Activity (25 commits/90d)
 - ✅ SmartSwitch/DPU Feature Development
