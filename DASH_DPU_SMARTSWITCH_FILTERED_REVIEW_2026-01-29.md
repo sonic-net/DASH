@@ -23,20 +23,24 @@ This review focuses **exclusively on items related to DASH, DPU, SmartSwitch, an
 
 ### Repositories with DASH/DPU/SmartSwitch Activity
 
-**Note**: "Relevant Items" shows the count and type of items matching your keywords in the query period (Jan 15-27, 2026) and extended context (90 days for DASH repos).
+**Note**: "Relevant Items" shows the count and type of items matching your keywords in the query period (Jan 15-27, 2026). DASH core repos are included for context even with 0 PRs in period due to their foundational role.
 
 | Repository | Relevant Items | Activity Level |
 |------------|----------------|----------------|
-| **sonic-net/DASH** | All items (core DASH repo) | 🟡 Moderate |
-| **sonic-net/sonic-dash-api** | All items (DASH API repo) | 🟡 Moderate |
-| **sonic-net/sonic-dash-ha** | All items (DASH HA repo) | 🟢 High |
+| **sonic-net/DASH** | 0 PRs in period (core DASH repo) | 🟡 Moderate* |
+| **sonic-net/sonic-dash-api** | 0 PRs in period (DASH API repo) | 🟡 Moderate* |
+| **sonic-net/sonic-dash-ha** | 0 PRs merged + 1 PR created | 🟢 High |
 | **sonic-net/SONiC** | 2 HLDs (design documents) | 🟢 High |
 | **sonic-net/sonic-buildimage** | 6 PRs merged + 10 PRs created | 🟢 High |
 | **sonic-net/sonic-mgmt** | 10 PRs merged + 16 PRs created | 🟢 Very High |
 | **sonic-net/sonic-gnmi** | 2 PRs merged + 1 PR created | 🟡 Moderate |
 | **sonic-net/sonic-sairedis** | 3 PRs merged + 3 PRs created | 🟡 Moderate |
-| **sonic-net/sonic-platform-common** | Platform infrastructure (context) | 🟡 Moderate |
-| **sonic-net/sonic-host-services** | 1 PR created | 🟡 Low |
+| **sonic-net/sonic-platform-common** | 0 PRs in period (context only) | 🟡 Moderate* |
+| **sonic-net/sonic-host-services** | 0 PRs merged + 1 PR created | 🟡 Low |
+
+**Activity Level Notes**:
+- \*Moderate rating based on 90-day context and foundational importance
+- Ratings reflect both query period activity and broader ecosystem role
 
 ---
 
