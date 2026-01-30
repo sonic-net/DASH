@@ -57,14 +57,14 @@ Example: `weekly_reviews/DASH_DPU_SmartSwitch_Review_2026-01-15_to_2026-01-27.md
 Add to crontab (`crontab -e`):
 
 ```bash
-# Run every Monday at 9 AM
-0 9 * * 1 cd /path/to/DASH && ./scripts/generate_weekly_review.sh
+# Run every Tuesday at 2 PM
+0 14 * * 2 cd /path/to/DASH && ./scripts/generate_weekly_review.sh
 ```
 
 For Python version:
 ```bash
-# Run every Monday at 9 AM
-0 9 * * 1 cd /path/to/DASH && GITHUB_TOKEN=xxx python3 scripts/generate_weekly_review.py
+# Run every Tuesday at 2 PM
+0 14 * * 2 cd /path/to/DASH && GITHUB_TOKEN=xxx python3 scripts/generate_weekly_review.py
 ```
 
 ### Option B: Run Weekly via GitHub Actions
@@ -158,7 +158,7 @@ Make scripts executable: `chmod +x scripts/generate_weekly_review.sh scripts/gen
 Typical weekly workflow:
 
 ```bash
-# Monday morning - generate last week's review
+# Tuesday afternoon - generate last week's review
 cd /path/to/DASH
 ./scripts/generate_weekly_review.sh
 

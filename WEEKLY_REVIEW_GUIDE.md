@@ -97,21 +97,21 @@ cat weekly_reviews/DASH_DPU_SmartSwitch_Review_2026-01-15_to_2026-01-27.md
 # Edit crontab
 crontab -e
 
-# Add this line to run every Monday at 9 AM
-0 9 * * 1 cd /path/to/DASH && ./scripts/generate_weekly_review.sh
+# Add this line to run every Tuesday at 2 PM
+0 14 * * 2 cd /path/to/DASH && ./scripts/generate_weekly_review.sh
 ```
 
 ### Option 2: GitHub Actions (Recommended for Team Use)
 
 The workflow `.github/workflows/weekly-review.yml` is included:
 
-- **Runs**: Every Monday at 9 AM UTC
+- **Runs**: Every Tuesday at 2 PM UTC
 - **Output**: Creates PR with weekly review
 - **Manual**: Can also trigger manually from Actions tab
 
 To enable:
 1. Workflow file is already committed
-2. It will run automatically every Monday
+2. It will run automatically every Tuesday
 3. Or trigger manually: GitHub → Actions → Weekly Review → Run workflow
 
 ## Output Format
@@ -157,7 +157,7 @@ Each report includes:
 
 ## Tips
 
-1. **Weekly Routine**: Run every Monday to track last week's activity
+1. **Weekly Routine**: Run every Tuesday to track last week's activity
 2. **Date Range**: Use 12-day windows (covers weekends)
 3. **Historical Tracking**: Save reports to track trends over time
 4. **Compare**: Look at merge rates and repository activity patterns

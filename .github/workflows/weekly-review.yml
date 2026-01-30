@@ -1,9 +1,9 @@
 name: Weekly DASH/DPU/SmartSwitch Activity Review
 
-# Run every Monday at 9 AM UTC
+# Run every Tuesday at 2 PM UTC
 on:
   schedule:
-    - cron: '0 9 * * 1'
+    - cron: '0 14 * * 2'
   # Allow manual trigger
   workflow_dispatch:
     inputs:
