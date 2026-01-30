@@ -18,6 +18,11 @@ Four comprehensive review documents have been generated, each with a different s
 **Items Found**: 33 matching items
 
 **Key Sections**:
+- ✅ **Week-over-Week Trend Chart** - NEW!
+  - 8-week historical PR merge trend (ASCII line chart)
+  - Week-by-week comparison table
+  - Trend statistics (15% growth, 19.9 avg PRs/week)
+  - Visual velocity tracking
 - ✅ **Query Period Analysis** - NEW!
   - PRs Merged (Jan 15-27): 21 PRs by repository
   - PRs Created (Jan 15-27): 33 PRs with full table
