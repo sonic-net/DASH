@@ -13,3 +13,6 @@ dash-pipeline/dpdk-pna/dash_pipeline.dpdk
 dash-pipeline/SAI/lib/
 dash-pipeline/SAI/rpc/
 dash-pipeline/dpapp/build
+
+# Generated weekly review reports (optional: remove this line to commit reviews)
+weekly_reviews/
