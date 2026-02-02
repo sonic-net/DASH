@@ -13,7 +13,7 @@
 set -e
 
 # Configuration
-KEYWORDS="DPU OR DASH OR SmartSwitch"
+KEYWORDS="DPU OR DASH OR SmartSwitch OR Smart"
 ORG="sonic-net"
 WEEKS_BACK=${1:-8}  # Default to 8 weeks
 
