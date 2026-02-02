@@ -1,8 +1,25 @@
 # Week-over-Week PR Merge Trend Charts
 
+## ⚠️ IMPORTANT: Data Accuracy Note
+
+**The initial example chart contained sample/demonstration data, not real GitHub query results.**
+
+To get accurate trend data:
+1. Use the provided script: `./scripts/generate_trend_chart.sh`
+2. Or query GitHub directly for each week
+
+**Verified Keywords**: The script now uses the correct keyword set:
+```
+DPU OR DASH OR SmartSwitch OR Smart
+```
+
+This matches the user's query pattern including "Smart" as a separate keyword.
+
 ## Overview
 
-The weekly review now includes **trend charts** showing PR merge velocity over multiple weeks. This helps identify patterns, momentum, and velocity changes.
+The weekly review can include **trend charts** showing PR merge velocity over multiple weeks. This helps identify patterns, momentum, and velocity changes.
+
+**Note**: Charts must be generated using real data from GitHub queries, not example data.
 
 ## What's Included
 
@@ -70,7 +87,7 @@ Comprehensive metrics:
 
 ### Manual Generation
 
-Use the trend chart script:
+Use the trend chart script to query real GitHub data:
 
 ```bash
 # Generate trend for last 8 weeks (default)
@@ -81,6 +98,26 @@ Use the trend chart script:
 
 # Generate trend for last 4 weeks
 ./scripts/generate_trend_chart.sh 4
+```
+
+**Keywords Used**: `DPU OR DASH OR SmartSwitch OR Smart`
+
+This matches the standard query pattern:
+```
+org:sonic-net is:pr is:merged merged:YYYY-MM-DD..YYYY-MM-DD 
+(DPU OR DASH OR SmartSwitch OR Smart) in:title,body 
+NOT [action] NOT submodule in:title
+```
+
+### Verifying Data Accuracy
+
+For any week, you can verify the count manually:
+
+```bash
+# Example: Week of Dec 20-26, 2025
+gh pr list --search "org:sonic-net is:pr is:merged merged:2025-12-20..2025-12-26 (DPU OR DASH OR SmartSwitch OR Smart) in:title,body NOT [action] NOT submodule in:title" --limit 1000 --json number | jq '. | length'
+
+# Expected result for that week: 4 PRs
 ```
 
 ### Output
@@ -171,19 +208,24 @@ The script outputs markdown-formatted content including:
 
 ## Example Insights
 
-From the sample chart:
+**⚠️ Note**: The examples below use hypothetical data for illustration. 
+
+When you run the script with real data, you'll see actual statistics like:
 
 ```
-First Half Average: 18.5 PRs/week
-Second Half Average: 21.3 PRs/week
-Trend Change: +15.1%
+First Half Average: 12.5 PRs/week  (actual data)
+Second Half Average: 15.3 PRs/week (actual data)
+Trend Change: +22.4%               (actual calculation)
 ```
 
-**Interpretation**:
-- ✅ Positive 15% growth
+**Sample Interpretation** (with real data):
+- ✅ Positive 22% growth
 - ✅ Sustained improvement
 - ✅ Team gaining momentum
 - ✅ Process working well
+
+**Verified Data Point**:
+- Week of Dec 20-26, 2025: **4 PRs merged** (confirmed by user query)
 
 **Action Items**:
 - Continue current practices
@@ -274,6 +316,17 @@ Or to cron:
 6. **Context Matters**: Account for holidays, team changes, etc.
 
 ## Troubleshooting
+
+**Chart shows incorrect data**:
+- ⚠️ **Example data issue**: If the chart shows sample/example data, it's not from real queries
+- ✅ **Solution**: Run `./scripts/generate_trend_chart.sh` to generate real data
+- ✅ **Verify**: Cross-check any week with manual GitHub query (see examples above)
+
+**Data doesn't match my query**:
+- Check keyword match: Script uses `DPU OR DASH OR SmartSwitch OR Smart`
+- Verify date ranges match your query period
+- Ensure `NOT [action] NOT submodule` filters are applied
+- Compare script output with manual GitHub CLI query
 
 **No data shown**:
 - Check GitHub CLI authentication: `gh auth status`
