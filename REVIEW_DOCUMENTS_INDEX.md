@@ -1,7 +1,29 @@
 # Project Review Documents - Index & Quick Access
 
+---
+
+## 🆕 Latest Review (Jan 29 - Feb 18, 2026) - EXPANDED RANGE
+
+**Period**: 21 days (2026-01-29 to 2026-02-18)
+
+### Quick Access:
+- **[📝 Full Review](DASH_DPU_SMARTSWITCH_FILTERED_REVIEW_2026-01-29_to_2026-02-18.md)** - Complete analysis with all 64 PRs
+- **[📊 Executive Summary](REVIEW_SUMMARY_2026-01-29_to_2026-02-18.md)** - Key highlights and metrics
+
+**Quick Stats**:
+- **41 PRs created** (2.0 per day average)
+- **23 PRs merged** (1.1 per day average)
+- **56% merge rate**
+- **11 active repositories**
+- **Focus Areas**: HA development (35%), Private Link (20%), Platform updates (20%)
+- **Rating**: ⭐⭐⭐⭐ (4/5) - Strong Activity
+
+---
+
+## 📚 Previous Report (Jan 15-27, 2026)
+
 **Report Date**: January 27, 2026  
-**Query Period**: January 15-27, 2026
+**Query Period**: January 15-27, 2026 (12 days)
 
 ---
 
