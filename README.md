@@ -24,7 +24,7 @@ For a quick technical deep-dive, please begin with:
 1. Peruse the [DASH high level design](documentation/general/dash-high-level-design.md) for an overview of DASH architecture.
 2. [SONiC-DASH High Level Design](https://github.com/sonic-net/DASH/blob/main/documentation/general/dash-sonic-hld.md) 
 3. The [SDN Packet Transforms](documentation/general/sdn-features-packet-transforms.md) document, this facilitates understanding of the program goal and the 7 networking scenarios that Azure has defined.  
-4. [HERO Test](documentation/general/program-scale-testing-requirements-draft.md) for an example of a test to stress DPU/NIC hardware.
+4. [HERO Test](documentation/general/program-scale-testing-requirements/hero-implementation-details.md) for an example of a test to stress DPU/NIC hardware.
 
 The API and Object Model for VNET<->VNET has been posted; the remaining services will be added into the dash-sonic-hld.md as as we move forward.
 
