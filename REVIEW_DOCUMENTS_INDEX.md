@@ -2,11 +2,31 @@
 
 ---
 
-## 🆕 Latest Review (Jan 29 - Feb 18, 2026) - EXPANDED RANGE
+## 🆕 Latest Review (Feb 19-25, 2026) - WEEKLY REPORT
 
-**Period**: 21 days (2026-01-29 to 2026-02-18)
+**Period**: 7 days (2026-02-19 to 2026-02-25)
 
 ### Quick Access:
+- **[📝 Full Review](DASH_DPU_SMARTSWITCH_FILTERED_REVIEW_2026-02-19_to_2026-02-25.md)** - Complete analysis with all 22 PRs created, 17 merged
+- **[📊 Executive Summary](REVIEW_SUMMARY_2026-02-19_to_2026-02-25.md)** - Key highlights and metrics
+
+**Quick Stats**:
+- **22 PRs created** (3.1 per day average)
+- **17 PRs merged** (2.4 per day average)
+- **77% merge rate** ⬆️
+- **11 active repositories**
+- **Focus Areas**: SmartSwitch testbed (36%), DASH features (32%), DPU management (23%)
+- **Rating**: ⭐⭐⭐⭐⭐ (5/5) - Very Strong Activity & High Merge Rate
+
+---
+
+## 📚 Previous Reviews
+
+### Feb-Mar 2026 Reviews
+
+#### Report: Jan 29 - Feb 18, 2026 (EXPANDED RANGE)
+**Period**: 21 days (2026-01-29 to 2026-02-18)
+
 - **[📝 Full Review](DASH_DPU_SMARTSWITCH_FILTERED_REVIEW_2026-01-29_to_2026-02-18.md)** - Complete analysis with all 64 PRs
 - **[📊 Executive Summary](REVIEW_SUMMARY_2026-01-29_to_2026-02-18.md)** - Key highlights and metrics
 
