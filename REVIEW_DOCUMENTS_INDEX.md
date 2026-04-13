@@ -2,25 +2,20 @@
 
 ---
 
-## 🆕 Latest Review (Feb 16 - Mar 25, 2026) - EXTENDED REPORT
+## 🆕 Latest Review (Mar 26 - Apr 8, 2026) - WEEKLY REPORT
 
-**Period**: 38 days (2026-02-16 to 2026-03-25)
-
-### ⭐ QUICK ACCESS (WORKS IMMEDIATELY):
-- **[🎯 INLINE SUMMARY](INLINE_SUMMARY.md)** ⭐ **← START HERE!** - Complete embedded summary (works immediately!)
-- **[🔧 Access Help](FILE_ACCESS_SOLUTION.md)** - Having trouble accessing files? Read this!
+**Period**: 14 days (2026-03-26 to 2026-04-08)
 
 ### Full Documents:
-- **[📝 Full Review](DASH_DPU_SMARTSWITCH_FILTERED_REVIEW_2026-02-16_to_2026-03-25.md)** - Complete analysis with all 87 PRs created, 70 merged
-- **[📊 Executive Summary](REVIEW_SUMMARY_2026-02-16_to_2026-03-25.md)** - Key highlights and metrics
+- **[📝 Full Review](DASH_DPU_SMARTSWITCH_FILTERED_REVIEW_2026-03-26_to_2026-04-08.md)** - Complete analysis with all 54 PRs created, 35 merged
 
 **Quick Stats**:
-- **87 PRs created** (2.3 per day average)
-- **70 PRs merged** (1.8 per day average)
-- **80.5% merge rate** ⬆️ (improved from 77%)
+- **54 PRs created** (3.9 per day average)
+- **35 PRs merged** (2.5 per day average)
+- **64.8% merge rate**
 - **12 active repositories**
-- **Focus Areas**: Testing & QA (49%), Platform Infrastructure (28%), Data Plane (9%)
-- **Rating**: ⭐⭐⭐⭐⭐ (5/5) - Excellent Merge Rate & Comprehensive Coverage
+- **Focus Areas**: SmartSwitch HA stabilization, DPU management tooling, DASH feature development
+- **Top Highlights**: 202511 HA cherry-pick batch, ZMQ keepalives, NVGRE FNIC testing, DPU gNOI improvements
 
 ---
 
