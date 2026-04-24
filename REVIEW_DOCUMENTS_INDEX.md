@@ -2,11 +2,30 @@
 
 ---
 
-## 🆕 Latest Review (Mar 26 - Apr 8, 2026) - WEEKLY REPORT
+## 🆕 Latest Review (Apr 9 - Apr 22, 2026) - WEEKLY REPORT
 
-**Period**: 14 days (2026-03-26 to 2026-04-08)
+**Period**: 14 days (2026-04-09 to 2026-04-22)
 
 ### Full Documents:
+- **[📝 Full Review](DASH_DPU_SMARTSWITCH_FILTERED_REVIEW_2026-04-09_to_2026-04-22.md)** - Complete analysis with all 52 PRs created, 45 merged
+
+**Quick Stats**:
+- **52 PRs created** (3.7 per day average)
+- **45 PRs merged** (3.2 per day average)
+- **86.5% merge rate** ⬆️ (up from 64.8%)
+- **10 active repositories**
+- **Focus Areas**: Maximum DASH scale unblocking, HA test modules 3/6/7/8, ENI counter infrastructure, Flow API
+- **Top Highlights**: Multi-repo max-scale coordination (sairedis+gnmi+buildimage+swss-common), HA modules merged, Flow API in SWSS, ENI counter lifecycle
+
+---
+
+## 📚 Previous Reviews
+
+### Mar-Apr 2026 Reviews
+
+#### Report: Mar 26 - Apr 8, 2026 (WEEKLY REPORT)
+**Period**: 14 days (2026-03-26 to 2026-04-08)
+
 - **[📝 Full Review](DASH_DPU_SMARTSWITCH_FILTERED_REVIEW_2026-03-26_to_2026-04-08.md)** - Complete analysis with all 54 PRs created, 35 merged
 
 **Quick Stats**:
@@ -18,8 +37,6 @@
 - **Top Highlights**: 202511 HA cherry-pick batch, ZMQ keepalives, NVGRE FNIC testing, DPU gNOI improvements
 
 ---
-
-## 📚 Previous Reviews
 
 ### Feb-Mar 2026 Reviews
 
