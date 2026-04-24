@@ -25,6 +25,12 @@ This report covers activity from **April 9 – April 22, 2026** across the sonic
 - Redis pipeline optimization for deferred DASH result table writes (#4484)
 - DPU flow dump added to techsupport (#4458)
 - DPU upgrade and smart switch full upgrade test tooling expanded
+- HA test plan Module 8 (BGP shutdown/startup, config reload) completed — 7 of 9 modules merged *(from meeting notes)*
+- ENI counter stale-entry cleanup fix contributed by Lawrence *(from meeting notes)*
+- DPU image upgrade utility added for testbed consistency *(from meeting notes)*
+
+### Active Contributor Organizations
+Microsoft · Cisco · AMD · Nvidia · DreamBig Semiconductor · Xsite Labs · Keysight
 
 ---
 
@@ -288,12 +294,15 @@ Overview of repositories with DASH/DPU/SmartSwitch activity during April 9 – A
 2. **Pensando DPU reboot fix** – #4472 (Pensando reboot handling) needs broader testing across DPU vendors
 3. **202511 branch readiness** – Multiple cherry-pick PRs landed this period; assess overall 202511 DASH/HA feature completeness
 4. **sairedis high-scale optimization** – #1863 skips SaiObjectCollection tracking for DASH; measure performance impact at scale
+5. **Cisco platform reboot abstraction** – Follow up with Ramesh on moving platform-specific logic out of generic helper scripts *(from meeting)*
+6. **HA Module 9 completion** – Final HA test plan module in progress; prioritize review and merge *(from meeting)*
 
 ### Long-term (Next Quarter)
 1. **HA module 1–8 complete coverage** – All 8 HA modules are being implemented; track completion and integration across modules
 2. **Multi-vendor DPU platform parity** – Activity spans Mellanox/Nvidia, AMD/Pensando, Marvell; ensure consistent DPU lifecycle management across all platforms
 3. **YANG model completeness** – HA Set Counters YANG (#25563) is a template; extend YANG coverage to all DASH/HA configuration objects
 4. **Production scale validation** – With scale limits addressed, plan full end-to-end DASH scale testing at 64k+ ENIs
+5. **VTAP feature design** – Community to define requirements and test scope for flow/packet mirroring feature *(from meeting)*
 
 ---
 
@@ -322,6 +331,68 @@ The merge of sonic-sairedis #1838 ([202511] Update SAI to v1.17.5) and the new b
 
 ---
 
+## Community Meeting Highlights
+
+> ⚠️ **Note:** The following section is derived from AI-generated Teams meeting recap notes. Content should be verified for accuracy before relying on it.
+
+The Smart Switch community meeting held during this period provided additional context beyond what is captured in GitHub activity alone.
+
+### Community & Contributor Growth
+
+- **New participants welcomed:** Varun and Marty joined the community during this period. Both were welcomed by Kristina, who offered separate onboarding sessions to explain project goals and processes.
+- **Contributor organizations active this period:** Microsoft, Cisco, AMD, Nvidia, DreamBig Semiconductor, Xsite Labs, and Keysight — reflecting a broad multi-vendor ecosystem.
+
+### Technical Contributions Discussed
+
+#### Smart Switch HA HLD Update
+- The Smart Switch HA HLD received updates including a **new architecture diagram** and revisions to **failure notification and state transition** logic.
+- Contributions credited to **Cheng Rong** with involvement from the **Cisco team**.
+- *Cross-reference:* Aligns with HA module merges (modules 3, 6, 7, 8) and sonic-dash-ha activity visible in the PR data.
+
+#### HA Test Plan Progress (Module 8 Complete)
+- **Michael** reported that **Module 8** of the HA test plan — covering BGP session shutdown/startup and config reload scenarios — was completed and merged.
+- **7 of 9 modules** are now merged; work is ongoing for **Module 9**.
+- *Cross-reference:* Consistent with sonic-mgmt HA test PR merges (#24073, #24074, #24103, #24138) seen this period.
+
+#### ENI Counter Cleanup Fix
+- **Lawrence** contributed a fix to clean up **stale ENI counter entries from COUNTERS_DB**, addressing incomplete cleanup from prior runs.
+- *Cross-reference:* Maps to ENI counter OID mapping and lifecycle improvements in sonic-swss this period.
+
+#### DPU Image Upgrade Utility
+- **Lawrence** (SONiC team) added a **utility for upgrading DPU images** in SmartSwitch testbeds, ensuring image consistency during nightly test runs.
+- *Cross-reference:* Consistent with DPU upgrade utility PRs (#23915, #24005) in sonic-mgmt.
+
+#### Other Notable Fixes Mentioned
+- **Private Link source IP changes** – Contributed by the **NVIDIA team**
+- **Pensando reboot handling fix** – Addresses DPU reboot behavior on Pensando/Elba platforms (*cross-reference:* #4472)
+- **DHCP fixes** – Infrastructure reliability improvements
+- **Bulk remove post-processing fix** – Significant fix for routing entry bulk remove operations
+
+### Platform Discussion: Cisco SmartSwitch Helper Script
+
+A technical discussion was raised by **Vasundhara** regarding changes to the SmartSwitch helper script affecting **Cisco platforms**:
+
+- **Question raised:** Whether skipping DPU reboot during a full switch reboot on Cisco was intentional
+- **Response from Senthilnathan:** Confirmed that a full switch reboot on Cisco automatically reboots the DPU, making an explicit DPU reboot command unnecessary
+- **Proposal from Gagan:** Suggested moving the platform-dependent condition from the **generic helper script** to the **platform-specific implementation** to reduce future maintenance burden
+- **Next step:** Group agreed to discuss further with **Ramesh** during the upcoming platform meeting and review the PMON call implementation
+
+### Upcoming Features & Presentations
+
+| Feature / Event | Details |
+|-----------------|---------|
+| **VTAP** | Potential new feature for mirroring flows/packets for compliance use cases. Requirements and tests to be defined by the community. |
+| **SmartSwitch Design Presentation** | Vasundhara scheduled to present a new design at the next Smart Switch meeting. Kristina offered the main forum as an alternative venue. |
+
+### Meeting Action Items
+
+| Action Item | Owner(s) | Status |
+|-------------|----------|--------|
+| Discuss smart switch helper script platform dependency with Ramesh at platform meeting | Senthilnathan, Vasundhara | Open |
+| Check with Riff on SmartSwitch meeting invite scheduling; use current slot if unscheduled | Vasundhara | Open |
+
+---
+
 ## Conclusion
 
 The period of **April 9 – April 22, 2026** showed **very high activity** with 52 PRs created and 45 PRs merged across 10 repositories. The **86.5% merge rate** – significantly higher than the prior period's 64.8% – indicates a productive sprint clearing a backlog of ready-to-merge work.
@@ -332,6 +403,8 @@ Key achievements:
 3. **ENI Counter Infrastructure** – Proper OID mapping and lifecycle cleanup for long-running deployments
 4. **Flow API in SWSS** – Foundational for stateful HA failover, now merged alongside updated HLDs
 5. **DPU Diagnostics Expansion** – Flow dump in techsupport, improved upgrade tooling
+
+The community meeting notes reinforce the GitHub data: **HA test plan progression (7 of 9 modules merged)**, **ENI counter cleanup**, and **DPU image upgrade tooling** were all highlighted as significant milestones. The platform-specific reboot discussion for Cisco signals growing multi-vendor complexity that will require careful abstraction work going forward.
 
 The high sonic-mgmt activity (27 of 52 PRs created, 24 of 45 merged) continues to reflect the investment in test infrastructure needed to validate DASH/SmartSwitch across the full feature matrix.
 
