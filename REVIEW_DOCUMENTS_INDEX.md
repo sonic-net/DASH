@@ -2,11 +2,30 @@
 
 ---
 
-## 🆕 Latest Review (Apr 9 - Apr 22, 2026) - WEEKLY REPORT
+## 🆕 Latest Review (Apr 23 - May 13, 2026) - WEEKLY REPORT
 
-**Period**: 14 days (2026-04-09 to 2026-04-22)
+**Period**: 21 days (2026-04-23 to 2026-05-13)
 
 ### Full Documents:
+- **[📝 Full Review](DASH_DPU_SMARTSWITCH_FILTERED_REVIEW_2026-04-23_to_2026-05-13.md)** - Complete analysis with all 62 PRs created, 45 merged
+
+**Quick Stats**:
+- **62 PRs created** (3.0 per day average)
+- **45 PRs merged** (2.1 per day average)
+- **72.6% merge rate**
+- **9 active repositories**
+- **Focus Areas**: SmartSwitch HA test maturity, DPU lifecycle handling, DASH scale-path updates
+- **Top Highlights**: High sonic-mgmt throughput, sustained cross-repo merges, broad SmartSwitch/DPU delivery
+
+---
+
+## 📚 Previous Reviews
+
+### Apr-May 2026 Reviews
+
+#### Report: Apr 9 - Apr 22, 2026 (WEEKLY REPORT)
+**Period**: 14 days (2026-04-09 to 2026-04-22)
+
 - **[📝 Full Review](DASH_DPU_SMARTSWITCH_FILTERED_REVIEW_2026-04-09_to_2026-04-22.md)** - Complete analysis with all 52 PRs created, 45 merged
 
 **Quick Stats**:
@@ -18,8 +37,6 @@
 - **Top Highlights**: Multi-repo max-scale coordination (sairedis+gnmi+buildimage+swss-common), HA modules merged, Flow API in SWSS, ENI counter lifecycle
 
 ---
-
-## 📚 Previous Reviews
 
 ### Mar-Apr 2026 Reviews
 
