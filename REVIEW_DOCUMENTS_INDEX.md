@@ -2,11 +2,30 @@
 
 ---
 
-## 🆕 Latest Review (Apr 23 - May 13, 2026) - WEEKLY REPORT
+## 🆕 Latest Review (Apr 7 - May 13, 2026) - EXTENDED REPORT
 
-**Period**: 21 days (2026-04-23 to 2026-05-13)
+**Period**: 37 days (2026-04-07 to 2026-05-13)
 
 ### Full Documents:
+- **[📝 Full Review](DASH_DPU_SMARTSWITCH_FILTERED_REVIEW_2026-04-07_to_2026-05-13.md)** - Complete analysis with all 125 PRs created, 104 merged
+
+**Quick Stats**:
+- **125 PRs created** (3.4 per day average)
+- **104 PRs merged** (2.8 per day average)
+- **83.2% merge rate**
+- **13 active repositories**
+- **Focus Areas**: SmartSwitch HA maturity, DPU lifecycle/platform reliability, DASH data-path improvements
+- **Top Highlights**: High sonic-mgmt/sonic-buildimage throughput, strong cross-repo merge cadence, meeting-note cross-references included
+
+---
+
+## 📚 Previous Reviews
+
+### Apr-May 2026 Reviews
+
+#### Report: Apr 23 - May 13, 2026 (WEEKLY REPORT)
+**Period**: 21 days (2026-04-23 to 2026-05-13)
+
 - **[📝 Full Review](DASH_DPU_SMARTSWITCH_FILTERED_REVIEW_2026-04-23_to_2026-05-13.md)** - Complete analysis with all 62 PRs created, 45 merged
 
 **Quick Stats**:
@@ -18,10 +37,6 @@
 - **Top Highlights**: High sonic-mgmt throughput, sustained cross-repo merges, broad SmartSwitch/DPU delivery
 
 ---
-
-## 📚 Previous Reviews
-
-### Apr-May 2026 Reviews
 
 #### Report: Apr 9 - Apr 22, 2026 (WEEKLY REPORT)
 **Period**: 14 days (2026-04-09 to 2026-04-22)
