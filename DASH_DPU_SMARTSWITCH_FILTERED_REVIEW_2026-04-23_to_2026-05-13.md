@@ -1,6 +1,6 @@
 # DASH/DPU/SmartSwitch Weekly Review
 **Period:** April 23 – May 13, 2026 (21 days)
-**Report Generated:** May 13, 2026
+**Report Generated:** May 14, 2026
 **Query Keywords:** DPU, DASH, SmartSwitch, Smart
 
 ---
@@ -193,16 +193,45 @@ Overview of repositories with DASH/DPU/SmartSwitch activity during April 23 – 
 
 ---
 
+## Community Meeting Notes (Applied Where Applicable)
+
+> ⚠️ **Note:** The following section is derived from AI-generated meeting recap notes and mapped to this date range where matching PR evidence exists.
+
+| Topic from Meeting Notes | Applicability in Apr 23 – May 13 Data | Evidence in This Report |
+|---|---|---|
+| Backend IP route rule for PL redirect | **Applicable** | sonic-mgmt [#24181](https://github.com/sonic-net/sonic-mgmt/pull/24181) (created Apr 24, merged May 4) |
+| Smart Switch HA HLD update | **Applicable** | SONiC [#2307](https://github.com/sonic-net/SONiC/pull/2307) (created Apr 27, merged Apr 30) |
+| DPU pairing support update | **Applicable** | sonic-dash-ha [#157](https://github.com/sonic-net/sonic-dash-ha/pull/157) (created Apr 24, merged Apr 29) |
+| Floating NIC steady-state/planned-shutdown test | **Applicable** | sonic-mgmt [#24376](https://github.com/sonic-net/sonic-mgmt/pull/24376) (created May 4) |
+| gNMI-ZMQ management VRF test path | **Applicable** | sonic-mgmt [#24412](https://github.com/sonic-net/sonic-mgmt/pull/24412) (created May 5) |
+| ENI OID mapping + DPU counter/virtual path handling | **Applicable** | sonic-swss [#4540](https://github.com/sonic-net/sonic-swss/pull/4540), sonic-gnmi [#665](https://github.com/sonic-net/sonic-gnmi/pull/665) |
+| ZMQ socket timeout reset fix | **Applicable** | sonic-sairedis [#1881](https://github.com/sonic-net/sonic-sairedis/pull/1881) (created May 1) |
+| gNMI client placement in sonic-management docker | **Partially applicable (discussion/planning)** | No single merged placement PR clearly identified in this window; keep as follow-up track item |
+| HA module progress (8 committed, module 9 in review) | **Applicable** | sonic-mgmt [#24176](https://github.com/sonic-net/sonic-mgmt/pull/24176) (Module 9) merged May 13 |
+| DASH architecture walkthrough request | **Planning item** | No direct PR mapping required; community onboarding/documentation follow-up |
+
+### Meeting Follow-up Tasks
+
+| Action Item | Owner(s) | Tracking in This Report |
+|---|---|---|
+| Respond to DASH walkthrough email | Kristina | Community/onboarding action; no direct PR required |
+| Coordinate gNMI client integration location (sonic-management docker) | Michael, Mircea | Track under cross-repo infra/testing PRs in upcoming reports |
+| Share involved-routing examples and diagrams | Michal | Expected to drive follow-on test PRs; monitor sonic-mgmt activity |
+
+---
+
 ## Recommendations
 
 ### High Priority
 1. Keep merge throughput aligned with creation volume in the highest-traffic repositories.
 2. Continue HA/DPU validation coverage for reboot and upgrade scenarios across platform variants.
 3. Prioritize follow-up on scale-related changes with targeted stress and regression runs.
+4. Track meeting follow-up items explicitly on the project board (gNMI client placement, routing examples, walkthrough/onboarding).
 
 ### Medium Priority
 1. Track time-to-merge for high-volume repos to identify review bottlenecks.
 2. Maintain cross-repo traceability for related SmartSwitch/DASH changes in stacked PR sets.
+3. Continue validation of ZMQ and DPU proxy test paths as GNMI/SAIRedis fixes land.
 
 ---
 
@@ -225,6 +254,8 @@ Overview of repositories with DASH/DPU/SmartSwitch activity during April 23 – 
 ## Conclusion
 
 The April 23 – May 13 window shows sustained multi-repository execution for SmartSwitch/DPU/DASH development, with strong merge throughput and broad cross-team activity. The dataset indicates continued emphasis on HA quality, DPU lifecycle operations, and scalable DASH enablement.
+
+Meeting recap items were integrated where PR evidence exists in this window (HA HLD, backend IP route rule, FNIC and ZMQ test-path additions, ENI/DPU counter work, and ZMQ timeout handling). Remaining meeting actions are captured as planning tracks for follow-up in subsequent reports.
 
 ---
 
