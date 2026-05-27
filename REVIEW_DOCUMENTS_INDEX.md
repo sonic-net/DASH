@@ -2,22 +2,23 @@
 
 ---
 
-## 🆕 Latest Review (May 14 - May 20, 2026)
+## 🆕 Latest Review (May 21 - May 27, 2026)
 
-**Period**: 7 days (2026-05-14 to 2026-05-20)
+**Period**: 7 days (2026-05-21 to 2026-05-27)
 
 ### Full Documents:
-- **[📝 Full Review](DASH_DPU_SMARTSWITCH_FILTERED_REVIEW_2026-05-14_to_2026-05-20.md)** - Complete analysis with all 26 PRs created and 13 merged
+- **[📝 Full Review](DASH_DPU_SMARTSWITCH_FILTERED_REVIEW_2026-05-21_to_2026-05-27.md)** - Complete analysis with all 16 PRs created and 14 merged
 
 **Quick Stats**:
-- **26 PRs created** (3.7 per day average)
-- **13 PRs merged** (1.9 per day average)
-- **50.0% merge rate**
-- **10 active repositories**
-- **Focus Areas**: SmartSwitch HA reliability, DPU lifecycle handling, DASH scale-path plumbing
-- **Top Highlights**: Strong mgmt/buildimage throughput, swss/sairedis scale-path work, continued gNMI/DASH integration
+- **16 PRs created** (2.3 per day average)
+- **14 PRs merged** (2.0 per day average)
+- **87.5% merge rate**
+- **7 active repositories**
+- **Focus Areas**: SmartSwitch HA coverage, DPU platform updates, DASH scale-path enablement
+- **Top Highlights**: Strong merge throughput in sonic-mgmt, stable weekly delivery, added Sep-2025→current Mermaid trend chart
 
 ---
+
 ## 📚 Previous Reviews
 
 ### Apr-May 2026 Reviews
