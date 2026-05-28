@@ -226,6 +226,7 @@ To provide the ENI-level HA control, each ENI will have the following SAI attrib
 | -------------- | ---- | ----------- |
 | SAI_ENI_ATTR_HA_SCOPE_ID | `sai_object_id_t` | The HA scope ID of the ENI. |
 | SAI_ENI_ATTR_IS_HA_FLOW_OWNER | `bool` | Determines which DPU in the pair creates flows belonging to this ENI in steady-state. Typically this is set to True for the ENIs on the Active DPU and False for the Standby DPU. |
+| SAI_ENI_ATTR_IS_OPERATIONAL_HA_FLOW_OWNER | `bool` | Read-only. Returns the operational HA flow ownership status of the ENI. |
 
 ### 4.6. Event notifications
 
