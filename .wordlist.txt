@@ -96,6 +96,7 @@ CloudStorm
 cloudstorm
 CNIP
 codebase
+codegen
 collaterals
 compat
 Compat
@@ -105,7 +106,9 @@ confgen
 config
 configs
 configurated
-Conntrack
+conntrack
+ConntrackIn
+ConntrackOut
 Containerlab
 CP
 CPUs
@@ -236,6 +239,7 @@ ENIs
 ENI's
 enqueue
 enqueues
+entrypoint
 entrypoints
 enum
 EPUs
@@ -504,6 +508,8 @@ PTF
 ptf
 ptftests
 py
+py_model
+pymodel
 PyPi
 pytest
 PyTest
@@ -545,6 +551,7 @@ RJ
 Roadmap
 roadmap
 routable
+rpc
 RPC
 RPCs
 RPF
@@ -665,6 +672,7 @@ TEP
 testability
 testbed
 testbeds
+textproto
 TGen
 Tgen
 Tgens

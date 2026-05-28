@@ -1,0 +1,53 @@
+# Start from official slim Python 3.12 image
+FROM python:3.12-slim@sha256:099ee0a92a07ff652ef62145d7b6c70d316a14109d6e88a3a835de7ebd74c637  AS base
+
+LABEL maintainer="SONIC-DASH Community"
+LABEL description="DASH Pymodel Builder"
+
+# Environment setup
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    TZ=America/Los_Angeles \
+    DEBIAN_FRONTEND=noninteractive
+
+# Install only required system packages
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+        python3-dev \
+        libpcap-dev \
+        ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir \
+        scapy \
+        p4runtime \
+        grpcio \
+        bitarray \
+        openpyxl \
+        cerberus \
+        python-docx \
+        google-cloud-storage \
+        protobuf==3.20.* \
+        googleapis-common-protos \
+        packaging
+
+# Create non-root user
+ARG user=dashuser
+ARG group=dashusers
+ARG uid=4321
+ARG guid=4321
+RUN addgroup --gid ${guid} ${group} && \
+    adduser --disabled-password --gecos "" --uid ${uid} --gid ${guid} ${user}
+
+USER ${user}
+WORKDIR /
+# Copy project
+COPY --chown=${user}:${group} py_model /py_model
+
+# Set Python path for the project
+ENV PYTHONPATH=/py_model
+
+# Default command
+CMD ["python"]

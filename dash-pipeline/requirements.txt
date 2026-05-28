@@ -1,0 +1,10 @@
+bitarray
+scapy
+openpyxl
+cerberus
+python-docx
+pyyaml
+grpcio
+google-cloud-storage
+protobuf==3.20.*
+googleapis-common-protos
