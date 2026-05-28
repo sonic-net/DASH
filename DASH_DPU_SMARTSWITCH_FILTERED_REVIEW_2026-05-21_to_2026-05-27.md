@@ -68,7 +68,7 @@ xychart-beta
 ### Follow-up Tasks
 | Task | Owner | Status |
 |------|-------|--------|
-| Schedule Nvidia/Cisco review after receiving scale/perf logs from Mircea (referred as Mitch in follow-up notes) | Prabhat | Open |
+| Schedule Nvidia/Cisco review after receiving scale/perf logs from Mircea | Prabhat | Open |
 | Confirm counters DB move to NPU includes required test updates with Lawrence | Prabhat | Open |
 | Ensure inbound route/rule deletion fix in SONiC has matching test coverage updates with Lawrence | Prabhat | Open |
 
