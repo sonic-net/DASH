@@ -140,6 +140,19 @@ sai_apis:
     valid_only: null
     is_vlan: false
     deprecated: false
+  - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
+    name: SAI_HA_SET_ATTR_DP_CHANNEL_TUNNEL_KEY
+    description: Action parameter data plane channel tunnel key
+    type: sai_uint32_t
+    attr_value_field: u32
+    default: '0'
+    isresourcetype: false
+    flags: CREATE_AND_SET
+    object_name: null
+    allow_null: false
+    valid_only: null
+    is_vlan: false
+    deprecated: false
   stats:
   - !!python/object:utils.sai_spec.sai_attribute.SaiAttribute
     name: SAI_HA_SET_STAT_DP_PROBE_REQ_RX_BYTES
@@ -479,6 +492,12 @@ sai_apis:
               id: 12
               field: u32
               bitwidth: 32
+              ip_is_v6_field_id: 0
+              skipattr: null
+            SAI_HA_SET_ATTR_DP_CHANNEL_TUNNEL_KEY: !!python/object:utils.sai_spec.sai_api_p4_meta.SaiApiP4MetaActionParam
+              id: 13
+              field: u32
+              bitwidth: 24
               ip_is_v6_field_id: 0
               skipattr: null
 - !!python/object:utils.sai_spec.sai_api.SaiApi
