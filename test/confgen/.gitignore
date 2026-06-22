@@ -1,0 +1,8 @@
+*.bkp
+*.log
+__pycache__/
+*.pyc
+*.json
+
+
+!sample_dash_conf.json

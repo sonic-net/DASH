@@ -8,3 +8,8 @@ ixnetwork-restpy
 snappi
 snappi-ixnetwork
 ixload
+
+# used by confgen
+orjson
+ipaddress
+macaddress
