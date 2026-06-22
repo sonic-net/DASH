@@ -270,9 +270,10 @@ typedef enum _sai_dash_ha_dpu_message_types_t {
      */
     SAI_DASH_HA_DPU_MESSAGE_TYPE_END,
 
-} sai_dash_ha_dpu_message_types_t
+} sai_dash_ha_dpu_message_types_t;
+
 /**
- * @brief Notification data format for received for the DPU Control message
+ * @brief Notification data format for the DPU Control message
  *  callback.
  */
 typedef struct _sai_dash_ha_dpu_control_message_notification_data_t {
@@ -288,7 +289,184 @@ typedef struct _sai_dash_ha_dpu_control_message_notification_data_t {
 } sai_dash_ha_dpu_control_message_notification_data_t;
 
 /**
- * @brief Notification Data format for received flow sync messages from the DPU
+ * @brief DPU Message notification
+ *
+ * Notification for DPU message to be relayed
+ *
+ * @param[in] sai_object_id_t vipID
+ * @param[in] attr_count Number of attributes
+ * @param[in] attr_list Array of attributes
+ *
+ */
+typedef void (*sai_dash_ha_dpu_message_notification_fn) (
+        _In_ sai_object_id_t *dash_ha_vip_id,
+        _In_ uint32_t attr_count,
+        _In_ const sai_attribute_t *attr_list);
+
+/**
+ * @brief Policy Result Enumeration
+ */
+typedef enum _sai_dash_ha_policy_result_t {
+     /**
+      * @brief Default result - undefined
+      */
+     SAI_DASH_HA_POLICY_RESULT_NONE,
+
+     /**
+      * @brief Permit flow
+      */
+     SAI_DASH_HA_POLICY_RESULT_ALLOW,
+
+     /**
+      * @brief Deny flow
+      */
+     SAI_DASH_HA_POLICY_RESULT_DENY,
+
+} _sai_dash_ha_policy_result_t;
+
+/**
+ * @brief Bitmap values for HA Rewrite flags
+ */
+typedef enum _sai_dash_ha_rewrite_flags_t {
+
+    /**
+     * @brief Rewrite Initiator Flow DMAC
+     */
+    SAI_DASH_HA_REWRITE_IFLOW_DMAC = 1 << 0;
+
+    /**
+     * @brief Rewrite Initiator Flow Source IP Address
+     */
+    SAI_DASH_HA_REWRITE_IFLOW_SIP = 1 << 1;
+
+    /**
+     * @brief Rewrite Initiator Flow Source Port
+     */
+    SAI_DASH_HA_REWRITE_IFLOW_SPORT = 1 << 2;
+
+    /**
+     * @brief Rewrite Initiator Flow VNI
+     */
+    SAI_DASH_HA_REWRITE_IFLOW_VNI = 1 << 3;
+
+    /**
+     * @brief Rewrite Reverse Flow Source IP addresss
+     */
+    SAI_DASH_HA_REWRITE_RFLOW_SIP = 1 << 4;
+
+    /**
+     * @brief Rewrite Reverse Flow Destination IP Address
+     */
+    SAI_DASH_HA_REWRITE_RFLOW_DIP = 1 << 5;
+
+    /**
+     * @brief Rewrite Reverse Flow L4 Destination Port
+     */
+    SAI_DASH_HA_REWRITE_RFLOW_DPORT = 1 << 6;
+
+    /**
+     * @brief Rewrite Reverse Flow L4 Source Port
+     */
+    SAI_DASH_HA_REWRITE_RFLOW_SPORT = 1 << 7;
+
+    /**
+     * @brief Rewrite Reverse Flow VNI
+     */
+    SAI_DASH_HA_REWRITE_RFLOW_VNI = 1 << 8;
+
+} sai_dash_ha_rewrite_flags_t;
+
+/**
+ * @brief Rewrite info for Flow sync messages
+ *
+ */
+typedef struct _sai_dash_ha_rewrite_info_t {
+    /**
+     * @brief Flow Rewrite Flags expressed as a bit map of sai_dash_ha_rewrite_flags_t
+     */
+    sai_uint64_t rewrite_flags;
+
+    /**
+     * @brief Initiator Flow DMAC
+     */
+    sai_mac_t iflow_dmac;
+
+    /**
+     * @brief Initiator Flow Source IP address
+     */
+    sai_ip_address_t iflow_sip;
+
+    /**
+     * @brief Initiator Flow L4 Source Port
+     */
+    sai_uint16_t iflow_sport;
+
+    /**
+     * @brief Initiator Flow VNID
+     */
+    sai_uint32_t iflow_vni;
+
+    /**
+     * @brief Reverse Flow Source IP address
+     */
+    sai_ip_address_t rflow_sip;
+
+    /**
+     * @brief Reverse Flow Destination IP address
+     */
+    sai_ip_address_t rflow_dip;
+
+    /**
+     * @brief Reverse Flow Destination Port
+     */
+    sai_uint16_t rflow_dport;
+
+    /**
+     * @brief Reverse Flow Source Port
+     */
+    sai_uint16_t rflow_sport;
+
+    /**
+     * @brief Reverse Flow VNID
+     */
+    sai_uint32_t rflow_vni;
+} sai_dash_ha_rewrite_info_t;
+
+/**
+ * @brief data format for the Flow Sync Message
+ *
+ */
+typedef struct _sai_dash_ha_flow_sync_message_metadata_t {
+
+    /**
+     * @brief Policy results for this flow
+     */
+    sai_dash_ha_policy_result_t policy_result;
+
+    /**
+     * @brief Dest PA from mapping lookup if available.
+     */
+    sai_ip_address_t dest_pa;
+
+    /**
+     * @brief ID of metering class to be used
+     */
+    sai_uint64_t metering_class;
+
+    /**
+     * @brief Rewrite information for the flow
+     */
+    sai_dash_ha_rewrite_info_t rewrite_info;
+
+    /**
+     * @brief Vendor specific metadata
+     */
+     sai_u8_list_t vendor_metadata;
+
+} sai_dash_ha_flow_sync_message_metadata_t;
+
+/**
+ * @brief Data format for received flow sync messages from the DPU
  */
 typedef struct _sai_dash_ha_flow_sync_message_notification_data_t {
     /**
@@ -323,7 +501,7 @@ typedef struct _sai_dash_ha_flow_sync_message_notification_data_t {
 } sai_dash_ha_flow_sync_message_notification_data_t;
 
 /**
- * @brief Notification Data format for received oper state updates from the DPU
+ * @brief Notification Data format for received operational state updates from the DPU
  */
 typedef struct _sai_dash_ha_oper_role_status_notification_data_t {
     /**
@@ -341,6 +519,21 @@ typedef struct _sai_dash_ha_oper_role_status_notification_data_t {
      */
      sai_u8_list_t data;
 }
+
+/**
+ * @brief HA Operational Role notification
+ *
+ * Notification of change of HA Operational role
+ *
+ * @param[in] sai_object_id_t vipID
+ * @param[in] attr_count Number of attributes
+ * @param[in] attr_list Array of attributes
+ *
+ */
+typedef void (*sai_dash_ha_oper_role_notification_fn) (
+        _In_ sai_object_id_t *dash_ha_vip_id,
+        _In_ uint32_t attr_count,
+        _In_ const sai_attribute_t *attr_list);
 
 /**
  * @brief L4 information for TCP and UDP flows.
@@ -379,7 +572,7 @@ typedef union _sai_dash_ha_flow_l4_info_t {
 } sai_dash_ha_flow_l4_info_t;
 
 /**
- * @brief Attribute data for #SAI_DASH_HA_SESSION_ATTR_ROLE
+ * @brief HA Session Roles enumeration
  */
 typedef enum _sai_dash_ha_session_role_t
 {
@@ -394,6 +587,17 @@ typedef enum _sai_dash_ha_session_role_t
     SAI_DASH_HA_SESSION_ROLE_SECONDARY,
 
 } sai_dash_ha_session_role_t;
+
+/**
+ * @brief HA Session Encapsulations enumeration
+ */
+typedef enum _sai_dash_ha_session_dp_encap_t
+{
+    /**
+     * @brief UDP encapsulation.
+     */
+    SAI_DASH_HA_SESSION_ENCAP_UDP,
+} sai_dash_ha_session_dp_encap_t;
 
 /**
  * @brief Attribute ID for DASH HA session
@@ -414,6 +618,30 @@ typedef enum _sai_dash_ha_session_attr_t
     SAI_DASH_HA_SESSION_ATTR_PEER_IP,
 
     /**
+     * @brief Source IP address
+     *
+     * @type sai_ip_address_t
+     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
+     */
+    SAI_DASH_HA_SESSION_ATTR_SOURCE_IP,
+
+    /**
+     * @brief IP DSCP value for control messages
+     *
+     * @type sai_uint8_t
+     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
+     */
+    SAI_DASH_HA_SESSION_ATTR_IP_DSCP,
+
+    /**
+     * @brief Encapsulation used for DP control messages
+     *
+     * @type sai_dash_ha_session_dp_encap_t
+     * @flags MANDATORY_ON_CREATE | CREATE_ONLY
+     */
+    SAI_DASH_HA_SESSION_ATTR_DP_ENCAP,
+
+    /**
      * @brief Sessions Admin role
      *
      * @type sai_dash_ha_session_role_t
@@ -423,7 +651,7 @@ typedef enum _sai_dash_ha_session_attr_t
     SAI_DASH_HA_SESSION_ATTR_ADMIN_ROLE,
 
     /**
-     * @brief HB Interval
+     * @brief HB Interval in milliseconds
      * @type sai_uint16_t
      */
     SAI_DASH_HA_SESSION_ATTR_HB_INTERVAL,
@@ -436,6 +664,7 @@ typedef enum _sai_dash_ha_session_attr_t
 
     /**
      * @brief Named pipe for bi-directional control stream
+     *  Used for FLow sync message and DPU control messages
      * @type sai_uint8_list_t
      */
     SAI_DASH_HA_REGISTER_CP_CHANNEL_ATTR_NAMED_PIPE,
@@ -498,7 +727,7 @@ typedef sai_status_t (*sai_get_dash_ha_session_attribute_fn)(
         _Inout_ sai_attribute_t *attr_list);
 
 /**
- * @brief Attributes ID for get_peer_capabilities
+ * @brief Attributes ID for get_capabilities
  */
 typedef enum  _sai_dash_ha_get_capabilities_attr_t {
 
@@ -518,6 +747,12 @@ typedef enum  _sai_dash_ha_get_capabilities_attr_t {
      * @type sai_uint16_t
      */
     SAI_DASH_HA_GET_CAPABILITIES_ATTR_HB_MISS_COUNT,
+
+    /**
+     * @brief Encap for DP messages
+     * @type sai_dash_ha_session_dp_encap_t
+     */
+    SAI_DASH_HA_GET_CAPABILITIES_ATTR_DP_ENCAP,
 
     /**
      * @brief Capabilities
@@ -567,6 +802,12 @@ typedef enum  _sai_dash_ha_process_peer_capabilities_attr_t {
      * @type sai_uint16_t
      */
     SAI_DASH_HA_PROCESS_PEER_CAPABILITIES_ATTR_HB_MISS_COUNT,
+
+    /**
+     * @brief Encap for DP messages
+     * @type sai_dash_ha_session_dp_encap_t
+     */
+    SAI_DASH_HA_GET_CAPABILITIES_ATTR_DP_ENCAP,
 
     /**
      * @brief Capabilities
@@ -1012,6 +1253,11 @@ enum OperRole {
   OperStandalone = 3;
 }
 
+// Encap used by DP
+enum MsgEncap {
+  // default UDP encap
+  UDP = 0;
+}
 
 // IP Address object
 message IPAddress {
@@ -1058,6 +1304,52 @@ message IPFlowKey {
   FlowL4Info L4Info     = 5;
 }
 
+// policy result enumeration
+enum PolicyResult {
+  NONE  = 0;
+  ALLOW = 1;
+  DENY  = 2;
+}
+
+enum RewriteFlags {
+  IFLOW_DMAC    = 0;
+  IFLOW_SIP     = 1;
+  IFLOW_SPORT   = 2;
+  IFLOW_VNI     = 3;
+  RFLOW_SIP     = 4;
+  RFLOW_DIP     = 5;
+  RFLOW_DPORT   = 6;
+  RFLOW_SPORT   = 7;
+  RFLOW_VNI     = 8;
+}
+// Packet rewrite information for a flow
+message RewriteInfo {
+  uint64                  IFlowMAC      = 1;
+  IPAddress               IFlowSIp      = 2;
+  uint32                  IFlowSPort    = 3;
+  uint32                  IFlowVNI      = 4;
+  IPAddress               RFlowSIp      = 5;
+  IPAddress               RFlowDIp      = 6;
+  uint32                  RFlowDPort    = 7;
+  uint32                  RFlowSPort    = 8;
+  uint32                  RFlowVNI      = 9;
+  repeated RewriteFlags   RewriteFlags  = 10;
+}
+
+// Metadata for the flow
+message FlowMetadata {
+  // Policy results for the flow
+  PolicyResult    PolicyResult    = 1;
+  // Destination PA from mapping lookup if available
+  IPAddress       DestPA          = 2;
+  // Metering class for the flow if available
+  bytes           MeteringClass   = 3;
+  // Rewrite Information for the flow
+  RewriteInfo     RewriteInfo     = 4;
+  // Vendor specific metadata results
+  bytes           VendorData      = 5;
+}
+
 // Flow Sync Msg
 message FlowSyncMsg {
   message FlowInfo {
@@ -1066,7 +1358,7 @@ message FlowSyncMsg {
     // IP Flow tuple
     IPFlowKey Key   = 2;
     // Metadata containing policy results
-    bytes Metadata  = 3;
+    FlowMetadata Metadata  = 3;
   }
   repeated FlowInfo Info = 1;
 }
@@ -1116,8 +1408,10 @@ message CompatCheck {
     uint32 HBinterval  = 1;
     // Number of HB misses that will trigger switchover
     uint32 MissCount   = 2;
+    // Encap used for Messages
+    MsgEncap Encap = 3;
     // Opaque
-    bytes Capabilities = 3;
+    bytes Capabilities = 4;
   }
   // Compatibility/Capability information for each VIP on the node. Typically two entries.
   repeated DpVIPInfo VipInfo = 1;
