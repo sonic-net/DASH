@@ -1,0 +1,147 @@
+load("@bazel_skylib//rules:select_file.bzl", "select_file")
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "make")
+load("@sonic_build_infra//binary:keep_debug_info.bzl", "keep_debug_info")
+load("//bazel:runtime.bzl", "dash_runtime")
+load("//bazel:source.bzl", "prepare_dash")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "source_files",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "BUILD.bazel",
+            "**/__pycache__/**",
+            "**/*.pyc",
+            "SAI/**",
+            "lib/**",
+            "debian/**",
+            "saithrift/**",
+        ],
+    ),
+)
+
+prepare_dash(
+    name = "generated_sources",
+    srcs = [
+        ":source_files",
+        "//dash-pipeline:p4_sources",
+    ],
+    makefile = "//bazel:Makefile.dash",
+    p4c = "@p4c//:p4c_bm2_ss",
+    sai_sources = "@dash_sai_source//:sources",
+)
+
+make(
+    name = "dash_build",
+    # A generated directory remains nested beneath the foreign Make source root.
+    # The adapter copies its inputs into the private, writable build directory.
+    args = ["-f", "generated_sources/Makefile", "-j4"],
+    build_data = [
+        "@sonic_build_infra//tools/build_tools:foreign_runtime",
+        "@sonic_build_infra//tools/build_tools:metadata_runtime",
+    ],
+    copts = ["-g"],
+    env = {
+        "PATH": "$(execpath @sonic_build_infra//tools/build_tools:foreign_runtime)/bin:$(execpath @sonic_build_infra//tools/build_tools:metadata_runtime)/bin",
+        "SAI_ASPELL": "$(execpath @sonic_build_infra//tools/build_tools:metadata_runtime)/bin/aspell",
+    },
+    features = [
+        "-sanitize_pwd",
+        "-strip_debug_symbols",
+    ],
+    lib_source = ":generated_sources",
+    out_data_files = [
+        "lib/libdashsaimetadata.so",
+        "share/dash/dash_pipeline.json",
+        "share/dash/dash_pipeline_p4rt.json",
+        "share/dash/dash_pipeline_p4rt.txt",
+        "share/dash/dash_pipeline_ir.json",
+    ],
+    out_include_dir = "include/sai",
+    # libsaimetadata is shipped under a distinct name, but is not a second
+    # link dependency: DASH already embeds these metadata objects in libsai.
+    out_shared_libs = ["libsai.so"],
+    targets = [
+        "all",
+        "install",
+    ],
+    deps = [
+        "@dash_deps//libgrpc++-dev:libgrpc++",
+        "@dash_deps//libprotobuf-dev:libprotobuf",
+        "@p4lang_pi//:sdk",
+    ],
+)
+
+alias(
+    name = "sdk",
+    actual = ":dash_build",
+)
+
+[
+    select_file(
+        name = name,
+        srcs = ":dash_build",
+        subpath = "dash_build/lib/" + name + ".so",
+    )
+    for name in [
+        "libsai",
+        "libdashsaimetadata",
+    ]
+]
+
+# Apply the same debug-preserving configuration to data and ELF selections so
+# the source generation/Make stages are shared by both runtime and debug TARs.
+[
+    select_file(
+        name = "pipeline_" + name + "_selected",
+        srcs = ":dash_build",
+        subpath = "dash_build/share/dash/" + path,
+    )
+    for name, path in {
+        "json": "dash_pipeline.json",
+        "p4rt_json": "dash_pipeline_p4rt.json",
+        "p4rt_txt": "dash_pipeline_p4rt.txt",
+        "ir_json": "dash_pipeline_ir.json",
+    }.items()
+]
+
+[
+    keep_debug_info(
+        name = "pipeline_" + name,
+        src = ":pipeline_" + name + "_selected",
+    )
+    for name in [
+        "json",
+        "p4rt_json",
+        "p4rt_txt",
+        "ir_json",
+    ]
+]
+
+dash_runtime(
+    name = "runtime_amd64",
+    triplet = "x86_64-linux-gnu",
+)
+
+dash_runtime(
+    name = "runtime_arm64",
+    triplet = "aarch64-linux-gnu",
+)
+
+alias(
+    name = "runtime",
+    actual = select({
+        "@platforms//cpu:x86_64": ":runtime_amd64",
+        "@platforms//cpu:arm64": ":runtime_arm64",
+    }),
+)
+
+alias(
+    name = "runtime.debug_symbols",
+    actual = select({
+        "@platforms//cpu:x86_64": ":runtime_amd64.debug_symbols",
+        "@platforms//cpu:arm64": ":runtime_arm64.debug_symbols",
+    }),
+)

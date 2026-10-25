@@ -8,6 +8,9 @@
 *.pcap
 __pycache__/
 .pytest_cache/
+MODULE.bazel.lock
+.bazelrc.user
+/bazel-*
 dash-pipeline/bmv2/dash_pipeline.bmv2/
 dash-pipeline/dpdk-pna/dash_pipeline.dpdk
 dash-pipeline/SAI/lib/

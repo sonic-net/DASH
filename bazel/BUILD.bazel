@@ -1,0 +1,61 @@
+load("@dash_generator_deps//:requirements.bzl", "requirement")
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@rules_python//python:py_test.bzl", "py_test")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "Makefile.dash",
+    "requirements_lock.txt",
+])
+
+py_binary(
+    name = "prepare",
+    srcs = ["prepare.py"],
+    # Match the locked generator wheels even when the consumer uses Python 3.11.
+    python_version = "3.13",
+    deps = [requirement(name) for name in [
+        "jinja2",
+        "pyyaml",
+        "pyyaml-include",
+        "jsonpath-ng",
+    ]],
+)
+
+cc_binary(
+    name = "sdk_consumer",
+    testonly = True,
+    srcs = ["sdk_consumer.cpp"],
+    deps = ["//:sdk"],
+)
+
+cc_binary(
+    name = "runtime_loader",
+    testonly = True,
+    srcs = ["runtime_loader.c"],
+    linkopts = ["-ldl"],
+)
+
+py_test(
+    name = "runtime_test",
+    srcs = ["runtime_test.py"],
+    args = [
+        "$(rootpath //:runtime)",
+        "$(rootpath //:runtime.debug_symbols)",
+        "$(rootpath @p4lang_pi//:runtime)",
+        "$(rootpath :sdk_consumer)",
+        "$(rootpath :runtime_loader)",
+        "$(rootpaths @p4lang_pi//:runtime_libraries)",
+        "$(rootpaths @dash_deps//:packages)",
+    ],
+    data = [
+        ":sdk_consumer",
+        ":runtime_loader",
+        "//:runtime",
+        "//:runtime.debug_symbols",
+        "@dash_deps//:packages",
+        "@p4lang_pi//:runtime",
+        "@p4lang_pi//:runtime_libraries",
+    ],
+)

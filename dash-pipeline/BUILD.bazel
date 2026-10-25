@@ -1,0 +1,9 @@
+filegroup(
+    name = "p4_sources",
+    srcs = glob([
+        "bmv2/**/*.h",
+        "bmv2/**/*.p4",
+        "*.p4",
+    ]),
+    visibility = ["//visibility:public"],
+)

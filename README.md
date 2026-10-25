@@ -30,6 +30,11 @@ The API and Object Model for VNET<->VNET has been posted; the remaining services
 
 DASH Testing is covered  under the [test/](test/README.md) directory and is a work in progress.
 
+## Bazel BMv2 build
+
+The [Bazel source-build instructions](bazel/README.md) describe the DASH SAI
+runtime/debug TARs, C++ SDK, native Trixie validation matrix and CI artifacts.
+
 ## I Want To Contribute!
 
 This project welcomes contributions and suggestions.  We are happy to have the Community involved via submission of **Issues and Pull Requests** (with substantive content or even just fixes). We are hoping for the documents, test framework, etc. to become a community process with active engagement.  PRs can be reviewed by by any number of people, and a maintainer may accept.

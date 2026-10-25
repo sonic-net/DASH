@@ -1,0 +1,25 @@
+# The source tree and P4/SAI generated inputs are private Bazel action outputs.
+# Invoke the upstream compile targets; do not enter SAI/debian or build DEBs.
+SOURCE_ROOT := $(dir $(lastword $(MAKEFILE_LIST)))
+SAI := dash-pipeline/SAI
+
+.PHONY: all install
+all:
+	# Keep the generated directory immutable; upstream Make writes in its tree.
+	cp -aL "$(SOURCE_ROOT)dash-pipeline" .
+	chmod -R u+w dash-pipeline
+	# This upstream target builds the generated headers and metadata objects.
+	# Its shared-library recipe does not consume LDFLAGS, so carry them in CXX.
+	# Bazel emits paired source/generated include candidates. One may be absent;
+	# retain the normal search order while real missing headers remain errors.
+	CFLAGS="$(CPPFLAGS) $(CFLAGS) -g -Wdangling-pointer=1 -Wno-error=missing-include-dirs" $(MAKE) -C $(SAI)/SAI/meta CC="$(CC)" CXX="$(CXX) $(LDFLAGS)" libsaimetadata.so
+	# Record the actual runtime dependencies in libsai.so itself. An SDK client
+	# linking the transitive CcInfo libraries must not hide unresolved symbols.
+	$(MAKE) -C $(SAI)/lib CXX="$(CXX)" GXX_FLAGS="$(CPPFLAGS) $(CXXFLAGS) -g -Wno-error=missing-include-dirs" LDFLAGS="$(LDFLAGS) -Wl,-z,defs" LIBS="$(LIBS) -lpiprotogrpc -lpiprotobuf -lgrpc++ -lgrpc -lprotobuf -lgpr -labsl_synchronization" all
+
+install:
+	install -d $(PREFIX)/lib $(PREFIX)/include/sai $(PREFIX)/share/dash
+	install -m 0755 $(SAI)/lib/libsai.so $(PREFIX)/lib/libsai.so
+	install -m 0755 $(SAI)/SAI/meta/libsaimetadata.so $(PREFIX)/lib/libdashsaimetadata.so
+	install -m 0644 $(SAI)/SAI/inc/*.h $(SAI)/SAI/experimental/*.h $(PREFIX)/include/sai/
+	install -m 0644 dash-pipeline/bmv2/dash_pipeline.bmv2/* $(PREFIX)/share/dash/

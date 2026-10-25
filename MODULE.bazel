@@ -1,0 +1,79 @@
+module(
+    name = "sonic-dash",
+    version = "0.0.1",
+    bazel_compatibility = [
+        ">=8.5.1",
+        "<=8.5.1",
+    ],
+)
+
+bazel_dep(name = "bazel_skylib", version = "1.9.0")
+bazel_dep(name = "platforms", version = "1.1.0")
+bazel_dep(name = "rules_cc", version = "0.2.20")
+bazel_dep(name = "rules_foreign_cc", version = "0.16.0.sonic.1")
+bazel_dep(name = "rules_python", version = "1.8.0")
+bazel_dep(name = "rules_distroless", version = "0.9.4.sonic.10")
+bazel_dep(name = "sonic-build-infra", version = "0.0.22-a12bc826d6f811a157db5c7c02a2fe033896cc14", repo_name = "sonic_build_infra")
+bazel_dep(name = "p4lang-pi", version = "0.1.3.sonic.2", repo_name = "p4lang_pi")
+bazel_dep(name = "p4c", version = "1.2.4.2.sonic.2")
+
+gcc = use_extension("@sonic_build_infra//toolchains/gcc:extensions.bzl", "gcc")
+use_repo(gcc, "gcc_toolchains")
+
+register_toolchains("@gcc_toolchains//:all")
+
+register_toolchains(
+    "@sonic_build_infra//tools/build_tools:make_toolchain",
+    "@sonic_build_infra//tools/build_tools:m4_toolchain",
+    "@sonic_build_infra//tools/build_tools:pkgconfig_toolchain",
+    "@sonic_build_infra//tools/build_tools:autoconf_toolchain",
+)
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(python_version = "3.13")
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    hub_name = "dash_generator_deps",
+    python_version = "3.13",
+    requirements_lock = "//bazel:requirements_lock.txt",
+)
+use_repo(pip, "dash_generator_deps")
+
+# Preserve the source revision selected by .gitmodules' SAI gitlink. The
+# generator extends this private source tree before invoking its original Make.
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "dash_sai_source",
+    build_file_content = """exports_files(["LICENSE.txt"])
+filegroup(
+    name = "sources",
+    srcs = glob(["inc/**", "experimental/**", "custom/**", "meta/**", "LICENSE*"], exclude = ["**/BUILD", "**/BUILD.bazel"]),
+    visibility = ["//visibility:public"],
+)""",
+    # Reuse the landed SAI patch only in this private Bazel source tree.
+    remote_patch_strip = 1,
+    remote_patches = {
+        "https://raw.githubusercontent.com/securely1g/sonic-bazel-registry/05a3dad807844689397bd93e29b75a91b239b714/modules/sai/1.18.0-sonic.1/patches/configurable_aspell.patch": "sha256-HL08+hpvG2lfNAo0fSSthGTCggQWLD4RkKQjtU3Ihz8=",
+    },
+    sha256 = "1ca9533138f7e5be68473cebf062a5ca254b7673b6f368da7037694e173210c1",
+    strip_prefix = "SAI-8dd59e5eba472f0e53e8db00530e7c6e5ce2a335",
+    type = "tar.gz",
+    urls = ["https://codeload.github.com/opencomputeproject/SAI/tar.gz/8dd59e5eba472f0e53e8db00530e7c6e5ce2a335"],
+)
+
+apt = use_extension("@rules_distroless//apt:extensions.bzl", "apt")
+apt.install(
+    dependency_set = "dash_deps",
+    packages = [
+        "libgrpc++-dev (= 1.51.1-6)",
+        "libprotobuf-dev (= 3.21.12-11+deb13u1)",
+    ],
+    suites = [
+        "trixie",
+        "trixie-updates",
+        "trixie-security",
+    ],
+)
+use_repo(apt, "dash_deps")

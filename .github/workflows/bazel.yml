@@ -1,0 +1,99 @@
+name: Bazel DASH
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bazel-dash-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    name: Native source and TARs (${{ matrix.name }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: AMD64
+            architecture: amd64
+            machine: x86_64
+            platform: x86_64_trixie
+            runner: ubuntu-24.04
+          - name: ARM64
+            architecture: arm64
+            machine: aarch64
+            platform: aarch64_trixie
+            runner: ubuntu-24.04-arm
+    container: debian:trixie-20260918@sha256:9cc080028c43b27d2074d63a5f9caf7166d731494965616c1a6d2827a004585c
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Install runner and artifact inspection tools
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends ca-certificates git python3 binutils gdb build-essential unzip zstd
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Bazel
+        uses: bazel-contrib/setup-bazel@c5acdfb288317d0b5c0bbd7a396a3dc868bb0f86 # 0.19.0
+        with:
+          bazelisk-version: 1.29.0
+          bazelisk-cache: true
+          repository-cache: true
+          disk-cache: dash-${{ matrix.architecture }}
+          cache-version: "8.5.1"
+
+      - name: Record native execution and maintained registry
+        run: |
+          test "$(uname -m)" = "${{ matrix.machine }}"
+          test "$(dpkg --print-architecture)" = "${{ matrix.architecture }}"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          mkdir -p artifacts
+          git rev-parse HEAD > artifacts/source-commit.txt
+          uname -a > artifacts/runner.txt
+          dpkg --print-architecture >> artifacts/runner.txt
+          test ! -e MODULE.bazel.lock
+          test -z "$(git ls-files -- MODULE.bazel.lock)"
+          git check-ignore MODULE.bazel.lock
+          cp .bazelrc artifacts/bazelrc.txt
+          # Observe main without overriding the registry selected by .bazelrc.
+          git ls-remote https://github.com/securely1g/sonic-bazel-registry.git \
+            refs/heads/main > artifacts/registry-main-before-build.txt
+
+      - name: Build and exercise the source-produced runtime and symbols
+        run: |
+          flags=(--platforms=@sonic_build_infra//platforms:${{ matrix.platform }} --host_platform=@sonic_build_infra//platforms:${{ matrix.platform }} --jobs=4)
+          bazel test "${flags[@]}" //bazel:runtime_test \
+            --build_event_json_file=artifacts/build-events.json 2>&1 | tee artifacts/build.log
+          bazel build "${flags[@]}" //:runtime //:runtime.debug_symbols //:sdk
+          cp "$(bazel cquery "${flags[@]}" //:runtime --output=files)" artifacts/runtime.tar
+          cp "$(bazel cquery "${flags[@]}" //:runtime.debug_symbols --output=files)" artifacts/debug.tar
+          sha256sum artifacts/runtime.tar artifacts/debug.tar > artifacts/SHA256SUMS
+          cp MODULE.bazel.lock artifacts/generated-MODULE.bazel.lock
+          bazel mod graph > artifacts/module-graph.txt
+          git ls-remote https://github.com/securely1g/sonic-bazel-registry.git \
+            refs/heads/main > artifacts/registry-main-after-build.txt
+          git diff --exit-code
+
+      - name: Upload TARs and source validation evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dash-bazel-${{ matrix.architecture }}
+          path: |
+            artifacts/
+            bazel-testlogs/bazel/runtime_test/test.log
+            bazel-testlogs/bazel/runtime_test/test.xml
+          if-no-files-found: error
