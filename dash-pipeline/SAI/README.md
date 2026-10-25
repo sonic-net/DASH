@@ -1,4 +1,18 @@
 # dash-pipeline/SAI directory description
+
+## Metadata size baseline
+
+The `sai-meta` target compares generated headers with pristine headers from the
+SAI submodule commit recorded by DASH. `pin_metadata_baseline.py` verifies the
+checkout and pins the existing `size.sh` comparison to that commit. This avoids
+comparing an older selected SAI layout with newer headers from `origin/master`.
+The original metadata size assertions and Make targets remain enabled.
+
+The helper accepts only the original script or its own already pinned form.
+It stops on a different checkout or unrelated script edits. Run its isolated
+regressions with `python3 dash-pipeline/SAI/test_pin_metadata_baseline.py` from
+the repository root; they require Git and a C compiler and use no network.
+
 ## sai_api_gen.py
 ```
 usage: sai_api_gen.py [-h] [--print-sai-lib PRINT_SAI_LIB]

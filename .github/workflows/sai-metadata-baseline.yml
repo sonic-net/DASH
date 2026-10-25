@@ -1,0 +1,22 @@
+name: SAI metadata baseline
+
+on:
+  pull_request:
+    paths:
+      - 'dash-pipeline/Makefile'
+      - 'dash-pipeline/SAI/pin_metadata_baseline.py'
+      - 'dash-pipeline/SAI/test_pin_metadata_baseline.py'
+      - '.github/workflows/sai-metadata-baseline.yml'
+  push:
+    paths:
+      - 'dash-pipeline/Makefile'
+      - 'dash-pipeline/SAI/pin_metadata_baseline.py'
+      - 'dash-pipeline/SAI/test_pin_metadata_baseline.py'
+      - '.github/workflows/sai-metadata-baseline.yml'
+
+jobs:
+  baseline:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 dash-pipeline/SAI/test_pin_metadata_baseline.py
