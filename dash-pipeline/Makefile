@@ -203,6 +203,7 @@ sai-headers: p4 docker-saithrift-bldr-image-exists | SAI/SAI
 
 sai-meta:
 	@echo "Generate SAI metadata..."
+	python3 SAI/pin_metadata_baseline.py
 	# hack - remove scripts which cause Git ownership failures in CI pipelines
 	# We don't need them, they're to check that SAI headers didn't experience enum changes etc.
 	sed -i.bak '/checkenumlock.sh/d' SAI/SAI/meta/Makefile
