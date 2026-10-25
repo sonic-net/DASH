@@ -37,7 +37,11 @@ make(
     name = "dash_build",
     # A generated directory remains nested beneath the foreign Make source root.
     # The adapter copies its inputs into the private, writable build directory.
-    args = ["-f", "generated_sources/Makefile", "-j4"],
+    args = [
+        "-f",
+        "generated_sources/Makefile",
+        "-j4",
+    ],
     build_data = [
         "@sonic_build_infra//tools/build_tools:foreign_runtime",
         "@sonic_build_infra//tools/build_tools:metadata_runtime",
@@ -144,4 +148,9 @@ alias(
         "@platforms//cpu:x86_64": ":runtime_amd64.debug_symbols",
         "@platforms//cpu:arm64": ":runtime_arm64.debug_symbols",
     }),
+)
+
+exports_files(
+    ["debian/libsai_1.0.0_amd64/DEBIAN/control"],
+    visibility = ["//visibility:public"],
 )
