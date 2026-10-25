@@ -35,6 +35,7 @@ Public targets:
 | `//:runtime` | Stripped `libsai.so`, `libdashsaimetadata.so`, and four generated `/etc/dash` pipeline files |
 | `//:runtime.debug_symbols` | Matching detached symbols under `/usr/lib/debug/.build-id` |
 | `//:sdk` | Installed public headers and a DASH SAI library for C++ consumers to link |
+| `//:runtime_packages.json` | `libsai` identity from the existing Debian control, dependencies derived from the runtime, and the runtime TAR hash |
 | `//bazel:runtime_test` | Standalone runtime loading, installed SDK switch/generated DASH VIP API queries, pipeline validation, dependency closure, debug IDs/checksums, and GDB source-line lookup |
 
 Native Trixie AMD64 and ARM64 are the validation configurations. Cross-compiling
@@ -61,18 +62,20 @@ rules split the deployed runtime and debug TARs from the same linked ELF.
 Local builds and CI use the maintained registry `main` endpoint from `.bazelrc`.
 PI, p4c, shared tools and foreign-build support are published there. CI does not
 replace that endpoint with a temporary snapshot. Workflow artifacts contain both
-TARs, checksums, the source revision, test results, the generated lock and the
-resolved module graph. The recorded registry tips before and after the build
+TARs, generated package metadata, checksums, the source revision, test results,
+the generated lock and the resolved module graph. The recorded registry tips before and after the build
 are observations of `main`, not a frozen registry selection.
 
 The selected published modules are:
 
 | Module | Published support |
 | --- | --- |
-| `rules_distroless@0.9.4.sonic.10` | [Declared C++ header roots, registry #96](https://github.com/securely1g/sonic-bazel-registry/pull/96) |
+| `rules_distroless@0.9.4.sonic.13` | [Published APT payload and control support](https://github.com/securely1g/sonic-bazel-registry/tree/main/modules/rules_distroless/0.9.4.sonic.13) |
 | `p4lang-pi@0.1.3.sonic.2` | [PI source and runtime metadata, registry #107](https://github.com/securely1g/sonic-bazel-registry/pull/107) |
 | `p4c@1.2.4.2.sonic.2` | [P4C source and runtime metadata, registry #109](https://github.com/securely1g/sonic-bazel-registry/pull/109) |
 | `sonic-build-infra@0.0.22-a12bc826d6f811a157db5c7c02a2fe033896cc14` | [Shared build tools and metadata, registry #120](https://github.com/securely1g/sonic-bazel-registry/pull/120) |
 | `rules_foreign_cc@0.16.0.sonic.1` | [Header search classifications, registry #119](https://github.com/securely1g/sonic-bazel-registry/pull/119) |
 
-The two `Native source and TARs` checks are required on `main`. Their successful source builds and installed runtime/debug tests are merge gates; a completed analysis or a queued workflow does not satisfy them.
+The two `Native source and TARs` checks validate source builds, generated package
+metadata and installed runtime/debug behavior on AMD64 and ARM64. A completed
+analysis or a queued workflow does not establish that validation passed.

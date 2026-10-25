@@ -1,3 +1,5 @@
+load("@sonic_build_infra//oci:runtime_packages.bzl", "runtime_packages")
+
 package(default_visibility = ["//visibility:public"])
 
 alias(
@@ -19,3 +21,27 @@ exports_files([
     "LICENSE-CODE.md",
     "MODULE.bazel",
 ])
+
+# Reuse the existing binary control; dependencies are derived from the actual
+# source-built ELF payload and the same source/APT libraries used at link time.
+runtime_packages(
+    name = "runtime_packages.json",
+    apt_packages = {
+        "@dash_deps//" + package + ":data": "@dash_deps//" + package + ":control"
+        for package in [
+            "libabsl20240722",
+            "libc-ares2",
+            "libgrpc++1.51t64",
+            "libgrpc29t64",
+            "libprotobuf-lite32t64",
+            "libprotobuf32t64",
+            "libre2-11",
+            "zlib1g",
+        ]
+    },
+    control = "//dash-pipeline/SAI:debian/libsai_1.0.0_amd64/DEBIAN/control",
+    dependencies = ["@p4lang_pi//:runtime_packages.json"],
+    packages = {"libsai": "//:runtime"},
+)
+
+exports_files(["runtime_packages.md"])

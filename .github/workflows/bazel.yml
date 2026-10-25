@@ -77,10 +77,11 @@ jobs:
           flags=(--platforms=@sonic_build_infra//platforms:${{ matrix.platform }} --host_platform=@sonic_build_infra//platforms:${{ matrix.platform }} --jobs=4)
           bazel test "${flags[@]}" //bazel:runtime_test \
             --build_event_json_file=artifacts/build-events.json 2>&1 | tee artifacts/build.log
-          bazel build "${flags[@]}" //:runtime //:runtime.debug_symbols //:sdk
+          bazel build "${flags[@]}" //:runtime //:runtime.debug_symbols //:sdk //:runtime_packages.json
           cp "$(bazel cquery "${flags[@]}" //:runtime --output=files)" artifacts/runtime.tar
           cp "$(bazel cquery "${flags[@]}" //:runtime.debug_symbols --output=files)" artifacts/debug.tar
-          sha256sum artifacts/runtime.tar artifacts/debug.tar > artifacts/SHA256SUMS
+          cp "$(bazel cquery "${flags[@]}" //:runtime_packages.json --output=files)" artifacts/runtime_packages.json
+          sha256sum artifacts/runtime.tar artifacts/debug.tar artifacts/runtime_packages.json > artifacts/SHA256SUMS
           cp MODULE.bazel.lock artifacts/generated-MODULE.bazel.lock
           bazel mod graph > artifacts/module-graph.txt
           git ls-remote https://github.com/securely1g/sonic-bazel-registry.git \
