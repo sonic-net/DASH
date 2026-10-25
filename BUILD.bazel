@@ -1,0 +1,21 @@
+package(default_visibility = ["//visibility:public"])
+
+alias(
+    name = "runtime",
+    actual = "//dash-pipeline/SAI:runtime",
+)
+
+alias(
+    name = "runtime.debug_symbols",
+    actual = "//dash-pipeline/SAI:runtime.debug_symbols",
+)
+
+alias(
+    name = "sdk",
+    actual = "//dash-pipeline/SAI:sdk",
+)
+
+exports_files([
+    "LICENSE-CODE.md",
+    "MODULE.bazel",
+])
