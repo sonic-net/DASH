@@ -40,7 +40,7 @@ jobs:
       - name: Install runner and artifact inspection tools
         run: |
           apt-get update
-          apt-get install -y --no-install-recommends ca-certificates git python3 binutils gdb build-essential unzip zstd
+          apt-get install -y --no-install-recommends ca-certificates git python3 binutils gdb build-essential unzip zstd file
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -75,8 +75,7 @@ jobs:
       - name: Build and exercise the source-produced runtime and symbols
         run: |
           flags=(--platforms=@sonic_build_infra//platforms:${{ matrix.platform }} --host_platform=@sonic_build_infra//platforms:${{ matrix.platform }} --jobs=4)
-          bazel test "${flags[@]}" //bazel:runtime_test \
-            --build_event_json_file=artifacts/build-events.json 2>&1 | tee artifacts/build.log
+          bazel test "${flags[@]}" //bazel:runtime_test //bazel:make_flags_test 2>&1 | tee artifacts/build.log
           bazel build "${flags[@]}" //:runtime //:runtime.debug_symbols //:sdk //:runtime_packages.json
           cp "$(bazel cquery "${flags[@]}" //:runtime --output=files)" artifacts/runtime.tar
           cp "$(bazel cquery "${flags[@]}" //:runtime.debug_symbols --output=files)" artifacts/debug.tar
@@ -94,7 +93,20 @@ jobs:
         with:
           name: dash-bazel-${{ matrix.architecture }}
           path: |
-            artifacts/
+            artifacts/source-commit.txt
+            artifacts/runner.txt
+            artifacts/bazelrc.txt
+            artifacts/registry-main-before-build.txt
+            artifacts/build.log
+            artifacts/runtime.tar
+            artifacts/debug.tar
+            artifacts/runtime_packages.json
+            artifacts/SHA256SUMS
+            artifacts/generated-MODULE.bazel.lock
+            artifacts/module-graph.txt
+            artifacts/registry-main-after-build.txt
             bazel-testlogs/bazel/runtime_test/test.log
             bazel-testlogs/bazel/runtime_test/test.xml
+            bazel-testlogs/bazel/make_flags_test/test.log
+            bazel-testlogs/bazel/make_flags_test/test.xml
           if-no-files-found: error

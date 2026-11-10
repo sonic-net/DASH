@@ -2,11 +2,6 @@ name: SAI metadata baseline
 
 on:
   pull_request:
-    paths:
-      - 'dash-pipeline/Makefile'
-      - 'dash-pipeline/SAI/pin_metadata_baseline.py'
-      - 'dash-pipeline/SAI/test_pin_metadata_baseline.py'
-      - '.github/workflows/sai-metadata-baseline.yml'
   push:
     paths:
       - 'dash-pipeline/Makefile'
@@ -15,7 +10,20 @@ on:
       - '.github/workflows/sai-metadata-baseline.yml'
 
 jobs:
+  select_inputs:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/select-required-inputs.yml
+    with:
+      paths: |-
+        .github/workflows/select-required-inputs.yml
+        dash-pipeline/Makefile
+        dash-pipeline/SAI/pin_metadata_baseline.py
+        dash-pipeline/SAI/test_pin_metadata_baseline.py
+        .github/workflows/sai-metadata-baseline.yml
+
   baseline:
+    needs: select_inputs
+    if: ${{ !cancelled() && (needs.select_inputs.result != 'success' || needs.select_inputs.outputs.changed != 'false') }}
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4

@@ -11,16 +11,24 @@ on:
       - 'dash-pipeline/dockerfiles/.dockerignore'
   pull_request:
     branches: [ "**" ]
-    paths:
-      - '.github/workflows/dash-saithrift-client-docker.yml'
-      - 'dash-pipeline/Makefile'
-      - 'dash-pipeline/dockerfiles/Dockerfile.saithrift-client'
-      - 'dash-pipeline/.dockerignore'
-      - 'dash-pipeline/dockerfiles/.dockerignore'
   workflow_dispatch:
 
 jobs:
+  select_inputs:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/select-required-inputs.yml
+    with:
+      paths: |-
+        .github/workflows/select-required-inputs.yml
+        .github/workflows/dash-saithrift-client-docker.yml
+        dash-pipeline/Makefile
+        dash-pipeline/dockerfiles/Dockerfile.saithrift-client
+        dash-pipeline/.dockerignore
+        dash-pipeline/dockerfiles/.dockerignore
+
   build:
+    needs: select_inputs
+    if: ${{ !cancelled() && (needs.select_inputs.result != 'success' || needs.select_inputs.outputs.changed != 'false') }}
     name: Build dash-saithrift-client-image
     runs-on: ubuntu-22.04
     env:
