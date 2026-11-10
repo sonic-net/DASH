@@ -43,10 +43,13 @@ make(
         "-j4",
     ],
     build_data = [
+        "@sonic_build_infra//tools/build_tools:configure_environment.sh",
+        "@sonic_build_infra//tools/build_tools:configure_linker_flags.sh",
         "@sonic_build_infra//tools/build_tools:foreign_runtime",
         "@sonic_build_infra//tools/build_tools:metadata_runtime",
     ],
     copts = ["-g"],
+    data = ["//bazel:make_with_flags.sh"],
     env = {
         "PATH": "$(execpath @sonic_build_infra//tools/build_tools:foreign_runtime)/bin:$(execpath @sonic_build_infra//tools/build_tools:metadata_runtime)/bin",
         "SAI_ASPELL": "$(execpath @sonic_build_infra//tools/build_tools:metadata_runtime)/bin/aspell",
@@ -71,6 +74,12 @@ make(
         "all",
         "install",
     ],
+    tool_prefix = " ".join([
+        'source "$$EXT_BUILD_ROOT$$/$(execpath //bazel:make_with_flags.sh)"',
+        '"$$EXT_BUILD_ROOT$$/$(execpath @sonic_build_infra//tools/build_tools:configure_linker_flags.sh)"',
+        '"$$EXT_BUILD_ROOT$$/$(execpath @sonic_build_infra//tools/build_tools:configure_environment.sh)"',
+        '"$$EXT_BUILD_ROOT$$/$(execpath @sonic_build_infra//tools/build_tools:foreign_runtime)/bin/python3"',
+    ]),
     deps = [
         "@dash_deps//libgrpc++-dev:libgrpc++",
         "@dash_deps//libprotobuf-dev:libprotobuf",

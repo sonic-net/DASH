@@ -1,0 +1,46 @@
+name: Select required check inputs
+
+on:
+  workflow_call:
+    inputs:
+      paths:
+        description: Repository-relative file names to check, one per line.
+        required: true
+        type: string
+    outputs:
+      changed:
+        description: Whether the pull request changes any of the listed files.
+        value: ${{ jobs.diff.outputs.changed }}
+
+jobs:
+  diff:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.diff.outputs.changed }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: diff
+        name: Compare inputs from the PR merge base
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          INPUT_PATHS: ${{ inputs.paths }}
+        run: |
+          mapfile -t paths <<< "$INPUT_PATHS"
+          if git --literal-pathspecs diff --no-ext-diff --no-renames --quiet "$BASE_SHA...$HEAD_SHA" -- "${paths[@]}"; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            echo 'No listed input changed.'
+          else
+            status=$?
+            if (( status != 1 )); then
+              exit "$status"
+            fi
+            echo 'changed=true' >> "$GITHUB_OUTPUT"
+            echo 'A listed input changed.'
+          fi
