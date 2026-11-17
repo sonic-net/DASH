@@ -15,7 +15,8 @@ all:
 	CFLAGS="$(CPPFLAGS) $(CFLAGS) -g -Wdangling-pointer=1 -Wno-error=missing-include-dirs" $(MAKE) -C $(SAI)/SAI/meta CC="$(CC)" CXX="$(CXX) $(LDFLAGS)" libsaimetadata.so
 	# Record the actual runtime dependencies in libsai.so itself. An SDK client
 	# linking the transitive CcInfo libraries must not hide unresolved symbols.
-	$(MAKE) -C $(SAI)/lib CXX="$(CXX)" GXX_FLAGS="$(CPPFLAGS) $(CXXFLAGS) -g -Wno-error=missing-include-dirs" LDFLAGS="$(LDFLAGS) -Wl,-z,defs" LIBS="$(LIBS) -lpiprotogrpc -lpiprotobuf -lgrpc++ -lgrpc -lprotobuf -lgpr -labsl_synchronization" all
+	# The native PI SDK exposes the ABI-versioned libraries in its link inputs.
+	$(MAKE) -C $(SAI)/lib CXX="$(CXX)" GXX_FLAGS="$(CPPFLAGS) $(CXXFLAGS) -g -Wno-error=missing-include-dirs" LDFLAGS="$(LDFLAGS) -Wl,-z,defs" LIBS="$(LIBS) -l:libpiprotogrpc.so.0 -l:libpiprotobuf.so.0 -lgrpc++ -lgrpc -lprotobuf -lgpr -labsl_synchronization" all
 
 install:
 	install -d $(PREFIX)/lib $(PREFIX)/include/sai $(PREFIX)/share/dash

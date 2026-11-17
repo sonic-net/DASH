@@ -2,6 +2,7 @@ from p4.v1 import p4runtime_pb2
 from ipaddress import ip_address
 from scapy.all import *
 from dash_pipeline_utils import P4Table, P4InternalConfigTable, mac_in_bytes
+from time import monotonic, sleep
 
 def get_mac(interface):
     try:
@@ -93,7 +94,7 @@ def use_flow(cls):
     return cls
 
 
-def verify_flow(eni_mac, vnet_id, packet, existed = True):
+def verify_flow(eni_mac, vnet_id, packet, existed=True, timeout=0):
     if packet.haslayer(TCP):
         sport = packet['TCP'].sport
         dport = packet['TCP'].dport
@@ -104,17 +105,17 @@ def verify_flow(eni_mac, vnet_id, packet, existed = True):
         assert False, "Not TCP/UDP packet"
 
     flow_table = P4FlowTable()
-    flow = flow_table.get(eni_mac, vnet_id,
-                          packet['IP'].src,
-                          packet['IP'].dst,
-                          sport,
-                          dport,
-                          packet['IP'].proto)
-    if existed:
-        assert flow, "flow not found"
-    else:
-        assert not flow, "flow still found"
+    deadline = monotonic() + timeout
+    while True:
+        flow = flow_table.get(eni_mac, vnet_id, packet['IP'].src,
+                              packet['IP'].dst, sport, dport, packet['IP'].proto)
+        if (flow is not None) == existed:
+            return
+        remaining = deadline - monotonic()
+        if remaining <= 0:
+            raise AssertionError("flow not found" if existed else "flow still found")
+        sleep(min(0.25, remaining))
 
 
-def verify_no_flow(eni_mac, vnet_id, packet):
-    verify_flow(eni_mac, vnet_id, packet, existed = False)
+def verify_no_flow(eni_mac, vnet_id, packet, timeout=0):
+    verify_flow(eni_mac, vnet_id, packet, existed=False, timeout=timeout)

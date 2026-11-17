@@ -3,6 +3,9 @@ from sai_base_test import *
 from p4_dash_utils import *
 
 
+FLOW_TTL_SECONDS = 5
+
+
 @use_flow
 class SaiThriftDpappPktTest(SaiHelperSimplified):
     """ Test saithrift vnet outbound towards dpapp"""
@@ -132,7 +135,7 @@ class SaiThriftDpappPktTest(SaiHelperSimplified):
                                            |SAI_DASH_FLOW_ENABLED_KEY_DST_IP
                                            |SAI_DASH_FLOW_ENABLED_KEY_SRC_PORT
                                            |SAI_DASH_FLOW_ENABLED_KEY_DST_PORT,
-                    flow_ttl_in_milliseconds=5000)
+                    flow_ttl_in_milliseconds=FLOW_TTL_SECONDS * 1000)
         assert (self.flow_table != SAI_NULL_OBJECT_ID)
         sai_thrift_set_eni_attribute(self.client, eni_oid = self.eni, flow_table_id=self.flow_table)
 
@@ -355,9 +358,10 @@ class SaiThriftDpappPktTest(SaiHelperSimplified):
         verify_packet(self, self.pkt_exp, 0)
         print("\tVerifying flow created...")
         verify_flow(self.eni_mac, self.vnet & 0xffff, inner_pkt)
-        time.sleep(6) # flow ttl has been set to 5s
+        # Wait for the TTL, then allow time for the VPP worker's periodic scan.
+        time.sleep(FLOW_TTL_SECONDS)
         print("\tVerifying flow aged out...")
-        verify_no_flow(self.eni_mac, self.vnet & 0xffff, inner_pkt)
+        verify_no_flow(self.eni_mac, self.vnet & 0xffff, inner_pkt, timeout=5)
         
 
         print(f"{self.__class__.__name__} ageoutTcpTest OK\n")    
