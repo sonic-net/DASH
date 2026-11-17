@@ -23,6 +23,8 @@ on:
     paths:
       - '.gitmodules'
       - '.github/workflows/dash-bmv2-ci.yml'
+      - 'MODULE.bazel'
+      - 'bazel/Makefile.dash'
       - 'test/**.py'
       - 'test/**requirements.txt'
       - 'test/**.sh'

@@ -47,6 +47,12 @@ def main():
                             "-o", str(directory / "value.o")], check=True)
             subprocess.run([tools["ar"], "rcs", str(directory / "liborder.a"),
                             str(directory / "value.o")], check=True)
+        # Match the PI SDK, which supplies the versioned DSOs to the linker.
+        for name in ("piprotogrpc", "piprotobuf"):
+            soname = f"lib{name}.so.0"
+            subprocess.run([tools["gcc"], "-shared", "-fPIC", "-x", "c", "-",
+                            "-Wl,-soname," + soname, "-o", str(root / "link first" / soname)],
+                           input="void pi_fixture(void) {}\n", text=True, check=True)
         program = (
             "#include <selected.h>\n#include <quoted_path.h>\n"
             '#ifdef __cplusplus\nextern "C"\n#endif\nint linker_value(void);\n'
@@ -75,7 +81,7 @@ def main():
             "\t$(file >linkflags.txt,$(LDFLAGS))\n"
             "\t$(file >libs.txt,$(LIBS))\n"
             "\t$(CXX) $(GXX_FLAGS) -c unit.cc -o unit.o\n"
-            "\t$(CXX) unit.o $(LDFLAGS) -o program\n"
+            "\t$(CXX) unit.o $(LDFLAGS) -Wl,--as-needed $(filter -lpipro% -l:libpipro%,$(LIBS)) -o program\n"
         )
         common = shlex.join([
             "-DVALUE=1", "-UVALUE", "-DVALUE=7", '-DSTRING="quoted value"',
@@ -184,7 +190,7 @@ def main():
             assert linker_response.read_text().splitlines() == ["sonic-linker-arguments-v1", *shlex.split(ldflags)]
             installed = root / "dash-pipeline/SAI"
             assert (installed / "lib/linkflags.txt").read_text() == "@" + str(linker_response) + " -Wl,-z,defs\n"
-            assert (installed / "lib/libs.txt").read_text().strip() == "-lpiprotogrpc -lpiprotobuf -lgrpc++ -lgrpc -lprotobuf -lgpr -labsl_synchronization"
+            assert (installed / "lib/libs.txt").read_text().strip() == "-l:libpiprotogrpc.so.0 -l:libpiprotobuf.so.0 -lgrpc++ -lgrpc -lprotobuf -lgpr -labsl_synchronization"
             assert len((installed / "SAI/meta/makeflags.txt").read_bytes()) < 131072
             assert len((installed / "lib/makeflags.txt").read_bytes()) < 131072
             row = {}

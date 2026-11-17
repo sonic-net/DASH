@@ -81,18 +81,17 @@ Local builds and CI resolve PI, build-infra, P4C and `rules_distroless` from the
 SONiC registry’s maintained `main` branch. Each module uses its published source
 archive, patches and overlays.
 
-The Infra `.28` minimum supplies `configure_linker_flags.sh` and the current shared
-compiler adapters. PI `.4` and P4C `.3` supply their source SDKs; `rules_distroless`
-`.18` supplies compact lock transport for that graph. Native CI installs `file`
-before repository evaluation so APT can distinguish real ELF libraries from
-linker scripts. Both native architectures retain the same build and runtime tests.
+The DASH library links against the native PI SDK. P4C compiles the BMv2 pipeline,
+and build-infra supplies the compiler and linker flag adapters. Native CI
+installs `file` before repository evaluation so APT can distinguish ELF
+libraries from linker scripts. Both native architectures retain the same build and runtime tests.
 
 | Module | Selected support |
 | --- | --- |
-| `rules_distroless@0.9.4.sonic.18` | [Compact APT lock transport, registry #237](https://github.com/securely1g/sonic-bazel-registry/pull/237) |
-| `p4lang-pi@0.1.3.sonic.4` | [PI source SDK and linker transport, registry #289](https://github.com/securely1g/sonic-bazel-registry/pull/289) |
+| `rules_distroless@0.9.4.sonic.20` | [Fixed APT roots and raw payload support, registry #325](https://github.com/securely1g/sonic-bazel-registry/pull/325) |
+| `p4lang-pi@0.1.3.sonic.6` | [Native PI SDK and runtime libraries, registry #322](https://github.com/securely1g/sonic-bazel-registry/pull/322) |
 | `p4c@1.2.4.2.sonic.3` | [P4C source and native execution support, registry #276](https://github.com/securely1g/sonic-bazel-registry/pull/276) |
-| `sonic-build-infra@0.0.28-9965823498ab54816de5addb6084638470dd04d7` | [Shared flag adapters, native linking and complete APT lock, registry #287](https://github.com/securely1g/sonic-bazel-registry/pull/287) |
+| `sonic-build-infra@0.0.37-316e298e77ab5cfa69af9b0c05ec24d5d94bbe1e` | [Shared toolchain and updated Trixie package selections, registry #323](https://github.com/securely1g/sonic-bazel-registry/pull/323) |
 | `rules_foreign_cc@0.16.0.sonic.1` | [Published header search classifications, registry #119](https://github.com/securely1g/sonic-bazel-registry/pull/119) |
 
 Workflow artifacts contain both TARs, generated package metadata, checksums, the
