@@ -1,4 +1,4 @@
-common --registry=https://raw.githubusercontent.com/securely1g/sonic-bazel-registry/main
+common --registry=https://raw.githubusercontent.com/sonic-net/sonic-bazel-registry/main
 common --registry=https://bcr.bazel.build
 common --lockfile_mode=update
 common --platforms=@sonic_build_infra//platforms:x86_64_trixie
