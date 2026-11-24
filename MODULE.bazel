@@ -55,7 +55,7 @@ filegroup(
     # Reuse the landed SAI patch only in this private Bazel source tree.
     remote_patch_strip = 1,
     remote_patches = {
-        "https://raw.githubusercontent.com/securely1g/sonic-bazel-registry/e7ee462aaa8fbd137ea2187f175506e308d81dcb/modules/sai/1.18.0-sonic.1/patches/configurable_aspell.patch": "sha256-HL08+hpvG2lfNAo0fSSthGTCggQWLD4RkKQjtU3Ihz8=",
+        "https://raw.githubusercontent.com/sonic-net/sonic-bazel-registry/e73724fb0134430da236e501e0770fe4d273782b/modules/sai/1.18.0.sonic.2/patches/configurable_aspell.patch": "sha256-HL08+hpvG2lfNAo0fSSthGTCggQWLD4RkKQjtU3Ihz8=",
     },
     sha256 = "1ca9533138f7e5be68473cebf062a5ca254b7673b6f368da7037694e173210c1",
     strip_prefix = "SAI-8dd59e5eba472f0e53e8db00530e7c6e5ce2a335",
