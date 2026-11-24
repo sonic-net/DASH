@@ -69,7 +69,7 @@ jobs:
           git check-ignore MODULE.bazel.lock
           cp .bazelrc artifacts/bazelrc.txt
           # Observe main without overriding the registry selected by .bazelrc.
-          git ls-remote https://github.com/securely1g/sonic-bazel-registry.git \
+          git ls-remote https://github.com/sonic-net/sonic-bazel-registry.git \
             refs/heads/main > artifacts/registry-main-before-build.txt
 
       - name: Build and exercise the source-produced runtime and symbols
@@ -83,7 +83,7 @@ jobs:
           sha256sum artifacts/runtime.tar artifacts/debug.tar artifacts/runtime_packages.json > artifacts/SHA256SUMS
           cp MODULE.bazel.lock artifacts/generated-MODULE.bazel.lock
           bazel mod graph > artifacts/module-graph.txt
-          git ls-remote https://github.com/securely1g/sonic-bazel-registry.git \
+          git ls-remote https://github.com/sonic-net/sonic-bazel-registry.git \
             refs/heads/main > artifacts/registry-main-after-build.txt
           git diff --exit-code
 
