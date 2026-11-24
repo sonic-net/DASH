@@ -6,6 +6,8 @@ invokes the original SAI metadata and DASH library Make targets through
 `rules_foreign_cc`. It does not invoke Debian packaging. Existing Docker/Make
 builds remain available with their original source files.
 
+The workspace resolves its build tools and libraries from the [SONiC Bazel registry](https://github.com/sonic-net/sonic-bazel-registry), then the Bazel Central Registry.
+
 The adapter copies the generated source directory into a private writable build
 directory. It first selects the upstream `libsaimetadata.so` target, which
 generates the metadata headers and library, then builds the DASH library. It
