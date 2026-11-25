@@ -1,0 +1,88 @@
+From: Guohan Lu <securely1g@gmail.com>
+Subject: [PATCH] meta: Allow an optional Aspell executable path
+
+Keep /usr/bin/aspell as the default for existing Make builds, and accept a
+single executable path through SAI_ASPELL when a build declares its own
+spell-checking tool. An unset or empty override retains the system path.
+Tool runtime libraries, loaders and dictionaries remain the executable's
+responsibility; SAI does not configure them.
+
+Invoke the executable with an argument list so paths containing spaces and
+input text never become shell commands. Use temporary files for input and
+combined output to preserve the existing response parser without a pipe
+buffer deadlock. Report launch, wait, nonzero-exit and signal failures so
+a broken tool cannot silently bypass spelling checks.
+
+This is a proposed downstream adaptation, not an accepted upstream patch.
+The companion regression harness exercises the real RunAspell function
+with the selected Perl interpreter and fake executables, including large
+input/output and the original default executable path.
+
+Source: https://github.com/opencomputeproject/SAI/blob/6dd738196ebb267be458eed0a00b687568455914/meta/style.pm
+Applies-To: opencomputeproject/SAI at 6dd738196ebb267be458eed0a00b687568455914
+
+---
+--- a/meta/style.pm
++++ b/meta/style.pm
+@@ -29,6 +29,8 @@
+ use warnings;
+ use diagnostics;
+ use Data::Dumper;
++use File::Temp;
++use IPC::Open3;
+ use utils;
+ 
+ require Exporter;
+@@ -39,9 +41,11 @@
+ 
+     my %wordsToCheck = %{ $hash };
+ 
+-    if (not -e "/usr/bin/aspell")
+-    {
+-        LogError "ASPELL IS NOT PRESENT, please install aspell";
++    my $aspell = $ENV{"SAI_ASPELL"} || "/usr/bin/aspell";
++
++    if (not -x $aspell)
++    {
++        LogError "ASPELL IS NOT PRESENT OR EXECUTABLE: $aspell";
+         return;
+     }
+ 
+@@ -55,7 +59,36 @@
+ 
+     LogInfo "Words to check: $count";
+ 
+-    my @result = `echo "$all" | /usr/bin/aspell -l en -a -p ./aspell.en.pws 2>&1`;
++    # File-backed I/O avoids pipe deadlocks when the checker produces output
++    # before consuming its input. Keep stderr in the existing response parser.
++    my $input = File::Temp->new();
++    my $output = File::Temp->new();
++    print {$input} "$all\n" or die "Cannot write Aspell input: $!";
++    seek($input, 0, 0) or die "Cannot rewind Aspell input: $!";
++
++    my $pid = eval {
++        open3("<&" . fileno($input), ">&" . fileno($output), ">&" . fileno($output),
++            $aspell, "-l", "en", "-a", "-p", "./aspell.en.pws");
++    };
++    if (not defined $pid)
++    {
++        LogError "Cannot launch Aspell '$aspell': $@";
++        return;
++    }
++    if (waitpid($pid, 0) != $pid)
++    {
++        LogError "Cannot wait for Aspell '$aspell': $!";
++        return;
++    }
++    my $status = $?;
++    seek($output, 0, 0) or die "Cannot rewind Aspell output: $!";
++    my @result = <$output>;
++    if ($status != 0)
++    {
++        LogError "Aspell '$aspell' failed (exit " . ($status >> 8) .
++            ", signal " . ($status & 127) . "): " . join("", @result);
++        return;
++    }
+ 
+     for my $res (@result)
+     {
