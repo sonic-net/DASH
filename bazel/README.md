@@ -13,7 +13,7 @@ directory. It first selects the upstream `libsaimetadata.so` target, which
 generates the metadata headers and library, then builds the DASH library. It
 does not run the upstream metadata developer `all` target or its header-check
 scripts; the native CI gates below validate the installed producer artifacts.
-The private SAI archive applies the same aspell patch as the SAI registry module.
+The private SAI archive applies the same spelling-tool patch as the SAI registry module.
 Bazel takes that patch from this checkout and passes the declared executable
 and dictionaries through `SAI_ASPELL`.
 
