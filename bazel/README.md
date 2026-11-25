@@ -13,11 +13,9 @@ directory. It first selects the upstream `libsaimetadata.so` target, which
 generates the metadata headers and library, then builds the DASH library. It
 does not run the upstream metadata developer `all` target or its header-check
 scripts; the native CI gates below validate the installed producer artifacts.
-The private SAI archive reuses the landed registry `configurable_aspell.patch`
-(pinned URL and integrity), and metadata generation selects the declared `aspell`
-executable and dictionaries through `SAI_ASPELL`. The patch is an immutable
-source input, not a module-registry endpoint. The legacy source tree keeps its
-original system executable.
+The private SAI archive applies the same spelling-tool patch as the SAI registry module.
+Bazel takes that patch from this checkout and passes the declared executable
+and dictionaries through `SAI_ASPELL`.
 
 Both legacy compile recipes retain their warning policies, except that
 `-Wmissing-include-dirs` stays a warning for the paired source/generated
@@ -93,7 +91,7 @@ libraries from linker scripts. Both native architectures retain the same build a
 | `rules_distroless@0.9.4.sonic.26` | [Fixed APT roots and raw payload support, registry #325](https://github.com/securely1g/sonic-bazel-registry/pull/325) |
 | `p4lang-pi@0.1.3.sonic.7` | [Native PI SDK and runtime libraries, registry #322](https://github.com/securely1g/sonic-bazel-registry/pull/322) |
 | `p4c@1.2.4.2.sonic.7` | [P4C source and native execution support, registry #276](https://github.com/securely1g/sonic-bazel-registry/pull/276) |
-| `sonic-build-infra@0.0.44-35726399908a3beb947174e9359f902077928289` | [Shared toolchain and updated Trixie package selections, registry #323](https://github.com/securely1g/sonic-bazel-registry/pull/323) |
+| `sonic-build-infra@0.0.45-77ef625a4ddafc8cdc15f3cc6aee31eabac8a5de` | [Shared Trixie toolchain](https://github.com/sonic-net/sonic-build-infra/commit/77ef625a4ddafc8cdc15f3cc6aee31eabac8a5de) |
 | `rules_foreign_cc@0.16.0.sonic.2` | [Published header search classifications, registry #119](https://github.com/securely1g/sonic-bazel-registry/pull/119) |
 
 Workflow artifacts contain both TARs, generated package metadata, checksums, the
