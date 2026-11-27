@@ -183,6 +183,15 @@ control dash_deparser(
         packet.emit(hdr.flow_u0_encap_data);
         packet.emit(hdr.flow_u1_encap_data);
 
+        packet.emit(hdr.u1_ethernet);
+        packet.emit(hdr.u1_ipv4);
+        packet.emit(hdr.u1_ipv4options);
+        packet.emit(hdr.u1_ipv6);
+        packet.emit(hdr.u1_udp);
+        packet.emit(hdr.u1_tcp);
+        packet.emit(hdr.u1_vxlan);
+        packet.emit(hdr.u1_nvgre);
+
         packet.emit(hdr.u0_ethernet);
         packet.emit(hdr.u0_ipv4);
         packet.emit(hdr.u0_ipv4options);
@@ -191,6 +200,7 @@ control dash_deparser(
         packet.emit(hdr.u0_tcp);
         packet.emit(hdr.u0_vxlan);
         packet.emit(hdr.u0_nvgre);
+
         packet.emit(hdr.customer_ethernet);
         packet.emit(hdr.customer_ipv4);
         packet.emit(hdr.customer_ipv6);
