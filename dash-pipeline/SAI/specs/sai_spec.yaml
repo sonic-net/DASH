@@ -505,6 +505,118 @@ enums:
     name: FNIC
     description: ''
     value: '1'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_eni_mac_type_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: SRC_MAC
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: DST_MAC
+    description: ''
+    value: '1'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_packet_source_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: EXTERNAL
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: PIPELINE
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: DPAPP
+    description: ''
+    value: '2'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: PEER
+    description: ''
+    value: '3'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_packet_subtype_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: NONE
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: FLOW_CREATE
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: FLOW_UPDATE
+    description: ''
+    value: '2'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: FLOW_DELETE
+    description: ''
+    value: '3'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_packet_type_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: REGULAR
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: FLOW_SYNC_REQ
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: FLOW_SYNC_ACK
+    description: ''
+    value: '2'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: DP_PROBE_REQ
+    description: ''
+    value: '3'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: DP_PROBE_ACK
+    description: ''
+    value: '4'
+- !!python/object:utils.sai_spec.sai_enum.SaiEnum
+  name: sai_dash_pipeline_stage_t
+  description: ''
+  members:
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: INVALID
+    description: ''
+    value: '0'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: INBOUND_STAGE_STARTING
+    description: ''
+    value: '1'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: INBOUND_ROUTING
+    description: ''
+    value: '2'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: OUTBOUND_STAGE_STARTING
+    description: ''
+    value: '3'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: OUTBOUND_ROUTING
+    description: ''
+    value: '4'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: OUTBOUND_MAPPING
+    description: ''
+    value: '5'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: OUTBOUND_PRE_ROUTING_ACTION_APPLY
+    description: ''
+    value: '6'
+  - !!python/object:utils.sai_spec.sai_enum_member.SaiEnumMember
+    name: ROUTING_ACTION_APPLY
+    description: ''
+    value: '7'
 port_extenstion: !!python/object:utils.sai_spec.sai_api_extension.SaiApiExtension
   attributes: []
   stats:
